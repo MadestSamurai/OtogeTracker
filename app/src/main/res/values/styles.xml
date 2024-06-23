@@ -1,0 +1,26 @@
+<resources>
+
+    <style name="error_appearance" parent="@android:style/TextAppearance">
+        <item name="android:textColor">@color/main_red</item>
+        <item name="backgroundColor">@color/bg_black</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="my_edit_text_style">
+        <!--文本的颜色，textColor和textSize不要放到style中-->
+        <item name="android:textColorHint">@color/text_gray</item>
+        <item name="colorControlNormal">@color/text_gray</item>
+        <item name="colorControlActivated">@color/main_red</item>
+    </style>
+
+    <style name="hint_appearance" parent="TextAppearance.AppCompat">
+        <item name="android:textSize">12dp</item>
+        <item name="android:textColor">@color/text_gray</item>
+    </style>
+
+    <style name="my_switch_theme">
+        <item name="colorControlActivated">@color/main_red</item>
+        <item name="colorSwitchThumbNormal">#FFF1F1F1</item>
+        <item name="android:colorForeground">#FF2F2F2F</item>
+    </style>
+</resources>

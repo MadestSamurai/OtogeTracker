@@ -1,0 +1,71 @@
+<resources>
+    <string name="app_name">OtogeTracker</string>
+    <string name="title_record">播放记录</string>
+    <string name="title_report">音乐报告</string>
+    <string name="title_notifications">周期排行</string>
+    <string name="title_setting">个人设置</string>
+    <string name="title_play_times_card">播放次数</string>
+
+    <string name="confirm">确定</string>
+    <string name="cancel">取消</string>
+
+    <string name="rank_test_title">Welcome</string>
+    <string name="rank_test_artist">方大同</string>
+    <string name="rank_test_up_time">2023–01–29 19:22</string>
+
+    <string name="listening_clock">时刻</string>
+    <string name="trend_vs">对比</string>
+    <string name="last_week">上周</string>
+    <string name="last_month">上个月</string>
+    <string name="last_year">上一年</string>
+    <string name="total_play">总播放数</string>
+    <string name="avg_daily_play">平均每日播放数</string>
+    <string name="total_playtime">总播放时长</string>
+    <string name="trend">趋势</string>
+    <string name="trend_artist">趋势艺人</string>
+    <string name="trend_album">趋势专辑</string>
+    <string name="trend_track">趋势曲目</string>
+    <string name="on_repeat">反复</string>
+    <string name="discovery">探索</string>
+    <string name="arrow">arrow</string>
+    <string name="top_artist_image">Top Artist Image</string>
+    <string name="top_album_image">Top Album Image</string>
+    <string name="top_track_image">Top Track Image</string>
+    <string name="first">1</string>
+    <string name="second">2</string>
+    <string name="third">3</string>
+
+    <string name="text_week_compare_online_test">您本周的播放次数超过了65%的MusiCord用户</string>
+
+    <string name="text_month_compare_online_test">您本月的播放次数超过了65%的MusiCord用户</string>
+
+    <string name="text_year_compare_online_test">您本年的播放次数超过了65%的MusiCord用户</string>
+
+    <string name="clock_plate">Clock Plate</string>
+    <string name="zero_clock">00:00</string>
+    <string name="six_clock">06:00</string>
+    <string name="twelve_clock">12:00</string>
+    <string name="eighteen_clock">18:00</string>
+    <string name="prev">prev</string>
+    <string name="next">next</string>
+    <string name="date">日期选择</string>
+    <string name="artist_ranking">艺人排行</string>
+    <string name="album_ranking">专辑排行</string>
+    <string name="track_ranking">曲目排行</string>
+    <string name="username">用户</string>
+    <string name="scrollable_10_times">总播放记录264次</string>
+    <string name="app_list">软件列表</string>
+    <string name="app_list_intro">此处会显示所有播放过音频的App，可以手动设置采集的模式，开关滑到左表示不进行采集，滑到中间表示智能采集，会通过算法规则筛选出音频内容，滑到右表示采集全部内容，不进行内容筛选。</string>
+    <string name="record_point">记录点</string>
+    <string name="record_point_intro">用于调整纳入记录的播放时长比例</string>
+    <string name="record_point_warning">警告：比例超过90%可能会漏掉部分数据记录</string>
+    <string name="blank" />
+    <string name="about_us">关于</string>
+    <string name="privacy_policy">隐私策略</string>
+    <string name="log_out">退出登录</string>
+    <string name="title_suggestion">私人推荐</string>
+    <string name="no_record_this_week">这一周没有音乐记录哦</string>
+    <string name="to_the_head">到头了，向后看看吧</string>
+    <string name="no_record_this_month">该月没有音乐记录哦</string>
+    <string name="no_record_this_year">该年度没有音乐记录哦</string>
+</resources>
