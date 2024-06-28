@@ -26,6 +26,7 @@ class RecordViewModel(
     val osuGroupList = MutableStateFlow<List<OsuGroup>>(emptyList())
     val osuRankGraphData = MutableStateFlow<List<Int>>(emptyList())
     val osuPlayData = MutableStateFlow<Map<String, String>>(emptyMap())
+    val osuLevelData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuInfoData = MutableStateFlow<Map<String, String>>(emptyMap())
 
     init {
@@ -101,14 +102,15 @@ class RecordViewModel(
             "totalHits" to CommonUtils.formatNumberThousand(osuInfo.user.statistics.totalHits),
             "maximumCombo" to CommonUtils.formatNumberThousand(osuInfo.user.statistics.maximumCombo.toLong()),
             "replaysWatchedByOthers" to CommonUtils.formatNumberThousand(osuInfo.user.statistics.replaysWatchedByOthers.toLong()),
-
-            "totalKudosu" to osuInfo.user.kudosu.total.toString(),
-            "ppExp" to osuInfo.user.statistics.ppExp.toString(),
-            "accuracy" to osuInfo.user.statistics.hitAccuracy.toString(),
-            "level" to osuInfo.user.statistics.level.toString()
+            "followerCount" to CommonUtils.formatNumberThousand(osuInfo.user.followerCount.toLong()),
+            "mappingFollowerCount" to CommonUtils.formatNumberThousand(osuInfo.user.mappingFollowerCount.toLong()),
+            "commentsCount" to CommonUtils.formatNumberThousand(osuInfo.user.commentsCount.toLong()),
         )
-        println("replaysWatchedByOthers: ${osuInfo.user.statistics.replaysWatchedByOthers}")
-        println("mappingFollowerCount: ${osuInfo.user.mappingFollowerCount}")
+
+        osuLevelData.value = mapOf(
+            "level" to osuInfo.user.statistics.level.current.toString(),
+            "levelProgress" to osuInfo.user.statistics.level.progress.toString()
+        )
     }
 }
 

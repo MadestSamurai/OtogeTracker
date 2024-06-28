@@ -9,6 +9,7 @@ import com.madsam.otora.consts.Colors
 import com.madsam.otora.ui.record.RecordViewModel
 import com.madsam.otora.ui.record.RecordViewModelFactory
 import com.madsam.otora.ui.record.cards.OsuCard
+import com.madsam.otora.ui.record.cards.OsuLevel
 import com.madsam.otora.ui.record.cards.OsuPlayData
 import com.madsam.otora.ui.record.cards.OsuRankGraph
 
@@ -31,6 +32,9 @@ fun OsuUserPage() {
         }
         item {
             OsuPlayData(osuPlayData = recordViewModel.osuPlayData)
+        }
+        item {
+            OsuLevel(osuLevelData = recordViewModel.osuLevelData)
         }
     }
 }

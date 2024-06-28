@@ -11,7 +11,7 @@ data class OsuStatistics(
     var count100: Long = 0,
     var count300: Long = 0,
     var count50: Long = 0,
-    var count_miss: Long = 0,
+    var countMiss: Long = 0,
     var level: Level = Level(),
     var globalRank: Int = 0,
     var globalRankExp: Int = 0,

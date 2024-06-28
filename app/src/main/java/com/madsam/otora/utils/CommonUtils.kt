@@ -5,7 +5,10 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresApi
+import androidx.collection.ArrayMap
+import androidx.compose.ui.graphics.Color
 import androidx.core.app.NotificationManagerCompat
+import com.madsam.otora.consts.Colors
 import java.util.Locale
 
 /**
@@ -46,22 +49,14 @@ object CommonUtils {
      * 秒转换为日时分秒
      *
      * @param value 秒数
-     * @return 日时分秒字符串
+     * @return 日时分秒,逗号分隔
      */
     fun secondToDHMS(value: Long): String {
         val day = value / (24 * 3600)
         val hour = value % (24 * 3600) / 3600
         val minute = value % 3600 / 60
         val second = value % 60
-        return if (day > 0) {
-            "${day}d${hour}h${minute}m${second}s"
-        } else if (hour > 0) {
-            "${hour}h${minute}m${second}s"
-        } else if (minute > 0) {
-            "${minute}m${second}s"
-        } else {
-            "${second}s"
-        }
+        return String.format(Locale.getDefault(), "%d,%d,%d,%d", day, hour, minute, second)
     }
 
     /**
@@ -82,5 +77,26 @@ object CommonUtils {
      */
     fun formatPercent(value: Double): String {
         return String.format(Locale.getDefault(), "%.2f%%", value)
+    }
+
+    /**
+     * 获取等级对应的颜色
+     *
+     * @param value 整型
+     * @return 颜色值
+     */
+    fun getLevelColor(value: Int): Color {
+        return when (value) {
+            in 0..14 -> Colors.OSU_LEVEL_WHITE
+            in 15..29 -> Colors.OSU_LEVEL_BLUE
+            in 30..44 -> Colors.OSU_LEVEL_GREEN
+            in 45..59 -> Colors.OSU_LEVEL_YELLOW
+            in 60..69 -> Colors.OSU_LEVEL_RED
+            in 70..79 -> Colors.OSU_LEVEL_PURPLE
+            in 80..89 -> Colors.OSU_LEVEL_BRONZE
+            in 90..94 -> Colors.OSU_LEVEL_SILVER
+            in 95..99 -> Colors.OSU_LEVEL_GOLD
+            else -> Colors.OSU_LEVEL_RUBY
+        }
     }
 }

@@ -134,9 +134,11 @@
     <color name="tooltip_background_light">#e6ffffff</color>
 
     <color name="osu_bright_red">#ffde4c9b</color>
+    <color name="osu_dark_red">#73184D</color>
     <color name="dark_red">#ff371722</color>
     <color name="dark_red_lighter">#834858</color>
     <color name="dark_red_text">#ffbbab9b</color>
     <color name="dark_red_text_light">#ffddc7b7</color>
     <color name="dark_red_deep">#ff2b0f0f</color>
+    <color name="dark_red_deeper">#160808</color>
 </resources>
