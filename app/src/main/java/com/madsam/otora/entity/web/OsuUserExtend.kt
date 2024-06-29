@@ -103,7 +103,7 @@ data class OsuUserExtend(
 
     data class RankHighest(
             var rank: Int = 0,
-            var updateAt: String = ""
+            var updatedAt: String = ""
     )
 
     data class UserAchievement(

@@ -1,4 +1,4 @@
-package com.madsam.otora.widget
+package com.madsam.otora.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding

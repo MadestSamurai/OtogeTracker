@@ -34,11 +34,11 @@ import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.SvgDecoder
 import com.madsam.otora.R
+import com.madsam.otora.component.BoxWithTip
 import com.madsam.otora.component.GroupListItem
-import com.madsam.otora.component.ImageWithTip
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.entity.web.OsuGroup
-import com.madsam.otora.widget.PopupTip
+import com.madsam.otora.component.PopupTip
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -173,6 +173,7 @@ fun OsuCard(
                     var showPopup by remember { mutableStateOf(false) }
                     var offset by remember { mutableStateOf(IntOffset(0,0)) }
 
+                    println(groupListData[index])
                     GroupListItem(
                         osuGroup = groupListData[index],
                         onClick = { size ->
@@ -234,18 +235,12 @@ fun OsuCard(
                 var showPopup by remember { mutableStateOf(false) }
                 var offset by remember { mutableStateOf(IntOffset(0,0)) }
 
-                ImageWithTip(
-                    painterId = when (cardData["supporterRank"]) {
-                            "1" -> R.drawable.supporter_rank1
-                            "2" -> R.drawable.supporter_rank2
-                            "3" -> R.drawable.supporter_rank3
-                            else -> R.drawable.supporter_rank1
-                        },
+                BoxWithTip(
                     onClick = { position ->
                         showPopup = true
                         offset = IntOffset(
                             x = position.x,
-                            y = position.y + 16
+                            y = position.y
                         )
                     },
                     modifier = Modifier
@@ -254,14 +249,25 @@ fun OsuCard(
                             bottom.linkTo(nameplateName.bottom, margin = 8.dp)
                             start.linkTo(nameplateName.end, margin = 12.dp)
                         }
-                        .height(20.dp)
                         .clip(RoundedCornerShape(100.dp))
                         .background(Colors.OSU_BRIGHT_RED)
-                        .padding(
-                            horizontal = 12.dp,
-                            vertical = 4.dp
-                        ),
-                )
+                ) {
+                    Image(
+                        painter = painterResource(
+                            id = when (cardData["supporterRank"]) {
+                            "1" -> R.drawable.supporter_rank1
+                            "2" -> R.drawable.supporter_rank2
+                            "3" -> R.drawable.supporter_rank3
+                            else -> R.drawable.supporter_rank1
+                        }),
+                        contentDescription = "Supporter Rank",
+                        modifier = Modifier.height(20.dp)
+                            .padding(
+                                horizontal = 12.dp,
+                                vertical = 4.dp
+                            ),
+                    )
+                }
 
                 PopupTip(
                     showPopup = showPopup,

@@ -16,7 +16,7 @@ import com.madsam.otora.ui.record.cards.OsuRankGraph
 @Composable
 fun OsuUserPage() {
     val recordViewModel: RecordViewModel = viewModel(factory = RecordViewModelFactory(
-        userId = "4937439",
+        userId = "10351684",
         mode = "mania"
     )
     )
@@ -28,13 +28,13 @@ fun OsuUserPage() {
             OsuCard(osuCardData = recordViewModel.osuCardData, osuGroupList = recordViewModel.osuGroupList)
         }
         item {
-            OsuRankGraph(osuRankGraphData = recordViewModel.osuRankGraphData)
-        }
-        item {
-            OsuPlayData(osuPlayData = recordViewModel.osuPlayData)
+            OsuRankGraph(osuRankGraphData = recordViewModel.osuRankGraphData, osuRankHighestData = recordViewModel.osuRankHighestData)
         }
         item {
             OsuLevel(osuLevelData = recordViewModel.osuLevelData)
+        }
+        item {
+            OsuPlayData(osuPlayData = recordViewModel.osuPlayData)
         }
     }
 }

@@ -3,11 +3,11 @@ package com.madsam.otora.ui.record.cards
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -296,6 +296,7 @@ fun OsuPlayData(
                         top.linkTo(playTimeTitle.bottom)
                         end.linkTo(parent.end, margin = 25.dp)
                     }
+                    .defaultMinSize(minWidth = 100.dp)
             )
 
             val (

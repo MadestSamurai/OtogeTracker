@@ -19,9 +19,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.R
@@ -44,9 +43,10 @@ fun GroupListItem(osuGroup: OsuGroup, onClick: (IntOffset) -> Unit) {
         modifier = Modifier
             .clickable(onClick = { onClick(size) })
             .onGloballyPositioned { coordinates ->
-                size = IntOffset(
-                    x = coordinates.size.width,
-                    y = coordinates.size.height
+                val position = coordinates.size
+                size = IntOffset (
+                    0,
+                    position.height
                 )
             }
             .padding(start = 8.dp)
@@ -87,4 +87,19 @@ fun GroupListItem(osuGroup: OsuGroup, onClick: (IntOffset) -> Unit) {
             )
         }
     }
+}
+
+@Preview
+@Composable
+fun GroupListItemPreview() {
+    GroupListItem(
+        OsuGroup(
+            id = 1,
+            name = "osu!",
+            shortName = "osu!",
+            colour = "#ff66aa",
+            hasPlaymodes = true,
+            playmodes = listOf("osu")
+        )
+    ) {}
 }

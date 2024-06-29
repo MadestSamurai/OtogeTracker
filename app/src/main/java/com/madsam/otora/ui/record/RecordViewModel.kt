@@ -27,6 +27,7 @@ class RecordViewModel(
     val osuRankGraphData = MutableStateFlow<List<Int>>(emptyList())
     val osuPlayData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuLevelData = MutableStateFlow<Map<String, String>>(emptyMap())
+    val osuRankHighestData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuInfoData = MutableStateFlow<Map<String, String>>(emptyMap())
 
     init {
@@ -78,6 +79,11 @@ class RecordViewModel(
         )
 
         osuRankGraphData.value = osuInfo.user.rankHistory.data
+        osuRankHighestData.value = mapOf(
+            "rank" to osuInfo.user.rankHighest.rank.toString(),
+            "date" to osuInfo.user.rankHighest.updatedAt
+        )
+        println(osuInfo.user.rankHighest)
 
         var playTime = ""
         if (osuInfo.user.statistics.playTime != 0) {

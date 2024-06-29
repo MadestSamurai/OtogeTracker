@@ -5,10 +5,9 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresApi
-import androidx.collection.ArrayMap
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.core.app.NotificationManagerCompat
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.GradientBrush
 import java.util.Locale
 
 /**
@@ -85,18 +84,19 @@ object CommonUtils {
      * @param value 整型
      * @return 颜色值
      */
-    fun getLevelColor(value: Int): Color {
+    fun getLevelBrush(value: Int): Brush {
         return when (value) {
-            in 0..14 -> Colors.OSU_LEVEL_WHITE
-            in 15..29 -> Colors.OSU_LEVEL_BLUE
-            in 30..44 -> Colors.OSU_LEVEL_GREEN
-            in 45..59 -> Colors.OSU_LEVEL_YELLOW
-            in 60..69 -> Colors.OSU_LEVEL_RED
-            in 70..79 -> Colors.OSU_LEVEL_PURPLE
-            in 80..89 -> Colors.OSU_LEVEL_BRONZE
-            in 90..94 -> Colors.OSU_LEVEL_SILVER
-            in 95..99 -> Colors.OSU_LEVEL_GOLD
-            else -> Colors.OSU_LEVEL_RUBY
+            in 0..14 -> GradientBrush.OSU_LEVEL_WHITE
+            in 15..29 -> GradientBrush.OSU_LEVEL_BLUE
+            in 30..44 -> GradientBrush.OSU_LEVEL_GREEN
+            in 45..59 -> GradientBrush.OSU_LEVEL_YELLOW
+            in 60..69 -> GradientBrush.OSU_LEVEL_RED
+            in 70..79 -> GradientBrush.OSU_LEVEL_PURPLE
+            in 80..89 -> GradientBrush.OSU_LEVEL_BRONZE
+            in 90..99 -> GradientBrush.OSU_LEVEL_SILVER
+            in 100..104 -> GradientBrush.OSU_LEVEL_GOLD
+            in 105..109 -> GradientBrush.OSU_LEVEL_PLATINUM
+            else -> GradientBrush.OSU_LEVEL_RAINBOW
         }
     }
 }
