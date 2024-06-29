@@ -8,10 +8,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.ui.record.RecordViewModel
 import com.madsam.otora.ui.record.RecordViewModelFactory
-import com.madsam.otora.ui.record.cards.OsuCard
-import com.madsam.otora.ui.record.cards.OsuLevel
-import com.madsam.otora.ui.record.cards.OsuPlayData
-import com.madsam.otora.ui.record.cards.OsuRankGraph
+import com.madsam.otora.ui.record.osu.OsuCard
+import com.madsam.otora.ui.record.osu.OsuLevel
+import com.madsam.otora.ui.record.osu.OsuPlayData
+import com.madsam.otora.ui.record.osu.OsuRankGraph
 
 @Composable
 fun OsuUserPage() {

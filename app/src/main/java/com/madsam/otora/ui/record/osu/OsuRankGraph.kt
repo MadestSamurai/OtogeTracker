@@ -1,4 +1,4 @@
-package com.madsam.otora.ui.record.cards
+package com.madsam.otora.ui.record.osu
 
 import android.text.Layout
 import androidx.compose.foundation.background

@@ -8,7 +8,11 @@ import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import com.madsam.otora.ui.record.sub.ChunithmUserPage
+import com.madsam.otora.ui.record.sub.MaimaiUserPage
 import com.madsam.otora.ui.record.sub.OsuUserPage
 import kotlinx.coroutines.launch
 
@@ -38,22 +42,12 @@ fun RecordScreen() {
         HorizontalPager(state = pagerState) { page ->
             when (tabs[page]) {
                 is Screen.Page1 -> OsuUserPage()
-                is Screen.Page2 -> TestPage2()
-                is Screen.Page3 -> TestPage3()
+                is Screen.Page2 -> MaimaiUserPage()
+                is Screen.Page3 -> ChunithmUserPage()
                 is Screen.Page4 -> TestPage4()
             }
         }
     }
-}
-
-@Composable
-fun TestPage2() {
-    Text(text = "TestPage2")
-}
-
-@Composable
-fun TestPage3() {
-    Text(text = "TestPage3")
 }
 
 @Composable
@@ -62,8 +56,8 @@ fun TestPage4() {
 }
 
 sealed class Screen(val route: String) {
-    data object Page1 : Screen("Osu Page")
-    data object Page2 : Screen("Page2")
-    data object Page3 : Screen("Page3")
+    data object Page1 : Screen("Osu")
+    data object Page2 : Screen("Maimai")
+    data object Page3 : Screen("Chunithm")
     data object Page4 : Screen("Page4")
 }

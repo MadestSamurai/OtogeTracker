@@ -1,4 +1,4 @@
-package com.madsam.otora.ui.record.cards
+package com.madsam.otora.ui.record.osu
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -48,8 +48,6 @@ fun OsuCard(
 ) {
     val cardData = osuCardData.collectAsState(initial = emptyMap()).value
     val groupListData = osuGroupList.collectAsState(initial = emptyList()).value
-
-    println(cardData)
 
     Surface(
         shape = RoundedCornerShape(20.dp),
