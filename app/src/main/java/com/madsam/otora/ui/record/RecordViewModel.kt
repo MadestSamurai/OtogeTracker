@@ -1,14 +1,21 @@
 package com.madsam.otora.ui.record
 
+import android.content.Context
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.madsam.otora.consts.FlagsAlphabet
 import com.madsam.otora.entity.web.OsuCard
 import com.madsam.otora.entity.web.OsuGroup
 import com.madsam.otora.entity.web.OsuInfo
+import com.madsam.otora.glance.SmallWidget
 import com.madsam.otora.service.DataRequestService
 import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.utils.ShareUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * 项目名: OtogeTracker
@@ -20,7 +27,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class RecordViewModel(
     userId: String,
-    mode: String
+    mode: String,
+    context: Context
 ) : ViewModel() {
     val osuCardData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuGroupList = MutableStateFlow<List<OsuGroup>>(emptyList())
@@ -31,16 +39,18 @@ class RecordViewModel(
     val osuInfoData = MutableStateFlow<Map<String, String>>(emptyMap())
 
     init {
-        requestOsuData(userId, mode)
+        requestOsuData(userId, mode, context)
     }
 
-    private fun requestOsuData(userId: String, mode: String) {
+    private val serviceScope = CoroutineScope(Dispatchers.IO)
+
+    private fun requestOsuData(userId: String, mode: String, context: Context) {
         val dataRequestService = DataRequestService()
         dataRequestService.getOsuCard({ osuCard: OsuCard -> setOsuCard(osuCard) }, userId)
 //        dataRequestService.getOsuTopRanks({ osuTopRanks: OsuTopRanks -> setOsuTopRanks(osuTopRanks) }, userId, mode)
 //        dataRequestService.getOsuBeatmap({ osuUserBeatmap: OsuUserBeatmap -> setOsuUserBeatmap(osuUserBeatmap) }, userId, mode)
 //        dataRequestService.getOsuHistorical({ osuHistorical: OsuHistorical -> setOsuHistorical(osuHistorical) }, userId, mode)
-        dataRequestService.getOsuMedals({ osuInfo: OsuInfo -> setOsuMedals(osuInfo) }, userId, mode)
+        dataRequestService.getOsuMedals({ osuInfo: OsuInfo -> setOsuMedals(osuInfo, context) }, userId, mode)
     }
 
     private fun setOsuCard(osuCard: OsuCard) {
@@ -59,7 +69,7 @@ class RecordViewModel(
         osuGroupList.value = osuCard.groups
     }
 
-    private fun setOsuMedals(osuInfo: OsuInfo) {
+    private fun setOsuMedals(osuInfo: OsuInfo, context: Context) {
         // check if title is null or empty
         if (osuInfo.user.title.isEmpty()) {
             osuCardData.value += mapOf(
@@ -117,14 +127,24 @@ class RecordViewModel(
             "level" to osuInfo.user.statistics.level.current.toString(),
             "levelProgress" to osuInfo.user.statistics.level.progress.toString()
         )
+
+        ShareUtil.putString("osuUserPp", osuInfo.user.statistics.pp.toString(), context)
+        serviceScope.launch {
+            val manager = GlanceAppWidgetManager(context)
+            val widget = SmallWidget()
+            val glanceIds = manager.getGlanceIds(widget.javaClass)
+            glanceIds.forEach { glanceId ->
+                widget.update(context, glanceId)
+            }
+        }
     }
 }
 
-class RecordViewModelFactory(private val userId: String, private val mode: String) : ViewModelProvider.Factory {
+class RecordViewModelFactory(private val userId: String, private val mode: String, private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RecordViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return RecordViewModel(userId, mode) as T
+            return RecordViewModel(userId, mode, context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

@@ -2,6 +2,8 @@
 accompanistThemeadapterMaterial3 = "0.34.0"
 activity = "1.8.2"
 coreSplashscreen = "1.1.0-rc01"
+glanceAppwidget = "1.1.0"
+glanceMaterial3 = "1.1.0"
 moshiKotlin = "1.15.1"
 retrofit = "2.11.0"
 androidxComposeBom = "2024.06.00"
@@ -16,9 +18,9 @@ junit = "4.13.2"
 junitVersion = "1.1.5"
 kotlin = "2.0.0"
 loggingInterceptor = "4.12.0"
-materialVersion = "1.6.8"
+materialVersion = "1.2.1"
 navigationSafe = "2.6.0"
-androidGradle = "8.5.0"
+androidGradle = "8.5.1"
 navigation = "2.7.7"
 okhttp = "4.12.0"
 roomVersion = "2.6.1"
@@ -35,8 +37,10 @@ androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "a
 androidx-constraintlayout-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "androidxConstraintlayoutCompose" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }
+androidx-glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glanceMaterial3" }
+androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glanceAppwidget" }
 androidx-junit = { module = "androidx.test.ext:junit", version.ref = "junitVersion" }
-androidx-material = { module = "androidx.compose.material:material", version.ref = "materialVersion" }
+androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "materialVersion" }
 androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomVersion" }
 androidx-room-room-guava = { module = "androidx.room:room-guava", version.ref = "roomVersion" }
 androidx-room-room-rxjava3 = { module = "androidx.room:room-rxjava3", version.ref = "roomVersion" }

@@ -56,11 +56,16 @@ dependencies {
     // Android X
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout.constraintlayout.compose)
-    implementation(libs.androidx.material)
+    implementation(libs.androidx.material3)
     implementation(libs.foundation)
     implementation(libs.androidx.runtime)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.splashscreen)
+
+    //Glance
+    implementation(libs.androidx.glance.appwidget)
+    // For interop APIs with Material 3
+    implementation(libs.androidx.glance.material3)
 
     // Coil Image Loader
     implementation(libs.coil.kt.coil.compose)

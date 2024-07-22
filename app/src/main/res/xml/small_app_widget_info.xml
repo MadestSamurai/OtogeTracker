@@ -1,0 +1,5 @@
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:updatePeriodMillis="6000"
+    android:initialLayout="@layout/glance_default_loading_layout"
+    android:widgetCategory="home_screen">
+</appwidget-provider>
