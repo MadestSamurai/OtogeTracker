@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 
 object ShareUtil {
-
     private var sps: SharedPreferences?=null
 
     private fun getSps(context: Context):SharedPreferences{

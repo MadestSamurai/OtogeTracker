@@ -1,10 +1,15 @@
 package com.madsam.otora.activity
 
 import android.animation.ObjectAnimator
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -24,7 +29,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.madsam.otora.service.FilePickerSource
+import com.madsam.otora.service.FileRequestService
 import com.madsam.otora.ui.record.RecordScreen
+import com.madsam.otora.ui.record.RecordUpdateViewModel
 
 /**
  * 项目名: OtogeTracker
@@ -36,7 +44,7 @@ import com.madsam.otora.ui.record.RecordScreen
 const val KEY_ROUTE = "route"
 
 @Composable
-fun MainActivityScreen() {
+fun MainActivityScreen(recordUpdateViewModel: RecordUpdateViewModel) {
     val items = listOf(Screen.Screen1, Screen.Screen2)
     val navController = rememberNavController()
     Scaffold(
@@ -67,7 +75,7 @@ fun MainActivityScreen() {
         Box(modifier = Modifier.padding(contentPadding)) {
             NavHost(navController = navController, startDestination = Screen.Screen1.route) {
                 composable(Screen.Screen1.route) {
-                    RecordScreen()
+                    RecordScreen(recordUpdateViewModel)
                 }
                 composable(Screen.Screen2.route) {
                     Screen2()
@@ -78,6 +86,7 @@ fun MainActivityScreen() {
 }
 
 class MainActivity : AppCompatActivity() {
+    private val recordUpdateViewModel: RecordUpdateViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
@@ -97,8 +106,30 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContent {
-            MainActivityScreen()
+            MainActivityScreen(recordUpdateViewModel)
         }
+    }
+
+    private var currentFilePickerSource: FilePickerSource? = null
+
+    private val filePickerResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uri: Uri? = result.data?.data
+            if (uri != null) {
+                val fileContent = FileRequestService().readFileContent(this, uri)
+                val source = currentFilePickerSource ?: return@registerForActivityResult
+                FileRequestService().fileAnalyser(fileContent, source, this, recordUpdateViewModel)
+            }
+        }
+    }
+
+    fun pickFile(source: FilePickerSource) {
+        currentFilePickerSource = source
+        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+            type = "*/*"
+            addCategory(Intent.CATEGORY_OPENABLE)
+        }
+        filePickerResultLauncher.launch(intent)
     }
 }
 

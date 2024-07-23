@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RecordScreen() {
+fun RecordScreen(recordUpdateViewModel: RecordUpdateViewModel) {
     val tabs =
         listOf(Screen.Page1, Screen.Page2, Screen.Page3, Screen.Page4)
     val pagerState = rememberPagerState(pageCount = { tabs.size })
@@ -40,7 +40,7 @@ fun RecordScreen() {
         HorizontalPager(state = pagerState) { page ->
             when (tabs[page]) {
                 is Screen.Page1 -> OsuUserPage()
-                is Screen.Page2 -> MaimaiUserPage()
+                is Screen.Page2 -> MaimaiUserPage(recordUpdateViewModel)
                 is Screen.Page3 -> ChunithmUserPage()
                 is Screen.Page4 -> TestPage4()
             }
