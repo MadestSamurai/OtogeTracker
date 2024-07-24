@@ -1,5 +1,6 @@
 package com.madsam.otora.service
 
+import com.madsam.otora.entity.web.OsuCard
 import com.madsam.otora.entity.web.OsuGroup
 import com.madsam.otora.entity.web.OsuMedalItem
 import com.madsam.otora.entity.web.OsuStatistics
@@ -95,6 +96,46 @@ class NullToDefaultActiveTournamentBannerAdapter {
             OsuUserExtend.ActiveTournamentBanner()
         } else {
             activeTournamentBannerAdapter.fromJson(reader) ?: OsuUserExtend.ActiveTournamentBanner()
+        }
+    }
+}
+
+class NullToDefaultCountryAdapter {
+    private val moshi: Moshi = Moshi.Builder()
+        .add(NullToDefaultStringAdapter())
+        .add(CamelCaseJsonAdapterFactory())
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
+    private val countryAdapter: JsonAdapter<OsuCard.Country> = moshi.adapter(OsuCard.Country::class.java)
+
+    @FromJson
+    @Suppress("unused")
+    fun fromJson(reader: JsonReader): OsuCard.Country {
+        return if (reader.peek() == JsonReader.Token.NULL) {
+            reader.nextNull<OsuCard.Country>()
+            OsuCard.Country()
+        } else {
+            countryAdapter.fromJson(reader) ?: OsuCard.Country()
+        }
+    }
+}
+
+class NullToDefaultCountryExtendAdapter {
+    private val moshi: Moshi = Moshi.Builder()
+        .add(NullToDefaultStringAdapter())
+        .add(CamelCaseJsonAdapterFactory())
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
+    private val countryAdapter: JsonAdapter<OsuUserExtend.Country> = moshi.adapter(OsuUserExtend.Country::class.java)
+
+    @FromJson
+    @Suppress("unused")
+    fun fromJson(reader: JsonReader): OsuUserExtend.Country {
+        return if (reader.peek() == JsonReader.Token.NULL) {
+            reader.nextNull<OsuUserExtend.Country>()
+            OsuUserExtend.Country()
+        } else {
+            countryAdapter.fromJson(reader) ?: OsuUserExtend.Country()
         }
     }
 }

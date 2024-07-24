@@ -40,6 +40,8 @@ class DataRequestService {
         .add(NullToDefaultGroupListAdapter())
         .add(NullToDefaultMedalItemListAdapter())
         .add(NullToDefaultActiveTournamentBannerAdapter())
+        .add(NullToDefaultCountryAdapter())
+        .add(NullToDefaultCountryExtendAdapter())
         .add(NullToDefaultActiveTournamentBannerListAdapter())
         .add(NullToDefaultBadgeListAdapter())
         .add(NullToDefaultVariantListAdapter())

@@ -64,9 +64,10 @@ class RecordViewModel(
             "isOnline" to if (osuCard.isOnline) "true" else "false",
             "isBot" to if (osuCard.isBot) "true" else "false",
             "isDeleted" to if (osuCard.isDeleted) "true" else "false",
-            "profileColour" to osuCard.profileColour
+            "profileColour" to osuCard.profileColour.ifEmpty { "#F5F5F5" }
         )
         osuGroupList.value = osuCard.groups
+        println("Profile Colour: ${osuCard.profileColour.isEmpty()}")
     }
 
     private fun setOsuMedals(osuInfo: OsuInfo, context: Context) {
