@@ -7,6 +7,7 @@ import com.madsam.otora.entity.web.OsuHistorical
 import com.madsam.otora.entity.web.OsuInfo
 import com.madsam.otora.entity.web.OsuTopRanks
 import com.madsam.otora.entity.web.OsuUserBeatmap
+import com.madsam.otora.utils.SafeSoupUtil.safeAttr
 import com.madsam.otora.web.Api
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -138,8 +139,8 @@ class DataRequestService {
             val doc = Jsoup.connect("https://osu.ppy.sh/users/$userId/$mode").get()
             val medals =
                 doc.selectFirst("div.js-react--profile-page.osu-layout.osu-layout--full")
-            val medalsJson = medals?.attr("data-initial-data")
-            val osuInfo = moshi.adapter(OsuInfo::class.java).fromJson(medalsJson!!)
+            val medalsJson = medals.safeAttr("data-initial-data")
+            val osuInfo = moshi.adapter(OsuInfo::class.java).fromJson(medalsJson)
             if (osuInfo != null) {
                 callback(osuInfo)
             } else Log.e(TAG, "OsuInfo is null")

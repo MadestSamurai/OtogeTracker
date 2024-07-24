@@ -8,6 +8,10 @@ object SafeSoupUtil {
         return this?.first()?.text() ?: default
     }
 
+    fun Element?.safeAttr(attrName: String, default: String = ""): String {
+        return this?.attr(attrName) ?: default
+    }
+
     fun Element?.safePreviousElementSibling(default: Element = Element("null")): Element {
         return this?.previousElementSibling() ?: default
     }

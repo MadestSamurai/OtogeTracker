@@ -37,6 +37,12 @@ class FileRequestService {
             FilePickerSource.CHUNI_PLAYDATA_BUTTON -> {
                 // Store in SharedPreferences
                 val doc = Jsoup.parse(fileContent)
+                val playerCharaInfo = doc.getElementsByClass("player_chara_info").select("img").safeFirstAttr("src")
+                val playerHonorBase = doc.getElementsByClass("player_honor_short").safeFirstAttr("style")
+                    .split("/").last()
+                    .split(".").first()
+                    .split("_").last()
+                val playerHonorText = doc.getElementsByClass("player_honor_text").safeFirstText()
                 val playerReborn = doc.getElementsByClass("player_reborn").safeFirstText()
                 val playerLv = doc.getElementsByClass("player_lv").safeFirstText()
                 val playerNameIn = doc.getElementsByClass("player_name_in").safeFirstText()
@@ -72,11 +78,14 @@ class FileRequestService {
                 val playerRatingMax = doc.getElementsByClass("player_rating_max").safeFirstText()
                 val playerOverpower = doc.getElementsByClass("player_overpower_text").safeFirstText()
                 val playerLastPlay = doc.getElementsByClass("player_lastplaydate_text").safeFirstText()
-                val emptyCount = listOf(playerReborn, playerLv, playerNameIn, playerRating, playerRatingMax, playerOverpower, playerLastPlay).count { it.isEmpty() }
+                val emptyCount = listOf(playerCharaInfo, playerHonorBase, playerHonorText, playerReborn, playerLv, playerNameIn, playerRating, playerRatingMax, playerOverpower, playerLastPlay).count { it.isEmpty() }
                 if (emptyCount > 3) {
                     println("Empty fields found in the file")
                 } else {
-                    ShareUtil.putString("analysedText", "Player Reborn: $playerReborn\n" +
+                    ShareUtil.putString("analysedText", "Player Chara Info: $playerCharaInfo\n" +
+                            "Player Honor Base: $playerHonorBase\n" +
+                            "Player Honor Text: $playerHonorText\n" +
+                            "Player Reborn: $playerReborn\n" +
                             "Player Level: $playerLv\n" +
                             "Player Name: $playerNameIn\n" +
                             "Player Class Emblem Base: $playerClassEmblemBase\n" +
