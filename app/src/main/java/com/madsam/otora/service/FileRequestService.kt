@@ -35,7 +35,7 @@ class FileRequestService {
                 println("File Content: $fileContent")
                 // Store in SharedPreferences
                 ShareUtil.putString("analysedText", fileContent.slice(0..100), context)
-                recordUpdateViewModel.filePicked.value = true
+                recordUpdateViewModel.updatePickedFile()
             }
             FilePickerSource.BUTTON2 -> {
                 // Handle the file picked from the second button

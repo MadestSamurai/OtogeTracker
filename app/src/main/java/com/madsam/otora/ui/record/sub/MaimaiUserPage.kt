@@ -18,11 +18,11 @@ fun MaimaiUserPage(recordUpdateViewModel: RecordUpdateViewModel) {
     val state = remember { mutableStateOf("init") }
     state.value = ShareUtil.getString("analysedText", context) ?: "null"
 
-    LaunchedEffect(recordUpdateViewModel.filePicked.value) {
-        if (recordUpdateViewModel.filePicked.value) {
+    LaunchedEffect(recordUpdateViewModel.isFilePicked()) {
+        if (recordUpdateViewModel.isFilePicked()) {
             state.value = ShareUtil.getString("analysedText", context) ?: "null"
             println(state.value)
-            recordUpdateViewModel.filePicked.value = false
+            recordUpdateViewModel.resetPickedFile()
         }
     }
     Text(

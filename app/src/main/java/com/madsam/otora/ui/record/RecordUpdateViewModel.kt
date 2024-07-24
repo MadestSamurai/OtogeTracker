@@ -6,9 +6,15 @@ import androidx.lifecycle.ViewModel
 
 
 class RecordUpdateViewModel : ViewModel() {
-    val filePicked = mutableStateOf(false)
+    private val filePicked = mutableStateOf(false)
 
     fun updatePickedFile() {
         filePicked.value = true
+    }
+    fun resetPickedFile() {
+        filePicked.value = false
+    }
+    fun isFilePicked(): Boolean {
+        return filePicked.value
     }
 }
