@@ -41,7 +41,7 @@ fun RecordScreen(recordUpdateViewModel: RecordUpdateViewModel) {
             when (tabs[page]) {
                 is Screen.Page1 -> OsuUserPage()
                 is Screen.Page2 -> MaimaiUserPage(recordUpdateViewModel)
-                is Screen.Page3 -> ChunithmUserPage()
+                is Screen.Page3 -> ChunithmUserPage(recordUpdateViewModel)
                 is Screen.Page4 -> TestPage4()
             }
         }

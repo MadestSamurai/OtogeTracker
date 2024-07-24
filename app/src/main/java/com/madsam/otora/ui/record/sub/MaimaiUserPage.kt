@@ -29,7 +29,7 @@ fun MaimaiUserPage(recordUpdateViewModel: RecordUpdateViewModel) {
         text = "Maimai User Page",
     )
     Button(onClick = {
-        (context as? MainActivity)?.pickFile(FilePickerSource.HOME_BUTTON)
+        (context as? MainActivity)?.pickFile(FilePickerSource.BUTTON2)
 
     }) {
         Text("Pick a File")
