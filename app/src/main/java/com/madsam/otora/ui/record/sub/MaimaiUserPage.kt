@@ -7,22 +7,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import com.madsam.otora.ui.record.RecordUpdateViewModel
 import com.madsam.otora.activity.MainActivity
 import com.madsam.otora.service.FilePickerSource
+import com.madsam.otora.ui.record.RecordViewModel
 import com.madsam.otora.utils.ShareUtil
 
 @Composable
-fun MaimaiUserPage(recordUpdateViewModel: RecordUpdateViewModel) {
+fun MaimaiUserPage(recordViewModel: RecordViewModel) {
     val context = LocalContext.current
     val state = remember { mutableStateOf("init") }
     state.value = ShareUtil.getString("analysedText", context) ?: "null"
 
-    LaunchedEffect(recordUpdateViewModel.isFilePicked()) {
-        if (recordUpdateViewModel.isFilePicked()) {
+    LaunchedEffect(recordViewModel.isFilePicked()) {
+        if (recordViewModel.isFilePicked()) {
             state.value = ShareUtil.getString("analysedText", context) ?: "null"
             println(state.value)
-            recordUpdateViewModel.resetPickedFile()
+            recordViewModel.resetPickedFile()
         }
     }
     Text(

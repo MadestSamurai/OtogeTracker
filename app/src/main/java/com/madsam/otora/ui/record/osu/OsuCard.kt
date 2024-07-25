@@ -203,7 +203,7 @@ fun OsuCard(
 
             Image(
                 painter = painterResource(id =
-                    if (cardData["isOnline"] == "true") R.drawable.ic_osu_online else R.drawable.ic_osu_offline
+                if (cardData["isOnline"] == "true") R.drawable.ic_osu_online else R.drawable.ic_osu_offline
                 ),
                 contentDescription = "Online Mark",
                 modifier = Modifier
@@ -253,11 +253,11 @@ fun OsuCard(
                     Image(
                         painter = painterResource(
                             id = when (cardData["supporterRank"]) {
-                            "1" -> R.drawable.supporter_rank1
-                            "2" -> R.drawable.supporter_rank2
-                            "3" -> R.drawable.supporter_rank3
-                            else -> R.drawable.supporter_rank1
-                        }),
+                                "1" -> R.drawable.supporter_rank1
+                                "2" -> R.drawable.supporter_rank2
+                                "3" -> R.drawable.supporter_rank3
+                                else -> R.drawable.supporter_rank1
+                            }),
                         contentDescription = "Supporter Rank",
                         modifier = Modifier.height(20.dp)
                             .padding(

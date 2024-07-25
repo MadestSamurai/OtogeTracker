@@ -42,6 +42,7 @@ class DataRequestService {
         .add(NullToDefaultActiveTournamentBannerAdapter())
         .add(NullToDefaultCountryAdapter())
         .add(NullToDefaultCountryExtendAdapter())
+        .add(NullToDefaultRankHighestAdapter())
         .add(NullToDefaultActiveTournamentBannerListAdapter())
         .add(NullToDefaultBadgeListAdapter())
         .add(NullToDefaultVariantListAdapter())

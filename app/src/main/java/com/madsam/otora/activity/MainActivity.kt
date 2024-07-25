@@ -32,7 +32,6 @@ import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.service.FilePickerSource
 import com.madsam.otora.service.FileRequestService
 import com.madsam.otora.ui.record.RecordScreen
-import com.madsam.otora.ui.record.RecordUpdateViewModel
 
 /**
  * 项目名: OtogeTracker
@@ -44,7 +43,7 @@ import com.madsam.otora.ui.record.RecordUpdateViewModel
 const val KEY_ROUTE = "route"
 
 @Composable
-fun MainActivityScreen(recordUpdateViewModel: RecordUpdateViewModel) {
+fun MainActivityScreen(mainViewModel: MainViewModel) {
     val items = listOf(Screen.Screen1, Screen.Screen2)
     val navController = rememberNavController()
     Scaffold(
@@ -75,7 +74,7 @@ fun MainActivityScreen(recordUpdateViewModel: RecordUpdateViewModel) {
         Box(modifier = Modifier.padding(contentPadding)) {
             NavHost(navController = navController, startDestination = Screen.Screen1.route) {
                 composable(Screen.Screen1.route) {
-                    RecordScreen(recordUpdateViewModel)
+                    RecordScreen(mainViewModel)
                 }
                 composable(Screen.Screen2.route) {
                     Screen2()
@@ -86,7 +85,7 @@ fun MainActivityScreen(recordUpdateViewModel: RecordUpdateViewModel) {
 }
 
 class MainActivity : AppCompatActivity() {
-    private val recordUpdateViewModel: RecordUpdateViewModel by viewModels()
+    private val mainViewModel by viewModels<MainViewModel>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
@@ -106,7 +105,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContent {
-            MainActivityScreen(recordUpdateViewModel)
+            MainActivityScreen(mainViewModel)
         }
     }
 
@@ -118,7 +117,7 @@ class MainActivity : AppCompatActivity() {
             if (uri != null) {
                 val fileContent = FileRequestService().readFileContent(this, uri)
                 val source = currentFilePickerSource ?: return@registerForActivityResult
-                FileRequestService().fileAnalyser(fileContent, source, this, recordUpdateViewModel)
+                FileRequestService().fileAnalyser(fileContent, source, this, mainViewModel)
             }
         }
     }

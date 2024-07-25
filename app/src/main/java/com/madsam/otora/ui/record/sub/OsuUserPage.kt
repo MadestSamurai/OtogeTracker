@@ -11,10 +11,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.ui.record.RecordViewModel
-import com.madsam.otora.ui.record.RecordViewModelFactory
 import com.madsam.otora.ui.record.osu.OsuCard
 import com.madsam.otora.ui.record.osu.OsuLevel
 import com.madsam.otora.ui.record.osu.OsuPlayData
@@ -22,14 +20,8 @@ import com.madsam.otora.ui.record.osu.OsuRankGraph
 import com.madsam.otora.utils.ShareUtil
 
 @Composable
-fun OsuUserPage() {
+fun OsuUserPage(recordViewModel: RecordViewModel) {
     val context = LocalContext.current
-    val recordViewModel: RecordViewModel = viewModel(factory = RecordViewModelFactory(
-        userId = ShareUtil.getString("userId", context) ?: "null",
-        mode = "mania",
-        context = context
-    ))
-
     // State for managing text input
     val textState = remember { mutableStateOf("") }
 

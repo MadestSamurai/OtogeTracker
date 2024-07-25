@@ -9,18 +9,32 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.madsam.otora.activity.MainViewModel
 import com.madsam.otora.ui.record.sub.ChunithmUserPage
 import com.madsam.otora.ui.record.sub.MaimaiUserPage
 import com.madsam.otora.ui.record.sub.OsuUserPage
+import com.madsam.otora.utils.ShareUtil
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RecordScreen(recordUpdateViewModel: RecordUpdateViewModel) {
+fun RecordScreen(mainViewModel: MainViewModel) {
+    val context = LocalContext.current
     val tabs =
         listOf(Screen.Page1, Screen.Page2, Screen.Page3, Screen.Page4)
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val coroutineScope = rememberCoroutineScope()
+    val recordViewModel: RecordViewModel = viewModel(factory = RecordViewModelFactory(
+        userId = ShareUtil.getString("userId", context) ?: "null",
+        mode = "mania",
+        context = context
+    ))
+    if (mainViewModel.isFilePicked()) {
+        recordViewModel.updatePickedFile()
+        mainViewModel.resetPickedFile()
+    }
 
     Column {
         TabRow(selectedTabIndex = pagerState.currentPage) {
@@ -39,9 +53,9 @@ fun RecordScreen(recordUpdateViewModel: RecordUpdateViewModel) {
 
         HorizontalPager(state = pagerState) { page ->
             when (tabs[page]) {
-                is Screen.Page1 -> OsuUserPage()
-                is Screen.Page2 -> MaimaiUserPage(recordUpdateViewModel)
-                is Screen.Page3 -> ChunithmUserPage(recordUpdateViewModel)
+                is Screen.Page1 -> OsuUserPage(recordViewModel)
+                is Screen.Page2 -> MaimaiUserPage(recordViewModel)
+                is Screen.Page3 -> ChunithmUserPage(recordViewModel)
                 is Screen.Page4 -> TestPage4()
             }
         }

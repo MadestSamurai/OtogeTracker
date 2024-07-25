@@ -1,10 +1,12 @@
 package com.madsam.otora.ui.record
 
 import android.content.Context
+import androidx.compose.runtime.mutableStateOf
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.madsam.otora.consts.FlagsAlphabet
+import com.madsam.otora.entity.chuni.ChuniCard
 import com.madsam.otora.entity.web.OsuCard
 import com.madsam.otora.entity.web.OsuGroup
 import com.madsam.otora.entity.web.OsuInfo
@@ -12,6 +14,8 @@ import com.madsam.otora.glance.SmallWidget
 import com.madsam.otora.service.DataRequestService
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ShareUtil
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +34,7 @@ class RecordViewModel(
     mode: String,
     context: Context
 ) : ViewModel() {
+    // Osu
     val osuCardData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuGroupList = MutableStateFlow<List<OsuGroup>>(emptyList())
     val osuRankGraphData = MutableStateFlow<List<Int>>(emptyList())
@@ -138,6 +143,26 @@ class RecordViewModel(
                 widget.update(context, glanceId)
             }
         }
+    }
+
+    // Chunithm
+    private val filePicked = mutableStateOf(false)
+
+    fun updatePickedFile() {
+        filePicked.value = true
+    }
+    fun resetPickedFile() {
+        filePicked.value = false
+    }
+    fun isFilePicked(): Boolean {
+        return filePicked.value
+    }
+
+    fun getChuniCardFromShare(context: Context): ChuniCard {
+        val json = ShareUtil.getString("analysedText", context) ?: "null"
+        return Moshi.Builder()
+            .addLast(KotlinJsonAdapterFactory())
+            .build().adapter(ChuniCard::class.java).fromJson(json) ?: ChuniCard()
     }
 }
 

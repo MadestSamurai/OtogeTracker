@@ -10,20 +10,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.madsam.otora.activity.MainActivity
 import com.madsam.otora.service.FilePickerSource
-import com.madsam.otora.ui.record.RecordUpdateViewModel
-import com.madsam.otora.utils.ShareUtil
+import com.madsam.otora.ui.record.RecordViewModel
+import com.madsam.otora.ui.record.chunithm.ChuniCard
+import com.madsam.otora.entity.chuni.ChuniCard
 
 @Composable
-fun ChunithmUserPage(recordUpdateViewModel: RecordUpdateViewModel) {
+fun ChunithmUserPage(recordViewModel: RecordViewModel) {
     val context = LocalContext.current
-    val state = remember { mutableStateOf("init") }
-    state.value = ShareUtil.getString("analysedText", context) ?: "null"
+    val chuniCard = remember { mutableStateOf(ChuniCard()) }
+    chuniCard.value = recordViewModel.getChuniCardFromShare(context)
 
-    LaunchedEffect(recordUpdateViewModel.isFilePicked()) {
-        if (recordUpdateViewModel.isFilePicked()) {
-            state.value = ShareUtil.getString("analysedText", context) ?: "null"
-            println(state.value)
-            recordUpdateViewModel.resetPickedFile()
+    LaunchedEffect(recordViewModel.isFilePicked()) {
+        if (recordViewModel.isFilePicked()) {
+            chuniCard.value = recordViewModel.getChuniCardFromShare(context)
+            recordViewModel.resetPickedFile()
         }
     }
     Column {
@@ -36,6 +36,6 @@ fun ChunithmUserPage(recordUpdateViewModel: RecordUpdateViewModel) {
         }) {
             Text("Pick Chunithm PlayData File")
         }
-        Text(text = state.value)
+        ChuniCard(chuniCard = chuniCard.value)
     }
 }

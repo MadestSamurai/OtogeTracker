@@ -6,7 +6,9 @@ import android.os.Build
 import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.core.app.NotificationManagerCompat
+import com.madsam.otora.consts.Colors
 import com.madsam.otora.consts.GradientBrush
 import java.util.Locale
 
@@ -97,6 +99,22 @@ object CommonUtils {
             in 100..104 -> GradientBrush.OSU_LEVEL_GOLD
             in 105..109 -> GradientBrush.OSU_LEVEL_PLATINUM
             else -> GradientBrush.OSU_LEVEL_RAINBOW
+        }
+    }
+
+    /**
+     * 获取Rating对应的颜色
+     *
+     * @param value 字符串
+     * @return 颜色值
+     */
+    fun getRatingBrush(value: String): Color {
+        val valueFloat = value.toFloat()
+        return when (valueFloat) {
+            in 15.25..16.00 -> Colors.OSU_LEVEL_PLATINUM_1
+            in 14.50..15.24 -> Colors.OSU_LEVEL_GOLD_1
+            in 14.25..14.49 -> Colors.OSU_LEVEL_SILVER_1
+            else -> Colors.OSU_LEVEL_WHITE_1
         }
     }
 }

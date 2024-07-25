@@ -1,11 +1,17 @@
-package com.madsam.otora.ui.record
+package com.madsam.otora.activity
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 
-
-
-class RecordUpdateViewModel : ViewModel() {
+/**
+ * 项目名: OtogeTracker
+ * 文件名: com.madsam.otora.activity.MainViewModel
+ * 创建者: MadSamurai
+ * 创建时间: 2024/7/25
+ * 描述: TODO
+ */
+class MainViewModel: ViewModel(){
+    // Chunithm
     private val filePicked = mutableStateOf(false)
 
     fun updatePickedFile() {

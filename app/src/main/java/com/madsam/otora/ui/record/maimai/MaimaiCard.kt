@@ -9,6 +9,4 @@ fun MaimaiCard(
     maimaiCardData: MutableStateFlow<Map<String, String>>,
 ) {
     val cardData = maimaiCardData.collectAsState(initial = emptyMap()).value
-
-
 }

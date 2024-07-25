@@ -140,6 +140,27 @@ class NullToDefaultCountryExtendAdapter {
     }
 }
 
+class NullToDefaultRankHighestAdapter {
+    private val moshi: Moshi = Moshi.Builder()
+        .add(NullToDefaultStringAdapter())
+        .add(NullToDefaultLongAdapter())
+        .add(CamelCaseJsonAdapterFactory())
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
+    private val rankHighestAdapter: JsonAdapter<OsuUserExtend.RankHighest> = moshi.adapter(OsuUserExtend.RankHighest::class.java)
+
+    @FromJson
+    @Suppress("unused")
+    fun fromJson(reader: JsonReader): OsuUserExtend.RankHighest {
+        return if (reader.peek() == JsonReader.Token.NULL) {
+            reader.nextNull<OsuUserExtend.RankHighest>()
+            OsuUserExtend.RankHighest()
+        } else {
+            rankHighestAdapter.fromJson(reader) ?: OsuUserExtend.RankHighest()
+        }
+    }
+}
+
 class NullToEmptyStringListAdapter {
     @FromJson
     @Suppress("unused")
