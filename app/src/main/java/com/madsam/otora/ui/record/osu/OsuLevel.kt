@@ -121,7 +121,7 @@ fun OsuLevel(
                 color = Colors.DARK_RED_TEXT_LIGHT,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                modifier = if ((levelData["levelProgress"]?.toInt() ?: 0) < 10) {
+                modifier = if ((levelData["levelProgress"]?.toInt() ?: 0) < 15) {
                     Modifier
                         .constrainAs(levelProgressText) {
                             start.linkTo(levelProgress.start, margin = 8.dp)

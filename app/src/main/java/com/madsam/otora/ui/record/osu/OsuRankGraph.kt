@@ -139,11 +139,12 @@ fun OsuRankGraph(
                     )
                 }
             } else {
+                // TODO: Graph cannot be updated immediately after data is loaded
                 val modelProducer = remember { CartesianChartModelProducer.build() }
                 LaunchedEffect(Unit) {
                     modelProducer.tryRunTransaction {
                         lineSeries {
-                            series(rankGraphData.map { it })
+                            series(osuRankGraphData.value.map { it })
                         }
                     }
                 }
@@ -179,8 +180,8 @@ fun OsuRankGraph(
                                 )
                             ),
                             axisValueOverrider = AxisValueOverrider.fixed(
-                                maxY = (rankGraphData.minOrNull()?.toFloat() ?: 0f) * 0.97f,
-                                minY = (rankGraphData.maxOrNull()?.toFloat() ?: -100f) * 1.03f,
+                                maxY = (osuRankGraphData.value.minOrNull()?.toFloat() ?: 0f) * 0.97f,
+                                minY = (osuRankGraphData.value.maxOrNull()?.toFloat() ?: -100f) * 1.03f,
                             )
                         ),
                         startAxis = rememberStartAxis(

@@ -36,7 +36,7 @@ class RecordViewModel(
 ) : ViewModel() {
     // Osu
     val osuCardData = MutableStateFlow<Map<String, String>>(emptyMap())
-    val osuGlanceData = MutableStateFlow<Map<String, String>>(emptyMap())
+    private val osuGlanceData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuGroupList = MutableStateFlow<List<OsuGroup>>(emptyList())
     val osuRankGraphData = MutableStateFlow<List<Int>>(emptyList())
     val osuPlayData = MutableStateFlow<Map<String, String>>(emptyMap())
@@ -50,7 +50,7 @@ class RecordViewModel(
 
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
-    private fun requestOsuData(userId: String, mode: String, context: Context) {
+    fun requestOsuData(userId: String, mode: String, context: Context) {
         val dataRequestService = DataRequestService()
         dataRequestService.getOsuCard({ osuCard: OsuCard -> setOsuCard(osuCard) }, userId)
 //        dataRequestService.getOsuTopRanks({ osuTopRanks: OsuTopRanks -> setOsuTopRanks(osuTopRanks) }, userId, mode)

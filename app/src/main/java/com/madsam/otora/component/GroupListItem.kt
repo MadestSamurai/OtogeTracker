@@ -56,7 +56,7 @@ fun GroupListItem(osuGroup: OsuGroup, onClick: (IntOffset) -> Unit) {
             )
             .padding(
                 start = 12.dp,
-                end = 6.dp,
+                end = if (osuGroup.hasPlaymodes) 6.dp else 12.dp,
                 top = 4.dp,
                 bottom = 4.dp
             )
