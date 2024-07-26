@@ -1,12 +1,14 @@
 package com.madsam.otora.ui.record.sub
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.madsam.otora.activity.MainActivity
 import com.madsam.otora.service.FilePickerSource
@@ -37,5 +39,8 @@ fun ChunithmUserPage(recordViewModel: RecordViewModel) {
             Text("Pick Chunithm PlayData File")
         }
         ChuniCard(chuniCard = chuniCard.value)
+        Text(text = chuniCard.value.toString(),
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }

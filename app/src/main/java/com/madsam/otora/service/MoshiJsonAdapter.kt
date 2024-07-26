@@ -143,7 +143,7 @@ class NullToDefaultCountryExtendAdapter {
 class NullToDefaultRankHighestAdapter {
     private val moshi: Moshi = Moshi.Builder()
         .add(NullToDefaultStringAdapter())
-        .add(NullToDefaultLongAdapter())
+        .add(NullToDefaultIntAdapter())
         .add(CamelCaseJsonAdapterFactory())
         .addLast(KotlinJsonAdapterFactory())
         .build()

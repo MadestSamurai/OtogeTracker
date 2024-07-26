@@ -2,6 +2,7 @@ package com.madsam.otora.ui.record
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Tab
@@ -9,6 +10,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.activity.MainViewModel
@@ -64,7 +66,9 @@ fun RecordScreen(mainViewModel: MainViewModel) {
 
 @Composable
 fun TestPage4() {
-    Text(text = "TestPage4")
+    Text(text = "TestPage4",
+        modifier = Modifier.fillMaxSize()
+    )
 }
 
 sealed class Screen(val route: String) {
