@@ -109,12 +109,16 @@ object CommonUtils {
      * @return 颜色值
      */
     fun getRatingBrush(value: String): Color {
-        val valueFloat = value.toFloat()
-        return when (valueFloat) {
-            in 15.25..16.00 -> Colors.OSU_LEVEL_PLATINUM_1
-            in 14.50..15.24 -> Colors.OSU_LEVEL_GOLD_1
-            in 14.25..14.49 -> Colors.OSU_LEVEL_SILVER_1
-            else -> Colors.OSU_LEVEL_WHITE_1
+        try {
+            val valueFloat = value.toFloat()
+            return when (valueFloat) {
+                in 15.25..16.00 -> Colors.OSU_LEVEL_PLATINUM_1
+                in 14.50..15.24 -> Colors.OSU_LEVEL_GOLD_1
+                in 14.25..14.49 -> Colors.OSU_LEVEL_SILVER_1
+                else -> Colors.OSU_LEVEL_WHITE_1
+            }
+        } catch (nfe: NumberFormatException) {
+            return Colors.OSU_LEVEL_WHITE_1
         }
     }
 }

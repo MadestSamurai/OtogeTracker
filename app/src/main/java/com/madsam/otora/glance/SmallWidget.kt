@@ -18,7 +18,11 @@ import androidx.glance.layout.padding
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
+import com.madsam.otora.consts.Colors
 import com.madsam.otora.utils.ShareUtil
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 class SmallWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -31,20 +35,36 @@ class SmallWidget : GlanceAppWidget() {
     @Composable
     private fun MyContent() {
         val context = LocalContext.current
-        val text = ShareUtil.getString("osuUserPp", context)?:"NaN"
-        println(text)
+        val osuGlanceJson = ShareUtil.getString("osuGlance", context)?: "{}"
+        val moshi = Moshi.Builder()
+            .addLast(KotlinJsonAdapterFactory())
+            .build()
+        val osuGlanceAdapter = moshi.adapter(Map::class.java)
+        val osuGlance = osuGlanceAdapter.fromJson(osuGlanceJson) as Map<*, *>
+        println(osuGlance)
         Column(
-            modifier = GlanceModifier.fillMaxSize()
-                .background(GlanceTheme.colors.background),
+            modifier = GlanceModifier
+                .fillMaxSize()
+                .background(color = Colors.DARK_RED_DEEP),
             verticalAlignment = Alignment.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = text + "pp",
+                text = osuGlance["username"].toString(),
                 modifier = GlanceModifier
                     .padding(12.dp),
                 style = TextStyle(
-                    color = GlanceTheme.colors.onBackground,
+                    color = ColorProvider(Colors.DARK_RED_TEXT_LIGHT),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            )
+            Text(
+                text = osuGlance["pp"].toString() + "pp",
+                modifier = GlanceModifier
+                    .padding(12.dp),
+                style = TextStyle(
+                    color = ColorProvider(Colors.DARK_RED_TEXT_LIGHT),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )

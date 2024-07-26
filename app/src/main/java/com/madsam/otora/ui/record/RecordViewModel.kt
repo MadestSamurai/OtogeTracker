@@ -36,6 +36,7 @@ class RecordViewModel(
 ) : ViewModel() {
     // Osu
     val osuCardData = MutableStateFlow<Map<String, String>>(emptyMap())
+    val osuGlanceData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuGroupList = MutableStateFlow<List<OsuGroup>>(emptyList())
     val osuRankGraphData = MutableStateFlow<List<Int>>(emptyList())
     val osuPlayData = MutableStateFlow<Map<String, String>>(emptyMap())
@@ -134,7 +135,15 @@ class RecordViewModel(
             "levelProgress" to osuInfo.user.statistics.level.progress.toString()
         )
 
-        ShareUtil.putString("osuUserPp", osuInfo.user.statistics.pp.toString(), context)
+        osuGlanceData.value = mapOf(
+            "username" to osuInfo.user.username,
+            "pp" to osuInfo.user.statistics.pp.toString(),
+        )
+        val moshi = Moshi.Builder()
+            .addLast(KotlinJsonAdapterFactory())
+            .build()
+        val osuGlanceJson = moshi.adapter(Map::class.java).toJson(osuGlanceData.value)
+        ShareUtil.putString("osuGlance", osuGlanceJson, context)
         serviceScope.launch {
             val manager = GlanceAppWidgetManager(context)
             val widget = SmallWidget()
