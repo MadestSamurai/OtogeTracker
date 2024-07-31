@@ -26,7 +26,7 @@ okhttp = "4.12.0"
 roomVersion = "2.6.1"
 runtime = "1.6.8"
 utilcode = "1.30.7"
-vico = "2.0.0-alpha.21"
+vico = "2.0.0-alpha.26"
 
 [libraries]
 accompanist-themeadapter-material3 = { module = "com.google.accompanist:accompanist-themeadapter-material3", version.ref = "accompanistThemeadapterMaterial3" }
@@ -70,8 +70,6 @@ utilcode = { module = "com.blankj:utilcode", version.ref = "utilcode" }
 
 # For Jetpack Compose.
 vico-compose = { group = "com.patrykandpatrick.vico", name = "compose", version.ref = "vico" }
-# For `compose`. Creates a `ChartStyle` based on an M2 Material Theme.
-vico-compose-m2 = { group = "com.patrykandpatrick.vico", name = "compose-m2", version.ref = "vico" }
 # For `compose`. Creates a `ChartStyle` based on an M3 Material Theme.
 vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
 # Houses the core logic for charts and other elements. Included in all other modules.
