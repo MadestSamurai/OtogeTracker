@@ -214,11 +214,12 @@ fun OsuPlayData(
                 replaysWatched,
                 followCount,
                 mappingFollowCount,
+                postsCount,
                 commentsCount,
             ) = refs
 
             val titleSize = 14.sp
-            val textSize = 18.sp
+            val textSize = 17.sp
             val titleSizeLarge = 16.sp
             val textSizeLarge = 20.sp
 
@@ -239,7 +240,7 @@ fun OsuPlayData(
             TitleText(
                 textTitle = "PP",
                 text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold)) {
+                    withStyle(style = SpanStyle(fontSize = textSizeLarge, fontWeight = FontWeight.Bold)) {
                         append(ppSplit?.get(0) ?: "0")
                     }
                     withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
@@ -263,13 +264,13 @@ fun OsuPlayData(
             TitleText(
                 textTitle = "Play Time",
                 text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold)) {
+                    withStyle(style = SpanStyle(fontSize = textSizeLarge, fontWeight = FontWeight.Bold)) {
                         append(playTimeStr?.get(0) ?: "0")
                     }
                     withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
                         append("${dayHourLabels[0]} ")
                     }
-                    withStyle(style = SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold)) {
+                    withStyle(style = SpanStyle(fontSize = textSizeLarge, fontWeight = FontWeight.Bold)) {
                         append(playTimeStr?.get(1) ?: "0")
                     }
                     withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
@@ -382,32 +383,6 @@ fun OsuPlayData(
                     }
             )
 
-            TitleText(
-                textTitle = "Followers",
-                text = playData["followerCount"] ?: "0",
-                titleSize = titleSize,
-                titleTextSize = textSize,
-                color = iconTextColor,
-                modifier = Modifier
-                    .constrainAs(followCount) {
-                        top.linkTo(replaysWatched.bottom, margin = 15.dp)
-                        start.linkTo(parent.start, margin = 15.dp)
-                    }
-            )
-
-            TitleText(
-                textTitle = "Mapping Followers",
-                text = playData["mappingFollowerCount"] ?: "0",
-                titleSize = titleSize,
-                titleTextSize = textSize,
-                color = iconTextColor,
-                modifier = Modifier
-                    .constrainAs(mappingFollowCount) {
-                        top.linkTo(replaysWatched.bottom, margin = 15.dp)
-                        end.linkTo(parent.end, margin = 15.dp)
-                    }
-            )
-
             val replayWatchedText = CommonUtils.bigNumberTextFormat(playData["replaysWatchedByOthers"]?:"0", textSize)
             TitleText(
                 textTitle = "Replays Watched By Others",
@@ -423,6 +398,46 @@ fun OsuPlayData(
             )
 
             TitleText(
+                textTitle = "Mapping Followers",
+                text = playData["mappingFollowerCount"] ?: "0",
+                titleSize = titleSize,
+                titleTextSize = textSize,
+                color = iconTextColor,
+                modifier = Modifier
+                    .constrainAs(mappingFollowCount) {
+                        top.linkTo(totalScore.bottom, margin = 15.dp)
+                        end.linkTo(parent.end, margin = 15.dp)
+                    }
+            )
+
+            TitleText(
+                textTitle = "Followers",
+                text = playData["followerCount"] ?: "0",
+                titleSize = titleSize,
+                titleTextSize = textSize,
+                color = iconTextColor,
+                modifier = Modifier
+                    .constrainAs(followCount) {
+                        top.linkTo(replaysWatched.bottom, margin = 15.dp)
+                        start.linkTo(parent.start, margin = 15.dp)
+                        bottom.linkTo(parent.bottom, margin = 15.dp)
+                    }
+            )
+
+            TitleText(
+                textTitle = "Posts",
+                text = playData["postCount"] ?: "0",
+                titleSize = titleSize,
+                titleTextSize = textSize,
+                color = iconTextColor,
+                modifier = Modifier
+                    .constrainAs(postsCount) {
+                        top.linkTo(replaysWatched.bottom, margin = 15.dp)
+                        start.linkTo(followCount.end)
+                        end.linkTo(commentsCount.start)
+                    }
+            )
+            TitleText(
                 textTitle = "Comments",
                 text = playData["commentsCount"] ?: "0",
                 titleSize = titleSize,
@@ -430,7 +445,7 @@ fun OsuPlayData(
                 color = iconTextColor,
                 modifier = Modifier
                     .constrainAs(commentsCount) {
-                        top.linkTo(totalScore.bottom, margin = 15.dp)
+                        top.linkTo(replaysWatched.bottom, margin = 15.dp)
                         end.linkTo(parent.end, margin = 15.dp)
                     }
             )

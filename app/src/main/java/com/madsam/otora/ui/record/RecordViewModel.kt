@@ -127,6 +127,7 @@ class RecordViewModel(
             "replaysWatchedByOthers" to CommonUtils.formatNumberThousand(osuInfo.user.statistics.replaysWatchedByOthers.toLong()),
             "followerCount" to CommonUtils.formatNumberThousand(osuInfo.user.followerCount.toLong()),
             "mappingFollowerCount" to CommonUtils.formatNumberThousand(osuInfo.user.mappingFollowerCount.toLong()),
+            "postCount" to CommonUtils.formatNumberThousand(osuInfo.user.postCount.toLong()),
             "commentsCount" to CommonUtils.formatNumberThousand(osuInfo.user.commentsCount.toLong()),
         )
 

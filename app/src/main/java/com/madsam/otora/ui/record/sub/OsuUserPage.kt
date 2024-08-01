@@ -46,7 +46,6 @@ fun OsuUserPage(recordViewModel: RecordViewModel) {
                 modifier = Modifier.fillMaxWidth()
             )
             Row {
-
                 Column {
                     Button(
                         onClick = { isClicked.value = !isClicked.value },
