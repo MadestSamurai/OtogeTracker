@@ -7,6 +7,7 @@ import com.madsam.otora.entity.web.OsuHistorical
 import com.madsam.otora.entity.web.OsuInfo
 import com.madsam.otora.entity.web.OsuTopRanks
 import com.madsam.otora.entity.web.OsuUserBeatmap
+import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.SafeSoupUtil.safeAttr
 import com.madsam.otora.web.Api
 import com.squareup.moshi.Moshi
@@ -139,7 +140,7 @@ class DataRequestService {
 
     private fun requestOsuMedals(callback: ICallback<OsuInfo>, userId: String, mode: String) {
         try {
-            val doc = Jsoup.connect("https://osu.ppy.sh/users/$userId/$mode").get()
+            val doc = Jsoup.connect(CommonUtils.encodeURL("https://osu.ppy.sh/users/$userId/$mode")).get()
             val medals =
                 doc.selectFirst("div.js-react--profile-page.osu-layout.osu-layout--full")
             val medalsJson = medals.safeAttr("data-initial-data")

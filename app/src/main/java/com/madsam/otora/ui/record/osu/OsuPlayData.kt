@@ -3,7 +3,6 @@ package com.madsam.otora.ui.record.osu
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,7 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.madsam.otora.R
+import com.madsam.otora.component.TitleText
 import com.madsam.otora.consts.Colors
+import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -201,341 +202,236 @@ fun OsuPlayData(
             )
 
             val (
-                medalsTitle,
-                ppTitle,
-                playTimeTitle,
-                medalsText,
-                ppText,
-                playTimeText,
+                medals,
+                pp,
+                playTime,
+                rankedScore,
+                hitAccuracy,
+                playCount,
+                totalScore,
+                totalHits,
+                maximumCombo,
+                replaysWatched,
+                followCount,
+                mappingFollowCount,
+                commentsCount,
             ) = refs
 
-            val titleSize = 16.sp
-            val titleTextSize = 18.sp
+            val titleSize = 14.sp
+            val textSize = 18.sp
+            val titleSizeLarge = 16.sp
+            val textSizeLarge = 20.sp
 
-            Text(text = "Medals",
+            TitleText(
+                textTitle = "Medals",
+                text = playData["medalCount"] ?: "0",
+                titleSize = titleSizeLarge,
+                titleTextSize = textSizeLarge,
                 color = iconTextColor,
-                fontSize = titleSize,
                 modifier = Modifier
-                    .constrainAs(medalsTitle) {
+                    .constrainAs(medals) {
                         top.linkTo(judgeBackground.bottom, margin = 15.dp)
-                        start.linkTo(parent.start, margin = 25.dp)
-                    }
-            )
-
-            Text(text = playData["medalCount"] ?: "0",
-                color = iconTextColor,
-                fontSize = titleTextSize,
-                fontWeight = iconTextWeight,
-                modifier = iconTextModifier
-                    .constrainAs(medalsText) {
-                        top.linkTo(medalsTitle.bottom)
-                        start.linkTo(medalsTitle.start)
-                    }
-            )
-
-            Text(text = "PP",
-                color = iconTextColor,
-                fontSize = titleSize,
-                modifier = Modifier
-                    .constrainAs(ppTitle) {
-                        top.linkTo(judgeBackground.bottom, margin = 15.dp)
-                        start.linkTo(ppText.start)
+                        start.linkTo(parent.start, margin = 15.dp)
                     }
             )
 
             val ppSplit = playData["pp"]?.split(".")
-
-            Text(text = buildAnnotatedString {
-                withStyle(style = SpanStyle(fontSize = titleTextSize, fontWeight = FontWeight.Bold)) {
-                    append(ppSplit?.get(0) ?: "0")
-                }
-                withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
-                    append(".${ppSplit?.get(1) ?: "00"}")
-                }
-            },
-                color = iconTextColor,
-                fontSize = titleTextSize,
-                fontWeight = iconTextWeight,
-                modifier = iconTextModifier
-                    .constrainAs(ppText) {
-                        top.linkTo(ppTitle.bottom)
-                        start.linkTo(medalsText.end)
-                        end.linkTo(playTimeText.start)
+            TitleText(
+                textTitle = "PP",
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold)) {
+                        append(ppSplit?.get(0) ?: "0")
                     }
-            )
-
-            Text(text = "Play Time",
+                    withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
+                        append(".${ppSplit?.get(1) ?: "00"}")
+                    }
+                },
+                titleSize = titleSizeLarge,
+                titleTextSize = textSizeLarge,
                 color = iconTextColor,
-                fontSize = titleSize,
                 modifier = Modifier
-                    .constrainAs(playTimeTitle) {
+                    .constrainAs(pp) {
                         top.linkTo(judgeBackground.bottom, margin = 15.dp)
-                        start.linkTo(playTimeText.start)
+                        start.linkTo(medals.end)
+                        end.linkTo(playTime.start)
                     }
             )
             
-            val playTime = playData["playTime"]?.split(",")
-            val timeLabels = listOf("D", "H", "M", "S")
-
-            Text(text = buildAnnotatedString {
-                playTime?.forEachIndexed { index, time ->
-                    withStyle(style = SpanStyle(fontSize = titleTextSize, fontWeight = FontWeight.Bold)) {
-                        append(time)
+            val playTimeStr = playData["playTime"]?.split(",")
+            val dayHourLabels = listOf("D", "H")
+            val monthSecondLabels = listOf("M", "S")
+            TitleText(
+                textTitle = "Play Time",
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold)) {
+                        append(playTimeStr?.get(0) ?: "0")
                     }
                     withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
-                        append(timeLabels[index])
+                        append("${dayHourLabels[0]} ")
                     }
-                    if (index != playTime.size - 1) {
-                        append(" ")
+                    withStyle(style = SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold)) {
+                        append(playTimeStr?.get(1) ?: "0")
                     }
-                }
-            },
+                    withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
+                        append("${dayHourLabels[1]} ")
+                    }
+                    withStyle(style = SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold)) {
+                        append(playTimeStr?.get(2) ?: "0")
+                    }
+                    withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
+                        append("${monthSecondLabels[0]} ")
+                    }
+                    withStyle(style = SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold)) {
+                        append(playTimeStr?.get(3) ?: "0")
+                    }
+                    withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
+                        append(monthSecondLabels[1])
+                    }
+                },
+                titleSize = titleSizeLarge,
+                titleTextSize = textSizeLarge,
                 color = iconTextColor,
-                modifier = iconTextModifier
-                    .constrainAs(playTimeText) {
-                        top.linkTo(playTimeTitle.bottom)
-                        end.linkTo(parent.end, margin = 25.dp)
-                    }
-                    .defaultMinSize(minWidth = 100.dp)
-            )
-
-            val (
-                rankedScoreTitle,
-                hitAccuracyTitle,
-                playCountTitle,
-                totalScoreTitle,
-                totalHitsTitle,
-                maximumComboTitle,
-                replaysWatchedTitle,
-                followCountTitle,
-                rankedScoreText,
-                hitAccuracyText,
-                playCountText,
-                totalScoreText,
-                totalHitsText,
-                maximumComboText,
-                replaysWatchedText,
-                followCountText,
-            ) = refs
-
-            val (
-                mappingFollowCountTitle,
-                commentsCountTitle,
-                mappingFollowCountText,
-                commentsCountText,
-            ) = refs
-
-            val textSize = 14.sp
-
-            Text(text = "Ranked Score",
-                color = iconTextColor,
-                fontSize = textSize,
                 modifier = Modifier
-                    .constrainAs(rankedScoreTitle) {
-                        top.linkTo(medalsText.bottom, margin = 15.dp)
-                        start.linkTo(parent.start, margin = 25.dp)
+                    .constrainAs(playTime) {
+                        top.linkTo(judgeBackground.bottom, margin = 15.dp)
+                        end.linkTo(parent.end, margin = 15.dp)
                     }
             )
 
-            Text(text = "Hit Accuracy",
+            val rankedScoreText = CommonUtils.bigNumberTextFormat(playData["rankedScore"]?:"0", textSize)
+            TitleText(
+                textTitle = "Ranked Score",
+                text = rankedScoreText,
+                titleSize = titleSize,
+                titleTextSize = textSize,
                 color = iconTextColor,
-                fontSize = textSize,
                 modifier = Modifier
-                    .constrainAs(hitAccuracyTitle) {
-                        top.linkTo(rankedScoreTitle.bottom, margin = 3.dp)
-                        start.linkTo(parent.start, margin = 25.dp)
+                    .constrainAs(rankedScore) {
+                        top.linkTo(medals.bottom, margin = 15.dp)
+                        start.linkTo(parent.start, margin = 15.dp)
                     }
             )
 
-            Text(text = "Play Count",
+            TitleText(
+                textTitle = "Hit Accuracy",
+                text = playData["hitAccuracy"] ?: "0",
+                titleSize = titleSize,
+                titleTextSize = textSize,
                 color = iconTextColor,
-                fontSize = textSize,
                 modifier = Modifier
-                    .constrainAs(playCountTitle) {
-                        top.linkTo(hitAccuracyTitle.bottom, margin = 3.dp)
-                        start.linkTo(parent.start, margin = 25.dp)
+                    .constrainAs(hitAccuracy) {
+                        top.linkTo(medals.bottom, margin = 15.dp)
+                        start.linkTo(rankedScore.end)
+                        end.linkTo(playCount.start)
                     }
             )
 
-            Text(text = "Total Score",
+            TitleText(
+                textTitle = "Play Count",
+                text = playData["playCount"] ?: "0",
+                titleSize = titleSize,
+                titleTextSize = textSize,
                 color = iconTextColor,
-                fontSize = textSize,
                 modifier = Modifier
-                    .constrainAs(totalScoreTitle) {
-                        top.linkTo(playCountTitle.bottom, margin = 3.dp)
-                        start.linkTo(parent.start, margin = 25.dp)
+                    .constrainAs(playCount) {
+                        top.linkTo(medals.bottom, margin = 15.dp)
+                        end.linkTo(parent.end, margin = 15.dp)
                     }
             )
 
-            Text(text = "Total Hits",
+            val totalScoreText = CommonUtils.bigNumberTextFormat(playData["totalScore"]?:"0", textSize)
+            TitleText(
+                textTitle = "Total Score",
+                text = totalScoreText,
+                titleSize = titleSize,
+                titleTextSize = textSize,
                 color = iconTextColor,
-                fontSize = textSize,
                 modifier = Modifier
-                    .constrainAs(totalHitsTitle) {
-                        top.linkTo(totalScoreTitle.bottom, margin = 3.dp)
-                        start.linkTo(parent.start, margin = 25.dp)
+                    .constrainAs(totalScore) {
+                        top.linkTo(rankedScore.bottom, margin = 15.dp)
+                        start.linkTo(parent.start, margin = 15.dp)
                     }
             )
 
-            Text(text = "Maximum Combo",
+            val totalHitsText = CommonUtils.bigNumberTextFormat(playData["totalHits"]?:"0", textSize)
+            TitleText(
+                textTitle = "Total Hits",
+                text = totalHitsText,
+                titleSize = titleSize,
+                titleTextSize = textSize,
                 color = iconTextColor,
-                fontSize = textSize,
                 modifier = Modifier
-                    .constrainAs(maximumComboTitle) {
-                        top.linkTo(totalHitsTitle.bottom, margin = 3.dp)
-                        start.linkTo(parent.start, margin = 25.dp)
+                    .constrainAs(totalHits) {
+                        top.linkTo(rankedScore.bottom, margin = 15.dp)
+                        start.linkTo(totalScore.end)
+                        end.linkTo(maximumCombo.start)
                     }
             )
 
-            Text(text = "Replays Watched by Others",
+            val maximumComboText = CommonUtils.bigNumberTextFormat(playData["maximumCombo"]?:"0", textSize)
+            TitleText(
+                textTitle = "Max Combo",
+                text = maximumComboText,
+                titleSize = titleSize,
+                titleTextSize = textSize,
                 color = iconTextColor,
-                fontSize = textSize,
                 modifier = Modifier
-                    .constrainAs(replaysWatchedTitle) {
-                        top.linkTo(maximumComboTitle.bottom, margin = 3.dp)
-                        start.linkTo(parent.start, margin = 25.dp)
+                    .constrainAs(maximumCombo) {
+                        top.linkTo(rankedScore.bottom, margin = 15.dp)
+                        end.linkTo(parent.end, margin = 15.dp)
                     }
             )
 
-            Text(text = "Followers",
+            TitleText(
+                textTitle = "Followers",
+                text = playData["followerCount"] ?: "0",
+                titleSize = titleSize,
+                titleTextSize = textSize,
                 color = iconTextColor,
-                fontSize = textSize,
                 modifier = Modifier
-                    .constrainAs(followCountTitle) {
-                        top.linkTo(replaysWatchedTitle.bottom, margin = 3.dp)
-                        start.linkTo(parent.start, margin = 25.dp)
+                    .constrainAs(followCount) {
+                        top.linkTo(replaysWatched.bottom, margin = 15.dp)
+                        start.linkTo(parent.start, margin = 15.dp)
                     }
             )
 
-            Text(text = "Mapping Followers",
+            TitleText(
+                textTitle = "Mapping Followers",
+                text = playData["mappingFollowerCount"] ?: "0",
+                titleSize = titleSize,
+                titleTextSize = textSize,
                 color = iconTextColor,
-                fontSize = textSize,
                 modifier = Modifier
-                    .constrainAs(mappingFollowCountTitle) {
-                        top.linkTo(followCountTitle.bottom, margin = 3.dp)
-                        start.linkTo(parent.start, margin = 25.dp)
+                    .constrainAs(mappingFollowCount) {
+                        top.linkTo(replaysWatched.bottom, margin = 15.dp)
+                        end.linkTo(parent.end, margin = 15.dp)
                     }
             )
 
-            Text(text = "Comments",
+            val replayWatchedText = CommonUtils.bigNumberTextFormat(playData["replaysWatchedByOthers"]?:"0", textSize)
+            TitleText(
+                textTitle = "Replays Watched By Others",
+                text = replayWatchedText,
+                titleSize = titleSize,
+                titleTextSize = textSize,
                 color = iconTextColor,
-                fontSize = textSize,
                 modifier = Modifier
-                    .constrainAs(commentsCountTitle) {
-                        top.linkTo(mappingFollowCountTitle.bottom, margin = 3.dp)
-                        start.linkTo(parent.start, margin = 25.dp)
-                        bottom.linkTo(parent.bottom, margin = 15.dp)
+                    .constrainAs(replaysWatched) {
+                        top.linkTo(totalScore.bottom, margin = 15.dp)
+                        start.linkTo(parent.start, margin = 15.dp)
                     }
             )
 
-            Text(text = playData["replaysWatchedByOthers"] ?: "0",
+            TitleText(
+                textTitle = "Comments",
+                text = playData["commentsCount"] ?: "0",
+                titleSize = titleSize,
+                titleTextSize = textSize,
                 color = iconTextColor,
-                fontSize = textSize,
                 modifier = Modifier
-                    .constrainAs(replaysWatchedText) {
-                        top.linkTo(replaysWatchedTitle.top)
-                        bottom.linkTo(replaysWatchedTitle.bottom)
-                        start.linkTo(replaysWatchedTitle.end)
-                        end.linkTo(parent.end, margin = 25.dp)
-                    }
-            )
-
-            Text(text = playData["rankedScore"] ?: "0",
-                color = iconTextColor,
-                fontSize = textSize,
-                modifier = Modifier
-                    .constrainAs(rankedScoreText) {
-                        top.linkTo(rankedScoreTitle.top)
-                        bottom.linkTo(rankedScoreTitle.bottom)
-                        start.linkTo(replaysWatchedText.start)
-                    }
-            )
-
-            Text(text = playData["hitAccuracy"] ?: "0",
-                color = iconTextColor,
-                fontSize = textSize,
-                modifier = Modifier
-                    .constrainAs(hitAccuracyText) {
-                        top.linkTo(hitAccuracyTitle.top)
-                        bottom.linkTo(hitAccuracyTitle.bottom)
-                        start.linkTo(replaysWatchedText.start)
-                    }
-            )
-
-            Text(text = playData["playCount"] ?: "0",
-                color = iconTextColor,
-                fontSize = textSize,
-                modifier = Modifier
-                    .constrainAs(playCountText) {
-                        top.linkTo(playCountTitle.top)
-                        bottom.linkTo(playCountTitle.bottom)
-                        start.linkTo(replaysWatchedText.start)
-                    }
-            )
-
-            Text(text = playData["totalScore"] ?: "0",
-                color = iconTextColor,
-                fontSize = textSize,
-                modifier = Modifier
-                    .constrainAs(totalScoreText) {
-                        top.linkTo(totalScoreTitle.top)
-                        bottom.linkTo(totalScoreTitle.bottom)
-                        start.linkTo(replaysWatchedText.start)
-                    }
-            )
-
-            Text(text = playData["totalHits"] ?: "0",
-                color = iconTextColor,
-                fontSize = textSize,
-                modifier = Modifier
-                    .constrainAs(totalHitsText) {
-                        top.linkTo(totalHitsTitle.top)
-                        bottom.linkTo(totalHitsTitle.bottom)
-                        start.linkTo(replaysWatchedText.start)
-                    }
-            )
-
-            Text(text = playData["maximumCombo"] ?: "0",
-                color = iconTextColor,
-                fontSize = textSize,
-                modifier = Modifier
-                    .constrainAs(maximumComboText) {
-                        top.linkTo(maximumComboTitle.top)
-                        bottom.linkTo(maximumComboTitle.bottom)
-                        start.linkTo(replaysWatchedText.start)
-                    }
-            )
-
-            Text(text = playData["followerCount"] ?: "0",
-                color = iconTextColor,
-                fontSize = textSize,
-                modifier = Modifier
-                    .constrainAs(followCountText) {
-                        top.linkTo(followCountTitle.top)
-                        bottom.linkTo(followCountTitle.bottom)
-                        start.linkTo(replaysWatchedText.start)
-                    }
-            )
-
-            Text(text = playData["mappingFollowerCount"] ?: "0",
-                color = iconTextColor,
-                fontSize = textSize,
-                modifier = Modifier
-                    .constrainAs(mappingFollowCountText) {
-                        top.linkTo(mappingFollowCountTitle.top)
-                        bottom.linkTo(mappingFollowCountTitle.bottom)
-                        start.linkTo(replaysWatchedText.start)
-                    }
-            )
-
-            Text(text = playData["commentsCount"] ?: "0",
-                color = iconTextColor,
-                fontSize = textSize,
-                modifier = Modifier
-                    .constrainAs(commentsCountText) {
-                        top.linkTo(commentsCountTitle.top)
-                        bottom.linkTo(commentsCountTitle.bottom)
-                        start.linkTo(replaysWatchedText.start)
+                    .constrainAs(commentsCount) {
+                        top.linkTo(totalScore.bottom, margin = 15.dp)
+                        end.linkTo(parent.end, margin = 15.dp)
                     }
             )
         }

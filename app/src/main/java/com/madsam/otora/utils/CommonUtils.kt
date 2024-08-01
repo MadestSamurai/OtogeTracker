@@ -7,9 +7,18 @@ import android.provider.Settings
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.consts.GradientBrush
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.util.Locale
 
 /**
@@ -120,5 +129,44 @@ object CommonUtils {
         } catch (nfe: NumberFormatException) {
             return Colors.OSU_LEVEL_WHITE_1
         }
+    }
+
+    /**
+     * URL编码
+     *
+     * @param url 字符串
+     * @return 编码后的字符串
+     */
+    fun encodeURL(url: String): String {
+        val encodedUrl = URLEncoder.encode(url, StandardCharsets.UTF_8.toString())
+        return encodedUrl.replace("%3A", ":").replace("%2F", "/")
+    }
+
+    /**
+     * 大数字符串处理标记文本
+     *
+     * @param value 字符串
+     * @return 处理后的字符串标记文本
+     */
+    fun bigNumberTextFormat(value: String, textSize: TextUnit): AnnotatedString {
+        val split = value.split(",")
+        val firstPart = split.dropLast(2).joinToString(",")
+        val text = if (split.size > 2) {
+            buildAnnotatedString {
+                withStyle(style = SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold)) {
+                    append(firstPart)
+                }
+                withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
+                    append(",${split.takeLast(2).joinToString(",")}")
+                }
+            }
+        } else {
+            buildAnnotatedString {
+                withStyle(style = SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold)) {
+                    append(split.joinToString(","))
+                }
+            }
+        }
+        return text
     }
 }
