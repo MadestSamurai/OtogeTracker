@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -14,6 +15,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -29,7 +31,8 @@ fun OsuLevel(
     osuLevelData: MutableStateFlow<Map<String, String>>
 ) {
     val levelData = osuLevelData.collectAsState(initial = emptyMap()).value
-
+    val configuration = LocalConfiguration.current
+    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     Surface(
         shape = RoundedCornerShape(
             topStart = 6.dp,
@@ -50,6 +53,7 @@ fun OsuLevel(
             modifier = Modifier
                 .background(Colors.DARK_RED_DEEP)
         ) {
+            val cardWidthDp = screenWidthDp - 32.dp
             val refs = createRefs()
             val (
                 levelText,
@@ -60,7 +64,7 @@ fun OsuLevel(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .fillMaxWidth(0.15f)
+                    .width(55.dp)
                     .fillMaxHeight()
                     .constrainAs(levelText) {
                         start.linkTo(parent.start, margin = 16.dp)
@@ -89,7 +93,7 @@ fun OsuLevel(
                 color = Colors.DARKER_RED,
                 modifier = Modifier
                     .height(25.dp)
-                    .fillMaxWidth(0.75f)
+                    .width(cardWidthDp - 103.dp)
                     .constrainAs(levelProgressBar) {
                         start.linkTo(levelText.end)
                         end.linkTo(parent.end)
@@ -103,11 +107,7 @@ fun OsuLevel(
                 color = Colors.OSU_DARK_RED,
                 modifier = Modifier
                     .height(25.dp)
-                    .fillMaxWidth(
-                        levelData["levelProgress"]
-                            ?.toFloat()
-                            ?.div(133.33f) ?: 0f
-                    )
+                    .width((cardWidthDp - 103.dp) * (levelData["levelProgress"]?.toFloat() ?: 0f) / 100f)
                     .constrainAs(levelProgress) {
                         start.linkTo(levelProgressBar.start)
                         top.linkTo(parent.top, margin = 16.dp)

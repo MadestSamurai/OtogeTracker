@@ -23,6 +23,7 @@ import com.madsam.otora.ui.record.osu.OsuCard
 import com.madsam.otora.ui.record.osu.OsuLevel
 import com.madsam.otora.ui.record.osu.OsuPlayData
 import com.madsam.otora.ui.record.osu.OsuRankGraph
+import com.madsam.otora.ui.record.osu.OsuSocialCard
 import com.madsam.otora.utils.ShareUtil
 
 @Composable
@@ -93,6 +94,9 @@ fun OsuUserPage(recordViewModel: RecordViewModel) {
         }
         item {
             OsuPlayData(osuPlayData = recordViewModel.osuPlayData)
+        }
+        item {
+            OsuSocialCard(osuSocialCard = recordViewModel.osuSocialCardData)
         }
     }
 }

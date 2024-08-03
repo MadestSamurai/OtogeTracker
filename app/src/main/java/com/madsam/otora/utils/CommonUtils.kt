@@ -19,6 +19,8 @@ import com.madsam.otora.consts.Colors
 import com.madsam.otora.consts.GradientBrush
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 /**
@@ -45,7 +47,6 @@ object CommonUtils {
      *
      * @param context 上下文
      */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
     fun openNotificationListenSettings(context: Context) {
         try {
             val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
@@ -67,6 +68,54 @@ object CommonUtils {
         val minute = value % 3600 / 60
         val second = value % 60
         return String.format(Locale.getDefault(), "%d,%d,%d,%d", day, hour, minute, second)
+    }
+
+    /**
+     * 日期码转换为年月日时分秒
+     *
+     * @param value 日期码 格式 2011-03-25T11:21:02+00:00
+     * @return 日时分秒空格分隔
+     */
+    fun dateCodeToYMDHMSU(value: String): String {
+        val date = value.split("T")[0].split("-")
+        val time = value.split("T")[1].slice(0 until 8).split(":")
+        val utc = value.split("T")[1].slice(8 until 14)
+        return String.format(Locale.getDefault(), "%s %s(UTC%s)", date.joinToString("-"), time.joinToString(":"), utc)
+    }
+
+    /**
+     * 日期码转换为毫秒数时间戳
+     *
+     * @param value 日期码 格式 2011-03-25T11:21:02+00:00
+     * @return 毫秒数时间戳
+     */
+    fun dateCodeToMillis(value: String): Long {
+        val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+        val offsetDateTime = OffsetDateTime.parse(value, formatter)
+        return offsetDateTime.toInstant().toEpochMilli()
+    }
+
+    /**
+     * 日期码转换为最近时间
+     * 少于30秒显示刚刚,少于1分钟显示秒,少于1小时显示分钟,少于1天显示小时,少于1周显示天,少于1月显示周,少于1年显示月,否则显示年
+     *
+     * @param value 日期码 格式 2011-03-25T11:21:02+00:00
+     * @return 最近时间
+     */
+    fun dateCodeToRecent(value: String): String {
+        val current = System.currentTimeMillis()
+        val delta = current - dateCodeToMillis(value)
+        println(delta)
+        return when {
+            delta < 30 * 1000 -> "recent"
+            delta < 60 * 1000 -> "${delta / 1000} seconds ago"
+            delta < 60L * 60 * 1000 -> "${delta / (60L * 1000)} minutes ago"
+            delta < 24L * 60 * 60 * 1000 -> "${delta / (60L * 60 * 1000)} hours ago"
+            delta < 7L * 24 * 60 * 60 * 1000 -> "${delta / (24L * 60 * 60 * 1000)} days ago"
+            delta < 30L * 24 * 60 * 60 * 1000 -> "${delta / (7L * 24 * 60 * 60 * 1000)} weeks ago"
+            delta < 365L * 24 * 60 * 60 * 1000 -> "${delta / (30L * 24 * 60 * 60 * 1000)} months ago"
+            else -> "${delta / (365L * 24 * 60 * 60 * 1000)} years ago"
+        }
     }
 
     /**

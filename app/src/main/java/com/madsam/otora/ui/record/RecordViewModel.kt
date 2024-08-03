@@ -42,6 +42,7 @@ class RecordViewModel(
     val osuPlayData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuLevelData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuRankHighestData = MutableStateFlow<Map<String, String>>(emptyMap())
+    val osuSocialCardData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuInfoData = MutableStateFlow<Map<String, String>>(emptyMap())
 
     init {
@@ -134,6 +135,18 @@ class RecordViewModel(
         osuLevelData.value = mapOf(
             "level" to osuInfo.user.statistics.level.current.toString(),
             "levelProgress" to osuInfo.user.statistics.level.progress.toString()
+        )
+
+        osuSocialCardData.value = mapOf(
+            "discord" to osuInfo.user.discord,
+            "twitter" to osuInfo.user.twitter,
+            "website" to osuInfo.user.website,
+            "location" to osuInfo.user.location,
+            "interests" to osuInfo.user.interests,
+            "occupation" to osuInfo.user.occupation,
+            "joinDate" to osuInfo.user.joinDate,
+            "lastVisit" to osuInfo.user.lastVisit,
+            "playStyle" to osuInfo.user.playstyle.joinToString(", ")
         )
 
         osuGlanceData.value = mapOf(

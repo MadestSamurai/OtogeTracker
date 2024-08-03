@@ -42,7 +42,6 @@ fun ChuniCard(
 ) {
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
-    println("screenWidthDp: $screenWidthDp")
     Surface(
         shape = RoundedCornerShape(10.dp),
         color = Color.Transparent,
