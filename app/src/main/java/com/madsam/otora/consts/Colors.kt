@@ -20,6 +20,7 @@ object Colors {
     val BRIGHT_RED: Color = Color(android.graphics.Color.parseColor("#834858"))
     val DARK_RED_TEXT: Color = Color(android.graphics.Color.parseColor("#bbab9b"))
     val DARK_RED_TEXT_LIGHT: Color = Color(android.graphics.Color.parseColor("#ddc7b7"))
+
     val OSU_BRIGHT_RED: Color = Color(android.graphics.Color.parseColor("#de4c9b"))
     val OSU_DARK_RED: Color = Color(android.graphics.Color.parseColor("#73184d"))
     val OSU_BRIGHT_RED_HALF_TRANS: Color = Color(android.graphics.Color.parseColor("#aade4c9b"))
@@ -46,6 +47,11 @@ object Colors {
     val OSU_LEVEL_GOLD_2: Color = Color(android.graphics.Color.parseColor("#d2ac27"))
     val OSU_LEVEL_PLATINUM_1: Color = Color(android.graphics.Color.parseColor("#fffeb3"))
     val OSU_LEVEL_PLATINUM_2: Color = Color(android.graphics.Color.parseColor("#cfd360"))
+
+    val OSU_X_BG: Color = Color(android.graphics.Color.parseColor("#000000"))
+    val OSU_X_TEXT: Color = Color(android.graphics.Color.parseColor("#ffffff"))
+    val OSU_DISCORD_BG: Color = Color(android.graphics.Color.parseColor("#5865f2"))
+    val OSU_DISCORD_TEXT: Color = Color(android.graphics.Color.parseColor("#ffffff"))
 }
 
 object GradientBrush {

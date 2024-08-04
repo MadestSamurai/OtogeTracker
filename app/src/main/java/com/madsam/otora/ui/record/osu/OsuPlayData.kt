@@ -1,5 +1,6 @@
 package com.madsam.otora.ui.record.osu
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -8,15 +9,24 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -64,12 +74,8 @@ fun OsuPlayData(
             val refs = createRefs()
             val (
                 judgeBackground,
-                sshIcon,
-                ssIcon,
-                shIcon,
-                sIcon,
-                aIcon,
-                playDataCard,
+                sshIcon, ssIcon, shIcon, sIcon, aIcon,
+                playDataCard
             ) = refs
 
             createHorizontalChain(sshIcon, ssIcon, shIcon, sIcon, aIcon)
@@ -93,80 +99,58 @@ fun OsuPlayData(
                     }
             )
 
-            ImageWithText(
-                painter = painterResource(id = R.drawable.ic_osu_ssh),
-                contentDescription = "SSH",
-                text = playData["sshCount"] ?: "0",
-                textSize = iconTextSize,
-                textColor = iconTextColor,
-                modifier = Modifier
-                    .constrainAs(sshIcon) {
-                        top.linkTo(parent.top)
-                    },
-                iconModifier = iconModifier,
-                textModifier = iconTextModifier
+            val imageWithTextData = listOf(
+                Triple(R.drawable.ic_osu_ssh, "SSH", playData["sshCount"] ?: "0"),
+                Triple(R.drawable.ic_osu_ss, "SS", playData["ssCount"] ?: "0"),
+                Triple(R.drawable.ic_osu_sh, "SH", playData["shCount"] ?: "0"),
+                Triple(R.drawable.ic_osu_s, "S", playData["sCount"] ?: "0"),
+                Triple(R.drawable.ic_osu_a, "A", playData["aCount"] ?: "0")
             )
 
-            ImageWithText(
-                painter = painterResource(id = R.drawable.ic_osu_ss),
-                contentDescription = "SS",
-                text = playData["ssCount"] ?: "0",
-                textSize = iconTextSize,
-                textColor = iconTextColor,
-                modifier = Modifier
-                    .constrainAs(ssIcon) {
-                        top.linkTo(parent.top)
-                    },
-                iconModifier = iconModifier,
-                textModifier = iconTextModifier
-            )
-
-            ImageWithText(
-                painter = painterResource(id = R.drawable.ic_osu_sh),
-                contentDescription = "SH",
-                text = playData["shCount"] ?: "0",
-                textSize = iconTextSize,
-                textColor = iconTextColor,
-                modifier = Modifier
-                    .constrainAs(shIcon) {
-                        top.linkTo(parent.top)
-                    },
-                iconModifier = iconModifier,
-                textModifier = iconTextModifier
-            )
-
-            ImageWithText(
-                painter = painterResource(id = R.drawable.ic_osu_s),
-                contentDescription = "S",
-                text = playData["sCount"] ?: "0",
-                textSize = iconTextSize,
-                textColor = iconTextColor,
-                modifier = Modifier
-                    .constrainAs(sIcon) {
-                        top.linkTo(parent.top)
-                    },
-                iconModifier = iconModifier,
-                textModifier = iconTextModifier
-            )
-
-            ImageWithText(
-                painter = painterResource(id = R.drawable.ic_osu_a),
-                contentDescription = "A",
-                text = playData["aCount"] ?: "0",
-                textSize = iconTextSize,
-                textColor = iconTextColor,
-                modifier = Modifier
-                    .constrainAs(aIcon) {
-                        top.linkTo(parent.top)
-                    },
-                iconModifier = iconModifier,
-                textModifier = iconTextModifier
-            )
+            imageWithTextData.forEachIndexed { index, data ->
+                val (imageRes, contentDescription, text) = data
+                ImageWithText(
+                    painter = painterResource(id = imageRes),
+                    contentDescription = contentDescription,
+                    text = text,
+                    textSize = iconTextSize,
+                    textColor = iconTextColor,
+                    modifier = Modifier
+                        .constrainAs(
+                            when (index) {
+                                0 -> sshIcon
+                                1 -> ssIcon
+                                2 -> shIcon
+                                3 -> sIcon
+                                else -> aIcon
+                            }
+                        ) {
+                            top.linkTo(parent.top)
+                        },
+                    iconModifier = iconModifier,
+                    textModifier = iconTextModifier
+                )
+            }
 
             val titleSize = 16.sp
             val textSize = 20.sp
             val textWidth = cardWidthDp / 2 - 24.dp
 
+            var shown by remember { mutableStateOf(false) }
+            val rowData = listOf(
+                "Ranked Score" to "rankedScore",
+                "Total Score" to "totalScore",
+                "Play Count" to "playCount",
+                "Total Hits" to "totalHits",
+                "Hit Accuracy" to "hitAccuracy",
+                "Max Combo" to "maximumCombo",
+                "Medals" to "medalCount",
+                "Replays Watched" to "replaysWatchedByOthers",
+                "Followers" to "followerCount",
+                "Mapping Followers" to "mappingFollowerCount",
+                "Posts" to "postCount",
+                "Comments" to "commentsCount"
+            )
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -185,28 +169,68 @@ fun OsuPlayData(
                     TitleText(
                         textTitle = "Play Time",
                         text = buildAnnotatedString {
-                            withStyle(style = SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold)) {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = textSize,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
                                 append(playTimeStr?.get(0) ?: "0")
                             }
-                            withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Normal
+                                )
+                            ) {
                                 append("${dayHourLabels[0]} ")
                             }
-                            withStyle(style = SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold)) {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = textSize,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
                                 append(playTimeStr?.get(1) ?: "0")
                             }
-                            withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Normal
+                                )
+                            ) {
                                 append("${dayHourLabels[1]} ")
                             }
-                            withStyle(style = SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold)) {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
                                 append(playTimeStr?.get(2) ?: "0")
                             }
-                            withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Normal
+                                )
+                            ) {
                                 append("${monthSecondLabels[0]} ")
                             }
-                            withStyle(style = SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold)) {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
                                 append(playTimeStr?.get(3) ?: "0")
                             }
-                            withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Normal
+                                )
+                            ) {
                                 append(monthSecondLabels[1])
                             }
                         },
@@ -221,10 +245,20 @@ fun OsuPlayData(
                     TitleText(
                         textTitle = "PP",
                         text = buildAnnotatedString {
-                            withStyle(style = SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold)) {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = textSize,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
                                 append(ppSplit?.get(0) ?: "0")
                             }
-                            withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.Normal
+                                )
+                            ) {
                                 append(".${ppSplit?.get(1) ?: "00"}")
                             }
                         },
@@ -236,171 +270,55 @@ fun OsuPlayData(
                             .width(textWidth)
                     )
                 }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                )  {
-                    val rankedScoreText = CommonUtils.bigNumberTextFormat(playData["rankedScore"]?:"0", textSize)
-                    TitleText(
-                        textTitle = "Ranked Score",
-                        text = rankedScoreText,
-                        titleSize = titleSize,
-                        titleTextSize = textSize,
-                        color = iconTextColor,
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .width(textWidth)
-                    )
-                    val totalScoreText = CommonUtils.bigNumberTextFormat(playData["totalScore"]?:"0", textSize)
-                    TitleText(
-                        textTitle = "Total Score",
-                        text = totalScoreText,
-                        titleSize = titleSize,
-                        titleTextSize = textSize,
-                        color = iconTextColor,
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .width(textWidth)
-                    )
+                rowData.chunked(2).forEach { pair ->
+                    AnimatedVisibility(
+                        visible = shown,
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp)
+                        ) {
+                            pair.forEach { (title, key) ->
+                                val text = CommonUtils.bigNumberTextFormat(
+                                    playData[key] ?: "0",
+                                    textSize
+                                )
+                                TitleText(
+                                    textTitle = title,
+                                    text = text,
+                                    titleSize = titleSize,
+                                    titleTextSize = textSize,
+                                    color = iconTextColor,
+                                    modifier = Modifier
+                                        .padding(start = 16.dp)
+                                        .width(textWidth)
+                                )
+                            }
+                        }
+                    }
                 }
-
-                Row(
+                Button(
+                    onClick = {
+                        shown = !shown
+                    },
+                    shape = RectangleShape,
+                    colors = ButtonDefaults.buttonColors(Colors.DARK_RED_DEEPER),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp)
                 ) {
-                    TitleText(
-                        textTitle = "Play Count",
-                        text = playData["playCount"] ?: "0",
-                        titleSize = titleSize,
-                        titleTextSize = textSize,
-                        color = iconTextColor,
+                    Image(
+                        painter = painterResource(id = if (shown) R.drawable.ic_arrow_up else R.drawable.ic_arrow_down),
+                        colorFilter = ColorFilter.tint(Colors.DARK_RED_TEXT_LIGHT),
+                        contentDescription = "Show More",
                         modifier = Modifier
-                            .padding(start = 16.dp)
-                            .width(textWidth)
+                            .padding(end = 8.dp)
+                            .size(24.dp)
                     )
-                    val totalHitsText =
-                        CommonUtils.bigNumberTextFormat(playData["totalHits"] ?: "0", textSize)
-                    TitleText(
-                        textTitle = "Total Hits",
-                        text = totalHitsText,
-                        titleSize = titleSize,
-                        titleTextSize = textSize,
-                        color = iconTextColor,
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .width(textWidth)
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                ) {
-                    TitleText(
-                        textTitle = "Hit Accuracy",
-                        text = playData["hitAccuracy"] ?: "0",
-                        titleSize = titleSize,
-                        titleTextSize = textSize,
-                        color = iconTextColor,
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .width(textWidth)
-                    )
-                    val maximumComboText = CommonUtils.bigNumberTextFormat(playData["maximumCombo"]?:"0", textSize)
-                    TitleText(
-                        textTitle = "Max Combo",
-                        text = maximumComboText,
-                        titleSize = titleSize,
-                        titleTextSize = textSize,
-                        color = iconTextColor,
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .width(textWidth)
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                ) {
-                    TitleText(
-                        textTitle = "Medals",
-                        text = playData["medalCount"] ?: "0",
-                        titleSize = titleSize,
-                        titleTextSize = textSize,
-                        color = iconTextColor,
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .width(textWidth)
-                    )
-                    val replayWatchedText = CommonUtils.bigNumberTextFormat(
-                        playData["replaysWatchedByOthers"] ?: "0",
-                        textSize
-                    )
-                    TitleText(
-                        textTitle = "Replays Watched",
-                        text = replayWatchedText,
-                        titleSize = titleSize,
-                        titleTextSize = textSize,
-                        color = iconTextColor,
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .width(textWidth)
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                ) {
-                    TitleText(
-                        textTitle = "Followers",
-                        text = playData["followerCount"] ?: "0",
-                        titleSize = titleSize,
-                        titleTextSize = textSize,
-                        color = iconTextColor,
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .width(textWidth)
-                    )
-                    TitleText(
-                        textTitle = "Mapping Followers",
-                        text = playData["mappingFollowerCount"] ?: "0",
-                        titleSize = titleSize,
-                        titleTextSize = textSize,
-                        color = iconTextColor,
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .width(textWidth)
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                ) {
-                    TitleText(
-                        textTitle = "Posts",
-                        text = playData["postCount"] ?: "0",
-                        titleSize = titleSize,
-                        titleTextSize = textSize,
-                        color = iconTextColor,
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .width(textWidth)
-                    )
-                    TitleText(
-                        textTitle = "Comments",
-                        text = playData["commentsCount"] ?: "0",
-                        titleSize = titleSize,
-                        titleTextSize = textSize,
-                        color = iconTextColor,
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .width(textWidth)
+                    Text(
+                        text = if (shown) "Show Less Play Data" else "Show More Play Data",
+                        fontSize = 18.sp,
+                        color = Colors.DARK_RED_TEXT_LIGHT
                     )
                 }
             }

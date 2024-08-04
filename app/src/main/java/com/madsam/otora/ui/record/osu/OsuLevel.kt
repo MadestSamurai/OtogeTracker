@@ -65,7 +65,7 @@ fun OsuLevel(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .width(55.dp)
-                    .fillMaxHeight()
+                    .height(55.dp)
                     .constrainAs(levelText) {
                         start.linkTo(parent.start, margin = 16.dp)
                         top.linkTo(parent.top, margin = 16.dp)

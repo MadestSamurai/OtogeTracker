@@ -6,14 +6,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -116,31 +119,58 @@ fun OsuSocialCard(
                     fontSize = 16.sp,
                     color = Colors.DARK_RED_TEXT_LIGHT,
                     modifier = Modifier
-                        .padding(start = 16.dp, top = 4.dp, end = 16.dp)
+                        .padding(start = 16.dp, top = 4.dp, end = 16.dp, bottom = 4.dp)
                 )
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(
-                            style = androidx.compose.ui.text.SpanStyle(
-                                fontWeight = FontWeight.Normal
-                            )
-                        ) {
-                            append("Play with ")
-                        }
-                        withStyle(
-                            style = androidx.compose.ui.text.SpanStyle(
-                                fontWeight = FontWeight.Bold
-                            )
-                        ) {
-                            append(osuSocialCardData["playStyle"] ?: "???")
-                        }
-                    },
-                    fontWeight = FontWeight.Normal,
-                    fontSize = 16.sp,
-                    color = Colors.DARK_RED_TEXT_LIGHT,
-                    modifier = Modifier
-                        .padding(start = 16.dp, top = 4.dp, end = 16.dp, bottom = 8.dp)
-                )
+                if ((osuSocialCardData["location"]?:"").isNotEmpty()) {
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = androidx.compose.ui.text.SpanStyle(
+                                    fontWeight = FontWeight.Normal
+                                )
+                            ) {
+                                append("From ")
+                            }
+                            withStyle(
+                                style = androidx.compose.ui.text.SpanStyle(
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
+                                append(osuSocialCardData["location"] ?: "???")
+                            }
+                        },
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 16.sp,
+                        color = Colors.DARK_RED_TEXT_LIGHT,
+                        modifier = Modifier
+                            .padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
+                    )
+                }
+                if ((osuSocialCardData["playStyle"]?:"").isNotEmpty()) {
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = androidx.compose.ui.text.SpanStyle(
+                                    fontWeight = FontWeight.Normal
+                                )
+                            ) {
+                                append("Plays with ")
+                            }
+                            withStyle(
+                                style = androidx.compose.ui.text.SpanStyle(
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
+                                append(osuSocialCardData["playStyle"] ?: "???")
+                            }
+                        },
+                        fontWeight = FontWeight.Normal,
+                        fontSize = 16.sp,
+                        color = Colors.DARK_RED_TEXT_LIGHT,
+                        modifier = Modifier
+                            .padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
+                    )
+                }
             }
             Column(
                 modifier = Modifier
@@ -149,77 +179,90 @@ fun OsuSocialCard(
                         top.linkTo(playInfo.bottom)
                         start.linkTo(parent.start)
                     }
+                    .padding(bottom = 16.dp)
             ) {
-                if (osuSocialCardData["twitter"] != null) {
+                if ((osuSocialCardData["twitter"]?:"").isNotEmpty()) {
                     Surface(
-                        color = Color.Black,
+                        color = Colors.OSU_X_BG,
                         modifier = Modifier
-                            .padding(vertical = 6.dp)
+                            .padding(top = 12.dp)
                             .fillMaxWidth()
                     ) {
                         Row {
                             Image(
-                                painter = painterResource(id = com.madsam.otora.R.drawable.ic_star),
+                                painter = painterResource(id = com.madsam.otora.R.drawable.ic_x_logo),
                                 contentDescription = "Twitter",
+                                colorFilter = ColorFilter.tint(Colors.OSU_X_TEXT),
                                 modifier = Modifier
-                                    .padding(top = 12.dp, start = 12.dp, bottom = 12.dp)
+                                    .size(50.dp)
+                                    .padding(start = 18.dp, top = 12.dp, bottom = 12.dp)
+                                    .align(Alignment.CenterVertically)
                             )
                             Text(
                                 text = "@${osuSocialCardData["twitter"]!!}",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp,
-                                color = Color.White,
+                                color = Colors.OSU_X_TEXT,
                                 modifier = Modifier
-                                    .padding(12.dp)
+                                    .padding(start = 12.dp)
+                                    .align(Alignment.CenterVertically)
                             )
                         }
                     }
                 }
                 if ((osuSocialCardData["discord"]?:"").isNotEmpty()) {
                     Surface(
-                        color = Color.Black,
+                        color = Colors.OSU_DISCORD_BG,
                         modifier = Modifier
-                            .padding(vertical = 6.dp)
+                            .padding(top = 12.dp)
                             .fillMaxWidth()
                     ) {
                         Row {
                             Image(
-                                painter = painterResource(id = com.madsam.otora.R.drawable.ic_star),
+                                painter = painterResource(id = com.madsam.otora.R.drawable.ic_discord),
                                 contentDescription = "Discord",
+                                colorFilter = ColorFilter.tint(Colors.OSU_DISCORD_TEXT),
                                 modifier = Modifier
-                                    .padding(top = 12.dp, start = 12.dp, bottom = 12.dp)
+                                    .size(50.dp)
+                                    .padding(start = 18.dp, top = 12.dp, bottom = 12.dp)
+                                    .align(Alignment.CenterVertically)
                             )
                             Text(
                                 text = osuSocialCardData["discord"]!!,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 20.sp,
-                                color = Color.White,
+                                color = Colors.OSU_DISCORD_TEXT,
                                 modifier = Modifier
-                                    .padding(12.dp)
+                                    .padding(start = 12.dp)
+                                    .align(Alignment.CenterVertically)
                             )
                         }
                     }
                 }
-                if (osuSocialCardData["website"] != null) {
+                if ((osuSocialCardData["website"]?:"").isNotEmpty()) {
                     Surface(
-                        color = Color.Black,
+                        color = Colors.OSU_BRIGHT_RED,
                         modifier = Modifier
-                            .padding(vertical = 6.dp)
+                            .padding(top = 12.dp)
                             .fillMaxWidth()
                     ) {
                         Row {
                             Image(
-                                painter = painterResource(id = com.madsam.otora.R.drawable.ic_star),
+                                painter = painterResource(id = com.madsam.otora.R.drawable.ic_link),
                                 contentDescription = "Website",
+                                colorFilter = ColorFilter.tint(Color.White),
                                 modifier = Modifier
-                                    .padding(top = 12.dp, start = 12.dp, bottom = 12.dp)
+                                    .size(50.dp)
+                                    .padding(start = 18.dp, top = 12.dp, bottom = 12.dp)
+                                    .align(Alignment.CenterVertically)
                             )
                             Text(
                                 text = osuSocialCardData["website"]!!,
-                                fontSize = 18.sp,
+                                fontSize = 16.sp,
                                 color = Color.White,
                                 modifier = Modifier
-                                    .padding(12.dp)
+                                    .padding(start = 12.dp)
+                                    .align(Alignment.CenterVertically)
                             )
                         }
                     }

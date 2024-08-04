@@ -19,9 +19,13 @@ import com.madsam.otora.consts.Colors
 import com.madsam.otora.consts.GradientBrush
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.sql.Time
+import java.time.Instant
 import java.time.OffsetDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import java.util.TimeZone
 
 /**
  * 项目名: OtogeTracker
@@ -74,13 +78,17 @@ object CommonUtils {
      * 日期码转换为年月日时分秒
      *
      * @param value 日期码 格式 2011-03-25T11:21:02+00:00
-     * @return 日时分秒空格分隔
+     * @return 年月日时分秒+UTC
      */
     fun dateCodeToYMDHMSU(value: String): String {
-        val date = value.split("T")[0].split("-")
-        val time = value.split("T")[1].slice(0 until 8).split(":")
-        val utc = value.split("T")[1].slice(8 until 14)
-        return String.format(Locale.getDefault(), "%s %s(UTC%s)", date.joinToString("-"), time.joinToString(":"), utc)
+        val millis = dateCodeToMillis(value)
+        val offsetDateTime = OffsetDateTime.ofInstant(
+            Instant.ofEpochMilli(millis),
+            TimeZone.getDefault().toZoneId()
+        )
+        val utc = TimeZone.getDefault().rawOffset / 3600000
+        val utcStr = if (utc >= 0) "+$utc" else utc.toString()
+        return offsetDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'UTC${utcStr}'"))
     }
 
     /**
@@ -94,6 +102,18 @@ object CommonUtils {
         val offsetDateTime = OffsetDateTime.parse(value, formatter)
         return offsetDateTime.toInstant().toEpochMilli()
     }
+
+    /**
+     * 毫秒数时间戳转换为日期码
+     *
+     * @param value 毫秒数时间戳
+     * @return 日期码
+     */
+    fun millisToDateCode(value: Long): String {
+        val offsetDateTime = OffsetDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneOffset.UTC)
+        return offsetDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+    }
+
 
     /**
      * 日期码转换为最近时间
