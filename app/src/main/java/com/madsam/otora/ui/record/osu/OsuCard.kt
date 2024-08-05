@@ -59,7 +59,6 @@ fun OsuCard(
     val groupListData = osuGroupList.collectAsState(initial = emptyList()).value
     val badgeListData = osuBadgeList.collectAsState(initial = emptyList()).value
     val configuration = LocalConfiguration.current
-    val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
 
@@ -194,7 +193,6 @@ fun OsuCard(
             )
         }
         LazyRow(
-            state = listState,
             reverseLayout = true,
             modifier = Modifier
                 .constrainAs(groupList) {
@@ -368,6 +366,7 @@ fun OsuCard(
             var listWidthDp = cardWidthDp - 16.dp - 40.dp
             val imageCount = (listWidthDp / (68.dp + 12.dp)).toInt()
             var imagePadding = (listWidthDp / imageCount) - 68.dp
+            val listState = rememberLazyListState()
             if (badgeListData.size <= imageCount) {
                 listWidthDp = screenWidthDp - 32.dp - 16.dp
                 imagePadding = (listWidthDp / badgeListData.size) - 68.dp
