@@ -84,7 +84,7 @@ fun OsuUserPage(recordViewModel: RecordViewModel) {
             }
         }
         item {
-            OsuCard(osuCardData = recordViewModel.osuCardData, osuGroupList = recordViewModel.osuGroupList)
+            OsuCard(osuCardData = recordViewModel.osuCardData, osuGroupList = recordViewModel.osuGroupList, osuBadgeList = recordViewModel.osuBadgeList)
         }
         item {
             OsuRankGraph(osuRankGraphData = recordViewModel.osuRankGraphData, osuRankHighestData = recordViewModel.osuRankHighestData)

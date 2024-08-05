@@ -34,12 +34,7 @@ fun OsuLevel(
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     Surface(
-        shape = RoundedCornerShape(
-            topStart = 6.dp,
-            topEnd = 6.dp,
-            bottomStart = 6.dp,
-            bottomEnd = 6.dp
-        ),
+        shape = RoundedCornerShape(6.dp),
         color = Color.Transparent,
         modifier = Modifier
             .padding(

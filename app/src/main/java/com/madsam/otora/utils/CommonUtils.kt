@@ -98,6 +98,7 @@ object CommonUtils {
      * @return 毫秒数时间戳
      */
     fun dateCodeToMillis(value: String): Long {
+        if (value.isEmpty()) return 0L
         val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
         val offsetDateTime = OffsetDateTime.parse(value, formatter)
         return offsetDateTime.toInstant().toEpochMilli()
@@ -125,7 +126,6 @@ object CommonUtils {
     fun dateCodeToRecent(value: String): String {
         val current = System.currentTimeMillis()
         val delta = current - dateCodeToMillis(value)
-        println(delta)
         return when {
             delta < 30 * 1000 -> "recent"
             delta < 60 * 1000 -> "${delta / 1000} seconds ago"
@@ -134,6 +134,7 @@ object CommonUtils {
             delta < 7L * 24 * 60 * 60 * 1000 -> "${delta / (24L * 60 * 60 * 1000)} days ago"
             delta < 30L * 24 * 60 * 60 * 1000 -> "${delta / (7L * 24 * 60 * 60 * 1000)} weeks ago"
             delta < 365L * 24 * 60 * 60 * 1000 -> "${delta / (30L * 24 * 60 * 60 * 1000)} months ago"
+            delta >= 365L * 24 * 60 * 60 * 1000 * 10 -> "too long ago"
             else -> "${delta / (365L * 24 * 60 * 60 * 1000)} years ago"
         }
     }

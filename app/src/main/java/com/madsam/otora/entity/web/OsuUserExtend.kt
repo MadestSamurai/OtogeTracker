@@ -88,15 +88,13 @@ data class OsuUserExtend(
             var id: Long = 0,
             var tournamentId: Long = 0,
             var image: String = "",
-            @Json(name = "image@2x")
-            var image2x: String = ""
+            @Json(name = "image@2x") var image2x: String = ""
     )
 
     data class Badge(
             var awardedAt: String = "",
             var description: String = "",
-            @Json(name = "image@2x_url")
-            var image2xUrl: String = "",
+            @Json(name = "image@2x_url") var image2xUrl: String = "",
             var imageUrl: String = "",
             var url: String = ""
     )

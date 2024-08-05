@@ -36,6 +36,7 @@ class RecordViewModel(
 ) : ViewModel() {
     // Osu
     val osuCardData = MutableStateFlow<Map<String, String>>(emptyMap())
+    val osuBadgeList = MutableStateFlow<List<Map<String, String>>>(emptyList())
     private val osuGlanceData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuGroupList = MutableStateFlow<List<OsuGroup>>(emptyList())
     val osuRankGraphData = MutableStateFlow<List<Int>>(emptyList())
@@ -57,7 +58,11 @@ class RecordViewModel(
 //        dataRequestService.getOsuTopRanks({ osuTopRanks: OsuTopRanks -> setOsuTopRanks(osuTopRanks) }, userId, mode)
 //        dataRequestService.getOsuBeatmap({ osuUserBeatmap: OsuUserBeatmap -> setOsuUserBeatmap(osuUserBeatmap) }, userId, mode)
 //        dataRequestService.getOsuHistorical({ osuHistorical: OsuHistorical -> setOsuHistorical(osuHistorical) }, userId, mode)
-        dataRequestService.getOsuMedals({ osuInfo: OsuInfo -> setOsuMedals(osuInfo, context) }, userId, mode)
+        dataRequestService.getOsuMedals(
+            { osuInfo: OsuInfo -> setOsuMedals(osuInfo, context) },
+            userId,
+            mode
+        )
     }
 
     private fun setOsuCard(osuCard: OsuCard) {
@@ -90,11 +95,21 @@ class RecordViewModel(
             )
         }
         osuCardData.value += mapOf(
+            "currentMode" to osuInfo.currentMode,
             "isSupporter" to if (osuInfo.user.isSupporter) "true" else "false",
             "supporterRank" to osuInfo.user.supportLevel.toString(),
             "rank" to "#" + osuInfo.user.statistics.globalRank.toString(),
-            "countryRank" to "#" + osuInfo.user.statistics.countryRank.toString()
+            "countryRank" to "#${osuInfo.user.statistics.countryRank}",
+            "formerUsernames" to osuInfo.user.previousUsernames.joinToString(", ")
         )
+        if (osuInfo.currentMode == "mania") {
+            osuCardData.value += mapOf(
+                "maniaModeGlobalRank" to "4K: #${osuInfo.user.statistics.variants[0].globalRank}\n" +
+                        "7K: #${osuInfo.user.statistics.variants[1].globalRank}",
+                "maniaModeCountryRank" to "4K: #${osuInfo.user.statistics.variants[0].countryRank}\n" +
+                        "7K: #${osuInfo.user.statistics.variants[1].countryRank}"
+            )
+        }
 
         osuRankGraphData.value = osuInfo.user.rankHistory.data
         osuRankHighestData.value = mapOf(
@@ -131,6 +146,20 @@ class RecordViewModel(
             "postCount" to CommonUtils.formatNumberThousand(osuInfo.user.postCount.toLong()),
             "commentsCount" to CommonUtils.formatNumberThousand(osuInfo.user.commentsCount.toLong()),
         )
+        println(osuInfo.user.badges)
+        osuBadgeList.value = osuInfo.user.badges.map { badge ->
+            mapOf(
+                "awardedAt" to badge.awardedAt,
+                "description" to badge.description,
+                "image2xUrl" to badge.image2xUrl.ifEmpty {
+                    badge.imageUrl.replace(
+                        ".png",
+                        "@2x.png"
+                    )
+                },
+                "url" to badge.url
+            )
+        }
 
         osuLevelData.value = mapOf(
             "level" to osuInfo.user.statistics.level.current.toString(),
@@ -174,9 +203,11 @@ class RecordViewModel(
     fun updatePickedFile() {
         filePicked.value = true
     }
+
     fun resetPickedFile() {
         filePicked.value = false
     }
+
     fun isFilePicked(): Boolean {
         return filePicked.value
     }
@@ -189,7 +220,11 @@ class RecordViewModel(
     }
 }
 
-class RecordViewModelFactory(private val userId: String, private val mode: String, private val context: Context) : ViewModelProvider.Factory {
+class RecordViewModelFactory(
+    private val userId: String,
+    private val mode: String,
+    private val context: Context
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RecordViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
