@@ -368,7 +368,7 @@ fun OsuCard(
             var imagePadding = (listWidthDp / imageCount) - 68.dp
             val listState = rememberLazyListState()
             if (badgeListData.size <= imageCount) {
-                listWidthDp = screenWidthDp - 32.dp - 16.dp
+                listWidthDp = cardWidthDp - 16.dp
                 imagePadding = (listWidthDp / badgeListData.size) - 68.dp
             }
             Row {
@@ -392,14 +392,15 @@ fun OsuCard(
                             }
                     )
                 }
+                println("listWidthDp: $listWidthDp imagePadding: $imagePadding")
                 LazyRow(
                     state = listState,
                     modifier = Modifier
-                        .width(listWidthDp)
                         .padding(
                             vertical = 8.dp,
                             horizontal = if (badgeListData.size > imageCount) 0.dp else 8.dp
                         )
+                        .width(listWidthDp)
                 ) {
                     items(badgeListData) { badge ->
                         Image(
