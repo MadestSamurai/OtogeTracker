@@ -18,11 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.consts.Colors
+import com.madsam.otora.entity.web.OsuRecentActivityList
 import com.madsam.otora.ui.record.RecordViewModel
 import com.madsam.otora.ui.record.osu.OsuCard
 import com.madsam.otora.ui.record.osu.OsuLevel
 import com.madsam.otora.ui.record.osu.OsuPlayData
 import com.madsam.otora.ui.record.osu.OsuRankGraph
+import com.madsam.otora.ui.record.osu.OsuRecent
 import com.madsam.otora.ui.record.osu.OsuSocialCard
 import com.madsam.otora.utils.ShareUtil
 
@@ -97,6 +99,9 @@ fun OsuUserPage(recordViewModel: RecordViewModel) {
         }
         item {
             OsuSocialCard(osuSocialCard = recordViewModel.osuSocialCardData)
+        }
+        item {
+            OsuRecent(recentActivityList = recordViewModel.osuRecentActivityData)
         }
     }
 }

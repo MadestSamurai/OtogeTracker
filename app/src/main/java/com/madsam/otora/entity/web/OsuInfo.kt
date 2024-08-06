@@ -1,5 +1,7 @@
 package com.madsam.otora.entity.web
 
+import com.squareup.moshi.Json
+
 /**
  * 项目名: OtogeTracker
  * 文件名: OsuInfo
@@ -10,7 +12,7 @@ package com.madsam.otora.entity.web
 
 data class OsuInfo(
     var achievements: List<OsuMedalItem> = emptyList(),
-    var currentMode: String = "",
-    var scoresNotice: String = "",
+    @Json(name = "current_mode") var currentMode: String = "",
+    @Json(name = "scores_notice") var scoresNotice: String = "",
     var user: OsuUserExtend = OsuUserExtend()
 )

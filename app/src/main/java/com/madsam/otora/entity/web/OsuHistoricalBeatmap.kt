@@ -1,5 +1,7 @@
 package com.madsam.otora.entity.web
 
+import com.squareup.moshi.Json
+
 /**
  * 项目名: OtogeTracker
  * 文件名: OsuHistoricalBeatmap
@@ -9,12 +11,12 @@ package com.madsam.otora.entity.web
  */
 
 data class OsuHistoricalBeatmap(
-    var beatmapsetId: Long = 0L,
-    var difficultyRating: Double = 0.0,
+    @Json(name = "beatmapset_id") var beatmapsetId: Long = 0L,
+    @Json(name = "difficulty_rating") var difficultyRating: Double = 0.0,
     var id: Long = 0L,
     var mode: String = "",
     var status: String = "",
-    var totalLength: Long = 0L,
-    var userId: Long = 0L,
+    @Json(name = "total_length") var totalLength: Long = 0L,
+    @Json(name = "user_id") var userId: Long = 0L,
     var version: String = ""
 )

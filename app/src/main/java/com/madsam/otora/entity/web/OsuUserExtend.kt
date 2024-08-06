@@ -11,106 +11,105 @@ import com.squareup.moshi.Json
  */
 
 data class OsuUserExtend(
-        var avatarUrl: String = "",
-        var countryCode: String = "",
-        var defaultGroup: String = "",
-        var id: Long = 0,
-        var isActive: Boolean = false,
-        var isBot: Boolean = false,
-        var isDeleted: Boolean = false,
-        var isOnline: Boolean = false,
-        var isSupporter: Boolean = false,
-        var lastVisit: String = "",
-        var pmFriendsOnly: Boolean = false,
-        var profileColour: String = "",
+        @Json(name = "avatar_url") var avatarUrl: String = "",
+        @Json(name = "country_code") var countryCode: String = "",
+        @Json(name = "default_group") var defaultGroup: String = "",
+        @Json(name = "is_active") var isActive: Boolean = false,
+        @Json(name = "is_bot") var isBot: Boolean = false,
+        @Json(name = "is_deleted") var isDeleted: Boolean = false,
+        @Json(name = "is_online") var isOnline: Boolean = false,
+        @Json(name = "is_supporter") var isSupporter: Boolean = false,
+        @Json(name = "last_visit") var lastVisit: String = "",
+        @Json(name = "pm_friends_only") var pmFriendsOnly: Boolean = false,
+        @Json(name = "profile_colour") var profileColour: String = "",
         var username: String = "",
-        var coverUrl: String = "",
+        @Json(name = "cover_url") var coverUrl: String = "",
         var discord: String = "",
         var interests: String = "",
-        var joinDate: String = "",
+        @Json(name = "join_date") var joinDate: String = "",
         var location: String = "",
-        var maxBlocks: String = "",
-        var maxFriends: String = "",
+        @Json(name = "max_blocks") var maxBlocks: String = "",
+        @Json(name = "max_friends") var maxFriends: String = "",
         var occupation: String = "",
         var playmode: String = "",
         var playstyle: List<String> = emptyList(),
-        var postCount: Int = 0,
-        var profileOrder: List<String> = emptyList(),
+        @Json(name = "post_count") var postCount: Int = 0,
+        @Json(name = "profile_order") var profileOrder: List<String> = emptyList(),
         var title: String = "",
-        var titleUrl: String = "",
+        @Json(name = "title_url") var titleUrl: String = "",
         var twitter: String = "",
         var website: String = "",
         var country: Country = Country(),
         var cover: Cover = Cover(),
-        var isAdmin: Boolean = false,
-        var isBng: Boolean = false,
-        var isFullBn: Boolean = false,
-        var isGmt: Boolean = false,
-        var isLimitedBn: Boolean = false,
-        var isNat: Boolean = false,
-        var isRestricted: Boolean = false,
-        var isSilenced: Boolean = false,
+        @Json(name = "is_admin") var isAdmin: Boolean = false,
+        @Json(name = "is_bng") var isBng: Boolean = false,
+        @Json(name = "is_full_bn") var isFullBn: Boolean = false,
+        @Json(name = "is_gmt") var isGmt: Boolean = false,
+        @Json(name = "is_limited_bn") var isLimitedBn: Boolean = false,
+        @Json(name = "is_nat") var isNat: Boolean = false,
+        @Json(name = "is_restricted") var isRestricted: Boolean = false,
+        @Json(name = "is_silenced") var isSilenced: Boolean = false,
         var kudosu: Kudosu = Kudosu(),
-        var accountHistory: List<String> = emptyList(),
-        var activeTournamentBanner: ActiveTournamentBanner = ActiveTournamentBanner(),
-        var activeTournamentBanners: List<ActiveTournamentBanner> = emptyList(),
+        @Json(name = "account_history") var accountHistory: List<String> = emptyList(),
+        @Json(name = "active_tournament_banner") var activeTournamentBanner: ActiveTournamentBanner = ActiveTournamentBanner(),
+        @Json(name = "active_tournament_banners") var activeTournamentBanners: List<ActiveTournamentBanner> = emptyList(),
         var badges: List<Badge> = emptyList(),
-        var commentsCount: Int = 0,
-        var followerCount: Int = 0,
+        @Json(name = "comments_count") var commentsCount: Int = 0,
+        @Json(name = "follower_count") var followerCount: Int = 0,
         var groups: List<OsuGroup> = emptyList(),
-        var mappingFollowerCount: Int = 0,
-        var pendingBeatmapsetCount: Int = 0,
-        var previousUsernames: List<String> = emptyList(),
-        var rankHighest: RankHighest = RankHighest(),
+        @Json(name = "mapping_follower_count") var mappingFollowerCount: Int = 0,
+        @Json(name = "pending_beatmapset_count") var pendingBeatmapsetCount: Int = 0,
+        @Json(name = "previous_usernames") var previousUsernames: List<String> = emptyList(),
+        @Json(name = "rank_highest") var rankHighest: RankHighest = RankHighest(),
         var statistics: OsuStatistics = OsuStatistics(),
-        var supportLevel: Int = 0,
-        var userAchievements: List<UserAchievement> = emptyList(),
-        var rankHistory: RankHistory = RankHistory(),
-        var unrankedBeatmapsetCount: Int = 0
+        @Json(name = "support_level") var supportLevel: Int = 0,
+        @Json(name = "user_achievements") var userAchievements: List<UserAchievement> = emptyList(),
+        @Json(name = "rank_history") var rankHistory: RankHistory = RankHistory(),
+        @Json(name = "unranked_beatmapset_count") var unrankedBeatmapsetCount: Int = 0
 ) {
-    data class Country(
-            var code: String = "",
-            var name: String = ""
-    )
+        data class Country(
+                var code: String = "",
+                var name: String = ""
+        )
 
-    data class Cover(
-            var customUrl: String = "",
-            var url: String = "",
-            var id: String = ""
-    )
+        data class Cover(
+                @Json(name = "custom_url") var customUrl: String = "",
+                var url: String = "",
+                var id: String = ""
+        )
 
-    data class Kudosu(
-            var total: Int = 0,
-            var available: Int = 0
-    )
+        data class Kudosu(
+                var total: Int = 0,
+                var available: Int = 0
+        )
 
-    data class ActiveTournamentBanner(
-            var id: Long = 0,
-            var tournamentId: Long = 0,
-            var image: String = "",
-            @Json(name = "image@2x") var image2x: String = ""
-    )
+        data class ActiveTournamentBanner(
+                var id: Long = 0,
+                @Json(name = "tournament_id") var tournamentId: Long = 0,
+                var image: String = "",
+                @Json(name = "image@2x") var image2x: String = ""
+        )
 
-    data class Badge(
-            var awardedAt: String = "",
-            var description: String = "",
-            @Json(name = "image@2x_url") var image2xUrl: String = "",
-            var imageUrl: String = "",
-            var url: String = ""
-    )
+        data class Badge(
+                @Json(name = "awarded_at") var awardedAt: String = "",
+                var description: String = "",
+                @Json(name = "image@2x_url") var image2xUrl: String = "",
+                @Json(name = "image_url") var imageUrl: String = "",
+                var url: String = ""
+        )
 
-    data class RankHighest(
-            var rank: Int = 0,
-            var updatedAt: String = ""
-    )
+        data class RankHighest(
+                var rank: Int = 0,
+                @Json(name = "updated_at") var updatedAt: String = ""
+        )
 
-    data class UserAchievement(
-            var achievedAt: String = "",
-            var achievementId: String = ""
-    )
+        data class UserAchievement(
+                @Json(name = "achieved_at") var achievedAt: String = "",
+                @Json(name = "achievement_id") var achievementId: String = ""
+        )
 
-    data class RankHistory(
-            var mode: String = "",
-            var data: List<Int> = emptyList()
-    )
+        data class RankHistory(
+                var mode: String = "",
+                var data: List<Int> = emptyList()
+        )
 }

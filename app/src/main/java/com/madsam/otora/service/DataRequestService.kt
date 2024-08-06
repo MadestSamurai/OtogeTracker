@@ -1,12 +1,10 @@
 package com.madsam.otora.service
 
 import android.util.Log
-import androidx.compose.ui.unit.IntOffset
 import com.madsam.otora.callback.ICallback
 import com.madsam.otora.entity.web.OsuCard
 import com.madsam.otora.entity.web.OsuHistorical
 import com.madsam.otora.entity.web.OsuInfo
-import com.madsam.otora.entity.web.OsuRecentActivity
 import com.madsam.otora.entity.web.OsuRecentActivityList
 import com.madsam.otora.entity.web.OsuTopRanks
 import com.madsam.otora.entity.web.OsuUserBeatmap
@@ -32,7 +30,13 @@ import java.io.IOException
  * 描述: 数据请求服务类
  */
 class DataRequestService {
-
+    /* The reason I am not using CamelCase adapter for moshi:
+    When you annotate a field with @Json(name = ),
+    the camel mapping will be done before the annotation is processed,
+    causing the annotation works incorrectly.
+    And to solve this, making the @CamelCase for every field is also not a good idea.
+    So just annotate every field with @Json(name = ) is the best way.
+    */
     private val moshi = Moshi.Builder()
         .add(NullToDefaultStringAdapter())
         .add(NullToDefaultLongAdapter())
@@ -52,7 +56,6 @@ class DataRequestService {
         .add(NullToDefaultVariantListAdapter())
         .add(NullToDefaultUserAchievementListAdapter())
         .add(NullToDefaultRecentActivityListAdapter())
-        .add(CamelCaseJsonAdapterFactory())
         .addLast(KotlinJsonAdapterFactory())
         .build()
 
@@ -73,7 +76,6 @@ class DataRequestService {
                 val osuCard = response.body()
                 if (osuCard != null) {
                     callback(osuCard)
-                    println(osuCard.toString())
                 } else Log.e(TAG, "com.madsam.otora.ui.record.cards.OsuCard is null")
             } else {
                 Log.e(TAG, "Response is not successful")
@@ -138,7 +140,7 @@ class DataRequestService {
                 val osuRecentActivity = response.body()
                 if (osuRecentActivity != null) {
                     callback(osuRecentActivity)
-                    println(osuRecentActivity)
+                    println("osuRecent:$osuRecentActivity")
                 } else Log.e(TAG, "OsuRecentActivity is null")
             } else {
                 Log.e(TAG, "Response is not successful")
@@ -171,7 +173,8 @@ class DataRequestService {
 
     private fun requestOsuMedals(callback: ICallback<OsuInfo>, userId: String, mode: String) {
         try {
-            val doc = Jsoup.connect(CommonUtils.encodeURL("https://osu.ppy.sh/users/$userId/$mode")).get()
+            val doc =
+                Jsoup.connect(CommonUtils.encodeURL("https://osu.ppy.sh/users/$userId/$mode")).get()
             val medals =
                 doc.selectFirst("div.js-react--profile-page.osu-layout.osu-layout--full")
             val medalsJson = medals.safeAttr("data-initial-data")
@@ -188,7 +191,12 @@ class DataRequestService {
         serviceScope.launch { requestOsuCard(callback, userId) }
     }
 
-    fun getOsuRecentActivity(callback: ICallback<OsuRecentActivityList>, userId: String, limit: Int, offset: Int) {
+    fun getOsuRecentActivity(
+        callback: ICallback<OsuRecentActivityList>,
+        userId: String,
+        limit: Int,
+        offset: Int
+    ) {
         serviceScope.launch { requestOsuRecentActivity(callback, userId, limit, offset) }
     }
 

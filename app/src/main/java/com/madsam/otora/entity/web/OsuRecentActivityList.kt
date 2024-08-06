@@ -8,6 +8,6 @@ package com.madsam.otora.entity.web
  * 描述: TODO
  */
 data class OsuRecentActivityList(
-    val data: List<OsuRecentActivity> = emptyList(),
+    val items: List<OsuRecentActivity> = emptyList(),
     val pagination: OsuPagination = OsuPagination()
 )

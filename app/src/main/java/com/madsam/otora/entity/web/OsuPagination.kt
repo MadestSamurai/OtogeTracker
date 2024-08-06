@@ -1,5 +1,7 @@
 package com.madsam.otora.entity.web
 
+import com.squareup.moshi.Json
+
 /**
  * 项目名: OtogeTracker
  * 文件名: OsuPagination
@@ -8,5 +10,5 @@ package com.madsam.otora.entity.web
  * 描述: Osu分页实体类
  */
 data class OsuPagination(
-    var hasMore: Boolean = false
+    @Json(name = "has_more") var hasMore: Boolean = false
 )

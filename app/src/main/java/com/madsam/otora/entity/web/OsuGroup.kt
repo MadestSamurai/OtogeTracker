@@ -1,5 +1,7 @@
 package com.madsam.otora.entity.web
 
+import com.squareup.moshi.Json
+
 /**
  * 项目名: OtogeTracker
  * 文件名: OsuGroup
@@ -9,12 +11,12 @@ package com.madsam.otora.entity.web
  */
 data class OsuGroup(
     var colour: String = "",
-    var hasListing: Boolean = false,
-    var hasPlaymodes: Boolean = false,
+    @Json(name = "has_listing") var hasListing: Boolean = false,
+    @Json(name = "has_playmodes") var hasPlaymodes: Boolean = false,
     var id: Int = 0,
     var identifier: String = "",
-    var isProbationary: Boolean = false,
+    @Json(name = "is_probationary") var isProbationary: Boolean = false,
     var name: String = "",
-    var shortName: String = "",
+    @Json(name = "short_name") var shortName: String = "",
     var playmodes: List<String> = emptyList()
 )

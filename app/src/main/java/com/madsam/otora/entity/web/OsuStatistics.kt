@@ -1,5 +1,7 @@
 package com.madsam.otora.entity.web
 
+import com.squareup.moshi.Json
+
 /**
  * 项目名: OtogeTracker
  * 文件名: OsuStatistics
@@ -8,26 +10,26 @@ package com.madsam.otora.entity.web
  * 描述: osu统计数据实体类
  */
 data class OsuStatistics(
-    var count100: Long = 0,
-    var count300: Long = 0,
-    var count50: Long = 0,
-    var countMiss: Long = 0,
+    @Json(name = "count_100") var count100: Long = 0,
+    @Json(name = "count_300") var count300: Long = 0,
+    @Json(name = "count_50") var count50: Long = 0,
+    @Json(name = "count_miss") var countMiss: Long = 0,
     var level: Level = Level(),
-    var globalRank: Int = 0,
-    var globalRankExp: Int = 0,
+    @Json(name = "global_rank") var globalRank: Int = 0,
+    @Json(name = "global_rank_exp") var globalRankExp: Int = 0,
     var pp: Double = 0.0,
-    var ppExp: Double = 0.0,
-    var rankedScore: Long = 0,
-    var hitAccuracy: Double = 0.0,
-    var playCount: Int = 0,
-    var playTime: Int = 0,
-    var totalScore: Long = 0,
-    var totalHits: Long = 0,
-    var maximumCombo: Int = 0,
-    var replaysWatchedByOthers: Int = 0,
-    var isRanked: Boolean = false,
-    var gradeCounts: GradeCounts = GradeCounts(),
-    var countryRank: Int = 0,
+    @Json(name = "pp_exp") var ppExp: Double = 0.0,
+    @Json(name = "ranked_score") var rankedScore: Long = 0,
+    @Json(name = "hit_accuracy") var hitAccuracy: Double = 0.0,
+    @Json(name = "play_count") var playCount: Int = 0,
+    @Json(name = "play_time") var playTime: Int = 0,
+    @Json(name = "total_score") var totalScore: Long = 0,
+    @Json(name = "total_hits") var totalHits: Long = 0,
+    @Json(name = "maximum_combo") var maximumCombo: Int = 0,
+    @Json(name = "replays_watched_by_others") var replaysWatchedByOthers: Int = 0,
+    @Json(name = "is_ranked") var isRanked: Boolean = false,
+    @Json(name = "grade_counts") var gradeCounts: GradeCounts = GradeCounts(),
+    @Json(name = "country_rank") var countryRank: Int = 0,
     var rank: Rank = Rank(),
     var variants: List<Variant> = emptyList()
 ) {
@@ -45,14 +47,14 @@ data class OsuStatistics(
     )
 
     data class Rank(
-        var country: Int = 0
+        @Json(name = "country") var country: Int = 0
     )
 
     data class Variant(
         var mode: String = "",
         var variant: String = "",
-        var countryRank: Int = 0,
-        var globalRank: Int = 0,
+        @Json(name = "country_rank") var countryRank: Int = 0,
+        @Json(name = "global_rank") var globalRank: Int = 0,
         var pp: Double = 0.0
     )
 }

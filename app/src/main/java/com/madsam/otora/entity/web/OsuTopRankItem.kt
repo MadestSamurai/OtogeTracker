@@ -13,40 +13,39 @@ import com.squareup.moshi.Json
 data class OsuTopRankItem(
     var ranked: Boolean = false,
     var preserve: Boolean = false,
-    var maximumStatistics: MaximumStatistics = MaximumStatistics(),
+    @Json(name = "maximum_statistics") var maximumStatistics: MaximumStatistics = MaximumStatistics(),
     var mods: List<Mod> = listOf(),
     var statistics: OsuBeatmapStatistics = OsuBeatmapStatistics(),
-    var beatmapId: Int = 0,
-    var bestId: Int = 0,
+    @Json(name = "beatmap_id") var beatmapId: Int = 0,
+    @Json(name = "best_id") var bestId: Int = 0,
     var id: Long = 0L,
     var rank: String = "",
     var type: String = "",
-    var userId: Long = 0L,
+    @Json(name = "user_id") var userId: Long = 0L,
     var accuracy: Double = 0.0,
-    var buildId: String = "",
-    var endedAt: String = "",
-    var hasReplay: Boolean = false,
-    var isPerfectCombo: Boolean = false,
-    var legacyPerfect: Boolean = false,
-    var legacyScoreId: Long = 0L,
-    var legacyTotalScore: Long = 0L,
-    var maxCombo: Long = 0L,
+    @Json(name = "build_id") var buildId: String = "",
+    @Json(name = "ended_at") var endedAt: String = "",
+    @Json(name = "has_replay") var hasReplay: Boolean = false,
+    @Json(name = "is_perfect_combo") var isPerfectCombo: Boolean = false,
+    @Json(name = "legacy_perfect") var legacyPerfect: Boolean = false,
+    @Json(name = "legacy_score_id") var legacyScoreId: Long = 0L,
+    @Json(name = "legacy_total_score") var legacyTotalScore: Long = 0L,
+    @Json(name = "max_combo") var maxCombo: Long = 0L,
     var passed: Boolean = false,
     var pp: Double = 0.0,
-    var rulesetId: Long = 0L,
-    var startedAt: String = "",
-    var totalScore: Long = 0L,
+    @Json(name = "ruleset_id") var rulesetId: Long = 0L,
+    @Json(name = "started_at") var startedAt: String = "",
+    @Json(name = "total_score") var totalScore: Long = 0L,
     var replay: Boolean = false,
-    var currentUserAttributes: CurrentUserAttributes = CurrentUserAttributes(),
+    @Json(name = "current_user_attributes") var currentUserAttributes: CurrentUserAttributes = CurrentUserAttributes(),
     var beatmap: OsuBeatmap = OsuBeatmap(),
-    @Json(name = "beatmapset")
-    var beatmapSet: OsuBeatmapSet = OsuBeatmapSet(),
+    @Json(name = "beatmapset") var beatmapSet: OsuBeatmapSet = OsuBeatmapSet(),
     var user: OsuUser = OsuUser(),
     var weight: Weight = Weight()
 ) {
     data class MaximumStatistics(
         var perfect: Int = 0,
-        var legacyComboIncrease: Int = 0
+        @Json(name = "legacy_combo_increase") var legacyComboIncrease: Int = 0
     )
 
     data class Mod(

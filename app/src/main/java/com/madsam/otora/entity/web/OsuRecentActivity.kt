@@ -1,5 +1,7 @@
 package com.madsam.otora.entity.web
 
+import com.squareup.moshi.Json
+
 /**
  * 项目名: OtogeTracker
  * 文件名: com.madsam.otora.entity.web.OsuRecentActivity
@@ -8,12 +10,12 @@ package com.madsam.otora.entity.web
  * 描述: TODO
  */
 data class OsuRecentActivity(
-    val createdAt : String = "",
-    val id : Int = 0,
-    val type : String = "",
-    val mode : String = "",
-    val beatmap : Beatmap = Beatmap(),
-    val user : User = User(),
+    @Json(name = "created_at") val createdAt: String = "",
+    val id: Int = 0,
+    val type: String = "",
+    val mode: String = "",
+    val beatmap: Beatmap = Beatmap(),
+    val user: User = User(),
 ) {
     data class Beatmap(
         val title: String = "",

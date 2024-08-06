@@ -413,7 +413,6 @@ fun OsuCard(
                                 }
                         )
                     }
-                    println("listWidthDp: $listWidthDp imagePadding: $imagePadding")
                     LazyRow(
                         state = listState,
                         modifier = Modifier

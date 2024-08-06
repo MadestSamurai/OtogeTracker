@@ -1,5 +1,7 @@
 package com.madsam.otora.entity.web
 
+import com.squareup.moshi.Json
+
 /**
  * 项目名: OtogeTracker
  * 文件名: OsuMedalItem
@@ -9,7 +11,7 @@ package com.madsam.otora.entity.web
  */
 
 data class OsuMedalItem(
-    var iconUrl: String = "",
+    @Json(name = "icon_url") var iconUrl: String = "",
     var id: Long = 0L,
     var name: String = "",
     var grouping: String = "",

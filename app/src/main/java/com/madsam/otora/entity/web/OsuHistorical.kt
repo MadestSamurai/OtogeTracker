@@ -1,5 +1,7 @@
 package com.madsam.otora.entity.web
 
+import com.squareup.moshi.Json
+
 /**
  * 项目名: OtogeTracker
  * 文件名: OsuHistorical
@@ -9,13 +11,13 @@ package com.madsam.otora.entity.web
  */
 
 data class OsuHistorical(
-    var beatmapPlaycounts: OsuHistoricalRecord = OsuHistoricalRecord(),
-    var monthlyPlaycounts: List<OsuDateCount> = listOf(),
+    @Json(name = "beatmap_playcounts") var beatmapPlaycounts: OsuHistoricalRecord = OsuHistoricalRecord(),
+    @Json(name = "monthly_playcounts") var monthlyPlaycounts: List<OsuDateCount> = listOf(),
     var recent: OsuHistoricalRecord = OsuHistoricalRecord(),
-    var replaysWatchedCounts: List<OsuDateCount> = listOf()
+    @Json(name = "replays_watched_counts") var replaysWatchedCounts: List<OsuDateCount> = listOf()
 ) {
     data class OsuDateCount(
-        var startDate: String = "",
+        @Json(name = "start_date") var startDate: String = "",
         var count: Int = 0
     )
 }

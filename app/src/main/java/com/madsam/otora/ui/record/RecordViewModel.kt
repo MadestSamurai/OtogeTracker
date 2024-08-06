@@ -46,7 +46,7 @@ class RecordViewModel(
     val osuRankHighestData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuSocialCardData = MutableStateFlow<Map<String, String>>(emptyMap())
 
-    val osuRecentActivityData = MutableStateFlow<Map<String, String>>(emptyMap())
+    val osuRecentActivityData = MutableStateFlow<List<Map<String, String>>>(emptyList())
     val osuInfoData = MutableStateFlow<Map<String, String>>(emptyMap())
 
 
@@ -90,11 +90,12 @@ class RecordViewModel(
         try {
             val dataRequestService = DataRequestService()
             dataRequestService.getOsuRecentActivity({ osuRecentActivityList ->
-                val osuRecentActivity = osuRecentActivityList.data
-                osuRecentActivityData.value = mapOf(
-                    "recentActivityCount" to osuRecentActivity.size.toString(),
-                    "recentActivity" to osuRecentActivity.joinToString("\n")
-                )
+                val osuRecentActivity = osuRecentActivityList.items
+                osuRecentActivityData.value = osuRecentActivity.map { activity ->
+                    mapOf(
+                        "content" to activity.beatmap.title,
+                    )
+                }
             }, userId, limit, offset)
         } catch (e: Exception) {
             Log.e("RecordViewModel", "Error fetching recent activity", e)
@@ -138,7 +139,6 @@ class RecordViewModel(
             "rank" to osuInfo.user.rankHighest.rank.toString(),
             "date" to osuInfo.user.rankHighest.updatedAt
         )
-        println(osuInfo.user.rankHighest)
 
         var playTime = ""
         if (osuInfo.user.statistics.playTime != 0) {
@@ -168,16 +168,12 @@ class RecordViewModel(
             "postCount" to CommonUtils.formatNumberThousand(osuInfo.user.postCount.toLong()),
             "commentsCount" to CommonUtils.formatNumberThousand(osuInfo.user.commentsCount.toLong()),
         )
-        println(osuInfo.user.badges)
         osuBadgeList.value = osuInfo.user.badges.map { badge ->
             mapOf(
                 "awardedAt" to badge.awardedAt,
                 "description" to badge.description,
                 "image2xUrl" to badge.image2xUrl.ifEmpty {
-                    badge.imageUrl.replace(
-                        ".png",
-                        "@2x.png"
-                    )
+                    badge.imageUrl
                 },
                 "url" to badge.url
             )
