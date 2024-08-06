@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import com.madsam.otora.activity.MainViewModel
 import com.madsam.otora.entity.chuni.ChuniCard
-import com.madsam.otora.ui.record.RecordViewModel
 import com.madsam.otora.utils.SafeSoupUtil.safeFirstAttr
 import com.madsam.otora.utils.SafeSoupUtil.safeFirstText
 import com.madsam.otora.utils.SafeSoupUtil.safePreviousElementSibling
@@ -90,7 +89,6 @@ class FileRequestService {
                 chuniCard.ratingMax = doc.getElementsByClass("player_rating_max").safeFirstText()
                 chuniCard.overpower = doc.getElementsByClass("player_overpower_text").safeFirstText()
                 chuniCard.lastPlay = doc.getElementsByClass("player_lastplaydate_text").safeFirstText()
-                // 利用Kotlin反射检查数据是否正常获取
                 val emptyCount = chuniCard::class.memberProperties.count {
                     it.returnType.jvmErasure == String::class && it.getter.call(chuniCard) == ""
                 }

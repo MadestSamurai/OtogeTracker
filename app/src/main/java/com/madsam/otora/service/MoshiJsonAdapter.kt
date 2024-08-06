@@ -3,6 +3,8 @@ package com.madsam.otora.service
 import com.madsam.otora.entity.web.OsuCard
 import com.madsam.otora.entity.web.OsuGroup
 import com.madsam.otora.entity.web.OsuMedalItem
+import com.madsam.otora.entity.web.OsuRecentActivity
+import com.madsam.otora.entity.web.OsuRecentActivityList
 import com.madsam.otora.entity.web.OsuStatistics
 import com.madsam.otora.entity.web.OsuUserExtend
 import com.squareup.moshi.FromJson
@@ -378,7 +380,49 @@ class NullToDefaultUserAchievementListAdapter {
             list
         }
     }
+}
 
+class NullToDefaultRecentActivityListAdapter {
+    private val moshi: Moshi = Moshi.Builder()
+        .add(NullToDefaultStringAdapter())
+        .add(NullToDefaultIntAdapter())
+        .add(NullToDefaultRecentActivityAdapter())
+        .add(CamelCaseJsonAdapterFactory())
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
+    private val recentActivityListAdapter: JsonAdapter<OsuRecentActivityList> = moshi.adapter(OsuRecentActivityList::class.java)
+
+    @FromJson
+    @Suppress("unused")
+    fun fromJson(reader: JsonReader): OsuRecentActivityList {
+        return if (reader.peek() == JsonReader.Token.NULL) {
+            reader.nextNull<OsuRecentActivityList>()
+            OsuRecentActivityList()
+        } else {
+            recentActivityListAdapter.fromJson(reader) ?: OsuRecentActivityList()
+        }
+    }
+}
+
+class NullToDefaultRecentActivityAdapter {
+    private val moshi: Moshi = Moshi.Builder()
+        .add(NullToDefaultStringAdapter())
+        .add(NullToDefaultIntAdapter())
+        .add(CamelCaseJsonAdapterFactory())
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
+    private val recentActivityAdapter: JsonAdapter<OsuRecentActivity> = moshi.adapter(OsuRecentActivity::class.java)
+
+    @FromJson
+    @Suppress("unused")
+    fun fromJson(reader: JsonReader): OsuRecentActivity {
+        return if (reader.peek() == JsonReader.Token.NULL) {
+            reader.nextNull<OsuRecentActivity>()
+            OsuRecentActivity()
+        } else {
+            recentActivityAdapter.fromJson(reader) ?: OsuRecentActivity()
+        }
+    }
 }
 
 class CamelCaseJsonAdapterFactory : JsonAdapter.Factory {

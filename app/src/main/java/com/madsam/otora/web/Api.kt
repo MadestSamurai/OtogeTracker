@@ -2,6 +2,7 @@ package com.madsam.otora.web
 
 import com.madsam.otora.entity.web.OsuCard
 import com.madsam.otora.entity.web.OsuHistorical
+import com.madsam.otora.entity.web.OsuRecentActivityList
 import com.madsam.otora.entity.web.OsuTopRanks
 import com.madsam.otora.entity.web.OsuUserBeatmap
 import retrofit2.Call
@@ -36,8 +37,9 @@ interface Api {
     @GET("users/{user}/extra-pages/recent_activity")
     fun getOsuRecentActivity(
         @Path("user") user: String,
-        @Query("mode") mode: String
-    ): Call<String>
+        @Query("limit") limit: Int,
+        @Query("offset") offset: Int
+    ): Call<OsuRecentActivityList>
 
     @GET("users/{user}/extra-pages/beatmaps")
     fun getOsuBeatmaps(

@@ -1,6 +1,7 @@
 package com.madsam.otora.ui.record
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.ViewModel
@@ -44,7 +45,10 @@ class RecordViewModel(
     val osuLevelData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuRankHighestData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuSocialCardData = MutableStateFlow<Map<String, String>>(emptyMap())
+
+    val osuRecentActivityData = MutableStateFlow<Map<String, String>>(emptyMap())
     val osuInfoData = MutableStateFlow<Map<String, String>>(emptyMap())
+
 
     init {
         requestOsuData(userId, mode, context)
@@ -55,6 +59,7 @@ class RecordViewModel(
     fun requestOsuData(userId: String, mode: String, context: Context) {
         val dataRequestService = DataRequestService()
         dataRequestService.getOsuCard({ osuCard: OsuCard -> setOsuCard(osuCard) }, userId)
+        fetchOsuRecentActivity(userId, 5, 0)
 //        dataRequestService.getOsuTopRanks({ osuTopRanks: OsuTopRanks -> setOsuTopRanks(osuTopRanks) }, userId, mode)
 //        dataRequestService.getOsuBeatmap({ osuUserBeatmap: OsuUserBeatmap -> setOsuUserBeatmap(osuUserBeatmap) }, userId, mode)
 //        dataRequestService.getOsuHistorical({ osuHistorical: OsuHistorical -> setOsuHistorical(osuHistorical) }, userId, mode)
@@ -79,7 +84,21 @@ class RecordViewModel(
             "profileColour" to osuCard.profileColour.ifEmpty { "#F5F5F5" }
         )
         osuGroupList.value = osuCard.groups
-        println("Profile Colour: ${osuCard.profileColour.isEmpty()}")
+    }
+
+    fun fetchOsuRecentActivity(userId: String, limit: Int, offset: Int) {
+        try {
+            val dataRequestService = DataRequestService()
+            dataRequestService.getOsuRecentActivity({ osuRecentActivityList ->
+                val osuRecentActivity = osuRecentActivityList.data
+                osuRecentActivityData.value = mapOf(
+                    "recentActivityCount" to osuRecentActivity.size.toString(),
+                    "recentActivity" to osuRecentActivity.joinToString("\n")
+                )
+            }, userId, limit, offset)
+        } catch (e: Exception) {
+            Log.e("RecordViewModel", "Error fetching recent activity", e)
+        }
     }
 
     private fun setOsuMedals(osuInfo: OsuInfo, context: Context) {
@@ -110,6 +129,9 @@ class RecordViewModel(
                         "7K: #${osuInfo.user.statistics.variants[1].countryRank}"
             )
         }
+        osuCardData.value += mapOf(
+            "tournamentBannerImage2x" to osuInfo.user.activeTournamentBanner.image2x
+        )
 
         osuRankGraphData.value = osuInfo.user.rankHistory.data
         osuRankHighestData.value = mapOf(

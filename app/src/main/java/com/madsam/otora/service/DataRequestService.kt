@@ -1,10 +1,13 @@
 package com.madsam.otora.service
 
 import android.util.Log
+import androidx.compose.ui.unit.IntOffset
 import com.madsam.otora.callback.ICallback
 import com.madsam.otora.entity.web.OsuCard
 import com.madsam.otora.entity.web.OsuHistorical
 import com.madsam.otora.entity.web.OsuInfo
+import com.madsam.otora.entity.web.OsuRecentActivity
+import com.madsam.otora.entity.web.OsuRecentActivityList
 import com.madsam.otora.entity.web.OsuTopRanks
 import com.madsam.otora.entity.web.OsuUserBeatmap
 import com.madsam.otora.utils.CommonUtils
@@ -48,6 +51,7 @@ class DataRequestService {
         .add(NullToDefaultBadgeListAdapter())
         .add(NullToDefaultVariantListAdapter())
         .add(NullToDefaultUserAchievementListAdapter())
+        .add(NullToDefaultRecentActivityListAdapter())
         .add(CamelCaseJsonAdapterFactory())
         .addLast(KotlinJsonAdapterFactory())
         .build()
@@ -79,7 +83,11 @@ class DataRequestService {
         }
     }
 
-    private fun requestOsuTopRank(callback: ICallback<OsuTopRanks>, userId: String, mode: String) {
+    private fun requestOsuTopRank(
+        callback: ICallback<OsuTopRanks>,
+        userId: String,
+        mode: String
+    ) {
         try {
             val osuTopRankCall = api.getOsuTopRanks(userId, mode)
             val response = osuTopRankCall.execute()
@@ -114,6 +122,29 @@ class DataRequestService {
             }
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in OsuBeatmapThread")
+        }
+    }
+
+    private fun requestOsuRecentActivity(
+        callback: ICallback<OsuRecentActivityList>,
+        userId: String,
+        limit: Int,
+        offset: Int
+    ) {
+        try {
+            val osuRecentActivityCall = api.getOsuRecentActivity(userId, limit, offset)
+            val response = osuRecentActivityCall.execute()
+            if (response.isSuccessful) {
+                val osuRecentActivity = response.body()
+                if (osuRecentActivity != null) {
+                    callback(osuRecentActivity)
+                    println(osuRecentActivity)
+                } else Log.e(TAG, "OsuRecentActivity is null")
+            } else {
+                Log.e(TAG, "Response is not successful")
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in OsuRecentActivityThread")
         }
     }
 
@@ -155,6 +186,10 @@ class DataRequestService {
 
     fun getOsuCard(callback: ICallback<OsuCard>, userId: String) {
         serviceScope.launch { requestOsuCard(callback, userId) }
+    }
+
+    fun getOsuRecentActivity(callback: ICallback<OsuRecentActivityList>, userId: String, limit: Int, offset: Int) {
+        serviceScope.launch { requestOsuRecentActivity(callback, userId, limit, offset) }
     }
 
     fun getOsuTopRanks(callback: ICallback<OsuTopRanks>, userId: String, mode: String) {

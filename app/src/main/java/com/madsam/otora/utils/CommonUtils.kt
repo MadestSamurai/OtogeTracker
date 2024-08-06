@@ -2,9 +2,7 @@ package com.madsam.otora.utils
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.provider.Settings
-import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -19,7 +17,6 @@ import com.madsam.otora.consts.Colors
 import com.madsam.otora.consts.GradientBrush
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import java.sql.Time
 import java.time.Instant
 import java.time.OffsetDateTime
 import java.time.ZoneOffset

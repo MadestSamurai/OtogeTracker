@@ -80,6 +80,7 @@ fun OsuCard(
             online,
             onlineMark,
             badgeList,
+            tournamentBanner,
         ) = refs
 
         val imageLoader = ImageLoader.Builder(LocalContext.current)
@@ -115,11 +116,33 @@ fun OsuCard(
                 modifier = Modifier.fillMaxSize()
             )
         }
+
+        Image(
+            painter = rememberAsyncImagePainter(
+                model = cardData["TournamentBanner"],
+                imageLoader = imageLoader
+            ),
+            contentDescription = "Tournament Banner",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .width(cardWidthDp)
+                .height(
+                    if ((cardData["TournamentBanner"]
+                            ?: "").isNotEmpty()
+                    ) cardWidthDp / 50 * 3 else 0.dp
+                )
+                .constrainAs(tournamentBanner) {
+                    top.linkTo(coverImage.bottom)
+                    start.linkTo(coverImage.start)
+                    end.linkTo(coverImage.end)
+                }
+        )
+
         Box(
             modifier = Modifier
                 .padding(bottom = 12.dp)
                 .constrainAs(background) {
-                    top.linkTo(coverImage.bottom)
+                    top.linkTo(tournamentBanner.bottom)
                     start.linkTo(coverImage.start)
                     end.linkTo(coverImage.end)
                 }
@@ -136,7 +159,7 @@ fun OsuCard(
         Box(
             modifier = Modifier
                 .constrainAs(baseBackground) {
-                    top.linkTo(coverImage.bottom)
+                    top.linkTo(tournamentBanner.bottom)
                     start.linkTo(coverImage.start)
                     end.linkTo(coverImage.end)
                 }
@@ -148,7 +171,7 @@ fun OsuCard(
         Box(
             modifier = Modifier
                 .constrainAs(avatarImage) {
-                    top.linkTo(coverImage.bottom)
+                    top.linkTo(tournamentBanner.bottom)
                     start.linkTo(coverImage.start)
                 }
                 .size(130.dp)
@@ -346,96 +369,95 @@ fun OsuCard(
                     onClick = { modeCountryRankShowPopup = true }
                 )
         )
-        if (badgeListData.isEmpty()) {
-            return@ConstraintLayout
-        }
-        Surface(
-            Modifier
-                .padding(
-                    bottom = 12.dp
-                )
-                .width(cardWidthDp)
-                .constrainAs(badgeList) {
-                    top.linkTo(background.bottom)
-                    start.linkTo(coverImage.start)
-                    end.linkTo(coverImage.end)
-                },
-            RoundedCornerShape(20.dp),
-            Colors.DARK_RED_DEEP
-        ) {
-            var listWidthDp = cardWidthDp - 16.dp - 40.dp
-            val imageCount = (listWidthDp / (68.dp + 12.dp)).toInt()
-            var imagePadding = (listWidthDp / imageCount) - 68.dp
-            val listState = rememberLazyListState()
-            if (badgeListData.size <= imageCount) {
-                listWidthDp = cardWidthDp - 16.dp
-                imagePadding = (listWidthDp / badgeListData.size) - 68.dp
-            }
-            Row {
-                if (badgeListData.size > imageCount) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_chevron_left),
-                        contentDescription = "Previous",
-                        contentScale = ContentScale.FillHeight,
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .width(20.dp)
-                            .height(30.dp)
-                            .align(Alignment.CenterVertically)
-                            .clickable {
-                                coroutineScope.launch {
-                                    val currentIndex = listState.firstVisibleItemIndex
-                                    if (currentIndex > 0) {
-                                        listState.animateScrollToItem(currentIndex - 1)
+        if (badgeListData.isNotEmpty()) {
+            Surface(
+                Modifier
+                    .padding(
+                        bottom = 12.dp
+                    )
+                    .width(cardWidthDp)
+                    .constrainAs(badgeList) {
+                        top.linkTo(background.bottom)
+                        start.linkTo(coverImage.start)
+                        end.linkTo(coverImage.end)
+                    },
+                RoundedCornerShape(20.dp),
+                Colors.DARK_RED_DEEP
+            ) {
+                var listWidthDp = cardWidthDp - 16.dp - 40.dp
+                val imageCount = (listWidthDp / (68.dp + 12.dp)).toInt()
+                var imagePadding = (listWidthDp / imageCount) - 68.dp
+                val listState = rememberLazyListState()
+                if (badgeListData.size <= imageCount) {
+                    listWidthDp = cardWidthDp - 16.dp
+                    imagePadding = (listWidthDp / badgeListData.size) - 68.dp
+                }
+                Row {
+                    if (badgeListData.size > imageCount) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_chevron_left),
+                            contentDescription = "Previous",
+                            contentScale = ContentScale.FillHeight,
+                            modifier = Modifier
+                                .padding(start = 8.dp)
+                                .width(20.dp)
+                                .height(30.dp)
+                                .align(Alignment.CenterVertically)
+                                .clickable {
+                                    coroutineScope.launch {
+                                        val currentIndex = listState.firstVisibleItemIndex
+                                        if (currentIndex > 0) {
+                                            listState.animateScrollToItem(currentIndex - 1)
+                                        }
                                     }
                                 }
-                            }
-                    )
-                }
-                println("listWidthDp: $listWidthDp imagePadding: $imagePadding")
-                LazyRow(
-                    state = listState,
-                    modifier = Modifier
-                        .padding(
-                            vertical = 8.dp,
-                            horizontal = if (badgeListData.size > imageCount) 0.dp else 8.dp
-                        )
-                        .width(listWidthDp)
-                ) {
-                    items(badgeListData) { badge ->
-                        Image(
-                            painter = rememberAsyncImagePainter(
-                                model = badge["image2xUrl"],
-                            ),
-                            contentScale = ContentScale.FillHeight,
-                            contentDescription = badge["description"],
-                            modifier = Modifier
-                                .padding(vertical = 4.dp, horizontal = imagePadding / 2)
-                                .clip(RoundedCornerShape(6.dp))
-                                .height(32.dp)
-                                .width(68.dp)
                         )
                     }
-                }
-                if (badgeListData.size > imageCount) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_chevron_right),
-                        contentDescription = "Next",
-                        contentScale = ContentScale.FillHeight,
+                    println("listWidthDp: $listWidthDp imagePadding: $imagePadding")
+                    LazyRow(
+                        state = listState,
                         modifier = Modifier
-                            .padding(end = 8.dp)
-                            .width(20.dp)
-                            .height(30.dp)
-                            .align(Alignment.CenterVertically)
-                            .clickable {
-                                coroutineScope.launch {
-                                    val currentIndex = listState.firstVisibleItemIndex
-                                    if (currentIndex < badgeListData.size - 1) {
-                                        listState.animateScrollToItem(currentIndex + 1)
+                            .padding(
+                                vertical = 8.dp,
+                                horizontal = if (badgeListData.size > imageCount) 0.dp else 8.dp
+                            )
+                            .width(listWidthDp)
+                    ) {
+                        items(badgeListData) { badge ->
+                            Image(
+                                painter = rememberAsyncImagePainter(
+                                    model = badge["image2xUrl"],
+                                ),
+                                contentScale = ContentScale.FillHeight,
+                                contentDescription = badge["description"],
+                                modifier = Modifier
+                                    .padding(vertical = 4.dp, horizontal = imagePadding / 2)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .height(32.dp)
+                                    .width(68.dp)
+                            )
+                        }
+                    }
+                    if (badgeListData.size > imageCount) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_chevron_right),
+                            contentDescription = "Next",
+                            contentScale = ContentScale.FillHeight,
+                            modifier = Modifier
+                                .padding(end = 8.dp)
+                                .width(20.dp)
+                                .height(30.dp)
+                                .align(Alignment.CenterVertically)
+                                .clickable {
+                                    coroutineScope.launch {
+                                        val currentIndex = listState.firstVisibleItemIndex
+                                        if (currentIndex < badgeListData.size - 1) {
+                                            listState.animateScrollToItem(currentIndex + 1)
+                                        }
                                     }
                                 }
-                            }
-                    )
+                        )
+                    }
                 }
             }
         }
@@ -483,7 +505,7 @@ fun OsuCard(
                 text = cardData["maniaModeGlobalRank"] ?: "",
                 color = Colors.DARK_RED_TEXT_LIGHT,
                 modifier = Modifier.constrainAs(modeGlobalRankPopup) {
-                    top.linkTo(rank.bottom, margin = 4.dp)
+                    bottom.linkTo(rank.top, margin = 4.dp)
                     start.linkTo(rank.start)
                     end.linkTo(rank.end)
                 },
@@ -497,7 +519,7 @@ fun OsuCard(
                 text = cardData["maniaModeCountryRank"] ?: "",
                 color = Colors.DARK_RED_TEXT_LIGHT,
                 modifier = Modifier.constrainAs(modeCountryRankPopup) {
-                    top.linkTo(countryRank.bottom, margin = 4.dp)
+                    bottom.linkTo(countryRank.top, margin = 4.dp)
                     start.linkTo(countryRank.start)
                     end.linkTo(countryRank.end)
                 },

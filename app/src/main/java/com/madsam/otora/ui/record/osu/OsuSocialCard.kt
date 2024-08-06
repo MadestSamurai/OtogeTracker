@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,8 +43,8 @@ fun OsuSocialCard(
         shape = RoundedCornerShape(
             topStart = 6.dp,
             topEnd = 6.dp,
-            bottomStart = 6.dp,
-            bottomEnd = 6.dp
+            bottomStart = 20.dp,
+            bottomEnd = 20.dp
         ),
         color = Color.Transparent,
         modifier = Modifier
@@ -61,10 +60,7 @@ fun OsuSocialCard(
         ) {
             val (
                 playInfo,
-                links,
-                location,
-                interests,
-                occupation,
+                links
             ) = createRefs()
             Column(
                 modifier = Modifier
