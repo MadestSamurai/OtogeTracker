@@ -11,13 +11,21 @@ import com.squareup.moshi.Json
  */
 data class OsuRecentActivity(
     @Json(name = "created_at") val createdAt: String = "",
-    val id: Int = 0,
+    val id: Long = 0,
     val type: String = "",
+    val scoreRank: String = "",
+    val rank: Int = 0,
     val mode: String = "",
     val beatmap: Beatmap = Beatmap(),
+    val beatmapset: Beatmapset = Beatmapset(),
     val user: User = User(),
 ) {
     data class Beatmap(
+        val title: String = "",
+        val url: String = "",
+    )
+
+    data class Beatmapset(
         val title: String = "",
         val url: String = "",
     )

@@ -5,7 +5,7 @@ import com.madsam.otora.callback.ICallback
 import com.madsam.otora.entity.web.OsuCard
 import com.madsam.otora.entity.web.OsuHistorical
 import com.madsam.otora.entity.web.OsuInfo
-import com.madsam.otora.entity.web.OsuRecentActivityList
+import com.madsam.otora.entity.web.OsuRecentActivity
 import com.madsam.otora.entity.web.OsuTopRanks
 import com.madsam.otora.entity.web.OsuUserBeatmap
 import com.madsam.otora.utils.CommonUtils
@@ -128,13 +128,11 @@ class DataRequestService {
     }
 
     private fun requestOsuRecentActivity(
-        callback: ICallback<OsuRecentActivityList>,
-        userId: String,
-        limit: Int,
-        offset: Int
+        callback: ICallback<List<OsuRecentActivity>>,
+        userId: String
     ) {
         try {
-            val osuRecentActivityCall = api.getOsuRecentActivity(userId, limit, offset)
+            val osuRecentActivityCall = api.getOsuRecentActivity(userId)
             val response = osuRecentActivityCall.execute()
             if (response.isSuccessful) {
                 val osuRecentActivity = response.body()
@@ -191,13 +189,8 @@ class DataRequestService {
         serviceScope.launch { requestOsuCard(callback, userId) }
     }
 
-    fun getOsuRecentActivity(
-        callback: ICallback<OsuRecentActivityList>,
-        userId: String,
-        limit: Int,
-        offset: Int
-    ) {
-        serviceScope.launch { requestOsuRecentActivity(callback, userId, limit, offset) }
+    fun getOsuRecentActivity(callback: ICallback<List<OsuRecentActivity>>, userId: String, ) {
+        serviceScope.launch { requestOsuRecentActivity(callback, userId) }
     }
 
     fun getOsuTopRanks(callback: ICallback<OsuTopRanks>, userId: String, mode: String) {

@@ -11,6 +11,7 @@ import com.madsam.otora.entity.chuni.ChuniCard
 import com.madsam.otora.entity.web.OsuCard
 import com.madsam.otora.entity.web.OsuGroup
 import com.madsam.otora.entity.web.OsuInfo
+import com.madsam.otora.entity.web.OsuRecentActivity
 import com.madsam.otora.glance.SmallWidget
 import com.madsam.otora.service.DataRequestService
 import com.madsam.otora.utils.CommonUtils
@@ -59,7 +60,7 @@ class RecordViewModel(
     fun requestOsuData(userId: String, mode: String, context: Context) {
         val dataRequestService = DataRequestService()
         dataRequestService.getOsuCard({ osuCard: OsuCard -> setOsuCard(osuCard) }, userId)
-        fetchOsuRecentActivity(userId, 5, 0)
+        dataRequestService.getOsuRecentActivity({ osuRecentActivity: List<OsuRecentActivity> -> setOsuRecentActivity(osuRecentActivity) }, userId)
 //        dataRequestService.getOsuTopRanks({ osuTopRanks: OsuTopRanks -> setOsuTopRanks(osuTopRanks) }, userId, mode)
 //        dataRequestService.getOsuBeatmap({ osuUserBeatmap: OsuUserBeatmap -> setOsuUserBeatmap(osuUserBeatmap) }, userId, mode)
 //        dataRequestService.getOsuHistorical({ osuHistorical: OsuHistorical -> setOsuHistorical(osuHistorical) }, userId, mode)
@@ -86,19 +87,17 @@ class RecordViewModel(
         osuGroupList.value = osuCard.groups
     }
 
-    fun fetchOsuRecentActivity(userId: String, limit: Int, offset: Int) {
-        try {
-            val dataRequestService = DataRequestService()
-            dataRequestService.getOsuRecentActivity({ osuRecentActivityList ->
-                val osuRecentActivity = osuRecentActivityList.items
-                osuRecentActivityData.value = osuRecentActivity.map { activity ->
-                    mapOf(
-                        "content" to activity.beatmap.title,
-                    )
-                }
-            }, userId, limit, offset)
-        } catch (e: Exception) {
-            Log.e("RecordViewModel", "Error fetching recent activity", e)
+    private fun setOsuRecentActivity(osuRecentActivityList: List<OsuRecentActivity>) {
+        osuRecentActivityData.value = osuRecentActivityList.map { activity ->
+            mapOf(
+                "username" to activity.user.username,
+                "type" to activity.type,
+                "rank" to activity.rank.toString(),
+                "beatmapTitle" to activity.beatmap.title,
+                "beatmapSetTitle" to activity.beatmapset.title,
+                "createdAt" to activity.createdAt,
+                "mode" to activity.mode
+            )
         }
     }
 

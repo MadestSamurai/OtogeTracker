@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.consts.Colors
-import com.madsam.otora.entity.web.OsuRecentActivityList
 import com.madsam.otora.ui.record.RecordViewModel
 import com.madsam.otora.ui.record.osu.OsuCard
 import com.madsam.otora.ui.record.osu.OsuLevel
