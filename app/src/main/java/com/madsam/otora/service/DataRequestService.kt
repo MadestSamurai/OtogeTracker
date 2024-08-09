@@ -6,7 +6,7 @@ import com.madsam.otora.entity.web.OsuCard
 import com.madsam.otora.entity.web.OsuHistorical
 import com.madsam.otora.entity.web.OsuInfo
 import com.madsam.otora.entity.web.OsuRecentActivity
-import com.madsam.otora.entity.web.OsuTopRanks
+import com.madsam.otora.entity.web.OsuTopRankItem
 import com.madsam.otora.entity.web.OsuUserBeatmap
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.SafeSoupUtil.safeAttr
@@ -85,24 +85,69 @@ class DataRequestService {
         }
     }
 
-    private fun requestOsuTopRank(
-        callback: ICallback<OsuTopRanks>,
+    private fun requestOsuPinnedMap(
+        callback: ICallback<List<OsuTopRankItem>>,
         userId: String,
         mode: String
     ) {
         try {
-            val osuTopRankCall = api.getOsuTopRanks(userId, mode)
-            val response = osuTopRankCall.execute()
+            val osuPinnedMapCall = api.getOsuPinnedMap(userId, mode)
+            val response = osuPinnedMapCall.execute()
             if (response.isSuccessful) {
-                val osuTopRank = response.body()
-                if (osuTopRank != null) {
-                    callback(osuTopRank)
-                } else Log.e(TAG, "OsuTopRank is null")
+                val osuPinnedMap = response.body()
+                if (osuPinnedMap != null) {
+                    callback(osuPinnedMap)
+                    println("osuPinned:$osuPinnedMap")
+                } else Log.e(TAG, "OsuPinnedMap is null")
             } else {
                 Log.e(TAG, "Response is not successful")
             }
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuTopRankThread")
+            Log.e(TAG, "IOException occurred in OsuPinnedMapThread")
+        }
+    }
+
+    private fun requestOsuBestMap(
+        callback: ICallback<List<OsuTopRankItem>>,
+        userId: String,
+        mode: String
+    ) {
+        try {
+            val osuBestMapCall = api.getOsuBestMap(userId, mode)
+            val response = osuBestMapCall.execute()
+            if (response.isSuccessful) {
+                val osuBestMap = response.body()
+                if (osuBestMap != null) {
+                    callback(osuBestMap)
+                    println("osuBest:$osuBestMap")
+                } else Log.e(TAG, "OsuBestMap is null")
+            } else {
+                Log.e(TAG, "Response is not successful")
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in OsuBestMapThread")
+        }
+    }
+
+    private fun requestOsuFirstMap(
+        callback: ICallback<List<OsuTopRankItem>>,
+        userId: String,
+        mode: String
+    ) {
+        try {
+            val osuFirstMapCall = api.getOsuFirstMap(userId, mode)
+            val response = osuFirstMapCall.execute()
+            if (response.isSuccessful) {
+                val osuFirstMap = response.body()
+                if (osuFirstMap != null) {
+                    callback(osuFirstMap)
+                    println("osuFirst:$osuFirstMap")
+                } else Log.e(TAG, "OsuFirstMap is null")
+            } else {
+                Log.e(TAG, "Response is not successful")
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in OsuFirstMapThread")
         }
     }
 
@@ -193,8 +238,16 @@ class DataRequestService {
         serviceScope.launch { requestOsuRecentActivity(callback, userId) }
     }
 
-    fun getOsuTopRanks(callback: ICallback<OsuTopRanks>, userId: String, mode: String) {
-        serviceScope.launch { requestOsuTopRank(callback, userId, mode) }
+    fun getOsuPinnedMap(callback: ICallback<List<OsuTopRankItem>>, userId: String, mode: String) {
+        serviceScope.launch { requestOsuPinnedMap(callback, userId, mode) }
+    }
+
+    fun getOsuBestMap(callback: ICallback<List<OsuTopRankItem>>, userId: String, mode: String) {
+        serviceScope.launch { requestOsuBestMap(callback, userId, mode) }
+    }
+
+    fun getOsuFirstMap(callback: ICallback<List<OsuTopRankItem>>, userId: String, mode: String) {
+        serviceScope.launch { requestOsuFirstMap(callback, userId, mode) }
     }
 
     fun getOsuBeatmap(callback: ICallback<OsuUserBeatmap>, userId: String, mode: String) {

@@ -16,7 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment.Companion.Bottom
-import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -28,6 +27,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -130,6 +130,7 @@ fun OsuRecent(
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                         .clip(RoundedCornerShape(6.dp))
                         .background(Colors.DARK_RED_DEEPER)
+                        .padding(vertical = 2.dp)
                 ) {
                     Column(
                         modifier = Modifier
@@ -154,7 +155,7 @@ fun OsuRecent(
                                     contentDescription = "Osu Mode",
                                     contentScale = ContentScale.Fit,
                                     modifier = Modifier
-                                        .padding(horizontal = 8.dp, vertical = 6.dp)
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
                                         .width(20.dp)
                                         .align(CenterHorizontally)
                                 )
@@ -210,17 +211,18 @@ fun OsuRecent(
                         fontSize = 14.sp,
                         color = Color.White,
                         modifier = Modifier
-                            .width(textWidth*0.8f)
+                            .width(textWidth-80.dp)
                             .padding(8.dp)
                             .align(CenterVertically)
                     )
                     Text(
                         text = CommonUtils.dateCodeToRecent(recentActivity["createdAt"]?:"1970-01-01T00:00:00+00:00"),
                         fontSize = 10.sp,
+                        textAlign = TextAlign.End,
                         color = Color.Gray,
                         modifier = Modifier
-                            .width(textWidth*0.2f)
-                            .padding(bottom = 8.dp)
+                            .width(80.dp)
+                            .padding(bottom = 8.dp, end = 8.dp)
                             .align(Bottom)
                     )
                 }

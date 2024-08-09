@@ -11,8 +11,10 @@ import com.squareup.moshi.Json
  */
 
 data class OsuTopRankItem(
+    @Json(name = "classic_total_score") var classicTotalScore: Long = 0L,
     var ranked: Boolean = false,
     var preserve: Boolean = false,
+    var processed: Boolean = false,
     @Json(name = "maximum_statistics") var maximumStatistics: MaximumStatistics = MaximumStatistics(),
     var mods: List<Mod> = listOf(),
     var statistics: OsuBeatmapStatistics = OsuBeatmapStatistics(),

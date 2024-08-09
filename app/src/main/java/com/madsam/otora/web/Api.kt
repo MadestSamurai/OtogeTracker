@@ -3,7 +3,7 @@ package com.madsam.otora.web
 import com.madsam.otora.entity.web.OsuCard
 import com.madsam.otora.entity.web.OsuHistorical
 import com.madsam.otora.entity.web.OsuRecentActivity
-import com.madsam.otora.entity.web.OsuTopRanks
+import com.madsam.otora.entity.web.OsuTopRankItem
 import com.madsam.otora.entity.web.OsuUserBeatmap
 import retrofit2.Call
 import retrofit2.http.GET
@@ -22,11 +22,23 @@ interface Api {
     @GET("users/{user}/card")
     fun getOsuCard(@Path("user") user: String?): Call<OsuCard>
 
-    @GET("users/{user}/extra-pages/top_ranks")
-    fun getOsuTopRanks(
+    @GET("users/{user}/scores/pinned?limit=100")
+    fun getOsuPinnedMap(
         @Path("user") user: String,
         @Query("mode") mode: String
-    ): Call<OsuTopRanks>
+    ): Call<List<OsuTopRankItem>>
+
+    @GET("users/{user}/scores/best?limit=100")
+    fun getOsuBestMap(
+        @Path("user") user: String,
+        @Query("mode") mode: String
+    ): Call<List<OsuTopRankItem>>
+
+    @GET("users/{user}/scores/first?limit=100")
+    fun getOsuFirstMap(
+        @Path("user") user: String,
+        @Query("mode") mode: String
+    ): Call<List<OsuTopRankItem>>
 
     @GET("users/{user}/extra-pages/historical")
     fun getOsuHistorical(

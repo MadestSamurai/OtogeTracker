@@ -2,6 +2,7 @@ package com.madsam.otora.ui.record
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.foundation.lazy.layout.LazyLayoutPinnedItemList
 import androidx.compose.runtime.mutableStateOf
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.ViewModel
@@ -12,6 +13,7 @@ import com.madsam.otora.entity.web.OsuCard
 import com.madsam.otora.entity.web.OsuGroup
 import com.madsam.otora.entity.web.OsuInfo
 import com.madsam.otora.entity.web.OsuRecentActivity
+import com.madsam.otora.entity.web.OsuTopRankItem
 import com.madsam.otora.glance.SmallWidget
 import com.madsam.otora.service.DataRequestService
 import com.madsam.otora.utils.CommonUtils
@@ -48,7 +50,10 @@ class RecordViewModel(
     val osuSocialCardData = MutableStateFlow<Map<String, String>>(emptyMap())
 
     val osuRecentActivityData = MutableStateFlow<List<Map<String, String>>>(emptyList())
-    val osuInfoData = MutableStateFlow<Map<String, String>>(emptyMap())
+
+    val osuPinnedMapData = MutableStateFlow<List<Map<String, String>>>(emptyList())
+    val osuFirstMapData = MutableStateFlow<List<Map<String, String>>>(emptyList())
+    val osuBestMapData = MutableStateFlow<List<Map<String, String>>>(emptyList())
 
 
     init {
@@ -61,7 +66,9 @@ class RecordViewModel(
         val dataRequestService = DataRequestService()
         dataRequestService.getOsuCard({ osuCard: OsuCard -> setOsuCard(osuCard) }, userId)
         dataRequestService.getOsuRecentActivity({ osuRecentActivity: List<OsuRecentActivity> -> setOsuRecentActivity(osuRecentActivity) }, userId)
-//        dataRequestService.getOsuTopRanks({ osuTopRanks: OsuTopRanks -> setOsuTopRanks(osuTopRanks) }, userId, mode)
+        dataRequestService.getOsuPinnedMap({ osuPinnedMap: List<OsuTopRankItem> -> setOsuPinnedMap(osuPinnedMap) }, userId, mode)
+        dataRequestService.getOsuFirstMap({ osuFirstMap: List<OsuTopRankItem> -> setOsuFirstMap(osuFirstMap) }, userId, mode)
+        dataRequestService.getOsuBestMap({ osuBestMap: List<OsuTopRankItem> -> setOsuBestMap(osuBestMap) }, userId, mode)
 //        dataRequestService.getOsuBeatmap({ osuUserBeatmap: OsuUserBeatmap -> setOsuUserBeatmap(osuUserBeatmap) }, userId, mode)
 //        dataRequestService.getOsuHistorical({ osuHistorical: OsuHistorical -> setOsuHistorical(osuHistorical) }, userId, mode)
         dataRequestService.getOsuMedals(
@@ -97,6 +104,60 @@ class RecordViewModel(
                 "beatmapSetTitle" to activity.beatmapset.title,
                 "createdAt" to activity.createdAt,
                 "mode" to activity.mode
+            )
+        }
+    }
+
+    private fun setOsuPinnedMap(osuPinnedMap: List<OsuTopRankItem>) {
+        osuPinnedMapData.value = osuPinnedMap.map { pinnedMap ->
+            mapOf(
+                "beatmapSetTitle" to pinnedMap.beatmapSet.title,
+                "pp" to pinnedMap.pp.toString(),
+                "accuracy" to CommonUtils.formatPercent(pinnedMap.accuracy),
+                "rank" to pinnedMap.rank,
+                "maxCombo" to pinnedMap.maxCombo.toString(),
+                "mods" to pinnedMap.mods.joinToString(", "),
+                "totalScore" to CommonUtils.formatNumberThousand(pinnedMap.totalScore),
+                "weight" to pinnedMap.weight.percentage.toString(),
+                "weightPP" to pinnedMap.weight.pp.toString(),
+                "beatmapId" to pinnedMap.beatmap.id.toString(),
+                "beatmapSetId" to pinnedMap.beatmapSet.id.toString()
+            )
+        }
+    }
+
+    private fun setOsuFirstMap(osuFirstMap: List<OsuTopRankItem>) {
+        osuFirstMapData.value = osuFirstMap.map { firstMap ->
+            mapOf(
+                "beatmapSetTitle" to firstMap.beatmapSet.title,
+                "pp" to firstMap.pp.toString(),
+                "accuracy" to CommonUtils.formatPercent(firstMap.accuracy),
+                "rank" to firstMap.rank,
+                "maxCombo" to firstMap.maxCombo.toString(),
+                "mods" to firstMap.mods.joinToString(", "),
+                "totalScore" to CommonUtils.formatNumberThousand(firstMap.totalScore),
+                "weight" to firstMap.weight.percentage.toString(),
+                "weightPP" to firstMap.weight.pp.toString(),
+                "beatmapId" to firstMap.beatmap.id.toString(),
+                "beatmapSetId" to firstMap.beatmapSet.id.toString()
+            )
+        }
+    }
+
+    private fun setOsuBestMap(osuBestMap: List<OsuTopRankItem>) {
+        osuBestMapData.value = osuBestMap.map { bestMap ->
+            mapOf(
+                "beatmapSetTitle" to bestMap.beatmapSet.title,
+                "pp" to bestMap.pp.toString(),
+                "accuracy" to CommonUtils.formatPercent(bestMap.accuracy),
+                "rank" to bestMap.rank,
+                "maxCombo" to bestMap.maxCombo.toString(),
+                "mods" to bestMap.mods.joinToString(", "),
+                "totalScore" to CommonUtils.formatNumberThousand(bestMap.totalScore),
+                "weight" to bestMap.weight.percentage.toString(),
+                "weightPP" to bestMap.weight.pp.toString(),
+                "beatmapId" to bestMap.beatmap.id.toString(),
+                "beatmapSetId" to bestMap.beatmapSet.id.toString()
             )
         }
     }
