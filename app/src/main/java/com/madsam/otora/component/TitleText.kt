@@ -21,7 +21,7 @@ import com.madsam.otora.consts.Colors
  * 文件名: com.madsam.otora.component.TitleText
  * 创建者: MadSamurai
  * 创建时间: 2024/8/1
- * 描述: TODO
+ * 描述: 标题文字
  */
 
 @Composable

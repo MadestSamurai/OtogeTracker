@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * 文件名: com.madsam.otora.ui.record.osu.OsuSocialCard
  * 创建者: MadSamurai
  * 创建时间: 2024/8/3
- * 描述: TODO
+ * 描述: osu!社交卡片
  */
 @Composable
 fun OsuSocialCard(

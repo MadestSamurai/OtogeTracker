@@ -148,16 +148,26 @@ class RecordViewModel(
         osuBestMapData.value = osuBestMap.map { bestMap ->
             mapOf(
                 "beatmapSetTitle" to bestMap.beatmapSet.title,
+                "beatmapSetTitleUnicode" to bestMap.beatmapSet.titleUnicode,
+                "beatmapSubTitle" to bestMap.beatmap.version,
+                "artist" to bestMap.beatmapSet.artist,
+                "artistUnicode" to bestMap.beatmapSet.artistUnicode,
+                "creator" to bestMap.beatmapSet.creator,
+                "coverUrl" to bestMap.beatmapSet.covers.cover2x,
+                "previewUrl" to bestMap.beatmapSet.previewUrl,
                 "pp" to bestMap.pp.toString(),
                 "accuracy" to CommonUtils.formatPercent(bestMap.accuracy),
                 "rank" to bestMap.rank,
+                "date" to bestMap.endedAt,
                 "maxCombo" to bestMap.maxCombo.toString(),
+                "score" to bestMap.legacyTotalScore.toString(),
                 "mods" to bestMap.mods.joinToString(", "),
                 "totalScore" to CommonUtils.formatNumberThousand(bestMap.totalScore),
                 "weight" to bestMap.weight.percentage.toString(),
                 "weightPP" to bestMap.weight.pp.toString(),
                 "beatmapId" to bestMap.beatmap.id.toString(),
-                "beatmapSetId" to bestMap.beatmapSet.id.toString()
+                "beatmapSetId" to bestMap.beatmapSet.id.toString(),
+                "status" to bestMap.beatmapSet.status,
             )
         }
     }

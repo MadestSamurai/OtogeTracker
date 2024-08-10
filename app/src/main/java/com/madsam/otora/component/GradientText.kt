@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
  * 文件名: com.madsam.otora.component.GradientText
  * 创建者: MadSamurai
  * 创建时间: 2024/7/25
- * 描述: TODO
+ * 描述: 渐变文字
  */
 
 @Composable

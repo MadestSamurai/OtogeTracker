@@ -7,7 +7,7 @@ import com.squareup.moshi.Json
  * 文件名: com.madsam.otora.entity.web.OsuRecentActivity
  * 创建者: MadSamurai
  * 创建时间: 2024/8/7
- * 描述: TODO
+ * 描述: 最近活动实体类
  */
 data class OsuRecentActivity(
     @Json(name = "created_at") val createdAt: String = "",

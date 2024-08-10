@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
  * 文件名: com.madsam.otora.activity.MainViewModel
  * 创建者: MadSamurai
  * 创建时间: 2024/7/25
- * 描述: TODO
+ * 描述: 主ViewModel
  */
 class MainViewModel: ViewModel(){
     // Chunithm

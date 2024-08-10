@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.TextUnit
  * 文件名: com.madsam.otora.component.ImageWithText
  * 创建者: MadSamurai
  * 创建时间: 2024/8/3
- * 描述: TODO
+ * 描述: 图片和文字
  */
 @Composable
 fun ImageWithText(

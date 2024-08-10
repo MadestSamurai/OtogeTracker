@@ -5,7 +5,7 @@ package com.madsam.otora.entity.chuni
  * 文件名: com.madsam.otora.entity.chuni.ChuniCard
  * 创建者: MadSamurai
  * 创建时间: 2024/7/25
- * 描述: TODO
+ * 描述: Chunithm卡片
  */
 data class ChuniCard(
     var charaInfo: String = "",
