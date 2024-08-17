@@ -111,7 +111,13 @@ class RecordViewModel(
     private fun setOsuPinnedMap(osuPinnedMap: List<OsuTopRankItem>) {
         osuPinnedMapData.value = osuPinnedMap.map { pinnedMap ->
             mapOf(
+                "cover2x" to pinnedMap.beatmapSet.covers.cover2x,
                 "beatmapSetTitle" to pinnedMap.beatmapSet.title,
+                "beatmapSetTitleUnicode" to pinnedMap.beatmapSet.titleUnicode,
+                "beatmapSubTitle" to pinnedMap.beatmap.version,
+                "artist" to pinnedMap.beatmapSet.artist,
+                "artistUnicode" to pinnedMap.beatmapSet.artistUnicode,
+                "creator" to pinnedMap.beatmapSet.creator,
                 "pp" to pinnedMap.pp.toString(),
                 "accuracy" to CommonUtils.formatPercent(pinnedMap.accuracy),
                 "rank" to pinnedMap.rank,
@@ -129,7 +135,13 @@ class RecordViewModel(
     private fun setOsuFirstMap(osuFirstMap: List<OsuTopRankItem>) {
         osuFirstMapData.value = osuFirstMap.map { firstMap ->
             mapOf(
+                "cover2x" to firstMap.beatmapSet.covers.cover2x,
                 "beatmapSetTitle" to firstMap.beatmapSet.title,
+                "beatmapSetTitleUnicode" to firstMap.beatmapSet.titleUnicode,
+                "beatmapSubTitle" to firstMap.beatmap.version,
+                "artist" to firstMap.beatmapSet.artist,
+                "artistUnicode" to firstMap.beatmapSet.artistUnicode,
+                "creator" to firstMap.beatmapSet.creator,
                 "pp" to firstMap.pp.toString(),
                 "accuracy" to CommonUtils.formatPercent(firstMap.accuracy),
                 "rank" to firstMap.rank,
@@ -147,13 +159,14 @@ class RecordViewModel(
     private fun setOsuBestMap(osuBestMap: List<OsuTopRankItem>) {
         osuBestMapData.value = osuBestMap.map { bestMap ->
             mapOf(
+                "cover2x" to bestMap.beatmapSet.covers.cover2x,
                 "beatmapSetTitle" to bestMap.beatmapSet.title,
                 "beatmapSetTitleUnicode" to bestMap.beatmapSet.titleUnicode,
                 "beatmapSubTitle" to bestMap.beatmap.version,
                 "artist" to bestMap.beatmapSet.artist,
                 "artistUnicode" to bestMap.beatmapSet.artistUnicode,
                 "creator" to bestMap.beatmapSet.creator,
-                "coverUrl" to bestMap.beatmapSet.covers.cover2x,
+                "difficultyRating" to bestMap.beatmap.difficultyRating.toString(),
                 "previewUrl" to bestMap.beatmapSet.previewUrl,
                 "pp" to bestMap.pp.toString(),
                 "accuracy" to CommonUtils.formatPercent(bestMap.accuracy),

@@ -131,7 +131,16 @@ fun OsuRecent(
                                 }
                             }
                         }
-
+                        "beatmapsetRevive" -> {
+                            buildAnnotatedString {
+                                withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
+                                    append("revived a beatmap ")
+                                }
+                                withStyle(style = SpanStyle(color = Colors.OSU_BRIGHT_YELLOW)) {
+                                    append(recentActivity["beatmapSetTitle"])
+                                }
+                            }
+                        }
                         else -> {
                             buildAnnotatedString {
                                 withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {

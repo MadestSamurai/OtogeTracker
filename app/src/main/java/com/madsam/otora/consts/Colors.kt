@@ -52,6 +52,13 @@ object Colors {
     val OSU_X_TEXT: Color = Color(android.graphics.Color.parseColor("#ffffff"))
     val OSU_DISCORD_BG: Color = Color(android.graphics.Color.parseColor("#5865f2"))
     val OSU_DISCORD_TEXT: Color = Color(android.graphics.Color.parseColor("#ffffff"))
+
+    val OSU_DIFFICULTY_VERY_BASIC: Color = Color(android.graphics.Color.parseColor("#469efc"))
+    val OSU_DIFFICULTY_BASIC: Color = Color(android.graphics.Color.parseColor("#49abfd"))
+    val OSU_DIFFICULTY_VERY_EASY: Color = Color(android.graphics.Color.parseColor("#4dbafe"))
+    val OSU_DIFFICULTY_EASY: Color = Color(android.graphics.Color.parseColor("#4fdeee"))
+    val OSU_DIFFICULTY_NORMAL: Color = Color(android.graphics.Color.parseColor("#51ffd2"))
+    val OSU_DIFFICULTY_NORMAL_PLUS: Color = Color(android.graphics.Color.parseColor("#4fffae"))
 }
 
 object GradientBrush {

@@ -25,6 +25,7 @@ import com.madsam.otora.ui.record.osu.OsuPlayData
 import com.madsam.otora.ui.record.osu.OsuRankGraph
 import com.madsam.otora.ui.record.osu.OsuRecent
 import com.madsam.otora.ui.record.osu.OsuSocialCard
+import com.madsam.otora.ui.record.osu.OsuTopRank
 import com.madsam.otora.utils.ShareUtil
 
 @Composable
@@ -101,6 +102,9 @@ fun OsuUserPage(recordViewModel: RecordViewModel) {
         }
         item {
             OsuRecent(recentActivityList = recordViewModel.osuRecentActivityData)
+        }
+        item {
+            OsuTopRank(recordViewModel.osuPinnedMapData, recordViewModel.osuBestMapData, recordViewModel.osuFirstMapData)
         }
     }
 }

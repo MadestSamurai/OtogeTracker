@@ -109,7 +109,8 @@ fun OsuCard(
             Image(
                 painter = rememberAsyncImagePainter(
                     model = cardData["coverUrl"],
-                    imageLoader = imageLoader
+                    imageLoader = imageLoader,
+                    contentScale = ContentScale.Crop
                 ),
                 contentDescription = "Cover Image",
                 contentScale = ContentScale.Crop,
@@ -120,7 +121,8 @@ fun OsuCard(
         Image(
             painter = rememberAsyncImagePainter(
                 model = cardData["TournamentBanner"],
-                imageLoader = imageLoader
+                imageLoader = imageLoader,
+                contentScale = ContentScale.Crop
             ),
             contentDescription = "Tournament Banner",
             contentScale = ContentScale.Crop,
@@ -185,7 +187,8 @@ fun OsuCard(
             Image(
                 painter = rememberAsyncImagePainter(
                     model = cardData["avatarUrl"],
-                    imageLoader = imageLoader
+                    imageLoader = imageLoader,
+                    contentScale = ContentScale.Crop
                 ),
                 contentDescription = "Avatar Image",
                 contentScale = ContentScale.Crop,
@@ -328,7 +331,8 @@ fun OsuCard(
         Image(
             painter = rememberAsyncImagePainter(
                 model = cardData["flagUrl"],
-                imageLoader = imageLoader
+                imageLoader = imageLoader,
+                contentScale = ContentScale.Fit
             ),
             contentDescription = "Country Flag",
             contentScale = ContentScale.Fit,

@@ -1,5 +1,6 @@
 package com.madsam.otora.ui.record.osu
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
@@ -7,19 +8,30 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.consts.Colors
-import com.madsam.otora.entity.web.OsuTopRankItem
+import com.madsam.otora.consts.OsuDiffColor
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -99,21 +111,125 @@ fun OsuTopRankItemCard(
     item: Map<String, String>,
     itemWidth: Dp
 ) {
-    ConstraintLayout(
-        modifier = Modifier
-            .padding(8.dp)
-            .background(Colors.DARK_RED_DEEP)
+    Surface(
+        Modifier
+            .width(itemWidth)
+            .padding(8.dp),
+        RoundedCornerShape(6.dp),
+        Colors.DARK_RED_DEEP
     ) {
-        val (rank, title, score, acc, pp) = createRefs()
-        Text(
-            text = item["rank"]!!,
-            color = Colors.DARK_RED_TEXT_LIGHT,
-            fontSize = 24.sp,
+        ConstraintLayout(
             modifier = Modifier
-                .constrainAs(rank) {
-                    top.linkTo(parent.top, 8.dp)
-                    start.linkTo(parent.start, 8.dp)
+                .padding(8.dp)
+                .background(Colors.DARK_RED_DEEP)
+        ) {
+            val (
+                cover,
+                diff,
+                rank,
+                title,
+                score,
+                acc,
+                pp
+            ) = createRefs()
+
+            Surface(
+                Modifier
+                    .constrainAs(cover) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                        bottom.linkTo(parent.bottom)
+                    }
+                    .width(100.dp)
+                    .height(100.dp),
+                RoundedCornerShape(6.dp),
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        model = item["cover2x"] ?: "",
+                        contentScale = ContentScale.Crop
+                    ),
+                    contentDescription = "Cover",
+                    contentScale = ContentScale.Crop
+                )
+            }
+            val inlineContent = mapOf(
+                "icon" to InlineTextContent(
+                    Placeholder(
+                        width = 14.sp,
+                        height = 14.sp,
+                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null,
+                        tint = OsuDiffColor.mapValueToTextColor(item["difficultyRating"]?.toFloat() ?: 0f),
+                    )
                 }
-        )
+            )
+            Text(
+                text = buildAnnotatedString {
+                    appendInlineContent("icon", "[icon]")
+                    append(item["difficultyRating"] ?: "")
+                },
+                inlineContent = inlineContent,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = OsuDiffColor.mapValueToTextColor(item["difficultyRating"]?.toFloat() ?: 0f),
+                modifier = Modifier
+                    .constrainAs(diff) {
+                        top.linkTo(parent.top, 4.dp)
+                        start.linkTo(cover.start, 4.dp)
+                    }
+                    .background(
+                        color = OsuDiffColor.mapValueToColor(item["difficultyRating"]?.toFloat() ?: 0f),
+                        shape = RoundedCornerShape(100.dp)
+                    )
+                    .padding(
+                        start = 8.dp,
+                        end = 8.dp,
+                        top = 3.dp,
+                        bottom = 3.dp
+                    )
+            )
+            Text(text = item["beatmapSetTitle"] ?: "",
+                color = Colors.DARK_RED_TEXT_LIGHT,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .constrainAs(title) {
+                        top.linkTo(parent.top)
+                        start.linkTo(cover.end, 8.dp)
+                    }
+            )
+            Text(text = item["artist"] ?: "",
+                color = Colors.DARK_RED_TEXT_LIGHT,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .constrainAs(score) {
+                        top.linkTo(title.bottom, 4.dp)
+                        start.linkTo(cover.end, 8.dp)
+                    }
+            )
+            Text(text = item["beatmapSubTitle"] ?: "",
+                color = Colors.OSU_BRIGHT_YELLOW,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .constrainAs(acc) {
+                        top.linkTo(score.bottom, 4.dp)
+                        start.linkTo(cover.end, 8.dp)
+                    }
+            )
+            Text(text = ("mapped by ${item["creator"]}"),
+                color = Colors.DARK_RED_TEXT_LIGHT,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .constrainAs(pp) {
+                        top.linkTo(acc.bottom, 4.dp)
+                        start.linkTo(cover.end, 8.dp)
+                    }
+            )
+        }
     }
 }
