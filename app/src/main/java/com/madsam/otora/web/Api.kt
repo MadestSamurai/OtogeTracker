@@ -34,7 +34,7 @@ interface Api {
         @Query("mode") mode: String
     ): Call<List<OsuTopRankItem>>
 
-    @GET("users/{user}/scores/first?limit=100")
+    @GET("users/{user}/scores/firsts?limit=100")
     fun getOsuFirstMap(
         @Path("user") user: String,
         @Query("mode") mode: String

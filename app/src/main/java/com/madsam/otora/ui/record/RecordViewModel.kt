@@ -108,81 +108,40 @@ class RecordViewModel(
         }
     }
 
+    private fun mapOsuTopRankItem(item: OsuTopRankItem): Map<String, String> {
+        return mapOf(
+            "cover2x" to item.beatmapSet.covers.list2x,
+            "bg2x" to item.beatmapSet.covers.card2x,
+            "beatmapSetTitle" to item.beatmapSet.title,
+            "beatmapSetTitleUnicode" to item.beatmapSet.titleUnicode,
+            "beatmapSubTitle" to item.beatmap.version,
+            "artist" to item.beatmapSet.artist,
+            "artistUnicode" to item.beatmapSet.artistUnicode,
+            "creator" to item.beatmapSet.creator,
+            "difficultyRating" to item.beatmap.difficultyRating.toString(),
+            "pp" to item.pp.toString(),
+            "accuracy" to CommonUtils.formatPercent(item.accuracy),
+            "rank" to item.rank,
+            "date" to item.endedAt,
+            "maxCombo" to item.maxCombo.toString(),
+            "score" to item.legacyTotalScore.toString(),
+            "mods" to item.mods.joinToString(", "),
+            "totalScore" to CommonUtils.formatNumberThousand(item.totalScore),
+            "weight" to item.weight.percentage.toString(),
+            "weightPP" to item.weight.pp.toString(),
+            "beatmapId" to item.beatmap.id.toString(),
+            "beatmapSetId" to item.beatmapSet.id.toString(),
+            "status" to item.beatmapSet.status,
+        )
+    }
     private fun setOsuPinnedMap(osuPinnedMap: List<OsuTopRankItem>) {
-        osuPinnedMapData.value = osuPinnedMap.map { pinnedMap ->
-            mapOf(
-                "cover2x" to pinnedMap.beatmapSet.covers.cover2x,
-                "beatmapSetTitle" to pinnedMap.beatmapSet.title,
-                "beatmapSetTitleUnicode" to pinnedMap.beatmapSet.titleUnicode,
-                "beatmapSubTitle" to pinnedMap.beatmap.version,
-                "artist" to pinnedMap.beatmapSet.artist,
-                "artistUnicode" to pinnedMap.beatmapSet.artistUnicode,
-                "creator" to pinnedMap.beatmapSet.creator,
-                "pp" to pinnedMap.pp.toString(),
-                "accuracy" to CommonUtils.formatPercent(pinnedMap.accuracy),
-                "rank" to pinnedMap.rank,
-                "maxCombo" to pinnedMap.maxCombo.toString(),
-                "mods" to pinnedMap.mods.joinToString(", "),
-                "totalScore" to CommonUtils.formatNumberThousand(pinnedMap.totalScore),
-                "weight" to pinnedMap.weight.percentage.toString(),
-                "weightPP" to pinnedMap.weight.pp.toString(),
-                "beatmapId" to pinnedMap.beatmap.id.toString(),
-                "beatmapSetId" to pinnedMap.beatmapSet.id.toString()
-            )
-        }
+        osuPinnedMapData.value = osuPinnedMap.map { mapOsuTopRankItem(it) }
     }
-
     private fun setOsuFirstMap(osuFirstMap: List<OsuTopRankItem>) {
-        osuFirstMapData.value = osuFirstMap.map { firstMap ->
-            mapOf(
-                "cover2x" to firstMap.beatmapSet.covers.cover2x,
-                "beatmapSetTitle" to firstMap.beatmapSet.title,
-                "beatmapSetTitleUnicode" to firstMap.beatmapSet.titleUnicode,
-                "beatmapSubTitle" to firstMap.beatmap.version,
-                "artist" to firstMap.beatmapSet.artist,
-                "artistUnicode" to firstMap.beatmapSet.artistUnicode,
-                "creator" to firstMap.beatmapSet.creator,
-                "pp" to firstMap.pp.toString(),
-                "accuracy" to CommonUtils.formatPercent(firstMap.accuracy),
-                "rank" to firstMap.rank,
-                "maxCombo" to firstMap.maxCombo.toString(),
-                "mods" to firstMap.mods.joinToString(", "),
-                "totalScore" to CommonUtils.formatNumberThousand(firstMap.totalScore),
-                "weight" to firstMap.weight.percentage.toString(),
-                "weightPP" to firstMap.weight.pp.toString(),
-                "beatmapId" to firstMap.beatmap.id.toString(),
-                "beatmapSetId" to firstMap.beatmapSet.id.toString()
-            )
-        }
+        osuFirstMapData.value = osuFirstMap.map { mapOsuTopRankItem(it) }
     }
-
     private fun setOsuBestMap(osuBestMap: List<OsuTopRankItem>) {
-        osuBestMapData.value = osuBestMap.map { bestMap ->
-            mapOf(
-                "cover2x" to bestMap.beatmapSet.covers.cover2x,
-                "beatmapSetTitle" to bestMap.beatmapSet.title,
-                "beatmapSetTitleUnicode" to bestMap.beatmapSet.titleUnicode,
-                "beatmapSubTitle" to bestMap.beatmap.version,
-                "artist" to bestMap.beatmapSet.artist,
-                "artistUnicode" to bestMap.beatmapSet.artistUnicode,
-                "creator" to bestMap.beatmapSet.creator,
-                "difficultyRating" to bestMap.beatmap.difficultyRating.toString(),
-                "previewUrl" to bestMap.beatmapSet.previewUrl,
-                "pp" to bestMap.pp.toString(),
-                "accuracy" to CommonUtils.formatPercent(bestMap.accuracy),
-                "rank" to bestMap.rank,
-                "date" to bestMap.endedAt,
-                "maxCombo" to bestMap.maxCombo.toString(),
-                "score" to bestMap.legacyTotalScore.toString(),
-                "mods" to bestMap.mods.joinToString(", "),
-                "totalScore" to CommonUtils.formatNumberThousand(bestMap.totalScore),
-                "weight" to bestMap.weight.percentage.toString(),
-                "weightPP" to bestMap.weight.pp.toString(),
-                "beatmapId" to bestMap.beatmap.id.toString(),
-                "beatmapSetId" to bestMap.beatmapSet.id.toString(),
-                "status" to bestMap.beatmapSet.status,
-            )
-        }
+        osuBestMapData.value = osuBestMap.map { mapOsuTopRankItem(it) }
     }
 
     private fun setOsuMedals(osuInfo: OsuInfo, context: Context) {

@@ -3,6 +3,7 @@ package com.madsam.otora.ui.record.osu
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -18,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -125,6 +127,7 @@ fun OsuTopRankItemCard(
         ) {
             val (
                 cover,
+                background,
                 diff,
                 rank,
                 title,
@@ -132,7 +135,24 @@ fun OsuTopRankItemCard(
                 acc,
                 pp
             ) = createRefs()
-
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = item["bg2x"] ?: "",
+                    contentScale = ContentScale.Crop
+                ),
+                contentDescription = "Cover",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .constrainAs(background) {
+                        top.linkTo(parent.top)
+                        start.linkTo(cover.start, 80.dp)
+                        bottom.linkTo(parent.bottom)
+                        end.linkTo(parent.end)
+                    }
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .alpha(0.15f)
+            )
             Surface(
                 Modifier
                     .constrainAs(cover) {
@@ -199,7 +219,7 @@ fun OsuTopRankItemCard(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .constrainAs(title) {
-                        top.linkTo(parent.top)
+                        top.linkTo(parent.top, 4.dp)
                         start.linkTo(cover.end, 8.dp)
                     }
             )

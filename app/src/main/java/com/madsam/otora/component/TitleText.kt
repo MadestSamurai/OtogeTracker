@@ -10,10 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.madsam.otora.consts.Colors
 
 /**
@@ -96,17 +94,4 @@ fun TitleText(
             )
         }
     }
-}
-
-@Preview
-@Composable
-fun TitleTextPreview() {
-    TitleText(
-        textTitle = "Title",
-        text = "Text",
-        titleSize = 20.sp,
-        titleTextSize = 16.sp,
-        color = Color.White,
-        modifier = Modifier.padding(16.dp)
-    )
 }

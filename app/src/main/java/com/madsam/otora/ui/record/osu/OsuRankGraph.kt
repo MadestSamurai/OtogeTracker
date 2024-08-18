@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,8 +62,8 @@ fun OsuRankGraph(
     osuRankGraphData: MutableStateFlow<List<Int>>,
     osuRankHighestData: MutableStateFlow<Map<String, String>>
 ) {
-    val rankGraphData = osuRankGraphData.collectAsState(initial = emptyList()).value
-    val highestData = osuRankHighestData.collectAsState(initial = emptyMap()).value
+    val rankGraphData by osuRankGraphData.collectAsState()
+    val highestData by osuRankHighestData.collectAsState()
     Surface(
         shape = RoundedCornerShape(
             topStart = 20.dp,
