@@ -27,6 +27,7 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -118,11 +119,10 @@ fun OsuTopRankItemCard(
             .width(itemWidth)
             .padding(8.dp),
         RoundedCornerShape(6.dp),
-        Colors.DARK_RED_DEEP
+        Color.Transparent
     ) {
         ConstraintLayout(
             modifier = Modifier
-                .padding(8.dp)
                 .background(Colors.DARK_RED_DEEP)
         ) {
             val (
@@ -149,7 +149,7 @@ fun OsuTopRankItemCard(
                         bottom.linkTo(parent.bottom)
                         end.linkTo(parent.end)
                     }
-                    .fillMaxWidth()
+                    .width(itemWidth - 80.dp)
                     .height(100.dp)
                     .alpha(0.15f)
             )
@@ -163,6 +163,7 @@ fun OsuTopRankItemCard(
                     .width(100.dp)
                     .height(100.dp),
                 RoundedCornerShape(6.dp),
+                Color.Transparent
             ) {
                 Image(
                     painter = rememberAsyncImagePainter(
@@ -213,15 +214,18 @@ fun OsuTopRankItemCard(
                         bottom = 3.dp
                     )
             )
-            Text(text = item["beatmapSetTitle"] ?: "",
+            Text(text = item["beatmapSetTitleUnicode"] ?: "",
                 color = Colors.DARK_RED_TEXT_LIGHT,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .constrainAs(title) {
                         top.linkTo(parent.top, 4.dp)
                         start.linkTo(cover.end, 8.dp)
                     }
+                    .width(itemWidth - 124.dp)
             )
             Text(text = item["artist"] ?: "",
                 color = Colors.DARK_RED_TEXT_LIGHT,

@@ -126,13 +126,13 @@ object CommonUtils {
         return when {
             delta < 30 * 1000 -> "recent"
             delta < 60 * 1000 -> "${delta / 1000} seconds ago"
-            delta < 60L * 60 * 1000 -> "${delta / (60L * 1000)} minutes ago"
-            delta < 24L * 60 * 60 * 1000 -> "${delta / (60L * 60 * 1000)} hours ago"
-            delta < 7L * 24 * 60 * 60 * 1000 -> "${delta / (24L * 60 * 60 * 1000)} days ago"
-            delta < 30L * 24 * 60 * 60 * 1000 -> "${delta / (7L * 24 * 60 * 60 * 1000)} weeks ago"
-            delta < 365L * 24 * 60 * 60 * 1000 -> "${delta / (30L * 24 * 60 * 60 * 1000)} months ago"
+            delta < 60L * 60 * 1000 -> "${delta / (60L * 1000)} minute${if (delta / (60L * 1000) > 1) "s" else ""} ago"
+            delta < 24L * 60 * 60 * 1000 -> "${delta / (60L * 60 * 1000)} hour${if (delta / (60L * 60 * 1000) > 1) "s" else ""} ago"
+            delta < 7L * 24 * 60 * 60 * 1000 -> "${delta / (24L * 60 * 60 * 1000)} day${if (delta / (24L * 60 * 60 * 1000) > 1) "s" else ""} ago"
+            delta < 30L * 24 * 60 * 60 * 1000 -> "${delta / (7L * 24 * 60 * 60 * 1000)} week${if (delta / (7L * 24 * 60 * 60 * 1000) > 1) "s" else ""} ago"
+            delta < 365L * 24 * 60 * 60 * 1000 -> "${delta / (30L * 24 * 60 * 60 * 1000)} month${if (delta / (30L * 24 * 60 * 60 * 1000) > 1) "s" else ""} ago"
             delta >= 365L * 24 * 60 * 60 * 1000 * 10 -> "too long ago"
-            else -> "${delta / (365L * 24 * 60 * 60 * 1000)} years ago"
+            else -> "${delta / (365L * 24 * 60 * 60 * 1000)} year${if (delta / (365L * 24 * 60 * 60 * 1000) > 1) "s" else ""} ago"
         }
     }
 
