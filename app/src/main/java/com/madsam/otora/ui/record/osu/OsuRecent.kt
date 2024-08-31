@@ -145,6 +145,8 @@ fun OsuRecent(
                                     }
                                 }
 
+                                // TODO: Add case for new medal
+
                                 else -> {
                                     withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
                                         append("achieved #${recentActivity["rank"]} on ${recentActivity["beatmapTitle"]}")
