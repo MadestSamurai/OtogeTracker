@@ -20,13 +20,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.ui.record.RecordViewModel
-import com.madsam.otora.ui.record.osu.OsuCard
-import com.madsam.otora.ui.record.osu.OsuLevel
-import com.madsam.otora.ui.record.osu.OsuPlayData
-import com.madsam.otora.ui.record.osu.OsuRankGraph
-import com.madsam.otora.ui.record.osu.OsuRecent
-import com.madsam.otora.ui.record.osu.OsuSocialCard
-import com.madsam.otora.ui.record.osu.OsuTopRank
+import com.madsam.otora.ui.record.osu.BadgeList
+import com.madsam.otora.ui.record.osu.Card
+import com.madsam.otora.ui.record.osu.Level
+import com.madsam.otora.ui.record.osu.PlayData
+import com.madsam.otora.ui.record.osu.RankGraph
+import com.madsam.otora.ui.record.osu.Recent
+import com.madsam.otora.ui.record.osu.SocialCard
+import com.madsam.otora.ui.record.osu.TopRank
 import com.madsam.otora.utils.ShareUtil
 
 @Composable
@@ -74,7 +75,6 @@ fun OsuUserPage(recordViewModel: RecordViewModel) {
                     }
                 )
             }
-            // Confirmation button
             Button(
                 onClick = {
                     ShareUtil.putString("userId", userState.value, context)
@@ -86,12 +86,13 @@ fun OsuUserPage(recordViewModel: RecordViewModel) {
                 Text("Confirm")
             }
         }
-        OsuCard(recordViewModel.osuCardData, recordViewModel.osuGroupList, recordViewModel.osuBadgeList)
-        OsuRankGraph(recordViewModel.osuRankGraphData, recordViewModel.osuRankHighestData)
-        OsuLevel(recordViewModel.osuLevelData)
-        OsuPlayData(recordViewModel.osuPlayData)
-        OsuSocialCard(recordViewModel.osuSocialCardData)
-        OsuRecent(recordViewModel.osuRecentActivityData)
-        OsuTopRank(recordViewModel.osuPinnedMapData, recordViewModel.osuBestMapData, recordViewModel.osuFirstMapData)
+        Card(recordViewModel.osuCardData, recordViewModel.osuGroupList)
+        BadgeList(recordViewModel.osuBadgeList)
+        RankGraph(recordViewModel.osuRankGraphData, recordViewModel.osuRankHighestData)
+        Level(recordViewModel.osuLevelData)
+        PlayData(recordViewModel.osuPlayData)
+        SocialCard(recordViewModel.osuSocialCardData)
+        Recent(recordViewModel.osuRecentActivityData)
+        TopRank(recordViewModel.osuPinnedMapData, recordViewModel.osuBestMapData, recordViewModel.osuFirstMapData)
     }
 }

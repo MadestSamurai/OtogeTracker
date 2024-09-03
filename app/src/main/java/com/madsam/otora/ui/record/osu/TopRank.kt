@@ -3,7 +3,6 @@ package com.madsam.otora.ui.record.osu
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -46,7 +45,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
  */
 
 @Composable
-fun OsuTopRank(
+fun TopRank(
     pinnedMaps : MutableStateFlow<List<Map<String, String>>>,
     topMaps : MutableStateFlow<List<Map<String, String>>>,
     firstMaps : MutableStateFlow<List<Map<String, String>>>
@@ -63,7 +62,6 @@ fun OsuTopRank(
             .width(screenWidthDp)
             .padding(
                 start = 16.dp,
-                top = 12.dp,
                 end = 16.dp,
                 bottom = 12.dp
             ),
