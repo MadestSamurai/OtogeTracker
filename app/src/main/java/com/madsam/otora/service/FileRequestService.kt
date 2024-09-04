@@ -99,7 +99,7 @@ class FileRequestService {
                     Moshi.Builder()
                         .addLast(KotlinJsonAdapterFactory())
                         .build().adapter(ChuniCard::class.java).toJson(chuniCard).also {
-                        ShareUtil.putString("analysedText", it, context)
+                        ShareUtil.putString("chuniCard", it, context)
                     }
                 }
                 mainViewModel.updatePickedFile()

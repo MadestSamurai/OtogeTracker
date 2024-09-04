@@ -24,18 +24,18 @@ import java.io.IOException
 
 /**
  * 项目名: OtogeTracker
- * 文件名: DataRequestService
+ * 文件名: OsuDataRequestService
  * 创建者: MadSamurai
  * 创建时间: 2024/3/4
- * 描述: 数据请求服务类
+ * 描述: Osu数据请求服务类
  */
-class DataRequestService {
-    /* The reason I am not using CamelCase adapter for moshi:
-    When you annotate a field with @Json(name = ),
-    the camel mapping will be done before the annotation is processed,
-    causing the annotation works incorrectly.
-    And to solve this, making the @CamelCase for every field is also not a good idea.
-    So just annotate every field with @Json(name = ) is the best way.
+class OsuDataRequestService {
+    /** The reason I am not using CamelCase adapter for moshi:
+    * When you annotate a field with @Json(name = ),
+    * the camel mapping will be done before the annotation is processed,
+    * causing the annotation works incorrectly.
+    * And to solve this, making the @CamelCase for every field is also not a good idea.
+    * So just annotate every field with @Json(name = ) is the best way.
     */
     private val moshi = Moshi.Builder()
         .add(NullToDefaultStringAdapter())
@@ -51,6 +51,7 @@ class DataRequestService {
         .add(NullToDefaultCountryAdapter())
         .add(NullToDefaultCountryExtendAdapter())
         .add(NullToDefaultRankHighestAdapter())
+        .add(NullToDefaultHypeAdapter())
         .add(NullToDefaultActiveTournamentBannerListAdapter())
         .add(NullToDefaultBadgeListAdapter())
         .add(NullToDefaultVariantListAdapter())
@@ -65,7 +66,6 @@ class DataRequestService {
         .addCallAdapterFactory(RxJava3CallAdapterFactory.create()) // RxJava
         .build()
     private val api = retrofit.create(Api::class.java)
-
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
     private fun requestOsuCard(callback: ICallback<OsuCard>, userId: String) {
@@ -216,10 +216,8 @@ class DataRequestService {
 
     private fun requestOsuMedals(callback: ICallback<OsuInfo>, userId: String, mode: String) {
         try {
-            val doc =
-                Jsoup.connect(CommonUtils.encodeURL("https://osu.ppy.sh/users/$userId/$mode")).get()
-            val medals =
-                doc.selectFirst("div.js-react--profile-page.osu-layout.osu-layout--full")
+            val doc = Jsoup.connect(CommonUtils.encodeURL("https://osu.ppy.sh/users/$userId/$mode")).get()
+            val medals = doc.selectFirst("div.js-react--profile-page.osu-layout.osu-layout--full")
             val medalsJson = medals.safeAttr("data-initial-data")
             val osuInfo = moshi.adapter(OsuInfo::class.java).fromJson(medalsJson)
             if (osuInfo != null) {

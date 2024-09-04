@@ -16,7 +16,7 @@ data class OsuBeatmapSet(
     var covers: OsuCovers = OsuCovers(),
     var creator: String = "",
     @Json(name = "favourite_count") var favouriteCount: Int = 0,
-    var hype: String = "",
+    var hype: Hype = Hype(),
     var id: Long = 0L,
     var nsfw: Boolean = false,
     @Json(name = "play_count") var playCount: Int = 0,
@@ -29,4 +29,9 @@ data class OsuBeatmapSet(
     @Json(name = "track_id") var trackId: Long = 0L,
     @Json(name = "user_id") var userId: Long = 0L,
     var video: Boolean = false
-)
+) {
+    data class Hype(
+        var current: Int = 0,
+        var required: Int = 0
+    )
+}

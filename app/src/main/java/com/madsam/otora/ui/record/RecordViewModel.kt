@@ -1,8 +1,6 @@
 package com.madsam.otora.ui.record
 
 import android.content.Context
-import android.util.Log
-import androidx.compose.foundation.lazy.layout.LazyLayoutPinnedItemList
 import androidx.compose.runtime.mutableStateOf
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.ViewModel
@@ -15,7 +13,8 @@ import com.madsam.otora.entity.web.OsuInfo
 import com.madsam.otora.entity.web.OsuRecentActivity
 import com.madsam.otora.entity.web.OsuTopRankItem
 import com.madsam.otora.glance.SmallWidget
-import com.madsam.otora.service.DataRequestService
+import com.madsam.otora.service.ChuniDataRequestService
+import com.madsam.otora.service.OsuDataRequestService
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ShareUtil
 import com.squareup.moshi.Moshi
@@ -55,6 +54,9 @@ class RecordViewModel(
     val osuFirstMapData = MutableStateFlow<List<Map<String, String>>>(emptyList())
     val osuBestMapData = MutableStateFlow<List<Map<String, String>>>(emptyList())
 
+    // Chunithm
+    val chuniCardData = MutableStateFlow<ChuniCard>(ChuniCard())
+
 
     init {
         requestOsuData(userId, mode, context)
@@ -63,19 +65,20 @@ class RecordViewModel(
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
     fun requestOsuData(userId: String, mode: String, context: Context) {
-        val dataRequestService = DataRequestService()
-        dataRequestService.getOsuCard({ osuCard: OsuCard -> setOsuCard(osuCard) }, userId)
-        dataRequestService.getOsuRecentActivity({ osuRecentActivity: List<OsuRecentActivity> -> setOsuRecentActivity(osuRecentActivity) }, userId)
-        dataRequestService.getOsuPinnedMap({ osuPinnedMap: List<OsuTopRankItem> -> setOsuPinnedMap(osuPinnedMap) }, userId, mode)
-        dataRequestService.getOsuFirstMap({ osuFirstMap: List<OsuTopRankItem> -> setOsuFirstMap(osuFirstMap) }, userId, mode)
-        dataRequestService.getOsuBestMap({ osuBestMap: List<OsuTopRankItem> -> setOsuBestMap(osuBestMap) }, userId, mode)
-//        dataRequestService.getOsuBeatmap({ osuUserBeatmap: OsuUserBeatmap -> setOsuUserBeatmap(osuUserBeatmap) }, userId, mode)
-//        dataRequestService.getOsuHistorical({ osuHistorical: OsuHistorical -> setOsuHistorical(osuHistorical) }, userId, mode)
-        dataRequestService.getOsuMedals(
-            { osuInfo: OsuInfo -> setOsuMedals(osuInfo, context) },
-            userId,
-            mode
-        )
+        val osuDataRequestService = OsuDataRequestService()
+        osuDataRequestService.getOsuCard({ osuCard: OsuCard -> setOsuCard(osuCard) }, userId)
+        osuDataRequestService.getOsuRecentActivity({ osuRecentActivity: List<OsuRecentActivity> -> setOsuRecentActivity(osuRecentActivity) }, userId)
+        osuDataRequestService.getOsuPinnedMap({ osuPinnedMap: List<OsuTopRankItem> -> setOsuPinnedMap(osuPinnedMap) }, userId, mode)
+        osuDataRequestService.getOsuFirstMap({ osuFirstMap: List<OsuTopRankItem> -> setOsuFirstMap(osuFirstMap) }, userId, mode)
+        osuDataRequestService.getOsuBestMap({ osuBestMap: List<OsuTopRankItem> -> setOsuBestMap(osuBestMap) }, userId, mode)
+//        osuDataRequestService.getOsuBeatmap({ osuUserBeatmap: OsuUserBeatmap -> setOsuUserBeatmap(osuUserBeatmap) }, userId, mode)
+//        osuDataRequestService.getOsuHistorical({ osuHistorical: OsuHistorical -> setOsuHistorical(osuHistorical) }, userId, mode)
+        osuDataRequestService.getOsuMedals({ osuInfo: OsuInfo -> setOsuMedals(osuInfo, context) }, userId, mode)
+    }
+
+    fun requestChuniData(context: Context) {
+        val chuniDataRequestService = ChuniDataRequestService(context)
+        chuniDataRequestService.getUserData()
     }
 
     private fun setOsuCard(osuCard: OsuCard) {
@@ -273,7 +276,7 @@ class RecordViewModel(
     }
 
     fun getChuniCardFromShare(context: Context): ChuniCard {
-        val json = ShareUtil.getString("analysedText", context) ?: "null"
+        val json = ShareUtil.getString("chuniCard", context) ?: "null"
         return Moshi.Builder()
             .addLast(KotlinJsonAdapterFactory())
             .build().adapter(ChuniCard::class.java).fromJson(json) ?: ChuniCard()

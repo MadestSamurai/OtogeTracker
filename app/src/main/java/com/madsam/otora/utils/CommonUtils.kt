@@ -237,4 +237,17 @@ object CommonUtils {
         }
         return text
     }
+
+    /**
+     * Cookie处理为键值对
+     *
+     * @param cookie 字符串
+     * @return 字符串键值对
+     */
+    fun parseCookie(cookie: String): Map<String, String> {
+        return cookie.split(";")
+            .map { it.trim() }
+            .map { it.split("=") }
+            .associate { it[0] to it[1] }
+    }
 }

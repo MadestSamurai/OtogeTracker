@@ -7,6 +7,7 @@ import com.madsam.otora.entity.web.OsuTopRankItem
 import com.madsam.otora.entity.web.OsuUserBeatmap
 import retrofit2.Call
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -59,4 +60,8 @@ interface Api {
 
     @GET("users/{user}/extra-pages/kudosu")
     fun getOsuKudosu(@Path("user") user: String, @Query("mode") mode: String): Call<String>
+
+    // Chunithm API
+    @GET("home")
+    fun getChunithmHome(@Header("User-Agent")userAgent: String): Call<String>
 }

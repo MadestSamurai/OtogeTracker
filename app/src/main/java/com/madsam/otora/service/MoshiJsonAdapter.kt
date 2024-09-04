@@ -1,5 +1,6 @@
 package com.madsam.otora.service
 
+import com.madsam.otora.entity.web.OsuBeatmapSet
 import com.madsam.otora.entity.web.OsuCard
 import com.madsam.otora.entity.web.OsuGroup
 import com.madsam.otora.entity.web.OsuMedalItem
@@ -9,11 +10,8 @@ import com.madsam.otora.entity.web.OsuUserExtend
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import java.lang.reflect.Type
-import java.util.Locale
 
 class NullToDefaultStringAdapter {
     @FromJson
@@ -154,6 +152,26 @@ class NullToDefaultRankHighestAdapter {
             OsuUserExtend.RankHighest()
         } else {
             rankHighestAdapter.fromJson(reader) ?: OsuUserExtend.RankHighest()
+        }
+    }
+}
+
+class NullToDefaultHypeAdapter {
+    private val moshi: Moshi = Moshi.Builder()
+        .add(NullToDefaultStringAdapter())
+        .add(NullToDefaultIntAdapter())
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
+    private val hypeAdapter: JsonAdapter<OsuBeatmapSet.Hype> = moshi.adapter(OsuBeatmapSet.Hype::class.java)
+
+    @FromJson
+    @Suppress("unused")
+    fun fromJson(reader: JsonReader): OsuBeatmapSet.Hype {
+        return if (reader.peek() == JsonReader.Token.NULL) {
+            reader.nextNull<OsuBeatmapSet.Hype>()
+            OsuBeatmapSet.Hype()
+        } else {
+            hypeAdapter.fromJson(reader) ?: OsuBeatmapSet.Hype()
         }
     }
 }

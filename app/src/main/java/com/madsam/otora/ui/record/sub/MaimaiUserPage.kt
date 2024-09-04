@@ -19,11 +19,11 @@ import com.madsam.otora.utils.ShareUtil
 fun MaimaiUserPage(recordViewModel: RecordViewModel) {
     val context = LocalContext.current
     val state = remember { mutableStateOf("init") }
-    state.value = ShareUtil.getString("analysedText", context) ?: "null"
+    state.value = ShareUtil.getString("chuniCard", context) ?: "null"
 
     LaunchedEffect(recordViewModel.isFilePicked()) {
         if (recordViewModel.isFilePicked()) {
-            state.value = ShareUtil.getString("analysedText", context) ?: "null"
+            state.value = ShareUtil.getString("chuniCard", context) ?: "null"
             println(state.value)
             recordViewModel.resetPickedFile()
         }
