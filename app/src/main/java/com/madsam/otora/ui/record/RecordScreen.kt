@@ -13,7 +13,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.madsam.otora.activity.MainViewModel
 import com.madsam.otora.ui.record.sub.ChunithmUserPage
 import com.madsam.otora.ui.record.sub.MaimaiUserPage
 import com.madsam.otora.ui.record.sub.OsuUserPage
@@ -22,7 +21,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RecordScreen(mainViewModel: MainViewModel) {
+fun RecordScreen() {
     val context = LocalContext.current
     val tabs =
         listOf(Screen.Page1, Screen.Page2, Screen.Page3, Screen.Page4)
@@ -33,10 +32,6 @@ fun RecordScreen(mainViewModel: MainViewModel) {
         mode = ShareUtil.getString("mode", context) ?: "osu",
         context = context
     ))
-    if (mainViewModel.isFilePicked()) {
-        recordViewModel.updatePickedFile()
-        mainViewModel.resetPickedFile()
-    }
 
     Column {
         TabRow(selectedTabIndex = pagerState.currentPage) {
@@ -56,7 +51,7 @@ fun RecordScreen(mainViewModel: MainViewModel) {
         HorizontalPager(state = pagerState) { page ->
             when (tabs[page]) {
                 is Screen.Page1 -> OsuUserPage(recordViewModel)
-                is Screen.Page2 -> MaimaiUserPage(recordViewModel)
+                is Screen.Page2 -> MaimaiUserPage()
                 is Screen.Page3 -> ChunithmUserPage(recordViewModel)
                 is Screen.Page4 -> TestPage4()
             }

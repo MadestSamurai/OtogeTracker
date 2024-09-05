@@ -1,7 +1,6 @@
 package com.madsam.otora.ui.record
 
 import android.content.Context
-import androidx.compose.runtime.mutableStateOf
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -56,7 +55,6 @@ class RecordViewModel(
 
     // Chunithm
     val chuniCardData = MutableStateFlow<ChuniCard>(ChuniCard())
-
 
     init {
         requestOsuData(userId, mode, context)
@@ -261,20 +259,6 @@ class RecordViewModel(
     }
 
     // Chunithm
-    private val filePicked = mutableStateOf(false)
-
-    fun updatePickedFile() {
-        filePicked.value = true
-    }
-
-    fun resetPickedFile() {
-        filePicked.value = false
-    }
-
-    fun isFilePicked(): Boolean {
-        return filePicked.value
-    }
-
     fun getChuniCardFromShare(context: Context): ChuniCard {
         val json = ShareUtil.getString("chuniCard", context) ?: "null"
         return Moshi.Builder()

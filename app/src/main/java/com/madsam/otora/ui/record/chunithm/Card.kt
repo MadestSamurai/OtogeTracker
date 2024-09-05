@@ -37,7 +37,7 @@ import com.madsam.otora.entity.chuni.ChuniCard
 import com.madsam.otora.utils.CommonUtils
 
 @Composable
-fun ChuniCard(
+fun Card(
     chuniCard: ChuniCard,
 ) {
     val configuration = LocalConfiguration.current

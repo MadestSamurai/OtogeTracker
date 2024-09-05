@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.madsam.otora.entity.chuni.ChuniCard
 import com.madsam.otora.ui.record.RecordViewModel
-import com.madsam.otora.ui.record.chunithm.ChuniCard
+import com.madsam.otora.ui.record.chunithm.Card
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ShareUtil
 
@@ -67,6 +67,6 @@ fun ChunithmUserPage(recordViewModel: RecordViewModel) {
         }) {
             Text("Update Data")
         }
-        ChuniCard(chuniCard = chuniCard.value)
+        Card(chuniCard = chuniCard.value)
     }
 }

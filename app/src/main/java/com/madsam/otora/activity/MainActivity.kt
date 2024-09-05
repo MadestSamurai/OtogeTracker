@@ -1,14 +1,10 @@
 package com.madsam.otora.activity
 
 import android.animation.ObjectAnimator
-import android.app.Activity
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
@@ -29,8 +25,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.madsam.otora.service.FilePickerSource
-import com.madsam.otora.service.FileRequestService
 import com.madsam.otora.ui.record.RecordScreen
 
 /**
@@ -74,7 +68,7 @@ fun MainActivityScreen(mainViewModel: MainViewModel) {
         Box(modifier = Modifier.padding(contentPadding)) {
             NavHost(navController = navController, startDestination = Screen.Screen1.route) {
                 composable(Screen.Screen1.route) {
-                    RecordScreen(mainViewModel)
+                    RecordScreen()
                 }
                 composable(Screen.Screen2.route) {
                     Screen2()
@@ -107,28 +101,6 @@ class MainActivity : AppCompatActivity() {
         setContent {
             MainActivityScreen(mainViewModel)
         }
-    }
-
-    private var currentFilePickerSource: FilePickerSource? = null
-
-    private val filePickerResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val uri: Uri? = result.data?.data
-            if (uri != null) {
-                val fileContent = FileRequestService().readFileContent(this, uri)
-                val source = currentFilePickerSource ?: return@registerForActivityResult
-                FileRequestService().fileAnalyser(fileContent, source, this, mainViewModel)
-            }
-        }
-    }
-
-    fun pickFile(source: FilePickerSource) {
-        currentFilePickerSource = source
-        val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
-            type = "*/*"
-            addCategory(Intent.CATEGORY_OPENABLE)
-        }
-        filePickerResultLauncher.launch(intent)
     }
 }
 
