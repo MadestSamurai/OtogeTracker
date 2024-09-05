@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,6 +26,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,14 +74,11 @@ fun Card(
             title,
             groupList,
             rank,
-            countryFlag,
             country,
             countryRank,
             online,
-            onlineMark,
             tournamentBanner,
         ) = refs
-
         val svgLoader = ImageLoader.Builder(LocalContext.current)
             .components {
                 add(SvgDecoder.Factory())
@@ -89,6 +91,42 @@ fun Card(
                 add(GifDecoder.Factory())
             }
             .build()
+        val inlineContent = mapOf(
+            "onlineMark" to InlineTextContent(
+                Placeholder(
+                    width = 25.sp,
+                    height = 20.sp,
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
+                )
+            ) {
+                Image(
+                    painter = painterResource(
+                        id =
+                        if (cardData["isOnline"] == "true") R.drawable.ic_osu_online else R.drawable.ic_osu_offline
+                    ),
+                    contentDescription = "Online Mark",
+                    modifier = Modifier.padding(end = 5.dp)
+                )
+            },
+            "flag" to InlineTextContent(
+                Placeholder(
+                    width = 26.sp,
+                    height = 20.sp,
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
+                )
+            ) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        model = cardData["flagUrl"],
+                        imageLoader = svgLoader,
+                        contentScale = ContentScale.Fit
+                    ),
+                    contentDescription = "Flag",
+                    modifier = Modifier.padding(end = 2.dp),
+                    contentScale = ContentScale.Fit,
+                )
+            }
+        )
         val cardWidthDp = screenWidthDp - 32.dp
         Box(
             modifier = Modifier
@@ -228,27 +266,17 @@ fun Card(
                     onClick = { formerUsernameShowPopup.targetState = true }
                 )
         )
-        Image(
-            painter = painterResource(
-                id =
-                if (cardData["isOnline"] == "true") R.drawable.ic_osu_online else R.drawable.ic_osu_offline
-            ),
-            contentDescription = "Online Mark",
-            modifier = Modifier
-                .constrainAs(onlineMark) {
-                    top.linkTo(nameplateName.bottom)
-                    bottom.linkTo(baseBackground.bottom)
-                    start.linkTo(nameplateName.start)
-                }
-                .size(20.dp)
-        )
         Text(
-            text = if (cardData["isOnline"] == "true") "Online" else "Offline",
+            text = buildAnnotatedString {
+                appendInlineContent("onlineMark", "[Online Mark]")
+                append(if (cardData["isOnline"] == "true") "Online" else "Offline")
+            },
+            inlineContent = inlineContent,
             modifier = Modifier
                 .constrainAs(online) {
-                    top.linkTo(onlineMark.top)
-                    bottom.linkTo(onlineMark.bottom)
-                    start.linkTo(onlineMark.end, margin = 5.dp)
+                    start.linkTo(nameplateName.start)
+                    top.linkTo(nameplateName.bottom)
+                    bottom.linkTo(baseBackground.bottom)
                 }
                 .padding(start = 5.dp),
             color = Colors.DARK_RED_TEXT_LIGHT,
@@ -306,33 +334,18 @@ fun Card(
                 )
         )
         val modeCountryRankShowPopup = remember { MutableTransitionState(false) }
-        Image(
-            painter = rememberAsyncImagePainter(
-                model = cardData["flagUrl"],
-                imageLoader = svgLoader,
-                contentScale = ContentScale.Fit
-            ),
-            contentDescription = "Country Flag",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .constrainAs(countryFlag) {
-                    top.linkTo(baseBackground.bottom, margin = 6.dp)
-                    start.linkTo(rank.end, margin = 15.dp)
-                }
-                .clickable(
-                    onClick = { modeCountryRankShowPopup.targetState = true }
-                )
-                .size(20.dp)
-        )
         Text(
-            text = cardData["country"] ?: "",
+            text = buildAnnotatedString {
+                appendInlineContent("flag", "[Flag]")
+                append(cardData["country"] ?: "")
+            },
+            inlineContent = inlineContent,
             color = Colors.DARK_RED_TEXT,
             fontSize = 14.sp,
             modifier = Modifier
                 .constrainAs(country) {
-                    top.linkTo(countryFlag.top)
-                    bottom.linkTo(countryFlag.bottom)
-                    start.linkTo(countryFlag.end, margin = 5.dp)
+                    start.linkTo(rank.end, margin = 15.dp)
+                    top.linkTo(baseBackground.bottom, margin = 5.dp)
                 }
                 .clickable(
                     onClick = { modeCountryRankShowPopup.targetState = true }
@@ -344,7 +357,7 @@ fun Card(
             fontSize = 16.sp,
             modifier = Modifier
                 .constrainAs(countryRank) {
-                    top.linkTo(countryFlag.bottom)
+                    top.linkTo(country.bottom)
                     start.linkTo(rank.end, margin = 15.dp)
                 }
                 .clickable(
@@ -358,7 +371,6 @@ fun Card(
             modeGlobalRankPopup,
             modeCountryRankPopup,
         ) = refs
-
         if (cardData["isSupporter"] == "true") {
             PopupTip(
                 "Supporter Rank  ${cardData["supporterRank"]}",
