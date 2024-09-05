@@ -70,9 +70,49 @@ fun TopRank(
     ) {
         val cardWidth = screenWidthDp - 32.dp
         Column {
-            OsuTopRankItemContent(pinned, "Pinned", cardWidth)
-            OsuTopRankItemContent(top, "Top", cardWidth)
-            OsuTopRankItemContent(first, "First", cardWidth)
+            if (pinned.isEmpty() && top.isEmpty() && first.isEmpty()) {
+                Text(
+                    text = "No play records",
+                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(16.dp)
+                )
+                return@Column
+            }
+            if (pinned.isEmpty()) {
+                Text(
+                    text = "No pinned maps",
+                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(16.dp)
+                )
+            } else {
+                OsuTopRankItemContent(pinned, "Pinned", cardWidth)
+            }
+            if (top.isEmpty()) {
+                Text(
+                    text = "No top maps",
+                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(16.dp)
+                )
+            } else {
+                OsuTopRankItemContent(top, "Top", cardWidth)
+            }
+            if (first.isEmpty()) {
+                Text(
+                    text = "No first maps",
+                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(16.dp)
+                )
+            } else {
+                OsuTopRankItemContent(first, "First", cardWidth)
+            }
         }
     }
 }

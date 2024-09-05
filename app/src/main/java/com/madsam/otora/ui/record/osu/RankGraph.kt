@@ -63,6 +63,9 @@ fun RankGraph(
 ) {
     val rankGraphData by osuRankGraphData.collectAsState()
     val highestData by osuRankHighestData.collectAsState()
+    if (rankGraphData.isEmpty() && highestData.isEmpty()) {
+        return
+    }
     ConstraintLayout(
         modifier = Modifier
             .padding(
@@ -235,6 +238,9 @@ fun RankGraph(
             )
         }
 
+        if ((highestData["rank"] == null || highestData["rank"] == "0" || highestData["rank"] == "") && (highestData["date"] == null || highestData["date"] == "")) {
+            return@ConstraintLayout
+        }
         Text(
             text = buildAnnotatedString {
                 append("")

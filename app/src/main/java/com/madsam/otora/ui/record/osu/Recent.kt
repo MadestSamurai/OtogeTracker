@@ -49,6 +49,9 @@ fun Recent(
     recentActivityList: MutableStateFlow<List<Map<String, String>>>
 ) {
     val recentActivities = recentActivityList.collectAsState(initial = emptyList()).value
+    if (recentActivities.isEmpty() || recentActivities[0].isEmpty()) {
+        return
+    }
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     Surface(

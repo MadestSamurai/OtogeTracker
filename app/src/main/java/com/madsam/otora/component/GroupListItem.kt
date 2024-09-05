@@ -62,7 +62,7 @@ fun GroupListItem(
             Text(
                 text = osuGroup.shortName,
                 fontWeight = FontWeight.Bold,
-                color = Color(android.graphics.Color.parseColor(osuGroup.colour)),
+                color = Color(android.graphics.Color.parseColor(osuGroup.colour.ifEmpty { "#FFFFFF" })),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
         }
@@ -71,7 +71,7 @@ fun GroupListItem(
         ) {
             Text(
                 text = osuGroup.name,
-                color = Color(android.graphics.Color.parseColor(osuGroup.colour)),
+                color = Color(android.graphics.Color.parseColor(osuGroup.colour.ifEmpty { "#FFFFFF" })),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
         }

@@ -176,6 +176,28 @@ class NullToDefaultHypeAdapter {
     }
 }
 
+class NullToDefaultRankHistoryAdapter {
+    private val moshi: Moshi = Moshi.Builder()
+        .add(NullToDefaultStringAdapter())
+        .add(NullToDefaultIntAdapter())
+        .add(NullToEmptyIntListAdapter())
+        .addLast(KotlinJsonAdapterFactory())
+        .build()
+    private val rankHistoryAdapter: JsonAdapter<OsuUserExtend.RankHistory> = moshi.adapter(OsuUserExtend.RankHistory::class.java)
+
+    @FromJson
+    @Suppress("unused")
+    fun fromJson(reader: JsonReader): OsuUserExtend.RankHistory {
+        return if (reader.peek() == JsonReader.Token.NULL) {
+            reader.nextNull<OsuUserExtend.RankHistory>()
+            OsuUserExtend.RankHistory()
+        } else {
+            rankHistoryAdapter.fromJson(reader) ?: OsuUserExtend.RankHistory()
+        }
+    }
+
+}
+
 class NullToEmptyStringListAdapter {
     @FromJson
     @Suppress("unused")

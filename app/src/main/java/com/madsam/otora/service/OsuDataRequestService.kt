@@ -52,6 +52,7 @@ class OsuDataRequestService {
         .add(NullToDefaultCountryExtendAdapter())
         .add(NullToDefaultRankHighestAdapter())
         .add(NullToDefaultHypeAdapter())
+        .add(NullToDefaultRankHistoryAdapter())
         .add(NullToDefaultActiveTournamentBannerListAdapter())
         .add(NullToDefaultBadgeListAdapter())
         .add(NullToDefaultVariantListAdapter())

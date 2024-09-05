@@ -184,10 +184,10 @@ class RecordViewModel(
             "rank" to osuInfo.user.rankHighest.rank.toString(),
             "date" to osuInfo.user.rankHighest.updatedAt
         )
-
-        var playTime = ""
-        if (osuInfo.user.statistics.playTime != 0) {
-            playTime = CommonUtils.secondToDHMS(osuInfo.user.statistics.playTime.toLong())
+        val playTime = if (osuInfo.user.statistics.playTime != 0) {
+            CommonUtils.secondToDHMS(osuInfo.user.statistics.playTime.toLong())
+        } else {
+            "0,0,0,0"
         }
 
         osuPlayData.value = mapOf(
