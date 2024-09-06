@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -301,12 +302,13 @@ fun Card(
                 Image(
                     painter = painterResource(
                         id = when (cardData["supporterRank"]) {
-                            "1" -> R.drawable.supporter_rank1
-                            "2" -> R.drawable.supporter_rank2
-                            "3" -> R.drawable.supporter_rank3
-                            else -> R.drawable.supporter_rank1
+                            "1" -> R.drawable.ic_support_1
+                            "2" -> R.drawable.ic_support_2
+                            "3" -> R.drawable.ic_support_3
+                            else -> R.drawable.ic_support_1
                         }
                     ),
+                    colorFilter = ColorFilter.tint(Color.White),
                     contentDescription = "Supporter Rank",
                     modifier = Modifier
                         .height(20.dp)

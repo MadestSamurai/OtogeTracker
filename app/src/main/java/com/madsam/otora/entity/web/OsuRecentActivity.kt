@@ -18,6 +18,8 @@ data class OsuRecentActivity(
     val mode: String = "",
     val beatmap: Beatmap = Beatmap(),
     val beatmapset: Beatmapset = Beatmapset(),
+    val achievement: OsuMedalItem = OsuMedalItem(),
+    val approval: String = "",
     val user: User = User(),
 ) {
     data class Beatmap(

@@ -17,6 +17,7 @@ data class OsuMedalItem(
     var grouping: String = "",
     var ordering: String = "",
     var description: String = "",
+    var slug: String = "",
     var mode: String = "",
     var instructions: String = ""
 )

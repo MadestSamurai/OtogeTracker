@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -131,6 +132,12 @@ fun Recent(
                                     }
                                 }
 
+                                "userSupportAgain" -> {
+                                    withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
+                                        append("support osu! again")
+                                    }
+                                }
+
                                 "beatmapsetRevive" -> {
                                     withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
                                         append("revived a beatmap ")
@@ -140,7 +147,23 @@ fun Recent(
                                     }
                                 }
 
-                                // TODO: Add case for new medal
+                                "beatmapsetApprove" -> {
+                                    withStyle(style = SpanStyle(color = Colors.OSU_BRIGHT_YELLOW)) {
+                                        append(recentActivity["beatmapSetTitle"])
+                                    }
+                                    withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
+                                        append(" has been ${recentActivity["approval"]}")
+                                    }
+                                }
+
+                                "achievement" -> {
+                                    withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
+                                        append("achieved ")
+                                    }
+                                    withStyle(style = SpanStyle(color = Colors.OSU_BRIGHT_YELLOW)) {
+                                        append(recentActivity["achievement"])
+                                    }
+                                }
 
                                 else -> {
                                     withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
@@ -182,30 +205,47 @@ fun Recent(
                             },
                             "icon" to InlineTextContent(
                                 Placeholder(
-                                    width = if (recentActivity["type"] == "rank") 28.sp else 16.sp,
-                                    height = 14.sp,
-                                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
+                                    width = when (recentActivity["type"]) {
+                                        "rank" -> 28.sp
+                                        "achievement" -> 24.sp
+                                        else -> 18.sp
+                                    },
+                                    height = when (recentActivity["type"]) {
+                                        "achievement" -> 20.sp
+                                        else -> 14.sp
+                                    },
+                                    placeholderVerticalAlign = when (recentActivity["type"]) {
+                                        "achievement" -> PlaceholderVerticalAlign.TextTop
+                                        else -> PlaceholderVerticalAlign.TextBottom
+                                    }
                                 )
                             ) {
                                 when (recentActivity["type"]) {
-                                    "rank", "rankLost" -> {
-                                        val id = if (recentActivity["type"] == "rank") {
-                                            when (recentActivity["scoreRank"]) {
+                                    "rank" -> {
+                                        Image(
+                                            painter = painterResource(id = when (recentActivity["scoreRank"]) {
                                                 "SSH" -> com.madsam.otora.R.drawable.ic_osu_ssh
                                                 "SS" -> com.madsam.otora.R.drawable.ic_osu_ss
                                                 "SH" -> com.madsam.otora.R.drawable.ic_osu_sh
                                                 "S" -> com.madsam.otora.R.drawable.ic_osu_s
                                                 "A" -> com.madsam.otora.R.drawable.ic_osu_a
-                                                else -> com.madsam.otora.R.drawable.ic_osu_a
-                                            }
-                                        } else {
-                                            com.madsam.otora.R.drawable.ic_arrow_down
-                                        }
-                                        Image(
-                                            painter = painterResource(id = id),
+                                                "B" -> com.madsam.otora.R.drawable.ic_osu_b
+                                                "C" -> com.madsam.otora.R.drawable.ic_osu_c
+                                                "D" -> com.madsam.otora.R.drawable.ic_osu_d
+                                                else -> com.madsam.otora.R.drawable.ic_osu_f
+                                            }),
                                             contentDescription = "Osu Mode",
                                             contentScale = ContentScale.Fit,
-                                            modifier = Modifier.padding(end = 2.dp)
+                                            modifier = Modifier.padding(end = 4.dp)
+                                        )
+                                    }
+
+                                    "rankLost" -> {
+                                        Image(
+                                            painter = painterResource(id = com.madsam.otora.R.drawable.ic_double_down),
+                                            contentDescription = "Osu Mode",
+                                            colorFilter = ColorFilter.tint(Color.White),
+                                            modifier = Modifier.padding(end = 4.dp)
                                         )
                                     }
 
@@ -214,22 +254,66 @@ fun Recent(
                                             painter =
                                             painterResource(
                                                 id = when (recentActivity["type"]) {
-                                                    "beatmapsetUpload" -> com.madsam.otora.R.drawable.ic_arrow_up
-                                                    "beatmapsetUpdate" -> com.madsam.otora.R.drawable.ic_arrow_up_2
-                                                    else -> com.madsam.otora.R.drawable.ic_arrow_up
+                                                    "beatmapsetUpload" -> com.madsam.otora.R.drawable.ic_up_arrow
+                                                    "beatmapsetUpdate" -> com.madsam.otora.R.drawable.ic_rotate_arrow
+                                                    else -> com.madsam.otora.R.drawable.ic_up_arrow
                                                 }
                                             ),
                                             contentDescription = "Beatmap Upload",
-                                            colorFilter = ColorFilter.tint(Color.White),
-                                            modifier = Modifier.padding(end = 2.dp)
+                                            colorFilter = when (recentActivity["type"]) {
+                                                "beatmapsetUpload" -> ColorFilter.tint(Colors.OSU_ARROW_YELLOW)
+                                                "beatmapsetUpdate" -> ColorFilter.tint(Colors.OSU_ROTATE_GREEN)
+                                                else -> ColorFilter.tint(Color.White)
+                                            },
+                                            modifier = Modifier.padding(end = 4.dp)
                                         )
                                     }
 
                                     "userSupportGift" -> {
                                         Image(
-                                            painter = painterResource(id = com.madsam.otora.R.drawable.supporter_rank1),
+                                            painter = painterResource(id = com.madsam.otora.R.drawable.ic_gift),
                                             contentDescription = "Osu Mode",
-                                            modifier = Modifier.padding(end = 2.dp)
+                                            colorFilter = ColorFilter.tint(Colors.OSU_HEART_RED),
+                                            modifier = Modifier.padding(end = 4.dp)
+                                        )
+                                    }
+
+                                    "userSupportAgain" -> {
+                                        Image(
+                                            painter = painterResource(id = com.madsam.otora.R.drawable.ic_support_1),
+                                            contentDescription = "Osu Mode",
+                                            colorFilter = ColorFilter.tint(Colors.OSU_HEART_RED),
+                                            modifier = Modifier.padding(end = 4.dp)
+                                        )
+                                    }
+
+                                    "beatmapsetApprove" -> {
+                                        Image(
+                                            painter = painterResource(id = com.madsam.otora.R.drawable.ic_tick),
+                                            contentDescription = "Osu Mode",
+                                            colorFilter = ColorFilter.tint(Colors.OSU_HEART_RED),
+                                            modifier = Modifier.padding(end = 4.dp)
+                                        )
+                                    }
+
+                                    "beatmapsetRevive" -> {
+                                        Image(
+                                            painter = painterResource(id = com.madsam.otora.R.drawable.ic_trash_arrow_up),
+                                            contentDescription = "Osu Mode",
+                                            colorFilter = ColorFilter.tint(Color.White),
+                                            modifier = Modifier.padding(end = 4.dp)
+                                        )
+                                    }
+
+                                    "achievement" -> {
+                                        Image(
+                                            painter = rememberAsyncImagePainter(
+                                                model = recentActivity["achievementIcon"] ?: "",
+                                                contentScale = ContentScale.Fit
+                                            ),
+                                            contentScale = ContentScale.Fit,
+                                            contentDescription = "Achievement Icon",
+                                            modifier = Modifier.padding(end = 4.dp)
                                         )
                                     }
                                 }
@@ -245,7 +329,9 @@ fun Recent(
                                 .padding(start = 8.dp, top = 4.dp, end = 8.dp)
                         )
                         Text(
-                            text = CommonUtils.dateCodeToRecent(recentActivity["createdAt"] ?: "1970-01-01T00:00:00+00:00"),
+                            text = CommonUtils.dateCodeToRecent(
+                                recentActivity["createdAt"] ?: "1970-01-01T00:00:00+00:00"
+                            ),
                             fontSize = 12.sp,
                             color = Color.Gray,
                             modifier = Modifier
