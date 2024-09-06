@@ -40,7 +40,7 @@ import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.compose.common.of
-import com.patrykandpatrick.vico.core.cartesian.CartesianDrawContext
+import com.patrykandpatrick.vico.core.cartesian.CartesianDrawingContext
 import com.patrykandpatrick.vico.core.cartesian.Zoom
 import com.patrykandpatrick.vico.core.cartesian.data.AxisValueOverrider
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
@@ -214,7 +214,7 @@ fun RankGraph(
                             private val decimalFormatY = DecimalFormat("'#'#,###")
 
                             override fun format(
-                                context: CartesianDrawContext,
+                                context: CartesianDrawingContext,
                                 targets: List<CartesianMarker.Target>
                             ): CharSequence {
                                 return targets.joinToString { target ->
