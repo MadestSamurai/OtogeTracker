@@ -125,7 +125,82 @@ class ChuniDataRequestService(private val context: Context) {
             Log.e(TAG, "IOException occurred in OsuMedalsThread")
         }
     }
-
+    private fun requestPlayerData() {
+        try {
+            val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/home/playerData"))
+            val header = connect.header("User-Agent", userAgent)
+            header.cookie("_t", cookie.token)
+            header.cookie("expires", cookie.expires)
+            header.cookie("Max-Age", cookie.maxAge)
+            header.cookie("path", cookie.path)
+            header.cookie("SameSite", cookie.sameSite)
+            header.cookie("userId", cookie.userId)
+            header.cookie("friendCodeList", cookie.friendCodeList)
+            val response = connect.execute()
+            val doc = response.parse()
+            updateCookie(response)
+            ShareUtil.putString("chuniPlayerData", doc.toString(), context)
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+        }
+    }
+    private fun requestRatingDetailBest() {
+        try {
+            val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/home/playerData/ratingDetailBest"))
+            val header = connect.header("User-Agent", userAgent)
+            header.cookie("_t", cookie.token)
+            header.cookie("expires", cookie.expires)
+            header.cookie("Max-Age", cookie.maxAge)
+            header.cookie("path", cookie.path)
+            header.cookie("SameSite", cookie.sameSite)
+            header.cookie("userId", cookie.userId)
+            header.cookie("friendCodeList", cookie.friendCodeList)
+            val response = connect.execute()
+            val doc = response.parse()
+            updateCookie(response)
+            ShareUtil.putString("chuniRatingDetailBest", doc.toString(), context)
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+        }
+    }
+    private fun requestRatingDetailRecent() {
+        try {
+            val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/home/playerData/ratingDetailRecent"))
+            val header = connect.header("User-Agent", userAgent)
+            header.cookie("_t", cookie.token)
+            header.cookie("expires", cookie.expires)
+            header.cookie("Max-Age", cookie.maxAge)
+            header.cookie("path", cookie.path)
+            header.cookie("SameSite", cookie.sameSite)
+            header.cookie("userId", cookie.userId)
+            header.cookie("friendCodeList", cookie.friendCodeList)
+            val response = connect.execute()
+            val doc = response.parse()
+            updateCookie(response)
+            ShareUtil.putString("chuniRatingDetailRecent", doc.toString(), context)
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+        }
+    }
+    private fun requestRatingDetailNext() {
+        try {
+            val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/home/playerData/ratingDetailNext"))
+            val header = connect.header("User-Agent", userAgent)
+            header.cookie("_t", cookie.token)
+            header.cookie("expires", cookie.expires)
+            header.cookie("Max-Age", cookie.maxAge)
+            header.cookie("path", cookie.path)
+            header.cookie("SameSite", cookie.sameSite)
+            header.cookie("userId", cookie.userId)
+            header.cookie("friendCodeList", cookie.friendCodeList)
+            val response = connect.execute()
+            val doc = response.parse()
+            updateCookie(response)
+            ShareUtil.putString("chuniRatingDetailNext", doc.toString(), context)
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+        }
+    }
     private fun requestRecord() {
         try {
             val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/record"))
@@ -140,8 +215,109 @@ class ChuniDataRequestService(private val context: Context) {
             val response = connect.execute()
             val doc = response.parse()
             updateCookie(response)
-            val mapTitle = doc.getElementsByClass("map_title_text text_l text_b").text()
-            println(mapTitle)
+            ShareUtil.putString("chuniRecord", doc.toString(), context)
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+        }
+    }
+    private fun requestPlayLog() {
+        try {
+            val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/record/playlog"))
+            val header = connect.header("User-Agent", userAgent)
+            header.cookie("_t", cookie.token)
+            header.cookie("expires", cookie.expires)
+            header.cookie("Max-Age", cookie.maxAge)
+            header.cookie("path", cookie.path)
+            header.cookie("SameSite", cookie.sameSite)
+            header.cookie("userId", cookie.userId)
+            header.cookie("friendCodeList", cookie.friendCodeList)
+            val response = connect.execute()
+            val doc = response.parse()
+            updateCookie(response)
+            ShareUtil.putString("chuniPlayLog", doc.toString(), context)
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+        }
+    }
+    private fun requestPlayRecord() {
+        val diffArray = arrayOf("basic", "advanced", "expert", "master", "ultima")
+        for (diff in diffArray) {
+            try {
+                val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/record/musicGenre/send$diff"))
+                val header = connect.header("User-Agent", userAgent)
+                header.cookie("_t", cookie.token)
+                header.cookie("expires", cookie.expires)
+                header.cookie("Max-Age", cookie.maxAge)
+                header.cookie("path", cookie.path)
+                header.cookie("SameSite", cookie.sameSite)
+                header.cookie("userId", cookie.userId)
+                header.cookie("friendCodeList", cookie.friendCodeList)
+                connect.requestBody("genre=99&token=${cookie.token}")
+                val response = connect.method(Connection.Method.POST).execute()
+                val doc = response.parse()
+                updateCookie(response)
+                println(response.headers())
+                ShareUtil.putString("chuniPlayRecord${diff[0].uppercaseChar()}${diff.substring(1)}", doc.toString(), context)
+            } catch (e: IOException) {
+                Log.e(TAG, "IOException occurred in OsuMedalsThread")
+            }
+        }
+    }
+    private fun requestCollection() {
+        try {
+            val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/collection"))
+            val header = connect.header("User-Agent", userAgent)
+            header.cookie("_t", cookie.token)
+            header.cookie("expires", cookie.expires)
+            header.cookie("Max-Age", cookie.maxAge)
+            header.cookie("path", cookie.path)
+            header.cookie("SameSite", cookie.sameSite)
+            header.cookie("userId", cookie.userId)
+            header.cookie("friendCodeList", cookie.friendCodeList)
+            val response = connect.execute()
+            val doc = response.parse()
+            updateCookie(response)
+            ShareUtil.putString("chuniCollection", doc.toString(), context)
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+        }
+    }
+
+    private fun requestFriend() {
+        try {
+            val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/friend"))
+            val header = connect.header("User-Agent", userAgent)
+            header.cookie("_t", cookie.token)
+            header.cookie("expires", cookie.expires)
+            header.cookie("Max-Age", cookie.maxAge)
+            header.cookie("path", cookie.path)
+            header.cookie("SameSite", cookie.sameSite)
+            header.cookie("userId", cookie.userId)
+            header.cookie("friendCodeList", cookie.friendCodeList)
+            val response = connect.execute()
+            val doc = response.parse()
+            updateCookie(response)
+            ShareUtil.putString("chuniFriend", doc.toString(), context)
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+        }
+    }
+
+    private fun requestLoginBonus() {
+        try {
+            val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/loginBonus"))
+            val header = connect.header("User-Agent", userAgent)
+            header.cookie("_t", cookie.token)
+            header.cookie("expires", cookie.expires)
+            header.cookie("Max-Age", cookie.maxAge)
+            header.cookie("path", cookie.path)
+            header.cookie("SameSite", cookie.sameSite)
+            header.cookie("userId", cookie.userId)
+            header.cookie("friendCodeList", cookie.friendCodeList)
+            val response = connect.execute()
+            val doc = response.parse()
+            updateCookie(response)
+            ShareUtil.putString("chuniLoginBonus", doc.toString(), context)
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in OsuMedalsThread")
         }
@@ -159,7 +335,15 @@ class ChuniDataRequestService(private val context: Context) {
     }
     fun getUserData() {
         serviceScope.launch { mutex.withLock { requestHome() }}
+        serviceScope.launch { mutex.withLock { requestPlayerData() }}
+        serviceScope.launch { mutex.withLock { requestRatingDetailBest() }}
+        serviceScope.launch { mutex.withLock { requestRatingDetailRecent() }}
         serviceScope.launch { mutex.withLock { requestRecord() }}
+        serviceScope.launch { mutex.withLock { requestPlayLog() }}
+        serviceScope.launch { mutex.withLock { requestPlayRecord() }}
+        serviceScope.launch { mutex.withLock { requestCollection() }}
+        serviceScope.launch { mutex.withLock { requestFriend() }}
+        serviceScope.launch { mutex.withLock { requestLoginBonus() }}
         // Save the cookies
         ShareUtil.putString("chuniToken", cookie.token, context)
         ShareUtil.putString("chuniExpires", cookie.expires, context)

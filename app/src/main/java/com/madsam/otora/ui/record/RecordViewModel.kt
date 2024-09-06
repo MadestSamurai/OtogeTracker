@@ -101,10 +101,15 @@ class RecordViewModel(
                 "username" to activity.user.username,
                 "type" to activity.type,
                 "rank" to activity.rank.toString(),
+                "scoreRank" to activity.scoreRank,
                 "beatmapTitle" to activity.beatmap.title,
                 "beatmapSetTitle" to activity.beatmapset.title,
                 "createdAt" to activity.createdAt,
-                "mode" to activity.mode
+                "mode" to activity.mode,
+                "achievement" to activity.achievement.name,
+                "modeAchievement" to activity.achievement.mode,
+                "achievementIcon" to activity.achievement.iconUrl,
+                "approval" to activity.approval,
             )
         }
     }
