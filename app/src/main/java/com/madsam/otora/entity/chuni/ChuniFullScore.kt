@@ -5,7 +5,7 @@ package com.madsam.otora.entity.chuni
  * 文件名: com.madsam.otora.entity.chuni.ChuniFullScore
  * 创建者: MadSamurai
  * 创建时间: 2024/9/17
- * 描述: TODO
+ * 描述: 中二节奏完整成绩
  */
 data class ChuniFullScore(
     var id : String = "",

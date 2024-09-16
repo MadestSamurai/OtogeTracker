@@ -4,21 +4,22 @@ import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AccelerateInterpolator
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
@@ -26,6 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.ui.record.RecordScreen
+import com.madsam.otora.ui.theme.AppTheme
 
 /**
  * 项目名: OtogeTracker
@@ -37,7 +39,7 @@ import com.madsam.otora.ui.record.RecordScreen
 const val KEY_ROUTE = "route"
 
 @Composable
-fun MainActivityScreen(mainViewModel: MainViewModel) {
+fun MainActivityScreen() {
     val items = listOf(Screen.Screen1, Screen.Screen2)
     val navController = rememberNavController()
     Scaffold(
@@ -78,11 +80,9 @@ fun MainActivityScreen(mainViewModel: MainViewModel) {
     }
 }
 
-class MainActivity : AppCompatActivity() {
-    private val mainViewModel by viewModels<MainViewModel>()
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        supportActionBar?.hide()
 
         val splashScreen = installSplashScreen()
         splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
@@ -97,9 +97,12 @@ class MainActivity : AppCompatActivity() {
             fadeOut.doOnEnd { splashScreenViewProvider.remove() }
             fadeOut.start()
         }
-
         setContent {
-            MainActivityScreen(mainViewModel)
+            AppTheme {
+                Surface(tonalElevation = 5.dp) {
+                    MainActivityScreen()
+                }
+            }
         }
     }
 }

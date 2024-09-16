@@ -5,7 +5,7 @@ package com.madsam.otora.entity.chuni
  * 文件名: com.madsam.otora.entity.chuni.ChuniPenguin
  * 创建者: MadSamurai
  * 创建时间: 2024/9/16
- * 描述: TODO
+ * 描述: 中二节奏企鹅
  */
 data class ChuniPenguin(
     var back : String = "",

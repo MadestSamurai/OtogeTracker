@@ -233,7 +233,7 @@ class OsuDataRequestService {
         serviceScope.launch { requestOsuCard(callback, userId) }
     }
 
-    fun getOsuRecentActivity(callback: ICallback<List<OsuRecentActivity>>, userId: String, ) {
+    fun getOsuRecentActivity(callback: ICallback<List<OsuRecentActivity>>, userId: String) {
         serviceScope.launch { requestOsuRecentActivity(callback, userId) }
     }
 
