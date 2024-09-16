@@ -10,17 +10,9 @@ import android.app.Application
  * 描述: 用于启动MediaControllerService的应用块
  */
 class MyApplication : Application() {
-    companion object {
-        const val MY_TAG = "Otoge_log"
+    override fun onCreate() {
+        super.onCreate()
+        applicationInfo.labelRes = 0
+        applicationInfo.nonLocalizedLabel = "OtogeTracker"
     }
-
-//    fun startService() {
-//        Log.i(MY_TAG, "MyApplication startService")
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            //8.0以上系统启动为前台服务, 否则在后台, 测试中发现过几分钟后MediaController监听不到音乐信息
-//            startForegroundService(Intent(this, MediaControllerService::class.java))
-//        } else {
-//            startService(Intent(this, MediaControllerService::class.java))
-//        }
-//    }
 }

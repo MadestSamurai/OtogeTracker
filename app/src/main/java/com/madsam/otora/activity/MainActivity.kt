@@ -3,6 +3,7 @@ package com.madsam.otora.activity
 import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.View
+import android.view.Window
 import android.view.animation.AccelerateInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -83,6 +84,7 @@ fun MainActivityScreen() {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
 
         val splashScreen = installSplashScreen()
         splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
