@@ -224,8 +224,8 @@ fun Recent(
                                     "rank" -> {
                                         Image(
                                             painter = painterResource(id = when (recentActivity["scoreRank"]) {
-                                                "SSH" -> com.madsam.otora.R.drawable.ic_osu_ssh
-                                                "SS" -> com.madsam.otora.R.drawable.ic_osu_ss
+                                                "XH" -> com.madsam.otora.R.drawable.ic_osu_ssh
+                                                "X" -> com.madsam.otora.R.drawable.ic_osu_ss
                                                 "SH" -> com.madsam.otora.R.drawable.ic_osu_sh
                                                 "S" -> com.madsam.otora.R.drawable.ic_osu_s
                                                 "A" -> com.madsam.otora.R.drawable.ic_osu_a

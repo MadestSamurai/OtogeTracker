@@ -19,4 +19,8 @@ object SafeSoupUtil {
     fun Elements?.safeFirstAttr(attrName: String, default: String = ""): String {
         return this?.first()?.attr(attrName) ?: default
     }
+
+    fun Elements?.safeFirst(): Element {
+        return this?.first() ?: Element("null")
+    }
 }

@@ -4,7 +4,13 @@ import android.content.Context
 import android.util.Log
 import com.madsam.otora.entity.chuni.ChuniCard
 import com.madsam.otora.entity.chuni.ChuniCookie
+import com.madsam.otora.entity.chuni.ChuniDataExtend
+import com.madsam.otora.entity.chuni.ChuniFullScore
+import com.madsam.otora.entity.chuni.ChuniGenre
+import com.madsam.otora.entity.chuni.ChuniPenguin
+import com.madsam.otora.entity.chuni.ChuniScore
 import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.utils.SafeSoupUtil.safeFirst
 import com.madsam.otora.utils.SafeSoupUtil.safeFirstAttr
 import com.madsam.otora.utils.SafeSoupUtil.safeFirstText
 import com.madsam.otora.utils.SafeSoupUtil.safePreviousElementSibling
@@ -46,9 +52,12 @@ class ChuniDataRequestService(private val context: Context) {
         ShareUtil.getString("chuniUserId", context) ?: "",
         ShareUtil.getString("chuniFriendCodeList", context) ?: ""
     )
-    private fun requestHome() {
+    private val moshi = Moshi.Builder()
+        .add(KotlinJsonAdapterFactory())
+        .build()
+    private fun requestPlayerData() {
         try {
-            val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/home"))
+            val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/home/playerData"))
             val header = connect.header("User-Agent", userAgent)
             header.cookie("_t", cookie.token)
             header.cookie("expires", cookie.expires)
@@ -60,6 +69,7 @@ class ChuniDataRequestService(private val context: Context) {
             val response = connect.execute()
             val doc = response.parse()
             updateCookie(response)
+            // Parse the player data
             val chuniCard = ChuniCard()
             chuniCard.charaInfo = doc.getElementsByClass("player_chara_info").select("img").safeFirstAttr("src")
             chuniCard.charaBase = doc.getElementsByClass("player_chara_info").safeFirstAttr("style")
@@ -113,37 +123,42 @@ class ChuniDataRequestService(private val context: Context) {
             if (emptyCount > 5) {
                 println("Empty fields found in the file")
             } else {
-                val moshi = Moshi.Builder()
-                    .add(KotlinJsonAdapterFactory())
-                    .build()
-                val jsonAdapter = moshi.adapter(ChuniCard::class.java)
-                val json = jsonAdapter.toJson(chuniCard)
-                println(json)
-                ShareUtil.putString("chuniCard", json, context)
+                val jsonAdapterCard = moshi.adapter(ChuniCard::class.java)
+                val jsonCard = jsonAdapterCard.toJson(chuniCard)
+                ShareUtil.putString("chuniCard", jsonCard, context)
             }
+            // Parse the penguin data
+            val chuniPenguin = ChuniPenguin()
+            chuniPenguin.back = doc.getElementsByClass("avatar_back").select("img").safeFirstAttr("src")
+            chuniPenguin.skinfootR = doc.getElementsByClass("avatar_skinfoot_r").select("img").safeFirstAttr("src")
+            chuniPenguin.skinfootL = doc.getElementsByClass("avatar_skinfoot_l").select("img").safeFirstAttr("src")
+            chuniPenguin.skin = doc.getElementsByClass("avatar_skin").select("img").safeFirstAttr("src")
+            chuniPenguin.wear = doc.getElementsByClass("avatar_wear").select("img").safeFirstAttr("src")
+            chuniPenguin.face = doc.getElementsByClass("avatar_face").select("img").safeFirstAttr("src")
+            chuniPenguin.faceCover = doc.getElementsByClass("avatar_face_cover").select("img").safeFirstAttr("src")
+            chuniPenguin.head = doc.getElementsByClass("avatar_head").select("img").safeFirstAttr("src")
+            chuniPenguin.handR = doc.getElementsByClass("avatar_hand_r").select("img").safeFirstAttr("src")
+            chuniPenguin.handL = doc.getElementsByClass("avatar_hand_l").select("img").safeFirstAttr("src")
+            chuniPenguin.itemR = doc.getElementsByClass("avatar_item_r").select("img").safeFirstAttr("src")
+            chuniPenguin.itemL = doc.getElementsByClass("avatar_item_l").select("img").safeFirstAttr("src")
+            val jsonAdapterPenguin = moshi.adapter(ChuniPenguin::class.java)
+            val jsonPenguin = jsonAdapterPenguin.toJson(chuniPenguin)
+            ShareUtil.putString("chuniPenguin", jsonPenguin, context)
+            // Parse the extend data
+            val chuniDataExtend = ChuniDataExtend()
+            chuniDataExtend.friendCode = doc.getElementsByClass("user_data_friend_code").safeFirst()
+                .getElementsByAttributeValue("style", "display:none;").text()
+            chuniDataExtend.point = doc.getElementsByClass("user_data_point").safeFirstText()
+            chuniDataExtend.totalPoint = doc.getElementsByClass("user_data_total_point").safeFirstText()
+            chuniDataExtend.playCount = doc.getElementsByClass("user_data_play_count").safeFirstText()
+            val jsonAdapterExtend = moshi.adapter(ChuniDataExtend::class.java)
+            val jsonExtend = jsonAdapterExtend.toJson(chuniDataExtend)
+            ShareUtil.putString("chuniDataExtend", jsonExtend, context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+            Log.e(TAG, "IOException occurred in ChuniData-requestPlayerData")
         }
     }
-    private fun requestPlayerData() {
-        try {
-            val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/home/playerData"))
-            val header = connect.header("User-Agent", userAgent)
-            header.cookie("_t", cookie.token)
-            header.cookie("expires", cookie.expires)
-            header.cookie("Max-Age", cookie.maxAge)
-            header.cookie("path", cookie.path)
-            header.cookie("SameSite", cookie.sameSite)
-            header.cookie("userId", cookie.userId)
-            header.cookie("friendCodeList", cookie.friendCodeList)
-            val response = connect.execute()
-            val doc = response.parse()
-            updateCookie(response)
-            ShareUtil.putString("chuniPlayerData", doc.toString(), context)
-        } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuMedalsThread")
-        }
-    }
+
     private fun requestRatingDetailBest() {
         try {
             val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/home/playerData/ratingDetailBest"))
@@ -158,9 +173,23 @@ class ChuniDataRequestService(private val context: Context) {
             val response = connect.execute()
             val doc = response.parse()
             updateCookie(response)
-            ShareUtil.putString("chuniRatingDetailBest", doc.toString(), context)
+            // Parse the rating detail best
+            val chuniRatingBest  = mutableListOf<ChuniScore>()
+            val ratingDetailBest = doc.getElementsByTag("form")
+            for (rating in ratingDetailBest) {
+                val title = rating.getElementsByClass("music_title").text()
+                val highScore = rating.getElementsByClass("text_b").text()
+                val id = rating.select("input[name=idx]").attr("value")
+                val genre = rating.select("input[name=genre]").attr("value")
+                val diff = rating.select("input[name=diff]").attr("value")
+                val token = rating.select("input[name=token]").attr("value")
+                chuniRatingBest.add(ChuniScore(id, title, genre, diff, token, highScore))
+            }
+            val jsonAdapter = moshi.adapter(List::class.java)
+            val json = jsonAdapter.toJson(chuniRatingBest)
+            ShareUtil.putString("chuniRatingDetailBest", json, context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+            Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailBest")
         }
     }
     private fun requestRatingDetailRecent() {
@@ -177,9 +206,23 @@ class ChuniDataRequestService(private val context: Context) {
             val response = connect.execute()
             val doc = response.parse()
             updateCookie(response)
-            ShareUtil.putString("chuniRatingDetailRecent", doc.toString(), context)
+            // Parse the rating detail recent
+            val chuniRatingRecent  = mutableListOf<ChuniScore>()
+            val ratingDetailRecent = doc.getElementsByTag("form")
+            for (rating in ratingDetailRecent) {
+                val title = rating.getElementsByClass("music_title").text()
+                val highScore = rating.getElementsByClass("text_b").text()
+                val id = rating.select("input[name=idx]").attr("value")
+                val genre = rating.select("input[name=genre]").attr("value")
+                val diff = rating.select("input[name=diff]").attr("value")
+                val token = rating.select("input[name=token]").attr("value")
+                chuniRatingRecent.add(ChuniScore(id, title, genre, diff, token, highScore))
+            }
+            val jsonAdapter = moshi.adapter(List::class.java)
+            val json = jsonAdapter.toJson(chuniRatingRecent)
+            ShareUtil.putString("chuniRatingDetailRecent", json, context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+            Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailRecent")
         }
     }
     private fun requestRatingDetailNext() {
@@ -196,12 +239,26 @@ class ChuniDataRequestService(private val context: Context) {
             val response = connect.execute()
             val doc = response.parse()
             updateCookie(response)
-            ShareUtil.putString("chuniRatingDetailNext", doc.toString(), context)
+            // Parse the rating detail next
+            val chuniRatingNext  = mutableListOf<ChuniScore>()
+            val ratingDetailNext = doc.getElementsByTag("form")
+            for (rating in ratingDetailNext) {
+                val title = rating.getElementsByClass("music_title").text()
+                val highScore = rating.getElementsByClass("text_b").text()
+                val id = rating.select("input[name=idx]").attr("value")
+                val genre = rating.select("input[name=genre]").attr("value")
+                val diff = rating.select("input[name=diff]").attr("value")
+                val token = rating.select("input[name=token]").attr("value")
+                chuniRatingNext.add(ChuniScore(id, title, genre, diff, token, highScore))
+            }
+            val jsonAdapter = moshi.adapter(List::class.java)
+            val json = jsonAdapter.toJson(chuniRatingNext)
+            ShareUtil.putString("chuniRatingDetailNext", json, context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+            Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailNext")
         }
     }
-    private fun requestRecord() {
+    private fun requestMapRecord() {
         try {
             val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/record"))
             val header = connect.header("User-Agent", userAgent)
@@ -215,9 +272,10 @@ class ChuniDataRequestService(private val context: Context) {
             val response = connect.execute()
             val doc = response.parse()
             updateCookie(response)
+            //TODO: Parse the map record
             ShareUtil.putString("chuniRecord", doc.toString(), context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+            Log.e(TAG, "IOException occurred in ChuniData-requestMapRecord")
         }
     }
     private fun requestPlayLog() {
@@ -234,9 +292,54 @@ class ChuniDataRequestService(private val context: Context) {
             val response = connect.execute()
             val doc = response.parse()
             updateCookie(response)
-            ShareUtil.putString("chuniPlayLog", doc.toString(), context)
+            val chuniPlayLog = mutableListOf<ChuniFullScore>()
+            val playLog = doc.getElementsByClass("frame02 w400")
+            for (log in playLog) {
+                val title = log.getElementsByClass("play_musicdata_title").text()
+                val level = log.getElementsByClass("play_track_result").select("img").attr("src")
+                    .split("/").last()
+                    .split(".").first()
+                    .split("_").last()
+                val score = log.getElementsByClass("play_musicdata_score_text").text()
+                val marks = log.getElementsByClass("play_musicdata_icon clearfix")
+                val clearMarks = marks.select("img").joinToString("") {
+                    it.attr("src")
+                        .split("/").last()
+                        .split(".").first()
+                        .split("_").last()
+                }
+                val isClear = clearMarks.contains("icon_playlog_clear")
+                val isFullCombo = clearMarks.contains("icon_playlog_fullcombo")
+                val isAllJustice = clearMarks.contains("icon_playlog_alljustice")
+                val isAJC = clearMarks.contains("icon_playlog_alljustice_critical")
+                val isFullChain = clearMarks.contains("icon_playlog_fullchain")
+                val rank = marks.select("img[src*='rank']").attr("src")
+                    .split("/").last()
+                    .split(".").first()
+                    .split("_").last()
+                val jacket = log.getElementsByClass("play_jacket_img").select("img").attr("data-original")
+                val date = log.getElementsByClass("play_datalist_date").text()
+                val trackNumber = log.getElementsByClass("play_track_text").text().split(" ").last()
+                chuniPlayLog.add(ChuniFullScore(
+                    title = title,
+                    diff = level,
+                    score = score,
+                    isClear = isClear,
+                    isFullCombo = isFullCombo,
+                    isAllJustice = isAllJustice,
+                    isAJC = isAJC,
+                    isFullChain = isFullChain,
+                    rank = rank,
+                    jacket = jacket,
+                    date = date,
+                    trackNumber = trackNumber
+                ))
+            }
+            val jsonAdapter = moshi.adapter(List::class.java)
+            val json = jsonAdapter.toJson(chuniPlayLog)
+            ShareUtil.putString("chuniPlayLog", json, context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+            Log.e(TAG, "IOException occurred in ChuniData-requestPlayLog")
         }
     }
     private fun requestPlayRecord() {
@@ -256,8 +359,55 @@ class ChuniDataRequestService(private val context: Context) {
                 val response = connect.method(Connection.Method.POST).execute()
                 val doc = response.parse()
                 updateCookie(response)
-                println(response.headers())
-                ShareUtil.putString("chuniPlayRecord${diff[0].uppercaseChar()}${diff.substring(1)}", doc.toString(), context)
+                val allGenre = doc.getElementsByClass("box05 w400")
+                val chuniGenre = mutableListOf<ChuniGenre>()
+                for (genre in allGenre) {
+                    val genreName = genre.getElementsByClass("genre_title").text()
+                    val genreScore = genre.getElementsByClass("w388 musiclist_box bg_master")
+                    val chuniScore = mutableListOf<ChuniFullScore>()
+                    for (score in genreScore) {
+                        val id = score.select("input[name=idx]").attr("value")
+                        val title = score.getElementsByClass("music_title").text()
+                        val level = score.select("input[name=diff]").attr("value")
+                        val highScore = score.getElementsByClass("play_musicdata_highscore").safeFirstText()
+                        val genreId = score.select("input[name=genre]").attr("value")
+                        val token = score.select("input[name=token]").attr("value")
+                        val marks = score.getElementsByClass("music_icon").select("img")
+                        val clearMarks = marks.joinToString("") {
+                            it.attr("src")
+                                .split("/").last()
+                                .split(".").first()
+                                .split("_").last()
+                        }
+                        val isClear = clearMarks.contains("icon_playlog_clear")
+                        val isFullCombo = clearMarks.contains("icon_playlog_fullcombo")
+                        val isAllJustice = clearMarks.contains("icon_playlog_alljustice")
+                        val isAJC = clearMarks.contains("icon_playlog_alljustice_critical")
+                        val isFullChain = clearMarks.contains("icon_playlog_fullchain")
+                        val rank = marks.select("img[src*='rank']").attr("src")
+                            .split("/").last()
+                            .split(".").first()
+                            .split("_").last()
+                        chuniScore.add(ChuniFullScore(
+                            id = id,
+                            title = title,
+                            diff = level,
+                            score = highScore,
+                            genre = genreId,
+                            token = token,
+                            isClear = isClear,
+                            isFullCombo = isFullCombo,
+                            isAllJustice = isAllJustice,
+                            isAJC = isAJC,
+                            isFullChain = isFullChain,
+                            rank = rank,
+                        ))
+                    }
+                    chuniGenre.add(ChuniGenre(genreName, chuniScore))
+                }
+                val jsonAdapter = moshi.adapter(List::class.java)
+                val json = jsonAdapter.toJson(chuniGenre)
+                ShareUtil.putString("chuniPlayRecord${diff[0].uppercaseChar()}${diff.substring(1)}", json, context)
             } catch (e: IOException) {
                 Log.e(TAG, "IOException occurred in OsuMedalsThread")
             }
@@ -282,7 +432,6 @@ class ChuniDataRequestService(private val context: Context) {
             Log.e(TAG, "IOException occurred in OsuMedalsThread")
         }
     }
-
     private fun requestFriend() {
         try {
             val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/friend"))
@@ -334,11 +483,11 @@ class ChuniDataRequestService(private val context: Context) {
         }
     }
     fun getUserData() {
-        serviceScope.launch { mutex.withLock { requestHome() }}
         serviceScope.launch { mutex.withLock { requestPlayerData() }}
         serviceScope.launch { mutex.withLock { requestRatingDetailBest() }}
         serviceScope.launch { mutex.withLock { requestRatingDetailRecent() }}
-        serviceScope.launch { mutex.withLock { requestRecord() }}
+        serviceScope.launch { mutex.withLock { requestRatingDetailNext() }}
+        serviceScope.launch { mutex.withLock { requestMapRecord() }}
         serviceScope.launch { mutex.withLock { requestPlayLog() }}
         serviceScope.launch { mutex.withLock { requestPlayRecord() }}
         serviceScope.launch { mutex.withLock { requestCollection() }}

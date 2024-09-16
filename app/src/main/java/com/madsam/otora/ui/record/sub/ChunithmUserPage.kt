@@ -30,12 +30,12 @@ fun ChunithmUserPage(recordViewModel: RecordViewModel) {
     val uaState = remember { mutableStateOf("") }
     val chuniCard = remember { mutableStateOf(ChuniCard()) }
 
-    val chuniRecord = remember { mutableStateOf("") }
+    val chuniRatingBest = remember { mutableStateOf("") }
     val chuniMasterRecord = remember { mutableStateOf("") }
 
     chuniCard.value = recordViewModel.getChuniCardFromShare(context)
 
-    chuniRecord.value = ShareUtil.getString("chuniRecord", context) ?: ""
+    chuniRatingBest.value = ShareUtil.getString("chuniRatingDetailBest", context) ?: ""
     chuniMasterRecord.value = ShareUtil.getString("chuniPlayRecordMaster", context) ?: ""
     Column(
         modifier = Modifier
@@ -87,7 +87,7 @@ fun ChunithmUserPage(recordViewModel: RecordViewModel) {
         }
         Card(chuniCard = chuniCard.value)
         Text(text = "Chunithm Record")
-        Text(text = chuniRecord.value,
+        Text(text = chuniRatingBest.value,
             modifier = Modifier.fillMaxSize()
         )
     }
