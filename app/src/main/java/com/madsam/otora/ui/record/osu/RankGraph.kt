@@ -16,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import com.madsam.otora.R
 import com.madsam.otora.consts.Colors
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
@@ -91,7 +93,7 @@ fun RankGraph(
         ) = createRefs()
 
         Text(
-            text = "Global Ranking",
+            text = stringResource(id = R.string.global_ranking),
             color = Colors.DARK_RED_TEXT_LIGHT,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
@@ -106,7 +108,7 @@ fun RankGraph(
         )
 
         Text(
-            text = "Recent 90 Days",
+            text = stringResource(id = R.string.recent_90_days),
             color = Colors.DARK_RED_TEXT_LIGHT,
             fontSize = 16.sp,
             modifier = Modifier
@@ -251,7 +253,7 @@ fun RankGraph(
                     )
                 ) {
                     if (highestData["rank"] != null) {
-                        append("Highest Rank: #${highestData["rank"]}")
+                        append("${stringResource(id = R.string.highest_rank)}: #${highestData["rank"]}")
                     }
                 }
                 withStyle(

@@ -28,6 +28,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
@@ -105,7 +106,7 @@ fun Card(
                         id =
                         if (cardData["isOnline"] == "true") R.drawable.ic_osu_online else R.drawable.ic_osu_offline
                     ),
-                    contentDescription = "Online Mark",
+                    contentDescription = stringResource(id = R.string.online_mark),
                     modifier = Modifier.padding(end = 5.dp)
                 )
             },
@@ -269,8 +270,8 @@ fun Card(
         )
         Text(
             text = buildAnnotatedString {
-                appendInlineContent("onlineMark", "[Online Mark]")
-                append(if (cardData["isOnline"] == "true") "Online" else "Offline")
+                appendInlineContent("onlineMark", "[${stringResource(id = R.string.online_mark)}]")
+                append(stringResource(id = if (cardData["isOnline"] == "true") R.string.online else R.string.offline))
             },
             inlineContent = inlineContent,
             modifier = Modifier

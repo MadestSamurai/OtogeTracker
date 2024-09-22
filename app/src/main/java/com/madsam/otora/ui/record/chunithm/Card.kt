@@ -196,6 +196,7 @@ fun Card(
                 text = chuniCard.nameIn,
                 color = Colors.DARK_RED_TEXT_LIGHT,
                 fontSize = 18.sp,
+                lineHeight = 22.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .constrainAs(username) {
@@ -280,7 +281,7 @@ fun Card(
                         top.linkTo(username.bottom)
                         start.linkTo(charaImage.end)
                     }
-                    .padding(start = 5.dp, top = 5.dp)
+                    .padding(start = 5.dp, top = 2.dp)
             )
 
             Text(
@@ -298,13 +299,14 @@ fun Card(
                 },
                 color = Colors.DARK_RED_TEXT_LIGHT,
                 fontSize = 12.sp,
+                lineHeight = 14.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .constrainAs(overpower) {
                         top.linkTo(rating.bottom)
                         start.linkTo(charaImage.end)
                     }
-                    .padding(start = 5.dp, top = 2.dp)
+                    .padding(start = 5.dp)
             )
 
             Text(
@@ -322,13 +324,14 @@ fun Card(
                 },
                 color = Colors.DARK_RED_TEXT_LIGHT,
                 fontSize = 12.sp,
+                lineHeight = 16.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .constrainAs(lastPlay) {
                         top.linkTo(overpower.bottom)
                         start.linkTo(charaImage.end)
                     }
-                    .padding(start = 5.dp, top = 2.dp)
+                    .padding(start = 5.dp)
             )
         }
     }

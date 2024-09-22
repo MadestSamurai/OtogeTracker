@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">OtogeTracker</string>
+    <string name="online_mark">Online Mark</string>
+    <string name="offline_mark">Offline Mark</string>
+    <string name="online">Online</string>
+    <string name="offline">Offline</string>
+    <string name="global_ranking">Global Ranking</string>
+    <string name="recent_90_days">Recent 90 Days</string>
+    <string name="highest_rank">Highest Rank</string>
 </resources>

@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">音游追迹者</string>
+    <string name="online_mark">在线标识</string>
+    <string name="offline_mark">离线标识</string>
+    <string name="online">在线</string>
+    <string name="offline">离线</string>
+    <string name="global_ranking">全球排行</string>
+    <string name="recent_90_days">最近90天</string>
+    <string name="highest_rank">最高排行</string>
 </resources>
