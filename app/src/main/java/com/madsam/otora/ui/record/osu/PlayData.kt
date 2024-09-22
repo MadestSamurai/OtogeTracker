@@ -3,6 +3,7 @@ package com.madsam.otora.ui.record.osu
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,8 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,12 +25,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -122,7 +126,7 @@ fun PlayData(
 
         val titleSize = 16.sp
         val textSize = 20.sp
-        val textWidth = cardWidthDp / 2 - 24.dp
+        val textWidth = cardWidthDp / 2 - 15.dp
 
         var shown by remember { mutableStateOf(false) }
         val rowData = listOf(
@@ -143,7 +147,7 @@ fun PlayData(
             modifier = Modifier
                 .fillMaxWidth()
                 .constrainAs(playDataCard) {
-                    top.linkTo(judgeBackground.bottom, margin = 15.dp)
+                    top.linkTo(judgeBackground.bottom, margin = 10.dp)
                 }
         ) {
             Row(
@@ -157,76 +161,27 @@ fun PlayData(
                 TitleText(
                     textTitle = "Play Time",
                     text = buildAnnotatedString {
-                        withStyle(
-                            style = SpanStyle(
-                                fontSize = textSize,
-                                fontWeight = FontWeight.Bold
-                            )
-                        ) {
-                            append(playTimeStr?.get(0) ?: "0")
-                        }
-                        withStyle(
-                            style = SpanStyle(
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Normal
-                            )
-                        ) {
-                            append("${dayHourLabels[0]} ")
-                        }
-                        withStyle(
-                            style = SpanStyle(
-                                fontSize = textSize,
-                                fontWeight = FontWeight.Bold
-                            )
-                        ) {
-                            append(playTimeStr?.get(1) ?: "0")
-                        }
-                        withStyle(
-                            style = SpanStyle(
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Normal
-                            )
-                        ) {
-                            append("${dayHourLabels[1]} ")
-                        }
-                        withStyle(
-                            style = SpanStyle(
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        ) {
-                            append(playTimeStr?.get(2) ?: "0")
-                        }
-                        withStyle(
-                            style = SpanStyle(
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Normal
-                            )
-                        ) {
-                            append("${monthSecondLabels[0]} ")
-                        }
-                        withStyle(
-                            style = SpanStyle(
-                                fontSize = 13.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        ) {
-                            append(playTimeStr?.get(3) ?: "0")
-                        }
-                        withStyle(
-                            style = SpanStyle(
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Normal
-                            )
-                        ) {
-                            append(monthSecondLabels[1])
+                        val styles = listOf(
+                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold) to (playTimeStr?.get(0) ?: "0"),
+                            SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${dayHourLabels[0]} ",
+                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold) to (playTimeStr?.get(1) ?: "0"),
+                            SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${dayHourLabels[1]} ",
+                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold) to (playTimeStr?.get(2) ?: "0"),
+                            SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${monthSecondLabels[0]} ",
+                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold) to (playTimeStr?.get(3) ?: "0"),
+                            SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to monthSecondLabels[1]
+                        )
+                        styles.forEach { (style, text) ->
+                            withStyle(style = style) {
+                                append(text)
+                            }
                         }
                     },
                     titleSize = titleSize,
                     titleTextSize = textSize,
                     color = iconTextColor,
                     modifier = Modifier
-                        .padding(start = 16.dp)
+                        .padding(start = 10.dp)
                         .width(textWidth)
                 )
                 val ppSplit = playData["pp"]?.split(".")
@@ -254,7 +209,7 @@ fun PlayData(
                     titleTextSize = textSize,
                     color = iconTextColor,
                     modifier = Modifier
-                        .padding(start = 16.dp)
+                        .padding(start = 10.dp)
                         .width(textWidth)
                 )
             }
@@ -279,36 +234,55 @@ fun PlayData(
                                 titleTextSize = textSize,
                                 color = iconTextColor,
                                 modifier = Modifier
-                                    .padding(start = 16.dp)
+                                    .padding(start = 10.dp)
                                     .width(textWidth)
                             )
                         }
                     }
                 }
             }
-            Button(
-                onClick = {
-                    shown = !shown
+            val placeholderHeight = 20.sp
+            val density = LocalDensity.current
+            val inlineContent = mapOf(
+                "icon" to InlineTextContent(
+                    Placeholder(
+                        width = 25.sp,
+                        height = placeholderHeight,
+                        placeholderVerticalAlign = PlaceholderVerticalAlign.Center
+                    )
+                ) {
+                    Image(
+                        painter = painterResource(id = if (shown) R.drawable.ic_arrow_up else R.drawable.ic_arrow_down),
+                        colorFilter = ColorFilter.tint(Colors.DARK_RED_TEXT_LIGHT),
+                        contentDescription = "Show More",
+                        modifier = Modifier.size(with(density) { placeholderHeight.toDp() })
+                    )
+                }
+            )
+            Text(
+                text = buildAnnotatedString {
+                    appendInlineContent("icon")
+                    withStyle(
+                        style = SpanStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    ) {
+                        append(if (shown) "Show Less Play Data" else "Show More Play Data")
+                    }
                 },
-                shape = RectangleShape,
-                colors = ButtonDefaults.buttonColors(Colors.DARK_RED_DEEPER),
+                fontSize = 18.sp,
+                color = Colors.DARK_RED_TEXT_LIGHT,
+                inlineContent = inlineContent,
+                textAlign = TextAlign.Center,
                 modifier = Modifier
+                    .background(Colors.DARK_RED_DEEPER)
+                    .clickable {
+                        shown = !shown
+                    }
                     .fillMaxWidth()
-            ) {
-                Image(
-                    painter = painterResource(id = if (shown) R.drawable.ic_arrow_up else R.drawable.ic_arrow_down),
-                    colorFilter = ColorFilter.tint(Colors.DARK_RED_TEXT_LIGHT),
-                    contentDescription = "Show More",
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                        .size(24.dp)
-                )
-                Text(
-                    text = if (shown) "Show Less Play Data" else "Show More Play Data",
-                    fontSize = 18.sp,
-                    color = Colors.DARK_RED_TEXT_LIGHT
-                )
-            }
+                    .padding(vertical = 8.dp)
+            )
         }
     }
 }

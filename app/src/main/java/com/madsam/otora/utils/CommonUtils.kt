@@ -218,7 +218,7 @@ object CommonUtils {
     fun bigNumberTextFormat(value: String, textSize: TextUnit): AnnotatedString {
         val split = value.split(",")
         val text = if (split.size > 2) {
-            val splitSize = if (split.size == 3) split.size - 1 else split.size - 2
+            val splitSize = split.size - 2
             val firstPart = split.dropLast(splitSize).joinToString(",")
             buildAnnotatedString {
                 withStyle(style = SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold)) {

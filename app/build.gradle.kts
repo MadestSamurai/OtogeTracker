@@ -54,7 +54,6 @@ android {
 
 dependencies {
     // Android X
-    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout.constraintlayout.compose)
     implementation(libs.androidx.material3)
     implementation(libs.foundation)
@@ -71,11 +70,13 @@ dependencies {
     implementation(libs.coil.kt.coil.compose)
     implementation(libs.coil.kt.coil.svg)
     implementation(libs.coil.gif)
-    // Vico
+
+    // Vico Graph
     implementation(libs.vico.compose)
     implementation(libs.vico.compose.m3)
     implementation(libs.vico.core)
     implementation(libs.vico.views)
+
     // BOM
     implementation(platform(libs.kotlin.bom))
     implementation(platform(libs.androidx.compose.compose.bom))
@@ -112,9 +113,10 @@ dependencies {
     // UtilCode
     implementation(libs.utilcode)
 
-    // Jsoup
+    // JSoup
     implementation(libs.jsoup)
 
+    // JUnit
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

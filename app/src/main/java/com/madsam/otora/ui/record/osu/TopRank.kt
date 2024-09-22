@@ -10,8 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,6 +20,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
@@ -221,7 +220,7 @@ fun OsuTopRankItemCard(
                     )
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Star,
+                        painter = painterResource(id = com.madsam.otora.R.drawable.ic_star),
                         contentDescription = null,
                         tint = OsuDiffColor.mapValueToTextColor(item["difficultyRating"]?.toFloat() ?: 0f),
                     )
@@ -245,53 +244,53 @@ fun OsuTopRankItemCard(
                         color = OsuDiffColor.mapValueToColor(item["difficultyRating"]?.toFloat() ?: 0f),
                         shape = RoundedCornerShape(100.dp)
                     )
-                    .padding(
-                        start = 8.dp,
-                        end = 8.dp,
-                        top = 3.dp,
-                        bottom = 3.dp
-                    )
+                    .padding(horizontal = 8.dp)
             )
-            Text(text = item["beatmapSetTitleUnicode"] ?: "",
-                color = Colors.DARK_RED_TEXT_LIGHT,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+            Column(
                 modifier = Modifier
-                    .constrainAs(title) {
-                        top.linkTo(parent.top, 4.dp)
-                        start.linkTo(cover.end, 8.dp)
+                    .constrainAs(rank) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        end.linkTo(parent.end)
                     }
-                    .width(itemWidth - 124.dp)
-            )
-            Text(text = item["artist"] ?: "",
-                color = Colors.DARK_RED_TEXT_LIGHT,
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .constrainAs(score) {
-                        top.linkTo(title.bottom, 4.dp)
-                        start.linkTo(cover.end, 8.dp)
-                    }
-            )
-            Text(text = item["beatmapSubTitle"] ?: "",
-                color = Colors.OSU_BRIGHT_YELLOW,
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .constrainAs(acc) {
-                        top.linkTo(score.bottom, 4.dp)
-                        start.linkTo(cover.end, 8.dp)
-                    }
-            )
-            Text(text = ("mapped by ${item["creator"]}"),
-                color = Colors.DARK_RED_TEXT_LIGHT,
-                fontSize = 14.sp,
-                modifier = Modifier
-                    .constrainAs(pp) {
-                        top.linkTo(acc.bottom, 4.dp)
-                        start.linkTo(cover.end, 8.dp)
-                    }
-            )
+            ) {
+                Text(text = item["beatmapSetTitleUnicode"] ?: "",
+                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .width(itemWidth - 124.dp)
+                )
+                Text(text = item["artist"] ?: "",
+                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    fontSize = 14.sp,
+                    lineHeight = 22.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .width(itemWidth - 124.dp)
+                )
+                Text(text = item["beatmapSubTitle"] ?: "",
+                    color = Colors.OSU_BRIGHT_YELLOW,
+                    fontSize = 14.sp,
+                    lineHeight = 22.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .width(itemWidth - 124.dp)
+                )
+                Text(text = ("mapped by ${item["creator"]}"),
+                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    fontSize = 14.sp,
+                    lineHeight = 22.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .width(itemWidth - 124.dp)
+                )
+            }
         }
     }
 }

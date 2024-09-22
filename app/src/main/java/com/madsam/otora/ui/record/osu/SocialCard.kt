@@ -95,7 +95,7 @@ fun SocialCard(
                 fontSize = 16.sp,
                 color = Colors.DARK_RED_TEXT_LIGHT,
                 modifier = Modifier
-                    .padding(start = 16.dp, top = 16.dp, end = 16.dp)
+                    .padding(start = 16.dp, top = 16.dp)
             )
             Text(
                 text = buildAnnotatedString {
@@ -122,7 +122,7 @@ fun SocialCard(
                 fontSize = 16.sp,
                 color = Colors.DARK_RED_TEXT_LIGHT,
                 modifier = Modifier
-                    .padding(start = 16.dp, top = 4.dp, end = 16.dp, bottom = 4.dp)
+                    .padding(start = 16.dp)
             )
             if ((osuSocialCardData["location"] ?: "").isNotEmpty()) {
                 Text(
@@ -146,7 +146,7 @@ fun SocialCard(
                     fontSize = 16.sp,
                     color = Colors.DARK_RED_TEXT_LIGHT,
                     modifier = Modifier
-                        .padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
+                        .padding(start = 16.dp)
                 )
             }
             if ((osuSocialCardData["playStyle"] ?: "").isNotEmpty()) {
@@ -171,7 +171,7 @@ fun SocialCard(
                     fontSize = 16.sp,
                     color = Colors.DARK_RED_TEXT_LIGHT,
                     modifier = Modifier
-                        .padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
+                        .padding(start = 16.dp, bottom = 4.dp)
                 )
             }
         }

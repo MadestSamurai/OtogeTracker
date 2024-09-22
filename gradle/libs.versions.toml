@@ -8,7 +8,6 @@ moshiKotlin = "1.15.1"
 retrofit = "2.11.0"
 androidxComposeBom = "2024.09.01"
 androidxConstraintlayoutCompose = "1.1.0-beta01"
-appcompat = "1.7.0"
 coilVersion = "2.7.0"
 comGoogleDevtoolsKspGradlePlugin = "2.0.20-1.0.25"
 espressoCore = "3.6.1"
@@ -20,7 +19,7 @@ kotlin = "2.0.20"
 loggingInterceptor = "4.12.0"
 materialVersion = "1.3.0"
 navigationSafe = "2.8.0"
-androidGradle = "8.5.2"
+androidGradle = "8.6.0"
 navigation = "2.8.0"
 okhttp = "4.12.0"
 roomVersion = "2.6.1"
@@ -33,7 +32,6 @@ accompanist-themeadapter-material3 = { module = "com.google.accompanist:accompan
 adapter-rxjava = { module = "com.squareup.retrofit2:adapter-rxjava3", version.ref = "retrofit" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 androidx-compose-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "androidxComposeBom" }
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-constraintlayout-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "androidxConstraintlayoutCompose" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCore" }

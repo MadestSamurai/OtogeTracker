@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -76,7 +77,6 @@ fun Card(
             groupList,
             rank,
             country,
-            countryRank,
             online,
             tournamentBanner,
         ) = refs
@@ -112,7 +112,7 @@ fun Card(
             "flag" to InlineTextContent(
                 Placeholder(
                     width = 26.sp,
-                    height = 20.sp,
+                    height = 18.sp,
                     placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
                 )
             ) {
@@ -336,36 +336,34 @@ fun Card(
                 )
         )
         val modeCountryRankShowPopup = remember { MutableTransitionState(false) }
-        Text(
-            text = buildAnnotatedString {
-                appendInlineContent("flag", "[Flag]")
-                append(cardData["country"] ?: "")
-            },
-            inlineContent = inlineContent,
-            color = Colors.DARK_RED_TEXT,
-            fontSize = 14.sp,
+        Column(
             modifier = Modifier
                 .constrainAs(country) {
                     start.linkTo(rank.end, margin = 15.dp)
-                    top.linkTo(baseBackground.bottom, margin = 5.dp)
+                    top.linkTo(baseBackground.bottom)
+                    bottom.linkTo(avatarImage.bottom)
                 }
                 .clickable(
                     onClick = { modeCountryRankShowPopup.targetState = true }
                 )
-        )
-        Text(
-            text = cardData["countryRank"] ?: "",
-            color = Colors.DARK_RED_TEXT_LIGHT,
-            fontSize = 16.sp,
-            modifier = Modifier
-                .constrainAs(countryRank) {
-                    top.linkTo(country.bottom)
-                    start.linkTo(rank.end, margin = 15.dp)
-                }
-                .clickable(
-                    onClick = { modeCountryRankShowPopup.targetState = true }
-                )
-        )
+        ) {
+            Text(
+                text = buildAnnotatedString {
+                    appendInlineContent("flag", "[Flag]")
+                    append(cardData["country"] ?: "")
+                },
+                inlineContent = inlineContent,
+                color = Colors.DARK_RED_TEXT,
+                fontSize = 14.sp,
+                lineHeight = 18.sp,
+            )
+            Text(
+                text = cardData["countryRank"] ?: "",
+                color = Colors.DARK_RED_TEXT_LIGHT,
+                fontSize = 16.sp,
+                lineHeight = 20.sp,
+            )
+        }
         // Popups
         val (
             supporterPopup,
@@ -414,9 +412,9 @@ fun Card(
                 cardData["maniaModeCountryRank"] ?: "",
                 Colors.DARK_RED_TEXT_LIGHT,
                 Modifier.constrainAs(modeCountryRankPopup) {
-                    top.linkTo(countryRank.bottom, margin = 4.dp)
-                    start.linkTo(countryRank.start)
-                    end.linkTo(countryRank.end)
+                    top.linkTo(country.bottom, margin = 4.dp)
+                    start.linkTo(country.start)
+                    end.linkTo(country.end)
                 },
                 modeCountryRankShowPopup,
                 Alignment.TopCenter

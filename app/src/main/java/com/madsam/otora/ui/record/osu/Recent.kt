@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -235,22 +236,21 @@ fun Recent(
                                                 else -> com.madsam.otora.R.drawable.ic_osu_f
                                             }),
                                             contentDescription = "Osu Mode",
-                                            contentScale = ContentScale.Fit,
                                             modifier = Modifier.padding(end = 4.dp)
                                         )
                                     }
 
                                     "rankLost" -> {
-                                        Image(
+                                        Icon(
                                             painter = painterResource(id = com.madsam.otora.R.drawable.ic_double_down),
                                             contentDescription = "Osu Mode",
-                                            colorFilter = ColorFilter.tint(Color.White),
+                                            tint = Color.White,
                                             modifier = Modifier.padding(end = 4.dp)
                                         )
                                     }
 
                                     "beatmapsetUpload", "beatmapsetUpdate" -> {
-                                        Image(
+                                        Icon(
                                             painter =
                                             painterResource(
                                                 id = when (recentActivity["type"]) {
@@ -260,47 +260,52 @@ fun Recent(
                                                 }
                                             ),
                                             contentDescription = "Beatmap Upload",
-                                            colorFilter = when (recentActivity["type"]) {
-                                                "beatmapsetUpload" -> ColorFilter.tint(Colors.OSU_ARROW_YELLOW)
-                                                "beatmapsetUpdate" -> ColorFilter.tint(Colors.OSU_ROTATE_GREEN)
-                                                else -> ColorFilter.tint(Color.White)
+                                            tint = when (recentActivity["type"]) {
+                                                "beatmapsetUpload" -> Colors.OSU_ARROW_YELLOW
+                                                "beatmapsetUpdate" -> Colors.OSU_ROTATE_GREEN
+                                                else -> Color.White
                                             },
                                             modifier = Modifier.padding(end = 4.dp)
                                         )
                                     }
 
                                     "userSupportGift" -> {
-                                        Image(
+                                        Icon(
                                             painter = painterResource(id = com.madsam.otora.R.drawable.ic_gift),
                                             contentDescription = "Osu Mode",
-                                            colorFilter = ColorFilter.tint(Colors.OSU_HEART_RED),
+                                            tint = Colors.OSU_HEART_RED,
                                             modifier = Modifier.padding(end = 4.dp)
                                         )
                                     }
 
                                     "userSupportAgain" -> {
-                                        Image(
+                                        Icon(
                                             painter = painterResource(id = com.madsam.otora.R.drawable.ic_support_1),
                                             contentDescription = "Osu Mode",
-                                            colorFilter = ColorFilter.tint(Colors.OSU_HEART_RED),
+                                            tint = Colors.OSU_HEART_RED,
                                             modifier = Modifier.padding(end = 4.dp)
                                         )
                                     }
 
                                     "beatmapsetApprove" -> {
-                                        Image(
+                                        Icon(
                                             painter = painterResource(id = com.madsam.otora.R.drawable.ic_tick),
                                             contentDescription = "Osu Mode",
-                                            colorFilter = ColorFilter.tint(Colors.OSU_HEART_RED),
+                                            tint = when (recentActivity["approval"]) {
+                                                "qualified" -> Colors.OSU_HEART_RED
+                                                "approved" -> Colors.OSU_HEART_RED
+                                                "loved" -> Colors.OSU_HEART_RED
+                                                else -> Color.White
+                                            },
                                             modifier = Modifier.padding(end = 4.dp)
                                         )
                                     }
 
                                     "beatmapsetRevive" -> {
-                                        Image(
+                                        Icon(
                                             painter = painterResource(id = com.madsam.otora.R.drawable.ic_trash_arrow_up),
                                             contentDescription = "Osu Mode",
-                                            colorFilter = ColorFilter.tint(Color.White),
+                                            tint = Color.White,
                                             modifier = Modifier.padding(end = 4.dp)
                                         )
                                     }
@@ -323,6 +328,7 @@ fun Recent(
                             text = textFormat,
                             inlineContent = inlineContent,
                             fontSize = 14.sp,
+                            lineHeight = 16.sp,
                             color = Color.White,
                             modifier = Modifier
                                 .width(textWidth)
@@ -333,6 +339,7 @@ fun Recent(
                                 recentActivity["createdAt"] ?: "1970-01-01T00:00:00+00:00"
                             ),
                             fontSize = 12.sp,
+                            lineHeight = 14.sp,
                             color = Color.Gray,
                             modifier = Modifier
                                 .padding(end = 8.dp, bottom = 4.dp)
