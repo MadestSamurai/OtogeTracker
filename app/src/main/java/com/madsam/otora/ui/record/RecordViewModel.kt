@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.madsam.otora.consts.FlagsAlphabet
 import com.madsam.otora.entity.chuni.ChuniCard
-import com.madsam.otora.entity.web.OsuCard
+import com.madsam.otora.entity.web.OsuCardList
 import com.madsam.otora.entity.web.OsuGroup
 import com.madsam.otora.entity.web.OsuInfo
 import com.madsam.otora.entity.web.OsuRecentActivity
@@ -64,7 +64,7 @@ class RecordViewModel(
 
     fun requestOsuData(userId: String, mode: String, context: Context) {
         val osuDataRequestService = OsuDataRequestService()
-        osuDataRequestService.getOsuCard({ osuCard: OsuCard -> setOsuCard(osuCard) }, userId)
+        osuDataRequestService.getOsuCard({ osuCardList: OsuCardList -> setOsuCard(osuCardList) }, userId)
         osuDataRequestService.getOsuRecentActivity({ osuRecentActivity: List<OsuRecentActivity> -> setOsuRecentActivity(osuRecentActivity) }, userId)
         osuDataRequestService.getOsuPinnedMap({ osuPinnedMap: List<OsuTopRankItem> -> setOsuPinnedMap(osuPinnedMap) }, userId, mode)
         osuDataRequestService.getOsuFirstMap({ osuFirstMap: List<OsuTopRankItem> -> setOsuFirstMap(osuFirstMap) }, userId, mode)
@@ -79,7 +79,11 @@ class RecordViewModel(
         chuniDataRequestService.getUserData()
     }
 
-    private fun setOsuCard(osuCard: OsuCard) {
+    private fun setOsuCard(osuCardList: OsuCardList) {
+        if (osuCardList.users.isEmpty()) {
+            return
+        }
+        val osuCard = osuCardList.users[0]
         osuCardData.value = mapOf(
             "username" to osuCard.username,
             "country" to osuCard.country.name,

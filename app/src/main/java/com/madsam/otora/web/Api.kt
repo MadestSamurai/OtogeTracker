@@ -1,6 +1,6 @@
 package com.madsam.otora.web
 
-import com.madsam.otora.entity.web.OsuCard
+import com.madsam.otora.entity.web.OsuCardList
 import com.madsam.otora.entity.web.OsuHistorical
 import com.madsam.otora.entity.web.OsuRecentActivity
 import com.madsam.otora.entity.web.OsuTopRankItem
@@ -20,8 +20,8 @@ import retrofit2.http.Query
  */
 interface Api {
     //osu API
-    @GET("users/{user}/card")
-    fun getOsuCard(@Path("user") user: String?): Call<OsuCard>
+    @GET("users/lookup")
+    fun getOsuCard(@Query("ids[]") user: String): Call<OsuCardList>
 
     @GET("users/{user}/scores/pinned?limit=100")
     fun getOsuPinnedMap(

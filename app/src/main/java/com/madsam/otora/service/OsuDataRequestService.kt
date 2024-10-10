@@ -2,7 +2,7 @@ package com.madsam.otora.service
 
 import android.util.Log
 import com.madsam.otora.callback.ICallback
-import com.madsam.otora.entity.web.OsuCard
+import com.madsam.otora.entity.web.OsuCardList
 import com.madsam.otora.entity.web.OsuHistorical
 import com.madsam.otora.entity.web.OsuInfo
 import com.madsam.otora.entity.web.OsuRecentActivity
@@ -69,7 +69,7 @@ class OsuDataRequestService {
     private val api = retrofit.create(Api::class.java)
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
-    private fun requestOsuCard(callback: ICallback<OsuCard>, userId: String) {
+    private fun requestOsuCard(callback: ICallback<OsuCardList>, userId: String) {
         try {
             val osuCardCall = api.getOsuCard(userId)
             val response = osuCardCall.execute()
@@ -82,7 +82,7 @@ class OsuDataRequestService {
                 Log.e(TAG, "Response is not successful")
             }
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuCardThread")
+            Log.e(TAG, "IOException occurred in OsuCardThread: $e")
         }
     }
 
@@ -104,7 +104,7 @@ class OsuDataRequestService {
                 Log.e(TAG, "Response is not successful")
             }
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuPinnedMapThread")
+            Log.e(TAG, "IOException occurred in OsuPinnedMapThread: $e")
         }
     }
 
@@ -126,7 +126,7 @@ class OsuDataRequestService {
                 Log.e(TAG, "Response is not successful")
             }
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuBestMapThread")
+            Log.e(TAG, "IOException occurred in OsuBestMapThread: $e")
         }
     }
 
@@ -148,7 +148,7 @@ class OsuDataRequestService {
                 Log.e(TAG, "Response is not successful")
             }
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuFirstMapThread")
+            Log.e(TAG, "IOException occurred in OsuFirstMapThread: $e")
         }
     }
 
@@ -169,7 +169,7 @@ class OsuDataRequestService {
                 Log.e(TAG, "Response is not successful")
             }
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuBeatmapThread")
+            Log.e(TAG, "IOException occurred in OsuBeatmapThread: $e")
         }
     }
 
@@ -190,7 +190,7 @@ class OsuDataRequestService {
                 Log.e(TAG, "Response is not successful")
             }
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuRecentActivityThread")
+            Log.e(TAG, "IOException occurred in OsuRecentActivityThread: $e")
         }
     }
 
@@ -211,7 +211,7 @@ class OsuDataRequestService {
                 Log.e(TAG, "Response is not successful")
             }
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuHistoricalThread")
+            Log.e(TAG, "IOException occurred in OsuHistoricalThread: $e")
         }
     }
 
@@ -225,11 +225,11 @@ class OsuDataRequestService {
                 callback(osuInfo)
             } else Log.e(TAG, "OsuInfo is null")
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+            Log.e(TAG, "IOException occurred in OsuMedalsThread: $e")
         }
     }
 
-    fun getOsuCard(callback: ICallback<OsuCard>, userId: String) {
+    fun getOsuCard(callback: ICallback<OsuCardList>, userId: String) {
         serviceScope.launch { requestOsuCard(callback, userId) }
     }
 
