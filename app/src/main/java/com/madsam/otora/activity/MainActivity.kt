@@ -27,6 +27,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.madsam.otora.ui.bof.BofScreen
 import com.madsam.otora.ui.record.RecordScreen
 import com.madsam.otora.ui.theme.AppTheme
 
@@ -41,7 +42,7 @@ const val KEY_ROUTE = "route"
 
 @Composable
 fun MainActivityScreen() {
-    val items = listOf(Screen.Screen1, Screen.Screen2)
+    val items = listOf(Screen.RecordScreen, Screen.ReportScreen, Screen.BOFScreen)
     val navController = rememberNavController()
     Scaffold(
         bottomBar = {
@@ -69,12 +70,15 @@ fun MainActivityScreen() {
         }
     ) { contentPadding ->
         Box(modifier = Modifier.padding(contentPadding)) {
-            NavHost(navController = navController, startDestination = Screen.Screen1.route) {
-                composable(Screen.Screen1.route) {
+            NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
+                composable(Screen.RecordScreen.route) {
                     RecordScreen()
                 }
-                composable(Screen.Screen2.route) {
+                composable(Screen.ReportScreen.route) {
                     Screen2()
+                }
+                composable(Screen.BOFScreen.route) {
+                    BofScreen()
                 }
             }
         }
@@ -110,8 +114,9 @@ class MainActivity : ComponentActivity() {
 }
 
 sealed class Screen(val route: String, val label: String) {
-    data object Screen1 : Screen("record", "Record")
-    data object Screen2 : Screen("report", "Report")
+    data object RecordScreen : Screen("record", "Record")
+    data object ReportScreen : Screen("report", "Report")
+    data object BOFScreen : Screen("bof", "BOF")
 }
 
 @Composable

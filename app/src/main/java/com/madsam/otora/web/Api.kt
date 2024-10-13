@@ -1,5 +1,6 @@
 package com.madsam.otora.web
 
+import com.madsam.otora.entity.bof.BofEntry
 import com.madsam.otora.entity.web.OsuCardList
 import com.madsam.otora.entity.web.OsuHistorical
 import com.madsam.otora.entity.web.OsuRecentActivity
@@ -61,7 +62,9 @@ interface Api {
     @GET("users/{user}/extra-pages/kudosu")
     fun getOsuKudosu(@Path("user") user: String, @Query("mode") mode: String): Call<String>
 
-    // Chunithm API
-    @GET("home")
-    fun getChunithmHome(@Header("User-Agent")userAgent: String): Call<String>
+    // Bof API
+    @GET("bofttjson/{date}.json")
+    fun getBofttData(
+        @Path("date") date: String
+    ): Call<List<BofEntry>>
 }
