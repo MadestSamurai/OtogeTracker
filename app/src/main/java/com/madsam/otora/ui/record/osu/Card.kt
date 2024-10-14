@@ -44,7 +44,7 @@ import com.madsam.otora.R
 import com.madsam.otora.component.GroupListItem
 import com.madsam.otora.component.PopupTip
 import com.madsam.otora.consts.Colors
-import com.madsam.otora.entity.web.OsuGroup
+import com.madsam.otora.model.web.OsuGroup
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable

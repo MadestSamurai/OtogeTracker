@@ -15,7 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.madsam.otora.consts.Colors
-import com.madsam.otora.entity.chuni.ChuniCard
+import com.madsam.otora.model.chuni.ChuniCard
 import com.madsam.otora.ui.record.RecordViewModel
 import com.madsam.otora.ui.record.chunithm.Card
 import com.madsam.otora.utils.CommonUtils

@@ -1,14 +1,13 @@
 package com.madsam.otora.web
 
-import com.madsam.otora.entity.bof.BofEntry
-import com.madsam.otora.entity.web.OsuCardList
-import com.madsam.otora.entity.web.OsuHistorical
-import com.madsam.otora.entity.web.OsuRecentActivity
-import com.madsam.otora.entity.web.OsuTopRankItem
-import com.madsam.otora.entity.web.OsuUserBeatmap
+import com.madsam.otora.model.bof.BofEntry
+import com.madsam.otora.model.web.OsuCardList
+import com.madsam.otora.model.web.OsuHistorical
+import com.madsam.otora.model.web.OsuRecentActivity
+import com.madsam.otora.model.web.OsuTopRankItem
+import com.madsam.otora.model.web.OsuUserBeatmap
 import retrofit2.Call
 import retrofit2.http.GET
-import retrofit2.http.Header
 import retrofit2.http.Path
 import retrofit2.http.Query
 

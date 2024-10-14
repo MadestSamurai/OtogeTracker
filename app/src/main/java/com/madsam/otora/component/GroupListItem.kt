@@ -23,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.R
 import com.madsam.otora.consts.Colors
-import com.madsam.otora.entity.web.OsuGroup
+import com.madsam.otora.model.web.OsuGroup
 import kotlinx.coroutines.delay
 
 /**

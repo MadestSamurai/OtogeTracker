@@ -1,12 +1,12 @@
 package com.madsam.otora.service
 
-import com.madsam.otora.entity.web.OsuBeatmapSet
-import com.madsam.otora.entity.web.OsuCard
-import com.madsam.otora.entity.web.OsuGroup
-import com.madsam.otora.entity.web.OsuMedalItem
-import com.madsam.otora.entity.web.OsuRecentActivity
-import com.madsam.otora.entity.web.OsuStatistics
-import com.madsam.otora.entity.web.OsuUserExtend
+import com.madsam.otora.model.web.OsuBeatmapSet
+import com.madsam.otora.model.web.OsuCard
+import com.madsam.otora.model.web.OsuGroup
+import com.madsam.otora.model.web.OsuMedalItem
+import com.madsam.otora.model.web.OsuRecentActivity
+import com.madsam.otora.model.web.OsuStatistics
+import com.madsam.otora.model.web.OsuUserExtend
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader

@@ -17,12 +17,10 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments["room.schemaLocation"] = "$projectDir/schemas"
-                arguments["room.incremental"] = "true"
-                arguments["room.expandProjection"] = "true"
-            }
+        ksp {
+            arg("room.schemaLocation", "$projectDir/schemas")
+            arg("room.incremental", "true")
+            arg("room.expandProjection", "true")
         }
     }
 
@@ -89,12 +87,8 @@ dependencies {
     // Room
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
-    // optional - RxJava2 support for Room
-    implementation(libs.androidx.room.rxjava2)
     // optional - RxJava3 support for Room
     implementation(libs.androidx.room.room.rxjava3)
-    // optional - Guava support for Room, including Optional and ListenableFuture
-    implementation(libs.androidx.room.room.guava)
     // optional - Test helpers
     testImplementation(libs.androidx.room.room.testing3)
     // optional - Paging 3 Integration

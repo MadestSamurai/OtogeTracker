@@ -2,13 +2,13 @@ package com.madsam.otora.service
 
 import android.content.Context
 import android.util.Log
-import com.madsam.otora.entity.chuni.ChuniCard
-import com.madsam.otora.entity.chuni.ChuniCookie
-import com.madsam.otora.entity.chuni.ChuniDataExtend
-import com.madsam.otora.entity.chuni.ChuniFullScore
-import com.madsam.otora.entity.chuni.ChuniGenre
-import com.madsam.otora.entity.chuni.ChuniPenguin
-import com.madsam.otora.entity.chuni.ChuniScore
+import com.madsam.otora.model.chuni.ChuniCard
+import com.madsam.otora.model.chuni.ChuniCookie
+import com.madsam.otora.model.chuni.ChuniDataExtend
+import com.madsam.otora.model.chuni.ChuniFullScore
+import com.madsam.otora.model.chuni.ChuniGenre
+import com.madsam.otora.model.chuni.ChuniPenguin
+import com.madsam.otora.model.chuni.ChuniScore
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.SafeSoupUtil.safeFirst
 import com.madsam.otora.utils.SafeSoupUtil.safeFirstAttr
@@ -155,7 +155,7 @@ class ChuniDataRequestService(private val context: Context) {
             val jsonExtend = jsonAdapterExtend.toJson(chuniDataExtend)
             ShareUtil.putString("chuniDataExtend", jsonExtend, context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in ChuniData-requestPlayerData")
+            Log.e(TAG, "IOException occurred in ChuniData-requestPlayerData: ${e.message}")
         }
     }
 
@@ -189,7 +189,7 @@ class ChuniDataRequestService(private val context: Context) {
             val json = jsonAdapter.toJson(chuniRatingBest)
             ShareUtil.putString("chuniRatingDetailBest", json, context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailBest")
+            Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailBest: ${e.message}")
         }
     }
     private fun requestRatingDetailRecent() {
@@ -222,7 +222,7 @@ class ChuniDataRequestService(private val context: Context) {
             val json = jsonAdapter.toJson(chuniRatingRecent)
             ShareUtil.putString("chuniRatingDetailRecent", json, context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailRecent")
+            Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailRecent: ${e.message}")
         }
     }
     private fun requestRatingDetailNext() {
@@ -255,7 +255,7 @@ class ChuniDataRequestService(private val context: Context) {
             val json = jsonAdapter.toJson(chuniRatingNext)
             ShareUtil.putString("chuniRatingDetailNext", json, context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailNext")
+            Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailNext: ${e.message}")
         }
     }
     private fun requestMapRecord() {
@@ -275,7 +275,7 @@ class ChuniDataRequestService(private val context: Context) {
             //TODO: Parse the map record
             ShareUtil.putString("chuniRecord", doc.toString(), context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in ChuniData-requestMapRecord")
+            Log.e(TAG, "IOException occurred in ChuniData-requestMapRecord: ${e.message}")
         }
     }
     private fun requestPlayLog() {
@@ -339,7 +339,7 @@ class ChuniDataRequestService(private val context: Context) {
             val json = jsonAdapter.toJson(chuniPlayLog)
             ShareUtil.putString("chuniPlayLog", json, context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in ChuniData-requestPlayLog")
+            Log.e(TAG, "IOException occurred in ChuniData-requestPlayLog: ${e.message}")
         }
     }
     private fun requestPlayRecord() {
@@ -409,7 +409,7 @@ class ChuniDataRequestService(private val context: Context) {
                 val json = jsonAdapter.toJson(chuniGenre)
                 ShareUtil.putString("chuniPlayRecord${diff[0].uppercaseChar()}${diff.substring(1)}", json, context)
             } catch (e: IOException) {
-                Log.e(TAG, "IOException occurred in OsuMedalsThread")
+                Log.e(TAG, "IOException occurred in OsuMedalsThread: ${e.message}")
             }
         }
     }
@@ -429,7 +429,7 @@ class ChuniDataRequestService(private val context: Context) {
             updateCookie(response)
             ShareUtil.putString("chuniCollection", doc.toString(), context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+            Log.e(TAG, "IOException occurred in OsuMedalsThread: ${e.message}")
         }
     }
     private fun requestFriend() {
@@ -448,7 +448,7 @@ class ChuniDataRequestService(private val context: Context) {
             updateCookie(response)
             ShareUtil.putString("chuniFriend", doc.toString(), context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+            Log.e(TAG, "IOException occurred in OsuMedalsThread: ${e.message}")
         }
     }
 
@@ -468,9 +468,10 @@ class ChuniDataRequestService(private val context: Context) {
             updateCookie(response)
             ShareUtil.putString("chuniLoginBonus", doc.toString(), context)
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in OsuMedalsThread")
+            Log.e(TAG, "IOException occurred in OsuMedalsThread: ${e.message}")
         }
     }
+
     private fun updateCookie(response: Connection.Response) {
         if (response.cookie("_t") != null) {
             cookie.token = response.cookie("_t")!!.toString()
@@ -482,6 +483,7 @@ class ChuniDataRequestService(private val context: Context) {
             cookie.userId = response.cookie("userId")!!.toString()
         }
     }
+
     fun getUserData() {
         serviceScope.launch { mutex.withLock { requestPlayerData() }}
         serviceScope.launch { mutex.withLock { requestRatingDetailBest() }}
