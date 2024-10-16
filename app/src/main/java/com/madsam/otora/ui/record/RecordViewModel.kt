@@ -53,9 +53,6 @@ class RecordViewModel(
     val osuFirstMapData = MutableStateFlow<List<Map<String, String>>>(emptyList())
     val osuBestMapData = MutableStateFlow<List<Map<String, String>>>(emptyList())
 
-    // Chunithm
-    val chuniCardData = MutableStateFlow<ChuniCard>(ChuniCard())
-
     init {
         requestOsuData(userId, mode, context)
     }
@@ -64,6 +61,7 @@ class RecordViewModel(
 
     fun requestOsuData(userId: String, mode: String, context: Context) {
         val osuDataRequestService = OsuDataRequestService()
+        osuDataRequestService.getOsuMedals({ osuInfo: OsuInfo -> setOsuMedals(osuInfo, context) }, userId, mode)
         osuDataRequestService.getOsuCard({ osuCardList: OsuCardList -> setOsuCard(osuCardList) }, userId)
         osuDataRequestService.getOsuRecentActivity({ osuRecentActivity: List<OsuRecentActivity> -> setOsuRecentActivity(osuRecentActivity) }, userId)
         osuDataRequestService.getOsuPinnedMap({ osuPinnedMap: List<OsuTopRankItem> -> setOsuPinnedMap(osuPinnedMap) }, userId, mode)
@@ -71,7 +69,6 @@ class RecordViewModel(
         osuDataRequestService.getOsuBestMap({ osuBestMap: List<OsuTopRankItem> -> setOsuBestMap(osuBestMap) }, userId, mode)
 //        osuDataRequestService.getOsuBeatmap({ osuUserBeatmap: OsuUserBeatmap -> setOsuUserBeatmap(osuUserBeatmap) }, userId, mode)
 //        osuDataRequestService.getOsuHistorical({ osuHistorical: OsuHistorical -> setOsuHistorical(osuHistorical) }, userId, mode)
-        osuDataRequestService.getOsuMedals({ osuInfo: OsuInfo -> setOsuMedals(osuInfo, context) }, userId, mode)
     }
 
     fun requestChuniData(context: Context) {
@@ -84,7 +81,7 @@ class RecordViewModel(
             return
         }
         val osuCard = osuCardList.users[0]
-        osuCardData.value = mapOf(
+        osuCardData.value += mapOf(
             "username" to osuCard.username,
             "country" to osuCard.country.name,
             "flagUrl" to FlagsAlphabet.getFlagAlphabet(osuCard.country.code),
