@@ -62,7 +62,8 @@ fun TopRank(
             .padding(
                 start = 16.dp,
                 end = 16.dp,
-                bottom = 12.dp
+                bottom = 12.dp,
+                top = 12.dp
             ),
         RoundedCornerShape(20.dp),
         Colors.DARK_RED_DEEP
@@ -166,11 +167,7 @@ fun OsuTopRankItemCard(
                 cover,
                 background,
                 diff,
-                rank,
-                title,
-                score,
-                acc,
-                pp
+                rank
             ) = createRefs()
             Image(
                 painter = rememberAsyncImagePainter(

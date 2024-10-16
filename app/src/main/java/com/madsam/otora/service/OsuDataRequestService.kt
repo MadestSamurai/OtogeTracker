@@ -79,7 +79,7 @@ class OsuDataRequestService {
                     callback(osuCard)
                 } else Log.e(TAG, "com.madsam.otora.ui.record.cards.OsuCard is null")
             } else {
-                Log.e(TAG, "Response is not successful")
+                Log.e(TAG, "Response is not successful in OsuCardThread")
             }
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in OsuCardThread: $e")
@@ -101,7 +101,7 @@ class OsuDataRequestService {
                     println("osuPinned:$osuPinnedMap")
                 } else Log.e(TAG, "OsuPinnedMap is null")
             } else {
-                Log.e(TAG, "Response is not successful")
+                Log.e(TAG, "Response is not successful in OsuPinnedMapThread")
             }
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in OsuPinnedMapThread: $e")
@@ -123,7 +123,7 @@ class OsuDataRequestService {
                     println("osuBest:$osuBestMap")
                 } else Log.e(TAG, "OsuBestMap is null")
             } else {
-                Log.e(TAG, "Response is not successful")
+                Log.e(TAG, "Response is not successful in OsuBestMapThread")
             }
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in OsuBestMapThread: $e")
@@ -145,7 +145,7 @@ class OsuDataRequestService {
                     println("osuFirst:$osuFirstMap")
                 } else Log.e(TAG, "OsuFirstMap is null")
             } else {
-                Log.e(TAG, "Response is not successful")
+                Log.e(TAG, "Response is not successful in OsuFirstMapThread")
             }
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in OsuFirstMapThread: $e")
@@ -166,7 +166,7 @@ class OsuDataRequestService {
                     callback(osuBeatmap)
                 } else Log.e(TAG, "OsuBeatmap is null")
             } else {
-                Log.e(TAG, "Response is not successful")
+                Log.e(TAG, "Response is not successful in OsuBeatmapThread")
             }
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in OsuBeatmapThread: $e")
@@ -187,7 +187,7 @@ class OsuDataRequestService {
                     println("osuRecent:$osuRecentActivity")
                 } else Log.e(TAG, "OsuRecentActivity is null")
             } else {
-                Log.e(TAG, "Response is not successful")
+                Log.e(TAG, "Response is not successful in OsuRecentActivityThread")
             }
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in OsuRecentActivityThread: $e")
@@ -208,7 +208,7 @@ class OsuDataRequestService {
                     callback(osuHistorical)
                 } else Log.e(TAG, "OsuHistorical is null")
             } else {
-                Log.e(TAG, "Response is not successful")
+                Log.e(TAG, "Response is not successful in OsuHistoricalThread")
             }
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in OsuHistoricalThread: $e")
@@ -218,7 +218,7 @@ class OsuDataRequestService {
     private fun requestOsuMedals(callback: ICallback<OsuInfo>, userId: String, mode: String) {
         try {
             val doc = Jsoup.connect(CommonUtils.encodeURL("https://osu.ppy.sh/users/$userId/$mode")).get()
-            val medals = doc.selectFirst("div.js-react--profile-page.osu-layout.osu-layout--full")
+            val medals = doc.selectFirst("div.js-react--profile-page.u-contents")
             val medalsJson = medals.safeAttr("data-initial-data")
             val osuInfo = moshi.adapter(OsuInfo::class.java).fromJson(medalsJson)
             if (osuInfo != null) {

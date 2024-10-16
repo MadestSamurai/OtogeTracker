@@ -26,7 +26,7 @@ fun RecordScreen() {
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val coroutineScope = rememberCoroutineScope()
     val recordViewModel: RecordViewModel = viewModel(factory = RecordViewModelFactory(
-        userId = ShareUtil.getString("userId", context) ?: "peppy",
+        userId = ShareUtil.getString("userId", context) ?: "2",
         mode = ShareUtil.getString("mode", context) ?: "osu",
         context = context
     ))

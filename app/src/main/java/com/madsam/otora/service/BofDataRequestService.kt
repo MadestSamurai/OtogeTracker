@@ -90,7 +90,14 @@ class BofDataRequestService(private val context: Context) {
         val filledAvg = mutableListOf<BofEntry.PointDouble>()
 
         var currentTime = startTime
+        val now = System.currentTimeMillis()
+
         while (currentTime <= endTime) {
+            // Stop filling if the current time exceeds the current system time and the date is today
+            if (date == LocalDate.now().toString() && currentTime > now) {
+                break
+            }
+
             val timeString = CommonUtils.millisToYmd(currentTime).substring(11, 16) // Extract HH:mm
 
             val impr = entry.impr.find { it.time.startsWith(timeString) } ?: entry.impr.lastOrNull { it.time < timeString }
@@ -153,12 +160,18 @@ class BofDataRequestService(private val context: Context) {
 
     fun getBofttData() {
         serviceScope.launch {
-            val startDate = getLastDate() ?: "2024-10-13"
-            println("startDate: $startDate")
-            var currentDate = LocalDate.parse(startDate)
-            val endDate = LocalDate.now()
+            val today = LocalDate.now()
+            requestBofttEntryData(today.toString())
 
-            while (!currentDate.isAfter(endDate)) {
+            val yesterday = today.minusDays(1)
+            val lastDate = getLastDate()
+            if (lastDate == null || LocalDate.parse(lastDate).isBefore(yesterday)) {
+                requestBofttEntryData(yesterday.toString())
+            }
+
+            var currentDate = lastDate?.let { LocalDate.parse(it) } ?: LocalDate.parse("2024-10-13")
+
+            while (!currentDate.isAfter(yesterday)) {
                 requestBofttEntryData(currentDate.toString())
                 currentDate = currentDate.plusDays(1)
             }

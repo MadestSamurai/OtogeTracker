@@ -62,8 +62,7 @@ fun Recent(
             .padding(
                 start = 16.dp,
                 top = 12.dp,
-                end = 16.dp,
-                bottom = 12.dp
+                end = 16.dp
             ),
         RoundedCornerShape(20.dp),
         Colors.DARK_RED_DEEP
