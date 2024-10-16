@@ -11,15 +11,18 @@ import androidx.room.Room
  * 描述: 数据库提供者
  */
 object DatabaseProvider {
-    private var db: AppDatabase? = null
+    @Volatile
+    private var INSTANCE: AppDatabase? = null
 
     fun getDatabase(context: Context): AppDatabase {
-        if (db == null) {
-            db = Room.databaseBuilder(
+        return INSTANCE ?: synchronized(this) {
+            val instance = Room.databaseBuilder(
                 context.applicationContext,
-                AppDatabase::class.java, "otora-database"
+                AppDatabase::class.java,
+                "otora_database"
             ).build()
+            INSTANCE = instance
+            instance
         }
-        return db!!
     }
 }

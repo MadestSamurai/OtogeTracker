@@ -17,13 +17,18 @@ data class BofEntry(
     @Json(name = "Title") var title: String = "",
     @Json(name = "Regist") var regist: String = "",
     @Json(name = "Update") var update: String = "",
-    @Json(name = "Impr") var impr: List<Point> = emptyList(),
-    @Json(name = "Total") var total: List<Point> = emptyList(),
-    @Json(name = "Median") var median: List<Point> = emptyList(),
-    @Json(name = "Avg") var avg: List<Point> = emptyList(),
+    @Json(name = "Impr") var impr: List<PointInt> = emptyList(),
+    @Json(name = "Total") var total: List<PointInt> = emptyList(),
+    @Json(name = "Median") var median: List<PointDouble> = emptyList(),
+    @Json(name = "Avg") var avg: List<PointDouble> = emptyList(),
 ) {
-    data class Point(
+    data class PointInt(
         var time: String = "",
         var value: Int = 0
+    )
+
+    data class PointDouble(
+        var time: String = "",
+        var value: Double = 0.0
     )
 }

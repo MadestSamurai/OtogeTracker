@@ -18,6 +18,9 @@ import com.madsam.otora.consts.GradientBrush
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -134,6 +137,32 @@ object CommonUtils {
             delta >= 365L * 24 * 60 * 60 * 1000 * 10 -> "too long ago"
             else -> "${delta / (365L * 24 * 60 * 60 * 1000)} year${if (delta / (365L * 24 * 60 * 60 * 1000) > 1) "s" else ""} ago"
         }
+    }
+
+    /**
+     * 年月日时分秒转换为时间戳
+     *
+     * @param date 年月日 格式 2011-03-25
+     * @param time 时分秒 格式 11:21:02
+     * @return 毫秒数时间戳
+     */
+    fun ymdToMillis(date: String, time: String): Long {
+        val localDate = LocalDate.parse(date, DateTimeFormatter.ISO_DATE)
+        val timeWithoutSeconds = time.substring(0, 5) + ":00"
+        val localTime = LocalTime.parse(timeWithoutSeconds, DateTimeFormatter.ISO_TIME)
+        val localDateTime = LocalDateTime.of(localDate, localTime)
+        return localDateTime.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+    }
+
+    /**
+     * 毫秒数时间戳转换为年月日时分秒
+     *
+     * @param millis 毫秒数时间戳
+     * @return 年月日时分秒
+     */
+    fun millisToYmd(millis: Long): String {
+        val localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), java.time.ZoneId.systemDefault())
+        return localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
     }
 
     /**
