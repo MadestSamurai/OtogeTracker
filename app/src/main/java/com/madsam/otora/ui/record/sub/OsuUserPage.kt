@@ -47,7 +47,7 @@ fun OsuUserPage(recordViewModel: RecordViewModel) {
         TextField(
             value = userState.value,
             onValueChange = { userState.value = it },
-            label = { Text("Enter osu id or username") },
+            label = { Text("Enter osu id") },
             modifier = Modifier.fillMaxWidth()
         )
         Row {

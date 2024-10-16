@@ -33,4 +33,7 @@ interface BofEntryDao {
             update(entry)
         }
     }
+
+    @Query("SELECT * FROM bof_entries WHERE `no` IN (:ids)")
+    fun getEntriesByIds(ids: List<Int>): List<BofEntryEntity>
 }

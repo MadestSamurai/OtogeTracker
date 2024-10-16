@@ -21,4 +21,10 @@ interface BofPointDao {
 
     @Update
     fun updateAll(points: List<BofPointEntity>)
+
+    @Query("SELECT * FROM bof_points WHERE timeAndEntry BETWEEN :startId AND :endId")
+    fun getPointsByRange(startId: Int, endId: Int): List<BofPointEntity>
+
+    @Query("SELECT MAX(timeAndEntry) FROM bof_points")
+    fun getMaxId(): Int
 }

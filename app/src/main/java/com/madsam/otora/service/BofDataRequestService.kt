@@ -6,6 +6,7 @@ import com.madsam.otora.database.DatabaseProvider
 import com.madsam.otora.entity.bof.BofEntryEntity
 import com.madsam.otora.entity.bof.BofPointEntity
 import com.madsam.otora.model.bof.BofEntry
+import com.madsam.otora.model.bof.BofEntryShow
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ShareUtil
 import com.madsam.otora.web.Api
@@ -44,8 +45,8 @@ class BofDataRequestService(private val context: Context) {
         .build()
 
     private val api = retrofit.create(Api::class.java)
-    private val serviceScope = CoroutineScope(Dispatchers.IO)
     private val db = DatabaseProvider.getDatabase(context)
+    private val serviceScope = CoroutineScope(Dispatchers.IO)
 
     private fun requestBofttEntryData(
         date: String
@@ -137,12 +138,10 @@ class BofDataRequestService(private val context: Context) {
                 avg = entry.avg.find { it.time == point.time }?.value ?: 0.0,
             )
             pointsToInsert.add(pointEntity)
-            // Check if the time is 23:55
             if (point.time.startsWith("23:55")) {
                 isLastEntryOfDay = true
             }
         }
-        // Perform batch insert and update
         db.bofPointDao().insertAll(pointsToInsert)
 
         if (isLastEntryOfDay) {
@@ -178,9 +177,51 @@ class BofDataRequestService(private val context: Context) {
         }
     }
 
-    suspend fun getBofEntriesFromDatabase(): List<BofEntryEntity> {
+    suspend fun getBofttEntryByTime(): List<BofEntryShow> {
         return withContext(Dispatchers.IO) {
-            DatabaseProvider.getDatabase(context).bofEntryDao().getAll()
+            try {
+                val maxId = db.bofPointDao().getMaxId()
+                val time = maxId / 10000 * 10000
+                val points = db.bofPointDao().getPointsByRange(time, time + 999)
+                if (points.isNotEmpty()) {
+                    val entryIds = points.map { it.timeAndEntry % 10000 }
+                    val entries = db.bofEntryDao().getEntriesByIds(entryIds)
+
+                    // Calculate the previous day's id based on the provided time
+                    val startInMillis = CommonUtils.ymdToMillis("2024-10-13", "00:00:00")
+                    val providedTimeMillis = startInMillis + time * 10
+                    val previousDayMillis = providedTimeMillis - 24 * 60 * 60 * 1000
+                    val previousDayId = ((previousDayMillis - startInMillis) / 10).toInt()
+                    val previousDayPoints = db.bofPointDao().getPointsByRange(previousDayId, previousDayId + 999)
+
+                    entries.map { entry ->
+                        val point = points.find { it.timeAndEntry % 10000 == entry.no }
+                        val previousDayPoint = previousDayPoints.find { it.timeAndEntry % 10000 == entry.no }
+                        BofEntryShow(
+                            no = entry.no,
+                            team = entry.team,
+                            artist = entry.artist,
+                            genre = entry.genre,
+                            title = entry.title,
+                            regist = entry.regist,
+                            update = entry.update,
+                            impr = point?.impr ?: 0,
+                            total = point?.total ?: 0,
+                            median = point?.median ?: 0.0,
+                            avg = point?.avg ?: 0.0,
+                            oldImpr = previousDayPoint?.impr ?: 0,
+                            oldTotal = previousDayPoint?.total ?: 0,
+                            oldMedian = previousDayPoint?.median ?: 0.0,
+                            oldAvg = previousDayPoint?.avg ?: 0.0
+                        )
+                    }
+                } else {
+                    emptyList()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error fetching entry by id: ${e.message}")
+                emptyList()
+            }
         }
     }
 }
