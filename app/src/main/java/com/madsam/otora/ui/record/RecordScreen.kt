@@ -1,5 +1,6 @@
 package com.madsam.otora.ui.record
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
@@ -18,6 +19,7 @@ import com.madsam.otora.ui.record.sub.OsuUserPage
 import com.madsam.otora.utils.ShareUtil
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RecordScreen() {
     val context = LocalContext.current

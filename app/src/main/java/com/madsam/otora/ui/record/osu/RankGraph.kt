@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.madsam.otora.R
+import com.madsam.otora.component.DoubleCircleIndicator
 import com.madsam.otora.consts.Colors
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
@@ -38,7 +39,6 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.component.fixed
-import com.patrykandpatrick.vico.compose.common.component.rememberShapeComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.compose.common.of
@@ -54,7 +54,6 @@ import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.core.cartesian.marker.LineCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.core.common.Dimensions
 import com.patrykandpatrick.vico.core.common.component.TextComponent
-import com.patrykandpatrick.vico.core.common.shape.Shape
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.text.DecimalFormat
 
@@ -150,8 +149,10 @@ fun RankGraph(
                 }
             }
 
-            val indicatorComponent =
-                rememberShapeComponent(shape = Shape.Pill, color = Colors.OSU_BRIGHT_YELLOW)
+            val indicatorComponent = DoubleCircleIndicator(
+                outerCircleColor = Colors.OSU_BRIGHT_YELLOW_HALF_TRANS,
+                innerCircleColor = Colors.OSU_BRIGHT_YELLOW
+            )
 
             CartesianChartHost(
                 modifier = Modifier

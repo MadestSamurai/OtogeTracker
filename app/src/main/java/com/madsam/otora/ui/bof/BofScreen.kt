@@ -3,6 +3,7 @@ package com.madsam.otora.ui.bof
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,6 +17,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.madsam.otora.fonts.sarasaFontFamily
 import com.madsam.otora.model.bof.BofEntryShow
 import com.madsam.otora.service.BofDataRequestService
 import kotlinx.coroutines.launch
@@ -46,11 +48,15 @@ fun BofScreen() {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Text(text = "BOF Screen")
-        Button(onClick = { refreshData() }, modifier = Modifier.padding(16.dp)) {
-            Text(text = "Refresh Data")
-        }
         LazyColumn {
+            item {
+                Text(text = "BOF Screen")
+            }
+            item {
+                Button(onClick = { refreshData() }, modifier = Modifier.padding(16.dp)) {
+                    Text(text = "Refresh Data")
+                }
+            }
             items(todayLatestData.value) { entry ->
                 BofEntryRow(entry)
             }
@@ -60,9 +66,22 @@ fun BofScreen() {
 
 @Composable
 fun BofEntryRow(entry: BofEntryShow) {
-    Row(modifier = Modifier.padding(8.dp)) {
-        Text(text = entry.title, modifier = Modifier.padding(end = 8.dp))
-        Text(text = entry.artist, modifier = Modifier.padding(end = 8.dp))
+    Row(modifier = Modifier
+        .padding(8.dp)
+        .fillMaxWidth()
+    ) {
+        Column {
+            Text(
+                text = entry.title,
+                modifier = Modifier.padding(end = 8.dp),
+                fontFamily = sarasaFontFamily,
+            )
+            Text(
+                text = entry.artist,
+                modifier = Modifier.padding(end = 8.dp),
+                fontFamily = sarasaFontFamily,
+            )
+        }
         Text(text = entry.impr.toString(), modifier = Modifier.padding(end = 8.dp))
         Text(text = entry.total.toString(), modifier = Modifier.padding(end = 8.dp))
         Text(text = entry.median.toString(), modifier = Modifier.padding(end = 8.dp))

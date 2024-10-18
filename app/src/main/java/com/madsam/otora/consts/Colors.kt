@@ -23,9 +23,9 @@ object Colors {
 
     val OSU_BRIGHT_RED: Color = Color(0xFFDE4C9B)
     val OSU_DARK_RED: Color = Color(0xFF73184D)
-    val OSU_BRIGHT_RED_HALF_TRANS: Color = Color(0xAADE4C9B)
+    val OSU_BRIGHT_RED_HALF_TRANS: Color = Color(0x80DE4C9B)
     val OSU_BRIGHT_YELLOW: Color = Color(0xFFFFCC22)
-    val OSU_BRIGHT_YELLOW_HALF_TRANS: Color = Color(0xAAFFCC22)
+    val OSU_BRIGHT_YELLOW_HALF_TRANS: Color = Color(0x80FFCC22)
 
     val OSU_LEVEL_WHITE_1: Color = Color(0xFFF0F0F0)
     val OSU_LEVEL_WHITE_2: Color = Color(0xFFFDF6FB)
