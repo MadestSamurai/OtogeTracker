@@ -56,6 +56,9 @@ object Colors {
     val OSU_X_TEXT: Color = Color(0xFFFFFFFF)
     val OSU_DISCORD_BG: Color = Color(0xFF5865F2)
     val OSU_DISCORD_TEXT: Color = Color(0xFFFFFFFF)
+
+    val TEXT_GRAY: Color = Color(0xFF818181)
+    val BG_DARK_GRAY: Color = Color(0xFF2A2A2A)
 }
 
 object GradientBrush {

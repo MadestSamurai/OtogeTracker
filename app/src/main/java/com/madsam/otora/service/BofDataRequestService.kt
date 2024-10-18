@@ -157,12 +157,11 @@ class BofDataRequestService(private val context: Context) {
         return ShareUtil.getString(LAST_DATE_KEY, context)
     }
 
-    fun getBofttData() {
+    fun getBofttData(dateTime: LocalDate) {
         serviceScope.launch {
-            val today = LocalDate.now()
-            requestBofttEntryData(today.toString())
+            requestBofttEntryData(dateTime.toString())
 
-            val yesterday = today.minusDays(1)
+            val yesterday = dateTime.minusDays(1)
             val lastDate = getLastDate()
             if (lastDate == null || LocalDate.parse(lastDate).isBefore(yesterday)) {
                 requestBofttEntryData(yesterday.toString())
@@ -212,7 +211,8 @@ class BofDataRequestService(private val context: Context) {
                             oldImpr = previousDayPoint?.impr ?: 0,
                             oldTotal = previousDayPoint?.total ?: 0,
                             oldMedian = previousDayPoint?.median ?: 0.0,
-                            oldAvg = previousDayPoint?.avg ?: 0.0
+                            oldAvg = previousDayPoint?.avg ?: 0.0,
+                            time = CommonUtils.millisToYmd(providedTimeMillis).substring(11, 16)
                         )
                     }
                 } else {

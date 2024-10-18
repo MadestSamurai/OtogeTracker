@@ -13,6 +13,9 @@ import com.madsam.otora.R
  * 描述: TODO
  */
 
-val sarasaFontFamily = FontFamily(
+val sarasaFont = FontFamily(
     Font(R.font.sarasa_regular, FontWeight.Normal)
+)
+val sarasaBold = FontFamily(
+    Font(R.font.sarasa_bold_latin, FontWeight.Bold)
 )

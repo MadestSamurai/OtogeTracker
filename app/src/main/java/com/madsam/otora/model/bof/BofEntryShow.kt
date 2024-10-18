@@ -23,4 +23,12 @@ data class BofEntryShow(
     var oldTotal: Int = 0,
     var oldMedian: Double = 0.0,
     var oldAvg: Double = 0.0,
+    var time: String = "",
+    var rankDiff: Int = 0,
+    var imprDiff: Int = 0,
+    var totalDiff: Int = 0,
+    var medianRank: Int = 0,
+    var medianDiff: Int = 0,
+    var avgRank: Int = 0,
+    var avgDiff: Int = 0,
 )
