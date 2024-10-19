@@ -9,6 +9,7 @@ package com.madsam.otora.model.bof
  */
 data class BofEntryShow(
     var no: Int = 0,
+    var index: Int = 0,
     var team: String = "",
     var artist: String = "",
     var genre: String = "",

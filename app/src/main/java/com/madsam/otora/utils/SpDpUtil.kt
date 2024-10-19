@@ -37,6 +37,6 @@ private fun getRealDp(context: Context, value: Double, isDp: Boolean = true): Do
     val density =
         if (isDp) context.resources.displayMetrics.density else context.resources.displayMetrics.scaledDensity
     val screenWidth =
-        (if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) context.resources.displayMetrics.heightPixels else context.resources.displayMetrics.widthPixels) / 820.0
+        (if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) context.resources.displayMetrics.heightPixels else context.resources.displayMetrics.widthPixels) / 850.0
     return screenWidth * 2 * value / density
 }

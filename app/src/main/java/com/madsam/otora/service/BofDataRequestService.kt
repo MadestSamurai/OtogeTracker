@@ -176,12 +176,23 @@ class BofDataRequestService(private val context: Context) {
         }
     }
 
-    suspend fun getBofttEntryByTime(): List<BofEntryShow> {
+    suspend fun getBofttEntryLatest(): List<BofEntryShow> {
         return withContext(Dispatchers.IO) {
             try {
                 val maxId = db.bofPointDao().getMaxId()
                 val time = maxId / 10000 * 10000
-                val points = db.bofPointDao().getPointsByRange(time, time + 999)
+                getBofttEntryByTime(time)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error fetching latest entry: ${e.message}")
+                emptyList()
+            }
+        }
+    }
+
+    suspend fun getBofttEntryByTime(time: Int): List<BofEntryShow> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val points = db.bofPointDao().getPointsByRange(time.toInt(), (time + 999).toInt())
                 if (points.isNotEmpty()) {
                     val entryIds = points.map { it.timeAndEntry % 10000 }
                     val entries = db.bofEntryDao().getEntriesByIds(entryIds)
@@ -219,7 +230,7 @@ class BofDataRequestService(private val context: Context) {
                     emptyList()
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error fetching entry by id: ${e.message}")
+                Log.e(TAG, "Error fetching entry by time: ${e.message}")
                 emptyList()
             }
         }
