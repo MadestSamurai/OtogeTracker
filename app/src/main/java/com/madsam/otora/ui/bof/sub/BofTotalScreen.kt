@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -100,8 +102,19 @@ fun BofTotalScreen() {
             val startInMillis = CommonUtils.ymdToMillis("2024-10-13", "00:00:00")
             data = bofDataRequestService.getBofttEntryByTime(((timeInMillis - startInMillis)/10).toInt())
         }
+        // Sort the data by oldTotal in descending order
+        var sortedData = data.sortedByDescending { it.oldTotal }
+        // Assign rankings
+        var currentOldRank = 1
+        sortedData.forEachIndexed { index, entry ->
+            if (index > 0 && sortedData[index - 1].oldTotal != entry.oldTotal) {
+                currentOldRank = index + 1
+            }
+            entry.oldIndex = currentOldRank
+        }
+        sortedData = data.sortedBy { it.impr }
         // Sort the data by total in descending order
-        val sortedData = data.sortedByDescending { it.total }
+        sortedData = data.sortedByDescending { it.total }
         // Assign rankings
         var currentRank = 1
         sortedData.forEachIndexed { index, entry ->
@@ -109,6 +122,9 @@ fun BofTotalScreen() {
                 currentRank = index + 1
             }
             entry.index = currentRank
+        }
+        sortedData.forEach {
+            it.rankDiff = it.oldIndex - it.index
         }
         todayLatestData.value = sortedData
     }
@@ -145,7 +161,7 @@ fun BofTotalScreen() {
                         color = Color.White,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
-                            .fillMaxWidth(0.93f)
+                            .fillMaxWidth()
                             .background(Color.Black)
                             .padding(top = 10.ndp())
                     )
@@ -156,7 +172,7 @@ fun BofTotalScreen() {
                         color = Color.White,
                         textAlign = TextAlign.End,
                         modifier = Modifier
-                            .fillMaxWidth(0.93f)
+                            .fillMaxWidth()
                             .background(Color.Black)
                     )
                 }
@@ -170,7 +186,7 @@ fun BofTotalScreen() {
                     Text(
                         text = "",
                         modifier = Modifier
-                            .width(36.ndp())
+                            .width(90.ndp())
                     )
                     Text(
                         text = "",
@@ -181,7 +197,7 @@ fun BofTotalScreen() {
                     Text(
                         text = " ",
                         modifier = Modifier
-                            .fillMaxWidth(0.4f)
+                            .fillMaxWidth(0.5f)
                     )
                     Text(
                         text = "Impr",
@@ -248,6 +264,32 @@ fun BofEntryRowTotal(
                 rowHeight.intValue = coordinates.size.height
             }
     ) {
+        Icon(
+            painter = entry.rankDiff.let {
+                if (it > 0) {
+                    painterResource(id = com.madsam.otora.R.drawable.ic_wind_up)
+                } else if (it < 0) {
+                    painterResource(id = com.madsam.otora.R.drawable.ic_wind_down)
+                } else {
+                    painterResource(id = com.madsam.otora.R.drawable.ic_flat)
+                }
+            },
+            contentDescription = null,
+            tint = if (entry.rankDiff < 0) Colors.RANKING_RED else if (entry.rankDiff > 0) Colors.RANKING_GREEN else Colors.RANKING_YELLOW,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .width(30.ndp())
+        )
+        Text(
+            text = if (entry.oldTotal == 0) "NEW" else entry.rankDiff.toString(),
+            fontFamily = sarasaFont,
+            fontSize = 14.nsp(),
+            color = if (entry.rankDiff < 0) Colors.RANKING_RED else if (entry.rankDiff > 0) Colors.RANKING_GREEN else Colors.RANKING_YELLOW,
+            textAlign = TextAlign.Start,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .width(24.ndp())
+        )
         Text(
             text = entry.index.toString(),
             fontFamily = sarasaBold,
@@ -299,7 +341,7 @@ fun BofEntryRowTotal(
         Column {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.4f)
+                    .fillMaxWidth(0.5f)
                     .background(
                         color = Color.Transparent,
                     )
@@ -315,20 +357,17 @@ fun BofEntryRowTotal(
                         modifier = Modifier
                             .padding(end = 20.ndp())
                             .fillMaxWidth(barWidthFraction)
-//                            .height(18.ndp())
-                            .height(32.ndp())
+                            .height(18.ndp())
                             .background(
-                                color = Color.Red,
+                                color = Colors.RANKING_RED,
                                 shape = RoundedCornerShape(topEnd = 50.ndp(), bottomEnd = 50.ndp())
                             )
                     )
                     Text(
                         text = entry.total.toString(),
                         color = Color.White,
-//                        fontSize = 14.nsp(),
-//                        lineHeight = 18.nsp(),
-                        fontSize = 22.nsp(),
-                        lineHeight = 24.nsp(),
+                        fontSize = 14.nsp(),
+                        lineHeight = 18.nsp(),
                         fontFamily = sarasaBold,
                         overflow = TextOverflow.Visible,
                         maxLines = 1,
@@ -338,43 +377,43 @@ fun BofEntryRowTotal(
                     )
                 }
             }
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth(0.4f)
-//                    .background(
-//                        color = Color.Transparent,
-//                    )
-//            ) {
-//                Box(
-//                    Modifier
-//                        .background(
-//                            color = Color.Transparent,
-//                        )
-//                ) {
-//                    Box(
-//                        modifier = Modifier
-//                            .padding(end = 20.ndp())
-//                            .fillMaxWidth(barWidthOldFaction)
-//                            .height(14.ndp())
-//                            .background(
-//                                color = Color.Blue,
-//                                shape = RoundedCornerShape(topEnd = 10.ndp(), bottomEnd = 10.ndp())
-//                            )
-//                    )
-//                    Text(
-//                        text = entry.oldTotal.toString(),
-//                        color = Color.White,
-//                        fontSize = 12.nsp(),
-//                        lineHeight = 14.nsp(),
-//                        fontFamily = sarasaBold,
-//                        overflow = TextOverflow.Visible,
-//                        maxLines = 1,
-//                        modifier = Modifier
-//                            .padding(end = 24.ndp())
-//                            .align(Alignment.CenterEnd)
-//                    )
-//                }
-//            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.5f)
+                    .background(
+                        color = Color.Transparent,
+                    )
+            ) {
+                Box(
+                    Modifier
+                        .background(
+                            color = Color.Transparent,
+                        )
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .padding(end = 20.ndp())
+                            .fillMaxWidth(barWidthOldFaction)
+                            .height(14.ndp())
+                            .background(
+                                color = Colors.RANKING_BLUE,
+                                shape = RoundedCornerShape(topEnd = 10.ndp(), bottomEnd = 10.ndp())
+                            )
+                    )
+                    Text(
+                        text = entry.oldTotal.toString(),
+                        color = Color.White,
+                        fontSize = 12.nsp(),
+                        lineHeight = 14.nsp(),
+                        fontFamily = sarasaBold,
+                        overflow = TextOverflow.Visible,
+                        maxLines = 1,
+                        modifier = Modifier
+                            .padding(end = 24.ndp())
+                            .align(Alignment.CenterEnd)
+                    )
+                }
+            }
         }
         Text(
             text = entry.impr.toString(),

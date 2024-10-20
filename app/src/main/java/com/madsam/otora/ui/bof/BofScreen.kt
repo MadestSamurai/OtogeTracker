@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.madsam.otora.ui.bof.sub.BofAvgScreen
+import com.madsam.otora.ui.bof.sub.BofDiffScreen
 import com.madsam.otora.ui.bof.sub.BofMedianScreen
 import com.madsam.otora.ui.bof.sub.BofTotalScreen
 import kotlinx.coroutines.launch
@@ -52,22 +53,15 @@ fun BofScreen() {
                 is Screen.Page1 -> BofTotalScreen()
                 is Screen.Page2 -> BofAvgScreen()
                 is Screen.Page3 -> BofMedianScreen()
-                is Screen.Page4 -> TestPage4()
+                is Screen.Page4 -> BofDiffScreen()
             }
         }
     }
-}
-
-@Composable
-fun TestPage4() {
-    Text(text = "TestPage4",
-        modifier = Modifier.fillMaxSize()
-    )
 }
 
 sealed class Screen(val route: String) {
     data object Page1 : Screen("Total")
     data object Page2 : Screen("Avg")
     data object Page3 : Screen("Median")
-    data object Page4 : Screen("Page4")
+    data object Page4 : Screen("Diff")
 }

@@ -59,6 +59,11 @@ object Colors {
 
     val TEXT_GRAY: Color = Color(0xFF818181)
     val BG_DARK_GRAY: Color = Color(0xFF2A2A2A)
+
+    val RANKING_RED: Color = Color(0xFFD32F2F)
+    val RANKING_BLUE: Color = Color(0xFF2A518D)
+    val RANKING_GREEN: Color = Color(0xFF388E3C)
+    val RANKING_YELLOW: Color = Color(0xFFFBC02D)
 }
 
 object GradientBrush {

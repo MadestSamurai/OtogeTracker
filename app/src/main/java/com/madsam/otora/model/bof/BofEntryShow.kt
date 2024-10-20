@@ -10,6 +10,7 @@ package com.madsam.otora.model.bof
 data class BofEntryShow(
     var no: Int = 0,
     var index: Int = 0,
+    var oldIndex: Int = 0,
     var team: String = "",
     var artist: String = "",
     var genre: String = "",
@@ -32,4 +33,5 @@ data class BofEntryShow(
     var medianDiff: Int = 0,
     var avgRank: Int = 0,
     var avgDiff: Int = 0,
+    var div: Int = 0,
 )

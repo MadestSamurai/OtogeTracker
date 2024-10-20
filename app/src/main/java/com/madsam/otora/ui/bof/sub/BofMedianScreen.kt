@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,6 +49,7 @@ import com.madsam.otora.utils.nsp
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.Calendar
+import kotlin.math.max
 
 /**
  * 项目名: OtogeTracker
@@ -91,6 +94,7 @@ fun BofMedianScreen() {
     }
 
     var thresholdImpr: Int = 1
+    var thresholdImprOld: Int = 1
     LaunchedEffect(selectedDate, selectedTime) {
         Log.d("BofScreen", "selectedDate: $selectedDate, selectedTime: $selectedTime")
         val data: List<BofEntryShow>
@@ -102,9 +106,21 @@ fun BofMedianScreen() {
             data = bofDataRequestService.getBofttEntryByTime(((timeInMillis - startInMillis)/10).toInt())
         }
         // Sort the data by total in descending order
-        val sortedData = data.sortedByDescending { it.total }
-        thresholdImpr = sortedData.getOrNull(149)?.impr ?: 0
-        val filteredData = sortedData.filter { it.impr >= thresholdImpr }.sortedByDescending { it.median }
+        var sortedData = data.sortedByDescending { it.oldImpr }
+        thresholdImprOld = max(sortedData.getOrNull(199)?.oldImpr ?: 0, 3)
+        var filteredData = sortedData.filter { it.oldImpr >= thresholdImprOld }.sortedByDescending { it.oldMedian }
+        // Assign average rank
+        var currentOldRank = 1
+        filteredData.forEachIndexed { index, entry ->
+            if (index > 0 && filteredData[index - 1].oldMedian != entry.oldMedian) {
+                currentOldRank = index + 1
+            }
+            entry.oldIndex = currentOldRank
+        }
+        // Sort the data by total in descending order
+        sortedData = data.sortedByDescending { it.impr }
+        thresholdImpr = max(sortedData.getOrNull(199)?.impr ?: 0, 3)
+        filteredData = sortedData.filter { it.impr >= thresholdImpr }.sortedByDescending { it.median }
         // Assign average rank
         var currentRank = 1
         filteredData.forEachIndexed { index, entry ->
@@ -112,6 +128,9 @@ fun BofMedianScreen() {
                 currentRank = index + 1
             }
             entry.index = currentRank
+        }
+        filteredData.forEach {
+            it.medianDiff = it.oldIndex - it.index
         }
         todayLatestData.value = filteredData
     }
@@ -146,7 +165,7 @@ fun BofMedianScreen() {
                         color = Color.White,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
-                            .fillMaxWidth(0.95f)
+                            .fillMaxWidth()
                             .background(Color.Black)
                             .padding(top = 10.ndp())
                     )
@@ -157,7 +176,7 @@ fun BofMedianScreen() {
                         color = Color.White,
                         textAlign = TextAlign.End,
                         modifier = Modifier
-                            .fillMaxWidth(0.95f)
+                            .fillMaxWidth()
                             .background(Color.Black)
                     )
                 }
@@ -197,7 +216,7 @@ fun BofMedianScreen() {
                 }
             }
             itemsIndexed(todayLatestData.value) { index, entry ->
-                BofEntryRow(entry, index+1, 1000)
+                BofEntryRowMedian(entry, index+1, thresholdImprOld)
             }
         }
     }
@@ -205,14 +224,14 @@ fun BofMedianScreen() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BofEntryRow(
+fun BofEntryRowMedian(
     entry: BofEntryShow,
     index: Int,
-    maxMedian: Int
+    ther: Int
 ) {
     val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
-    val barWidthFraction = (entry.median.toFloat() / maxMedian) * 1f
-    val barWidthOldFaction = ((entry.oldMedian).toFloat() / maxMedian) * 1f
+    val barWidthFraction = (entry.median.toFloat() / 1000) * 1f
+    val barWidthOldFaction = ((entry.oldMedian).toFloat() / 1000) * 1f
     var rowHeight = remember { mutableIntStateOf(0) }
 
     Row(
@@ -223,6 +242,42 @@ fun BofEntryRow(
                 rowHeight.intValue = coordinates.size.height
             }
     ) {
+        Icon(
+            painter = entry.medianDiff.let {
+                if (it > 0 || entry.oldImpr < ther) {
+                    painterResource(id = com.madsam.otora.R.drawable.ic_wind_up)
+                } else if (it < 0) {
+                    painterResource(id = com.madsam.otora.R.drawable.ic_wind_down)
+                } else {
+                    painterResource(id = com.madsam.otora.R.drawable.ic_flat)
+                }
+            },
+            contentDescription = null,
+            tint = if (entry.medianDiff > 0 || entry.oldImpr < ther)
+                Colors.RANKING_GREEN
+            else if (entry.medianDiff < 0)
+                Colors.RANKING_RED
+            else
+                Colors.RANKING_YELLOW,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .width(30.ndp())
+        )
+        Text(
+            text = if (entry.oldImpr < ther) "NEW" else entry.medianDiff.toString(),
+            fontFamily = sarasaFont,
+            fontSize = 14.nsp(),
+            color = if (entry.medianDiff > 0 || entry.oldImpr < ther)
+                Colors.RANKING_GREEN
+            else if (entry.medianDiff < 0)
+                Colors.RANKING_RED
+            else
+                Colors.RANKING_YELLOW,
+            textAlign = TextAlign.Start,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .width(24.ndp())
+        )
         Text(
             text = entry.index.toString(),
             fontFamily = sarasaBold,
