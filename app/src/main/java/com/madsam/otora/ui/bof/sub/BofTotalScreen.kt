@@ -35,11 +35,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.consts.Colors
-import com.madsam.otora.fonts.sarasaBold
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.BofEntryShow
 import com.madsam.otora.service.BofDataRequestService
@@ -134,11 +134,13 @@ fun BofTotalScreen() {
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
             item {
-                Button(onClick = { selectTime() }, modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Select Date and Time")
-                }
-                Button(onClick = { refreshData() }, modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Refresh Data")
+                Row {
+                    Button(onClick = { selectTime() }, modifier = Modifier.padding(16.dp)) {
+                        Text(text = "Select Date and Time")
+                    }
+                    Button(onClick = { refreshData() }, modifier = Modifier.padding(16.dp)) {
+                        Text(text = "Refresh Data")
+                    }
                 }
             }
             item {
@@ -157,6 +159,7 @@ fun BofTotalScreen() {
                     Text(
                         text = "Total Score Ranking",
                         fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 24.nsp(),
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -186,7 +189,7 @@ fun BofTotalScreen() {
                     Text(
                         text = "",
                         modifier = Modifier
-                            .width(90.ndp())
+                            .width(98.ndp())
                     )
                     Text(
                         text = "",
@@ -202,6 +205,7 @@ fun BofTotalScreen() {
                     Text(
                         text = "Impr",
                         fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 16.nsp(),
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -212,6 +216,7 @@ fun BofTotalScreen() {
                     Text(
                         text = "Median",
                         fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 16.nsp(),
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -223,12 +228,13 @@ fun BofTotalScreen() {
                     Text(
                         text = "Avg",
                         fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 16.nsp(),
                         color = Color.White,
                         textAlign = TextAlign.End,
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
-                            .width(70.ndp())
+                            .width(74.ndp())
                     )
                 }
             }
@@ -283,17 +289,19 @@ fun BofEntryRowTotal(
         Text(
             text = if (entry.oldTotal == 0) "NEW" else entry.rankDiff.toString(),
             fontFamily = sarasaFont,
+            fontWeight = FontWeight.Bold,
             fontSize = 14.nsp(),
             color = if (entry.rankDiff < 0) Colors.RANKING_RED else if (entry.rankDiff > 0) Colors.RANKING_GREEN else Colors.RANKING_YELLOW,
             textAlign = TextAlign.Start,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
-                .width(24.ndp())
+                .width(32.ndp())
         )
         Text(
             text = entry.index.toString(),
-            fontFamily = sarasaBold,
-            fontSize = 18.nsp(),
+            fontFamily = sarasaFont,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.nsp(),
             color = Color.White,
             textAlign = TextAlign.End,
             modifier = Modifier
@@ -306,6 +314,7 @@ fun BofEntryRowTotal(
                 fontSize = 14.nsp(),
                 lineHeight = 16.nsp(),
                 fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.End,
                 color = Color.White,
                 maxLines = 1,
@@ -368,7 +377,8 @@ fun BofEntryRowTotal(
                         color = Color.White,
                         fontSize = 14.nsp(),
                         lineHeight = 18.nsp(),
-                        fontFamily = sarasaBold,
+                        fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
                         overflow = TextOverflow.Visible,
                         maxLines = 1,
                         modifier = Modifier
@@ -405,7 +415,7 @@ fun BofEntryRowTotal(
                         color = Color.White,
                         fontSize = 12.nsp(),
                         lineHeight = 14.nsp(),
-                        fontFamily = sarasaBold,
+                        fontFamily = sarasaFont,
                         overflow = TextOverflow.Visible,
                         maxLines = 1,
                         modifier = Modifier
@@ -417,8 +427,9 @@ fun BofEntryRowTotal(
         }
         Text(
             text = entry.impr.toString(),
-            fontFamily = sarasaBold,
-            fontSize = 18.nsp(),
+            fontFamily = sarasaFont,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.nsp(),
             color = Color.White,
             textAlign = TextAlign.End,
             modifier = Modifier
@@ -426,29 +437,33 @@ fun BofEntryRowTotal(
                 .width(36.ndp())
         )
         Text(
-            text = entry.median.toString(),
-            fontFamily = sarasaBold,
-            fontSize = 18.nsp(),
+            text = CommonUtils.formatNumber(entry.median),
+            fontFamily = sarasaFont,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.nsp(),
             lineHeight = 36.nsp(),
             color = Color.White,
             textAlign = TextAlign.End,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(start = 8.ndp())
-                .width(70.ndp())
+                .width(74.ndp())
                 .background(calculateColor(entry.median))
+                .padding(end = 4.ndp())
         )
         Text(
-            text = entry.avg.toString(),
-            fontFamily = sarasaBold,
-            fontSize = 18.nsp(),
+            text = CommonUtils.formatNumber(entry.avg),
+            fontFamily = sarasaFont,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.nsp(),
             lineHeight = 36.nsp(),
             color = Color.White,
             textAlign = TextAlign.End,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
-                .width(70.ndp())
+                .width(74.ndp())
                 .background(calculateColor(entry.avg))
+                .padding(end = 4.ndp())
         )
     }
 }

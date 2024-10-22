@@ -12,7 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.ui.record.sub.ChunithmUserPage
 import com.madsam.otora.ui.record.sub.MaimaiUserPage
 import com.madsam.otora.ui.record.sub.OsuUserPage
@@ -61,8 +63,10 @@ fun RecordScreen() {
 
 @Composable
 fun TestPage4() {
-    Text(text = "TestPage4",
-        modifier = Modifier.fillMaxSize()
+    Text(text = "TestPage4aaaaaaaaaaaaaaaaaaaAAAAAAAAA啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊",
+        modifier = Modifier.fillMaxSize(),
+        fontFamily = sarasaFont,
+        fontSize = 20.sp
     )
 }
 

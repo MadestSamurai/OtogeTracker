@@ -3,10 +3,9 @@ package com.madsam.otora.activity
 import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.View
-import android.view.Window
 import android.view.animation.AccelerateInterpolator
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,7 +29,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.ui.bof.BofScreen
 import com.madsam.otora.ui.record.RecordScreen
-import com.madsam.otora.ui.theme.AppTheme
 
 /**
  * 项目名: OtogeTracker
@@ -54,11 +52,13 @@ fun MainActivityScreen() {
                 val currentRoute = navBackStackEntry?.arguments?.getString(KEY_ROUTE)
                 items.forEach { screen ->
                     NavigationBarItem(
-                        icon = { Icon(
-                            Icons.Filled.Favorite,
-                            contentDescription = null,
-                            modifier = Modifier.padding(bottom = 2.dp)
-                        ) },
+                        icon = {
+                            Icon(
+                                Icons.Filled.Favorite,
+                                contentDescription = null,
+                                modifier = Modifier.padding(bottom = 2.dp)
+                            )
+                        },
                         label = { Text(screen.label) },
                         alwaysShowLabel = false,
                         selected = currentRoute == screen.route,
@@ -93,10 +93,9 @@ fun MainActivityScreen() {
     }
 }
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
 
         val splashScreen = installSplashScreen()
         splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
@@ -112,10 +111,8 @@ class MainActivity : ComponentActivity() {
             fadeOut.start()
         }
         setContent {
-            AppTheme {
-                Surface(tonalElevation = 5.dp) {
-                    MainActivityScreen()
-                }
+            Surface(tonalElevation = 5.dp) {
+                MainActivityScreen()
             }
         }
     }

@@ -35,11 +35,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.consts.Colors
-import com.madsam.otora.fonts.sarasaBold
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.BofEntryShow
 import com.madsam.otora.service.BofDataRequestService
@@ -77,13 +77,19 @@ fun BofAvgScreen() {
 
     fun selectTime() {
         val calendar = Calendar.getInstance()
-        DatePickerDialog(context, { _, year, month, dayOfMonth ->
-            selectedDate = LocalDate.of(year, month + 1, dayOfMonth)
-            TimePickerDialog(context, { _, hourOfDay, minute ->
-                selectedTime = String.format("%02d:%02d", hourOfDay, minute)
-                refreshData()
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
-        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                selectedDate = LocalDate.of(year, month + 1, dayOfMonth)
+                TimePickerDialog(context, { _, hourOfDay, minute ->
+                    selectedTime = String.format("%02d:%02d", hourOfDay, minute)
+                    refreshData()
+                }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
     }
 
     fun roundDownToNearestFiveMinutes(hms: String): String {
@@ -101,14 +107,19 @@ fun BofAvgScreen() {
         if (selectedTime == "-1") {
             data = bofDataRequestService.getBofttEntryLatest()
         } else {
-            val timeInMillis = CommonUtils.ymdToMillis(selectedDate.toString(), roundDownToNearestFiveMinutes(selectedTime))
+            val timeInMillis = CommonUtils.ymdToMillis(
+                selectedDate.toString(),
+                roundDownToNearestFiveMinutes(selectedTime)
+            )
             val startInMillis = CommonUtils.ymdToMillis("2024-10-13", "00:00:00")
-            data = bofDataRequestService.getBofttEntryByTime(((timeInMillis - startInMillis)/10).toInt())
+            data =
+                bofDataRequestService.getBofttEntryByTime(((timeInMillis - startInMillis) / 10).toInt())
         }
         // Sort the data by total in descending order
         var sortedData = data.sortedByDescending { it.oldImpr }
         thresholdImprOld = max(sortedData.getOrNull(199)?.oldImpr ?: 0, 3)
-        var filteredData = sortedData.filter { it.oldImpr >= thresholdImprOld }.sortedByDescending { it.oldAvg }
+        var filteredData =
+            sortedData.filter { it.oldImpr >= thresholdImprOld }.sortedByDescending { it.oldAvg }
         // Assign average rank
         var currentOldRank = 1
         filteredData.forEachIndexed { index, entry ->
@@ -138,11 +149,13 @@ fun BofAvgScreen() {
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
             item {
-                Button(onClick = { selectTime() }, modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Select Date and Time")
-                }
-                Button(onClick = { refreshData() }, modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Refresh Data")
+                Row {
+                    Button(onClick = { selectTime() }, modifier = Modifier.padding(16.dp)) {
+                        Text(text = "Select Date and Time")
+                    }
+                    Button(onClick = { refreshData() }, modifier = Modifier.padding(16.dp)) {
+                        Text(text = "Refresh Data")
+                    }
                 }
             }
             item {
@@ -161,6 +174,7 @@ fun BofAvgScreen() {
                     Text(
                         text = "Avg Ranking - Exclude Impr below $thresholdImpr",
                         fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 24.nsp(),
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -190,7 +204,7 @@ fun BofAvgScreen() {
                     Text(
                         text = "",
                         modifier = Modifier
-                            .width(36.ndp())
+                            .width(98.ndp())
                     )
                     Text(
                         text = "",
@@ -206,6 +220,7 @@ fun BofAvgScreen() {
                     Text(
                         text = "Impr",
                         fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 16.nsp(),
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -216,7 +231,7 @@ fun BofAvgScreen() {
                 }
             }
             itemsIndexed(todayLatestData.value) { index, entry ->
-                BofEntryRowAvg(entry, index+1, thresholdImprOld)
+                BofEntryRowAvg(entry, index + 1, thresholdImprOld)
             }
         }
     }
@@ -265,6 +280,7 @@ fun BofEntryRowAvg(
         Text(
             text = if (entry.oldImpr < ther) "NEW" else entry.avgDiff.toString(),
             fontFamily = sarasaFont,
+            fontWeight = FontWeight.Bold,
             fontSize = 14.nsp(),
             color = if (entry.avgDiff > 0 || entry.oldImpr < ther)
                 Colors.RANKING_GREEN
@@ -275,12 +291,13 @@ fun BofEntryRowAvg(
             textAlign = TextAlign.Start,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
-                .width(24.ndp())
+                .width(32.ndp())
         )
         Text(
             text = entry.index.toString(),
-            fontFamily = sarasaBold,
-            fontSize = 18.nsp(),
+            fontFamily = sarasaFont,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.nsp(),
             color = Color.White,
             textAlign = TextAlign.End,
             modifier = Modifier
@@ -293,6 +310,7 @@ fun BofEntryRowAvg(
                 fontSize = 14.nsp(),
                 lineHeight = 16.nsp(),
                 fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.End,
                 color = Color.White,
                 maxLines = 1,
@@ -352,13 +370,14 @@ fun BofEntryRowAvg(
                             )
                     )
                     Text(
-                        text = entry.avg.toString(),
+                        text = CommonUtils.formatNumber(entry.avg),
                         color = Color.White,
+                        fontWeight = FontWeight.Bold,
 //                        fontSize = 14.nsp(),
 //                        lineHeight = 18.nsp(),
                         fontSize = 22.nsp(),
                         lineHeight = 24.nsp(),
-                        fontFamily = sarasaBold,
+                        fontFamily = sarasaFont,
                         overflow = TextOverflow.Visible,
                         maxLines = 1,
                         modifier = Modifier
@@ -395,7 +414,7 @@ fun BofEntryRowAvg(
 //                        color = Color.White,
 //                        fontSize = 12.nsp(),
 //                        lineHeight = 14.nsp(),
-//                        fontFamily = sarasaBold,
+//                        fontFamily = sarasaFont,
 //                        overflow = TextOverflow.Visible,
 //                        maxLines = 1,
 //                        modifier = Modifier
@@ -407,8 +426,9 @@ fun BofEntryRowAvg(
         }
         Text(
             text = entry.impr.toString(),
-            fontFamily = sarasaBold,
-            fontSize = 18.nsp(),
+            fontFamily = sarasaFont,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.nsp(),
             color = Color.White,
             textAlign = TextAlign.End,
             modifier = Modifier

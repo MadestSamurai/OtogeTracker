@@ -33,11 +33,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.consts.Colors
-import com.madsam.otora.fonts.sarasaBold
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.BofEntryShow
 import com.madsam.otora.service.BofDataRequestService
@@ -123,11 +123,13 @@ fun BofDiffScreen() {
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
             item {
-                Button(onClick = { selectTime() }, modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Select Date and Time")
-                }
-                Button(onClick = { refreshData() }, modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Refresh Data")
+                Row {
+                    Button(onClick = { selectTime() }, modifier = Modifier.padding(16.dp)) {
+                        Text(text = "Select Date and Time")
+                    }
+                    Button(onClick = { refreshData() }, modifier = Modifier.padding(16.dp)) {
+                        Text(text = "Refresh Data")
+                    }
                 }
             }
             item {
@@ -146,6 +148,7 @@ fun BofDiffScreen() {
                     Text(
                         text = "Total Difference Ranking",
                         fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 24.nsp(),
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -184,13 +187,14 @@ fun BofDiffScreen() {
                             .fillMaxWidth(0.5f)
                     )
                     Text(
-                        text = " ",
+                        text = "",
                         modifier = Modifier
-                            .fillMaxWidth(0.72f)
+                            .fillMaxWidth(0.85f)
                     )
                     Text(
                         text = "ImprDiff",
                         fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 16.nsp(),
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -228,8 +232,9 @@ fun BofEntryRowDiv(
     ) {
         Text(
             text = entry.index.toString(),
-            fontFamily = sarasaBold,
-            fontSize = 18.nsp(),
+            fontFamily = sarasaFont,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.nsp(),
             color = Color.White,
             textAlign = TextAlign.End,
             modifier = Modifier
@@ -242,6 +247,7 @@ fun BofEntryRowDiv(
                 fontSize = 14.nsp(),
                 lineHeight = 16.nsp(),
                 fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.End,
                 color = Color.White,
                 maxLines = 1,
@@ -307,7 +313,8 @@ fun BofEntryRowDiv(
 //                        lineHeight = 18.nsp(),
                         fontSize = 22.nsp(),
                         lineHeight = 24.nsp(),
-                        fontFamily = sarasaBold,
+                        fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
                         overflow = TextOverflow.Visible,
                         maxLines = 1,
                         modifier = Modifier
@@ -319,8 +326,9 @@ fun BofEntryRowDiv(
         }
         Text(
             text = entry.imprDiff.toString(),
-            fontFamily = sarasaBold,
-            fontSize = 18.nsp(),
+            fontFamily = sarasaFont,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.nsp(),
             color = Color.White,
             textAlign = TextAlign.End,
             modifier = Modifier

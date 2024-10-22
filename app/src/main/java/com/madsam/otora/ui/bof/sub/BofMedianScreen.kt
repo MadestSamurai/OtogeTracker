@@ -35,11 +35,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.madsam.otora.consts.Colors
-import com.madsam.otora.fonts.sarasaBold
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.BofEntryShow
 import com.madsam.otora.service.BofDataRequestService
@@ -138,11 +139,13 @@ fun BofMedianScreen() {
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
             item {
-                Button(onClick = { selectTime() }, modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Select Date and Time")
-                }
-                Button(onClick = { refreshData() }, modifier = Modifier.padding(16.dp)) {
-                    Text(text = "Refresh Data")
+                Row {
+                    Button(onClick = { selectTime() }, modifier = Modifier.padding(16.dp)) {
+                        Text(text = "Select Date and Time")
+                    }
+                    Button(onClick = { refreshData() }, modifier = Modifier.padding(16.dp)) {
+                        Text(text = "Refresh Data")
+                    }
                 }
             }
             item {
@@ -161,6 +164,7 @@ fun BofMedianScreen() {
                     Text(
                         text = "Median Ranking - Exclude Impr below $thresholdImpr",
                         fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 24.nsp(),
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -190,7 +194,7 @@ fun BofMedianScreen() {
                     Text(
                         text = "",
                         modifier = Modifier
-                            .width(36.ndp())
+                            .width(98.ndp())
                     )
                     Text(
                         text = "",
@@ -206,6 +210,7 @@ fun BofMedianScreen() {
                     Text(
                         text = "Impr",
                         fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
                         fontSize = 16.nsp(),
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -231,7 +236,6 @@ fun BofEntryRowMedian(
 ) {
     val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
     val barWidthFraction = (entry.median.toFloat() / 1000) * 1f
-    val barWidthOldFaction = ((entry.oldMedian).toFloat() / 1000) * 1f
     var rowHeight = remember { mutableIntStateOf(0) }
 
     Row(
@@ -267,6 +271,7 @@ fun BofEntryRowMedian(
             text = if (entry.oldImpr < ther) "NEW" else entry.medianDiff.toString(),
             fontFamily = sarasaFont,
             fontSize = 14.nsp(),
+            fontWeight = FontWeight.Bold,
             color = if (entry.medianDiff > 0 || entry.oldImpr < ther)
                 Colors.RANKING_GREEN
             else if (entry.medianDiff < 0)
@@ -280,8 +285,9 @@ fun BofEntryRowMedian(
         )
         Text(
             text = entry.index.toString(),
-            fontFamily = sarasaBold,
-            fontSize = 18.nsp(),
+            fontFamily = sarasaFont,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.nsp(),
             color = Color.White,
             textAlign = TextAlign.End,
             modifier = Modifier
@@ -294,7 +300,9 @@ fun BofEntryRowMedian(
                 fontSize = 14.nsp(),
                 lineHeight = 16.nsp(),
                 fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.End,
+                letterSpacing = (-0.1).nsp(),
                 color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -353,13 +361,14 @@ fun BofEntryRowMedian(
                             )
                     )
                     Text(
-                        text = entry.median.toString(),
+                        text = CommonUtils.formatNumber(entry.median),
                         color = Color.White,
 //                        fontSize = 14.nsp(),
 //                        lineHeight = 18.nsp(),
                         fontSize = 22.nsp(),
                         lineHeight = 24.nsp(),
-                        fontFamily = sarasaBold,
+                        fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
                         overflow = TextOverflow.Visible,
                         maxLines = 1,
                         modifier = Modifier
@@ -396,7 +405,7 @@ fun BofEntryRowMedian(
 //                        color = Color.White,
 //                        fontSize = 12.nsp(),
 //                        lineHeight = 14.nsp(),
-//                        fontFamily = sarasaBold,
+//                        fontFamily = sarasaFont,
 //                        overflow = TextOverflow.Visible,
 //                        maxLines = 1,
 //                        modifier = Modifier
@@ -408,8 +417,9 @@ fun BofEntryRowMedian(
         }
         Text(
             text = entry.impr.toString(),
-            fontFamily = sarasaBold,
-            fontSize = 18.nsp(),
+            fontFamily = sarasaFont,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.nsp(),
             color = Color.White,
             textAlign = TextAlign.End,
             modifier = Modifier

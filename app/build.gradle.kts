@@ -10,7 +10,7 @@ android {
     compileSdk = 35
     defaultConfig {
         applicationId = "com.madsam.otora"
-        minSdk = 26
+        minSdk = 27
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
@@ -54,6 +54,7 @@ dependencies {
     // Android X
     implementation(libs.androidx.constraintlayout.constraintlayout.compose)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.appcompat)
     implementation(libs.foundation)
     implementation(libs.androidx.runtime)
     implementation(libs.androidx.navigation.compose)

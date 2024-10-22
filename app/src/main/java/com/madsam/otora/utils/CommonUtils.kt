@@ -186,6 +186,20 @@ object CommonUtils {
     }
 
     /**
+     * 浮点数格式化成两位小数
+     *
+     * @param value 长整型
+     * @return 两位小数字符串
+     */
+    fun formatNumber(number: Double): String {
+        return if (number == number.toInt().toDouble()) {
+            number.toInt().toString()
+        } else {
+            String.format("%.2f", number).replace(Regex("0*$"), "").replace(Regex("\\.$"), "")
+        }
+    }
+
+    /**
      * 获取等级对应的颜色
      *
      * @param value 整型
