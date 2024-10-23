@@ -4,7 +4,9 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +20,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -33,36 +37,43 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.modifier.modifierLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.OsuDiffColor
 import com.madsam.otora.fonts.sarasaFont
-import com.madsam.otora.model.bof.BofEntryShow
+import com.madsam.otora.model.bof.BofTeamShow
 import com.madsam.otora.service.BofDataRequestService
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
+import com.patrykandpatrick.vico.compose.cartesian.layer.stacked
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.util.Calendar
+import kotlin.text.toFloat
 
 /**
  * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.ui.bof.sub.BofScreen
+ * 文件名: com.madsam.otora.ui.bof.sub.BofTeamScreen
  * 创建者: MadSamurai
- * 创建时间: 2024/10/7
- * 描述: BOF数据展示界面
+ * 创建时间: 2024/10/23
+ * 描述: BOF团队数据展示界面
  */
-
 @Composable
-fun BofTotalScreen() {
+fun BofTeamScreen() {
     val context = LocalContext.current
     val bofDataRequestService = BofDataRequestService(context)
-    val todayLatestData = remember { mutableStateOf<List<BofEntryShow>>(emptyList()) }
+    val todayLatestData = remember { mutableStateOf<List<BofTeamShow>>(emptyList()) }
     val coroutineScope = rememberCoroutineScope()
     val dateTime = LocalDate.now()
     var selectedDate by remember { mutableStateOf(dateTime) }
@@ -70,19 +81,25 @@ fun BofTotalScreen() {
 
     fun refreshData() {
         coroutineScope.launch {
-            bofDataRequestService.getBofttData(dateTime)
+            bofDataRequestService.getBofttTeamData(dateTime)
         }
     }
 
     fun selectTime() {
         val calendar = Calendar.getInstance()
-        DatePickerDialog(context, { _, year, month, dayOfMonth ->
-            selectedDate = LocalDate.of(year, month + 1, dayOfMonth)
-            TimePickerDialog(context, { _, hourOfDay, minute ->
-                selectedTime = String.format("%02d:%02d", hourOfDay, minute)
-                refreshData()
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
-        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                selectedDate = LocalDate.of(year, month + 1, dayOfMonth)
+                TimePickerDialog(context, { _, hourOfDay, minute ->
+                    selectedTime = String.format("%02d:%02d", hourOfDay, minute)
+                    refreshData()
+                }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
     }
 
     fun roundDownToNearestFiveMinutes(hms: String): String {
@@ -94,13 +111,17 @@ fun BofTotalScreen() {
 
     LaunchedEffect(selectedDate, selectedTime) {
         Log.d("BofScreen", "selectedDate: $selectedDate, selectedTime: $selectedTime")
-        val data: List<BofEntryShow>
+        val data: List<BofTeamShow>
         if (selectedTime == "-1") {
-            data = bofDataRequestService.getBofttEntryLatest()
+            data = bofDataRequestService.getBofttTeamLatest()
         } else {
-            val timeInMillis = CommonUtils.ymdToMillis(selectedDate.toString(), roundDownToNearestFiveMinutes(selectedTime))
+            val timeInMillis = CommonUtils.ymdToMillis(
+                selectedDate.toString(),
+                roundDownToNearestFiveMinutes(selectedTime)
+            )
             val startInMillis = CommonUtils.ymdToMillis("2024-10-13", "00:00:00")
-            data = bofDataRequestService.getBofttEntryByTime(((timeInMillis - startInMillis)/10).toInt())
+            data =
+                bofDataRequestService.getBofttTeamByTime(((timeInMillis - startInMillis) / 10).toInt())
         }
         // Sort the data by oldTotal in descending order
         var sortedData = data.sortedByDescending { it.oldTotal }
@@ -129,7 +150,7 @@ fun BofTotalScreen() {
         todayLatestData.value = sortedData
     }
 
-    val maxTotal = todayLatestData.value.maxOfOrNull { it.total } ?: 1
+    val maxTotal = todayLatestData.value.maxOfOrNull { it.total } ?: 1.0
 
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
@@ -157,7 +178,7 @@ fun BofTotalScreen() {
                     Text(text = "No Data at $selectedDate $selectedTimeStr")
                 } else {
                     Text(
-                        text = "Total Score Ranking",
+                        text = "Total Team Score Ranking",
                         fontFamily = sarasaFont,
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.nsp(),
@@ -195,12 +216,12 @@ fun BofTotalScreen() {
                         text = "",
                         modifier = Modifier
                             .padding(end = 8.dp, top = 2.dp)
-                            .fillMaxWidth(0.5f)
+                            .fillMaxWidth(0.7f)
                     )
                     Text(
                         text = " ",
                         modifier = Modifier
-                            .fillMaxWidth(0.5f)
+                            .fillMaxWidth(0.3f)
                     )
                     Text(
                         text = "Impr",
@@ -211,6 +232,7 @@ fun BofTotalScreen() {
                         textAlign = TextAlign.End,
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
+                            .padding(start = 26.ndp())
                             .width(36.ndp())
                     )
                     Text(
@@ -222,24 +244,13 @@ fun BofTotalScreen() {
                         textAlign = TextAlign.End,
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
-                            .padding(start = 8.ndp())
+                            .padding(start = 44.ndp())
                             .width(70.ndp())
-                    )
-                    Text(
-                        text = "Avg",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .width(74.ndp())
                     )
                 }
             }
             itemsIndexed(todayLatestData.value) { index, entry ->
-                BofEntryRowTotal(entry, index+1, maxTotal)
+                BofTeamRowTotal(entry, index + 1, maxTotal)
             }
         }
     }
@@ -247,14 +258,14 @@ fun BofTotalScreen() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BofEntryRowTotal(
-    entry: BofEntryShow,
+fun BofTeamRowTotal(
+    entry: BofTeamShow,
     index: Int,
-    maxTotal: Int
+    maxTotal: Double
 ) {
     val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
-    val barWidthFraction = (entry.total.toFloat() / maxTotal) * 1f
-    val barWidthOldFaction = ((entry.oldTotal).toFloat() / maxTotal) * 1f
+    val barWidthFraction = (entry.total / maxTotal) * 1f
+    val barWidthOldFaction = ((entry.oldTotal) / maxTotal) * 1f
     var rowHeight = remember { mutableIntStateOf(0) }
 
     fun calculateColor(value: Double): Color {
@@ -287,7 +298,7 @@ fun BofEntryRowTotal(
                 .width(30.ndp())
         )
         Text(
-            text = if (entry.oldTotal == 0) "NEW" else entry.rankDiff.toString(),
+            text = if (entry.oldTotal < 1.0) "NEW" else entry.rankDiff.toString(),
             fontFamily = sarasaFont,
             fontWeight = FontWeight.Bold,
             fontSize = 14.nsp(),
@@ -309,51 +320,13 @@ fun BofEntryRowTotal(
                 .width(36.ndp())
         )
         Column {
-            Text(
-                text = entry.title,
-                fontSize = 15.nsp(),
-                lineHeight = 16.nsp(),
-                fontFamily = sarasaFont,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.End,
-                color = Color.White,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .padding(end = 8.ndp(), top = 2.ndp())
-                    .fillMaxWidth(0.5f)
-                    .horizontalScroll(rememberScrollState())
-                // use horizontalScroll for capturing, basicMarquee is more useful
-//                    .basicMarquee(
-//                        spacing = MarqueeSpacing(10.dp)
-//                    )
-            )
-            Text(
-                text = entry.artist,
-                fontSize = 12.nsp(),
-                lineHeight = 13.nsp(),
-                fontFamily = sarasaFont,
-                textAlign = TextAlign.End,
-                color = Colors.TEXT_GRAY,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .padding(end = 8.ndp())
-                    .fillMaxWidth(0.5f)
-                    .horizontalScroll(rememberScrollState())
-                // use horizontalScroll for capturing, basicMarquee is more useful
-//                    .basicMarquee(
-//                        spacing = MarqueeSpacing(10.dp)
-//                    )
-            )
-        }
-        Column {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.5f)
+                    .fillMaxWidth(0.8f)
                     .background(
                         color = Color.Transparent,
                     )
+                    .padding(start = 13.ndp())
             ) {
                 Box(
                     Modifier
@@ -365,18 +338,21 @@ fun BofEntryRowTotal(
                     Box(
                         modifier = Modifier
                             .padding(end = 20.ndp())
-                            .fillMaxWidth(barWidthFraction)
+                            .fillMaxWidth(barWidthFraction.toFloat())
                             .height(18.ndp())
                             .background(
                                 color = Colors.RANKING_RED,
-                                shape = RoundedCornerShape(topEnd = 50.ndp(), bottomEnd = 50.ndp())
+                                shape = RoundedCornerShape(
+                                    topEnd = 50.ndp(),
+                                    bottomEnd = 50.ndp()
+                                )
                             )
                     )
                     Text(
-                        text = entry.total.toString(),
+                        text = CommonUtils.formatNumber(entry.total),
                         color = Color.White,
                         fontSize = 14.nsp(),
-                        lineHeight = 18.nsp(),
+                        lineHeight = 16.nsp(),
                         fontFamily = sarasaFont,
                         fontWeight = FontWeight.Bold,
                         overflow = TextOverflow.Visible,
@@ -389,10 +365,11 @@ fun BofEntryRowTotal(
             }
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.5f)
+                    .fillMaxWidth(0.8f)
                     .background(
                         color = Color.Transparent,
                     )
+                    .padding(start = 13.ndp())
             ) {
                 Box(
                     Modifier
@@ -403,15 +380,18 @@ fun BofEntryRowTotal(
                     Box(
                         modifier = Modifier
                             .padding(end = 20.ndp())
-                            .fillMaxWidth(barWidthOldFaction)
+                            .fillMaxWidth(barWidthOldFaction.toFloat())
                             .height(14.ndp())
                             .background(
                                 color = Colors.RANKING_BLUE,
-                                shape = RoundedCornerShape(topEnd = 10.ndp(), bottomEnd = 10.ndp())
+                                shape = RoundedCornerShape(
+                                    topEnd = 10.ndp(),
+                                    bottomEnd = 10.ndp()
+                                )
                             )
                     )
                     Text(
-                        text = entry.oldTotal.toString(),
+                        text = CommonUtils.formatNumber(entry.oldTotal),
                         color = Color.White,
                         fontSize = 12.nsp(),
                         lineHeight = 14.nsp(),
@@ -424,46 +404,136 @@ fun BofEntryRowTotal(
                     )
                 }
             }
+            Text(
+                text = entry.team,
+                fontSize = 16.nsp(),
+                lineHeight = 16.nsp(),
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Start,
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .padding(start = 13.ndp(), end = 8.ndp(), top = 2.ndp())
+                    .fillMaxWidth(0.8f)
+                    .horizontalScroll(rememberScrollState())
+                // use horizontalScroll for capturing, basicMarquee is more useful
+//                    .basicMarquee(
+//                        spacing = MarqueeSpacing(10.dp)
+//                    )
+            )
+
+            val titles = listOf(entry.title1, entry.title2, entry.title3, entry.title4)
+            val artists = listOf(entry.artist1, entry.artist2, entry.artist3, entry.artist4)
+            val fss = listOf(entry.fs1, entry.fs2, entry.fs3, entry.fs4)
+            val totals = listOf(entry.total1, entry.total2, entry.total3, entry.total4)
+
+            titles.forEachIndexed { index, title ->
+                if (title.isNotEmpty()) {
+                    val inlineContent = mapOf(
+                        "icon" to InlineTextContent(
+                            Placeholder(
+                                width = 13.nsp(),
+                                height = 11.nsp(),
+                                placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(id = com.madsam.otora.R.drawable.ic_star),
+                                contentDescription = null,
+                                tint = if (fss[index] == "1") Colors.RANKING_YELLOW else Color.Transparent,
+                            )
+                        }
+                    )
+                    Row {
+                        Text(
+                            text = buildAnnotatedString {
+                                appendInlineContent("icon", "[icon]")
+                                append("$title - ${artists[index]}")
+                            },
+                            inlineContent = inlineContent,
+                            fontSize = 11.nsp(),
+                            lineHeight = 13.nsp(),
+                            fontFamily = sarasaFont,
+                            textAlign = TextAlign.Start,
+                            color = Colors.TEXT_GRAY,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier
+                                .padding(end = 10.ndp())
+                                .fillMaxWidth(0.72f)
+                                .horizontalScroll(rememberScrollState())
+                                // use horizontalScroll for capturing, basicMarquee is more useful
+//                                .basicMarquee(
+//                                    spacing = MarqueeSpacing(10.dp)
+//                                )
+                        )
+                        Text(
+                            text = totals[index],
+                            fontSize = 11.nsp(),
+                            lineHeight = 13.nsp(),
+                            fontFamily = sarasaFont,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.End,
+                            color = Colors.TEXT_GRAY,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier
+                                .padding(end = 8.ndp())
+                                .fillMaxWidth(0.22f)
+                                .horizontalScroll(rememberScrollState())
+                                // use horizontalScroll for capturing, basicMarquee is more useful
+                        )
+                    }
+                }
+            }
         }
+
         Text(
             text = entry.impr.toString(),
             fontFamily = sarasaFont,
             fontWeight = FontWeight.Bold,
-            fontSize = 20.nsp(),
+            fontSize = 24.nsp(),
             color = Color.White,
             textAlign = TextAlign.End,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
-                .width(36.ndp())
+                .width(48.ndp())
         )
-        Text(
-            text = CommonUtils.formatNumber(entry.median),
-            fontFamily = sarasaFont,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.nsp(),
-            lineHeight = 36.nsp(),
-            color = Color.White,
-            textAlign = TextAlign.End,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .padding(start = 8.ndp())
-                .width(74.ndp())
-                .background(calculateColor(entry.median))
-                .padding(end = 4.ndp())
-        )
-        Text(
-            text = CommonUtils.formatNumber(entry.avg),
-            fontFamily = sarasaFont,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.nsp(),
-            lineHeight = 36.nsp(),
-            color = Color.White,
-            textAlign = TextAlign.End,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .width(74.ndp())
-                .background(calculateColor(entry.avg))
-                .padding(end = 4.ndp())
-        )
+        val medianValue = entry.median.toDoubleOrNull()
+        if (medianValue != null) {
+            Text(
+                text = CommonUtils.formatNumber(medianValue),
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.nsp(),
+                lineHeight = 114.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(start = 8.ndp())
+                    .width(110.ndp())
+                    .background(calculateColor(medianValue))
+                    .padding(end = 4.ndp())
+            )
+        } else {
+            Text(
+                text = entry.median,
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.nsp(),
+                lineHeight = 114.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(start = 8.ndp())
+                    .width(110.ndp())
+                    .background(Color.Black)
+                    .padding(end = 4.ndp())
+            )
+        }
     }
 }

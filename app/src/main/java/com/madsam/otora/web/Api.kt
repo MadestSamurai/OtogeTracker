@@ -1,6 +1,7 @@
 package com.madsam.otora.web
 
 import com.madsam.otora.model.bof.BofEntry
+import com.madsam.otora.model.bof.BofTeam
 import com.madsam.otora.model.web.OsuCardList
 import com.madsam.otora.model.web.OsuHistorical
 import com.madsam.otora.model.web.OsuRecentActivity
@@ -66,4 +67,9 @@ interface Api {
     fun getBofttData(
         @Path("date") date: String
     ): Call<List<BofEntry>>
+
+    @GET("bofttteamjson/{date}.json")
+    fun getBofttTeamData(
+        @Path("date") date: String
+    ): Call<List<BofTeam>>
 }

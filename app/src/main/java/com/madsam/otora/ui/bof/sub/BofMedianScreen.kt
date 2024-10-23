@@ -39,7 +39,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.BofEntryShow
@@ -57,7 +56,7 @@ import kotlin.math.max
  * 文件名: com.madsam.otora.ui.bof.sub.BofScreen
  * 创建者: MadSamurai
  * 创建时间: 2024/10/7
- * 描述: TODO
+ * 描述: BOF数据展示界面
  */
 
 @Composable
@@ -297,7 +296,7 @@ fun BofEntryRowMedian(
         Column {
             Text(
                 text = entry.title,
-                fontSize = 14.nsp(),
+                fontSize = 15.nsp(),
                 lineHeight = 16.nsp(),
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,

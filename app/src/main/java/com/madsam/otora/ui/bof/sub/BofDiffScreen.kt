@@ -53,7 +53,7 @@ import java.util.Calendar
  * 文件名: com.madsam.otora.ui.bof.sub.BofScreen
  * 创建者: MadSamurai
  * 创建时间: 2024/10/7
- * 描述: TODO
+ * 描述: BOF数据展示界面
  */
 
 @Composable
@@ -244,7 +244,7 @@ fun BofEntryRowDiv(
         Column {
             Text(
                 text = entry.title,
-                fontSize = 14.nsp(),
+                fontSize = 15.nsp(),
                 lineHeight = 16.nsp(),
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,

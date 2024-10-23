@@ -1,7 +1,7 @@
 [versions]
 accompanistThemeadapterMaterial3 = "0.34.0" # Not newest version because of a bug of screenshot
 activity = "1.9.2"
-appcompat = "1.6.1"
+appcompat = "1.6.1" # Not newest version because of a bug of screenshot
 coreSplashscreen = "1.1.0-rc01"
 glanceAppwidget = "1.1.0" # Not newest version because of a bug of ColorProvider
 glanceMaterial3 = "1.1.0" # Not newest version because of a bug of ColorProvider
