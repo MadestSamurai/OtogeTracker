@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.madsam.otora.entity.bof.BofPointEntity
 import com.madsam.otora.entity.bof.BofTeamPointEntity
 
 /**
@@ -23,9 +22,6 @@ interface BofTeamPointDao {
     @Update
     fun updateAll(points: List<BofTeamPointEntity>)
 
-    @Query("SELECT * FROM bof_team_points WHERE timeAndEntry BETWEEN :startId AND :endId")
-    fun getPointsByRange(startId: Int, endId: Int): List<BofTeamPointEntity>
-
-    @Query("SELECT MAX(timeAndEntry) FROM bof_team_points")
-    fun getMaxId(): Int
+    @Query("SELECT * FROM bof_team_points WHERE time BETWEEN :start AND :end")
+    fun getPointsByRange(start: Long, end: Long): List<BofTeamPointEntity>
 }

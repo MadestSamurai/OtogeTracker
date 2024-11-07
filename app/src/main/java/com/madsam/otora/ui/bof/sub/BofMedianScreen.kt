@@ -102,8 +102,7 @@ fun BofMedianScreen() {
             data = bofDataRequestService.getBofttEntryLatest()
         } else {
             val timeInMillis = CommonUtils.ymdToMillis(selectedDate.toString(), roundDownToNearestFiveMinutes(selectedTime))
-            val startInMillis = CommonUtils.ymdToMillis("2024-10-13", "00:00:00")
-            data = bofDataRequestService.getBofttEntryByTime(((timeInMillis - startInMillis)/10).toInt())
+            data = bofDataRequestService.getBofttEntryByTime(timeInMillis)
         }
         // Sort the data by total in descending order
         var sortedData = data.sortedByDescending { it.oldImpr }
@@ -146,6 +145,11 @@ fun BofMedianScreen() {
                         Text(text = "Refresh Data")
                     }
                 }
+            }
+            var isCompare: Boolean = if (todayLatestData.value.isNotEmpty()) {
+                todayLatestData.value[0].oldTotal != 0
+            } else {
+                false
             }
             item {
                 val selectedTimeStr: String = if (selectedTime == "-1") {
@@ -220,7 +224,7 @@ fun BofMedianScreen() {
                 }
             }
             itemsIndexed(todayLatestData.value) { index, entry ->
-                BofEntryRowMedian(entry, index+1, thresholdImprOld)
+                BofEntryRowMedian(entry, index+1, thresholdImprOld, isCompare)
             }
         }
     }
@@ -231,7 +235,8 @@ fun BofMedianScreen() {
 fun BofEntryRowMedian(
     entry: BofEntryShow,
     index: Int,
-    ther: Int
+    ther: Int,
+    isCompare: Boolean
 ) {
     val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
     val barWidthFraction = (entry.median.toFloat() / 1000) * 1f
@@ -245,43 +250,45 @@ fun BofEntryRowMedian(
                 rowHeight.intValue = coordinates.size.height
             }
     ) {
-        Icon(
-            painter = entry.medianDiff.let {
-                if (it > 0 || entry.oldImpr < ther) {
-                    painterResource(id = com.madsam.otora.R.drawable.ic_wind_up)
-                } else if (it < 0) {
-                    painterResource(id = com.madsam.otora.R.drawable.ic_wind_down)
-                } else {
-                    painterResource(id = com.madsam.otora.R.drawable.ic_flat)
-                }
-            },
-            contentDescription = null,
-            tint = if (entry.medianDiff > 0 || entry.oldImpr < ther)
-                Colors.RANKING_GREEN
-            else if (entry.medianDiff < 0)
-                Colors.RANKING_RED
-            else
-                Colors.RANKING_YELLOW,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .width(30.ndp())
-        )
-        Text(
-            text = if (entry.oldImpr < ther) "NEW" else entry.medianDiff.toString(),
-            fontFamily = sarasaFont,
-            fontSize = 14.nsp(),
-            fontWeight = FontWeight.Bold,
-            color = if (entry.medianDiff > 0 || entry.oldImpr < ther)
-                Colors.RANKING_GREEN
-            else if (entry.medianDiff < 0)
-                Colors.RANKING_RED
-            else
-                Colors.RANKING_YELLOW,
-            textAlign = TextAlign.Start,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .width(24.ndp())
-        )
+        if (isCompare) {
+            Icon(
+                painter = entry.medianDiff.let {
+                    if (it > 0 || entry.oldImpr < ther) {
+                        painterResource(id = com.madsam.otora.R.drawable.ic_wind_up)
+                    } else if (it < 0) {
+                        painterResource(id = com.madsam.otora.R.drawable.ic_wind_down)
+                    } else {
+                        painterResource(id = com.madsam.otora.R.drawable.ic_flat)
+                    }
+                },
+                contentDescription = null,
+                tint = if (entry.medianDiff > 0 || entry.oldImpr < ther)
+                    Colors.RANKING_GREEN
+                else if (entry.medianDiff < 0)
+                    Colors.RANKING_RED
+                else
+                    Colors.RANKING_YELLOW,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .width(30.ndp())
+            )
+            Text(
+                text = if (entry.oldImpr < ther) "NEW" else entry.medianDiff.toString(),
+                fontFamily = sarasaFont,
+                fontSize = 14.nsp(),
+                fontWeight = FontWeight.Bold,
+                color = if (entry.medianDiff > 0 || entry.oldImpr < ther)
+                    Colors.RANKING_GREEN
+                else if (entry.medianDiff < 0)
+                    Colors.RANKING_RED
+                else
+                    Colors.RANKING_YELLOW,
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .width(24.ndp())
+            )
+        }
         Text(
             text = entry.index.toString(),
             fontFamily = sarasaFont,

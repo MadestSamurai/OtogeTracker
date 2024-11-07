@@ -1,7 +1,6 @@
 package com.madsam.otora.entity.bof
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
 /**
  * 项目名: OtogeTracker
@@ -11,9 +10,9 @@ import androidx.room.PrimaryKey
  * 描述: BOF条目实体（数据库）
  */
 
-@Entity(tableName = "bof_entries")
+@Entity(tableName = "bof_entries", primaryKeys = ["no"])
 data class BofEntryEntity(
-    @PrimaryKey val no: Int = 0,
+    val no: Int = 0,
     var team: String = "",
     var artist: String = "",
     var genre: String = "",

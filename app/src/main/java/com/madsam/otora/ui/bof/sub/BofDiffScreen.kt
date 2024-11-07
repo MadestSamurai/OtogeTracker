@@ -97,8 +97,7 @@ fun BofDiffScreen() {
             data = bofDataRequestService.getBofttEntryLatest()
         } else {
             val timeInMillis = CommonUtils.ymdToMillis(selectedDate.toString(), roundDownToNearestFiveMinutes(selectedTime))
-            val startInMillis = CommonUtils.ymdToMillis("2024-10-13", "00:00:00")
-            data = bofDataRequestService.getBofttEntryByTime(((timeInMillis - startInMillis)/10).toInt())
+            data = bofDataRequestService.getBofttEntryByTime(timeInMillis)
         }
         // Calculate Total Score difference
         data.forEach {

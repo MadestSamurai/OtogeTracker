@@ -107,13 +107,8 @@ fun BofAvgScreen() {
         if (selectedTime == "-1") {
             data = bofDataRequestService.getBofttEntryLatest()
         } else {
-            val timeInMillis = CommonUtils.ymdToMillis(
-                selectedDate.toString(),
-                roundDownToNearestFiveMinutes(selectedTime)
-            )
-            val startInMillis = CommonUtils.ymdToMillis("2024-10-13", "00:00:00")
-            data =
-                bofDataRequestService.getBofttEntryByTime(((timeInMillis - startInMillis) / 10).toInt())
+            val timeInMillis = CommonUtils.ymdToMillis(selectedDate.toString(), roundDownToNearestFiveMinutes(selectedTime))
+            data = bofDataRequestService.getBofttEntryByTime(timeInMillis)
         }
         // Sort the data by total in descending order
         var sortedData = data.sortedByDescending { it.oldImpr }
@@ -195,6 +190,11 @@ fun BofAvgScreen() {
                     )
                 }
             }
+            var isCompare: Boolean = if (todayLatestData.value.isNotEmpty()) {
+                todayLatestData.value[0].oldTotal != 0
+            } else {
+                false
+            }
             item {
                 Row(
                     modifier = Modifier
@@ -231,7 +231,7 @@ fun BofAvgScreen() {
                 }
             }
             itemsIndexed(todayLatestData.value) { index, entry ->
-                BofEntryRowAvg(entry, index + 1, thresholdImprOld)
+                BofEntryRowAvg(entry, index + 1, thresholdImprOld, isCompare)
             }
         }
     }
@@ -242,7 +242,8 @@ fun BofAvgScreen() {
 fun BofEntryRowAvg(
     entry: BofEntryShow,
     index: Int,
-    ther: Int
+    ther: Int,
+    isCompare: Boolean
 ) {
     val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
     val barWidthFraction = (entry.avg.toFloat() / 1000) * 1f
@@ -256,43 +257,45 @@ fun BofEntryRowAvg(
                 rowHeight.intValue = coordinates.size.height
             }
     ) {
-        Icon(
-            painter = entry.avgDiff.let {
-                if (it > 0 || entry.oldImpr < ther) {
-                    painterResource(id = com.madsam.otora.R.drawable.ic_wind_up)
-                } else if (it < 0) {
-                    painterResource(id = com.madsam.otora.R.drawable.ic_wind_down)
-                } else {
-                    painterResource(id = com.madsam.otora.R.drawable.ic_flat)
-                }
-            },
-            contentDescription = null,
-            tint = if (entry.avgDiff > 0 || entry.oldImpr < ther)
-                Colors.RANKING_GREEN
-            else if (entry.avgDiff < 0)
-                Colors.RANKING_RED
-            else
-                Colors.RANKING_YELLOW,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .width(30.ndp())
-        )
-        Text(
-            text = if (entry.oldImpr < ther) "NEW" else entry.avgDiff.toString(),
-            fontFamily = sarasaFont,
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.nsp(),
-            color = if (entry.avgDiff > 0 || entry.oldImpr < ther)
-                Colors.RANKING_GREEN
-            else if (entry.avgDiff < 0)
-                Colors.RANKING_RED
-            else
-                Colors.RANKING_YELLOW,
-            textAlign = TextAlign.Start,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .width(32.ndp())
-        )
+        if (isCompare) {
+            Icon(
+                painter = entry.avgDiff.let {
+                    if (it > 0 || entry.oldImpr < ther) {
+                        painterResource(id = com.madsam.otora.R.drawable.ic_wind_up)
+                    } else if (it < 0) {
+                        painterResource(id = com.madsam.otora.R.drawable.ic_wind_down)
+                    } else {
+                        painterResource(id = com.madsam.otora.R.drawable.ic_flat)
+                    }
+                },
+                contentDescription = null,
+                tint = if (entry.avgDiff > 0 || entry.oldImpr < ther)
+                    Colors.RANKING_GREEN
+                else if (entry.avgDiff < 0)
+                    Colors.RANKING_RED
+                else
+                    Colors.RANKING_YELLOW,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .width(30.ndp())
+            )
+            Text(
+                text = if (entry.oldImpr < ther) "NEW" else entry.avgDiff.toString(),
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.nsp(),
+                color = if (entry.avgDiff > 0 || entry.oldImpr < ther)
+                    Colors.RANKING_GREEN
+                else if (entry.avgDiff < 0)
+                    Colors.RANKING_RED
+                else
+                    Colors.RANKING_YELLOW,
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .width(32.ndp())
+            )
+        }
         Text(
             text = entry.index.toString(),
             fontFamily = sarasaFont,
