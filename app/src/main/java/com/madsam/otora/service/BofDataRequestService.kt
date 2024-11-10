@@ -95,7 +95,15 @@ class BofDataRequestService(private val context: Context) {
                 if (bofTeamList != null) {
                     // Insert data into database
                     bofTeamList.forEach { team ->
+                        /** XXX: Bad performance because of hash generation,
+                         *  but data is quite small (less than 300 records per day) so it's fine.
+                         *  Check if data is already in the database and make id incremental
+                         *  is a better solution but I'm too lazy to do that.
+                         */
+                        val id = CommonUtils.generateHash(team.team)
                         val entity = BofTeamEntity(
+                            id = id,
+                            date = date,
                             team = team.team,
                             title1 = team.title1,
                             title2 = team.title2,
@@ -110,8 +118,8 @@ class BofDataRequestService(private val context: Context) {
                             fs3 = team.fs3,
                             fs4 = team.fs4
                         )
-                        val no = db.bofTeamDao().insertOrUpdate(entity)
-                        team.no = no
+                        db.bofTeamDao().insertOrUpdate(entity)
+                        team.id = id
                         storePoints(team, date)
                     }
                 } else Log.e(TAG, "Response body is null")
@@ -145,7 +153,7 @@ class BofDataRequestService(private val context: Context) {
         entry.total.forEach { point ->
             val timeInMillis = CommonUtils.ymdToMillis(date, point.time)
             val pointEntity = BofTeamPointEntity(
-                no = entry.no,
+                id = entry.id,
                 time = timeInMillis,
                 total = point.value,
                 median = entry.median.find { it.time == point.time }?.value ?: entry.median.lastOrNull { it.time < point.time }?.value ?: "",
@@ -187,6 +195,8 @@ class BofDataRequestService(private val context: Context) {
             while (currentDate.isAfter(startDate)) {
                 if (!ShareUtil.findStringArray("datesTeam", currentDate.toString(), context)) {
                     requestBofttTeamData(currentDate.toString())
+                    if (currentDate.isBefore(dateTime))
+                        ShareUtil.insertStringArray("datesTeam", currentDate.toString(), context)
                 }
                 currentDate = currentDate.minusDays(1)
             }
@@ -212,9 +222,7 @@ class BofDataRequestService(private val context: Context) {
                         val oldClosestPoint = entryPoints
                             .filter { it.time <= oldTimeLimit }
                             .minByOrNull { abs(it.time - oldTimeLimit) }
-
                         BofEntryShow(
-                            no = entry.no,
                             team = entry.team,
                             artist = entry.artist,
                             genre = entry.genre,
@@ -248,11 +256,10 @@ class BofDataRequestService(private val context: Context) {
                 val oldTimeLimit = time - 24 * 60 * 60 * 1000 // 24 hours in milliseconds
                 val points = db.bofTeamPointDao().getPointsByRange(startTime, time)
                 if (points.isNotEmpty()) {
-                    val teamIds = points.map { it.no }.distinct()
-                    val teams = db.bofTeamDao().getTeamsByIds(teamIds)
+                    val teams = db.bofTeamDao().getTeamsByDate(CommonUtils.millisToYmd(time).substring(0, 10))
 
                     teams.map { team ->
-                        val teamPoints = points.filter { it.no == team.no }
+                        val teamPoints = points.filter { it.id == team.id }
                         val closestPoint = teamPoints
                             .filter { it.time <= time }
                             .minByOrNull { abs(it.time - time) }
@@ -260,8 +267,6 @@ class BofDataRequestService(private val context: Context) {
                             .filter { it.time <= oldTimeLimit }
                             .minByOrNull { abs(it.time - oldTimeLimit) }
                         BofTeamShow(
-                            no = team.no,
-                            time = CommonUtils.millisToYmd(time).substring(11, 16),
                             team = team.team,
                             title1 = team.title1,
                             title2 = team.title2,
@@ -289,6 +294,7 @@ class BofDataRequestService(private val context: Context) {
                             oldImpr = oldClosestPoint?.impr ?: 0,
                             oldTotal = oldClosestPoint?.total ?: 0.0,
                             oldMedian = oldClosestPoint?.median ?: "",
+                            time = CommonUtils.millisToYmd(time).substring(11, 16)
                         )
                     }
                 } else {

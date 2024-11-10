@@ -27,34 +27,15 @@ interface BofTeamDao {
     @Update
     fun update(entry: BofTeamEntity)
 
-    @Query("SELECT * FROM bof_teams WHERE team = :team LIMIT 1")
-    fun getByTeam(team: String): BofTeamEntity?
-
     @Transaction
-    fun insertOrUpdate(entry: BofTeamEntity): Int {
-        val existingEntry = getByTeam(entry.team)
-        return if (existingEntry == null) {
-            insert(entry).toInt()
-        } else {
-            val updatedEntry = existingEntry.copy(
-                title1 = entry.title1,
-                title2 = entry.title2,
-                title3 = entry.title3,
-                title4 = entry.title4,
-                artist1 = entry.artist1,
-                artist2 = entry.artist2,
-                artist3 = entry.artist3,
-                artist4 = entry.artist4,
-                fs1 = entry.fs1,
-                fs2 = entry.fs2,
-                fs3 = entry.fs3,
-                fs4 = entry.fs4
-            )
-            update(updatedEntry)
-            existingEntry.no
+    fun insertOrUpdate(entry: BofTeamEntity): String {
+        val id = insert(entry)
+        if (id == -1L) {
+            update(entry)
         }
+        return entry.id
     }
 
-    @Query("SELECT * FROM bof_teams WHERE `no` IN (:ids)")
-    fun getTeamsByIds(ids: List<Int>): List<BofTeamEntity>
+    @Query("SELECT * FROM bof_teams WHERE date = :date")
+    fun getTeamsByDate(date: String): List<BofTeamEntity>
 }

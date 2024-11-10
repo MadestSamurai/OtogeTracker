@@ -9,10 +9,10 @@ import androidx.room.Entity
  * 创建时间: 2024/10/23
  * 描述: BOF团队得分实体（数据库）
  */
-@Entity(tableName = "bof_team_points", primaryKeys = ["time", "no"])
+@Entity(tableName = "bof_team_points", primaryKeys = ["time", "id"])
 data class BofTeamPointEntity(
-    var no: Int = 0,
     var time: Long = 0,
+    var id: String = "",
     var total: Double = 0.0,
     var median: String = "",
     var impr: Int = 0,

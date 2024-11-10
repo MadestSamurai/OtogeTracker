@@ -1,7 +1,6 @@
 package com.madsam.otora.entity.bof
 
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
 /**
  * 项目名: OtogeTracker
@@ -10,9 +9,10 @@ import androidx.room.PrimaryKey
  * 创建时间: 2024/10/23
  * 描述: TODO
  */
-@Entity(tableName = "bof_teams")
+@Entity(tableName = "bof_teams", primaryKeys = ["id", "date"])
 data class BofTeamEntity(
-    @PrimaryKey(autoGenerate = true) val no: Int = 0,
+    var id: String = "",
+    val date: String = "",
     var team: String = "",
     var title1: String = "",
     var title2: String = "",

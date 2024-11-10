@@ -10,7 +10,7 @@ import com.squareup.moshi.Json
  * 描述: TODO
  */
 data class BofTeam (
-    var no: Int = 0,
+    var id: String = "",
     @Json(name = "Team") var team: String = "",
     @Json(name = "Title1") var title1: String = "",
     @Json(name = "Title2") var title2: String = "",

@@ -1,7 +1,5 @@
 package com.madsam.otora.ui.bof.sub
 
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -23,12 +21,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,7 +44,6 @@ import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.util.Calendar
 
 /**
  * 项目名: OtogeTracker
@@ -59,31 +54,13 @@ import java.util.Calendar
  */
 
 @Composable
-fun BofTotalScreen() {
+fun BofTotalScreen(
+    selectedDate: LocalDate,
+    selectedTime: String,
+) {
     val context = LocalContext.current
     val bofDataRequestService = BofDataRequestService(context)
     val todayLatestData = remember { mutableStateOf<List<BofEntryShow>>(emptyList()) }
-    val coroutineScope = rememberCoroutineScope()
-    val dateTime = LocalDate.now()
-    var selectedDate by remember { mutableStateOf(dateTime) }
-    var selectedTime by remember { mutableStateOf("-1") }
-
-    fun refreshData() {
-        coroutineScope.launch {
-            bofDataRequestService.getBofttData(dateTime)
-        }
-    }
-
-    fun selectTime() {
-        val calendar = Calendar.getInstance()
-        DatePickerDialog(context, { _, year, month, dayOfMonth ->
-            selectedDate = LocalDate.of(year, month + 1, dayOfMonth)
-            TimePickerDialog(context, { _, hourOfDay, minute ->
-                selectedTime = String.format("%02d:%02d", hourOfDay, minute)
-                refreshData()
-            }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
-        }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
-    }
 
     fun roundDownToNearestFiveMinutes(hms: String): String {
         val parts = hms.split(":").map { it.toInt() }
@@ -142,16 +119,6 @@ fun BofTotalScreen() {
 
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
-            item {
-                Row {
-                    Button(onClick = { selectTime() }, modifier = Modifier.padding(16.dp)) {
-                        Text(text = "Select Date and Time")
-                    }
-                    Button(onClick = { refreshData() }, modifier = Modifier.padding(16.dp)) {
-                        Text(text = "Refresh Data")
-                    }
-                }
-            }
             item {
                 if (todayLatestData.value.isEmpty()) {
                     Text(text = "No Data at $selectedDate $selectedTimeStr")

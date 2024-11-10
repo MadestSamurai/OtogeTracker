@@ -17,6 +17,7 @@ import com.madsam.otora.consts.Colors
 import com.madsam.otora.consts.GradientBrush
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -292,5 +293,16 @@ object CommonUtils {
             .map { it.trim() }
             .map { it.split("=") }
             .associate { it[0] to it[1] }
+    }
+
+    /**
+     * 任意字符串生成哈希字符串
+     *
+     * @param ori 原始字符串
+     * @return 哈希字符串
+     */
+    fun generateHash(input: String): String {
+        val bytes = MessageDigest.getInstance("SHA-256").digest(input.toByteArray())
+        return bytes.joinToString("") { "%02x".format(it) }
     }
 }

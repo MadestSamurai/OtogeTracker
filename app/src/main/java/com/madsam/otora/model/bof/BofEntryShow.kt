@@ -8,7 +8,6 @@ package com.madsam.otora.model.bof
  * 描述: BOF数据展示实体
  */
 data class BofEntryShow(
-    var no: Int = 0,
     var index: Int = 0,
     var oldIndex: Int = 0,
     var team: String = "",
