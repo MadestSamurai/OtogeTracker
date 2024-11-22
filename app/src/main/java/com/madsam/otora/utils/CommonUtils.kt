@@ -201,6 +201,20 @@ object CommonUtils {
     }
 
     /**
+     * 大数字符串转换为整型
+     *
+     * @param value 字符串
+     * @return 整型
+     */
+    fun bigNumberToInt(value: String): Int {
+        return try {
+            value.replace(",", "").toInt()
+        } catch (e: NumberFormatException) {
+            0
+        }
+    }
+
+    /**
      * 获取等级对应的颜色
      *
      * @param value 整型

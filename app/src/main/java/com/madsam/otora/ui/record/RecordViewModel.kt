@@ -5,7 +5,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.madsam.otora.consts.FlagsAlphabet
-import com.madsam.otora.model.chuni.ChuniCard
+import com.madsam.otora.model.chuni.net.ChuniCard
 import com.madsam.otora.model.web.OsuCardList
 import com.madsam.otora.model.web.OsuGroup
 import com.madsam.otora.model.web.OsuInfo
@@ -15,6 +15,7 @@ import com.madsam.otora.glance.SmallWidget
 import com.madsam.otora.service.ChuniDataRequestService
 import com.madsam.otora.service.OsuDataRequestService
 import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.utils.JsonUtil
 import com.madsam.otora.utils.ShareUtil
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -71,7 +72,14 @@ class RecordViewModel(
 //        osuDataRequestService.getOsuHistorical({ osuHistorical: OsuHistorical -> setOsuHistorical(osuHistorical) }, userId, mode)
     }
 
-    fun requestChuniData(context: Context) {
+    fun requestChuniSongData(context: Context) {
+        val chuniDataRequestService = ChuniDataRequestService(context)
+        chuniDataRequestService.getChuniSongsData { chuniDatas ->
+            //TODO: setChuniSongs(chuniDatas)
+        }
+    }
+
+    fun requestChuniUserData(context: Context) {
         val chuniDataRequestService = ChuniDataRequestService(context)
         chuniDataRequestService.getUserData()
     }
@@ -266,7 +274,11 @@ class RecordViewModel(
 
     // Chunithm
     fun getChuniCardFromShare(context: Context): ChuniCard {
-        val json = ShareUtil.getString("chuniCard", context) ?: "null"
+        val json = JsonUtil.readJsonFromFile(context, "chuniCard.json")
+        if (json.isNullOrEmpty()) {
+            println("JSON is empty or null")
+            return ChuniCard()
+        }
         return Moshi.Builder()
             .addLast(KotlinJsonAdapterFactory())
             .build().adapter(ChuniCard::class.java).fromJson(json) ?: ChuniCard()

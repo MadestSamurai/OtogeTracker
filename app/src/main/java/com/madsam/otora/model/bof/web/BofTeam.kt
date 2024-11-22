@@ -1,10 +1,10 @@
-package com.madsam.otora.model.bof
+package com.madsam.otora.model.bof.web
 
 import com.squareup.moshi.Json
 
 /**
  * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.model.bof.BofTeam
+ * 文件名: com.madsam.otora.model.bof.web.BofTeam
  * 创建者: MadSamurai
  * 创建时间: 2024/10/23
  * 描述: TODO

@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,7 +23,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,14 +33,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.madsam.otora.R
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.fonts.sarasaFont
-import com.madsam.otora.model.bof.BofEntryShow
+import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.service.BofDataRequestService
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 /**
@@ -249,11 +247,11 @@ fun BofEntryRowTotal(
             Icon(
                 painter = entry.rankDiff.let {
                     if (it > 0) {
-                        painterResource(id = com.madsam.otora.R.drawable.ic_wind_up)
+                        painterResource(id = R.drawable.ic_wind_up)
                     } else if (it < 0) {
-                        painterResource(id = com.madsam.otora.R.drawable.ic_wind_down)
+                        painterResource(id = R.drawable.ic_wind_down)
                     } else {
-                        painterResource(id = com.madsam.otora.R.drawable.ic_flat)
+                        painterResource(id = R.drawable.ic_flat)
                     }
                 },
                 contentDescription = null,

@@ -33,7 +33,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.fonts.sarasaFont
-import com.madsam.otora.model.bof.BofEntryShow
+import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.service.BofDataRequestService
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ndp

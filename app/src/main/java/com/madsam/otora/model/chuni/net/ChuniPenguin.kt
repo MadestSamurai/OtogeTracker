@@ -1,4 +1,4 @@
-package com.madsam.otora.model.chuni
+package com.madsam.otora.model.chuni.net
 
 /**
  * 项目名: OtogeTracker

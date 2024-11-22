@@ -1,4 +1,4 @@
-package com.madsam.otora.model.bof
+package com.madsam.otora.model.bof.web
 
 import com.squareup.moshi.Json
 

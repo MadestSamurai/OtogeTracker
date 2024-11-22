@@ -1,8 +1,8 @@
-package com.madsam.otora.model.bof
+package com.madsam.otora.model.bof.ui
 
 /**
  * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.model.bof.BofEntryShow
+ * 文件名: com.madsam.otora.model.bof.ui.BofEntryShow
  * 创建者: MadSamurai
  * 创建时间: 2024/10/23
  * 描述: BOF团队数据展示实体

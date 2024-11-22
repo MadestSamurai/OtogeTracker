@@ -2,19 +2,26 @@ package com.madsam.otora.service
 
 import android.content.Context
 import android.util.Log
-import com.madsam.otora.model.chuni.ChuniCard
-import com.madsam.otora.model.chuni.ChuniCookie
-import com.madsam.otora.model.chuni.ChuniDataExtend
-import com.madsam.otora.model.chuni.ChuniFullScore
-import com.madsam.otora.model.chuni.ChuniGenre
-import com.madsam.otora.model.chuni.ChuniPenguin
-import com.madsam.otora.model.chuni.ChuniScore
+import com.madsam.otora.callback.ICallback
+import com.madsam.otora.database.DatabaseProvider
+import com.madsam.otora.entity.chunithm.ChuniSheetsEntity
+import com.madsam.otora.entity.chunithm.ChuniSongsEntity
+import com.madsam.otora.model.chuni.net.ChuniCard
+import com.madsam.otora.model.chuni.net.ChuniCookie
+import com.madsam.otora.model.chuni.net.ChuniDataExtend
+import com.madsam.otora.model.chuni.net.ChuniFullScore
+import com.madsam.otora.model.chuni.net.ChuniGenre
+import com.madsam.otora.model.chuni.net.ChuniPenguin
+import com.madsam.otora.model.chuni.net.ChuniScore
+import com.madsam.otora.model.chuni.web.ChuniDatas
 import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.utils.JsonUtil
 import com.madsam.otora.utils.SafeSoupUtil.safeFirst
 import com.madsam.otora.utils.SafeSoupUtil.safeFirstAttr
 import com.madsam.otora.utils.SafeSoupUtil.safeFirstText
 import com.madsam.otora.utils.SafeSoupUtil.safePreviousElementSibling
 import com.madsam.otora.utils.ShareUtil
+import com.madsam.otora.web.Api
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
@@ -22,8 +29,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import org.jsoup.Connection
 import org.jsoup.Jsoup
+import retrofit2.Retrofit
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.IOException
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.jvmErasure
@@ -53,7 +64,14 @@ class ChuniDataRequestService(private val context: Context) {
         ShareUtil.getString("chuniFriendCodeList", context) ?: ""
     )
     private val moshi = Moshi.Builder()
-        .add(KotlinJsonAdapterFactory())
+        .add(NullToDefaultStringAdapter())
+        .add(NullToDefaultLongAdapter())
+        .add(NullToDefaultIntAdapter())
+        .add(NullToDefaultDoubleAdapter())
+        .add(NullToDefaultBooleanAdapter())
+        .add(NullToEmptyStringListAdapter())
+        .add(NullToEmptyIntListAdapter())
+        .addLast(KotlinJsonAdapterFactory())
         .build()
     private fun requestPlayerData() {
         try {
@@ -125,7 +143,7 @@ class ChuniDataRequestService(private val context: Context) {
             } else {
                 val jsonAdapterCard = moshi.adapter(ChuniCard::class.java)
                 val jsonCard = jsonAdapterCard.toJson(chuniCard)
-                ShareUtil.putString("chuniCard", jsonCard, context)
+                JsonUtil.saveJsonToFile(context, "chuniCard.json", jsonCard)
             }
             // Parse the penguin data
             val chuniPenguin = ChuniPenguin()
@@ -143,7 +161,7 @@ class ChuniDataRequestService(private val context: Context) {
             chuniPenguin.itemL = doc.getElementsByClass("avatar_item_l").select("img").safeFirstAttr("src")
             val jsonAdapterPenguin = moshi.adapter(ChuniPenguin::class.java)
             val jsonPenguin = jsonAdapterPenguin.toJson(chuniPenguin)
-            ShareUtil.putString("chuniPenguin", jsonPenguin, context)
+            JsonUtil.saveJsonToFile(context, "chuniPenguin.json", jsonPenguin)
             // Parse the extend data
             val chuniDataExtend = ChuniDataExtend()
             chuniDataExtend.friendCode = doc.getElementsByClass("user_data_friend_code").safeFirst()
@@ -153,7 +171,7 @@ class ChuniDataRequestService(private val context: Context) {
             chuniDataExtend.playCount = doc.getElementsByClass("user_data_play_count").safeFirstText()
             val jsonAdapterExtend = moshi.adapter(ChuniDataExtend::class.java)
             val jsonExtend = jsonAdapterExtend.toJson(chuniDataExtend)
-            ShareUtil.putString("chuniDataExtend", jsonExtend, context)
+            JsonUtil.saveJsonToFile(context, "chuniDataExtend.json", jsonExtend)
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in ChuniData-requestPlayerData: ${e.message}")
         }
@@ -187,7 +205,7 @@ class ChuniDataRequestService(private val context: Context) {
             }
             val jsonAdapter = moshi.adapter(List::class.java)
             val json = jsonAdapter.toJson(chuniRatingBest)
-            ShareUtil.putString("chuniRatingDetailBest", json, context)
+            JsonUtil.saveJsonToFile(context, "chuniRatingDetailBest.json", json)
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailBest: ${e.message}")
         }
@@ -220,7 +238,7 @@ class ChuniDataRequestService(private val context: Context) {
             }
             val jsonAdapter = moshi.adapter(List::class.java)
             val json = jsonAdapter.toJson(chuniRatingRecent)
-            ShareUtil.putString("chuniRatingDetailRecent", json, context)
+            JsonUtil.saveJsonToFile(context, "chuniRatingDetailRecent.json", json)
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailRecent: ${e.message}")
         }
@@ -253,7 +271,7 @@ class ChuniDataRequestService(private val context: Context) {
             }
             val jsonAdapter = moshi.adapter(List::class.java)
             val json = jsonAdapter.toJson(chuniRatingNext)
-            ShareUtil.putString("chuniRatingDetailNext", json, context)
+            JsonUtil.saveJsonToFile(context, "chuniRatingDetailNext.json", json)
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailNext: ${e.message}")
         }
@@ -273,7 +291,7 @@ class ChuniDataRequestService(private val context: Context) {
             val doc = response.parse()
             updateCookie(response)
             //TODO: Parse the map record
-            ShareUtil.putString("chuniRecord", doc.toString(), context)
+            JsonUtil.saveJsonToFile(context, "chuniMapRecord.json", doc.toString())
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in ChuniData-requestMapRecord: ${e.message}")
         }
@@ -337,7 +355,7 @@ class ChuniDataRequestService(private val context: Context) {
             }
             val jsonAdapter = moshi.adapter(List::class.java)
             val json = jsonAdapter.toJson(chuniPlayLog)
-            ShareUtil.putString("chuniPlayLog", json, context)
+            JsonUtil.saveJsonToFile(context, "chuniPlayLog.json", json)
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in ChuniData-requestPlayLog: ${e.message}")
         }
@@ -407,7 +425,7 @@ class ChuniDataRequestService(private val context: Context) {
                 }
                 val jsonAdapter = moshi.adapter(List::class.java)
                 val json = jsonAdapter.toJson(chuniGenre)
-                ShareUtil.putString("chuniPlayRecord${diff[0].uppercaseChar()}${diff.substring(1)}", json, context)
+                JsonUtil.saveJsonToFile(context, "chuniPlayRecord${diff[0].uppercaseChar()}${diff.substring(1)}.json", json)
             } catch (e: IOException) {
                 Log.e(TAG, "IOException occurred in OsuMedalsThread: ${e.message}")
             }
@@ -427,7 +445,7 @@ class ChuniDataRequestService(private val context: Context) {
             val response = connect.execute()
             val doc = response.parse()
             updateCookie(response)
-            ShareUtil.putString("chuniCollection", doc.toString(), context)
+            JsonUtil.saveJsonToFile(context, "chuniCollection.json", doc.toString())
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in OsuMedalsThread: ${e.message}")
         }
@@ -446,7 +464,7 @@ class ChuniDataRequestService(private val context: Context) {
             val response = connect.execute()
             val doc = response.parse()
             updateCookie(response)
-            ShareUtil.putString("chuniFriend", doc.toString(), context)
+            JsonUtil.saveJsonToFile(context, "chuniFriend.json", doc.toString())
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in OsuMedalsThread: ${e.message}")
         }
@@ -466,9 +484,77 @@ class ChuniDataRequestService(private val context: Context) {
             val response = connect.execute()
             val doc = response.parse()
             updateCookie(response)
-            ShareUtil.putString("chuniLoginBonus", doc.toString(), context)
+            JsonUtil.saveJsonToFile(context, "chuniLoginBonus.json", doc.toString())
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in OsuMedalsThread: ${e.message}")
+        }
+    }
+
+    private fun requestSongsDatas() {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://dp4p6x0xfi5o9.cloudfront.net")
+            .addConverterFactory(MoshiConverterFactory.create(moshi)) // Moshi
+            .addCallAdapterFactory(RxJava3CallAdapterFactory.create()) // RxJava
+            .build()
+        val api = retrofit.create(Api::class.java)
+        val db = DatabaseProvider.getDatabase(context)
+        try {
+            val chuniSongsCall = api.getChunithmSongsData()
+            val response = chuniSongsCall.execute()
+            if (response.isSuccessful) {
+                val chuniDatas = response.body()
+                if (chuniDatas != null) {
+                    val chuniSongs = chuniDatas.songs
+                    val chuniSongsEntity = mutableListOf<ChuniSongsEntity>()
+                    for (song in chuniSongs) {
+                        val chuniSongEntity = ChuniSongsEntity(
+                            id = CommonUtils.generateHash(song.songId),
+                            category = song.category,
+                            title = song.title,
+                            artist = song.artist,
+                            bpm = song.bpm,
+                            imageName = song.imageName,
+                            version = song.version,
+                            releaseDate = song.releaseDate,
+                            isNew = song.isNew,
+                            isLocked = song.isLocked,
+                            comment = song.comment
+                        )
+                        chuniSongsEntity.add(chuniSongEntity)
+                        val chuniSheets = song.sheets
+                        val chuniSheetsEntity = mutableListOf<ChuniSheetsEntity>()
+                        for (sheet in chuniSheets) {
+                            val chuniSheetEntity = ChuniSheetsEntity(
+                                id = CommonUtils.generateHash(song.songId),
+                                difficulty = sheet.difficulty,
+                                level = sheet.level,
+                                levelValue = sheet.levelValue,
+                                internalLevel = sheet.internalLevel,
+                                internalLevelValue = sheet.internalLevelValue,
+                                noteDesigner = sheet.noteDesigner,
+                                tap = sheet.noteCounts.tap,
+                                hold = sheet.noteCounts.hold,
+                                slide = sheet.noteCounts.slide,
+                                air = sheet.noteCounts.air,
+                                flick = sheet.noteCounts.flick,
+                                total = sheet.noteCounts.total,
+                                jp = sheet.regions.jp,
+                                intl = sheet.regions.intl,
+                                isSpecial = sheet.isSpecial
+                            )
+                            chuniSheetsEntity.add(chuniSheetEntity)
+                        }
+                        db.chuniSheetsDao().insertAll(chuniSheetsEntity)
+                    }
+                    db.chuniSongsDao().insertAll(chuniSongsEntity)
+                } else {
+                    Log.e(TAG, "Failed to get the songs data")
+                }
+            } else {
+                Log.e(TAG, "Failed to get the songs data")
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in ChuniData-requestSongsDatas: ${e.message}")
         }
     }
 
@@ -499,5 +585,31 @@ class ChuniDataRequestService(private val context: Context) {
         ShareUtil.putString("chuniToken", cookie.token, context)
         ShareUtil.putString("chuniExpires", cookie.expires, context)
         ShareUtil.putString("chuniUserId", cookie.userId, context)
+    }
+
+    fun getChuniSongsData(callback: ICallback<ChuniDatas>) {
+        serviceScope.launch { mutex.withLock { requestSongsDatas() }}
+    }
+
+    // Get songs data from the database
+    suspend fun getChuniSongData(title: String): ChuniSongsEntity {
+        return withContext(Dispatchers.IO) {
+            try {
+                DatabaseProvider.getDatabase(context).chuniSongsDao()
+                    .getSongById(CommonUtils.generateHash(title)) ?: ChuniSongsEntity()
+            } catch (e: Exception) {
+                ChuniSongsEntity()
+            }
+        }
+    }
+    suspend fun getChuniSongSheetData(title: String, diff: String): ChuniSheetsEntity {
+        return withContext(Dispatchers.IO) {
+            try {
+                DatabaseProvider.getDatabase(context).chuniSheetsDao()
+                    .getSheetById(CommonUtils.generateHash(title), diff) ?: ChuniSheetsEntity()
+            } catch (e: Exception) {
+                ChuniSheetsEntity()
+            }
+        }
     }
 }

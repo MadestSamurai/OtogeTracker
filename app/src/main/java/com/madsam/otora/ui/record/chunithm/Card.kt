@@ -33,7 +33,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.SvgDecoder
 import com.madsam.otora.consts.Colors
-import com.madsam.otora.model.chuni.ChuniCard
+import com.madsam.otora.model.chuni.net.ChuniCard
 import com.madsam.otora.utils.CommonUtils
 
 @Composable

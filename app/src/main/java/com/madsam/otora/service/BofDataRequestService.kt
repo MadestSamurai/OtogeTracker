@@ -7,10 +7,10 @@ import com.madsam.otora.entity.bof.BofEntryEntity
 import com.madsam.otora.entity.bof.BofPointEntity
 import com.madsam.otora.entity.bof.BofTeamEntity
 import com.madsam.otora.entity.bof.BofTeamPointEntity
-import com.madsam.otora.model.bof.BofEntry
-import com.madsam.otora.model.bof.BofEntryShow
-import com.madsam.otora.model.bof.BofTeam
-import com.madsam.otora.model.bof.BofTeamShow
+import com.madsam.otora.model.bof.web.BofEntry
+import com.madsam.otora.model.bof.ui.BofEntryShow
+import com.madsam.otora.model.bof.web.BofTeam
+import com.madsam.otora.model.bof.ui.BofTeamShow
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ShareUtil
 import com.madsam.otora.web.Api

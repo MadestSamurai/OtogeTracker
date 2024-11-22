@@ -62,7 +62,7 @@ class OsuDataRequestService {
         .build()
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl("http://osu.ppy.sh/") // OSU Url
+        .baseUrl("https://osu.ppy.sh/") // OSU Url
         .addConverterFactory(MoshiConverterFactory.create(moshi)) // Moshi
         .addCallAdapterFactory(RxJava3CallAdapterFactory.create()) // RxJava
         .build()

@@ -38,9 +38,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.madsam.otora.R
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.fonts.sarasaFont
-import com.madsam.otora.model.bof.BofTeamShow
+import com.madsam.otora.model.bof.ui.BofTeamShow
 import com.madsam.otora.service.BofDataRequestService
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ndp
@@ -238,11 +239,11 @@ fun BofTeamRowTotal(
             Icon(
                 painter = entry.rankDiff.let {
                     if (it > 0) {
-                        painterResource(id = com.madsam.otora.R.drawable.ic_wind_up)
+                        painterResource(id = R.drawable.ic_wind_up)
                     } else if (it < 0) {
-                        painterResource(id = com.madsam.otora.R.drawable.ic_wind_down)
+                        painterResource(id = R.drawable.ic_wind_down)
                     } else {
-                        painterResource(id = com.madsam.otora.R.drawable.ic_flat)
+                        painterResource(id = R.drawable.ic_flat)
                     }
                 },
                 contentDescription = null,

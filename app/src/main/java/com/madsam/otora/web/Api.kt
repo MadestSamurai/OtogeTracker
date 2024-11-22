@@ -1,7 +1,8 @@
 package com.madsam.otora.web
 
-import com.madsam.otora.model.bof.BofEntry
-import com.madsam.otora.model.bof.BofTeam
+import com.madsam.otora.model.bof.web.BofEntry
+import com.madsam.otora.model.bof.web.BofTeam
+import com.madsam.otora.model.chuni.web.ChuniDatas
 import com.madsam.otora.model.web.OsuCardList
 import com.madsam.otora.model.web.OsuHistorical
 import com.madsam.otora.model.web.OsuRecentActivity
@@ -72,4 +73,8 @@ interface Api {
     fun getBofttTeamData(
         @Path("date") date: String
     ): Call<List<BofTeam>>
+
+    // Chunithm API
+    @GET("chunithm/data.json")
+    fun getChunithmSongsData(): Call<ChuniDatas>
 }

@@ -6,10 +6,14 @@ import com.madsam.otora.dao.BofEntryDao
 import com.madsam.otora.dao.BofPointDao
 import com.madsam.otora.dao.BofTeamDao
 import com.madsam.otora.dao.BofTeamPointDao
+import com.madsam.otora.dao.ChuniSheetsDao
+import com.madsam.otora.dao.ChuniSongsDao
 import com.madsam.otora.entity.bof.BofEntryEntity
 import com.madsam.otora.entity.bof.BofPointEntity
 import com.madsam.otora.entity.bof.BofTeamEntity
 import com.madsam.otora.entity.bof.BofTeamPointEntity
+import com.madsam.otora.entity.chunithm.ChuniSheetsEntity
+import com.madsam.otora.entity.chunithm.ChuniSongsEntity
 
 /**
  * 项目名: OtogeTracker
@@ -22,11 +26,15 @@ import com.madsam.otora.entity.bof.BofTeamPointEntity
     BofEntryEntity::class,
     BofPointEntity::class,
     BofTeamEntity::class,
-    BofTeamPointEntity::class
+    BofTeamPointEntity::class,
+    ChuniSongsEntity::class,
+    ChuniSheetsEntity::class
                      ], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun bofEntryDao(): BofEntryDao
     abstract fun bofPointDao(): BofPointDao
     abstract fun bofTeamDao(): BofTeamDao
     abstract fun bofTeamPointDao(): BofTeamPointDao
+    abstract fun chuniSongsDao(): ChuniSongsDao
+    abstract fun chuniSheetsDao(): ChuniSheetsDao
 }
