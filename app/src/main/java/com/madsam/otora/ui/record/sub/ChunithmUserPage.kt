@@ -25,6 +25,7 @@ import com.madsam.otora.entity.chunithm.ChuniSheetsEntity
 import com.madsam.otora.entity.chunithm.ChuniSongsEntity
 import com.madsam.otora.model.chuni.net.ChuniCard
 import com.madsam.otora.model.chuni.net.ChuniFullScore
+import com.madsam.otora.model.chuni.net.ChuniGenre
 import com.madsam.otora.model.chuni.net.ChuniScore
 import com.madsam.otora.service.ChuniDataRequestService
 import com.madsam.otora.ui.record.RecordViewModel
@@ -47,7 +48,7 @@ fun ChunithmUserPage(recordViewModel: RecordViewModel) {
     val uaState = remember { mutableStateOf("") }
     val chuniCard = remember { mutableStateOf(ChuniCard()) }
 
-    val chuniMasterRecord = remember { mutableStateOf(listOf<ChuniFullScore>()) }
+    val chuniMasterRecord = remember { mutableStateOf(listOf<ChuniGenre>()) }
     val moshi = Moshi.Builder()
         .addLast(KotlinJsonAdapterFactory())
         .build()
@@ -55,13 +56,19 @@ fun ChunithmUserPage(recordViewModel: RecordViewModel) {
     chuniCard.value = recordViewModel.getChuniCardFromShare(context)
     recordViewModel.requestChuniSongData(context)
 
-    val masterRecordListType = Types.newParameterizedType(List::class.java, ChuniFullScore::class.java)
-    val masterRecordJsonAdapter = moshi.adapter<List<ChuniFullScore>>(masterRecordListType)
-    val masterRecordJson = JsonUtil.readJsonFromFile(context, "chuniMasterRecord.json")
+    val masterRecordListType = Types.newParameterizedType(List::class.java, ChuniGenre::class.java)
+    val masterRecordJsonAdapter = moshi.adapter<List<ChuniGenre>>(masterRecordListType)
+    val masterRecordJson = JsonUtil.readJsonFromFile(context, "chuniPlayRecordMaster.json")
     if (masterRecordJson != null) {
         chuniMasterRecord.value = masterRecordJsonAdapter.fromJson(masterRecordJson) ?: listOf()
     }
 
+    var totalMasterScore = 0
+    for (masterScore in chuniMasterRecord.value) {
+        for (fullScore in masterScore.fullScoreList) {
+            totalMasterScore += CommonUtils.bigNumberToInt(fullScore.score)
+        }
+    }
     LazyColumn(
         modifier = Modifier.background(color = Colors.BRIGHT_RED)
     ) {
@@ -120,6 +127,12 @@ fun ChunithmUserPage(recordViewModel: RecordViewModel) {
         }
         item {
             Card(chuniCard = chuniCard.value)
+        }
+        item {
+            Text(text = "Chunithm Master Record")
+        }
+        item {
+            Text(text = "Total Master Score: $totalMasterScore")
         }
         item {
             Text(text = "Chunithm Record")

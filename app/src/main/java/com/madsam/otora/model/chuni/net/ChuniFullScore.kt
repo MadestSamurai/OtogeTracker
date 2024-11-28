@@ -19,6 +19,7 @@ data class ChuniFullScore(
     var isAllJustice : Boolean = false,
     var isAJC : Boolean = false,
     var isFullChain : Boolean = false,
+    var isFullChain2 : Boolean = false,
     var rank : String = "",
     var jacket : String = "",
     var date : String = "",

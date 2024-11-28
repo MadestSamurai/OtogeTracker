@@ -233,7 +233,6 @@ fun ChuniRatingItemCard(
                     modifier = Modifier
                         .width(itemWidth - 144.dp)
                 )
-                println("score: ${item.score}")
                 Text(
                     text = "${item.levelValue} -> ${
                         CommonUtils.formatNumber(

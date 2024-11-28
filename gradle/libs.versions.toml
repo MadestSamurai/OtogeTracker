@@ -6,6 +6,8 @@ coreSplashscreen = "1.1.0-rc01"
 glanceAppwidget = "1.1.0" # Not newest version because of a bug of ColorProvider
 glanceMaterial3 = "1.1.0" # Not newest version because of a bug of ColorProvider
 moshiKotlin = "1.15.1"
+realmAndroidLibraryVersion = "10.19.0"
+realmRealmGradlePlugin = "10.19.0"
 retrofit = "2.11.0"
 androidxComposeBom = "2024.06.00" # Not newest version because of a bug of screenshot
 androidxConstraintlayoutCompose = "1.1.0-alpha13" # Not newest version because of a bug of screenshot
@@ -53,6 +55,7 @@ coil-kt-coil-svg = { module = "io.coil-kt:coil-svg", version.ref = "coilVersion"
 coil-kt-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilVersion" }
 com-google-devtools-ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "comGoogleDevtoolsKspGradlePlugin" }
 foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundationVersion" }
+io-realm-realm-gradle-plugin = { module = "io.realm:realm-gradle-plugin", version.ref = "realmRealmGradlePlugin" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
@@ -62,6 +65,8 @@ navigation-safe-args-gradle-plugin = { module = "androidx.navigation:navigation-
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+realm-annotations-processor = { module = "io.realm:realm-annotations-processor", version.ref = "realmAndroidLibraryVersion" }
+realm-realm-android-library = { module = "io.realm:realm-android-library", version.ref = "realmAndroidLibraryVersion" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 squareup-converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit" }
 utilcode = { module = "com.blankj:utilcode", version.ref = "utilcode" }

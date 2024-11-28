@@ -2,7 +2,6 @@ package com.madsam.otora.service
 
 import android.content.Context
 import android.util.Log
-import com.madsam.otora.callback.ICallback
 import com.madsam.otora.database.DatabaseProvider
 import com.madsam.otora.entity.chunithm.ChuniSheetsEntity
 import com.madsam.otora.entity.chunithm.ChuniSongsEntity
@@ -13,7 +12,6 @@ import com.madsam.otora.model.chuni.net.ChuniFullScore
 import com.madsam.otora.model.chuni.net.ChuniGenre
 import com.madsam.otora.model.chuni.net.ChuniPenguin
 import com.madsam.otora.model.chuni.net.ChuniScore
-import com.madsam.otora.model.chuni.web.ChuniDatas
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.JsonUtil
 import com.madsam.otora.utils.SafeSoupUtil.safeFirst
@@ -24,6 +22,8 @@ import com.madsam.otora.utils.ShareUtil
 import com.madsam.otora.web.Api
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import io.realm.Realm
+import io.realm.kotlin.executeTransactionAwait
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -38,6 +38,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.IOException
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.jvmErasure
+import kotlin.text.category
 
 /**
  * 项目名: OtogeTracker
@@ -380,28 +381,30 @@ class ChuniDataRequestService(private val context: Context) {
                 val allGenre = doc.getElementsByClass("box05 w400")
                 val chuniGenre = mutableListOf<ChuniGenre>()
                 for (genre in allGenre) {
-                    val genreName = genre.getElementsByClass("genre_title").text()
+                    val genreName = genre.getElementsByClass("genre scroll_point text_white").text()
                     val genreScore = genre.getElementsByClass("w388 musiclist_box bg_master")
                     val chuniScore = mutableListOf<ChuniFullScore>()
                     for (score in genreScore) {
-                        val id = score.select("input[name=idx]").attr("value")
+                        val highScore = score.getElementsByClass("play_musicdata_highscore")
+                            .select("span").text()
                         val title = score.getElementsByClass("music_title").text()
+
+                        val id = score.select("input[name=idx]").attr("value")
                         val level = score.select("input[name=diff]").attr("value")
-                        val highScore = score.getElementsByClass("play_musicdata_highscore").safeFirstText()
                         val genreId = score.select("input[name=genre]").attr("value")
                         val token = score.select("input[name=token]").attr("value")
-                        val marks = score.getElementsByClass("music_icon").select("img")
+
+                        val marks = score.getElementsByClass("play_musicdata_icon clearfix").select("img")
                         val clearMarks = marks.joinToString("") {
                             it.attr("src")
-                                .split("/").last()
-                                .split(".").first()
                                 .split("_").last()
                         }
-                        val isClear = clearMarks.contains("icon_playlog_clear")
-                        val isFullCombo = clearMarks.contains("icon_playlog_fullcombo")
-                        val isAllJustice = clearMarks.contains("icon_playlog_alljustice")
-                        val isAJC = clearMarks.contains("icon_playlog_alljustice_critical")
-                        val isFullChain = clearMarks.contains("icon_playlog_fullchain")
+                        val isClear = clearMarks.contains("clear.png")
+                        val isFullCombo = clearMarks.contains("fullcombo.png")
+                        val isAllJustice = clearMarks.contains("alljustice.png")
+                        val isAJC = clearMarks.contains("alljusticecritical.png")
+                        val isFullChain = clearMarks.contains("fullchain.png")
+                        val isFullChain2 = clearMarks.contains("fullchain2.png")
                         val rank = marks.select("img[src*='rank']").attr("src")
                             .split("/").last()
                             .split(".").first()
@@ -418,6 +421,7 @@ class ChuniDataRequestService(private val context: Context) {
                             isAllJustice = isAllJustice,
                             isAJC = isAJC,
                             isFullChain = isFullChain,
+                            isFullChain2 = isFullChain2,
                             rank = rank,
                         ))
                     }
@@ -497,7 +501,6 @@ class ChuniDataRequestService(private val context: Context) {
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create()) // RxJava
             .build()
         val api = retrofit.create(Api::class.java)
-        val db = DatabaseProvider.getDatabase(context)
         try {
             val chuniSongsCall = api.getChunithmSongsData()
             val response = chuniSongsCall.execute()
@@ -505,48 +508,49 @@ class ChuniDataRequestService(private val context: Context) {
                 val chuniDatas = response.body()
                 if (chuniDatas != null) {
                     val chuniSongs = chuniDatas.songs
-                    val chuniSongsEntity = mutableListOf<ChuniSongsEntity>()
-                    for (song in chuniSongs) {
-                        val chuniSongEntity = ChuniSongsEntity(
-                            id = CommonUtils.generateHash(song.songId),
-                            category = song.category,
-                            title = song.title,
-                            artist = song.artist,
-                            bpm = song.bpm,
-                            imageName = song.imageName,
-                            version = song.version,
-                            releaseDate = song.releaseDate,
-                            isNew = song.isNew,
-                            isLocked = song.isLocked,
-                            comment = song.comment
-                        )
-                        chuniSongsEntity.add(chuniSongEntity)
-                        val chuniSheets = song.sheets
-                        val chuniSheetsEntity = mutableListOf<ChuniSheetsEntity>()
-                        for (sheet in chuniSheets) {
-                            val chuniSheetEntity = ChuniSheetsEntity(
-                                id = CommonUtils.generateHash(song.songId),
-                                difficulty = sheet.difficulty,
-                                level = sheet.level,
-                                levelValue = sheet.levelValue,
-                                internalLevel = sheet.internalLevel,
-                                internalLevelValue = sheet.internalLevelValue,
-                                noteDesigner = sheet.noteDesigner,
-                                tap = sheet.noteCounts.tap,
-                                hold = sheet.noteCounts.hold,
-                                slide = sheet.noteCounts.slide,
-                                air = sheet.noteCounts.air,
-                                flick = sheet.noteCounts.flick,
-                                total = sheet.noteCounts.total,
-                                jp = sheet.regions.jp,
-                                intl = sheet.regions.intl,
-                                isSpecial = sheet.isSpecial
-                            )
-                            chuniSheetsEntity.add(chuniSheetEntity)
+                    val realm = Realm.getDefaultInstance()
+                    realm.executeTransaction { transactionRealm ->
+                        for (song in chuniSongs) {
+                            val chuniSongEntity = ChuniSongsEntity().apply {
+                                id = song.songId
+                                category = song.category
+                                title = song.title
+                                artist = song.artist
+                                bpm = song.bpm
+                                imageName = song.imageName
+                                version = song.version
+                                releaseDate = song.releaseDate
+                                isNew = song.isNew
+                                isLocked = song.isLocked
+                                comment = song.comment
+                            }
+                            transactionRealm.copyToRealmOrUpdate(chuniSongEntity)
+
+                            for (sheet in song.sheets) {
+                                val chuniSheetEntity = ChuniSheetsEntity().apply {
+                                    id = "${song.songId}_${sheet.difficulty}"
+                                    type = sheet.type
+                                    difficulty = sheet.difficulty
+                                    level = sheet.level
+                                    levelValue = sheet.levelValue
+                                    internalLevel = sheet.internalLevel
+                                    internalLevelValue = sheet.internalLevelValue
+                                    noteDesigner = sheet.noteDesigner
+                                    tap = sheet.noteCounts.tap
+                                    hold = sheet.noteCounts.hold
+                                    slide = sheet.noteCounts.slide
+                                    air = sheet.noteCounts.air
+                                    flick = sheet.noteCounts.flick
+                                    total = sheet.noteCounts.total
+                                    jp = sheet.regions.jp
+                                    intl = sheet.regions.intl
+                                    isSpecial = sheet.isSpecial
+                                }
+                                transactionRealm.copyToRealmOrUpdate(chuniSheetEntity)
+                            }
                         }
-                        db.chuniSheetsDao().insertAll(chuniSheetsEntity)
                     }
-                    db.chuniSongsDao().insertAll(chuniSongsEntity)
+                    realm.close()
                 } else {
                     Log.e(TAG, "Failed to get the songs data")
                 }
@@ -587,28 +591,41 @@ class ChuniDataRequestService(private val context: Context) {
         ShareUtil.putString("chuniUserId", cookie.userId, context)
     }
 
-    fun getChuniSongsData(callback: ICallback<ChuniDatas>) {
+    fun getChuniSongsData() {
         serviceScope.launch { mutex.withLock { requestSongsDatas() }}
     }
 
     // Get songs data from the database
     suspend fun getChuniSongData(title: String): ChuniSongsEntity {
         return withContext(Dispatchers.IO) {
+            val realm = Realm.getDefaultInstance()
             try {
-                DatabaseProvider.getDatabase(context).chuniSongsDao()
-                    .getSongById(CommonUtils.generateHash(title)) ?: ChuniSongsEntity()
+                val song = realm.where(ChuniSongsEntity::class.java)
+                    .equalTo("id", title)
+                    .findFirst()
+                song?.let { realm.copyFromRealm(it) } ?: ChuniSongsEntity()
             } catch (e: Exception) {
+                Log.e(TAG, "Failed to get the song data: ${e.message}")
                 ChuniSongsEntity()
+            } finally {
+                realm.close()
             }
         }
     }
     suspend fun getChuniSongSheetData(title: String, diff: String): ChuniSheetsEntity {
         return withContext(Dispatchers.IO) {
+            val realm = Realm.getDefaultInstance()
             try {
-                DatabaseProvider.getDatabase(context).chuniSheetsDao()
-                    .getSheetById(CommonUtils.generateHash(title), diff) ?: ChuniSheetsEntity()
+                val sheet = realm.where(ChuniSheetsEntity::class.java)
+                    .equalTo("id", "${title}_${diff}")
+                    .findFirst()
+                println(sheet)
+                sheet?.let { realm.copyFromRealm(it) } ?: ChuniSheetsEntity()
             } catch (e: Exception) {
+                Log.e(TAG, "Failed to get the sheet data: ${e.message}")
                 ChuniSheetsEntity()
+            } finally {
+                realm.close()
             }
         }
     }

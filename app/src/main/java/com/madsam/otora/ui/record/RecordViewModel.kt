@@ -74,9 +74,7 @@ class RecordViewModel(
 
     fun requestChuniSongData(context: Context) {
         val chuniDataRequestService = ChuniDataRequestService(context)
-        chuniDataRequestService.getChuniSongsData { chuniDatas ->
-            //TODO: setChuniSongs(chuniDatas)
-        }
+        chuniDataRequestService.getChuniSongsData()
     }
 
     fun requestChuniUserData(context: Context) {

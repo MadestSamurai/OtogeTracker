@@ -3,6 +3,8 @@ plugins {
     id("androidx.navigation.safeargs")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
+    id("kotlin-kapt")
+    id("realm-android")
     alias(libs.plugins.compose.compiler)
 }
 
@@ -94,6 +96,10 @@ dependencies {
     testImplementation(libs.androidx.room.room.testing3)
     // optional - Paging 3 Integration
     implementation(libs.androidx.room.paging)
+
+    // Realm
+    implementation(libs.realm.realm.android.library)
+    kapt(libs.realm.annotations.processor)
 
     // Moshi
     implementation(libs.moshi.kotlin)

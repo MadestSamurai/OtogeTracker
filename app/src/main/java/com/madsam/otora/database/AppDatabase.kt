@@ -6,8 +6,6 @@ import com.madsam.otora.dao.BofEntryDao
 import com.madsam.otora.dao.BofPointDao
 import com.madsam.otora.dao.BofTeamDao
 import com.madsam.otora.dao.BofTeamPointDao
-import com.madsam.otora.dao.ChuniSheetsDao
-import com.madsam.otora.dao.ChuniSongsDao
 import com.madsam.otora.entity.bof.BofEntryEntity
 import com.madsam.otora.entity.bof.BofPointEntity
 import com.madsam.otora.entity.bof.BofTeamEntity
@@ -26,15 +24,11 @@ import com.madsam.otora.entity.chunithm.ChuniSongsEntity
     BofEntryEntity::class,
     BofPointEntity::class,
     BofTeamEntity::class,
-    BofTeamPointEntity::class,
-    ChuniSongsEntity::class,
-    ChuniSheetsEntity::class
+    BofTeamPointEntity::class
                      ], version = 1)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun bofEntryDao(): BofEntryDao
     abstract fun bofPointDao(): BofPointDao
     abstract fun bofTeamDao(): BofTeamDao
     abstract fun bofTeamPointDao(): BofTeamPointDao
-    abstract fun chuniSongsDao(): ChuniSongsDao
-    abstract fun chuniSheetsDao(): ChuniSheetsDao
 }

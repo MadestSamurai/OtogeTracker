@@ -8,6 +8,7 @@ buildscript {
         classpath(libs.kotlin.gradle.plugin)
         classpath(libs.navigation.safe.args.gradle.plugin)
         classpath(libs.com.google.devtools.ksp.gradle.plugin)
+        classpath(libs.io.realm.realm.gradle.plugin)
     }
 }
 
