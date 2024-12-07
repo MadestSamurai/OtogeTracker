@@ -27,8 +27,8 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.consts.Colors
-import com.madsam.otora.entity.chunithm.ChuniSheetsEntity
-import com.madsam.otora.entity.chunithm.ChuniSongsEntity
+import com.madsam.otora.entity.ChuniSheetsEntity
+import com.madsam.otora.entity.ChuniSongsEntity
 import com.madsam.otora.model.chuni.net.ChuniScore
 import com.madsam.otora.model.chuni.ui.ChuniScoreShow
 import com.madsam.otora.service.ChuniDataRequestService

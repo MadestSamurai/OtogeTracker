@@ -2,7 +2,6 @@ plugins {
     id("com.android.application")
     id("androidx.navigation.safeargs")
     id("org.jetbrains.kotlin.android")
-    id("com.google.devtools.ksp")
     id("kotlin-kapt")
     id("realm-android")
     alias(libs.plugins.compose.compiler)
@@ -18,12 +17,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-            arg("room.incremental", "true")
-            arg("room.expandProjection", "true")
-        }
     }
 
     buildTypes {
@@ -86,16 +79,6 @@ dependencies {
     implementation(libs.accompanist.themeadapter.material3)
 
     debugImplementation(libs.androidx.ui.tooling)
-
-    // Room
-    implementation(libs.androidx.room.runtime)
-    ksp(libs.androidx.room.compiler)
-    // optional - RxJava3 support for Room
-    implementation(libs.androidx.room.room.rxjava3)
-    // optional - Test helpers
-    testImplementation(libs.androidx.room.room.testing3)
-    // optional - Paging 3 Integration
-    implementation(libs.androidx.room.paging)
 
     // Realm
     implementation(libs.realm.realm.android.library)

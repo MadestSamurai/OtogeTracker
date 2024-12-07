@@ -25,7 +25,6 @@ navigationSafe = "2.7.7" # Not newest version because of a bug of screenshot
 androidGradle = "8.7.2"
 navigation = "2.7.7" # Not newest version because of a bug of screenshot
 okhttp = "4.12.0"
-roomVersion = "2.6.1"
 runtime = "1.7.3"
 utilcode = "1.30.7"
 vico = "2.0.0-alpha.28"
@@ -43,11 +42,6 @@ androidx-glance-material3 = { module = "androidx.glance:glance-material3", versi
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glanceAppwidget" }
 androidx-junit = { module = "androidx.test.ext:junit", version.ref = "junitVersion" }
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "materialVersion" }
-androidx-room-paging = { module = "androidx.room:room-paging", version.ref = "roomVersion" }
-androidx-room-room-rxjava3 = { module = "androidx.room:room-rxjava3", version.ref = "roomVersion" }
-androidx-room-room-testing3 = { module = "androidx.room:room-testing", version.ref = "roomVersion" }
-androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomVersion" }
-androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomVersion" }
 androidx-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "runtime" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 coil-gif = { module = "io.coil-kt:coil-gif", version.ref = "coilVersion" }
@@ -84,4 +78,3 @@ vico-views = { group = "com.patrykandpatrick.vico", name = "views", version.ref 
 android-application = { id = "com.android.application", version.ref = "androidGradle" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 android-library = { id = "com.android.library", version.ref = "androidGradle" }
-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "comGoogleDevtoolsKspGradlePlugin" }

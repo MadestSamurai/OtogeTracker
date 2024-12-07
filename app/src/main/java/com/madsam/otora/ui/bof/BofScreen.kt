@@ -5,7 +5,6 @@ import android.app.TimePickerDialog
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
@@ -18,9 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import com.madsam.otora.service.BofDataRequestService
 import com.madsam.otora.ui.bof.sub.BofAvgScreen
 import com.madsam.otora.ui.bof.sub.BofDiffScreen
@@ -63,10 +60,8 @@ fun BofScreen() {
     }
 
     fun refreshData() {
-        coroutineScope.launch {
-            bofDataRequestService.getBofttData(dateTime)
-            bofDataRequestService.getBofttTeamData(dateTime)
-        }
+        bofDataRequestService.getBofttData(dateTime)
+        bofDataRequestService.getBofttTeamData(dateTime)
     }
 
     Column {

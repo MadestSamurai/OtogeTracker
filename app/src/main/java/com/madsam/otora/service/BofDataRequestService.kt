@@ -2,30 +2,41 @@ package com.madsam.otora.service
 
 import android.content.Context
 import android.util.Log
-import com.madsam.otora.database.DatabaseProvider
-import com.madsam.otora.entity.bof.BofEntryEntity
-import com.madsam.otora.entity.bof.BofPointEntity
-import com.madsam.otora.entity.bof.BofTeamEntity
-import com.madsam.otora.entity.bof.BofTeamPointEntity
-import com.madsam.otora.model.bof.web.BofEntry
+import com.madsam.otora.entity.BofEntryEntity
+import com.madsam.otora.entity.BofPointEntity
+import com.madsam.otora.entity.BofTeamEntity
+import com.madsam.otora.entity.BofTeamPointEntity
 import com.madsam.otora.model.bof.ui.BofEntryShow
-import com.madsam.otora.model.bof.web.BofTeam
 import com.madsam.otora.model.bof.ui.BofTeamShow
+import com.madsam.otora.model.bof.web.BofEntry
+import com.madsam.otora.model.bof.web.BofTeam
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ShareUtil
 import com.madsam.otora.web.Api
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import io.realm.Realm
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.IOException
 import java.time.LocalDate
+import java.util.concurrent.Executors
+import kotlin.compareTo
 import kotlin.math.abs
+import kotlin.text.compareTo
+import kotlin.text.get
+import kotlin.toString
 
 /**
  * 项目名: OtogeTracker
@@ -38,6 +49,7 @@ class BofDataRequestService(private val context: Context) {
     companion object {
         const val TAG = "BofDataRequestService"
     }
+
     private val moshi = Moshi.Builder()
         .addLast(KotlinJsonAdapterFactory())
         .build()
@@ -49,8 +61,10 @@ class BofDataRequestService(private val context: Context) {
         .build()
 
     private val api = retrofit.create(Api::class.java)
-    private val db = DatabaseProvider.getDatabase(context)
     private val serviceScope = CoroutineScope(Dispatchers.IO)
+    private val mutex = Mutex()
+    private val dispatcher = Executors.newFixedThreadPool(4).asCoroutineDispatcher()
+    private val semaphore = Semaphore(4)
 
     // Request BOF data from the server
     private fun requestBofttEntryData(
@@ -62,21 +76,28 @@ class BofDataRequestService(private val context: Context) {
             if (response.isSuccessful) {
                 val bofEntryList = response.body()
                 if (bofEntryList != null) {
-                    // Insert data into database
-                    bofEntryList.forEach { entry ->
-                        val entity = BofEntryEntity(
-                            no = entry.no,
-                            team = entry.team,
-                            artist = entry.artist,
-                            genre = entry.genre,
-                            title = entry.title,
-                            regist = entry.regist,
-                            update = entry.update
-                        )
-                        db.bofEntryDao().insertOrUpdate(entity)
-                        storePoints(entry, date)
+                    val realm = Realm.getDefaultInstance()
+                    realm.executeTransaction { transactionRealm ->
+                        bofEntryList.forEach { entry ->
+                            val entity = BofEntryEntity().apply {
+                                id = "${date}_${entry.no}"
+                                no = entry.no
+                                team = entry.team
+                                this.date = date
+                                artist = entry.artist
+                                genre = entry.genre
+                                title = entry.title
+                                regist = entry.regist
+                                update = entry.update
+                            }
+                            transactionRealm.copyToRealmOrUpdate(entity)
+                            storePoints(transactionRealm, entry, date)
+                        }
                     }
-                } else Log.e(TAG, "Response body is null")
+                    realm.close()
+                } else {
+                    Log.e(TAG, "Response body is null")
+                }
             } else {
                 Log.e(TAG, "Response is not successful")
             }
@@ -84,45 +105,42 @@ class BofDataRequestService(private val context: Context) {
             Log.e(TAG, "IOException: ${e.message}")
         }
     }
-    private fun requestBofttTeamData(
-        date: String
-    ) {
+
+    private fun requestBofttTeamData(date: String) {
         try {
             val bofTeamCall = api.getBofttTeamData(date)
             val response = bofTeamCall.execute()
             if (response.isSuccessful) {
                 val bofTeamList = response.body()
                 if (bofTeamList != null) {
-                    // Insert data into database
-                    bofTeamList.forEach { team ->
-                        /** XXX: Bad performance because of hash generation,
-                         *  but data is quite small (less than 300 records per day) so it's fine.
-                         *  Check if data is already in the database and make id incremental
-                         *  is a better solution but I'm too lazy to do that.
-                         */
-                        val id = CommonUtils.generateHash(team.team)
-                        val entity = BofTeamEntity(
-                            id = id,
-                            date = date,
-                            team = team.team,
-                            title1 = team.title1,
-                            title2 = team.title2,
-                            title3 = team.title3,
-                            title4 = team.title4,
-                            artist1 = team.artist1,
-                            artist2 = team.artist2,
-                            artist3 = team.artist3,
-                            artist4 = team.artist4,
-                            fs1 = team.fs1,
-                            fs2 = team.fs2,
-                            fs3 = team.fs3,
-                            fs4 = team.fs4
-                        )
-                        db.bofTeamDao().insertOrUpdate(entity)
-                        team.id = id
-                        storePoints(team, date)
+                    val realm = Realm.getDefaultInstance()
+                    realm.executeTransaction { transactionRealm ->
+                        bofTeamList.forEach { team ->
+                            val entity = BofTeamEntity().apply {
+                                this.id = "${date}_${team.team}"
+                                this.date = date
+                                this.team = team.team
+                                this.title1 = team.title1
+                                this.title2 = team.title2
+                                this.title3 = team.title3
+                                this.title4 = team.title4
+                                this.artist1 = team.artist1
+                                this.artist2 = team.artist2
+                                this.artist3 = team.artist3
+                                this.artist4 = team.artist4
+                                this.fs1 = team.fs1
+                                this.fs2 = team.fs2
+                                this.fs3 = team.fs3
+                                this.fs4 = team.fs4
+                            }
+                            transactionRealm.copyToRealmOrUpdate(entity)
+                            storePoints(transactionRealm, team, date)
+                        }
                     }
-                } else Log.e(TAG, "Response body is null")
+                    realm.close()
+                } else {
+                    Log.e(TAG, "Response body is null")
+                }
             } else {
                 Log.e(TAG, "Response is not successful")
             }
@@ -132,96 +150,130 @@ class BofDataRequestService(private val context: Context) {
     }
 
     // Store data points in the database
-    private fun storePoints(entry: BofEntry, date: String) {
-        val pointsToInsert = mutableListOf<BofPointEntity>()
+    private fun storePoints(realm: Realm, entry: BofEntry, date: String) {
         entry.total.forEach { point ->
             val timeInMillis = CommonUtils.ymdToMillis(date, point.time)
-            val pointEntity = BofPointEntity(
-                no = entry.no,
-                time = timeInMillis,
-                total = point.value,
-                impr = entry.impr.find { it.time == point.time }?.value ?: entry.impr.lastOrNull { it.time < point.time }?.value ?: 0,
-                median = entry.median.find { it.time == point.time }?.value ?: entry.median.lastOrNull { it.time < point.time }?.value ?: 0.0,
-                avg = entry.avg.find { it.time == point.time }?.value ?: entry.avg.lastOrNull { it.time < point.time }?.value ?: 0.0
-            )
-            pointsToInsert.add(pointEntity)
+            val pointEntity = BofPointEntity().apply {
+                id = "${timeInMillis}_${entry.no}"
+                no = entry.no
+                time = timeInMillis
+                total = point.value
+                impr = entry.impr.find { it.time == point.time }?.value
+                    ?: entry.impr.lastOrNull { it.time < point.time }?.value ?: 0
+                median = entry.median.find { it.time == point.time }?.value
+                    ?: entry.median.lastOrNull { it.time < point.time }?.value ?: 0.0
+                avg = entry.avg.find { it.time == point.time }?.value
+                    ?: entry.avg.lastOrNull { it.time < point.time }?.value ?: 0.0
+            }
+            realm.copyToRealmOrUpdate(pointEntity)
         }
-        db.bofPointDao().insertAll(pointsToInsert)
     }
-    private fun storePoints(entry: BofTeam, date: String) {
-        val pointsToInsert = mutableListOf<BofTeamPointEntity>()
+
+    private fun storePoints(realm: Realm, entry: BofTeam, date: String) {
         entry.total.forEach { point ->
             val timeInMillis = CommonUtils.ymdToMillis(date, point.time)
-            val pointEntity = BofTeamPointEntity(
-                id = entry.id,
-                time = timeInMillis,
-                total = point.value,
-                median = entry.median.find { it.time == point.time }?.value ?: entry.median.lastOrNull { it.time < point.time }?.value ?: "",
-                impr = entry.impr.find { it.time == point.time }?.value ?: entry.impr.lastOrNull { it.time < point.time }?.value ?: 0,
-                total1 = entry.total1.find { it.time == point.time }?.value ?: entry.total1.lastOrNull { it.time < point.time }?.value ?: "",
-                median1 = entry.median1.find { it.time == point.time }?.value ?: entry.median1.lastOrNull { it.time < point.time }?.value ?: "",
-                total2 = entry.total2.find { it.time == point.time }?.value ?: entry.total2.lastOrNull { it.time < point.time }?.value ?: "",
-                median2 = entry.median2.find { it.time == point.time }?.value ?: entry.median2.lastOrNull { it.time < point.time }?.value ?: "",
-                total3 = entry.total3.find { it.time == point.time }?.value ?: entry.total3.lastOrNull { it.time < point.time }?.value ?: "",
-                median3 = entry.median3.find { it.time == point.time }?.value ?: entry.median3.lastOrNull { it.time < point.time }?.value ?: "",
-                total4 = entry.total4.find { it.time == point.time }?.value ?: entry.total4.lastOrNull { it.time < point.time }?.value ?: "",
-                median4 = entry.median4.find { it.time == point.time }?.value ?: entry.median4.lastOrNull { it.time < point.time }?.value ?: ""
-            )
-            pointsToInsert.add(pointEntity)
+            val pointEntity = BofTeamPointEntity().apply {
+                id = "${timeInMillis}_${entry.team}"
+                time = timeInMillis
+                team = entry.team
+                total = point.value
+                median = entry.median.find { it.time == point.time }?.value
+                    ?: entry.median.lastOrNull { it.time < point.time }?.value ?: ""
+                impr = entry.impr.find { it.time == point.time }?.value
+                    ?: entry.impr.lastOrNull { it.time < point.time }?.value ?: 0
+                total1 = entry.total1.find { it.time == point.time }?.value
+                    ?: entry.total1.lastOrNull { it.time < point.time }?.value ?: ""
+                median1 = entry.median1.find { it.time == point.time }?.value
+                    ?: entry.median1.lastOrNull { it.time < point.time }?.value ?: ""
+                total2 = entry.total2.find { it.time == point.time }?.value
+                    ?: entry.total2.lastOrNull { it.time < point.time }?.value ?: ""
+                median2 = entry.median2.find { it.time == point.time }?.value
+                    ?: entry.median2.lastOrNull { it.time < point.time }?.value ?: ""
+                total3 = entry.total3.find { it.time == point.time }?.value
+                    ?: entry.total3.lastOrNull { it.time < point.time }?.value ?: ""
+                median3 = entry.median3.find { it.time == point.time }?.value
+                    ?: entry.median3.lastOrNull { it.time < point.time }?.value ?: ""
+                total4 = entry.total4.find { it.time == point.time }?.value
+                    ?: entry.total4.lastOrNull { it.time < point.time }?.value ?: ""
+                median4 = entry.median4.find { it.time == point.time }?.value
+                    ?: entry.median4.lastOrNull { it.time < point.time }?.value ?: ""
+            }
+            realm.copyToRealmOrUpdate(pointEntity)
         }
-        db.bofTeamPointDao().insertAll(pointsToInsert)
     }
 
     // Get BOF data from the server
     fun getBofttData(dateTime: LocalDate) {
-        serviceScope.launch {
-            val startDate = LocalDate.parse("2024-10-16")
-            var currentDate = dateTime
-            while (currentDate.isAfter(startDate)) {
-                if (!ShareUtil.findStringArray("dates", currentDate.toString(), context)) {
-                    requestBofttEntryData(currentDate.toString())
-                    if (currentDate.isBefore(dateTime))
-                        ShareUtil.insertStringArray("dates", currentDate.toString(), context)
+        val startDate = LocalDate.parse("2024-10-16")
+        var currentDate = dateTime
+        while (!currentDate.isBefore(startDate)) {
+            val dateToRequest = currentDate.toString()
+            if (!ShareUtil.findStringArray("dates", dateToRequest, context)) {
+                serviceScope.launch(dispatcher) {
+                    println("Requesting data for $dateToRequest")
+                    semaphore.withPermit {
+                        requestBofttEntryData(dateToRequest)
+                        if (!ShareUtil.findStringArray("dates", dateToRequest, context)) {
+                            ShareUtil.insertStringArray("dates", dateToRequest, context)
+                        }
+                    }
                 }
-                currentDate = currentDate.minusDays(1)
             }
+            currentDate = currentDate.minusDays(1)
         }
     }
+
     fun getBofttTeamData(dateTime: LocalDate) {
-        serviceScope.launch {
-            val endDate = dateTime
-            val startDate = LocalDate.parse("2024-10-16")
-            var currentDate = endDate
-            while (currentDate.isAfter(startDate)) {
-                if (!ShareUtil.findStringArray("datesTeam", currentDate.toString(), context)) {
-                    requestBofttTeamData(currentDate.toString())
-                    if (currentDate.isBefore(dateTime))
-                        ShareUtil.insertStringArray("datesTeam", currentDate.toString(), context)
+        val startDate = LocalDate.parse("2024-10-16")
+        var currentDate = dateTime
+        while (!currentDate.isBefore(startDate)) {
+            val dateToRequest = currentDate.toString()
+            if (!ShareUtil.findStringArray("datesTeam", dateToRequest, context)) {
+                serviceScope.launch(dispatcher) {
+                    semaphore.withPermit {
+                        requestBofttTeamData(dateToRequest)
+                        if (!ShareUtil.findStringArray("datesTeam", dateToRequest, context)) {
+                            ShareUtil.insertStringArray("datesTeam", dateToRequest, context)
+                        }
+                    }
                 }
-                currentDate = currentDate.minusDays(1)
             }
+            currentDate = currentDate.minusDays(1)
         }
     }
 
     // Get BOF data from the database
     suspend fun getBofttEntryByTime(time: Long): List<BofEntryShow> {
         return withContext(Dispatchers.IO) {
+            val realm = Realm.getDefaultInstance()
             try {
                 val startTime = time - 48 * 60 * 60 * 1000 // 48 hours in milliseconds
                 val oldTimeLimit = time - 24 * 60 * 60 * 1000 // 24 hours in milliseconds
-                val points = db.bofPointDao().getPointsByRange(startTime, time)
+
+                // Fetch points within the time range
+                val points = realm.where(BofPointEntity::class.java)
+                    .between("time", startTime, time)
+                    .findAll()
+
                 if (points.isNotEmpty()) {
-                    val entryIds = points.map { it.no }.distinct()
-                    val entries = db.bofEntryDao().getEntriesByIds(entryIds)
+                    // Fetch entries for the given date
+                    val date = CommonUtils.millisToYmd(time).substring(0, 10)
+                    val entries = realm.where(BofEntryEntity::class.java)
+                        .equalTo("date", date)
+                        .findAll()
+
+                    // Create a map of entryId to points for quick access
+                    val pointsMap = points.groupBy { it.no }
 
                     entries.map { entry ->
-                        val entryPoints = points.filter { it.no == entry.no }
+                        val entryPoints = pointsMap[entry.no] ?: emptyList()
                         val closestPoint = entryPoints
                             .filter { it.time <= time }
                             .minByOrNull { abs(it.time - time) }
                         val oldClosestPoint = entryPoints
                             .filter { it.time <= oldTimeLimit }
                             .minByOrNull { abs(it.time - oldTimeLimit) }
+
                         BofEntryShow(
                             team = entry.team,
                             artist = entry.artist,
@@ -246,26 +298,43 @@ class BofDataRequestService(private val context: Context) {
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching entry by time: ${e.message}")
                 emptyList()
+            } finally {
+                realm.close()
             }
         }
     }
+
     suspend fun getBofttTeamByTime(time: Long): List<BofTeamShow> {
         return withContext(Dispatchers.IO) {
+            val realm = Realm.getDefaultInstance()
             try {
                 val startTime = time - 48 * 60 * 60 * 1000 // 48 hours in milliseconds
                 val oldTimeLimit = time - 24 * 60 * 60 * 1000 // 24 hours in milliseconds
-                val points = db.bofTeamPointDao().getPointsByRange(startTime, time)
+
+                // Fetch points within the time range
+                val points = realm.where(BofTeamPointEntity::class.java)
+                    .between("time", startTime, time)
+                    .findAll()
+
                 if (points.isNotEmpty()) {
-                    val teams = db.bofTeamDao().getTeamsByDate(CommonUtils.millisToYmd(time).substring(0, 10))
+                    // Fetch teams for the given date
+                    val date = CommonUtils.millisToYmd(time).substring(0, 10)
+                    val teams = realm.where(BofTeamEntity::class.java)
+                        .equalTo("date", date)
+                        .findAll()
+
+                    // Create a map of teamId to points for quick access
+                    val pointsMap = points.groupBy { it.team }
 
                     teams.map { team ->
-                        val teamPoints = points.filter { it.id == team.id }
+                        val teamPoints = pointsMap[team.team] ?: emptyList()
                         val closestPoint = teamPoints
                             .filter { it.time <= time }
                             .minByOrNull { abs(it.time - time) }
                         val oldClosestPoint = teamPoints
                             .filter { it.time <= oldTimeLimit }
                             .minByOrNull { abs(it.time - oldTimeLimit) }
+
                         BofTeamShow(
                             team = team.team,
                             title1 = team.title1,
@@ -303,6 +372,8 @@ class BofDataRequestService(private val context: Context) {
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching team by time: ${e.message}")
                 emptyList()
+            } finally {
+                realm.close()
             }
         }
     }
@@ -319,6 +390,7 @@ class BofDataRequestService(private val context: Context) {
             }
         }
     }
+
     suspend fun getBofttTeamLatest(): List<BofTeamShow> {
         return withContext(Dispatchers.IO) {
             try {

@@ -2,9 +2,8 @@ package com.madsam.otora.service
 
 import android.content.Context
 import android.util.Log
-import com.madsam.otora.database.DatabaseProvider
-import com.madsam.otora.entity.chunithm.ChuniSheetsEntity
-import com.madsam.otora.entity.chunithm.ChuniSongsEntity
+import com.madsam.otora.entity.ChuniSheetsEntity
+import com.madsam.otora.entity.ChuniSongsEntity
 import com.madsam.otora.model.chuni.net.ChuniCard
 import com.madsam.otora.model.chuni.net.ChuniCookie
 import com.madsam.otora.model.chuni.net.ChuniDataExtend
@@ -23,7 +22,6 @@ import com.madsam.otora.web.Api
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.realm.Realm
-import io.realm.kotlin.executeTransactionAwait
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -38,7 +36,6 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.IOException
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.jvmErasure
-import kotlin.text.category
 
 /**
  * 项目名: OtogeTracker
@@ -619,7 +616,6 @@ class ChuniDataRequestService(private val context: Context) {
                 val sheet = realm.where(ChuniSheetsEntity::class.java)
                     .equalTo("id", "${title}_${diff}")
                     .findFirst()
-                println(sheet)
                 sheet?.let { realm.copyFromRealm(it) } ?: ChuniSheetsEntity()
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get the sheet data: ${e.message}")

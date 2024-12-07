@@ -62,6 +62,9 @@ fun BofTotalScreen(
 
     fun roundDownToNearestFiveMinutes(hms: String): String {
         val parts = hms.split(":").map { it.toInt() }
+        if (parts.size != 2) {
+            return "Invalid Time"
+        }
         val hours = parts[0]
         val minutes = parts[1] / 5 * 5
         return String.format("%02d:%02d:00", hours, minutes)
@@ -118,7 +121,7 @@ fun BofTotalScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
             item {
-                if (todayLatestData.value.isEmpty()) {
+                if (todayLatestData.value.isEmpty() || todayLatestData.value[0].total == 0) {
                     Text(text = "No Data at $selectedDate $selectedTimeStr")
                 } else {
                     Text(
@@ -226,8 +229,8 @@ fun BofEntryRowTotal(
     isCompare: Boolean = true
 ) {
     val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
-    val barWidthFraction = (entry.total.toFloat() / maxTotal) * 1f
-    val barWidthOldFaction = ((entry.oldTotal).toFloat() / maxTotal) * 1f
+    val barWidthFraction = if (maxTotal == 0) 0f else (entry.total.toFloat() / maxTotal) * 1f
+    val barWidthOldFaction = if (maxTotal == 0) 0f else ((entry.oldTotal).toFloat() / maxTotal) * 1f
     var rowHeight = remember { mutableIntStateOf(0) }
 
     fun calculateColor(value: Double): Color {
