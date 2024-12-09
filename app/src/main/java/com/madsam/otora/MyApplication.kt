@@ -1,10 +1,6 @@
 package com.madsam.otora
 
 import android.app.Application
-import com.madsam.otora.entity.BofRealmModule
-import com.madsam.otora.entity.ChuniRealmModule
-import io.realm.Realm
-import io.realm.RealmConfiguration
 
 /**
  * 项目名: MusiCord
@@ -18,12 +14,5 @@ class MyApplication : Application() {
         super.onCreate()
         applicationInfo.labelRes = 0
         applicationInfo.nonLocalizedLabel = "OtogeTracker"
-        Realm.init(this)
-        val config = RealmConfiguration.Builder()
-            .name("otoge-tracker.realm")
-            .schemaVersion(1)
-            .modules(ChuniRealmModule(), BofRealmModule())
-            .build()
-        Realm.setDefaultConfiguration(config)
     }
 }

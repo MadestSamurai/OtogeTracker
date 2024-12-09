@@ -2,8 +2,7 @@ plugins {
     id("com.android.application")
     id("androidx.navigation.safeargs")
     id("org.jetbrains.kotlin.android")
-    id("kotlin-kapt")
-    id("realm-android")
+    alias(libs.plugins.realm.kotlin)
     alias(libs.plugins.compose.compiler)
 }
 
@@ -33,16 +32,17 @@ android {
         buildConfig = true
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
-
     defaultConfig {
         namespace = "com.madsam.otora"
     }
     kotlinOptions {
         jvmTarget = "17"
     }
+}
+
+composeCompiler {
+    reportsDestination = layout.buildDirectory.dir("compose_compiler")
+//    stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
 }
 
 dependencies {
@@ -81,8 +81,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
 
     // Realm
-    implementation(libs.realm.realm.android.library)
-    kapt(libs.realm.annotations.processor)
+    implementation(libs.realm.library.base)
 
     // Moshi
     implementation(libs.moshi.kotlin)
@@ -99,9 +98,4 @@ dependencies {
 
     // JSoup
     implementation(libs.jsoup)
-
-    // JUnit
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }

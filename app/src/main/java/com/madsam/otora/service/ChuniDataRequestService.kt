@@ -21,7 +21,8 @@ import com.madsam.otora.utils.ShareUtil
 import com.madsam.otora.web.Api
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import io.realm.Realm
+import io.realm.kotlin.Realm
+import io.realm.kotlin.RealmConfiguration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -71,6 +72,16 @@ class ChuniDataRequestService(private val context: Context) {
         .add(NullToEmptyIntListAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
+    private val realmConfig = RealmConfiguration.Builder(
+        schema = setOf(
+            ChuniSongsEntity::class,
+            ChuniSheetsEntity::class,
+        )
+    )
+        .name("otoge-tracker-bof.realm")
+        .schemaVersion(1)
+        .build()
+
     private fun requestPlayerData() {
         try {
             val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/home/playerData"))
@@ -491,71 +502,77 @@ class ChuniDataRequestService(private val context: Context) {
         }
     }
 
-    private fun requestSongsDatas() {
+    private suspend fun requestSongsDatas() {
         val retrofit = Retrofit.Builder()
             .baseUrl("https://dp4p6x0xfi5o9.cloudfront.net")
             .addConverterFactory(MoshiConverterFactory.create(moshi)) // Moshi
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create()) // RxJava
             .build()
         val api = retrofit.create(Api::class.java)
+        val realm = Realm.open(realmConfig)
+
         try {
             val chuniSongsCall = api.getChunithmSongsData()
             val response = chuniSongsCall.execute()
-            if (response.isSuccessful) {
-                val chuniDatas = response.body()
-                if (chuniDatas != null) {
-                    val chuniSongs = chuniDatas.songs
-                    val realm = Realm.getDefaultInstance()
-                    realm.executeTransaction { transactionRealm ->
-                        for (song in chuniSongs) {
-                            val chuniSongEntity = ChuniSongsEntity().apply {
-                                id = song.songId
-                                category = song.category
-                                title = song.title
-                                artist = song.artist
-                                bpm = song.bpm
-                                imageName = song.imageName
-                                version = song.version
-                                releaseDate = song.releaseDate
-                                isNew = song.isNew
-                                isLocked = song.isLocked
-                                comment = song.comment
-                            }
-                            transactionRealm.copyToRealmOrUpdate(chuniSongEntity)
-
-                            for (sheet in song.sheets) {
-                                val chuniSheetEntity = ChuniSheetsEntity().apply {
-                                    id = "${song.songId}_${sheet.difficulty}"
-                                    type = sheet.type
-                                    difficulty = sheet.difficulty
-                                    level = sheet.level
-                                    levelValue = sheet.levelValue
-                                    internalLevel = sheet.internalLevel
-                                    internalLevelValue = sheet.internalLevelValue
-                                    noteDesigner = sheet.noteDesigner
-                                    tap = sheet.noteCounts.tap
-                                    hold = sheet.noteCounts.hold
-                                    slide = sheet.noteCounts.slide
-                                    air = sheet.noteCounts.air
-                                    flick = sheet.noteCounts.flick
-                                    total = sheet.noteCounts.total
-                                    jp = sheet.regions.jp
-                                    intl = sheet.regions.intl
-                                    isSpecial = sheet.isSpecial
-                                }
-                                transactionRealm.copyToRealmOrUpdate(chuniSheetEntity)
-                            }
-                        }
-                    }
-                    realm.close()
-                } else {
-                    Log.e(TAG, "Failed to get the songs data")
-                }
-            } else {
+            if (!response.isSuccessful) {
                 Log.e(TAG, "Failed to get the songs data")
+                realm.close()
+                return
+            }
+
+            val chuniDatas = response.body()
+            if (chuniDatas == null) {
+                Log.e(TAG, "Failed to get the songs data")
+                realm.close()
+                return
+            }
+
+            val chuniSongs = chuniDatas.songs
+            realm.write {
+                for (song in chuniSongs) {
+                    val chuniSongEntity = ChuniSongsEntity().apply {
+                        id = song.songId
+                        category = song.category
+                        title = song.title
+                        artist = song.artist
+                        bpm = song.bpm
+                        imageName = song.imageName
+                        version = song.version
+                        releaseDate = song.releaseDate
+                        isNew = song.isNew
+                        isLocked = song.isLocked
+                        comment = song.comment
+                    }
+                    this.copyToRealm(chuniSongEntity)
+
+                    for (sheet in song.sheets) {
+                        val chuniSheetEntity = ChuniSheetsEntity().apply {
+                            id = "${song.songId}_${sheet.difficulty}"
+                            type = sheet.type
+                            difficulty = sheet.difficulty
+                            level = sheet.level
+                            levelValue = sheet.levelValue
+                            internalLevel = sheet.internalLevel
+                            internalLevelValue = sheet.internalLevelValue
+                            noteDesigner = sheet.noteDesigner
+                            tap = sheet.noteCounts.tap
+                            hold = sheet.noteCounts.hold
+                            slide = sheet.noteCounts.slide
+                            air = sheet.noteCounts.air
+                            flick = sheet.noteCounts.flick
+                            total = sheet.noteCounts.total
+                            jp = sheet.regions.jp
+                            intl = sheet.regions.intl
+                            isSpecial = sheet.isSpecial
+                        }
+                        this.copyToRealm(chuniSheetEntity)
+                    }
+                }
             }
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in ChuniData-requestSongsDatas: ${e.message}")
+        } finally {
+            realm.close()
         }
     }
 
@@ -595,12 +612,14 @@ class ChuniDataRequestService(private val context: Context) {
     // Get songs data from the database
     suspend fun getChuniSongData(title: String): ChuniSongsEntity {
         return withContext(Dispatchers.IO) {
-            val realm = Realm.getDefaultInstance()
+            val realm = Realm.open(realmConfig)
             try {
-                val song = realm.where(ChuniSongsEntity::class.java)
-                    .equalTo("id", title)
-                    .findFirst()
-                song?.let { realm.copyFromRealm(it) } ?: ChuniSongsEntity()
+                val song = realm.query<ChuniSongsEntity>(
+                    clazz = ChuniSongsEntity::class,
+                    query = "id == $0",
+                    title
+                ).first().find()
+                song ?: ChuniSongsEntity()
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get the song data: ${e.message}")
                 ChuniSongsEntity()
@@ -609,14 +628,17 @@ class ChuniDataRequestService(private val context: Context) {
             }
         }
     }
+
     suspend fun getChuniSongSheetData(title: String, diff: String): ChuniSheetsEntity {
         return withContext(Dispatchers.IO) {
-            val realm = Realm.getDefaultInstance()
+            val realm = Realm.open(realmConfig)
             try {
-                val sheet = realm.where(ChuniSheetsEntity::class.java)
-                    .equalTo("id", "${title}_${diff}")
-                    .findFirst()
-                sheet?.let { realm.copyFromRealm(it) } ?: ChuniSheetsEntity()
+                val sheet = realm.query<ChuniSheetsEntity>(
+                    clazz = ChuniSheetsEntity::class,
+                    query = "id == $0",
+                    "${title}_${diff}"
+                ).first().find()
+                sheet ?: ChuniSheetsEntity()
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get the sheet data: ${e.message}")
                 ChuniSheetsEntity()

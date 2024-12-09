@@ -7,8 +7,6 @@ buildscript {
     dependencies {
         classpath(libs.kotlin.gradle.plugin)
         classpath(libs.navigation.safe.args.gradle.plugin)
-        classpath(libs.com.google.devtools.ksp.gradle.plugin)
-        classpath(libs.io.realm.realm.gradle.plugin)
     }
 }
 
@@ -16,6 +14,7 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.compose.compiler) apply false
+    alias(libs.plugins.realm.kotlin) apply false
 }
 
 tasks.register<Delete>("clean") {
