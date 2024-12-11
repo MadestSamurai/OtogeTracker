@@ -64,6 +64,13 @@ object Colors {
     val RANKING_BLUE: Color = Color(0xFF2A518D)
     val RANKING_GREEN: Color = Color(0xFF388E3C)
     val RANKING_YELLOW: Color = Color(0xFFFBC02D)
+
+    val CHUNI_DIFF_BASIC: Color = Color(0xFF4CAF50)
+    val CHUNI_DIFF_ADVANCED: Color = Color(0xFFFF9800)
+    val CHUNI_DIFF_EXPERT: Color = Color(0xFFE35454)
+    val CHUNI_DIFF_MASTER: Color = Color(0xFFBF6AFF)
+    val CHUNI_DIFF_ULTIMA_1: Color = Color(0xFF202020)
+    val CHUNI_DIFF_ULTIMA_2: Color = Color(0xFFFF3A3A)
 }
 
 object GradientBrush {

@@ -2,6 +2,7 @@ package com.madsam.otora.ui.record.chunithm
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -184,13 +185,18 @@ fun ChuniRatingItemCard(
                     }
                     .background(
                         color = when (item.diff) {
-                            "basic" -> Color.Green
-                            "advanced" -> Color.Yellow
-                            "expert" -> Color.Red
-                            "master" -> Color.Magenta
-                            "ultima" -> Color.Black
-                            else -> Color.Magenta
+                            "basic" -> Colors.CHUNI_DIFF_BASIC
+                            "advanced" -> Colors.CHUNI_DIFF_ADVANCED
+                            "expert" -> Colors.CHUNI_DIFF_EXPERT
+                            "master" -> Colors.CHUNI_DIFF_MASTER
+                            "ultima" -> Colors.CHUNI_DIFF_ULTIMA_1
+                            else -> Colors.CHUNI_DIFF_MASTER
                         },
+                        shape = RoundedCornerShape(5.dp)
+                    )
+                    .border(
+                        width = if (item.diff == "ultima") 1.dp else 0.dp,
+                        color = if (item.diff == "ultima") Colors.CHUNI_DIFF_ULTIMA_2 else Color.Transparent,
                         shape = RoundedCornerShape(5.dp)
                     )
                     .padding(4.dp)

@@ -159,7 +159,7 @@ fun Card(
 
         Image(
             painter = rememberAsyncImagePainter(
-                model = cardData["TournamentBanner"],
+                model = cardData["tournamentBannerImage2x"],
                 contentScale = ContentScale.Crop
             ),
             contentDescription = "Tournament Banner",
@@ -167,7 +167,7 @@ fun Card(
             modifier = Modifier
                 .width(cardWidthDp)
                 .height(
-                    if ((cardData["TournamentBanner"]
+                    if ((cardData["tournamentBannerImage2x"]
                             ?: "").isNotEmpty()
                     ) cardWidthDp / 50 * 3 else 0.dp
                 )
