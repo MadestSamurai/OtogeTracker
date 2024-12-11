@@ -23,6 +23,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
+import io.realm.kotlin.UpdatePolicy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -78,7 +79,7 @@ class ChuniDataRequestService(private val context: Context) {
             ChuniSheetsEntity::class,
         )
     )
-        .name("otoge-tracker-bof.realm")
+        .name("otoge-tracker-chuni.realm")
         .schemaVersion(1)
         .build()
 
@@ -543,7 +544,7 @@ class ChuniDataRequestService(private val context: Context) {
                         isLocked = song.isLocked
                         comment = song.comment
                     }
-                    this.copyToRealm(chuniSongEntity)
+                    this.copyToRealm(chuniSongEntity, UpdatePolicy.ALL)
 
                     for (sheet in song.sheets) {
                         val chuniSheetEntity = ChuniSheetsEntity().apply {
@@ -565,7 +566,7 @@ class ChuniDataRequestService(private val context: Context) {
                             intl = sheet.regions.intl
                             isSpecial = sheet.isSpecial
                         }
-                        this.copyToRealm(chuniSheetEntity)
+                        this.copyToRealm(chuniSheetEntity, UpdatePolicy.ALL)
                     }
                 }
             }
@@ -618,8 +619,22 @@ class ChuniDataRequestService(private val context: Context) {
                     clazz = ChuniSongsEntity::class,
                     query = "id == $0",
                     title
-                ).first().find()
-                song ?: ChuniSongsEntity()
+                ).find().first()
+                val songData = ChuniSongsEntity().apply {
+                    id = song.id
+                    category = song.category
+                    this.title = song.title
+                    artist = song.artist
+                    bpm = song.bpm
+                    imageName = song.imageName
+                    version = song.version
+                    releaseDate = song.releaseDate
+                    isNew = song.isNew
+                    isLocked = song.isLocked
+                    comment = song.comment
+                }
+                println("Song data: $songData")
+                songData
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get the song data: ${e.message}")
                 ChuniSongsEntity()
@@ -637,8 +652,27 @@ class ChuniDataRequestService(private val context: Context) {
                     clazz = ChuniSheetsEntity::class,
                     query = "id == $0",
                     "${title}_${diff}"
-                ).first().find()
-                sheet ?: ChuniSheetsEntity()
+                ).find().first()
+                val sheetData = ChuniSheetsEntity().apply {
+                    id = sheet.id
+                    type = sheet.type
+                    difficulty = sheet.difficulty
+                    level = sheet.level
+                    levelValue = sheet.levelValue
+                    internalLevel = sheet.internalLevel
+                    internalLevelValue = sheet.internalLevelValue
+                    noteDesigner = sheet.noteDesigner
+                    tap = sheet.tap
+                    hold = sheet.hold
+                    slide = sheet.slide
+                    air = sheet.air
+                    flick = sheet.flick
+                    total = sheet.total
+                    jp = sheet.jp
+                    intl = sheet.intl
+                    isSpecial = sheet.isSpecial
+                }
+                sheetData
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get the sheet data: ${e.message}")
                 ChuniSheetsEntity()
