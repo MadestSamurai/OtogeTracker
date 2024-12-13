@@ -13,9 +13,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -35,11 +37,14 @@ import coil.decode.SvgDecoder
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.model.chuni.net.ChuniCard
 import com.madsam.otora.utils.CommonUtils
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @Composable
 fun Card(
-    chuniCard: ChuniCard,
+    chuniCard: MutableStateFlow<ChuniCard>
 ) {
+    val cardData = chuniCard.asStateFlow().collectAsState()
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     Surface(
@@ -90,7 +95,7 @@ fun Card(
                         )
                     )
                     .background(
-                        when (chuniCard.charaBase) {
+                        when (cardData.value.charaBase) {
                             "silver" -> Colors.OSU_LEVEL_SILVER_1
                             else -> {
                                 Colors.DARKER_RED
@@ -100,7 +105,7 @@ fun Card(
             ) {
                 Image(
                     painter = rememberAsyncImagePainter(
-                        model = chuniCard.charaInfo,
+                        model = cardData.value.charaInfo,
                         imageLoader = imageLoader
                     ),
                     contentDescription = "Cover Image",
@@ -119,7 +124,7 @@ fun Card(
                     .padding(5.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .background(
-                        when (chuniCard.honorBase) {
+                        when (cardData.value.honorBase) {
                             "silver" -> Colors.OSU_LEVEL_SILVER_1
                             "gold" -> Colors.OSU_LEVEL_GOLD_1
                             "platina" -> Colors.OSU_LEVEL_PLATINUM_1
@@ -130,7 +135,7 @@ fun Card(
                     )
             ) {
                 Text(
-                    text = chuniCard.honorText,
+                    text = cardData.value.honorText,
                     modifier = Modifier
                         .width(surfaceWidthDp - 130.dp)
                         .padding(2.dp),
@@ -145,6 +150,7 @@ fun Card(
 
             Image(
                 painter = painterResource(id = com.madsam.otora.R.drawable.ic_star),
+                colorFilter = ColorFilter.tint(Colors.OSU_LEVEL_GOLD_1),
                 contentDescription = "Reborn",
                 modifier = Modifier
                     .constrainAs(rebornBase) {
@@ -162,8 +168,8 @@ fun Card(
                         bottom.linkTo(rebornBase.bottom)
                         end.linkTo(rebornBase.end)
                     },
-                text = chuniCard.reborn.toString(),
-                color = Colors.DARK_RED_TEXT_LIGHT,
+                text = cardData.value.reborn.toString(),
+                color = Colors.DARK_RED,
                     fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -180,7 +186,7 @@ fun Card(
             )
 
             Text(
-                text = chuniCard.lv.toString(),
+                text = cardData.value.lv.toString(),
                 color = Colors.DARK_RED_TEXT_LIGHT,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
@@ -193,7 +199,7 @@ fun Card(
             )
 
             Text(
-                text = chuniCard.nameIn,
+                text = cardData.value.nameIn,
                 color = Colors.DARK_RED_TEXT_LIGHT,
                 fontSize = 18.sp,
                 lineHeight = 22.sp,
@@ -209,7 +215,7 @@ fun Card(
 
             Image(
                 painter = rememberAsyncImagePainter(
-                    model = "https://chunithm.wahlap.com/mobile/images/classemblem_base_0${chuniCard.classEmblemBase}.png",
+                    model = "https://chunithm.wahlap.com/mobile/images/classemblem_base_0${cardData.value.classEmblemBase}.png",
                     imageLoader = imageLoader
                 ),
                 contentDescription = "Class Emblem",
@@ -227,7 +233,7 @@ fun Card(
 
             Image(
                 painter = rememberAsyncImagePainter(
-                    model = "https://chunithm.wahlap.com/mobile/images/classemblem_medal_0${chuniCard.classEmblemTop}.png",
+                    model = "https://chunithm.wahlap.com/mobile/images/classemblem_medal_0${cardData.value.classEmblemTop}.png",
                     imageLoader = imageLoader
                 ),
                 contentDescription = "Class Emblem",
@@ -255,12 +261,12 @@ fun Card(
                     }
                     withStyle(
                         style = SpanStyle(
-                            color = CommonUtils.getRatingBrush(chuniCard.rating),
+                            color = CommonUtils.getRatingBrush(cardData.value.rating),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
                     ) {
-                        append(chuniCard.rating)
+                        append(cardData.value.rating)
                     }
                     append(" (MAX ")
                     withStyle(
@@ -270,7 +276,7 @@ fun Card(
                             fontWeight = FontWeight.Bold
                         )
                     ) {
-                        append(chuniCard.ratingMax)
+                        append(cardData.value.ratingMax)
                     }
                     append(")")
                 },
@@ -295,7 +301,7 @@ fun Card(
                     ) {
                         append("OVERPOWER ")
                     }
-                    append(chuniCard.overpower)
+                    append(cardData.value.overpower)
                 },
                 color = Colors.DARK_RED_TEXT_LIGHT,
                 fontSize = 12.sp,
@@ -320,7 +326,7 @@ fun Card(
                     ) {
                         append("LAST PLAY ")
                     }
-                    append(chuniCard.lastPlay)
+                    append(cardData.value.lastPlay)
                 },
                 color = Colors.DARK_RED_TEXT_LIGHT,
                 fontSize = 12.sp,

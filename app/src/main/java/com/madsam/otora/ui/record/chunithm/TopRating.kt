@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -39,6 +40,8 @@ import com.madsam.otora.utils.JsonUtil
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 
 /**
  * 项目名: OtogeTracker
@@ -54,7 +57,7 @@ fun TopRating() {
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     val chuniDataRequestService = ChuniDataRequestService(context)
 
-    val chuniRatingBest = remember { mutableStateOf(listOf<ChuniScore>()) }
+    val chuniRatingBest = MutableStateFlow(listOf<ChuniScore>())
     val moshi = Moshi.Builder()
         .addLast(KotlinJsonAdapterFactory())
         .build()
@@ -63,19 +66,19 @@ fun TopRating() {
     val ratingBestJsonAdapter = moshi.adapter<List<ChuniScore>>(ratingBestListType)
     val ratingBestJson = JsonUtil.readJsonFromFile(context, "chuniRatingDetailBest.json")
     if (ratingBestJson != null) {
-        chuniRatingBest.value = ratingBestJsonAdapter.fromJson(ratingBestJson) ?: listOf()
+        chuniRatingBest.update { ratingBestJsonAdapter.fromJson(ratingBestJson) ?: listOf() }
     }
-    Column(
-        modifier = Modifier
-            .padding(8.dp)
+
+    LazyColumn(
+        modifier = Modifier.padding(8.dp)
     ) {
-        chuniRatingBest.value.forEach { score ->
+        items(chuniRatingBest.value.size) { index ->
             val songData = remember { mutableStateOf(ChuniSongsEntity()) }
             val songSheetData = remember { mutableStateOf(ChuniSheetsEntity()) }
             val topRating = remember { mutableStateOf(ChuniScoreShow()) }
-            LaunchedEffect(score.title) {
-                songData.value = chuniDataRequestService.getChuniSongData(score.title)
-                val diff = when (score.diff) {
+            LaunchedEffect(Unit) {
+                songData.value = chuniDataRequestService.getChuniSongData(chuniRatingBest.value[index].title)
+                val diff = when (chuniRatingBest.value[index].diff) {
                     "0" -> "basic"
                     "1" -> "advanced"
                     "2" -> "expert"
@@ -84,7 +87,7 @@ fun TopRating() {
                     else -> "master"
                 }
                 songSheetData.value =
-                    chuniDataRequestService.getChuniSongSheetData(score.title, diff)
+                    chuniDataRequestService.getChuniSongSheetData(chuniRatingBest.value[index].title, diff)
                 topRating.value = ChuniScoreShow(
                     title = songData.value.title,
                     artist = songData.value.artist,
@@ -93,8 +96,8 @@ fun TopRating() {
                     diff = diff,
                     level = songSheetData.value.level,
                     levelValue = songSheetData.value.internalLevelValue,
-                    score = score.highScore,
-                    rank = CalcUtils.calcChuniRank(CommonUtils.bigNumberToInt(score.highScore)),
+                    score = chuniRatingBest.value[index].highScore,
+                    rank = CalcUtils.calcChuniRank(CommonUtils.bigNumberToInt(chuniRatingBest.value[index].highScore)),
                     jacket = songData.value.imageName,
                     tap = songSheetData.value.tap,
                     hold = songSheetData.value.hold,

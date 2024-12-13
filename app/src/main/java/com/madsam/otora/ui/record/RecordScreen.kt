@@ -12,14 +12,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.fonts.sarasaFont
+import com.madsam.otora.ui.record.chunithm.TopRating
 import com.madsam.otora.ui.record.sub.ChunithmUserPage
 import com.madsam.otora.ui.record.sub.MaimaiUserPage
 import com.madsam.otora.ui.record.sub.OsuUserPage
-import com.madsam.otora.utils.ShareUtil
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -27,16 +28,10 @@ import kotlinx.coroutines.launch
 fun RecordScreen(
     snackbarHostState : SnackbarHostState
 ) {
-    val context = LocalContext.current
-    val tabs =
-        listOf(Screen.Page1, Screen.Page2, Screen.Page3, Screen.Page4)
+    val navController = rememberNavController()
+    val tabs = listOf(Screen.Page1, Screen.Page2, Screen.Page3, Screen.Page4)
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val coroutineScope = rememberCoroutineScope()
-    val recordViewModel: RecordViewModel = viewModel(factory = RecordViewModelFactory(
-        userId = ShareUtil.getString("userId", context) ?: "2",
-        mode = ShareUtil.getString("mode", context) ?: "osu",
-        context = context
-    ))
 
     Column {
         TabRow(selectedTabIndex = pagerState.currentPage) {
@@ -55,16 +50,18 @@ fun RecordScreen(
 
         HorizontalPager(state = pagerState) { page ->
             when (tabs[page]) {
-                is Screen.Page1 -> OsuUserPage(recordViewModel)
+                is Screen.Page1 -> OsuUserPage()
                 is Screen.Page2 -> MaimaiUserPage()
-                is Screen.Page3 -> ChunithmUserPage(
-                    recordViewModel = recordViewModel,
-                    snackbarHostState = snackbarHostState
-                )
+                is Screen.Page3 -> NavHost(navController, startDestination = "chunithmUserPage") {
+                    composable("chunithmUserPage") { ChunithmUserPage(navController, snackbarHostState) }
+                    composable("topRating") { TopRating() }
+                }
                 is Screen.Page4 -> TestPage4()
             }
         }
     }
+
+
 }
 
 @Composable

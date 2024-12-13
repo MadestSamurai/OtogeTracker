@@ -20,8 +20,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +41,9 @@ import com.madsam.otora.service.BofDataRequestService
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.time.LocalDate
 
 /**
@@ -58,7 +61,7 @@ fun BofTotalScreen(
 ) {
     val context = LocalContext.current
     val bofDataRequestService = BofDataRequestService(context)
-    val todayLatestData = remember { mutableStateOf<List<BofEntryShow>>(emptyList()) }
+    val todayLatestData = MutableStateFlow(listOf<BofEntryShow>())
 
     fun roundDownToNearestFiveMinutes(hms: String): String {
         val parts = hms.split(":").map { it.toInt() }
@@ -103,16 +106,17 @@ fun BofTotalScreen(
         sortedData.forEach {
             it.rankDiff = it.oldIndex - it.index
         }
-        todayLatestData.value = sortedData
+        todayLatestData.update { sortedData }
     }
 
-    val maxTotal = todayLatestData.value.maxOfOrNull { it.total } ?: 1
+    val todayLatestDataValue = todayLatestData.asStateFlow().collectAsState()
+    val maxTotal = todayLatestDataValue.value.maxOfOrNull { it.total } ?: 1
 
     val selectedTimeStr: String = if (selectedTime == "-1") {
-        if (todayLatestData.value.isEmpty()) {
+        if (todayLatestDataValue.value.isEmpty()) {
             ""
         } else {
-            roundDownToNearestFiveMinutes(todayLatestData.value.first().time)
+            roundDownToNearestFiveMinutes(todayLatestDataValue.value.first().time)
         }
     } else {
         roundDownToNearestFiveMinutes(selectedTime)
@@ -121,7 +125,7 @@ fun BofTotalScreen(
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
             item {
-                if (todayLatestData.value.isEmpty() || todayLatestData.value[0].total == 0) {
+                if (todayLatestDataValue.value.isEmpty() || todayLatestDataValue.value[0].total == 0) {
                     Text(text = "No Data at $selectedDate $selectedTimeStr")
                 } else {
                     Text(
@@ -148,8 +152,8 @@ fun BofTotalScreen(
                     )
                 }
             }
-            var isCompare: Boolean = if (todayLatestData.value.isNotEmpty()) {
-                todayLatestData.value[0].oldTotal != 0
+            var isCompare: Boolean = if (todayLatestDataValue.value.isNotEmpty()) {
+                todayLatestDataValue.value[0].oldTotal != 0
             } else {
                 false
             }
@@ -211,8 +215,8 @@ fun BofTotalScreen(
                     )
                 }
             }
-            if (todayLatestData.value.isNotEmpty()) {
-                itemsIndexed(todayLatestData.value) { index, entry ->
+            if (todayLatestDataValue.value.isNotEmpty()) {
+                itemsIndexed(todayLatestDataValue.value) { index, entry ->
                     BofEntryRowTotal(entry, index+1, maxTotal, isCompare)
                 }
             }

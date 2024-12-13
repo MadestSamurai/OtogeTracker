@@ -1,21 +1,18 @@
-package com.madsam.otora.ui.record
+package com.madsam.otora.ui.record.viewmodel
 
 import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.madsam.otora.consts.FlagsAlphabet
-import com.madsam.otora.model.chuni.net.ChuniCard
+import com.madsam.otora.glance.SmallWidget
 import com.madsam.otora.model.web.OsuCardList
 import com.madsam.otora.model.web.OsuGroup
 import com.madsam.otora.model.web.OsuInfo
 import com.madsam.otora.model.web.OsuRecentActivity
 import com.madsam.otora.model.web.OsuTopRankItem
-import com.madsam.otora.glance.SmallWidget
-import com.madsam.otora.service.ChuniDataRequestService
 import com.madsam.otora.service.OsuDataRequestService
 import com.madsam.otora.utils.CommonUtils
-import com.madsam.otora.utils.JsonUtil
 import com.madsam.otora.utils.ShareUtil
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -29,10 +26,10 @@ import kotlinx.coroutines.launch
  * 文件名: RecordViewModel
  * 创建者: MadSamurai
  * 创建时间:2023/3/11 17:56
- * 描述: 记录页面ViewModel
+ * 描述: Osu视图模型
  */
 
-class RecordViewModel(
+class OsuViewModel(
     userId: String,
     mode: String,
     context: Context
@@ -70,16 +67,6 @@ class RecordViewModel(
         osuDataRequestService.getOsuBestMap({ osuBestMap: List<OsuTopRankItem> -> setOsuBestMap(osuBestMap) }, userId, mode)
 //        osuDataRequestService.getOsuBeatmap({ osuUserBeatmap: OsuUserBeatmap -> setOsuUserBeatmap(osuUserBeatmap) }, userId, mode)
 //        osuDataRequestService.getOsuHistorical({ osuHistorical: OsuHistorical -> setOsuHistorical(osuHistorical) }, userId, mode)
-    }
-
-    fun requestChuniSongData(context: Context) {
-        val chuniDataRequestService = ChuniDataRequestService(context)
-        chuniDataRequestService.getChuniSongsData()
-    }
-
-    fun requestChuniUserData(context: Context) {
-        val chuniDataRequestService = ChuniDataRequestService(context)
-        chuniDataRequestService.getUserData()
     }
 
     private fun setOsuCard(osuCardList: OsuCardList) {
@@ -121,7 +108,7 @@ class RecordViewModel(
         }
     }
 
-    private fun mapOsuTopRankItem(item: OsuTopRankItem): Map<String, String> {
+    private fun setOsuTopRankItem(item: OsuTopRankItem): Map<String, String> {
         return mapOf(
             "cover2x" to item.beatmapSet.covers.list2x,
             "bg2x" to item.beatmapSet.covers.card2x,
@@ -148,13 +135,13 @@ class RecordViewModel(
         )
     }
     private fun setOsuPinnedMap(osuPinnedMap: List<OsuTopRankItem>) {
-        osuPinnedMapData.value = osuPinnedMap.map { mapOsuTopRankItem(it) }
+        osuPinnedMapData.value = osuPinnedMap.map { setOsuTopRankItem(it) }
     }
     private fun setOsuFirstMap(osuFirstMap: List<OsuTopRankItem>) {
-        osuFirstMapData.value = osuFirstMap.map { mapOsuTopRankItem(it) }
+        osuFirstMapData.value = osuFirstMap.map { setOsuTopRankItem(it) }
     }
     private fun setOsuBestMap(osuBestMap: List<OsuTopRankItem>) {
-        osuBestMapData.value = osuBestMap.map { mapOsuTopRankItem(it) }
+        osuBestMapData.value = osuBestMap.map { setOsuTopRankItem(it) }
     }
 
     private fun setOsuMedals(osuInfo: OsuInfo, context: Context) {
@@ -269,29 +256,17 @@ class RecordViewModel(
             }
         }
     }
-
-    // Chunithm
-    fun getChuniCardFromShare(context: Context): ChuniCard {
-        val json = JsonUtil.readJsonFromFile(context, "chuniCard.json")
-        if (json.isNullOrEmpty()) {
-            println("JSON is empty or null")
-            return ChuniCard()
-        }
-        return Moshi.Builder()
-            .addLast(KotlinJsonAdapterFactory())
-            .build().adapter(ChuniCard::class.java).fromJson(json) ?: ChuniCard()
-    }
 }
 
-class RecordViewModelFactory(
+class OsuViewModelFactory(
     private val userId: String,
     private val mode: String,
     private val context: Context
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(RecordViewModel::class.java)) {
+        if (modelClass.isAssignableFrom(OsuViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return RecordViewModel(userId, mode, context) as T
+            return OsuViewModel(userId, mode, context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

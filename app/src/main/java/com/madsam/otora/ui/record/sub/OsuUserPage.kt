@@ -18,8 +18,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.consts.Colors
-import com.madsam.otora.ui.record.RecordViewModel
+import com.madsam.otora.ui.record.viewmodel.OsuViewModel
 import com.madsam.otora.ui.record.osu.BadgeList
 import com.madsam.otora.ui.record.osu.Card
 import com.madsam.otora.ui.record.osu.Level
@@ -28,11 +29,18 @@ import com.madsam.otora.ui.record.osu.RankGraph
 import com.madsam.otora.ui.record.osu.Recent
 import com.madsam.otora.ui.record.osu.SocialCard
 import com.madsam.otora.ui.record.osu.TopRank
+import com.madsam.otora.ui.record.viewmodel.OsuViewModelFactory
 import com.madsam.otora.utils.ShareUtil
 
 @Composable
-fun OsuUserPage(recordViewModel: RecordViewModel) {
+fun OsuUserPage() {
     val context = LocalContext.current
+
+    val osuViewModel: OsuViewModel = viewModel(factory = OsuViewModelFactory(
+        userId = ShareUtil.getString("userId", context) ?: "2",
+        mode = ShareUtil.getString("mode", context) ?: "osu",
+        context = context
+    ))
     val userState = remember { mutableStateOf("") }
     val modeState = remember { mutableStateOf("osu") }
     val items = listOf("mania", "osu", "taiko", "fruits")
@@ -79,20 +87,20 @@ fun OsuUserPage(recordViewModel: RecordViewModel) {
                 onClick = {
                     ShareUtil.putString("userId", userState.value, context)
                     ShareUtil.putString("mode", modeState.value, context)
-                    recordViewModel.requestOsuData(userState.value, modeState.value, context)
+                    osuViewModel.requestOsuData(userState.value, modeState.value, context)
                 },
                 modifier = Modifier.padding(start = 10.dp)
             ) {
                 Text("Confirm")
             }
         }
-        Card(recordViewModel.osuCardData, recordViewModel.osuGroupList)
-        BadgeList(recordViewModel.osuBadgeList)
-        RankGraph(recordViewModel.osuRankGraphData, recordViewModel.osuRankHighestData)
-        Level(recordViewModel.osuLevelData)
-        PlayData(recordViewModel.osuPlayData)
-        SocialCard(recordViewModel.osuSocialCardData)
-        Recent(recordViewModel.osuRecentActivityData)
-        TopRank(recordViewModel.osuPinnedMapData, recordViewModel.osuBestMapData, recordViewModel.osuFirstMapData)
+        Card(osuViewModel.osuCardData, osuViewModel.osuGroupList)
+        BadgeList(osuViewModel.osuBadgeList)
+        RankGraph(osuViewModel.osuRankGraphData, osuViewModel.osuRankHighestData)
+        Level(osuViewModel.osuLevelData)
+        PlayData(osuViewModel.osuPlayData)
+        SocialCard(osuViewModel.osuSocialCardData)
+        Recent(osuViewModel.osuRecentActivityData)
+        TopRank(osuViewModel.osuPinnedMapData, osuViewModel.osuBestMapData, osuViewModel.osuFirstMapData)
     }
 }

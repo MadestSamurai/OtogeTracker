@@ -209,7 +209,6 @@ class BofDataRequestService(private val context: Context) {
             val dateToRequest = currentDate.toString()
             if (!ShareUtil.findStringArray("dates", dateToRequest, context)) {
                 serviceScope.launch(dispatcher) {
-                    println("Requesting data for $dateToRequest")
                     semaphore.withPermit {
                         requestBofttEntryData(dateToRequest)
                         if (currentDate.isBefore(dateTime)) {
