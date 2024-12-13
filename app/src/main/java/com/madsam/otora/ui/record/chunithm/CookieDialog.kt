@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -13,10 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ShareUtil
+import kotlinx.coroutines.launch
 
 /**
  * 项目名: OtogeTracker
@@ -28,7 +31,9 @@ import com.madsam.otora.utils.ShareUtil
 @Composable
 fun CookieDialog(
     showDialog: MutableState<Boolean>,
-    context: Context
+    context: Context,
+    snackbarHostState: SnackbarHostState,
+    onResult: (Boolean) -> Unit
 ) {
     val requestState = remember { mutableStateOf("") }
     val responseState = remember { mutableStateOf("") }
@@ -36,6 +41,7 @@ fun CookieDialog(
 
     val requestError = remember { mutableStateOf(false) }
     val responseError = remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     AlertDialog(
         onDismissRequest = { showDialog.value = false },
         title = { Text("Input Cookies") },
@@ -102,6 +108,12 @@ fun CookieDialog(
                 }
                 val requestCookieMap = CommonUtils.parseCookie(requestState.value)
                 val responseCookieMap = CommonUtils.parseCookie(responseState.value)
+                if (requestCookieMap.isEmpty() || responseCookieMap.isEmpty()) {
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Invalid Cookies")
+                    }
+                    return@Button
+                }
                 ShareUtil.putString("chuniToken", requestCookieMap["_t"] ?: "", context)
                 ShareUtil.putString("chuniUserId", requestCookieMap["userId"] ?: "", context)
                 ShareUtil.putString("chuniFriendCodeList", requestCookieMap["friendCodeList"] ?: "", context)
@@ -109,16 +121,17 @@ fun CookieDialog(
                 ShareUtil.putString("chuniMaxAge", responseCookieMap["Max-Age"] ?: "", context)
                 ShareUtil.putString("chuniPath", responseCookieMap["path"] ?: "", context)
                 ShareUtil.putString("chuniSameSite", responseCookieMap["SameSite"] ?: "", context)
-                if (uaState.value.isNotEmpty()) {
-                    ShareUtil.putString("chuniUserAgent", uaState.value, context)
-                }
+                onResult(true)
                 showDialog.value = false
             }) {
                 Text("Save Cookies")
             }
         },
         dismissButton = {
-            Button(onClick = { showDialog.value = false }) {
+            Button(onClick = {
+                onResult(false)
+                showDialog.value = false
+            }) {
                 Text("Cancel")
             }
         }

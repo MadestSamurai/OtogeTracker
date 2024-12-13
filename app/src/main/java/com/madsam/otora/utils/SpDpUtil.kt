@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.sp
  * 文件名: com.madsam.otora.utils.SpDpUtil
  * 创建者: MadSamurai
  * 创建时间: 2024/10/19
- * 描述: SpDp匹配工具
+ * 描述: 定比SpDp函数
  */
 @Composable
 fun Int.nsp() = getRealDp(LocalContext.current, this.toDouble(), isDp = false).sp
@@ -34,9 +34,15 @@ fun Float.ndp() = getRealDp(LocalContext.current, this.toDouble()).dp
 fun Double.ndp() = getRealDp(LocalContext.current, this).dp
 
 private fun getRealDp(context: Context, value: Double, isDp: Boolean = true): Double {
-    val density =
-        if (isDp) context.resources.displayMetrics.density else context.resources.displayMetrics.scaledDensity
-    val screenWidth =
-        (if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) context.resources.displayMetrics.heightPixels else context.resources.displayMetrics.widthPixels) / 850.0
+    val density = if (isDp) {
+        context.resources.displayMetrics.density
+    } else {
+        context.resources.displayMetrics.densityDpi / 160.0f
+    }
+    val screenWidth = (if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        context.resources.displayMetrics.heightPixels
+    } else {
+        context.resources.displayMetrics.widthPixels
+    }) / 850.0
     return screenWidth * 2 * value / density
 }

@@ -3,6 +3,7 @@ package com.madsam.otora.utils
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
+import android.util.Log
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
@@ -13,6 +14,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
+import androidx.glance.LocalGlanceId
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.consts.GradientBrush
 import java.net.URLEncoder
@@ -210,6 +212,7 @@ object CommonUtils {
         return try {
             value.replace(",", "").toInt()
         } catch (e: NumberFormatException) {
+            Log.e("CommonUtils", "Big number value is not a number: $e")
             0
         }
     }
@@ -252,6 +255,7 @@ object CommonUtils {
                 else -> Colors.OSU_LEVEL_WHITE_1
             }
         } catch (nfe: NumberFormatException) {
+            Log.e("CommonUtils", "Rating value is not a number: $nfe")
             return Colors.OSU_LEVEL_WHITE_1
         }
     }
@@ -303,20 +307,13 @@ object CommonUtils {
      * @return 字符串键值对
      */
     fun parseCookie(cookie: String): Map<String, String> {
-        return cookie.split(";")
+        val cookieMap = cookie.split(";")
             .map { it.trim() }
             .map { it.split("=") }
-            .associate { it[0] to it[1] }
-    }
-
-    /**
-     * 任意字符串生成哈希字符串
-     *
-     * @param ori 原始字符串
-     * @return 哈希字符串
-     */
-    fun generateHash(input: String): String {
-        val bytes = MessageDigest.getInstance("SHA-256").digest(input.toByteArray())
-        return bytes.joinToString("") { "%02x".format(it) }
+        return if (cookieMap.size < 2) {
+            mapOf()
+        } else {
+            cookieMap.associate { it[0] to it[1] }
+        }
     }
 }

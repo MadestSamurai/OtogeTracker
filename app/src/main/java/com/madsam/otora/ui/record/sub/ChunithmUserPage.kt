@@ -3,6 +3,7 @@ package com.madsam.otora.ui.record.sub
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -22,20 +23,24 @@ import com.madsam.otora.utils.JsonUtil
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import kotlinx.coroutines.launch
 
 @Composable
-fun ChunithmUserPage(recordViewModel: RecordViewModel) {
+fun ChunithmUserPage(
+    recordViewModel: RecordViewModel,
+    snackbarHostState: SnackbarHostState
+) {
     val context = LocalContext.current
     val showDialog = remember { mutableStateOf(false) }
 
     val chuniCard = remember { mutableStateOf(ChuniCard()) }
-    val snackbarCoroutineScope = rememberCoroutineScope()
 
     val chuniMasterRecord = remember { mutableStateOf(listOf<ChuniGenre>()) }
     val moshi = Moshi.Builder()
         .addLast(KotlinJsonAdapterFactory())
         .build()
 
+    val scope = rememberCoroutineScope()
     chuniCard.value = recordViewModel.getChuniCardFromShare(context)
 //    recordViewModel.requestChuniSongData(context)
 
@@ -63,9 +68,17 @@ fun ChunithmUserPage(recordViewModel: RecordViewModel) {
         item {
             Button(onClick = {
                 recordViewModel.requestChuniUserData(context)
-                println("Request Sent")
             }) {
                 Text("Update Data")
+            }
+        }
+        item {
+            Button(
+                onClick = {
+                    recordViewModel.requestChuniSongData(context)
+                }
+            ) {
+                Text("Update Song Data")
             }
         }
         item {
@@ -89,6 +102,18 @@ fun ChunithmUserPage(recordViewModel: RecordViewModel) {
         CookieDialog(
             showDialog = showDialog,
             context = context,
+            snackbarHostState = snackbarHostState,
+            onResult = { success ->
+                if (success) {
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Cookies Saved")
+                    }
+                } else {
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Cancelled")
+                    }
+                }
+            }
         )
     }
 }

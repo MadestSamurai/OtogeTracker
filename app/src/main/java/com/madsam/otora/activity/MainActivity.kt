@@ -15,10 +15,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
@@ -43,7 +46,9 @@ const val KEY_ROUTE = "route"
 fun MainActivityScreen() {
     val items = listOf(Screen.RecordScreen, Screen.ReportScreen, Screen.BOFScreen)
     val navController = rememberNavController()
+    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             NavigationBar(
                 Modifier.height(56.dp)
@@ -80,7 +85,7 @@ fun MainActivityScreen() {
         Box(modifier = Modifier.padding(contentPadding)) {
             NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
                 composable(Screen.RecordScreen.route) {
-                    RecordScreen()
+                    RecordScreen(snackbarHostState)
                 }
                 composable(Screen.ReportScreen.route) {
                     Screen2()

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -23,7 +24,9 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RecordScreen() {
+fun RecordScreen(
+    snackbarHostState : SnackbarHostState
+) {
     val context = LocalContext.current
     val tabs =
         listOf(Screen.Page1, Screen.Page2, Screen.Page3, Screen.Page4)
@@ -54,7 +57,10 @@ fun RecordScreen() {
             when (tabs[page]) {
                 is Screen.Page1 -> OsuUserPage(recordViewModel)
                 is Screen.Page2 -> MaimaiUserPage()
-                is Screen.Page3 -> ChunithmUserPage(recordViewModel)
+                is Screen.Page3 -> ChunithmUserPage(
+                    recordViewModel = recordViewModel,
+                    snackbarHostState = snackbarHostState
+                )
                 is Screen.Page4 -> TestPage4()
             }
         }
@@ -63,7 +69,7 @@ fun RecordScreen() {
 
 @Composable
 fun TestPage4() {
-    Text(text = "TestPage4aaaaaaaaaaaaaaaaaaaAAAAAAAAA啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊啊",
+    Text(text = "TestPage4",
         modifier = Modifier.fillMaxSize(),
         fontFamily = sarasaFont,
         fontSize = 20.sp

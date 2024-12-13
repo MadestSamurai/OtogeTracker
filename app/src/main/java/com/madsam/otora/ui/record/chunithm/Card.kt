@@ -163,8 +163,8 @@ fun Card(
                         end.linkTo(rebornBase.end)
                     },
                 text = chuniCard.reborn.toString(),
-                color = Color.Black,
-                fontSize = 12.sp,
+                color = Colors.DARK_RED_TEXT_LIGHT,
+                    fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
             )
 
