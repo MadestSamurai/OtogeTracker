@@ -66,7 +66,9 @@ class BofViewModel(
         filter: (T) -> Boolean,
         reviewCountSelector: (T) -> Int
     ): List<T> where T : Rankable {
-        var sortedData = data.sortedWith(compareByDescending(oldTotalSelector).thenByDescending(reviewCountSelector))
+        var sortedData = data.sortedWith(
+            compareByDescending(oldTotalSelector).thenByDescending(reviewCountSelector)
+        )
         var currentOldRank = 1
         sortedData.forEachIndexed { index, entry ->
             if (index > 0 && oldTotalSelector(sortedData[index - 1]) != oldTotalSelector(entry)) {
@@ -74,7 +76,9 @@ class BofViewModel(
             }
             oldRankSetter(entry, currentOldRank)
         }
-        sortedData = data.sortedWith(compareByDescending(totalSelector).thenByDescending(reviewCountSelector)).filter(filter)
+        sortedData =
+            data.sortedWith(compareByDescending(totalSelector).thenByDescending(reviewCountSelector))
+                .filter(filter)
         var currentRank = 1
         sortedData.forEachIndexed { index, entry ->
             if (index > 0 && totalSelector(sortedData[index - 1]) != totalSelector(entry)) {
@@ -101,22 +105,21 @@ class BofViewModel(
             { bofDataRequestService.getBofttEntryLatest() },
             { time -> bofDataRequestService.getBofttEntryByTime(time) }
         )
-
-        if (data.isNotEmpty()) {
-            val updatedData = updateRanks(
-                data,
-                { it.oldTotal },
-                { it.total },
-                { entry, rank -> entry.oldIndex = rank },
-                { entry, rank -> entry.index = rank },
-                { entry, diff -> entry.rankDiff = diff },
-                { true },
-                { it.impr }
-            )
-            totalData.update { updatedData }
-        } else {
+        if (data.isEmpty()) {
             Log.d(TAG, "No data available for the selected date and time.")
+            return
         }
+        val updatedData = updateRanks(
+            data,
+            { it.oldTotal },
+            { it.total },
+            { entry, rank -> entry.oldIndex = rank },
+            { entry, rank -> entry.index = rank },
+            { entry, diff -> entry.rankDiff = diff },
+            { true },
+            { it.impr }
+        )
+        totalData.update { updatedData }
     }
 
     suspend fun requestAvgData() {
@@ -125,21 +128,21 @@ class BofViewModel(
             { time -> bofDataRequestService.getBofttEntryByTime(time) }
         )
         calculateThresholds(data)
-        if (data.isNotEmpty()) {
-            val updatedData = updateRanks(
-                data,
-                { it.oldAvg },
-                { it.avg },
-                { entry, rank -> entry.oldIndex = rank },
-                { entry, rank -> entry.index = rank },
-                { entry, diff -> entry.avgDiff = diff },
-                { it.impr >= thresholdImpr.value },
-                { it.impr }
-            )
-            avgData.update { updatedData }
-        } else {
+        if (data.isEmpty()) {
             Log.d(TAG, "No avg data available for the selected date and time.")
+            return
         }
+        val updatedData = updateRanks(
+            data,
+            { it.oldAvg },
+            { it.avg },
+            { entry, rank -> entry.oldIndex = rank },
+            { entry, rank -> entry.index = rank },
+            { entry, diff -> entry.avgDiff = diff },
+            { it.impr >= thresholdImpr.value },
+            { it.impr }
+        )
+        avgData.update { updatedData }
     }
 
     suspend fun requestMedianData() {
@@ -148,21 +151,21 @@ class BofViewModel(
             { time -> bofDataRequestService.getBofttEntryByTime(time) }
         )
         calculateThresholds(data)
-        if (data.isNotEmpty()) {
-            val updatedData = updateRanks(
-                data,
-                { it.oldMedian },
-                { it.median },
-                { entry, rank -> entry.oldIndex = rank },
-                { entry, rank -> entry.index = rank },
-                { entry, diff -> entry.medianDiff = diff },
-                { it.impr >= thresholdImpr.value },
-                { it.impr }
-            )
-            medianData.update { updatedData }
-        } else {
+        if (data.isEmpty()) {
             Log.d(TAG, "No median data available for the selected date and time.")
+            return
         }
+        val updatedData = updateRanks(
+            data,
+            { it.oldMedian },
+            { it.median },
+            { entry, rank -> entry.oldIndex = rank },
+            { entry, rank -> entry.index = rank },
+            { entry, diff -> entry.medianDiff = diff },
+            { it.impr >= thresholdImpr.value },
+            { it.impr }
+        )
+        medianData.update { updatedData }
     }
 
     suspend fun requestDiffData() {
@@ -193,6 +196,10 @@ class BofViewModel(
             { time -> bofDataRequestService.getBofttTeamByTime(time) }
         )
 
+        if (data.isEmpty()) {
+            Log.d(TAG, "No team data available for the selected date and time.")
+            return
+        }
         val updatedData = updateRanks(
             data,
             { it.oldTotal },
