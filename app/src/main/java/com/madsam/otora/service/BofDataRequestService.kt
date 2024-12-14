@@ -202,7 +202,7 @@ class BofDataRequestService(private val context: Context) {
     }
 
     // Get BOF data from the server
-    fun getBofttData(dateTime: LocalDate) {
+    fun getBofttData(dateTime: LocalDate, onComplete: () -> Unit) {
         val startDate = LocalDate.parse("2024-10-16")
         var currentDate = dateTime
         while (currentDate.isAfter(startDate)) {
@@ -214,6 +214,7 @@ class BofDataRequestService(private val context: Context) {
                         if (currentDate.isBefore(dateTime)) {
                             ShareUtil.insertStringArray("dates", dateToRequest, context)
                         }
+                        onComplete()
                     }
                 }
             }
@@ -221,7 +222,7 @@ class BofDataRequestService(private val context: Context) {
         }
     }
 
-    fun getBofttTeamData(dateTime: LocalDate) {
+    fun getBofttTeamData(dateTime: LocalDate, onComplete: () -> Unit) {
         val startDate = LocalDate.parse("2024-10-16")
         var currentDate = dateTime
         while (currentDate.isAfter(startDate)) {
@@ -233,6 +234,7 @@ class BofDataRequestService(private val context: Context) {
                         if (currentDate.isBefore(dateTime)) {
                             ShareUtil.insertStringArray("datesTeam", dateToRequest, context)
                         }
+                        onComplete()
                     }
                 }
             }
@@ -281,6 +283,8 @@ class BofDataRequestService(private val context: Context) {
                         .minByOrNull { abs(it.time - oldTimeLimit) }
 
                     BofEntryShow(
+                        oldIndex = 0,
+                        index = 0,
                         team = entry.team,
                         artist = entry.artist,
                         genre = entry.genre,
@@ -347,6 +351,8 @@ class BofDataRequestService(private val context: Context) {
                         .minByOrNull { abs(it.time - oldTimeLimit) }
 
                     BofTeamShow(
+                        oldIndex = 0,
+                        index = 0,
                         team = team.team,
                         title1 = team.title1,
                         title2 = team.title2,

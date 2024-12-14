@@ -1,13 +1,11 @@
 package com.madsam.otora.ui.bof.sub
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -23,11 +21,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,14 +35,12 @@ import com.madsam.otora.R
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
-import com.madsam.otora.service.BofDataRequestService
+import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import java.time.LocalDate
+import kotlinx.coroutines.launch
 
 /**
  * 项目名: OtogeTracker
@@ -55,170 +51,124 @@ import java.time.LocalDate
  */
 
 @Composable
-fun BofTotalScreen(
-    selectedDate: LocalDate,
-    selectedTime: String,
-) {
-    val context = LocalContext.current
-    val bofDataRequestService = BofDataRequestService(context)
-    val todayLatestData = MutableStateFlow(listOf<BofEntryShow>())
+fun BofTotalScreen(vm : BofViewModel) {
+    val totalData = vm.totalData.asStateFlow().collectAsState()
+    val maxTotal = totalData.value.maxOfOrNull { it.total } ?: 1
+    val selectedDate = vm.selectedDate.asStateFlow().collectAsState().value
+    val selectedTime = vm.selectedTime.asStateFlow().collectAsState().value
 
-    fun roundDownToNearestFiveMinutes(hms: String): String {
-        val parts = hms.split(":").map { it.toInt() }
-        if (parts.size != 2) {
-            return "Invalid Time"
-        }
-        val hours = parts[0]
-        val minutes = parts[1] / 5 * 5
-        return String.format("%02d:%02d:00", hours, minutes)
-    }
-
+    val scope = rememberCoroutineScope()
     LaunchedEffect(selectedDate, selectedTime) {
-        Log.d("BofScreen", "selectedDate: $selectedDate, selectedTime: $selectedTime")
-        val data: List<BofEntryShow>
-        if (selectedTime == "-1") {
-            data = bofDataRequestService.getBofttEntryLatest()
-        } else {
-            val timeInMillis = CommonUtils.ymdToMillis(selectedDate.toString(), roundDownToNearestFiveMinutes(selectedTime))
-            data = bofDataRequestService.getBofttEntryByTime(timeInMillis)
+        scope.launch {
+            vm.requestTotalData()
         }
-        // Sort the data by oldTotal in descending order
-        var sortedData = data.sortedByDescending { it.oldTotal }
-        // Assign rankings
-        var currentOldRank = 1
-        sortedData.forEachIndexed { index, entry ->
-            if (index > 0 && sortedData[index - 1].oldTotal != entry.oldTotal) {
-                currentOldRank = index + 1
-            }
-            entry.oldIndex = currentOldRank
-        }
-        sortedData = data.sortedBy { it.impr }
-        // Sort the data by total in descending order
-        sortedData = data.sortedByDescending { it.total }
-        // Assign rankings
-        var currentRank = 1
-        sortedData.forEachIndexed { index, entry ->
-            if (index > 0 && sortedData[index - 1].total != entry.total) {
-                currentRank = index + 1
-            }
-            entry.index = currentRank
-        }
-        sortedData.forEach {
-            it.rankDiff = it.oldIndex - it.index
-        }
-        todayLatestData.update { sortedData }
     }
-
-    val todayLatestDataValue = todayLatestData.asStateFlow().collectAsState()
-    val maxTotal = todayLatestDataValue.value.maxOfOrNull { it.total } ?: 1
 
     val selectedTimeStr: String = if (selectedTime == "-1") {
-        if (todayLatestDataValue.value.isEmpty()) {
+        if (totalData.value.isEmpty()) {
             ""
         } else {
-            roundDownToNearestFiveMinutes(todayLatestDataValue.value.first().time)
+            CommonUtils.roundDownToNearestFiveMinutes(totalData.value.first().time)
         }
     } else {
-        roundDownToNearestFiveMinutes(selectedTime)
+        CommonUtils.roundDownToNearestFiveMinutes(selectedTime)
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn {
-            item {
-                if (todayLatestDataValue.value.isEmpty() || todayLatestDataValue.value[0].total == 0) {
-                    Text(text = "No Data at $selectedDate $selectedTimeStr")
-                } else {
-                    Text(
-                        text = "Total Score Ranking",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.Black)
-                            .padding(top = 10.ndp())
-                    )
-                    Text(
-                        text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
-                        fontFamily = sarasaFont,
-                        fontSize = 12.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.Black)
-                    )
-                }
-            }
-            var isCompare: Boolean = if (todayLatestDataValue.value.isNotEmpty()) {
-                todayLatestDataValue.value[0].oldTotal != 0
+    LazyColumn {
+        item {
+            if (totalData.value.isEmpty() || totalData.value[0].total == 0) {
+                Text(text = "No Data at $selectedDate $selectedTimeStr")
             } else {
-                false
-            }
-            item {
-                Row(
+                Text(
+                    text = "Total Score Ranking",
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.nsp(),
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .background(Colors.BG_DARK_GRAY)
                         .fillMaxWidth()
-                ) {
-                    Text(
-                        text = "",
-                        modifier = Modifier
-                            .width(if (isCompare) 98.ndp() else 38.ndp())
-                    )
-                    Text(
-                        text = "",
-                        modifier = Modifier
-                            .padding(end = 8.dp, top = 2.dp)
-                            .fillMaxWidth(0.5f)
-                    )
-                    Text(
-                        text = "",
-                        modifier = Modifier
-                            .fillMaxWidth(0.5f)
-                    )
-                    Text(
-                        text = "Impr",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .width(36.ndp())
-                    )
-                    Text(
-                        text = "Median",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 8.ndp())
-                            .width(70.ndp())
-                    )
-                    Text(
-                        text = "Avg",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .width(74.ndp())
-                    )
-                }
+                        .background(Color.Black)
+                        .padding(top = 10.ndp())
+                )
+                Text(
+                    text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
+                    fontFamily = sarasaFont,
+                    fontSize = 12.nsp(),
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Black)
+                )
             }
-            if (todayLatestDataValue.value.isNotEmpty()) {
-                itemsIndexed(todayLatestDataValue.value) { index, entry ->
-                    BofEntryRowTotal(entry, index+1, maxTotal, isCompare)
-                }
+        }
+        var isCompare: Boolean = if (totalData.value.isNotEmpty()) {
+            totalData.value[0].oldTotal != 0
+        } else {
+            false
+        }
+        item {
+            Row(
+                modifier = Modifier
+                    .background(Colors.BG_DARK_GRAY)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "",
+                    modifier = Modifier
+                        .width(if (isCompare) 98.ndp() else 38.ndp())
+                )
+                Text(
+                    text = "",
+                    modifier = Modifier
+                        .padding(end = 8.dp, top = 2.dp)
+                        .fillMaxWidth(0.5f)
+                )
+                Text(
+                    text = "",
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                )
+                Text(
+                    text = "Impr",
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.nsp(),
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(36.ndp())
+                )
+                Text(
+                    text = "Median",
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.nsp(),
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .padding(start = 8.ndp())
+                        .width(70.ndp())
+                )
+                Text(
+                    text = "Avg",
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.nsp(),
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(74.ndp())
+                )
+            }
+        }
+        if (totalData.value.isNotEmpty()) {
+            itemsIndexed(totalData.value) { index, entry ->
+                BofEntryRowTotal(entry, index + 1, maxTotal, isCompare)
             }
         }
     }
@@ -348,7 +298,7 @@ fun BofEntryRowTotal(
                         modifier = Modifier
                             .padding(end = 20.ndp())
                             .fillMaxWidth(barWidthFraction)
-                            .height(if(isCompare) 18.ndp() else 34.ndp())
+                            .height(if (isCompare) 18.ndp() else 34.ndp())
                             .background(
                                 color = Colors.RANKING_RED,
                                 shape = RoundedCornerShape(topEnd = 50.ndp(), bottomEnd = 50.ndp())

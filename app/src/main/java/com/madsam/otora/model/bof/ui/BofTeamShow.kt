@@ -8,8 +8,8 @@ package com.madsam.otora.model.bof.ui
  * 描述: BOF团队数据展示实体
  */
 data class BofTeamShow(
-    var index: Int = 0,
-    var oldIndex: Int = 0,
+    override var oldIndex: Int,
+    override var index: Int,
     var team: String = "",
     var total: Double = 0.0,
     var median: String = "",
@@ -38,5 +38,5 @@ data class BofTeamShow(
     var oldMedian: String = "",
     var oldImpr: Int = 0,
     var rankDiff: Int = 0,
-    var time: String = "",
-)
+    var time: String = ""
+) : Rankable

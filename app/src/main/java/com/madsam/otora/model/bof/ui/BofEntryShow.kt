@@ -8,8 +8,8 @@ package com.madsam.otora.model.bof.ui
  * 描述: BOF数据展示实体
  */
 data class BofEntryShow(
-    var index: Int = 0,
-    var oldIndex: Int = 0,
+    override var oldIndex: Int,
+    override var index: Int,
     var team: String = "",
     var artist: String = "",
     var genre: String = "",
@@ -32,5 +32,5 @@ data class BofEntryShow(
     var medianDiff: Int = 0,
     var avgRank: Int = 0,
     var avgDiff: Int = 0,
-    var div: Int = 0,
-)
+    var div: Int = 0
+) : Rankable

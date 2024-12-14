@@ -1,13 +1,11 @@
 package com.madsam.otora.ui.bof.sub
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,16 +18,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,12 +35,12 @@ import com.madsam.otora.R
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
-import com.madsam.otora.service.BofDataRequestService
+import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
-import java.time.LocalDate
-import kotlin.math.max
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * 项目名: OtogeTracker
@@ -55,146 +51,100 @@ import kotlin.math.max
  */
 
 @Composable
-fun BofAvgScreen(
-    selectedDate: LocalDate,
-    selectedTime: String,
-) {
-    val context = LocalContext.current
-    val bofDataRequestService = BofDataRequestService(context)
-    val todayLatestData = remember { mutableStateOf<List<BofEntryShow>>(emptyList()) }
-
-    var thresholdImpr by remember { mutableIntStateOf(1) }
-    var thresholdImprOld by remember { mutableIntStateOf(1) }
-
-    fun roundDownToNearestFiveMinutes(hms: String): String {
-        val parts = hms.split(":").map { it.toInt() }
-        val hours = parts[0]
-        val minutes = parts[1] / 5 * 5
-        return String.format("%02d:%02d:00", hours, minutes)
-    }
+fun BofAvgScreen(vm: BofViewModel) {
+    val scope = rememberCoroutineScope()
+    val avgData = vm.avgData.asStateFlow().collectAsState()
+    val thresholdImpr = vm.thresholdImpr.asStateFlow().collectAsState()
+    val thresholdImprOld = vm.thresholdImprOld.asStateFlow().collectAsState()
+    val selectedDate = vm.selectedDate.asStateFlow().collectAsState().value
+    val selectedTime = vm.selectedTime.asStateFlow().collectAsState().value
 
     LaunchedEffect(selectedDate, selectedTime) {
-        Log.d("BofScreen", "selectedDate: $selectedDate, selectedTime: $selectedTime")
-        val data: List<BofEntryShow>
-        if (selectedTime == "-1") {
-            data = bofDataRequestService.getBofttEntryLatest()
-        } else {
-            val timeInMillis = CommonUtils.ymdToMillis(selectedDate.toString(), roundDownToNearestFiveMinutes(selectedTime))
-            data = bofDataRequestService.getBofttEntryByTime(timeInMillis)
+        scope.launch {
+            vm.requestAvgData()
         }
-        // Sort the data by total in descending order
-        var sortedData = data.sortedByDescending { it.oldImpr }
-        thresholdImprOld = max(sortedData.getOrNull(199)?.oldImpr ?: 0, 3)
-        var filteredData =
-            sortedData.filter { it.oldImpr >= thresholdImprOld }.sortedByDescending { it.oldAvg }
-        // Assign average rank
-        var currentOldRank = 1
-        filteredData.forEachIndexed { index, entry ->
-            if (index > 0 && filteredData[index - 1].oldAvg != entry.oldAvg) {
-                currentOldRank = index + 1
-            }
-            entry.oldIndex = currentOldRank
-        }
-        // Sort the data by total in descending order
-        sortedData = data.sortedByDescending { it.impr }
-        thresholdImpr = max(sortedData.getOrNull(199)?.impr ?: 0, 3)
-        filteredData = sortedData.filter { it.impr >= thresholdImpr }.sortedByDescending { it.avg }
-        // Assign average rank
-        var currentRank = 1
-        filteredData.forEachIndexed { index, entry ->
-            if (index > 0 && filteredData[index - 1].avg != entry.avg) {
-                currentRank = index + 1
-            }
-            entry.index = currentRank
-        }
-        filteredData.forEach {
-            it.avgDiff = it.oldIndex - it.index
-        }
-        todayLatestData.value = filteredData
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn {
-            item {
-                val selectedTimeStr: String = if (selectedTime == "-1") {
-                    if (todayLatestData.value.isEmpty()) {
-                        ""
-                    } else {
-                        roundDownToNearestFiveMinutes(todayLatestData.value.first().time)
-                    }
+    LazyColumn {
+        item {
+            val selectedTimeStr: String = if (selectedTime == "-1") {
+                if (avgData.value.isEmpty()) {
+                    ""
                 } else {
-                    roundDownToNearestFiveMinutes(selectedTime)
+                    CommonUtils.roundDownToNearestFiveMinutes(avgData.value.first().time)
                 }
-                if (todayLatestData.value.isEmpty()) {
-                    Text(text = "No Data at $selectedDate $selectedTimeStr")
-                } else {
-                    Text(
-                        text = "Avg Ranking - Exclude Impr below $thresholdImpr",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.Black)
-                            .padding(top = 10.ndp())
-                    )
-                    Text(
-                        text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
-                        fontFamily = sarasaFont,
-                        fontSize = 12.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.Black)
-                    )
-                }
-            }
-            var isCompare: Boolean = if (todayLatestData.value.isNotEmpty()) {
-                todayLatestData.value[0].oldTotal != 0
             } else {
-                false
+                CommonUtils.roundDownToNearestFiveMinutes(selectedTime)
             }
-            item {
-                Row(
+            if (avgData.value.isEmpty()) {
+                Text(text = "No Data at $selectedDate $selectedTimeStr")
+            } else {
+                Text(
+                    text = "Avg Ranking - Exclude Impr below ${thresholdImpr.value}",
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.nsp(),
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
-                        .background(Colors.BG_DARK_GRAY)
                         .fillMaxWidth()
-                ) {
-                    Text(
-                        text = "",
-                        modifier = Modifier
-                            .width(98.ndp())
-                    )
-                    Text(
-                        text = "",
-                        modifier = Modifier
-                            .padding(end = 8.dp, top = 2.dp)
-                            .fillMaxWidth(0.5f)
-                    )
-                    Text(
-                        text = " ",
-                        modifier = Modifier
-                            .fillMaxWidth(0.8f)
-                    )
-                    Text(
-                        text = "Impr",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .width(36.ndp())
-                    )
-                }
+                        .background(Color.Black)
+                        .padding(top = 10.ndp())
+                )
+                Text(
+                    text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
+                    fontFamily = sarasaFont,
+                    fontSize = 12.nsp(),
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Black)
+                )
             }
-            itemsIndexed(todayLatestData.value) { index, entry ->
-                BofEntryRowAvg(entry, index + 1, thresholdImprOld, isCompare)
+        }
+        var isCompare: Boolean = if (avgData.value.isNotEmpty()) {
+            avgData.value[0].oldTotal != 0
+        } else {
+            false
+        }
+        item {
+            Row(
+                modifier = Modifier
+                    .background(Colors.BG_DARK_GRAY)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "",
+                    modifier = Modifier
+                        .width(98.ndp())
+                )
+                Text(
+                    text = "",
+                    modifier = Modifier
+                        .padding(end = 8.dp, top = 2.dp)
+                        .fillMaxWidth(0.5f)
+                )
+                Text(
+                    text = " ",
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                )
+                Text(
+                    text = "Impr",
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.nsp(),
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(36.ndp())
+                )
             }
+        }
+        itemsIndexed(avgData.value) { index, entry ->
+            BofEntryRowAvg(entry, index + 1, thresholdImprOld.value, isCompare)
         }
     }
 }
@@ -204,7 +154,7 @@ fun BofAvgScreen(
 fun BofEntryRowAvg(
     entry: BofEntryShow,
     index: Int,
-    ther: Int,
+    oldThre: Int,
     isCompare: Boolean
 ) {
     val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
@@ -222,7 +172,7 @@ fun BofEntryRowAvg(
         if (isCompare) {
             Icon(
                 painter = entry.avgDiff.let {
-                    if (it > 0 || entry.oldImpr < ther) {
+                    if (it > 0 || entry.oldImpr < oldThre) {
                         painterResource(id = R.drawable.ic_wind_up)
                     } else if (it < 0) {
                         painterResource(id = R.drawable.ic_wind_down)
@@ -231,7 +181,7 @@ fun BofEntryRowAvg(
                     }
                 },
                 contentDescription = null,
-                tint = if (entry.avgDiff > 0 || entry.oldImpr < ther)
+                tint = if (entry.avgDiff > 0 || entry.oldImpr < oldThre)
                     Colors.RANKING_GREEN
                 else if (entry.avgDiff < 0)
                     Colors.RANKING_RED
@@ -242,11 +192,11 @@ fun BofEntryRowAvg(
                     .width(30.ndp())
             )
             Text(
-                text = if (entry.oldImpr < ther) "NEW" else entry.avgDiff.toString(),
+                text = if (entry.oldImpr < oldThre) "NEW" else entry.avgDiff.toString(),
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.nsp(),
-                color = if (entry.avgDiff > 0 || entry.oldImpr < ther)
+                color = if (entry.avgDiff > 0 || entry.oldImpr < oldThre)
                     Colors.RANKING_GREEN
                 else if (entry.avgDiff < 0)
                     Colors.RANKING_RED

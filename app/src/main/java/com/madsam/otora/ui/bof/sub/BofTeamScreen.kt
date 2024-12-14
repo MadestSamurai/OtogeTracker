@@ -1,6 +1,5 @@
 package com.madsam.otora.ui.bof.sub
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -22,14 +21,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -42,11 +41,12 @@ import com.madsam.otora.R
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofTeamShow
-import com.madsam.otora.service.BofDataRequestService
+import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
-import java.time.LocalDate
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * 项目名: OtogeTracker
@@ -56,78 +56,38 @@ import java.time.LocalDate
  * 描述: BOF团队数据展示界面
  */
 @Composable
-fun BofTeamScreen(
-    selectedDate: LocalDate,
-    selectedTime: String,
-) {
-    val context = LocalContext.current
-    val bofDataRequestService = BofDataRequestService(context)
-    val todayLatestData = remember { mutableStateOf<List<BofTeamShow>>(emptyList()) }
+fun BofTeamScreen(vm: BofViewModel) {
+    val teamData = vm.teamData.asStateFlow().collectAsState()
+    val maxTotal = teamData.value.maxOfOrNull { it.total } ?: 1.0
+    val selectedDate = vm.selectedDate.asStateFlow().collectAsState().value
+    val selectedTime = vm.selectedTime.asStateFlow().collectAsState().value
 
-    fun roundDownToNearestFiveMinutes(hms: String): String {
-        val parts = hms.split(":").map { it.toInt() }
-        val hours = parts[0]
-        val minutes = parts[1] / 5 * 5
-        return String.format("%02d:%02d:00", hours, minutes)
-    }
-
+    val scope = rememberCoroutineScope()
     LaunchedEffect(selectedDate, selectedTime) {
-        Log.d("BofScreen", "selectedDate: $selectedDate, selectedTime: $selectedTime")
-        val data: List<BofTeamShow>
-        if (selectedTime == "-1") {
-            data = bofDataRequestService.getBofttTeamLatest()
-        } else {
-            val timeInMillis = CommonUtils.ymdToMillis(selectedDate.toString(), roundDownToNearestFiveMinutes(selectedTime))
-            data = bofDataRequestService.getBofttTeamByTime(timeInMillis)
+        scope.launch {
+            vm.requestTeamData()
         }
-        // Sort the data by oldTotal in descending order
-        var sortedData = data.sortedByDescending { it.oldTotal }
-        // Assign rankings
-        var currentOldRank = 1
-        sortedData.forEachIndexed { index, entry ->
-            if (index > 0 && sortedData[index - 1].oldTotal != entry.oldTotal) {
-                currentOldRank = index + 1
-            }
-            entry.oldIndex = currentOldRank
-        }
-        sortedData = data.sortedBy { it.impr }
-        // Sort the data by total in descending order
-        sortedData = data.sortedByDescending { it.total }
-        // Assign rankings
-        var currentRank = 1
-        sortedData.forEachIndexed { index, entry ->
-            if (index > 0 && sortedData[index - 1].total != entry.total) {
-                currentRank = index + 1
-            }
-            entry.index = currentRank
-        }
-        sortedData.forEach {
-            it.rankDiff = it.oldIndex - it.index
-        }
-        todayLatestData.value = sortedData
     }
-
-    val maxTotal = todayLatestData.value.maxOfOrNull { it.total } ?: 1.0
 
     val selectedTimeStr: String = if (selectedTime == "-1") {
-        if (todayLatestData.value.isEmpty()) {
+        if (teamData.value.isEmpty()) {
             ""
         } else {
-            roundDownToNearestFiveMinutes(todayLatestData.value.first().time)
+            CommonUtils.roundDownToNearestFiveMinutes(teamData.value.first().time)
         }
     } else {
-        roundDownToNearestFiveMinutes(selectedTime)
+        CommonUtils.roundDownToNearestFiveMinutes(selectedTime)
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
-            var isCompare: Boolean = if (todayLatestData.value.isNotEmpty()) {
-                todayLatestData.value[0].oldTotal >= 1.0
+            var isCompare: Boolean = if (teamData.value.isNotEmpty()) {
+                teamData.value[0].oldTotal >= 1.0
             } else {
                 false
             }
             item {
-                if (todayLatestData.value.isEmpty()) {
+                if (teamData.value.isEmpty()) {
                     Text(text = "No Data at $selectedDate $selectedTimeStr")
                 } else {
                     Text(
@@ -202,7 +162,7 @@ fun BofTeamScreen(
                     )
                 }
             }
-            itemsIndexed(todayLatestData.value) { index, entry ->
+            itemsIndexed(teamData.value) { index, entry ->
                 BofTeamRowTotal(entry, index + 1, maxTotal, isCompare)
             }
         }
@@ -398,7 +358,7 @@ fun BofTeamRowTotal(
                             )
                         ) {
                             Icon(
-                                painter = painterResource(id = com.madsam.otora.R.drawable.ic_star),
+                                painter = painterResource(id = R.drawable.ic_star),
                                 contentDescription = null,
                                 tint = if (fss[index] == "1") Colors.RANKING_YELLOW else Color.Transparent,
                             )

@@ -1,6 +1,5 @@
 package com.madsam.otora.ui.bof.sub
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -19,14 +18,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,11 +33,12 @@ import androidx.compose.ui.unit.dp
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
-import com.madsam.otora.service.BofDataRequestService
+import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
-import java.time.LocalDate
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * 项目名: OtogeTracker
@@ -49,63 +49,32 @@ import java.time.LocalDate
  */
 
 @Composable
-fun BofDiffScreen(
-    selectedDate: LocalDate,
-    selectedTime: String,
-) {
-    val context = LocalContext.current
-    val bofDataRequestService = BofDataRequestService(context)
-    val todayLatestData = remember { mutableStateOf<List<BofEntryShow>>(emptyList()) }
+fun BofDiffScreen(vm: BofViewModel) {
+    val diffData = vm.diffData.asStateFlow().collectAsState()
+    val maxDiff = diffData.value.maxOfOrNull { it.totalDiff } ?: 1
+    val selectedDate = vm.selectedDate.asStateFlow().collectAsState().value
+    val selectedTime = vm.selectedTime.asStateFlow().collectAsState().value
 
-    fun roundDownToNearestFiveMinutes(hms: String): String {
-        val parts = hms.split(":").map { it.toInt() }
-        val hours = parts[0]
-        val minutes = parts[1] / 5 * 5
-        return String.format("%02d:%02d:00", hours, minutes)
-    }
-
+    val scope = rememberCoroutineScope()
     LaunchedEffect(selectedDate, selectedTime) {
-        Log.d("BofScreen", "selectedDate: $selectedDate, selectedTime: $selectedTime")
-        val data: List<BofEntryShow>
-        if (selectedTime == "-1") {
-            data = bofDataRequestService.getBofttEntryLatest()
-        } else {
-            val timeInMillis = CommonUtils.ymdToMillis(selectedDate.toString(), roundDownToNearestFiveMinutes(selectedTime))
-            data = bofDataRequestService.getBofttEntryByTime(timeInMillis)
+        scope.launch {
+            vm.requestDiffData()
         }
-        // Calculate Total Score difference
-        data.forEach {
-            it.totalDiff = it.total - it.oldTotal
-            it.imprDiff = it.impr - it.oldImpr
-        }
-        // Sort the data by total in descending order
-        val sortedData = data.sortedByDescending { it.totalDiff }
-        // Assign rankings
-        var currentRank = 1
-        sortedData.forEachIndexed { index, entry ->
-            if (index > 0 && sortedData[index - 1].totalDiff != entry.totalDiff) {
-                currentRank = index + 1
-            }
-            entry.index = currentRank
-        }
-        todayLatestData.value = sortedData
     }
-
-    val maxDiff = todayLatestData.value.maxOfOrNull { it.totalDiff } ?: 1
 
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
             item {
                 val selectedTimeStr: String = if (selectedTime == "-1") {
-                    if (todayLatestData.value.isEmpty()) {
+                    if (diffData.value.isEmpty()) {
                         ""
                     } else {
-                        roundDownToNearestFiveMinutes(todayLatestData.value.first().time)
+                        CommonUtils.roundDownToNearestFiveMinutes(diffData.value.first().time)
                     }
                 } else {
-                    roundDownToNearestFiveMinutes(selectedTime)
+                    CommonUtils.roundDownToNearestFiveMinutes(selectedTime)
                 }
-                if (todayLatestData.value.isEmpty()) {
+                if (diffData.value.isEmpty()) {
                     Text(text = "No Data at $selectedDate $selectedTimeStr")
                 } else {
                     Text(
@@ -167,7 +136,7 @@ fun BofDiffScreen(
                     )
                 }
             }
-            itemsIndexed(todayLatestData.value) { index, entry ->
+            itemsIndexed(diffData.value) { index, entry ->
                 BofEntryRowDiv(entry, index+1, maxDiff)
             }
         }
@@ -182,7 +151,7 @@ fun BofEntryRowDiv(
     maxDiff: Int
 ) {
     val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
-    val barWidthFraction = (entry.totalDiff.toFloat() / maxDiff) * 1f
+    val barWidthFraction = if (maxDiff==0) 0f else (entry.totalDiff.toFloat() / maxDiff) * 1f
     var rowHeight = remember { mutableIntStateOf(0) }
 
     Row(

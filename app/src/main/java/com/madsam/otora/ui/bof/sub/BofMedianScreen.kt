@@ -20,16 +20,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -39,12 +37,12 @@ import com.madsam.otora.R
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
-import com.madsam.otora.service.BofDataRequestService
+import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
-import java.time.LocalDate
-import kotlin.math.max
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * 项目名: OtogeTracker
@@ -55,85 +53,42 @@ import kotlin.math.max
  */
 
 @Composable
-fun BofMedianScreen(
-    selectedDate: LocalDate,
-    selectedTime: String,
-) {
-    val context = LocalContext.current
-    val bofDataRequestService = BofDataRequestService(context)
-    val todayLatestData = remember { mutableStateOf<List<BofEntryShow>>(emptyList()) }
-
-    var thresholdImpr by remember { mutableIntStateOf(1) }
-    var thresholdImprOld by remember { mutableIntStateOf(1) }
-
-    fun roundDownToNearestFiveMinutes(hms: String): String {
-        val parts = hms.split(":").map { it.toInt() }
-        val hours = parts[0]
-        val minutes = parts[1] / 5 * 5
-        return String.format("%02d:%02d:00", hours, minutes)
-    }
+fun BofMedianScreen(vm: BofViewModel) {
+    val scope = rememberCoroutineScope()
+    val medianData = vm.medianData.asStateFlow().collectAsState()
+    val thresholdImprOld = vm.thresholdImprOld.asStateFlow().collectAsState()
+    val thresholdImpr = vm.thresholdImpr.asStateFlow().collectAsState()
+    val selectedDate = vm.selectedDate.asStateFlow().collectAsState().value
+    val selectedTime = vm.selectedTime.asStateFlow().collectAsState().value
 
     LaunchedEffect(selectedDate, selectedTime) {
-        Log.d("BofScreen", "selectedDate: $selectedDate, selectedTime: $selectedTime")
-        val data: List<BofEntryShow>
-        if (selectedTime == "-1") {
-            data = bofDataRequestService.getBofttEntryLatest()
-        } else {
-            val timeInMillis = CommonUtils.ymdToMillis(selectedDate.toString(), roundDownToNearestFiveMinutes(selectedTime))
-            data = bofDataRequestService.getBofttEntryByTime(timeInMillis)
+        scope.launch {
+            vm.requestMedianData()
         }
-        // Sort the data by total in descending order
-        var sortedData = data.sortedByDescending { it.oldImpr }
-        thresholdImprOld = max(sortedData.getOrNull(199)?.oldImpr ?: 0, 3)
-        var filteredData = sortedData.filter { it.oldImpr >= thresholdImprOld }.sortedByDescending { it.oldMedian }
-        // Assign average rank
-        var currentOldRank = 1
-        filteredData.forEachIndexed { index, entry ->
-            if (index > 0 && filteredData[index - 1].oldMedian != entry.oldMedian) {
-                currentOldRank = index + 1
-            }
-            entry.oldIndex = currentOldRank
-        }
-        // Sort the data by total in descending order
-        sortedData = data.sortedByDescending { it.impr }
-        thresholdImpr = max(sortedData.getOrNull(199)?.impr ?: 0, 3)
-        filteredData = sortedData.filter { it.impr >= thresholdImpr }.sortedByDescending { it.median }
-        // Assign average rank
-        var currentRank = 1
-        filteredData.forEachIndexed { index, entry ->
-            if (index > 0 && filteredData[index - 1].median != entry.median) {
-                currentRank = index + 1
-            }
-            entry.index = currentRank
-        }
-        filteredData.forEach {
-            it.medianDiff = it.oldIndex - it.index
-        }
-        todayLatestData.value = filteredData
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn {
-            var isCompare: Boolean = if (todayLatestData.value.isNotEmpty()) {
-                todayLatestData.value[0].oldTotal != 0
+            var isCompare: Boolean = if (medianData.value.isNotEmpty()) {
+                medianData.value[0].oldTotal != 0
             } else {
                 false
             }
             item {
                 val selectedTimeStr: String = if (selectedTime == "-1") {
-                    if (todayLatestData.value.isEmpty()) {
+                    if (medianData.value.isEmpty()) {
                         ""
                     } else {
-                        roundDownToNearestFiveMinutes(todayLatestData.value.first().time)
+                        CommonUtils.roundDownToNearestFiveMinutes(medianData.value.first().time)
                     }
                 } else {
-                    roundDownToNearestFiveMinutes(selectedTime)
+                    CommonUtils.roundDownToNearestFiveMinutes(selectedTime)
                 }
-                if (todayLatestData.value.isEmpty()) {
+                if (medianData.value.isEmpty()) {
                     Text(text = "No Data at $selectedDate $selectedTimeStr")
                 } else {
                     Text(
-                        text = "Median Ranking - Exclude Impr below $thresholdImpr",
+                        text = "Median Ranking - Exclude Impr below ${thresholdImpr.value}",
                         fontFamily = sarasaFont,
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.nsp(),
@@ -191,8 +146,8 @@ fun BofMedianScreen(
                     )
                 }
             }
-            itemsIndexed(todayLatestData.value) { index, entry ->
-                BofEntryRowMedian(entry, index+1, thresholdImprOld, isCompare)
+            itemsIndexed(medianData.value) { index, entry ->
+                BofEntryRowMedian(entry, index+1, thresholdImprOld.value, isCompare)
             }
         }
     }
@@ -206,6 +161,7 @@ fun BofEntryRowMedian(
     ther: Int,
     isCompare: Boolean
 ) {
+    Log.d("BofEntryRowMedian", "entry: $entry, index: $index, ther: $ther, isCompare: $isCompare")
     val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
     val barWidthFraction = (entry.median.toFloat() / 1000) * 1f
     var rowHeight = remember { mutableIntStateOf(0) }

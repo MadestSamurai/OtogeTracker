@@ -14,12 +14,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
-import androidx.glance.LocalGlanceId
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.consts.GradientBrush
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -166,6 +164,22 @@ object CommonUtils {
     fun millisToYmd(millis: Long): String {
         val localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), java.time.ZoneId.systemDefault())
         return localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+    }
+
+    /**
+     * 时间向下取整到最近的五分钟
+     *
+     * @param value 时间 格式 11:21
+     * @return 时间 格式 11:20:00
+     */
+    fun roundDownToNearestFiveMinutes(hms: String): String {
+        val parts = hms.split(":").map { it.toInt() }
+        if (parts.size != 2) {
+            return "Invalid Time"
+        }
+        val hours = parts[0]
+        val minutes = parts[1] / 5 * 5
+        return String.format("%02d:%02d:00", hours, minutes)
     }
 
     /**
