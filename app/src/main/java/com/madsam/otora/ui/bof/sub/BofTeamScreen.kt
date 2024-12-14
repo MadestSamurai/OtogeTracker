@@ -47,6 +47,7 @@ import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.math.max
 
 /**
  * 项目名: OtogeTracker
@@ -58,7 +59,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun BofTeamScreen(vm: BofViewModel) {
     val teamData = vm.teamData.asStateFlow().collectAsState()
-    val maxTotal = teamData.value.maxOfOrNull { it.total } ?: 1.0
+    val maxTotal = max(teamData.value.maxOfOrNull { it.total } ?: 1.0, teamData.value.maxOfOrNull { it.oldTotal } ?: 1.0)
     val selectedDate = vm.selectedDate.asStateFlow().collectAsState().value
     val selectedTime = vm.selectedTime.asStateFlow().collectAsState().value
 

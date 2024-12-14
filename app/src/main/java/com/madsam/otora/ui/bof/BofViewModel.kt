@@ -110,7 +110,7 @@ class BofViewModel(
                 { entry, rank -> entry.oldIndex = rank },
                 { entry, rank -> entry.index = rank },
                 { entry, diff -> entry.rankDiff = diff },
-                { it.impr >= 0 },
+                { true },
                 { it.impr }
             )
             totalData.update { updatedData }
@@ -170,7 +170,6 @@ class BofViewModel(
             { bofDataRequestService.getBofttEntryLatest() },
             { time -> bofDataRequestService.getBofttEntryByTime(time) }
         )
-
         data.forEach {
             it.totalDiff = it.total - it.oldTotal
             it.imprDiff = it.impr - it.oldImpr
@@ -181,8 +180,8 @@ class BofViewModel(
             { it.totalDiff },
             { entry, rank -> entry.oldIndex = rank },
             { entry, rank -> entry.index = rank },
-            { entry, diff -> entry.totalDiff = diff },
-            { it.imprDiff >= 0 },
+            { entry, diff -> entry.totalDiff = entry.totalDiff },
+            { true },
             { it.imprDiff }
         )
         diffData.update { updatedData }
@@ -201,7 +200,7 @@ class BofViewModel(
             { entry, rank -> entry.oldIndex = rank },
             { entry, rank -> entry.index = rank },
             { entry, diff -> entry.rankDiff = diff },
-            { it.impr >= 0 },
+            { true },
             { it.impr }
         )
         teamData.update { updatedData }
