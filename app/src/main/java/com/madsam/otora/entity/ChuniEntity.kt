@@ -8,7 +8,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
  * 文件名: com.madsam.otora.entity.ChuniSongsEntity
  * 创建者: MadSamurai
  * 创建时间: 2024/11/15
- * 描述: TODO
+ * 描述: Chunithm歌曲实体
  */
 
 class ChuniSongsEntity : RealmObject {

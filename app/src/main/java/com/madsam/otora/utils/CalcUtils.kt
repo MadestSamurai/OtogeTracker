@@ -2,10 +2,10 @@ package com.madsam.otora.utils
 
 /**
  * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.utils.ChuniCalcUtils
+ * 文件名: com.madsam.otora.utils.CalcUtils
  * 创建者: MadSamurai
  * 创建时间: 2024/11/16
- * 描述: TODO
+ * 描述: 计算工具
  */
 object CalcUtils {
     // Chuni Rating

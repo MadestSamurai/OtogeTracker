@@ -5,7 +5,7 @@ package com.madsam.otora.model.chuni.ui
  * 文件名: com.madsam.otora.model.chuni.ui.ChuniScoreShow
  * 创建者: MadSamurai
  * 创建时间: 2024/11/20
- * 描述: TODO
+ * 描述: Chunithm成绩显示
  */
 data class ChuniScoreShow (
     var title : String = "",

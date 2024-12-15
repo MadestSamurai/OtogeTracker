@@ -7,7 +7,7 @@ import com.squareup.moshi.Json
  * 文件名: com.madsam.otora.model.bof.web.BofTeam
  * 创建者: MadSamurai
  * 创建时间: 2024/10/23
- * 描述: TODO
+ * 描述: BOF团队
  */
 data class BofTeam (
     var id: String = "",

@@ -7,7 +7,7 @@ import com.squareup.moshi.Json
  * 文件名: com.madsam.otora.model.chuni.web.ChuniSongs
  * 创建者: MadSamurai
  * 创建时间: 2024/11/15
- * 描述: TODO
+ * 描述: Chunithm歌曲
  */
 data class ChuniSong (
     @Json(name = "songId") var songId: String = "",

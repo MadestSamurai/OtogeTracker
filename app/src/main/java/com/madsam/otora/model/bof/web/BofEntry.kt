@@ -7,7 +7,7 @@ import com.squareup.moshi.Json
  * 文件名: com.madsam.otora.entity.bof.Entry
  * 创建者: MadSamurai
  * 创建时间: 2024/10/13
- * 描述: TODO
+ * 描述: BOF条目
  */
 data class BofEntry(
     @Json(name = "No.") var no: Int = 0,

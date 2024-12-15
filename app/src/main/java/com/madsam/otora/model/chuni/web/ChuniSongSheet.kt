@@ -7,7 +7,7 @@ import com.squareup.moshi.Json
  * 文件名: com.madsam.otora.model.chuni.web.ChuniSongSheet
  * 创建者: MadSamurai
  * 创建时间: 2024/11/15
- * 描述: TODO
+ * 描述: Chunithm谱面
  */
 data class ChuniSongSheet(
     @Json(name = "type") var type: String = "",

@@ -48,7 +48,7 @@ import kotlinx.coroutines.flow.update
  * 文件名: com.madsam.otora.ui.record.chunithm.TopRating
  * 创建者: MadSamurai
  * 创建时间: 2024/11/20
- * 描述: TODO
+ * 描述: Chunithm顶级成绩
  */
 @Composable
 fun TopRating() {

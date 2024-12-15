@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
  * 文件名: com.madsam.otora.ui.record.chunithm.CookieDialog
  * 创建者: MadSamurai
  * 创建时间: 2024/12/12
- * 描述: TODO
+ * 描述: Cookie对话框
  */
 @Composable
 fun CookieDialog(

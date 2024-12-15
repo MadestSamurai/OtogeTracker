@@ -10,7 +10,7 @@ import com.madsam.otora.R
  * 文件名: com.madsam.otora.fonts.CustomFonts
  * 创建者: MadSamurai
  * 创建时间: 2024/10/18
- * 描述: TODO
+ * 描述: 自定义字体
  */
 
 val sarasaFont = FontFamily(
