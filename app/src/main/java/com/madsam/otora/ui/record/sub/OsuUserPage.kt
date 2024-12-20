@@ -20,7 +20,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.consts.Colors
-import com.madsam.otora.ui.record.viewmodel.OsuViewModel
 import com.madsam.otora.ui.record.osu.BadgeList
 import com.madsam.otora.ui.record.osu.Card
 import com.madsam.otora.ui.record.osu.Level
@@ -29,6 +28,7 @@ import com.madsam.otora.ui.record.osu.RankGraph
 import com.madsam.otora.ui.record.osu.Recent
 import com.madsam.otora.ui.record.osu.SocialCard
 import com.madsam.otora.ui.record.osu.TopRank
+import com.madsam.otora.ui.record.viewmodel.OsuViewModel
 import com.madsam.otora.ui.record.viewmodel.OsuViewModelFactory
 import com.madsam.otora.utils.ShareUtil
 

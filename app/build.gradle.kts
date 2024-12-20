@@ -42,7 +42,6 @@ android {
 
 composeCompiler {
     reportsDestination = layout.buildDirectory.dir("compose_compiler")
-//    stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
 }
 
 dependencies {
@@ -74,9 +73,11 @@ dependencies {
     // BOM
     implementation(platform(libs.kotlin.bom))
     implementation(platform(libs.androidx.compose.compose.bom))
-    //Compose
+    // Compose
     implementation(libs.androidx.activity.compose)
     implementation(libs.accompanist.themeadapter.material3)
+    // Compose Screenshot
+    implementation(libs.shreyaspatil.capturable)
 
     debugImplementation(libs.androidx.ui.tooling)
 

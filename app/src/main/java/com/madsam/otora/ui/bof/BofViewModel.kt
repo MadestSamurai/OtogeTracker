@@ -40,6 +40,21 @@ class BofViewModel(
 
     var selectedDate = MutableStateFlow(LocalDate.now())
     var selectedTime = MutableStateFlow("-1")
+    var selectedTimeStr = MutableStateFlow("")
+
+    fun generateSelectedTimeStr() {
+        selectedTimeStr.update {
+            if (selectedTime.value == "-1") {
+                if (totalData.value.isEmpty()) {
+                    ""
+                } else {
+                    CommonUtils.roundDownToNearestFiveMinutes(totalData.value.first().time)
+                }
+            } else {
+                CommonUtils.roundDownToNearestFiveMinutes(selectedTime.value)
+            }
+        }
+    }
 
     suspend fun <T> fetchData(
         fetchLatest: suspend () -> List<T>,

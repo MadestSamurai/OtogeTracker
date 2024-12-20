@@ -2,6 +2,7 @@
 accompanistThemeadapterMaterial3 = "0.34.0" # Not newest version because of a bug of screenshot
 activity = "1.9.2"
 appcompat = "1.6.1" # Not newest version because of a bug of screenshot
+capturableVersion = "3.0.0"
 coreSplashscreen = "1.1.0-rc01"
 glanceAppwidget = "1.1.0" # Not newest version because of a bug of ColorProvider
 glanceMaterial3 = "1.1.0" # Not newest version because of a bug of ColorProvider
@@ -17,7 +18,7 @@ kotlin = "2.0.20"
 loggingInterceptor = "4.12.0"
 materialVersion = "1.2.1" # Not newest version because of a bug of screenshot
 navigationSafe = "2.7.7" # Not newest version because of a bug of screenshot
-androidGradle = "8.7.2"
+androidGradle = "8.7.3"
 navigation = "2.7.7" # Not newest version because of a bug of screenshot
 okhttp = "4.12.0"
 runtime = "1.7.3"
@@ -32,7 +33,6 @@ androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "a
 androidx-compose-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "androidxComposeBom" }
 androidx-constraintlayout-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "androidxConstraintlayoutCompose" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
-
 androidx-glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glanceMaterial3" }
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glanceAppwidget" }
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "materialVersion" }
@@ -52,6 +52,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 realm-library-base = { module = "io.realm.kotlin:library-base", version.ref = "realmLibrary" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+shreyaspatil-capturable = { module = "dev.shreyaspatil:capturable", version.ref = "capturableVersion" }
 squareup-converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "retrofit" }
 utilcode = { module = "com.blankj:utilcode", version.ref = "utilcode" }
 

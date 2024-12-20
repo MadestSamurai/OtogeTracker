@@ -56,6 +56,7 @@ fun BofScreen() {
             vm.selectedDate.update { LocalDate.of(year, month + 1, dayOfMonth) }
             TimePickerDialog(context, { _, hourOfDay, minute ->
                 vm.selectedTime.update { String.format("%02d:%02d", hourOfDay, minute) }
+                vm.generateSelectedTimeStr()
             }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
     }
