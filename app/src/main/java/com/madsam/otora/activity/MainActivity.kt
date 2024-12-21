@@ -91,7 +91,7 @@ fun MainActivityScreen() {
                     Screen2()
                 }
                 composable(Screen.BOFScreen.route) {
-                    BofScreen()
+                    BofScreen(snackbarHostState)
                 }
             }
         }

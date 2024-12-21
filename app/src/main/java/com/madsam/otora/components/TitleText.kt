@@ -1,4 +1,4 @@
-package com.madsam.otora.component
+package com.madsam.otora.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding

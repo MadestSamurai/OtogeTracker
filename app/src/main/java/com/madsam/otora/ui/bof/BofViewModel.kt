@@ -120,6 +120,7 @@ class BofViewModel(
             { bofDataRequestService.getBofttEntryLatest() },
             { time -> bofDataRequestService.getBofttEntryByTime(time) }
         )
+
         if (data.isEmpty()) {
             Log.d(TAG, "No data available for the selected date and time.")
             return

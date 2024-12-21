@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.madsam.otora.component.GradientBorderCircle
+import com.madsam.otora.components.GradientBorderCircle
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -24,6 +24,7 @@ okhttp = "4.12.0"
 runtime = "1.7.3"
 utilcode = "1.30.7"
 vico = "2.0.0-alpha.28"
+foundationAndroid = "1.6.8"
 
 [libraries]
 accompanist-themeadapter-material3 = { module = "com.google.accompanist:accompanist-themeadapter-material3", version.ref = "accompanistThemeadapterMaterial3" }
@@ -64,6 +65,7 @@ vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", ve
 vico-core = { group = "com.patrykandpatrick.vico", name = "core", version.ref = "vico" }
 # For the view system.
 vico-views = { group = "com.patrykandpatrick.vico", name = "views", version.ref = "vico" }
+androidx-foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "foundationAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradle" }

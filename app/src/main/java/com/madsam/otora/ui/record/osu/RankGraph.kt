@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.madsam.otora.R
-import com.madsam.otora.component.DoubleCircleIndicator
+import com.madsam.otora.components.DoubleCircleIndicator
 import com.madsam.otora.consts.Colors
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent

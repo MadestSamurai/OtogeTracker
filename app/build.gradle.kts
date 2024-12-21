@@ -78,6 +78,7 @@ dependencies {
     implementation(libs.accompanist.themeadapter.material3)
     // Compose Screenshot
     implementation(libs.shreyaspatil.capturable)
+    implementation(libs.androidx.foundation.android)
 
     debugImplementation(libs.androidx.ui.tooling)
 

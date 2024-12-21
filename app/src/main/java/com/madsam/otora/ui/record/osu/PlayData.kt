@@ -39,8 +39,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.madsam.otora.R
-import com.madsam.otora.component.ImageWithText
-import com.madsam.otora.component.TitleText
+import com.madsam.otora.components.ImageWithText
+import com.madsam.otora.components.TitleText
 import com.madsam.otora.consts.Colors
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow

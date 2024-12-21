@@ -1,4 +1,4 @@
-package com.madsam.otora.component
+package com.madsam.otora.components
 
 import android.graphics.Paint
 import androidx.compose.ui.graphics.Color

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -39,7 +40,7 @@ import java.util.Calendar
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BofScreen() {
+fun BofScreen(snackbarHostState: SnackbarHostState) {
     val context = LocalContext.current
     val navController = rememberNavController()
     val coroutineScope = rememberCoroutineScope()
@@ -56,7 +57,6 @@ fun BofScreen() {
             vm.selectedDate.update { LocalDate.of(year, month + 1, dayOfMonth) }
             TimePickerDialog(context, { _, hourOfDay, minute ->
                 vm.selectedTime.update { String.format("%02d:%02d", hourOfDay, minute) }
-                vm.generateSelectedTimeStr()
             }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
         }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH)).show()
     }
@@ -103,7 +103,7 @@ fun BofScreen() {
             }
         }
         NavHost(navController = navController, startDestination = "Total") {
-            composable("Total") { BofTotalScreen(vm) }
+            composable("Total") { BofTotalScreen(vm, snackbarHostState) }
             composable("Avg") { BofAvgScreen(vm) }
             composable("Median") { BofMedianScreen(vm) }
             composable("Diff") { BofDiffScreen(vm) }
