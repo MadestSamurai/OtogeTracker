@@ -1,5 +1,7 @@
 package com.madsam.otora.ui.bof.sub
 
+import android.content.Context
+import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeSpacing
@@ -24,6 +26,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -49,6 +53,7 @@ import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.record.osu.saveImageBitmapToFile
 import com.madsam.otora.ui.record.osu.saveImageToGallery
 import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.utils.ScreenUtil.isLandscape
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
 import dev.shreyaspatil.capturable.capturable
@@ -56,6 +61,7 @@ import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
+import java.time.LocalDate
 import kotlin.math.max
 
 /**
@@ -72,38 +78,23 @@ fun BofTotalScreen(
     vm: BofViewModel,
     snackbarHostState: SnackbarHostState
 ) {
+    val scope = rememberCoroutineScope()
+
+    val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val view = LocalView.current
+
     val totalData = vm.totalData.asStateFlow().collectAsState()
-    val maxTotal = max(totalData.value.maxOfOrNull { it.total } ?: 1,
-        totalData.value.maxOfOrNull { it.oldTotal } ?: 1)
+    val maxTotal = max(
+        totalData.value.maxOfOrNull { it.total } ?: 1,
+        totalData.value.maxOfOrNull { it.oldTotal } ?: 1
+    )
     val selectedDate = vm.selectedDate.asStateFlow().collectAsState().value
     val selectedTime = vm.selectedTime.asStateFlow().collectAsState().value
-    val context = LocalContext.current
-
     val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
-    var showDialog = remember { mutableStateOf(false) }
+    val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
+    val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
-    // Calculate the width of the bar and text
-    var isCompare: Boolean = if (totalData.value.isNotEmpty()) {
-        totalData.value[0].oldTotal != 0
-    } else {
-        false
-    }
-    val barWidth = when (screenWidthDp) {
-        in 0.dp..400.dp -> (screenWidthDp.value * 0.4f).ndp()
-        in 400.dp..800.dp -> ((screenWidthDp.value - 400) * 0.3f + 160).ndp()
-        else -> 280.ndp()
-    }
-    val textWidth =
-        if (screenWidthDp > 800.dp) screenWidthDp - 302.ndp() - barWidth
-        else if (isCompare) screenWidthDp - 58.ndp() - barWidth
-        else screenWidthDp - 40.ndp() - barWidth - 36.ndp()
-    val screenWidthImage = 1000.dp
-    val barWidthImage = 280.ndp()
-    val textWidthImage = 1000.dp - 302.ndp() - barWidthImage
-
-    val scope = rememberCoroutineScope()
     LaunchedEffect(selectedDate, selectedTime) {
         scope.launch {
             vm.requestTotalData()
@@ -111,6 +102,118 @@ fun BofTotalScreen(
         }
     }
 
+    val showDialog = remember { mutableStateOf(false) }
+    val dataSwitch = remember { mutableStateOf(false) }
+
+    val isCompare = totalData.value.isNotEmpty() && totalData.value[0].oldTotal != 0
+
+    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val barWidth = when (screenWidthDp) {
+        in 0.dp..400.dp -> (screenWidthDp.value * 0.4f).ndp()
+        in 400.dp..800.dp -> ((screenWidthDp.value - 400) * 0.3f + 160).ndp()
+        else -> 280.ndp()
+    }
+    val textWidth = when {
+        screenWidthDp > 800.dp -> screenWidthDp - 302.ndp() - barWidth
+        isCompare -> screenWidthDp - 58.ndp() - barWidth
+        else -> screenWidthDp - 40.ndp() - barWidth - 36.ndp()
+    }
+
+    LaunchedEffect(configuration) {
+        vm.updatePadding(view)
+    }
+
+    CaptureDialog(
+        showDialog = showDialog,
+        context = context,
+        snackbarHostState = snackbarHostState,
+        totalData = totalData.value,
+        selectedDate = selectedDate,
+        selectedTimeStr = selectedTimeStr,
+        maxTotal = maxTotal,
+        isCompare = isCompare,
+        configuration = configuration,
+        leftPadding = leftPadding,
+        rightPadding = rightPadding
+    )
+
+    LazyColumn {
+        item {
+            Row {
+                Button(
+                    onClick = { showDialog.value = true },
+                    modifier = Modifier
+                        .fillMaxWidth(0.5f)
+                        .padding(8.dp)
+                ) {
+                    Text(text = "Show Capture Dialog")
+                }
+                if (screenWidthDp <= 800.dp) {
+                    Button(
+                        onClick = { dataSwitch.value = !dataSwitch.value },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Text(text = "Switch Data")
+                    }
+                }
+            }
+        }
+        item {
+            RankColumn(
+                configuration = configuration,
+                leftPadding = leftPadding,
+                rightPadding = rightPadding,
+                screenWidthDp = screenWidthDp,
+                isCompare = isCompare,
+                barWidth = barWidth,
+                textWidth = textWidth,
+                totalData = totalData.value,
+                selectedDate = selectedDate,
+                selectedTimeStr = selectedTimeStr
+            )
+        }
+        if (totalData.value.isNotEmpty()) {
+            itemsIndexed(totalData.value) { index, entry ->
+                BofEntryRowTotal(
+                    entry = entry,
+                    index = index + 1,
+                    maxTotal = maxTotal,
+                    isCompare = isCompare,
+                    isImage = false,
+                    rowWidth = screenWidthDp,
+                    barWidth = barWidth,
+                    textWidth = textWidth,
+                    configuration = configuration,
+                    leftPadding = leftPadding,
+                    rightPadding = rightPadding,
+                    dataSwitch = dataSwitch.value
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun CaptureDialog(
+    showDialog: MutableState<Boolean>,
+    context: Context,
+    snackbarHostState: SnackbarHostState,
+    totalData: List<BofEntryShow>,
+    selectedDate: LocalDate,
+    selectedTimeStr: String,
+    maxTotal: Int,
+    isCompare: Boolean,
+    configuration: Configuration,
+    leftPadding: Dp,
+    rightPadding: Dp,
+) {
+    val screenWidthImage = 1000.dp
+    val barWidthImage = 280.ndp()
+    val textWidthImage = 1000.dp - 302.ndp() - barWidthImage
+    val scope = rememberCoroutineScope()
     if (showDialog.value) {
         val captureController = rememberCaptureController()
         AlertDialog(
@@ -130,115 +233,29 @@ fun BofTotalScreen(
                             .clip(RoundedCornerShape(15.dp))
                             .height(250.dp)
                             .requiredHeight(6000.dp)
-                            .requiredWidth(1000.dp)
+                            .requiredWidth(screenWidthImage)
                     ) {
                         Column(
                             modifier = Modifier
                                 .capturable(captureController)
                                 .fillMaxWidth()
                         ) {
-                            if (totalData.value.isEmpty() || totalData.value[0].total == 0) {
-                                Text(text = "No Data at $selectedDate $selectedTimeStr")
-                            } else {
-                                Text(
-                                    text = "Total Score Ranking",
-                                    fontFamily = sarasaFont,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 24.nsp(),
-                                    color = Color.White,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .background(Color.Black)
-                                        .padding(top = 10.ndp())
-                                )
-                                Text(
-                                    text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
-                                    fontFamily = sarasaFont,
-                                    fontSize = 12.nsp(),
-                                    color = Color.White,
-                                    textAlign = TextAlign.End,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .background(Color.Black)
-                                )
-                                Row(
-                                    modifier = Modifier
-                                        .background(Colors.BG_DARK_GRAY)
-                                        .fillMaxWidth()
-                                ) {
-                                    Text(
-                                        text = "Rank",
-                                        fontFamily = sarasaFont,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 16.nsp(),
-                                        color = Color.White,
-                                        textAlign = TextAlign.End,
-                                        modifier = Modifier
-                                            .padding(end = 4.ndp())
-                                            .width(98.ndp())
-                                    )
-                                    Text(
-                                        text = "",
-                                        modifier = Modifier
-                                            .padding(end = 8.ndp(), top = 2.ndp())
-                                            .width(textWidthImage)
-                                    )
-                                    Text(
-                                        text = "Total",
-                                        fontFamily = sarasaFont,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 16.nsp(),
-                                        color = Color.White,
-                                        modifier = Modifier
-                                            .width(barWidthImage)
-                                    )
-                                    Text(
-                                        text = "Impr",
-                                        fontFamily = sarasaFont,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 16.nsp(),
-                                        color = Color.White,
-                                        textAlign = TextAlign.End,
-                                        modifier = Modifier
-                                            .align(Alignment.CenterVertically)
-                                            .width(36.ndp())
-                                    )
-                                    Text(
-                                        text = "Median",
-                                        fontFamily = sarasaFont,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 16.nsp(),
-                                        color = Color.White,
-                                        textAlign = TextAlign.End,
-                                        modifier = Modifier
-                                            .align(Alignment.CenterVertically)
-                                            .padding(start = 8.ndp())
-                                            .width(70.ndp())
-                                    )
-                                    Text(
-                                        text = "Avg",
-                                        fontFamily = sarasaFont,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 16.nsp(),
-                                        color = Color.White,
-                                        textAlign = TextAlign.End,
-                                        modifier = Modifier
-                                            .align(Alignment.CenterVertically)
-                                            .width(74.ndp())
-                                    )
-                                }
-                            }
-                            if (totalData.value.isNotEmpty()) {
-                                var isCompare: Boolean = if (totalData.value.isNotEmpty()) {
-                                    totalData.value[0].oldTotal != 0
-                                } else {
-                                    false
-                                }
-                                for ((index, entry) in totalData.value.withIndex()) {
-                                    if (entry.index > 150) {
-                                        break
-                                    }
+                            RankColumn(
+                                configuration = configuration,
+                                leftPadding = leftPadding,
+                                rightPadding = rightPadding,
+                                screenWidthDp = screenWidthImage,
+                                isCompare = isCompare,
+                                barWidth = barWidthImage,
+                                textWidth = textWidthImage,
+                                isImage = true,
+                                totalData = totalData,
+                                selectedDate = selectedDate,
+                                selectedTimeStr = selectedTimeStr,
+                            )
+                            if (totalData.isNotEmpty()) {
+                                for ((index, entry) in totalData.withIndex()) {
+                                    if (entry.index > 150) break
                                     BofEntryRowTotal(
                                         entry = entry,
                                         index = index + 1,
@@ -247,7 +264,7 @@ fun BofTotalScreen(
                                         isImage = true,
                                         rowWidth = screenWidthImage,
                                         barWidth = barWidthImage,
-                                        textWidth = textWidthImage
+                                        textWidth = textWidthImage,
                                     )
                                 }
                             }
@@ -289,127 +306,127 @@ fun BofTotalScreen(
             }
         )
     }
+}
 
-    LazyColumn {
-        item {
-            Button(
-                onClick = { showDialog.value = true },
+@Composable
+fun RankColumn(
+    configuration: Configuration,
+    leftPadding: Dp,
+    rightPadding: Dp,
+    screenWidthDp: Dp,
+    isCompare: Boolean,
+    barWidth: Dp,
+    textWidth: Dp,
+    isImage: Boolean = false,
+    totalData: List<BofEntryShow> = emptyList(),
+    selectedDate: LocalDate = LocalDate.now(),
+    selectedTimeStr: String = ""
+) {
+    Column {
+        if (totalData.isEmpty() || totalData[0].total == 0) {
+            Text(text = "No Data at $selectedDate $selectedTimeStr")
+        } else {
+            Text(
+                text = "Total Score Ranking",
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                Text(text = "Show Capture Dialog")
-            }
-        }
-        item {
-            if (totalData.value.isEmpty() || totalData.value[0].total == 0) {
-                Text(text = "No Data at $selectedDate $selectedTimeStr")
-            } else {
-                Text(
-                    text = "Total Score Ranking",
-                    fontFamily = sarasaFont,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.nsp(),
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.Black)
-                        .padding(top = 10.ndp())
-                )
-                Text(
-                    text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
-                    fontFamily = sarasaFont,
-                    fontSize = 12.nsp(),
-                    color = Color.White,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.Black)
-                )
-            }
-        }
-        item {
-            Row(
+                    .background(Color.Black)
+                    .padding(top = 10.ndp())
+            )
+            Text(
+                text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
+                fontFamily = sarasaFont,
+                fontSize = 12.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.End,
                 modifier = Modifier
-                    .background(Colors.BG_DARK_GRAY)
                     .fillMaxWidth()
-            ) {
+                    .background(Color.Black)
+                    .padding(end = if (isLandscape(configuration) && !isImage) rightPadding else 0.dp)
+            )
+        }
+        Row(
+            modifier = Modifier
+                .background(Colors.BG_DARK_GRAY)
+                .fillMaxWidth()
+        ) {
+            if (isLandscape(configuration) && !isImage) {
+                Box(
+                    modifier = Modifier
+                        .width(leftPadding)
+                )
+            }
+            Text(
+                text = "Rank",
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .padding(end = if (screenWidthDp < 800.dp || !isCompare) 22.ndp() else 4.ndp())
+                    .width(if (screenWidthDp < 800.dp || !isCompare) 36.ndp() else 98.ndp())
+            )
+            Text(
+                text = "",
+                modifier = Modifier
+                    .padding(end = 8.ndp(), top = 2.ndp())
+                    .width(textWidth)
+            )
+            Text(
+                text = "Total",
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.nsp(),
+                color = Color.White,
+                modifier = Modifier
+                    .width(barWidth)
+            )
+            if (screenWidthDp > 800.dp) {
                 Text(
-                    text = "Rank",
+                    text = "Impr",
                     fontFamily = sarasaFont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
                     color = Color.White,
                     textAlign = TextAlign.End,
                     modifier = Modifier
-                        .padding(end = if (screenWidthDp < 800.dp || !isCompare) 22.ndp() else 4.ndp())
-                        .width(if (screenWidthDp < 800.dp || !isCompare) 36.ndp() else 98.ndp())
+                        .align(Alignment.CenterVertically)
+                        .width(36.ndp())
                 )
                 Text(
-                    text = "",
-                    modifier = Modifier
-                        .padding(end = 8.ndp(), top = 2.ndp())
-                        .width(textWidth)
-                )
-                Text(
-                    text = "Total",
+                    text = "Median",
                     fontFamily = sarasaFont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
                     color = Color.White,
+                    textAlign = TextAlign.End,
                     modifier = Modifier
-                        .width(barWidth)
+                        .align(Alignment.CenterVertically)
+                        .padding(start = 8.ndp())
+                        .width(70.ndp())
                 )
-                if (screenWidthDp > 800.dp) {
-                    Text(
-                        text = "Impr",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .width(36.ndp())
-                    )
-                    Text(
-                        text = "Median",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 8.ndp())
-                            .width(70.ndp())
-                    )
-                    Text(
-                        text = "Avg",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .width(74.ndp())
-                    )
-                }
+                Text(
+                    text = "Avg",
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.nsp(),
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(74.ndp())
+                )
             }
-        }
-        if (totalData.value.isNotEmpty()) {
-            itemsIndexed(totalData.value) { index, entry ->
-                BofEntryRowTotal(
-                    entry = entry,
-                    index = index + 1,
-                    maxTotal = maxTotal,
-                    isCompare = isCompare,
-                    isImage = false,
-                    rowWidth = screenWidthDp,
-                    barWidth = barWidth,
-                    textWidth = textWidth
+            if (isLandscape(configuration) && !isImage) {
+                Box(
+                    modifier = Modifier
+                        .width(rightPadding)
                 )
             }
         }
@@ -427,6 +444,10 @@ fun BofEntryRowTotal(
     rowWidth: Dp,
     barWidth: Dp,
     textWidth: Dp,
+    configuration: Configuration = LocalConfiguration.current,
+    leftPadding: Dp = 0.dp,
+    rightPadding: Dp = 0.dp,
+    dataSwitch: Boolean = false
 ) {
     val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
 
@@ -446,6 +467,13 @@ fun BofEntryRowTotal(
             .height(36.ndp())
             .background(backgroundColor)
     ) {
+        if (isLandscape(configuration)) {
+            Box(
+                modifier = Modifier
+                    .width(leftPadding)
+                    .height(36.ndp())
+            )
+        }
         if (rowWidth < 800.dp && isCompare) {
             Column {
                 Row(
@@ -464,7 +492,8 @@ fun BofEntryRowTotal(
                         },
                         contentDescription = null,
                         tint = if (entry.rankDiff < 0) Colors.RANKING_RED
-                        else if (entry.rankDiff > 0) Colors.RANKING_GREEN else Colors.RANKING_YELLOW,
+                        else if (entry.rankDiff > 0) Colors.RANKING_GREEN
+                        else Colors.RANKING_YELLOW,
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .padding(end = 2.ndp(), start = 8.ndp())
@@ -476,7 +505,8 @@ fun BofEntryRowTotal(
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.nsp(),
                         color = if (entry.rankDiff < 0) Colors.RANKING_RED
-                        else if (entry.rankDiff > 0) Colors.RANKING_GREEN else Colors.RANKING_YELLOW,
+                        else if (entry.rankDiff > 0) Colors.RANKING_GREEN
+                        else Colors.RANKING_YELLOW,
                         textAlign = TextAlign.Start,
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
@@ -508,7 +538,8 @@ fun BofEntryRowTotal(
                     },
                     contentDescription = null,
                     tint = if (entry.rankDiff < 0) Colors.RANKING_RED
-                    else if (entry.rankDiff > 0) Colors.RANKING_GREEN else Colors.RANKING_YELLOW,
+                    else if (entry.rankDiff > 0) Colors.RANKING_GREEN
+                    else Colors.RANKING_YELLOW,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .width(30.ndp())
@@ -519,7 +550,8 @@ fun BofEntryRowTotal(
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.nsp(),
                     color = if (entry.rankDiff < 0) Colors.RANKING_RED
-                    else if (entry.rankDiff > 0) Colors.RANKING_GREEN else Colors.RANKING_YELLOW,
+                    else if (entry.rankDiff > 0) Colors.RANKING_GREEN
+                    else Colors.RANKING_YELLOW,
                     textAlign = TextAlign.Start,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
@@ -540,86 +572,49 @@ fun BofEntryRowTotal(
             )
         }
         Column {
-            val modText = if (isImage) {
+            /**
+             * Please add (topPadding,height) in the round bracket.
+             */
+            val textMod = @Composable { top: Dp, height: Dp ->
                 Modifier
-                    .padding(end = 8.ndp(), top = 2.ndp())
+                    .padding(end = 8.ndp(), top = top)
                     .width(textWidth)
-            } else {
-                Modifier
-                    .padding(end = 8.ndp(), top = 2.ndp())
-                    .width(textWidth)
-                    .basicMarquee(
-                        spacing = MarqueeSpacing(15.ndp())
+                    .height(height)
+                    .then(
+                        if (!isImage) {
+                            Modifier.basicMarquee(spacing = MarqueeSpacing(15.ndp()))
+                        } else {
+                            Modifier
+                        }
                     )
             }
             Text(
                 text = entry.title,
                 fontSize = 15.nsp(),
+                lineHeight = 16.nsp(),
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.End,
                 color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = modText
-                    .height(18.ndp())
+                modifier = textMod(2.ndp(), 18.ndp())
             )
+
             Text(
                 text = entry.artist,
                 fontSize = 12.nsp(),
+                lineHeight = 13.nsp(),
                 fontFamily = sarasaFont,
                 textAlign = TextAlign.End,
                 color = Colors.TEXT_GRAY,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = modText
-                    .height(16.ndp())
+                modifier = textMod(0.ndp(), 16.ndp())
             )
         }
-        Column {
-            Box(
-                modifier = Modifier
-                    .width(barWidth)
-                    .background(
-                        color = Color.Transparent,
-                    )
-            ) {
-                Box(
-                    Modifier
-                        .padding(top = 2.ndp())
-                        .background(
-                            color = Color.Transparent,
-                        )
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .padding(end = 20.ndp())
-                            .width(newBarWidth)
-                            .height(if (isCompare) 18.ndp() else 34.ndp())
-                            .background(
-                                color = Colors.RANKING_RED,
-                                shape = RoundedCornerShape(
-                                    topEnd = 50.ndp(),
-                                    bottomEnd = 50.ndp()
-                                )
-                            )
-                    )
-                    Text(
-                        text = entry.total.toString(),
-                        color = Color.White,
-                        fontSize = if (isCompare) 14.nsp() else 20.nsp(),
-                        lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        overflow = TextOverflow.Visible,
-                        maxLines = 1,
-                        modifier = Modifier
-                            .padding(end = 24.ndp())
-                            .align(Alignment.CenterEnd)
-                    )
-                }
-            }
-            if (isCompare) {
+        if (rowWidth > 800.dp || !dataSwitch) {
+            Column {
                 Box(
                     modifier = Modifier
                         .width(barWidth)
@@ -629,6 +624,7 @@ fun BofEntryRowTotal(
                 ) {
                     Box(
                         Modifier
+                            .padding(top = 2.ndp())
                             .background(
                                 color = Color.Transparent,
                             )
@@ -636,22 +632,23 @@ fun BofEntryRowTotal(
                         Box(
                             modifier = Modifier
                                 .padding(end = 20.ndp())
-                                .width(oldBarWidth)
-                                .height(14.ndp())
+                                .width(newBarWidth)
+                                .height(if (isCompare) 18.ndp() else 34.ndp())
                                 .background(
-                                    color = Colors.RANKING_BLUE,
+                                    color = Colors.RANKING_RED,
                                     shape = RoundedCornerShape(
-                                        topEnd = 10.ndp(),
-                                        bottomEnd = 10.ndp()
+                                        topEnd = 50.ndp(),
+                                        bottomEnd = 50.ndp()
                                     )
                                 )
                         )
                         Text(
-                            text = entry.oldTotal.toString(),
+                            text = entry.total.toString(),
                             color = Color.White,
-                            fontSize = 12.nsp(),
-                            lineHeight = 14.nsp(),
+                            fontSize = if (isCompare) 14.nsp() else 20.nsp(),
+                            lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
                             fontFamily = sarasaFont,
+                            fontWeight = FontWeight.Bold,
                             overflow = TextOverflow.Visible,
                             maxLines = 1,
                             modifier = Modifier
@@ -660,9 +657,51 @@ fun BofEntryRowTotal(
                         )
                     }
                 }
+                if (isCompare) {
+                    Box(
+                        modifier = Modifier
+                            .width(barWidth)
+                            .background(
+                                color = Color.Transparent,
+                            )
+                    ) {
+                        Box(
+                            Modifier
+                                .background(
+                                    color = Color.Transparent,
+                                )
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .padding(end = 20.ndp())
+                                    .width(oldBarWidth)
+                                    .height(14.ndp())
+                                    .background(
+                                        color = Colors.RANKING_BLUE,
+                                        shape = RoundedCornerShape(
+                                            topEnd = 10.ndp(),
+                                            bottomEnd = 10.ndp()
+                                        )
+                                    )
+                            )
+                            Text(
+                                text = entry.oldTotal.toString(),
+                                color = Color.White,
+                                fontSize = 12.nsp(),
+                                lineHeight = 14.nsp(),
+                                fontFamily = sarasaFont,
+                                overflow = TextOverflow.Visible,
+                                maxLines = 1,
+                                modifier = Modifier
+                                    .padding(end = 24.ndp())
+                                    .align(Alignment.CenterEnd)
+                            )
+                        }
+                    }
+                }
             }
         }
-        if (rowWidth > 800.dp) {
+        if (rowWidth > 800.dp || dataSwitch) {
             Text(
                 text = entry.impr.toString(),
                 fontFamily = sarasaFont,
@@ -702,6 +741,13 @@ fun BofEntryRowTotal(
                     .width(74.ndp())
                     .background(calculateColor(entry.avg))
                     .padding(end = 4.ndp())
+            )
+        }
+        if (isLandscape(configuration)) {
+            Box(
+                modifier = Modifier
+                    .width(rightPadding)
+                    .height(36.ndp())
             )
         }
     }

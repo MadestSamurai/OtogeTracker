@@ -2,6 +2,8 @@ package com.madsam.otora.ui.bof
 
 import android.content.Context
 import android.util.Log
+import android.view.View
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.madsam.otora.model.bof.ui.BofEntryShow
@@ -9,6 +11,8 @@ import com.madsam.otora.model.bof.ui.BofTeamShow
 import com.madsam.otora.model.bof.ui.Rankable
 import com.madsam.otora.service.BofDataRequestService
 import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.utils.ScreenUtil.getSafeInsetLeftDp
+import com.madsam.otora.utils.ScreenUtil.getSafeInsetRightDp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import java.time.LocalDate
@@ -41,6 +45,14 @@ class BofViewModel(
     var selectedDate = MutableStateFlow(LocalDate.now())
     var selectedTime = MutableStateFlow("-1")
     var selectedTimeStr = MutableStateFlow("")
+
+    val leftPadding = MutableStateFlow(0.dp)
+    val rightPadding = MutableStateFlow(0.dp)
+
+    fun updatePadding(view: View) {
+        leftPadding.update { getSafeInsetLeftDp(view) }
+        rightPadding.update { getSafeInsetRightDp(view) }
+    }
 
     fun generateSelectedTimeStr() {
         selectedTimeStr.update {

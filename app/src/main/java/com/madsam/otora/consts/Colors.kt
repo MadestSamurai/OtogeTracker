@@ -11,6 +11,9 @@ import androidx.compose.ui.graphics.Color
  * 描述: 颜色常量类
  */
 object Colors {
+    val Purple200 = Color(0xFFBB86FC)
+    val Purple500 = Color(0xFF6200EE)
+    val Purple700 = Color(0xFF3700B3)
     val TEXT_WHITE: Color = Color(0xFFE0E0E0)
     val BG_HALF_TRANS_BLACK: Color = Color(0xAA000000)
     val DARK_RED_DEEP: Color = Color(0xFF2B0F0F)
