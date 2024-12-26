@@ -11,6 +11,9 @@ import com.madsam.otora.model.chuni.net.ChuniFullScore
 import com.madsam.otora.model.chuni.net.ChuniGenre
 import com.madsam.otora.model.chuni.net.ChuniPenguin
 import com.madsam.otora.model.chuni.net.ChuniScore
+import com.madsam.otora.model.chuni.web.lxns.ChuniAliases
+import com.madsam.otora.model.chuni.web.lxns.LxnsDatas
+import com.madsam.otora.model.chuni.web.zetaraku.ZetarakuDatas
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.JsonUtil
 import com.madsam.otora.utils.SafeSoupUtil.safeFirst
@@ -51,6 +54,7 @@ class ChuniDataRequestService(private val context: Context) {
         const val TAG = "ChuniDataRequestService"
         const val URL = "https://chunithm.wahlap.com/mobile/"
     }
+
     private val serviceScope = CoroutineScope(Dispatchers.IO)
     private val mutex = Mutex()
     private val userAgent = ShareUtil.getString("chuniUserAgent", context) ?: ""
@@ -99,15 +103,17 @@ class ChuniDataRequestService(private val context: Context) {
             updateCookie(response)
             // Parse the player data
             val chuniCard = ChuniCard()
-            chuniCard.charaInfo = doc.getElementsByClass("player_chara_info").select("img").safeFirstAttr("src")
+            chuniCard.charaInfo =
+                doc.getElementsByClass("player_chara_info").select("img").safeFirstAttr("src")
             chuniCard.charaBase = doc.getElementsByClass("player_chara_info").safeFirstAttr("style")
                 .split("/").last()
                 .split(".").first()
                 .split("_").last()
-            chuniCard.honorBase = doc.getElementsByClass("player_honor_short").safeFirstAttr("style")
-                .split("/").last()
-                .split(".").first()
-                .split("_").last()
+            chuniCard.honorBase =
+                doc.getElementsByClass("player_honor_short").safeFirstAttr("style")
+                    .split("/").last()
+                    .split(".").first()
+                    .split("_").last()
             chuniCard.honorText = doc.getElementsByClass("player_honor_text").safeFirstText()
             chuniCard.reborn = doc.getElementsByClass("player_reborn").safeFirstText()
                 .toIntOrNull() ?: 0
@@ -115,11 +121,12 @@ class ChuniDataRequestService(private val context: Context) {
                 .toIntOrNull() ?: 0
             chuniCard.nameIn = doc.getElementsByClass("player_name_in").safeFirstText()
             val playerClassEmblemBaseBlock = doc.getElementsByClass("player_classemblem_base")
-            chuniCard.classEmblemBase = playerClassEmblemBaseBlock.select("img").safeFirstAttr("src")
-                .split("/").last()
-                .split(".").first()
-                .split("_").last()
-                .toIntOrNull() ?: 0
+            chuniCard.classEmblemBase =
+                playerClassEmblemBaseBlock.select("img").safeFirstAttr("src")
+                    .split("/").last()
+                    .split(".").first()
+                    .split("_").last()
+                    .toIntOrNull() ?: 0
             val playerClassEmblemTopBlock = doc.getElementsByClass("player_classemblem_top")
             chuniCard.classEmblemTop = playerClassEmblemTopBlock.select("img").safeFirstAttr("src")
                 .split("/").last()
@@ -157,18 +164,30 @@ class ChuniDataRequestService(private val context: Context) {
             }
             // Parse the penguin data
             val chuniPenguin = ChuniPenguin()
-            chuniPenguin.back = doc.getElementsByClass("avatar_back").select("img").safeFirstAttr("src")
-            chuniPenguin.skinfootR = doc.getElementsByClass("avatar_skinfoot_r").select("img").safeFirstAttr("src")
-            chuniPenguin.skinfootL = doc.getElementsByClass("avatar_skinfoot_l").select("img").safeFirstAttr("src")
-            chuniPenguin.skin = doc.getElementsByClass("avatar_skin").select("img").safeFirstAttr("src")
-            chuniPenguin.wear = doc.getElementsByClass("avatar_wear").select("img").safeFirstAttr("src")
-            chuniPenguin.face = doc.getElementsByClass("avatar_face").select("img").safeFirstAttr("src")
-            chuniPenguin.faceCover = doc.getElementsByClass("avatar_face_cover").select("img").safeFirstAttr("src")
-            chuniPenguin.head = doc.getElementsByClass("avatar_head").select("img").safeFirstAttr("src")
-            chuniPenguin.handR = doc.getElementsByClass("avatar_hand_r").select("img").safeFirstAttr("src")
-            chuniPenguin.handL = doc.getElementsByClass("avatar_hand_l").select("img").safeFirstAttr("src")
-            chuniPenguin.itemR = doc.getElementsByClass("avatar_item_r").select("img").safeFirstAttr("src")
-            chuniPenguin.itemL = doc.getElementsByClass("avatar_item_l").select("img").safeFirstAttr("src")
+            chuniPenguin.back =
+                doc.getElementsByClass("avatar_back").select("img").safeFirstAttr("src")
+            chuniPenguin.skinfootR =
+                doc.getElementsByClass("avatar_skinfoot_r").select("img").safeFirstAttr("src")
+            chuniPenguin.skinfootL =
+                doc.getElementsByClass("avatar_skinfoot_l").select("img").safeFirstAttr("src")
+            chuniPenguin.skin =
+                doc.getElementsByClass("avatar_skin").select("img").safeFirstAttr("src")
+            chuniPenguin.wear =
+                doc.getElementsByClass("avatar_wear").select("img").safeFirstAttr("src")
+            chuniPenguin.face =
+                doc.getElementsByClass("avatar_face").select("img").safeFirstAttr("src")
+            chuniPenguin.faceCover =
+                doc.getElementsByClass("avatar_face_cover").select("img").safeFirstAttr("src")
+            chuniPenguin.head =
+                doc.getElementsByClass("avatar_head").select("img").safeFirstAttr("src")
+            chuniPenguin.handR =
+                doc.getElementsByClass("avatar_hand_r").select("img").safeFirstAttr("src")
+            chuniPenguin.handL =
+                doc.getElementsByClass("avatar_hand_l").select("img").safeFirstAttr("src")
+            chuniPenguin.itemR =
+                doc.getElementsByClass("avatar_item_r").select("img").safeFirstAttr("src")
+            chuniPenguin.itemL =
+                doc.getElementsByClass("avatar_item_l").select("img").safeFirstAttr("src")
             val jsonAdapterPenguin = moshi.adapter(ChuniPenguin::class.java)
             val jsonPenguin = jsonAdapterPenguin.toJson(chuniPenguin)
             JsonUtil.saveJsonToFile(context, "chuniPenguin.json", jsonPenguin)
@@ -177,8 +196,10 @@ class ChuniDataRequestService(private val context: Context) {
             chuniDataExtend.friendCode = doc.getElementsByClass("user_data_friend_code").safeFirst()
                 .getElementsByAttributeValue("style", "display:none;").text()
             chuniDataExtend.point = doc.getElementsByClass("user_data_point").safeFirstText()
-            chuniDataExtend.totalPoint = doc.getElementsByClass("user_data_total_point").safeFirstText()
-            chuniDataExtend.playCount = doc.getElementsByClass("user_data_play_count").safeFirstText()
+            chuniDataExtend.totalPoint =
+                doc.getElementsByClass("user_data_total_point").safeFirstText()
+            chuniDataExtend.playCount =
+                doc.getElementsByClass("user_data_play_count").safeFirstText()
             val jsonAdapterExtend = moshi.adapter(ChuniDataExtend::class.java)
             val jsonExtend = jsonAdapterExtend.toJson(chuniDataExtend)
             JsonUtil.saveJsonToFile(context, "chuniDataExtend.json", jsonExtend)
@@ -189,7 +210,8 @@ class ChuniDataRequestService(private val context: Context) {
 
     private fun requestRatingDetailBest() {
         try {
-            val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/home/playerData/ratingDetailBest"))
+            val connect =
+                Jsoup.connect(CommonUtils.encodeURL("$URL/home/playerData/ratingDetailBest"))
             val header = connect.header("User-Agent", userAgent)
             header.cookie("_t", cookie.token)
             header.cookie("expires", cookie.expires)
@@ -202,7 +224,7 @@ class ChuniDataRequestService(private val context: Context) {
             val doc = response.parse()
             updateCookie(response)
             // Parse the rating detail best
-            val chuniRatingBest  = mutableListOf<ChuniScore>()
+            val chuniRatingBest = mutableListOf<ChuniScore>()
             val ratingDetailBest = doc.getElementsByTag("form")
             for (rating in ratingDetailBest) {
                 val title = rating.getElementsByClass("music_title").text()
@@ -220,9 +242,11 @@ class ChuniDataRequestService(private val context: Context) {
             Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailBest: ${e.message}")
         }
     }
+
     private fun requestRatingDetailRecent() {
         try {
-            val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/home/playerData/ratingDetailRecent"))
+            val connect =
+                Jsoup.connect(CommonUtils.encodeURL("$URL/home/playerData/ratingDetailRecent"))
             val header = connect.header("User-Agent", userAgent)
             header.cookie("_t", cookie.token)
             header.cookie("expires", cookie.expires)
@@ -235,7 +259,7 @@ class ChuniDataRequestService(private val context: Context) {
             val doc = response.parse()
             updateCookie(response)
             // Parse the rating detail recent
-            val chuniRatingRecent  = mutableListOf<ChuniScore>()
+            val chuniRatingRecent = mutableListOf<ChuniScore>()
             val ratingDetailRecent = doc.getElementsByTag("form")
             for (rating in ratingDetailRecent) {
                 val title = rating.getElementsByClass("music_title").text()
@@ -253,9 +277,11 @@ class ChuniDataRequestService(private val context: Context) {
             Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailRecent: ${e.message}")
         }
     }
+
     private fun requestRatingDetailNext() {
         try {
-            val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/home/playerData/ratingDetailNext"))
+            val connect =
+                Jsoup.connect(CommonUtils.encodeURL("$URL/home/playerData/ratingDetailNext"))
             val header = connect.header("User-Agent", userAgent)
             header.cookie("_t", cookie.token)
             header.cookie("expires", cookie.expires)
@@ -268,7 +294,7 @@ class ChuniDataRequestService(private val context: Context) {
             val doc = response.parse()
             updateCookie(response)
             // Parse the rating detail next
-            val chuniRatingNext  = mutableListOf<ChuniScore>()
+            val chuniRatingNext = mutableListOf<ChuniScore>()
             val ratingDetailNext = doc.getElementsByTag("form")
             for (rating in ratingDetailNext) {
                 val title = rating.getElementsByClass("music_title").text()
@@ -286,6 +312,7 @@ class ChuniDataRequestService(private val context: Context) {
             Log.e(TAG, "IOException occurred in ChuniData-requestRatingDetailNext: ${e.message}")
         }
     }
+
     private fun requestMapRecord() {
         try {
             val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/record"))
@@ -306,6 +333,7 @@ class ChuniDataRequestService(private val context: Context) {
             Log.e(TAG, "IOException occurred in ChuniData-requestMapRecord: ${e.message}")
         }
     }
+
     private fun requestPlayLog() {
         try {
             val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/record/playlog"))
@@ -345,23 +373,26 @@ class ChuniDataRequestService(private val context: Context) {
                     .split("/").last()
                     .split(".").first()
                     .split("_").last()
-                val jacket = log.getElementsByClass("play_jacket_img").select("img").attr("data-original")
+                val jacket =
+                    log.getElementsByClass("play_jacket_img").select("img").attr("data-original")
                 val date = log.getElementsByClass("play_datalist_date").text()
                 val trackNumber = log.getElementsByClass("play_track_text").text().split(" ").last()
-                chuniPlayLog.add(ChuniFullScore(
-                    title = title,
-                    diff = level,
-                    score = score,
-                    isClear = isClear,
-                    isFullCombo = isFullCombo,
-                    isAllJustice = isAllJustice,
-                    isAJC = isAJC,
-                    isFullChain = isFullChain,
-                    rank = rank,
-                    jacket = jacket,
-                    date = date,
-                    trackNumber = trackNumber
-                ))
+                chuniPlayLog.add(
+                    ChuniFullScore(
+                        title = title,
+                        diff = level,
+                        score = score,
+                        isClear = isClear,
+                        isFullCombo = isFullCombo,
+                        isAllJustice = isAllJustice,
+                        isAJC = isAJC,
+                        isFullChain = isFullChain,
+                        rank = rank,
+                        jacket = jacket,
+                        date = date,
+                        trackNumber = trackNumber
+                    )
+                )
             }
             val jsonAdapter = moshi.adapter(List::class.java)
             val json = jsonAdapter.toJson(chuniPlayLog)
@@ -370,11 +401,13 @@ class ChuniDataRequestService(private val context: Context) {
             Log.e(TAG, "IOException occurred in ChuniData-requestPlayLog: ${e.message}")
         }
     }
+
     private fun requestPlayRecord() {
         val diffArray = arrayOf("basic", "advanced", "expert", "master", "ultima")
         for (diff in diffArray) {
             try {
-                val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/record/musicGenre/send$diff"))
+                val connect =
+                    Jsoup.connect(CommonUtils.encodeURL("$URL/record/musicGenre/send$diff"))
                 val header = connect.header("User-Agent", userAgent)
                 header.cookie("_t", cookie.token)
                 header.cookie("expires", cookie.expires)
@@ -403,7 +436,8 @@ class ChuniDataRequestService(private val context: Context) {
                         val genreId = score.select("input[name=genre]").attr("value")
                         val token = score.select("input[name=token]").attr("value")
 
-                        val marks = score.getElementsByClass("play_musicdata_icon clearfix").select("img")
+                        val marks =
+                            score.getElementsByClass("play_musicdata_icon clearfix").select("img")
                         val clearMarks = marks.joinToString("") {
                             it.attr("src")
                                 .split("_").last()
@@ -418,32 +452,39 @@ class ChuniDataRequestService(private val context: Context) {
                             .split("/").last()
                             .split(".").first()
                             .split("_").last()
-                        chuniScore.add(ChuniFullScore(
-                            id = id,
-                            title = title,
-                            diff = level,
-                            score = highScore,
-                            genre = genreId,
-                            token = token,
-                            isClear = isClear,
-                            isFullCombo = isFullCombo,
-                            isAllJustice = isAllJustice,
-                            isAJC = isAJC,
-                            isFullChain = isFullChain,
-                            isFullChain2 = isFullChain2,
-                            rank = rank,
-                        ))
+                        chuniScore.add(
+                            ChuniFullScore(
+                                id = id,
+                                title = title,
+                                diff = level,
+                                score = highScore,
+                                genre = genreId,
+                                token = token,
+                                isClear = isClear,
+                                isFullCombo = isFullCombo,
+                                isAllJustice = isAllJustice,
+                                isAJC = isAJC,
+                                isFullChain = isFullChain,
+                                isFullChain2 = isFullChain2,
+                                rank = rank,
+                            )
+                        )
                     }
                     chuniGenre.add(ChuniGenre(genreName, chuniScore))
                 }
                 val jsonAdapter = moshi.adapter(List::class.java)
                 val json = jsonAdapter.toJson(chuniGenre)
-                JsonUtil.saveJsonToFile(context, "chuniPlayRecord${diff[0].uppercaseChar()}${diff.substring(1)}.json", json)
+                JsonUtil.saveJsonToFile(
+                    context,
+                    "chuniPlayRecord${diff[0].uppercaseChar()}${diff.substring(1)}.json",
+                    json
+                )
             } catch (e: IOException) {
                 Log.e(TAG, "IOException occurred in OsuMedalsThread: ${e.message}")
             }
         }
     }
+
     private fun requestCollection() {
         try {
             val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/collection"))
@@ -463,6 +504,7 @@ class ChuniDataRequestService(private val context: Context) {
             Log.e(TAG, "IOException occurred in OsuMedalsThread: ${e.message}")
         }
     }
+
     private fun requestFriend() {
         try {
             val connect = Jsoup.connect(CommonUtils.encodeURL("$URL/friend"))
@@ -504,77 +546,223 @@ class ChuniDataRequestService(private val context: Context) {
     }
 
     private suspend fun requestSongsDatas() {
-        val retrofit = Retrofit.Builder()
+        val retrofitZ = Retrofit.Builder()
             .baseUrl("https://dp4p6x0xfi5o9.cloudfront.net")
             .addConverterFactory(MoshiConverterFactory.create(moshi)) // Moshi
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create()) // RxJava
             .build()
-        val api = retrofit.create(Api::class.java)
-        val realm = Realm.open(realmConfig)
-
+        val apiZ = retrofitZ.create(Api::class.java)
+        var chuniZetarakuDatas = ZetarakuDatas()
         try {
-            val chuniSongsCall = api.getChunithmSongsData()
+            val chuniSongsCall = apiZ.getChunithmSongsZetaraku()
             val response = chuniSongsCall.execute()
             if (!response.isSuccessful) {
                 Log.e(TAG, "Failed to get the songs data")
-                realm.close()
                 return
             }
-
             val chuniDatas = response.body()
             if (chuniDatas == null) {
                 Log.e(TAG, "Failed to get the songs data")
-                realm.close()
                 return
             }
-
-            val chuniSongs = chuniDatas.songs
-            realm.write {
-                for (song in chuniSongs) {
-                    val chuniSongEntity = ChuniSongsEntity().apply {
-                        id = song.songId
-                        category = song.category
-                        title = song.title
-                        artist = song.artist
-                        bpm = song.bpm
-                        imageName = song.imageName
-                        version = song.version
-                        releaseDate = song.releaseDate
-                        isNew = song.isNew
-                        isLocked = song.isLocked
-                        comment = song.comment
-                    }
-                    this.copyToRealm(chuniSongEntity, UpdatePolicy.ALL)
-
-                    for (sheet in song.sheets) {
-                        val chuniSheetEntity = ChuniSheetsEntity().apply {
-                            id = "${song.songId}_${sheet.difficulty}"
-                            type = sheet.type
-                            difficulty = sheet.difficulty
-                            level = sheet.level
-                            levelValue = sheet.levelValue
-                            internalLevel = sheet.internalLevel
-                            internalLevelValue = sheet.internalLevelValue
-                            noteDesigner = sheet.noteDesigner
-                            tap = sheet.noteCounts.tap
-                            hold = sheet.noteCounts.hold
-                            slide = sheet.noteCounts.slide
-                            air = sheet.noteCounts.air
-                            flick = sheet.noteCounts.flick
-                            total = sheet.noteCounts.total
-                            jp = sheet.regions.jp
-                            intl = sheet.regions.intl
-                            isSpecial = sheet.isSpecial
-                        }
-                        this.copyToRealm(chuniSheetEntity, UpdatePolicy.ALL)
-                    }
-                }
-            }
+            chuniZetarakuDatas = chuniDatas
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in ChuniData-requestSongsDatas: ${e.message}")
-        } finally {
-            realm.close()
         }
+        if (chuniZetarakuDatas.songs.isEmpty()) {
+            Log.e(TAG, "No songs data found in Zetaraku")
+        }
+
+        val retrofitL = Retrofit.Builder()
+            .baseUrl("https://maimai.lxns.net/api/v0/")
+            .addConverterFactory(MoshiConverterFactory.create(moshi)) // Moshi
+            .addCallAdapterFactory(RxJava3CallAdapterFactory.create()) // RxJava
+            .build()
+        val apiL = retrofitL.create(Api::class.java)
+        var chuniLxnsDatas = LxnsDatas()
+        var chuniAliases = ChuniAliases()
+        try {
+            val chuniSongsCall = apiL.getChunithmSongsLxns()
+            val chuniAliasCall = apiL.getChunithmAliasList()
+            val responseSongs = chuniSongsCall.execute()
+            val responseAlias = chuniAliasCall.execute()
+            if (!responseSongs.isSuccessful || !responseAlias.isSuccessful) {
+                Log.e(TAG, "Failed to get the songs data, ${responseSongs.code()}, ${responseAlias.code()}")
+                return
+            }
+            val chuniDatas = responseSongs.body()
+            val chuniAliasDatas = responseAlias.body()
+            if (chuniDatas == null || chuniAliasDatas == null) {
+                Log.e(TAG, "Failed to get the songs data, data is null")
+                return
+            }
+            chuniLxnsDatas = chuniDatas
+            chuniAliases = chuniAliasDatas
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in ChuniData-requestSongsDatas: ${e.message}")
+        }
+
+        if (chuniLxnsDatas.songs.isEmpty() || chuniAliases.aliases.isEmpty()) {
+            Log.e(TAG, "No alias data found in Lxns")
+        }
+        if (chuniZetarakuDatas.songs.isEmpty() && chuniLxnsDatas.songs.isEmpty() || chuniAliases.aliases.isEmpty()) {
+            Log.e(TAG, "No songs data found in both Zetaraku and Lxns, check the api")
+            return
+        }
+
+        val chuniSongsLMapI = mutableMapOf<Int, LxnsDatas.ChuniSong>()
+        for (song in chuniLxnsDatas.songs) {
+            val chuniSong = LxnsDatas.ChuniSong().apply {
+                id = song.id
+                genre = song.genre
+                title = song.title
+                artist = song.artist
+                bpm = song.bpm
+                map = song.map
+                version = song.version
+                difficulties = song.difficulties
+            }
+            chuniSongsLMapI[song.id] = chuniSong
+        }
+        val chuniAliasMapI = mutableMapOf<Int, ChuniAliases.ChuniAlias>()
+        for (alias in chuniAliases.aliases) {
+            val chuniAliasData = ChuniAliases.ChuniAlias().apply {
+                id = alias.id
+                aliases = alias.aliases
+            }
+            chuniAliasMapI[alias.id] = chuniAliasData
+        }
+        for (song in chuniLxnsDatas.songs) {
+            val chuniSong = chuniSongsLMapI[song.id]
+            val chuniAliasData = chuniAliasMapI[song.id]
+            if (chuniSong != null && chuniAliasData != null) {
+                chuniSong.aliases = chuniAliasData.aliases.joinToString(",")
+            }
+            song.aliases = chuniSong?.aliases ?: ""
+        }
+
+        val chuniSongsZMap = mutableMapOf<String, ZetarakuDatas.ChuniSong>()
+        for (song in chuniZetarakuDatas.songs) {
+            val chuniSong = ZetarakuDatas.ChuniSong().apply {
+                songId = song.songId
+                category = song.category
+                title = song.title
+                artist = song.artist
+                bpm = song.bpm
+                imageName = song.imageName
+                version = song.version
+                releaseDate = song.releaseDate
+                isNew = song.isNew
+                isLocked = song.isLocked
+                comment = song.comment
+                sheets = song.sheets
+            }
+            chuniSongsZMap[song.songId] = chuniSong
+        }
+        val chuniSongsLMapT = mutableMapOf<String, LxnsDatas.ChuniSong>()
+        for (song in chuniLxnsDatas.songs) {
+            if (song.difficulties.size == 1) {
+                song.title = "(WE) ${song.title}"
+            }
+            val chuniSong = LxnsDatas.ChuniSong().apply {
+                id = song.id
+                genre = song.genre
+                title = song.title
+                artist = song.artist
+                bpm = song.bpm
+                map = song.map
+                version = song.version
+                difficulties = song.difficulties
+                aliases = song.aliases
+            }
+            chuniSongsLMapT[song.title] = chuniSong
+        }
+        val realm = Realm.open(realmConfig)
+        realm.write {
+            for (song in chuniZetarakuDatas.songs) {
+                val chuniSongZ = chuniSongsZMap[song.songId]
+                val chuniSongL = chuniSongsLMapT[song.songId]
+                if (chuniSongZ == null) {
+                    Log.e(TAG, "Failed to get the song data from Zetaraku")
+                    continue
+                }
+                val chuniSongData = ChuniSongsEntity().apply {
+                    id = chuniSongZ.songId
+                    genre = chuniSongZ.category
+                    this.title = chuniSongZ.title
+                    artist = chuniSongZ.artist
+                    bpm = chuniSongZ.bpm
+                    imageName = chuniSongZ.imageName
+                    version = chuniSongZ.version
+                    releaseDate = chuniSongZ.releaseDate
+                    isNew = chuniSongZ.isNew
+                    isLocked = chuniSongZ.isLocked
+                    comment = chuniSongZ.comment
+                    cnId = if (chuniSongL == null) -1 else chuniSongL.id
+                    map = if (chuniSongL == null) "-" else chuniSongL.map
+                    aliases = if (chuniSongL == null) "" else chuniSongL.aliases
+                }
+                this.copyToRealm(chuniSongData, UpdatePolicy.ALL)
+
+                for (sheet in chuniSongZ.sheets) {
+                    val chuniSheetL = if (chuniSongL == null) {
+                        null
+                    } else {
+                        var chuniSheet = LxnsDatas.ChuniSong.Difficulty()
+                        try {
+                            chuniSheet = chuniSongL.difficulties[
+                                when (sheet.difficulty) {
+                                    "basic" -> 0
+                                    "advanced" -> 1
+                                    "expert" -> 2
+                                    "master" -> 3
+                                    "ultima" -> 4
+                                    "we" -> 0
+                                    else -> 0
+                                }
+                            ]
+                        } catch (e: IndexOutOfBoundsException) {
+                            if (sheet.difficulty == "ultima") {
+                                Log.i(TAG, "No Ultima data found of ${chuniSongL.title}")
+                            } else {
+                                Log.e(TAG, "Failed to get the sheet data from Lxns of ${chuniSongL.title}")
+                                throw e
+                            }
+                        }
+                        chuniSheet
+                    }
+                    val chuniSheetData = ChuniSheetsEntity().apply {
+                        id = "${chuniSongZ.songId}_${sheet.difficulty}"
+                        type = sheet.type
+                        difficulty = sheet.difficulty
+                        levelJp = sheet.level
+                        levelValueJp = sheet.levelValue
+                        internalLevelJp = sheet.internalLevel
+                        internalLevelValueJp = sheet.internalLevelValue
+                        levelCn = if (chuniSheetL == null) "" else chuniSheetL.level
+                        levelValueCn = if (chuniSheetL == null) 0.0 else chuniSheetL.levelValue
+                        noteDesigner =
+                            if (chuniSheetL == null) sheet.noteDesigner else chuniSheetL.noteDesigner
+                        tap = sheet.noteCounts.tap
+                        hold = sheet.noteCounts.hold
+                        slide = sheet.noteCounts.slide
+                        air = sheet.noteCounts.air
+                        flick = sheet.noteCounts.flick
+                        total = sheet.noteCounts.total
+                        jp = sheet.regions.jp
+                        intl = sheet.regions.intl
+                        cn = chuniSheetL != null
+                        isSpecial = sheet.isSpecial
+                        version = if (chuniSheetL == null) -1 else chuniSheetL.version
+                        originId = if (chuniSheetL == null) -1 else chuniSheetL.originId
+                        kanji = if (chuniSheetL == null) "-" else chuniSheetL.kanji
+                        star = if (chuniSheetL == null) 0 else chuniSheetL.star
+                    }
+                    this.copyToRealm(chuniSheetData, UpdatePolicy.ALL)
+                }
+            }
+        }
+        realm.close()
     }
 
     private fun updateCookie(response: Connection.Response) {
@@ -590,16 +778,16 @@ class ChuniDataRequestService(private val context: Context) {
     }
 
     fun getUserData() {
-        serviceScope.launch { mutex.withLock { requestPlayerData() }}
-        serviceScope.launch { mutex.withLock { requestRatingDetailBest() }}
-        serviceScope.launch { mutex.withLock { requestRatingDetailRecent() }}
-        serviceScope.launch { mutex.withLock { requestRatingDetailNext() }}
-        serviceScope.launch { mutex.withLock { requestMapRecord() }}
-        serviceScope.launch { mutex.withLock { requestPlayLog() }}
-        serviceScope.launch { mutex.withLock { requestPlayRecord() }}
-        serviceScope.launch { mutex.withLock { requestCollection() }}
-        serviceScope.launch { mutex.withLock { requestFriend() }}
-        serviceScope.launch { mutex.withLock { requestLoginBonus() }}
+        serviceScope.launch { mutex.withLock { requestPlayerData() } }
+        serviceScope.launch { mutex.withLock { requestRatingDetailBest() } }
+        serviceScope.launch { mutex.withLock { requestRatingDetailRecent() } }
+        serviceScope.launch { mutex.withLock { requestRatingDetailNext() } }
+        serviceScope.launch { mutex.withLock { requestMapRecord() } }
+        serviceScope.launch { mutex.withLock { requestPlayLog() } }
+        serviceScope.launch { mutex.withLock { requestPlayRecord() } }
+        serviceScope.launch { mutex.withLock { requestCollection() } }
+        serviceScope.launch { mutex.withLock { requestFriend() } }
+        serviceScope.launch { mutex.withLock { requestLoginBonus() } }
         // Save the cookies
         ShareUtil.putString("chuniToken", cookie.token, context)
         ShareUtil.putString("chuniExpires", cookie.expires, context)
@@ -607,7 +795,7 @@ class ChuniDataRequestService(private val context: Context) {
     }
 
     fun getChuniSongsData() {
-        serviceScope.launch { mutex.withLock { requestSongsDatas() }}
+        serviceScope.launch { mutex.withLock { requestSongsDatas() } }
     }
 
     // Get songs data from the database
@@ -622,7 +810,7 @@ class ChuniDataRequestService(private val context: Context) {
                 ).find().first()
                 val songData = ChuniSongsEntity().apply {
                     id = song.id
-                    category = song.category
+                    genre = song.genre
                     this.title = song.title
                     artist = song.artist
                     bpm = song.bpm
@@ -657,10 +845,12 @@ class ChuniDataRequestService(private val context: Context) {
                     id = sheet.id
                     type = sheet.type
                     difficulty = sheet.difficulty
-                    level = sheet.level
-                    levelValue = sheet.levelValue
-                    internalLevel = sheet.internalLevel
-                    internalLevelValue = sheet.internalLevelValue
+                    levelJp = sheet.levelJp
+                    levelValueJp = sheet.levelValueJp
+                    internalLevelJp = sheet.internalLevelJp
+                    internalLevelValueJp = sheet.internalLevelValueJp
+                    levelCn = sheet.levelCn
+                    levelValueCn = sheet.levelValueCn
                     noteDesigner = sheet.noteDesigner
                     tap = sheet.tap
                     hold = sheet.hold

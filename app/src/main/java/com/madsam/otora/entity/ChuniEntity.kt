@@ -14,7 +14,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 class ChuniSongsEntity : RealmObject {
     @PrimaryKey
     var id: String = ""
-    var category: String = ""
+    var genre: String = ""
     var title: String = ""
     var artist: String = ""
     var bpm: Double = 0.0
@@ -24,6 +24,9 @@ class ChuniSongsEntity : RealmObject {
     var isNew: Boolean = false
     var isLocked: Boolean = false
     var comment: String = ""
+    var cnId: Int = 0
+    var map: String = ""
+    var aliases: String = ""
 }
 
 class ChuniSheetsEntity : RealmObject {
@@ -31,10 +34,12 @@ class ChuniSheetsEntity : RealmObject {
     var id: String = ""
     var type: String = ""
     var difficulty: String = ""
-    var level: String = ""
-    var levelValue: Double = 0.0
-    var internalLevel: String = ""
-    var internalLevelValue: Double = 0.0
+    var levelJp: String = ""
+    var levelValueJp: Double = 0.0
+    var internalLevelJp: String = ""
+    var internalLevelValueJp: Double = 0.0
+    var levelCn: String = ""
+    var levelValueCn: Double = 0.0
     var noteDesigner: String = ""
     var tap: Int = 0
     var hold: Int = 0
@@ -44,5 +49,10 @@ class ChuniSheetsEntity : RealmObject {
     var total: Int = 0
     var jp: Boolean = false
     var intl: Boolean = false
+    var cn: Boolean = false
     var isSpecial: Boolean = false
+    var version: Int = 0
+    var originId: Int = 0
+    var kanji: String = ""
+    var star: Int = 0
 }

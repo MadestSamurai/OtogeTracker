@@ -2,7 +2,9 @@ package com.madsam.otora.web
 
 import com.madsam.otora.model.bof.web.BofEntry
 import com.madsam.otora.model.bof.web.BofTeam
-import com.madsam.otora.model.chuni.web.ChuniDatas
+import com.madsam.otora.model.chuni.web.lxns.ChuniAliases
+import com.madsam.otora.model.chuni.web.lxns.LxnsDatas
+import com.madsam.otora.model.chuni.web.zetaraku.ZetarakuDatas
 import com.madsam.otora.model.web.OsuCardList
 import com.madsam.otora.model.web.OsuHistorical
 import com.madsam.otora.model.web.OsuRecentActivity
@@ -76,5 +78,11 @@ interface Api {
 
     // Chunithm API
     @GET("chunithm/data.json")
-    fun getChunithmSongsData(): Call<ChuniDatas>
+    fun getChunithmSongsZetaraku(): Call<ZetarakuDatas>
+
+    @GET("chunithm/song/list")
+    fun getChunithmSongsLxns(): Call<LxnsDatas>
+
+    @GET("chunithm/alias/list")
+    fun getChunithmAliasList(): Call<ChuniAliases>
 }
