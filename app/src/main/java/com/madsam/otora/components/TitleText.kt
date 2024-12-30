@@ -12,7 +12,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.DARK_RED_DEEPER
 
 /**
  * 项目名: OtogeTracker
@@ -38,7 +38,7 @@ fun TitleText(
             bottomStart = 6.dp,
             bottomEnd = 6.dp
         ),
-        color = Colors.DARK_RED_DEEPER,
+        color = DARK_RED_DEEPER,
         modifier = modifier
     ) {
         Column {
@@ -75,7 +75,7 @@ fun TitleText(
             bottomStart = 6.dp,
             bottomEnd = 6.dp
         ),
-        color = Colors.DARK_RED_DEEPER,
+        color = DARK_RED_DEEPER,
         modifier = modifier
     ) {
         Column {

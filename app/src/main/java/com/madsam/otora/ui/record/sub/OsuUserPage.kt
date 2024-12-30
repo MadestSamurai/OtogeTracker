@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.BRIGHT_RED
 import com.madsam.otora.ui.record.osu.BadgeList
 import com.madsam.otora.ui.record.osu.Card
 import com.madsam.otora.ui.record.osu.Level
@@ -49,7 +49,7 @@ fun OsuUserPage() {
 
     Column(
         modifier = Modifier
-            .background(color = Colors.BRIGHT_RED)
+            .background(color = BRIGHT_RED)
             .verticalScroll(scrollState)
     ) {
         TextField(

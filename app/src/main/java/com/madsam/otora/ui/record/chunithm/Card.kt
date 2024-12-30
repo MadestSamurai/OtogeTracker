@@ -34,7 +34,14 @@ import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.SvgDecoder
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.DARKER_RED
+import com.madsam.otora.consts.DARK_RED
+import com.madsam.otora.consts.DARK_RED_DEEP
+import com.madsam.otora.consts.DARK_RED_TEXT
+import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
+import com.madsam.otora.consts.OSU_LEVEL_GOLD_1
+import com.madsam.otora.consts.OSU_LEVEL_PLATINUM_1
+import com.madsam.otora.consts.OSU_LEVEL_SILVER_1
 import com.madsam.otora.model.chuni.net.ChuniCard
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,7 +64,7 @@ fun Card(
         val surfaceWidthDp = screenWidthDp - 32.dp
         ConstraintLayout(
             modifier = Modifier
-                .background(Colors.DARK_RED_DEEP)
+                .background(DARK_RED_DEEP)
         ) {
             val (
                 charaImage,
@@ -96,9 +103,9 @@ fun Card(
                     )
                     .background(
                         when (cardData.value.charaBase) {
-                            "silver" -> Colors.OSU_LEVEL_SILVER_1
+                            "silver" -> OSU_LEVEL_SILVER_1
                             else -> {
-                                Colors.DARKER_RED
+                                DARKER_RED
                             }
                         }
                     )
@@ -125,11 +132,11 @@ fun Card(
                     .clip(RoundedCornerShape(5.dp))
                     .background(
                         when (cardData.value.honorBase) {
-                            "silver" -> Colors.OSU_LEVEL_SILVER_1
-                            "gold" -> Colors.OSU_LEVEL_GOLD_1
-                            "platina" -> Colors.OSU_LEVEL_PLATINUM_1
+                            "silver" -> OSU_LEVEL_SILVER_1
+                            "gold" -> OSU_LEVEL_GOLD_1
+                            "platina" -> OSU_LEVEL_PLATINUM_1
                             else -> {
-                                Colors.DARKER_RED
+                                DARKER_RED
                             }
                         }
                     )
@@ -150,7 +157,7 @@ fun Card(
 
             Image(
                 painter = painterResource(id = com.madsam.otora.R.drawable.ic_star),
-                colorFilter = ColorFilter.tint(Colors.OSU_LEVEL_GOLD_1),
+                colorFilter = ColorFilter.tint(OSU_LEVEL_GOLD_1),
                 contentDescription = "Reborn",
                 modifier = Modifier
                     .constrainAs(rebornBase) {
@@ -169,14 +176,14 @@ fun Card(
                         end.linkTo(rebornBase.end)
                     },
                 text = cardData.value.reborn.toString(),
-                color = Colors.DARK_RED,
+                color = DARK_RED,
                     fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
             )
 
             Text(
                 text = "Lv.",
-                color = Colors.DARK_RED_TEXT_LIGHT,
+                color = DARK_RED_TEXT_LIGHT,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .constrainAs(lvText) {
@@ -187,7 +194,7 @@ fun Card(
 
             Text(
                 text = cardData.value.lv.toString(),
-                color = Colors.DARK_RED_TEXT_LIGHT,
+                color = DARK_RED_TEXT_LIGHT,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -200,7 +207,7 @@ fun Card(
 
             Text(
                 text = cardData.value.nameIn,
-                color = Colors.DARK_RED_TEXT_LIGHT,
+                color = DARK_RED_TEXT_LIGHT,
                 fontSize = 18.sp,
                 lineHeight = 22.sp,
                 fontWeight = FontWeight.Bold,
@@ -252,7 +259,7 @@ fun Card(
                 text = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
-                            color = Colors.DARK_RED_TEXT,
+                            color = DARK_RED_TEXT,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Normal
                         )
@@ -271,7 +278,7 @@ fun Card(
                     append(" (MAX ")
                     withStyle(
                         style = SpanStyle(
-                            color = Colors.DARK_RED_TEXT,
+                            color = DARK_RED_TEXT,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -280,7 +287,7 @@ fun Card(
                     }
                     append(")")
                 },
-                color = Colors.DARK_RED_TEXT,
+                color = DARK_RED_TEXT,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .constrainAs(rating) {
@@ -294,7 +301,7 @@ fun Card(
                 text = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
-                            color = Colors.DARK_RED_TEXT,
+                            color = DARK_RED_TEXT,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Normal
                         )
@@ -303,7 +310,7 @@ fun Card(
                     }
                     append(cardData.value.overpower)
                 },
-                color = Colors.DARK_RED_TEXT_LIGHT,
+                color = DARK_RED_TEXT_LIGHT,
                 fontSize = 12.sp,
                 lineHeight = 14.sp,
                 fontWeight = FontWeight.Bold,
@@ -319,7 +326,7 @@ fun Card(
                 text = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
-                            color = Colors.DARK_RED_TEXT,
+                            color = DARK_RED_TEXT,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Normal
                         )
@@ -328,7 +335,7 @@ fun Card(
                     }
                     append(cardData.value.lastPlay)
                 },
-                color = Colors.DARK_RED_TEXT_LIGHT,
+                color = DARK_RED_TEXT_LIGHT,
                 fontSize = 12.sp,
                 lineHeight = 16.sp,
                 fontWeight = FontWeight.Bold,

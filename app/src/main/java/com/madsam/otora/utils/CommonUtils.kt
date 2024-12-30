@@ -14,8 +14,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import androidx.core.app.NotificationManagerCompat
-import com.madsam.otora.consts.Colors
 import com.madsam.otora.consts.GradientBrush
+import com.madsam.otora.consts.OSU_LEVEL_GOLD_1
+import com.madsam.otora.consts.OSU_LEVEL_PLATINUM_1
+import com.madsam.otora.consts.OSU_LEVEL_SILVER_1
+import com.madsam.otora.consts.OSU_LEVEL_WHITE_1
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.time.Instant
@@ -263,14 +266,14 @@ object CommonUtils {
         try {
             val valueFloat = value.toFloat()
             return when (valueFloat) {
-                in 15.25..16.00 -> Colors.OSU_LEVEL_PLATINUM_1
-                in 14.50..15.24 -> Colors.OSU_LEVEL_GOLD_1
-                in 14.25..14.49 -> Colors.OSU_LEVEL_SILVER_1
-                else -> Colors.OSU_LEVEL_WHITE_1
+                in 15.25..16.00 -> OSU_LEVEL_PLATINUM_1
+                in 14.50..15.24 -> OSU_LEVEL_GOLD_1
+                in 14.25..14.49 -> OSU_LEVEL_SILVER_1
+                else -> OSU_LEVEL_WHITE_1
             }
         } catch (nfe: NumberFormatException) {
             Log.e("CommonUtils", "Rating value is not a number: $nfe")
-            return Colors.OSU_LEVEL_WHITE_1
+            return OSU_LEVEL_WHITE_1
         }
     }
 

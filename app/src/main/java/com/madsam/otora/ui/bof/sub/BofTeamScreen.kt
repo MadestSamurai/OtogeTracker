@@ -38,7 +38,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.R
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.BG_DARK_GRAY
+import com.madsam.otora.consts.RANKING_BLUE
+import com.madsam.otora.consts.RANKING_GREEN
+import com.madsam.otora.consts.RANKING_RED
+import com.madsam.otora.consts.RANKING_YELLOW
+import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofTeamShow
 import com.madsam.otora.ui.bof.BofViewModel
@@ -118,7 +123,7 @@ fun BofTeamScreen(vm: BofViewModel) {
             item {
                 Row(
                     modifier = Modifier
-                        .background(Colors.BG_DARK_GRAY)
+                        .background(BG_DARK_GRAY)
                         .fillMaxWidth()
                 ) {
                     Text(
@@ -178,7 +183,7 @@ fun BofTeamRowTotal(
     maxTotal: Double,
     isCompare: Boolean
 ) {
-    val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
+    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
     val barWidthFraction = if(maxTotal == 0.0) 0f else (entry.total / maxTotal) * 1f
     val barWidthOldFaction = if(maxTotal == 0.0) 0f else ((entry.oldTotal) / maxTotal) * 1f
     var rowHeight = remember { mutableIntStateOf(0) }
@@ -208,7 +213,7 @@ fun BofTeamRowTotal(
                     }
                 },
                 contentDescription = null,
-                tint = if (entry.rankDiff < 0) Colors.RANKING_RED else if (entry.rankDiff > 0) Colors.RANKING_GREEN else Colors.RANKING_YELLOW,
+                tint = if (entry.rankDiff < 0) RANKING_RED else if (entry.rankDiff > 0) RANKING_GREEN else RANKING_YELLOW,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .width(30.ndp())
@@ -218,7 +223,7 @@ fun BofTeamRowTotal(
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.nsp(),
-                color = if (entry.rankDiff < 0) Colors.RANKING_RED else if (entry.rankDiff > 0) Colors.RANKING_GREEN else Colors.RANKING_YELLOW,
+                color = if (entry.rankDiff < 0) RANKING_RED else if (entry.rankDiff > 0) RANKING_GREEN else RANKING_YELLOW,
                 textAlign = TextAlign.Start,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
@@ -258,7 +263,7 @@ fun BofTeamRowTotal(
                             .fillMaxWidth(barWidthFraction.toFloat())
                             .height(if (isCompare) 18.ndp() else 34.ndp())
                             .background(
-                                color = Colors.RANKING_RED,
+                                color = RANKING_RED,
                                 shape = RoundedCornerShape(
                                     topEnd = 50.ndp(),
                                     bottomEnd = 50.ndp()
@@ -301,7 +306,7 @@ fun BofTeamRowTotal(
                                 .fillMaxWidth(barWidthOldFaction.toFloat())
                                 .height(14.ndp())
                                 .background(
-                                    color = Colors.RANKING_BLUE,
+                                    color = RANKING_BLUE,
                                     shape = RoundedCornerShape(
                                         topEnd = 10.ndp(),
                                         bottomEnd = 10.ndp()
@@ -361,7 +366,7 @@ fun BofTeamRowTotal(
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_star),
                                 contentDescription = null,
-                                tint = if (fss[index] == "1") Colors.RANKING_YELLOW else Color.Transparent,
+                                tint = if (fss[index] == "1") RANKING_YELLOW else Color.Transparent,
                             )
                         }
                     )
@@ -376,7 +381,7 @@ fun BofTeamRowTotal(
                             lineHeight = 13.nsp(),
                             fontFamily = sarasaFont,
                             textAlign = TextAlign.Start,
-                            color = Colors.TEXT_GRAY,
+                            color = TEXT_GRAY,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier
@@ -395,7 +400,7 @@ fun BofTeamRowTotal(
                             fontFamily = sarasaFont,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.End,
-                            color = Colors.TEXT_GRAY,
+                            color = TEXT_GRAY,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier

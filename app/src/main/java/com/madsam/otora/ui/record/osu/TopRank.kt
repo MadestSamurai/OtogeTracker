@@ -31,7 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.DARK_RED_DEEP
+import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
+import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
 import com.madsam.otora.consts.OsuDiffColor
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -66,14 +68,14 @@ fun TopRank(
                 top = 12.dp
             ),
         RoundedCornerShape(20.dp),
-        Colors.DARK_RED_DEEP
+        DARK_RED_DEEP
     ) {
         val cardWidth = screenWidthDp - 32.dp
         Column {
             if (pinned.isEmpty() && top.isEmpty() && first.isEmpty()) {
                 Text(
                     text = "No play records",
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(16.dp)
@@ -83,7 +85,7 @@ fun TopRank(
             if (pinned.isEmpty()) {
                 Text(
                     text = "No pinned maps",
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(16.dp)
@@ -94,7 +96,7 @@ fun TopRank(
             if (top.isEmpty()) {
                 Text(
                     text = "No top maps",
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(16.dp)
@@ -105,7 +107,7 @@ fun TopRank(
             if (first.isEmpty()) {
                 Text(
                     text = "No first maps",
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(16.dp)
@@ -128,7 +130,7 @@ fun OsuTopRankItemContent(
             text = title,
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp,
-            color = Colors.DARK_RED_TEXT_LIGHT,
+            color = DARK_RED_TEXT_LIGHT,
             modifier = Modifier
                 .padding(start = 16.dp, top = 16.dp)
         )
@@ -161,7 +163,7 @@ fun OsuTopRankItemCard(
     ) {
         ConstraintLayout(
             modifier = Modifier
-                .background(Colors.DARK_RED_DEEP)
+                .background(DARK_RED_DEEP)
         ) {
             val (
                 cover,
@@ -252,7 +254,7 @@ fun OsuTopRankItemCard(
                     }
             ) {
                 Text(text = item["beatmapSetTitleUnicode"] ?: "",
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -261,7 +263,7 @@ fun OsuTopRankItemCard(
                         .width(itemWidth - 124.dp)
                 )
                 Text(text = item["artist"] ?: "",
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,
@@ -270,7 +272,7 @@ fun OsuTopRankItemCard(
                         .width(itemWidth - 124.dp)
                 )
                 Text(text = item["beatmapSubTitle"] ?: "",
-                    color = Colors.OSU_BRIGHT_YELLOW,
+                    color = OSU_BRIGHT_YELLOW,
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,
@@ -279,7 +281,7 @@ fun OsuTopRankItemCard(
                         .width(itemWidth - 124.dp)
                 )
                 Text(text = ("mapped by ${item["creator"]}"),
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,

@@ -2,6 +2,7 @@ package com.madsam.otora.glance
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
@@ -19,7 +20,8 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.DARK_RED_DEEP
+import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
 import com.madsam.otora.utils.ShareUtil
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -45,7 +47,7 @@ class SmallWidget : GlanceAppWidget() {
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .background(color = Colors.DARK_RED_DEEP),
+                .background(DARK_RED_DEEP),
             verticalAlignment = Alignment.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -54,7 +56,7 @@ class SmallWidget : GlanceAppWidget() {
                 modifier = GlanceModifier
                     .padding(12.dp),
                 style = TextStyle(
-                    color = ColorProvider(Colors.DARK_RED_TEXT_LIGHT),
+                    color = MyColorProvider(DARK_RED_TEXT_LIGHT),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -64,11 +66,17 @@ class SmallWidget : GlanceAppWidget() {
                 modifier = GlanceModifier
                     .padding(12.dp),
                 style = TextStyle(
-                    color = ColorProvider(Colors.DARK_RED_TEXT_LIGHT),
+                    color = MyColorProvider(DARK_RED_TEXT_LIGHT),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
             )
         }
+    }
+}
+
+data class MyColorProvider(val color: Color) : ColorProvider {
+    override fun getColor(context: Context): Color {
+        return color
     }
 }

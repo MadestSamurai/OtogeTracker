@@ -30,7 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.BG_DARK_GRAY
+import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.ui.bof.BofViewModel
@@ -104,7 +105,7 @@ fun BofDiffScreen(vm: BofViewModel) {
             item {
                 Row(
                     modifier = Modifier
-                        .background(Colors.BG_DARK_GRAY)
+                        .background(BG_DARK_GRAY)
                         .fillMaxWidth()
                 ) {
                     Text(
@@ -150,7 +151,7 @@ fun BofEntryRowDiv(
     index: Int,
     maxDiff: Int
 ) {
-    val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
+    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
     val barWidthFraction = if (maxDiff==0) 0f else (entry.totalDiff.toFloat() / maxDiff) * 1f
     var rowHeight = remember { mutableIntStateOf(0) }
 
@@ -199,7 +200,7 @@ fun BofEntryRowDiv(
                 lineHeight = 13.nsp(),
                 fontFamily = sarasaFont,
                 textAlign = TextAlign.End,
-                color = Colors.TEXT_GRAY,
+                color = TEXT_GRAY,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier

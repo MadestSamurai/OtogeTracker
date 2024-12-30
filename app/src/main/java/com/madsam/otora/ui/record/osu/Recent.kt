@@ -20,10 +20,8 @@ import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -34,7 +32,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.DARK_RED_DEEP
+import com.madsam.otora.consts.DARK_RED_DEEPER
+import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
+import com.madsam.otora.consts.OSU_ARROW_YELLOW
+import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
+import com.madsam.otora.consts.OSU_HEART_RED
+import com.madsam.otora.consts.OSU_ROTATE_GREEN
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -65,14 +69,14 @@ fun Recent(
                 end = 16.dp
             ),
         RoundedCornerShape(20.dp),
-        Colors.DARK_RED_DEEP
+        DARK_RED_DEEP
     ) {
         Column {
             Text(
                 text = "Recent",
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp,
-                color = Colors.DARK_RED_TEXT_LIGHT,
+                color = DARK_RED_TEXT_LIGHT,
                 modifier = Modifier
                     .padding(start = 16.dp, top = 16.dp)
             )
@@ -89,84 +93,84 @@ fun Recent(
                             appendInlineContent("icon", "[${recentActivity["type"]}]")
                             when (recentActivity["type"]) {
                                 "rank" -> {
-                                    withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
                                         append("achieved #${recentActivity["rank"]} on ")
                                     }
                                     appendInlineContent("mode", "[${recentActivity["mode"]}]")
-                                    withStyle(style = SpanStyle(color = Colors.OSU_BRIGHT_YELLOW)) {
+                                    withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
                                         append(recentActivity["beatmapTitle"])
                                     }
                                 }
 
                                 "rankLost" -> {
-                                    withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
                                         append("lost first place on ")
                                     }
                                     appendInlineContent("mode", "[${recentActivity["mode"]}]")
-                                    withStyle(style = SpanStyle(color = Colors.OSU_BRIGHT_YELLOW)) {
+                                    withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
                                         append(recentActivity["beatmapTitle"])
                                     }
                                 }
 
                                 "beatmapsetUpload" -> {
-                                    withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
                                         append("submitted a new beatmap ")
                                     }
-                                    withStyle(style = SpanStyle(color = Colors.OSU_BRIGHT_YELLOW)) {
+                                    withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
                                         append(recentActivity["beatmapSetTitle"])
                                     }
                                 }
 
                                 "beatmapsetUpdate" -> {
-                                    withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
                                         append("updated a beatmap ")
                                     }
-                                    withStyle(style = SpanStyle(color = Colors.OSU_BRIGHT_YELLOW)) {
+                                    withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
                                         append(recentActivity["beatmapSetTitle"])
                                     }
                                 }
 
                                 "userSupportGift" -> {
-                                    withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
                                         append("received the gift of osu!supporter")
                                     }
                                 }
 
                                 "userSupportAgain" -> {
-                                    withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
                                         append("support osu! again")
                                     }
                                 }
 
                                 "beatmapsetRevive" -> {
-                                    withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
                                         append("revived a beatmap ")
                                     }
-                                    withStyle(style = SpanStyle(color = Colors.OSU_BRIGHT_YELLOW)) {
+                                    withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
                                         append(recentActivity["beatmapSetTitle"])
                                     }
                                 }
 
                                 "beatmapsetApprove" -> {
-                                    withStyle(style = SpanStyle(color = Colors.OSU_BRIGHT_YELLOW)) {
+                                    withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
                                         append(recentActivity["beatmapSetTitle"])
                                     }
-                                    withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
                                         append(" has been ${recentActivity["approval"]}")
                                     }
                                 }
 
                                 "achievement" -> {
-                                    withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
                                         append("achieved ")
                                     }
-                                    withStyle(style = SpanStyle(color = Colors.OSU_BRIGHT_YELLOW)) {
+                                    withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
                                         append(recentActivity["achievement"])
                                     }
                                 }
 
                                 else -> {
-                                    withStyle(style = SpanStyle(color = Colors.DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
                                         append("achieved #${recentActivity["rank"]} on ${recentActivity["beatmapTitle"]}")
                                     }
                                 }
@@ -176,7 +180,7 @@ fun Recent(
                         modifier = Modifier
                             .padding(horizontal = 8.dp, vertical = 4.dp)
                             .clip(RoundedCornerShape(6.dp))
-                            .background(Colors.DARK_RED_DEEPER)
+                            .background(DARK_RED_DEEPER)
                             .padding(2.dp)
                     ) {
                         val textWidth = cardWidthDp - 8.dp
@@ -260,8 +264,8 @@ fun Recent(
                                             ),
                                             contentDescription = "Beatmap Upload",
                                             tint = when (recentActivity["type"]) {
-                                                "beatmapsetUpload" -> Colors.OSU_ARROW_YELLOW
-                                                "beatmapsetUpdate" -> Colors.OSU_ROTATE_GREEN
+                                                "beatmapsetUpload" -> OSU_ARROW_YELLOW
+                                                "beatmapsetUpdate" -> OSU_ROTATE_GREEN
                                                 else -> Color.White
                                             },
                                             modifier = Modifier.padding(end = 4.dp)
@@ -272,7 +276,7 @@ fun Recent(
                                         Icon(
                                             painter = painterResource(id = com.madsam.otora.R.drawable.ic_gift),
                                             contentDescription = "Osu Mode",
-                                            tint = Colors.OSU_HEART_RED,
+                                            tint = OSU_HEART_RED,
                                             modifier = Modifier.padding(end = 4.dp)
                                         )
                                     }
@@ -281,7 +285,7 @@ fun Recent(
                                         Icon(
                                             painter = painterResource(id = com.madsam.otora.R.drawable.ic_support_1),
                                             contentDescription = "Osu Mode",
-                                            tint = Colors.OSU_HEART_RED,
+                                            tint = OSU_HEART_RED,
                                             modifier = Modifier.padding(end = 4.dp)
                                         )
                                     }
@@ -291,9 +295,9 @@ fun Recent(
                                             painter = painterResource(id = com.madsam.otora.R.drawable.ic_tick),
                                             contentDescription = "Osu Mode",
                                             tint = when (recentActivity["approval"]) {
-                                                "qualified" -> Colors.OSU_HEART_RED
-                                                "approved" -> Colors.OSU_HEART_RED
-                                                "loved" -> Colors.OSU_HEART_RED
+                                                "qualified" -> OSU_HEART_RED
+                                                "approved" -> OSU_HEART_RED
+                                                "loved" -> OSU_HEART_RED
                                                 else -> Color.White
                                             },
                                             modifier = Modifier.padding(end = 4.dp)

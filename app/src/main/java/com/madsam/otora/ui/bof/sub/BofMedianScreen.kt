@@ -1,6 +1,5 @@
 package com.madsam.otora.ui.bof.sub
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -34,7 +33,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.R
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.BG_DARK_GRAY
+import com.madsam.otora.consts.RANKING_GREEN
+import com.madsam.otora.consts.RANKING_RED
+import com.madsam.otora.consts.RANKING_YELLOW
+import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.ui.bof.BofViewModel
@@ -114,7 +117,7 @@ fun BofMedianScreen(vm: BofViewModel) {
             item {
                 Row(
                     modifier = Modifier
-                        .background(Colors.BG_DARK_GRAY)
+                        .background(BG_DARK_GRAY)
                         .fillMaxWidth()
                 ) {
                     Text(
@@ -161,8 +164,7 @@ fun BofEntryRowMedian(
     ther: Int,
     isCompare: Boolean
 ) {
-    Log.d("BofEntryRowMedian", "entry: $entry, index: $index, ther: $ther, isCompare: $isCompare")
-    val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
+    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
     val barWidthFraction = (entry.median.toFloat() / 1000) * 1f
     var rowHeight = remember { mutableIntStateOf(0) }
 
@@ -187,11 +189,11 @@ fun BofEntryRowMedian(
                 },
                 contentDescription = null,
                 tint = if (entry.medianDiff > 0 || entry.oldImpr < ther)
-                    Colors.RANKING_GREEN
+                    RANKING_GREEN
                 else if (entry.medianDiff < 0)
-                    Colors.RANKING_RED
+                    RANKING_RED
                 else
-                    Colors.RANKING_YELLOW,
+                    RANKING_YELLOW,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .width(30.ndp())
@@ -202,11 +204,11 @@ fun BofEntryRowMedian(
                 fontSize = 14.nsp(),
                 fontWeight = FontWeight.Bold,
                 color = if (entry.medianDiff > 0 || entry.oldImpr < ther)
-                    Colors.RANKING_GREEN
+                    RANKING_GREEN
                 else if (entry.medianDiff < 0)
-                    Colors.RANKING_RED
+                    RANKING_RED
                 else
-                    Colors.RANKING_YELLOW,
+                    RANKING_YELLOW,
                 textAlign = TextAlign.Start,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
@@ -251,7 +253,7 @@ fun BofEntryRowMedian(
                 lineHeight = 13.nsp(),
                 fontFamily = sarasaFont,
                 textAlign = TextAlign.End,
-                color = Colors.TEXT_GRAY,
+                color = TEXT_GRAY,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier

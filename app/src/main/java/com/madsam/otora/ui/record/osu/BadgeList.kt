@@ -23,7 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.R
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.DARK_RED_DEEP
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -53,7 +53,7 @@ fun BadgeList(
                 )
                 .width(cardWidthDp),
             RoundedCornerShape(20.dp),
-            Colors.DARK_RED_DEEP
+            DARK_RED_DEEP
         ) {
             var listWidthDp = cardWidthDp - 16.dp - 40.dp
             val imageCount = (listWidthDp / (68.dp + 12.dp)).toInt()

@@ -41,7 +41,10 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import com.madsam.otora.R
 import com.madsam.otora.components.ImageWithText
 import com.madsam.otora.components.TitleText
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.DARK_RED
+import com.madsam.otora.consts.DARK_RED_DEEP
+import com.madsam.otora.consts.DARK_RED_DEEPER
+import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -59,7 +62,7 @@ fun PlayData(
                 bottom = 4.dp
             )
             .clip(RoundedCornerShape(6.dp))
-            .background(Colors.DARK_RED_DEEP)
+            .background(DARK_RED_DEEP)
             .width(screenWidthDp - 32.dp)
     ) {
         val cardWidthDp = screenWidthDp - 32.dp
@@ -77,7 +80,7 @@ fun PlayData(
             .height(26.dp)
 
         val iconTextSize = 16.sp
-        val iconTextColor = Colors.DARK_RED_TEXT_LIGHT
+        val iconTextColor = DARK_RED_TEXT_LIGHT
         val iconTextModifier = Modifier.padding(top = 4.dp)
 
         Box(
@@ -85,7 +88,7 @@ fun PlayData(
                 .fillMaxWidth()
                 .height(80.dp)
                 .clip(RoundedCornerShape(6.dp))
-                .background(Colors.DARK_RED)
+                .background(DARK_RED)
                 .constrainAs(judgeBackground) {
                     top.linkTo(parent.top)
                 }
@@ -253,7 +256,7 @@ fun PlayData(
                 ) {
                     Image(
                         painter = painterResource(id = if (shown) R.drawable.ic_arrow_up else R.drawable.ic_arrow_down),
-                        colorFilter = ColorFilter.tint(Colors.DARK_RED_TEXT_LIGHT),
+                        colorFilter = ColorFilter.tint(DARK_RED_TEXT_LIGHT),
                         contentDescription = "Show More",
                         modifier = Modifier.size(with(density) { placeholderHeight.toDp() })
                     )
@@ -272,11 +275,11 @@ fun PlayData(
                     }
                 },
                 fontSize = 18.sp,
-                color = Colors.DARK_RED_TEXT_LIGHT,
+                color = DARK_RED_TEXT_LIGHT,
                 inlineContent = inlineContent,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .background(Colors.DARK_RED_DEEPER)
+                    .background(DARK_RED_DEEPER)
                     .clickable {
                         shown = !shown
                     }

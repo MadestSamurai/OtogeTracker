@@ -46,7 +46,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.R
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.BG_DARK_GRAY
+import com.madsam.otora.consts.RANKING_BLUE
+import com.madsam.otora.consts.RANKING_GREEN
+import com.madsam.otora.consts.RANKING_RED
+import com.madsam.otora.consts.RANKING_YELLOW
+import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.ui.bof.BofViewModel
@@ -352,7 +357,7 @@ fun RankColumn(
         }
         Row(
             modifier = Modifier
-                .background(Colors.BG_DARK_GRAY)
+                .background(BG_DARK_GRAY)
                 .fillMaxWidth()
         ) {
             if (isLandscape(configuration) && !isImage) {
@@ -449,7 +454,7 @@ fun BofEntryRowTotal(
     rightPadding: Dp = 0.dp,
     dataSwitch: Boolean = false
 ) {
-    val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
+    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
 
     val newBarWidth = if (maxTotal == 0) 0.dp
     else (entry.total.toFloat() / maxTotal * barWidth.value).ndp()
@@ -491,9 +496,9 @@ fun BofEntryRowTotal(
                             }
                         },
                         contentDescription = null,
-                        tint = if (entry.rankDiff < 0) Colors.RANKING_RED
-                        else if (entry.rankDiff > 0) Colors.RANKING_GREEN
-                        else Colors.RANKING_YELLOW,
+                        tint = if (entry.rankDiff < 0) RANKING_RED
+                        else if (entry.rankDiff > 0) RANKING_GREEN
+                        else RANKING_YELLOW,
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .padding(end = 2.ndp(), start = 8.ndp())
@@ -504,9 +509,9 @@ fun BofEntryRowTotal(
                         fontFamily = sarasaFont,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.nsp(),
-                        color = if (entry.rankDiff < 0) Colors.RANKING_RED
-                        else if (entry.rankDiff > 0) Colors.RANKING_GREEN
-                        else Colors.RANKING_YELLOW,
+                        color = if (entry.rankDiff < 0) RANKING_RED
+                        else if (entry.rankDiff > 0) RANKING_GREEN
+                        else RANKING_YELLOW,
                         textAlign = TextAlign.Start,
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
@@ -537,9 +542,9 @@ fun BofEntryRowTotal(
                         }
                     },
                     contentDescription = null,
-                    tint = if (entry.rankDiff < 0) Colors.RANKING_RED
-                    else if (entry.rankDiff > 0) Colors.RANKING_GREEN
-                    else Colors.RANKING_YELLOW,
+                    tint = if (entry.rankDiff < 0) RANKING_RED
+                    else if (entry.rankDiff > 0) RANKING_GREEN
+                    else RANKING_YELLOW,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .width(30.ndp())
@@ -549,9 +554,9 @@ fun BofEntryRowTotal(
                     fontFamily = sarasaFont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.nsp(),
-                    color = if (entry.rankDiff < 0) Colors.RANKING_RED
-                    else if (entry.rankDiff > 0) Colors.RANKING_GREEN
-                    else Colors.RANKING_YELLOW,
+                    color = if (entry.rankDiff < 0) RANKING_RED
+                    else if (entry.rankDiff > 0) RANKING_GREEN
+                    else RANKING_YELLOW,
                     textAlign = TextAlign.Start,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
@@ -607,7 +612,7 @@ fun BofEntryRowTotal(
                 lineHeight = 13.nsp(),
                 fontFamily = sarasaFont,
                 textAlign = TextAlign.End,
-                color = Colors.TEXT_GRAY,
+                color = TEXT_GRAY,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = textMod(0.ndp(), 16.ndp())
@@ -635,7 +640,7 @@ fun BofEntryRowTotal(
                                 .width(newBarWidth)
                                 .height(if (isCompare) 18.ndp() else 34.ndp())
                                 .background(
-                                    color = Colors.RANKING_RED,
+                                    color = RANKING_RED,
                                     shape = RoundedCornerShape(
                                         topEnd = 50.ndp(),
                                         bottomEnd = 50.ndp()
@@ -677,7 +682,7 @@ fun BofEntryRowTotal(
                                     .width(oldBarWidth)
                                     .height(14.ndp())
                                     .background(
-                                        color = Colors.RANKING_BLUE,
+                                        color = RANKING_BLUE,
                                         shape = RoundedCornerShape(
                                             topEnd = 10.ndp(),
                                             bottomEnd = 10.ndp()

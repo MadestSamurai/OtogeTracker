@@ -24,7 +24,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.DARK_RED_DEEP
+import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
+import com.madsam.otora.consts.OSU_BRIGHT_RED
+import com.madsam.otora.consts.OSU_DISCORD_BG
+import com.madsam.otora.consts.OSU_DISCORD_TEXT
+import com.madsam.otora.consts.OSU_X_BG
+import com.madsam.otora.consts.OSU_X_TEXT
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -54,7 +60,7 @@ fun SocialCard(
                     bottomEnd = 20.dp
                 )
             )
-            .background(Colors.DARK_RED_DEEP)
+            .background(DARK_RED_DEEP)
     ) {
         val (
             playInfo,
@@ -92,7 +98,7 @@ fun SocialCard(
                 },
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
-                color = Colors.DARK_RED_TEXT_LIGHT,
+                color = DARK_RED_TEXT_LIGHT,
                 modifier = Modifier
                     .padding(start = 16.dp, top = 16.dp)
             )
@@ -119,7 +125,7 @@ fun SocialCard(
                 },
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
-                color = Colors.DARK_RED_TEXT_LIGHT,
+                color = DARK_RED_TEXT_LIGHT,
                 modifier = Modifier
                     .padding(start = 16.dp)
             )
@@ -143,7 +149,7 @@ fun SocialCard(
                     },
                     fontWeight = FontWeight.Normal,
                     fontSize = 16.sp,
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     modifier = Modifier
                         .padding(start = 16.dp)
                 )
@@ -168,7 +174,7 @@ fun SocialCard(
                     },
                     fontWeight = FontWeight.Normal,
                     fontSize = 16.sp,
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     modifier = Modifier
                         .padding(start = 16.dp, bottom = 4.dp)
                 )
@@ -185,7 +191,7 @@ fun SocialCard(
         ) {
             if ((osuSocialCardData["twitter"] ?: "").isNotEmpty()) {
                 Surface(
-                    color = Colors.OSU_X_BG,
+                    color = OSU_X_BG,
                     modifier = Modifier
                         .padding(top = 12.dp)
                         .fillMaxWidth()
@@ -194,7 +200,7 @@ fun SocialCard(
                         Image(
                             painter = painterResource(id = com.madsam.otora.R.drawable.ic_x_logo),
                             contentDescription = "Twitter",
-                            colorFilter = ColorFilter.tint(Colors.OSU_X_TEXT),
+                            colorFilter = ColorFilter.tint(OSU_X_TEXT),
                             modifier = Modifier
                                 .size(50.dp)
                                 .padding(start = 18.dp, top = 12.dp, bottom = 12.dp)
@@ -204,7 +210,7 @@ fun SocialCard(
                             text = "@${osuSocialCardData["twitter"]!!}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp,
-                            color = Colors.OSU_X_TEXT,
+                            color = OSU_X_TEXT,
                             modifier = Modifier
                                 .padding(start = 12.dp)
                                 .align(Alignment.CenterVertically)
@@ -214,7 +220,7 @@ fun SocialCard(
             }
             if ((osuSocialCardData["discord"] ?: "").isNotEmpty()) {
                 Surface(
-                    color = Colors.OSU_DISCORD_BG,
+                    color = OSU_DISCORD_BG,
                     modifier = Modifier
                         .padding(top = 12.dp)
                         .fillMaxWidth()
@@ -223,7 +229,7 @@ fun SocialCard(
                         Image(
                             painter = painterResource(id = com.madsam.otora.R.drawable.ic_discord),
                             contentDescription = "Discord",
-                            colorFilter = ColorFilter.tint(Colors.OSU_DISCORD_TEXT),
+                            colorFilter = ColorFilter.tint(OSU_DISCORD_TEXT),
                             modifier = Modifier
                                 .size(50.dp)
                                 .padding(start = 18.dp, top = 12.dp, bottom = 12.dp)
@@ -233,7 +239,7 @@ fun SocialCard(
                             text = osuSocialCardData["discord"]!!,
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp,
-                            color = Colors.OSU_DISCORD_TEXT,
+                            color = OSU_DISCORD_TEXT,
                             modifier = Modifier
                                 .padding(start = 12.dp)
                                 .align(Alignment.CenterVertically)
@@ -243,7 +249,7 @@ fun SocialCard(
             }
             if ((osuSocialCardData["website"] ?: "").isNotEmpty()) {
                 Surface(
-                    color = Colors.OSU_BRIGHT_RED,
+                    color = OSU_BRIGHT_RED,
                     modifier = Modifier
                         .padding(top = 12.dp)
                         .fillMaxWidth()

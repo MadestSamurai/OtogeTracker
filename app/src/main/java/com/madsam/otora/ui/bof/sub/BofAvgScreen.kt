@@ -32,7 +32,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.R
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.BG_DARK_GRAY
+import com.madsam.otora.consts.RANKING_GREEN
+import com.madsam.otora.consts.RANKING_RED
+import com.madsam.otora.consts.RANKING_YELLOW
+import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.ui.bof.BofViewModel
@@ -111,7 +115,7 @@ fun BofAvgScreen(vm: BofViewModel) {
         item {
             Row(
                 modifier = Modifier
-                    .background(Colors.BG_DARK_GRAY)
+                    .background(BG_DARK_GRAY)
                     .fillMaxWidth()
             ) {
                 Text(
@@ -157,7 +161,7 @@ fun BofEntryRowAvg(
     oldThre: Int,
     isCompare: Boolean
 ) {
-    val backgroundColor = if (index % 2 == 0) Colors.BG_DARK_GRAY else Color.Black
+    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
     val barWidthFraction = (entry.avg.toFloat() / 1000) * 1f
     var rowHeight = remember { mutableIntStateOf(0) }
 
@@ -182,11 +186,11 @@ fun BofEntryRowAvg(
                 },
                 contentDescription = null,
                 tint = if (entry.avgDiff > 0 || entry.oldImpr < oldThre)
-                    Colors.RANKING_GREEN
+                    RANKING_GREEN
                 else if (entry.avgDiff < 0)
-                    Colors.RANKING_RED
+                    RANKING_RED
                 else
-                    Colors.RANKING_YELLOW,
+                    RANKING_YELLOW,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .width(30.ndp())
@@ -197,11 +201,11 @@ fun BofEntryRowAvg(
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.nsp(),
                 color = if (entry.avgDiff > 0 || entry.oldImpr < oldThre)
-                    Colors.RANKING_GREEN
+                    RANKING_GREEN
                 else if (entry.avgDiff < 0)
-                    Colors.RANKING_RED
+                    RANKING_RED
                 else
-                    Colors.RANKING_YELLOW,
+                    RANKING_YELLOW,
                 textAlign = TextAlign.Start,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
@@ -245,7 +249,7 @@ fun BofEntryRowAvg(
                 lineHeight = 13.nsp(),
                 fontFamily = sarasaFont,
                 textAlign = TextAlign.End,
-                color = Colors.TEXT_GRAY,
+                color = TEXT_GRAY,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier

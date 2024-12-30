@@ -28,7 +28,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.CHUNI_DIFF_ADVANCED
+import com.madsam.otora.consts.CHUNI_DIFF_BASIC
+import com.madsam.otora.consts.CHUNI_DIFF_EXPERT
+import com.madsam.otora.consts.CHUNI_DIFF_MASTER
+import com.madsam.otora.consts.CHUNI_DIFF_ULTIMA_1
+import com.madsam.otora.consts.CHUNI_DIFF_ULTIMA_2
+import com.madsam.otora.consts.DARK_RED_DEEP
+import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
+import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
 import com.madsam.otora.entity.ChuniSheetsEntity
 import com.madsam.otora.entity.ChuniSongsEntity
 import com.madsam.otora.model.chuni.net.ChuniScore
@@ -129,7 +137,7 @@ fun ChuniRatingItemCard(
     ) {
         ConstraintLayout(
             modifier = Modifier
-                .background(Colors.DARK_RED_DEEP)
+                .background(DARK_RED_DEEP)
         ) {
             val (
                 cover,
@@ -188,18 +196,18 @@ fun ChuniRatingItemCard(
                     }
                     .background(
                         color = when (item.diff) {
-                            "basic" -> Colors.CHUNI_DIFF_BASIC
-                            "advanced" -> Colors.CHUNI_DIFF_ADVANCED
-                            "expert" -> Colors.CHUNI_DIFF_EXPERT
-                            "master" -> Colors.CHUNI_DIFF_MASTER
-                            "ultima" -> Colors.CHUNI_DIFF_ULTIMA_1
-                            else -> Colors.CHUNI_DIFF_MASTER
+                            "basic" -> CHUNI_DIFF_BASIC
+                            "advanced" -> CHUNI_DIFF_ADVANCED
+                            "expert" -> CHUNI_DIFF_EXPERT
+                            "master" -> CHUNI_DIFF_MASTER
+                            "ultima" -> CHUNI_DIFF_ULTIMA_1
+                            else -> CHUNI_DIFF_MASTER
                         },
                         shape = RoundedCornerShape(5.dp)
                     )
                     .border(
                         width = if (item.diff == "ultima") 1.dp else 0.dp,
-                        color = if (item.diff == "ultima") Colors.CHUNI_DIFF_ULTIMA_2 else Color.Transparent,
+                        color = if (item.diff == "ultima") CHUNI_DIFF_ULTIMA_2 else Color.Transparent,
                         shape = RoundedCornerShape(5.dp)
                     )
                     .padding(4.dp)
@@ -214,7 +222,7 @@ fun ChuniRatingItemCard(
             ) {
                 Text(
                     text = item.title,
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -224,7 +232,7 @@ fun ChuniRatingItemCard(
                 )
                 Text(
                     text = item.artist,
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,
@@ -234,7 +242,7 @@ fun ChuniRatingItemCard(
                 )
                 Text(
                     text = item.score,
-                    color = Colors.OSU_BRIGHT_YELLOW,
+                    color = OSU_BRIGHT_YELLOW,
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,
@@ -250,7 +258,7 @@ fun ChuniRatingItemCard(
                                 item.levelValue
                             )
                         )}",
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,

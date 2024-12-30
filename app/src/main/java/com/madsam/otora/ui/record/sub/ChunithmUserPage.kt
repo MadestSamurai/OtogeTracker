@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.BRIGHT_RED
 import com.madsam.otora.entity.ChuniSheetsEntity
 import com.madsam.otora.entity.ChuniSongsEntity
 import com.madsam.otora.exporter.exportChuniSongsToCSV
@@ -70,7 +70,7 @@ fun ChunithmUserPage(
     }
 
     LazyColumn(
-        modifier = Modifier.background(color = Colors.BRIGHT_RED)
+        modifier = Modifier.background(color = BRIGHT_RED)
     ) {
         item {
             Button(onClick = { showDialog.value = true }) {

@@ -20,7 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.madsam.otora.components.GradientBorderCircle
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.DARKER_RED
+import com.madsam.otora.consts.DARK_RED_DEEP
+import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
+import com.madsam.otora.consts.OSU_DARK_RED
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -38,7 +41,7 @@ fun Level(
                 bottom = 4.dp
             )
             .clip(RoundedCornerShape(6.dp))
-            .background(Colors.DARK_RED_DEEP)
+            .background(DARK_RED_DEEP)
             .width(screenWidthDp - 32.dp)
     ) {
         val cardWidthDp = screenWidthDp - 32.dp
@@ -69,7 +72,7 @@ fun Level(
                 Text(
                     textAlign = TextAlign.Center,
                     text = levelData["level"] ?: "0",
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                 )
@@ -78,7 +81,7 @@ fun Level(
 
         Surface(
             shape = RoundedCornerShape(4.dp),
-            color = Colors.DARKER_RED,
+            color = DARKER_RED,
             modifier = Modifier
                 .height(25.dp)
                 .width(cardWidthDp - 103.dp)
@@ -92,7 +95,7 @@ fun Level(
 
         Surface(
             shape = RoundedCornerShape(4.dp),
-            color = Colors.OSU_DARK_RED,
+            color = OSU_DARK_RED,
             modifier = Modifier
                 .height(25.dp)
                 .width(
@@ -108,7 +111,7 @@ fun Level(
         Text(
             textAlign = TextAlign.Center,
             text = (levelData["levelProgress"] ?: "0") + "%",
-            color = Colors.DARK_RED_TEXT_LIGHT,
+            color = DARK_RED_TEXT_LIGHT,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             modifier = if ((levelData["levelProgress"]?.toInt() ?: 0) < 15) {

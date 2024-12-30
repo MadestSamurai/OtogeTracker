@@ -52,7 +52,12 @@ import coil.decode.SvgDecoder
 import com.madsam.otora.R
 import com.madsam.otora.components.GroupListItem
 import com.madsam.otora.components.PopupTip
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.BG_HALF_TRANS_BLACK
+import com.madsam.otora.consts.DARK_RED
+import com.madsam.otora.consts.DARK_RED_DEEP
+import com.madsam.otora.consts.DARK_RED_TEXT
+import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
+import com.madsam.otora.consts.OSU_BRIGHT_RED
 import com.madsam.otora.model.web.OsuGroup
 import dev.shreyaspatil.capturable.capturable
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
@@ -86,7 +91,7 @@ fun Card(
                 )
                 .capturable(captureController)
                 .clip(RoundedCornerShape(20.dp))
-                .background(Colors.DARK_RED_DEEP)
+                .background(DARK_RED_DEEP)
         ) {
             val refs = createRefs()
             val (
@@ -208,7 +213,7 @@ fun Card(
                     .width(cardWidthDp)
                     .height(80.dp)
                     .clip(RoundedCornerShape(bottomEnd = 15.dp))
-                    .background(Colors.DARK_RED)
+                    .background(DARK_RED)
             )
             Box(
                 modifier = Modifier
@@ -251,7 +256,7 @@ fun Card(
                             start.linkTo(coverImage.start, margin = 12.dp)
                         }
                         .clip(RoundedCornerShape(6.dp))
-                        .background(Colors.BG_HALF_TRANS_BLACK)
+                        .background(BG_HALF_TRANS_BLACK)
                         .padding(
                             horizontal = 5.dp,
                             vertical = 2.dp
@@ -277,7 +282,7 @@ fun Card(
             val formerUsernameShowPopup = remember { MutableTransitionState(false) }
             Text(
                 text = cardData["username"] ?: "",
-                color = Colors.DARK_RED_TEXT_LIGHT,
+                color = DARK_RED_TEXT_LIGHT,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -305,7 +310,7 @@ fun Card(
                         bottom.linkTo(baseBackground.bottom)
                     }
                     .padding(start = 5.dp),
-                color = Colors.DARK_RED_TEXT_LIGHT,
+                color = DARK_RED_TEXT_LIGHT,
                 fontSize = 18.sp
             )
             val supporterShowPopup = remember { MutableTransitionState(false) }
@@ -322,7 +327,7 @@ fun Card(
                         )
                         .height(20.dp)
                         .clip(RoundedCornerShape(100.dp))
-                        .background(Colors.OSU_BRIGHT_RED)
+                        .background(OSU_BRIGHT_RED)
                 ) {
                     Image(
                         painter = painterResource(
@@ -347,7 +352,7 @@ fun Card(
             val modeGlobalRankShowPopup = remember { MutableTransitionState(false) }
             Text(
                 text = cardData["rank"] ?: "",
-                color = Colors.DARK_RED_TEXT_LIGHT,
+                color = DARK_RED_TEXT_LIGHT,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -378,13 +383,13 @@ fun Card(
                         append(cardData["country"] ?: "")
                     },
                     inlineContent = inlineContent,
-                    color = Colors.DARK_RED_TEXT,
+                    color = DARK_RED_TEXT,
                     fontSize = 14.sp,
                     lineHeight = 18.sp,
                 )
                 Text(
                     text = cardData["countryRank"] ?: "",
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     fontSize = 16.sp,
                     lineHeight = 20.sp,
                 )
@@ -399,7 +404,7 @@ fun Card(
             if (cardData["isSupporter"] == "true") {
                 PopupTip(
                     "Supporter Rank  ${cardData["supporterRank"]}",
-                    Colors.OSU_BRIGHT_RED,
+                    OSU_BRIGHT_RED,
                     Modifier.constrainAs(supporterPopup) {
                         top.linkTo(supporterRank.bottom, margin = 4.dp)
                         start.linkTo(supporterRank.start)
@@ -412,7 +417,7 @@ fun Card(
             if ((cardData["formerUsernames"] ?: "").isNotEmpty()) {
                 PopupTip(
                     "formerly known as:\n${cardData["formerUsernames"]}",
-                    Colors.DARK_RED_TEXT_LIGHT,
+                    DARK_RED_TEXT_LIGHT,
                     Modifier.constrainAs(formerUsernamePopup) {
                         top.linkTo(nameplateName.bottom, margin = 4.dp)
                         start.linkTo(nameplateName.start)
@@ -424,7 +429,7 @@ fun Card(
             if (cardData["currentMode"] == "mania") {
                 PopupTip(
                     cardData["maniaModeGlobalRank"] ?: "",
-                    Colors.DARK_RED_TEXT_LIGHT,
+                    DARK_RED_TEXT_LIGHT,
                     Modifier.constrainAs(modeGlobalRankPopup) {
                         top.linkTo(rank.bottom, margin = 4.dp)
                         start.linkTo(rank.start)
@@ -435,7 +440,7 @@ fun Card(
                 )
                 PopupTip(
                     cardData["maniaModeCountryRank"] ?: "",
-                    Colors.DARK_RED_TEXT_LIGHT,
+                    DARK_RED_TEXT_LIGHT,
                     Modifier.constrainAs(modeCountryRankPopup) {
                         top.linkTo(country.bottom, margin = 4.dp)
                         start.linkTo(country.start)

@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.BG_HALF_TRANS_BLACK
 import kotlinx.coroutines.delay
 
 @Composable
@@ -45,7 +45,7 @@ fun PopupTip(
                         lineHeight = 18.sp,
                         modifier = Modifier
                             .background(
-                                color = Colors.BG_HALF_TRANS_BLACK,
+                                color = BG_HALF_TRANS_BLACK,
                                 shape = RoundedCornerShape(4.dp)
                             )
                             .padding(3.dp)

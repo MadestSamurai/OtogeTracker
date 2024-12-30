@@ -27,7 +27,10 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.madsam.otora.R
 import com.madsam.otora.components.DoubleCircleIndicator
-import com.madsam.otora.consts.Colors
+import com.madsam.otora.consts.DARK_RED_DEEP
+import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
+import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
+import com.madsam.otora.consts.OSU_BRIGHT_YELLOW_HALF_TRANS
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStartAxis
@@ -82,7 +85,7 @@ fun RankGraph(
                     bottomEnd = 6.dp
                 )
             )
-            .background(Colors.DARK_RED_DEEP)
+            .background(DARK_RED_DEEP)
     ) {
         val (
             rankGraph,
@@ -93,7 +96,7 @@ fun RankGraph(
 
         Text(
             text = stringResource(id = R.string.global_ranking),
-            color = Colors.DARK_RED_TEXT_LIGHT,
+            color = DARK_RED_TEXT_LIGHT,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -108,7 +111,7 @@ fun RankGraph(
 
         Text(
             text = stringResource(id = R.string.recent_90_days),
-            color = Colors.DARK_RED_TEXT_LIGHT,
+            color = DARK_RED_TEXT_LIGHT,
             fontSize = 16.sp,
             modifier = Modifier
                 .constrainAs(subtitle) {
@@ -134,7 +137,7 @@ fun RankGraph(
             ) {
                 Text(
                     text = "Loading data...",
-                    color = Colors.DARK_RED_TEXT_LIGHT,
+                    color = DARK_RED_TEXT_LIGHT,
                     fontSize = 16.sp,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -150,8 +153,8 @@ fun RankGraph(
             }
 
             val indicatorComponent = DoubleCircleIndicator(
-                outerCircleColor = Colors.OSU_BRIGHT_YELLOW_HALF_TRANS,
-                innerCircleColor = Colors.OSU_BRIGHT_YELLOW
+                outerCircleColor = OSU_BRIGHT_YELLOW_HALF_TRANS,
+                innerCircleColor = OSU_BRIGHT_YELLOW
             )
 
             CartesianChartHost(
@@ -178,7 +181,7 @@ fun RankGraph(
                         lineProvider = LineCartesianLayer.LineProvider.series(
                             rememberLine(
                                 remember {
-                                    LineCartesianLayer.LineFill.single(fill = fill(Colors.OSU_BRIGHT_YELLOW))
+                                    LineCartesianLayer.LineFill.single(fill = fill(OSU_BRIGHT_YELLOW))
                                 }
                             )
                         ),
@@ -205,11 +208,11 @@ fun RankGraph(
                             textAlignment = Layout.Alignment.ALIGN_CENTER,
                             minWidth = TextComponent.MinWidth.fixed(40.dp),
                             textSize = 13.sp,
-                            color = Colors.OSU_BRIGHT_YELLOW
+                            color = OSU_BRIGHT_YELLOW
                         ),
                         labelPosition = DefaultCartesianMarker.LabelPosition.Top,
                         guideline = rememberAxisGuidelineComponent(
-                            color = Colors.OSU_BRIGHT_YELLOW_HALF_TRANS
+                            color = OSU_BRIGHT_YELLOW_HALF_TRANS
                         ),
                         indicator = remember { { indicatorComponent } },
                         valueFormatter = object : CartesianMarkerValueFormatter {
@@ -268,7 +271,7 @@ fun RankGraph(
                     }
                 }
             },
-            color = Colors.DARK_RED_TEXT_LIGHT,
+            color = DARK_RED_TEXT_LIGHT,
             fontSize = 16.sp,
             modifier = Modifier
                 .constrainAs(highestRank) {
