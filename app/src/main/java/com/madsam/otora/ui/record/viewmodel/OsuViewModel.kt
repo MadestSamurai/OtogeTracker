@@ -6,11 +6,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.madsam.otora.consts.FlagsAlphabet
 import com.madsam.otora.glance.SmallWidget
-import com.madsam.otora.model.web.OsuCardList
-import com.madsam.otora.model.web.OsuGroup
-import com.madsam.otora.model.web.OsuInfo
-import com.madsam.otora.model.web.OsuRecentActivity
-import com.madsam.otora.model.web.OsuTopRankItem
+import com.madsam.otora.model.osu.web.OsuCardList
+import com.madsam.otora.model.osu.web.OsuGroup
+import com.madsam.otora.model.osu.web.OsuInfo
+import com.madsam.otora.model.osu.web.OsuRecentActivity
+import com.madsam.otora.model.osu.web.OsuTopRankItem
 import com.madsam.otora.service.OsuDataRequestService
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ShareUtil

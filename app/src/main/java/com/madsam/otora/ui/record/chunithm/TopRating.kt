@@ -128,6 +128,7 @@ fun ChuniRatingItemCard(
     item: ChuniScoreShow,
     itemWidth: Dp
 ) {
+    val url = "https://dp4p6x0xfi5o9.cloudfront.net/chunithm"
     Surface(
         Modifier
             .width(itemWidth)
@@ -147,7 +148,7 @@ fun ChuniRatingItemCard(
             ) = createRefs()
             Image(
                 painter = rememberAsyncImagePainter(
-                    model = "https://dp4p6x0xfi5o9.cloudfront.net/chunithm/img/cover/${item.jacket}",
+                    model = "$url/img/cover/${item.jacket}",
                     contentScale = ContentScale.Crop
                 ),
                 contentDescription = "Cover",
@@ -177,7 +178,7 @@ fun ChuniRatingItemCard(
             ) {
                 Image(
                     painter = rememberAsyncImagePainter(
-                        model = "https://dp4p6x0xfi5o9.cloudfront.net/chunithm/img/cover/${item.jacket}",
+                        model = "$url/img/cover/${item.jacket}",
                         contentScale = ContentScale.Crop
                     ),
                     contentDescription = "Cover",

@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.madsam.otora.R
 import com.madsam.otora.consts.BG_HALF_TRANS_BLACK
 import com.madsam.otora.consts.TEXT_WHITE
-import com.madsam.otora.model.web.OsuGroup
+import com.madsam.otora.model.osu.web.OsuGroup
 import kotlinx.coroutines.delay
 
 /**

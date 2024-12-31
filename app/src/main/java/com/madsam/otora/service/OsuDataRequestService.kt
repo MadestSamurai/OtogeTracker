@@ -2,12 +2,12 @@ package com.madsam.otora.service
 
 import android.util.Log
 import com.madsam.otora.callback.ICallback
-import com.madsam.otora.model.web.OsuCardList
-import com.madsam.otora.model.web.OsuHistorical
-import com.madsam.otora.model.web.OsuInfo
-import com.madsam.otora.model.web.OsuRecentActivity
-import com.madsam.otora.model.web.OsuTopRankItem
-import com.madsam.otora.model.web.OsuUserBeatmap
+import com.madsam.otora.model.osu.web.OsuCardList
+import com.madsam.otora.model.osu.web.OsuHistorical
+import com.madsam.otora.model.osu.web.OsuInfo
+import com.madsam.otora.model.osu.web.OsuRecentActivity
+import com.madsam.otora.model.osu.web.OsuTopRankItem
+import com.madsam.otora.model.osu.web.OsuUserBeatmap
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.SafeSoupUtil.safeAttr
 import com.madsam.otora.web.Api

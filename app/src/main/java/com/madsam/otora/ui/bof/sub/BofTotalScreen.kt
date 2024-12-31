@@ -7,6 +7,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,8 +16,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -40,9 +43,12 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.R
@@ -81,7 +87,8 @@ import kotlin.math.max
 @Composable
 fun BofTotalScreen(
     vm: BofViewModel,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    listState: LazyListState
 ) {
     val scope = rememberCoroutineScope()
 
@@ -99,6 +106,8 @@ fun BofTotalScreen(
     val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
     val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
     val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
+
+    val highlightedText = vm.highlightedText.asStateFlow().collectAsState().value
 
     LaunchedEffect(selectedDate, selectedTime) {
         scope.launch {
@@ -142,42 +151,48 @@ fun BofTotalScreen(
         rightPadding = rightPadding
     )
 
-    LazyColumn {
+    LazyColumn(state = listState) {
         item {
-            Row {
-                Button(
-                    onClick = { showDialog.value = true },
+            Box {
+                RankColumn(
+                    configuration = configuration,
+                    leftPadding = leftPadding,
+                    rightPadding = rightPadding,
+                    screenWidthDp = screenWidthDp,
+                    isCompare = isCompare,
+                    barWidth = barWidth,
+                    textWidth = textWidth,
+                    totalData = totalData.value,
+                    selectedDate = selectedDate,
+                    selectedTimeStr = selectedTimeStr
+                )
+                Row(
                     modifier = Modifier
-                        .fillMaxWidth(0.5f)
-                        .padding(8.dp)
+                        .height(40.dp)
+                        .align(Alignment.TopEnd)
                 ) {
-                    Text(text = "Show Capture Dialog")
-                }
-                if (screenWidthDp <= 800.dp) {
-                    Button(
-                        onClick = { dataSwitch.value = !dataSwitch.value },
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_picture),
+                        contentDescription = "Capture",
+                        tint = Color.White,
                         modifier = Modifier
-                            .fillMaxWidth()
                             .padding(8.dp)
-                    ) {
-                        Text(text = "Switch Data")
+                            .size(22.dp)
+                            .clickable(onClick = { showDialog.value = true })
+                    )
+                    if (screenWidthDp <= 800.dp) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_switch_arrow),
+                            contentDescription = "Capture",
+                            tint = Color.White,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .size(22.dp)
+                                .clickable(onClick = { dataSwitch.value = !dataSwitch.value })
+                        )
                     }
                 }
             }
-        }
-        item {
-            RankColumn(
-                configuration = configuration,
-                leftPadding = leftPadding,
-                rightPadding = rightPadding,
-                screenWidthDp = screenWidthDp,
-                isCompare = isCompare,
-                barWidth = barWidth,
-                textWidth = textWidth,
-                totalData = totalData.value,
-                selectedDate = selectedDate,
-                selectedTimeStr = selectedTimeStr
-            )
         }
         if (totalData.value.isNotEmpty()) {
             itemsIndexed(totalData.value) { index, entry ->
@@ -193,7 +208,8 @@ fun BofTotalScreen(
                     configuration = configuration,
                     leftPadding = leftPadding,
                     rightPadding = rightPadding,
-                    dataSwitch = dataSwitch.value
+                    dataSwitch = dataSwitch.value,
+                    highlightedText = highlightedText
                 )
             }
         }
@@ -452,7 +468,8 @@ fun BofEntryRowTotal(
     configuration: Configuration = LocalConfiguration.current,
     leftPadding: Dp = 0.dp,
     rightPadding: Dp = 0.dp,
-    dataSwitch: Boolean = false
+    dataSwitch: Boolean = false,
+    highlightedText: String = ""
 ) {
     val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
 
@@ -460,6 +477,24 @@ fun BofEntryRowTotal(
     else (entry.total.toFloat() / maxTotal * barWidth.value).ndp()
     val oldBarWidth = if (maxTotal == 0) 0.dp
     else (entry.oldTotal.toFloat() / maxTotal * barWidth.value).ndp()
+
+    val annotatedString = buildAnnotatedString {
+        if (highlightedText.isNotEmpty()) {
+            var startIndex = entry.title.indexOf(highlightedText, ignoreCase = true)
+            var currentIndex = 0
+            while (startIndex >= 0) {
+                append(entry.title.substring(currentIndex, startIndex))
+                withStyle(style = SpanStyle(background = Color.Red)) {
+                    append(entry.title.substring(startIndex, startIndex + highlightedText.length))
+                }
+                currentIndex = startIndex + highlightedText.length
+                startIndex = entry.title.indexOf(highlightedText, startIndex + highlightedText.length, ignoreCase = true)
+            }
+            append(entry.title.substring(currentIndex))
+        } else {
+            append(entry.title)
+        }
+    }
 
     fun calculateColor(value: Double): Color {
         val normalizedValue = value.toInt().coerceIn(0, 1000) / 1000f
@@ -594,7 +629,7 @@ fun BofEntryRowTotal(
                     )
             }
             Text(
-                text = entry.title,
+                text = annotatedString,
                 fontSize = 15.nsp(),
                 lineHeight = 16.nsp(),
                 fontFamily = sarasaFont,

@@ -5,11 +5,11 @@ import com.madsam.otora.model.bof.web.BofTeam
 import com.madsam.otora.model.chuni.web.lxns.ChuniAliases
 import com.madsam.otora.model.chuni.web.lxns.LxnsDatas
 import com.madsam.otora.model.chuni.web.zetaraku.ZetarakuDatas
-import com.madsam.otora.model.web.OsuCardList
-import com.madsam.otora.model.web.OsuHistorical
-import com.madsam.otora.model.web.OsuRecentActivity
-import com.madsam.otora.model.web.OsuTopRankItem
-import com.madsam.otora.model.web.OsuUserBeatmap
+import com.madsam.otora.model.osu.web.OsuCardList
+import com.madsam.otora.model.osu.web.OsuHistorical
+import com.madsam.otora.model.osu.web.OsuRecentActivity
+import com.madsam.otora.model.osu.web.OsuTopRankItem
+import com.madsam.otora.model.osu.web.OsuUserBeatmap
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path

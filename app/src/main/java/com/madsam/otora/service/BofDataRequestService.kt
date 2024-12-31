@@ -26,6 +26,7 @@ import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.IOException
+import java.net.SocketTimeoutException
 import java.time.LocalDate
 import java.util.concurrent.Executors
 import kotlin.math.abs
@@ -73,7 +74,13 @@ class BofDataRequestService(private val context: Context) {
     private suspend fun requestBofttEntryData(date: String) {
         println("Requesting data for $date")
         val bofCall = api.getBofttData(date)
-        val response = bofCall.execute()
+        val response = try {
+            bofCall.execute()
+        } catch (e: SocketTimeoutException) {
+            Log.e(TAG, "Exception: ${e.message}")
+            return
+        }
+
         if (!response.isSuccessful) {
             Log.e(TAG, "Response is not successful")
             return

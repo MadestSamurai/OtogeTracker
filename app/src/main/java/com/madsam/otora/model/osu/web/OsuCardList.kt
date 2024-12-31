@@ -1,4 +1,4 @@
-package com.madsam.otora.model.web
+package com.madsam.otora.model.osu.web
 
 /**
  * 项目名: OtogeTracker

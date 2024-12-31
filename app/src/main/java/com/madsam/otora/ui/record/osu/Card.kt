@@ -58,7 +58,7 @@ import com.madsam.otora.consts.DARK_RED_DEEP
 import com.madsam.otora.consts.DARK_RED_TEXT
 import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
 import com.madsam.otora.consts.OSU_BRIGHT_RED
-import com.madsam.otora.model.web.OsuGroup
+import com.madsam.otora.model.osu.web.OsuGroup
 import dev.shreyaspatil.capturable.capturable
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.MutableStateFlow

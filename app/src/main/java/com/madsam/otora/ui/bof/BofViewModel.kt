@@ -42,12 +42,49 @@ class BofViewModel(
     var thresholdImpr = MutableStateFlow(1)
     var thresholdImprOld = MutableStateFlow(1)
 
+    var selectedTab = MutableStateFlow(0)
     var selectedDate = MutableStateFlow(LocalDate.now())
     var selectedTime = MutableStateFlow("-1")
     var selectedTimeStr = MutableStateFlow("")
 
     val leftPadding = MutableStateFlow(0.dp)
     val rightPadding = MutableStateFlow(0.dp)
+
+    val scrollToIndexList = MutableStateFlow(listOf<Int>())
+    val highlightedIndices = MutableStateFlow(listOf<Int>())
+    val highlightedText = MutableStateFlow("")
+    val currentIndex = MutableStateFlow(0)
+
+    fun findItemIndex(query: String, originalData: List<BofEntryShow>) {
+        scrollToIndexList.update {
+            originalData.mapIndexedNotNull { index, item ->
+                if (item.title.contains(query, ignoreCase = true)) index else null
+            }
+        }
+        currentIndex.update { 0 }
+        highlightedText.update { query }
+        highlightedIndices.update {
+            originalData.mapIndexedNotNull { index, item ->
+                if (item.title.contains(query, ignoreCase = true)) index else null
+            }
+        }
+    }
+
+    fun scrollToPrevious() {
+        if (currentIndex.value > 0) {
+            currentIndex.update { it - 1 }
+        } else {
+            currentIndex.update { it }
+        }
+    }
+
+    fun scrollToNext() {
+        if (currentIndex.value < scrollToIndexList.value.size - 1) {
+            currentIndex.update { it + 1 }
+        } else {
+            currentIndex.update { it }
+        }
+    }
 
     fun updatePadding(view: View) {
         leftPadding.update { getSafeInsetLeftDp(view) }
