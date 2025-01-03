@@ -50,18 +50,41 @@ class BofViewModel(
     val leftPadding = MutableStateFlow(0.dp)
     val rightPadding = MutableStateFlow(0.dp)
 
-    val scrollToIndexList = MutableStateFlow(listOf<Int>())
     val highlightedIndices = MutableStateFlow(listOf<Int>())
     val highlightedText = MutableStateFlow("")
-    val currentIndex = MutableStateFlow(0)
 
-    fun findItemIndex(query: String, originalData: List<BofEntryShow>) {
+    val scrollToIndexListTotal = MutableStateFlow(listOf<Int>())
+    val currentIndexTotal = MutableStateFlow(0)
+    val scrollToIndexListAvg = MutableStateFlow(listOf<Int>())
+    val currentIndexAvg = MutableStateFlow(0)
+    val scrollToIndexListMedian = MutableStateFlow(listOf<Int>())
+    val currentIndexMedian = MutableStateFlow(0)
+    val scrollToIndexListDiff = MutableStateFlow(listOf<Int>())
+    val currentIndexDiff = MutableStateFlow(0)
+    val scrollToIndexListTeam = MutableStateFlow(listOf<Int>())
+    val currentIndexTeam = MutableStateFlow(0)
+
+    fun findItemIndex(query: String, originalData: List<BofEntryShow>, pageIndex: Int) {
+        val scrollToIndexList = when (pageIndex) {
+            0 -> scrollToIndexListTotal
+            1 -> scrollToIndexListAvg
+            2 -> scrollToIndexListMedian
+            3 -> scrollToIndexListDiff
+            else -> scrollToIndexListTotal
+        }
+        val currentIndex = when (pageIndex) {
+            0 -> currentIndexTotal
+            1 -> currentIndexAvg
+            2 -> currentIndexMedian
+            3 -> currentIndexDiff
+            else -> currentIndexTotal
+        }
+        currentIndex.update { 0 }
         scrollToIndexList.update {
             originalData.mapIndexedNotNull { index, item ->
                 if (item.title.contains(query, ignoreCase = true)) index else null
             }
         }
-        currentIndex.update { 0 }
         highlightedText.update { query }
         highlightedIndices.update {
             originalData.mapIndexedNotNull { index, item ->
@@ -70,7 +93,14 @@ class BofViewModel(
         }
     }
 
-    fun scrollToPrevious() {
+    fun scrollToPrevious(pageIndex: Int) {
+        val currentIndex = when (pageIndex) {
+            0 -> currentIndexTotal
+            1 -> currentIndexAvg
+            2 -> currentIndexMedian
+            3 -> currentIndexDiff
+            else -> currentIndexTotal
+        }
         if (currentIndex.value > 0) {
             currentIndex.update { it - 1 }
         } else {
@@ -78,7 +108,21 @@ class BofViewModel(
         }
     }
 
-    fun scrollToNext() {
+    fun scrollToNext(pageIndex: Int) {
+        val currentIndex = when (pageIndex) {
+            0 -> currentIndexTotal
+            1 -> currentIndexAvg
+            2 -> currentIndexMedian
+            3 -> currentIndexDiff
+            else -> currentIndexTotal
+        }
+        val scrollToIndexList = when (pageIndex) {
+            0 -> scrollToIndexListTotal
+            1 -> scrollToIndexListAvg
+            2 -> scrollToIndexListMedian
+            3 -> scrollToIndexListDiff
+            else -> scrollToIndexListTotal
+        }
         if (currentIndex.value < scrollToIndexList.value.size - 1) {
             currentIndex.update { it + 1 }
         } else {
@@ -122,30 +166,27 @@ class BofViewModel(
 
     fun <T, R : Comparable<R>> updateRanks(
         data: List<T>,
-        oldTotalSelector: (T) -> R,
-        totalSelector: (T) -> R,
+        oldSelector: (T) -> R,
+        selector: (T) -> R,
         oldRankSetter: (T, Int) -> Unit,
         rankSetter: (T, Int) -> Unit,
         diffSetter: (T, Int) -> Unit,
         filter: (T) -> Boolean,
         reviewCountSelector: (T) -> Int
     ): List<T> where T : Rankable {
-        var sortedData = data.sortedWith(
-            compareByDescending(oldTotalSelector).thenByDescending(reviewCountSelector)
-        )
+        var sortedDataOld = data.sortedWith(compareByDescending(oldSelector)).filter { filter(it) }
         var currentOldRank = 1
-        sortedData.forEachIndexed { index, entry ->
-            if (index > 0 && oldTotalSelector(sortedData[index - 1]) != oldTotalSelector(entry)) {
+        sortedDataOld.forEachIndexed { index, entry ->
+            if (index > 0 && oldSelector(sortedDataOld[index - 1]) != oldSelector(entry)) {
                 currentOldRank = index + 1
             }
             oldRankSetter(entry, currentOldRank)
         }
-        sortedData =
-            data.sortedWith(compareByDescending(totalSelector).thenByDescending(reviewCountSelector))
-                .filter(filter)
+        var sortedData =
+            sortedDataOld.sortedWith(compareByDescending(selector).thenByDescending(reviewCountSelector))
         var currentRank = 1
         sortedData.forEachIndexed { index, entry ->
-            if (index > 0 && totalSelector(sortedData[index - 1]) != totalSelector(entry)) {
+            if (index > 0 && selector(sortedData[index - 1]) != selector(entry)) {
                 currentRank = index + 1
             }
             rankSetter(entry, currentRank)

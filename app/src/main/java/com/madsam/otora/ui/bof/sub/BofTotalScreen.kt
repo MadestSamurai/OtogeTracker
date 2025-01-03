@@ -123,21 +123,30 @@ fun BofTotalScreen(
 
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     val barWidth = when (screenWidthDp) {
-        in 0.dp..400.dp -> (screenWidthDp.value * 0.4f).ndp()
-        in 400.dp..800.dp -> ((screenWidthDp.value - 400) * 0.3f + 160).ndp()
-        else -> 280.ndp()
+        in 0.dp..400.dp -> (screenWidthDp.value * 0.4f)
+        in 400.dp..800.dp -> ((screenWidthDp.value - 400) * 0.3f + 160)
+        else -> 280f
     }
     val textWidth = when {
-        screenWidthDp > 800.dp -> screenWidthDp - 302.ndp() - barWidth
-        isCompare -> screenWidthDp - 58.ndp() - barWidth
-        else -> screenWidthDp - 40.ndp() - barWidth - 36.ndp()
+        screenWidthDp > 800.dp && isCompare ->
+            // Compare: 62, Rank: 40, Impr: 36, Median: 82, Avg: 74
+            screenWidthDp - 294.ndp() - barWidth.ndp()
+        screenWidthDp > 800.dp && !isCompare ->
+            // Rank: 40, Impr: 36, Median: 82, Avg: 74
+            screenWidthDp - 232.ndp() - barWidth.ndp()
+        screenWidthDp < 800.dp && isCompare ->
+            // Rank: 58,
+            screenWidthDp - 58.ndp() - barWidth.ndp()
+        else ->
+            // Rank: 40,
+            screenWidthDp - 40.ndp() - barWidth.ndp()
     }
 
     LaunchedEffect(configuration) {
         vm.updatePadding(view)
     }
 
-    CaptureDialog(
+    TotalCapture(
         showDialog = showDialog,
         context = context,
         snackbarHostState = snackbarHostState,
@@ -154,7 +163,7 @@ fun BofTotalScreen(
     LazyColumn(state = listState) {
         item {
             Box {
-                RankColumn(
+                TotalHeader(
                     configuration = configuration,
                     leftPadding = leftPadding,
                     rightPadding = rightPadding,
@@ -164,7 +173,8 @@ fun BofTotalScreen(
                     textWidth = textWidth,
                     totalData = totalData.value,
                     selectedDate = selectedDate,
-                    selectedTimeStr = selectedTimeStr
+                    selectedTimeStr = selectedTimeStr,
+                    dataSwitch = dataSwitch.value
                 )
                 Row(
                     modifier = Modifier
@@ -218,7 +228,7 @@ fun BofTotalScreen(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun CaptureDialog(
+fun TotalCapture(
     showDialog: MutableState<Boolean>,
     context: Context,
     snackbarHostState: SnackbarHostState,
@@ -232,8 +242,8 @@ fun CaptureDialog(
     rightPadding: Dp,
 ) {
     val screenWidthImage = 1000.dp
-    val barWidthImage = 280.ndp()
-    val textWidthImage = 1000.dp - 302.ndp() - barWidthImage
+    val barWidthImage = 280f
+    val textWidthImage = 1000.dp - 294.ndp() - barWidthImage.ndp()
     val scope = rememberCoroutineScope()
     if (showDialog.value) {
         val captureController = rememberCaptureController()
@@ -253,7 +263,7 @@ fun CaptureDialog(
                         modifier = Modifier
                             .clip(RoundedCornerShape(15.dp))
                             .height(250.dp)
-                            .requiredHeight(6000.dp)
+                            .requiredHeight(10000.dp)
                             .requiredWidth(screenWidthImage)
                     ) {
                         Column(
@@ -261,7 +271,7 @@ fun CaptureDialog(
                                 .capturable(captureController)
                                 .fillMaxWidth()
                         ) {
-                            RankColumn(
+                            TotalHeader(
                                 configuration = configuration,
                                 leftPadding = leftPadding,
                                 rightPadding = rightPadding,
@@ -276,7 +286,7 @@ fun CaptureDialog(
                             )
                             if (totalData.isNotEmpty()) {
                                 for ((index, entry) in totalData.withIndex()) {
-                                    if (entry.index > 150) break
+                                    if (entry.index > 475) break
                                     BofEntryRowTotal(
                                         entry = entry,
                                         index = index + 1,
@@ -330,18 +340,19 @@ fun CaptureDialog(
 }
 
 @Composable
-fun RankColumn(
+fun TotalHeader(
     configuration: Configuration,
     leftPadding: Dp,
     rightPadding: Dp,
     screenWidthDp: Dp,
     isCompare: Boolean,
-    barWidth: Dp,
+    barWidth: Float,
     textWidth: Dp,
     isImage: Boolean = false,
     totalData: List<BofEntryShow> = emptyList(),
     selectedDate: LocalDate = LocalDate.now(),
-    selectedTimeStr: String = ""
+    selectedTimeStr: String = "",
+    dataSwitch: Boolean = false
 ) {
     Column {
         if (totalData.isEmpty() || totalData[0].total == 0) {
@@ -390,25 +401,27 @@ fun RankColumn(
                 color = Color.White,
                 textAlign = TextAlign.End,
                 modifier = Modifier
-                    .padding(end = if (screenWidthDp < 800.dp || !isCompare) 22.ndp() else 4.ndp())
-                    .width(if (screenWidthDp < 800.dp || !isCompare) 36.ndp() else 98.ndp())
+                    .padding(end = if (screenWidthDp < 800.dp && isCompare) 22.ndp() else 4.dp)
+                    .width(if (screenWidthDp >= 800.dp && isCompare) 98.ndp() else 36.ndp())
             )
             Text(
                 text = "",
                 modifier = Modifier
-                    .padding(end = 8.ndp(), top = 2.ndp())
                     .width(textWidth)
+                    .padding(end = 8.ndp(), top = 2.ndp())
             )
-            Text(
-                text = "Total",
-                fontFamily = sarasaFont,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.nsp(),
-                color = Color.White,
-                modifier = Modifier
-                    .width(barWidth)
-            )
-            if (screenWidthDp > 800.dp) {
+            if (!dataSwitch) {
+                Text(
+                    text = "Total",
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.nsp(),
+                    color = Color.White,
+                    modifier = Modifier
+                        .width(barWidth.ndp())
+                )
+            }
+            if (screenWidthDp > 800.dp || dataSwitch) {
                 Text(
                     text = "Impr",
                     fontFamily = sarasaFont,
@@ -442,6 +455,7 @@ fun RankColumn(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .width(74.ndp())
+                        .padding(end = 4.ndp())
                 )
             }
             if (isLandscape(configuration) && !isImage) {
@@ -463,7 +477,7 @@ fun BofEntryRowTotal(
     isCompare: Boolean = true,
     isImage: Boolean = false,
     rowWidth: Dp,
-    barWidth: Dp,
+    barWidth: Float,
     textWidth: Dp,
     configuration: Configuration = LocalConfiguration.current,
     leftPadding: Dp = 0.dp,
@@ -473,10 +487,10 @@ fun BofEntryRowTotal(
 ) {
     val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
 
-    val newBarWidth = if (maxTotal == 0) 0.dp
-    else (entry.total.toFloat() / maxTotal * barWidth.value).ndp()
-    val oldBarWidth = if (maxTotal == 0) 0.dp
-    else (entry.oldTotal.toFloat() / maxTotal * barWidth.value).ndp()
+    val newBarWidth = if (maxTotal == 0) 0f
+    else entry.total.toFloat() / maxTotal * barWidth
+    val oldBarWidth = if (maxTotal == 0) 0f
+    else entry.oldTotal.toFloat() / maxTotal * barWidth
 
     val annotatedString = buildAnnotatedString {
         if (highlightedText.isNotEmpty()) {
@@ -507,7 +521,7 @@ fun BofEntryRowTotal(
             .height(36.ndp())
             .background(backgroundColor)
     ) {
-        if (isLandscape(configuration)) {
+        if (isLandscape(configuration) && !isImage) {
             Box(
                 modifier = Modifier
                     .width(leftPadding)
@@ -617,8 +631,8 @@ fun BofEntryRowTotal(
              */
             val textMod = @Composable { top: Dp, height: Dp ->
                 Modifier
-                    .padding(end = 8.ndp(), top = top)
                     .width(textWidth)
+                    .padding(end = 8.ndp(), top = top)
                     .height(height)
                     .then(
                         if (!isImage) {
@@ -657,7 +671,7 @@ fun BofEntryRowTotal(
             Column {
                 Box(
                     modifier = Modifier
-                        .width(barWidth)
+                        .width(barWidth.ndp())
                         .background(
                             color = Color.Transparent,
                         )
@@ -671,8 +685,8 @@ fun BofEntryRowTotal(
                     ) {
                         Box(
                             modifier = Modifier
+                                .width(newBarWidth.ndp())
                                 .padding(end = 20.ndp())
-                                .width(newBarWidth)
                                 .height(if (isCompare) 18.ndp() else 34.ndp())
                                 .background(
                                     color = RANKING_RED,
@@ -700,7 +714,7 @@ fun BofEntryRowTotal(
                 if (isCompare) {
                     Box(
                         modifier = Modifier
-                            .width(barWidth)
+                            .width(barWidth.ndp())
                             .background(
                                 color = Color.Transparent,
                             )
@@ -713,8 +727,8 @@ fun BofEntryRowTotal(
                         ) {
                             Box(
                                 modifier = Modifier
+                                    .width(oldBarWidth.ndp())
                                     .padding(end = 20.ndp())
-                                    .width(oldBarWidth)
                                     .height(14.ndp())
                                     .background(
                                         color = RANKING_BLUE,
@@ -783,7 +797,7 @@ fun BofEntryRowTotal(
                     .padding(end = 4.ndp())
             )
         }
-        if (isLandscape(configuration)) {
+        if (isLandscape(configuration) && !isImage) {
             Box(
                 modifier = Modifier
                     .width(rightPadding)

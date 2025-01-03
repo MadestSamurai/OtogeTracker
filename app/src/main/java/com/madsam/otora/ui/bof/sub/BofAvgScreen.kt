@@ -1,38 +1,59 @@
 package com.madsam.otora.ui.bof.sub
 
+import android.content.Context
+import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.R
 import com.madsam.otora.consts.BG_DARK_GRAY
+import com.madsam.otora.consts.RANKING_BLUE
 import com.madsam.otora.consts.RANKING_GREEN
 import com.madsam.otora.consts.RANKING_RED
 import com.madsam.otora.consts.RANKING_YELLOW
@@ -40,11 +61,18 @@ import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.ui.bof.BofViewModel
-import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.ui.record.osu.saveImageBitmapToFile
+import com.madsam.otora.ui.record.osu.saveImageToGallery
+import com.madsam.otora.utils.ScreenUtil.isLandscape
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
+import dev.shreyaspatil.capturable.capturable
+import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
+import java.time.LocalDate
+import kotlin.math.max
 
 /**
  * 项目名: OtogeTracker
@@ -54,101 +82,369 @@ import kotlinx.coroutines.launch
  * 描述: BOF数据展示界面
  */
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun BofAvgScreen(vm: BofViewModel) {
+fun BofAvgScreen(
+    vm: BofViewModel,
+    snackbarHostState: SnackbarHostState,
+    listState: LazyListState
+) {
     val scope = rememberCoroutineScope()
+
+    val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val view = LocalView.current
+
     val avgData = vm.avgData.asStateFlow().collectAsState()
-    val thresholdImpr = vm.thresholdImpr.asStateFlow().collectAsState()
-    val thresholdImprOld = vm.thresholdImprOld.asStateFlow().collectAsState()
+    val maxAvg = max(
+        avgData.value.maxOfOrNull { it.avg } ?: 1.0,
+        avgData.value.maxOfOrNull { it.oldAvg } ?: 1.0
+    )
     val selectedDate = vm.selectedDate.asStateFlow().collectAsState().value
     val selectedTime = vm.selectedTime.asStateFlow().collectAsState().value
+    val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
+    val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
+    val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
+
+    val thresholdImpr = vm.thresholdImpr.asStateFlow().collectAsState()
+    val thresholdImprOld = vm.thresholdImprOld.asStateFlow().collectAsState()
+
+    val highlightedText = vm.highlightedText.asStateFlow().collectAsState().value
 
     LaunchedEffect(selectedDate, selectedTime) {
         scope.launch {
             vm.requestAvgData()
+            vm.generateSelectedTimeStr()
         }
     }
 
-    LazyColumn {
+    val showDialog = remember { mutableStateOf(false) }
+
+    val isCompare = avgData.value.isNotEmpty() && avgData.value[0].oldAvg != 0.0
+
+    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val barWidth = when (screenWidthDp) {
+        in 0.dp..800.dp -> (screenWidthDp.value * 0.3f)
+        else -> 240f
+    }
+    val textWidth = when {
+        screenWidthDp > 800.dp && isCompare ->
+            // Compare: 62, Rank: 40, Impr: 36
+            screenWidthDp - 138.ndp() - barWidth.ndp()
+
+        screenWidthDp > 800.dp && !isCompare ->
+            // Rank: 40, Impr: 36
+            screenWidthDp - 76.ndp() - barWidth.ndp()
+
+        screenWidthDp < 800.dp && isCompare ->
+            // Rank: 58, Impr: 36
+            screenWidthDp - 94.ndp() - barWidth.ndp()
+
+        else ->
+            // Rank: 40, Impr: 36
+            screenWidthDp - 76.ndp() - barWidth.ndp()
+    }
+
+    LaunchedEffect(configuration) {
+        vm.updatePadding(view)
+    }
+
+    AvgCapture(
+        showDialog = showDialog,
+        context = context,
+        snackbarHostState = snackbarHostState,
+        avgData = avgData.value,
+        selectedDate = selectedDate,
+        selectedTimeStr = selectedTimeStr,
+        maxAvg = maxAvg,
+        isCompare = isCompare,
+        configuration = configuration,
+        leftPadding = leftPadding,
+        rightPadding = rightPadding,
+        thresholdImpr = thresholdImpr.value,
+        thresholdImprOld = thresholdImprOld.value
+    )
+
+    LazyColumn(state = listState) {
         item {
-            val selectedTimeStr: String = if (selectedTime == "-1") {
-                if (avgData.value.isEmpty()) {
-                    ""
-                } else {
-                    CommonUtils.roundDownToNearestFiveMinutes(avgData.value.first().time)
+            Box {
+                AvgHeader(
+                    configuration = configuration,
+                    leftPadding = leftPadding,
+                    rightPadding = rightPadding,
+                    screenWidthDp = screenWidthDp,
+                    isCompare = isCompare,
+                    barWidth = barWidth,
+                    textWidth = textWidth,
+                    avgData = avgData.value,
+                    selectedDate = selectedDate,
+                    selectedTimeStr = selectedTimeStr,
+                    thresholdImpr = thresholdImpr.value,
+                )
+                Row(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .align(Alignment.TopEnd)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_picture),
+                        contentDescription = "Capture",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .size(22.dp)
+                            .clickable(onClick = { showDialog.value = true })
+                    )
                 }
-            } else {
-                CommonUtils.roundDownToNearestFiveMinutes(selectedTime)
             }
-            if (avgData.value.isEmpty()) {
-                Text(text = "No Data at $selectedDate $selectedTimeStr")
-            } else {
-                Text(
-                    text = "Avg Ranking - Exclude Impr below ${thresholdImpr.value}",
-                    fontFamily = sarasaFont,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.nsp(),
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.Black)
-                        .padding(top = 10.ndp())
-                )
-                Text(
-                    text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
-                    fontFamily = sarasaFont,
-                    fontSize = 12.nsp(),
-                    color = Color.White,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.Black)
+        }
+        if (avgData.value.isNotEmpty()) {
+            itemsIndexed(avgData.value) { index, entry ->
+                BofEntryRowAvg(
+                    entry = entry,
+                    index = index + 1,
+                    maxAvg = maxAvg,
+                    isCompare = isCompare,
+                    isImage = false,
+                    rowWidth = screenWidthDp,
+                    barWidth = barWidth,
+                    textWidth = textWidth,
+                    configuration = configuration,
+                    leftPadding = leftPadding,
+                    rightPadding = rightPadding,
+                    highlightedText = highlightedText,
+                    thresholdImprOld = thresholdImprOld.value
                 )
             }
         }
-        var isCompare: Boolean = if (avgData.value.isNotEmpty()) {
-            avgData.value[0].oldTotal != 0
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun AvgCapture(
+    showDialog: MutableState<Boolean>,
+    context: Context,
+    snackbarHostState: SnackbarHostState,
+    avgData: List<BofEntryShow>,
+    selectedDate: LocalDate,
+    selectedTimeStr: String,
+    maxAvg: Double,
+    isCompare: Boolean,
+    configuration: Configuration,
+    leftPadding: Dp,
+    rightPadding: Dp,
+    thresholdImpr: Int,
+    thresholdImprOld: Int
+) {
+    val screenWidthImage = 1000.dp
+    val barWidthImage = 280f
+    val textWidthImage = 1000.dp - 138.ndp() - barWidthImage.ndp()
+    val scope = rememberCoroutineScope()
+    if (showDialog.value) {
+        val captureController = rememberCaptureController()
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text(text = "Capture Content") },
+            modifier = Modifier.height(500.dp),
+            text = {
+                Column {
+                    Text(
+                        text = "Capturing content will save the current content to your gallery. " +
+                                "Image may be too large to show in the dialog, " +
+                                "including the parts that are not visible on the screen.",
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(15.dp))
+                            .height(250.dp)
+                            .requiredHeight(10000.dp)
+                            .requiredWidth(screenWidthImage)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .capturable(captureController)
+                                .fillMaxWidth()
+                        ) {
+                            AvgHeader(
+                                configuration = configuration,
+                                leftPadding = leftPadding,
+                                rightPadding = rightPadding,
+                                screenWidthDp = screenWidthImage,
+                                isCompare = isCompare,
+                                barWidth = barWidthImage,
+                                textWidth = textWidthImage,
+                                isImage = true,
+                                avgData = avgData,
+                                selectedDate = selectedDate,
+                                selectedTimeStr = selectedTimeStr,
+                                thresholdImpr = thresholdImpr
+                            )
+                            if (avgData.isNotEmpty()) {
+                                for ((index, entry) in avgData.withIndex()) {
+                                    if (entry.index > 150) break
+                                    BofEntryRowAvg(
+                                        entry = entry,
+                                        index = index + 1,
+                                        maxAvg = maxAvg,
+                                        isCompare = isCompare,
+                                        isImage = true,
+                                        rowWidth = screenWidthImage,
+                                        barWidth = barWidthImage,
+                                        textWidth = textWidthImage,
+                                        thresholdImprOld = thresholdImprOld
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            val bitmapAsync = captureController.captureAsync()
+                            try {
+                                val bitmap = bitmapAsync.await()
+                                val file = File(context.cacheDir, "bof_avg.png")
+                                saveImageBitmapToFile(bitmap, file)
+                                saveImageToGallery(context, file, "bof_avg")
+                                snackbarHostState.showSnackbar("Captured content saved to gallery")
+                            } catch (error: Throwable) {
+                                Log.e("Capture", "Error capturing content", error)
+                                snackbarHostState.showSnackbar("Error capturing content")
+                                error.printStackTrace()
+                            }
+                        }
+                        showDialog.value = false
+                    }
+                ) {
+                    Text(text = "Capture")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        showDialog.value = false
+                    }
+                ) {
+                    Text(text = "Cancel")
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun AvgHeader(
+    configuration: Configuration,
+    leftPadding: Dp,
+    rightPadding: Dp,
+    screenWidthDp: Dp,
+    isCompare: Boolean,
+    barWidth: Float,
+    textWidth: Dp,
+    isImage: Boolean = false,
+    avgData: List<BofEntryShow> = emptyList(),
+    selectedDate: LocalDate = LocalDate.now(),
+    selectedTimeStr: String = "",
+    thresholdImpr: Int
+) {
+    Column {
+        if (avgData.isEmpty() || avgData[0].avg == 0.0) {
+            Text(text = "No Data at $selectedDate $selectedTimeStr")
         } else {
-            false
-        }
-        item {
-            Row(
+            Text(
+                text = "Average Score Ranking",
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .background(BG_DARK_GRAY)
                     .fillMaxWidth()
-            ) {
-                Text(
-                    text = "",
+                    .background(Color.Black)
+                    .padding(top = 10.ndp())
+            )
+            Text(
+                text = "Exclude Impr below $thresholdImpr",
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Black)
+            )
+            Text(
+                text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
+                fontFamily = sarasaFont,
+                fontSize = 12.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Black)
+                    .padding(end = if (isLandscape(configuration) && !isImage) rightPadding else 0.dp)
+            )
+        }
+        Row(
+            modifier = Modifier
+                .background(BG_DARK_GRAY)
+                .fillMaxWidth()
+        ) {
+            if (isLandscape(configuration) && !isImage) {
+                Box(
                     modifier = Modifier
-                        .width(98.ndp())
-                )
-                Text(
-                    text = "",
-                    modifier = Modifier
-                        .padding(end = 8.dp, top = 2.dp)
-                        .fillMaxWidth(0.5f)
-                )
-                Text(
-                    text = " ",
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                )
-                Text(
-                    text = "Impr",
-                    fontFamily = sarasaFont,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.nsp(),
-                    color = Color.White,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .width(36.ndp())
+                        .width(leftPadding)
                 )
             }
-        }
-        itemsIndexed(avgData.value) { index, entry ->
-            BofEntryRowAvg(entry, index + 1, thresholdImprOld.value, isCompare)
+            Text(
+                text = "Rank",
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .padding(end = if (screenWidthDp < 800.dp && isCompare) 22.ndp() else 4.dp)
+                    .width(if (screenWidthDp >= 800.dp && isCompare) 98.ndp() else 36.ndp())
+            )
+            Text(
+                text = "",
+                modifier = Modifier
+                    .width(textWidth)
+                    .padding(end = 8.ndp(), top = 2.ndp())
+            )
+            Text(
+                text = "Average",
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.nsp(),
+                color = Color.White,
+                modifier = Modifier
+                    .width(barWidth.ndp())
+            )
+            Text(
+                text = "Impr",
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .width(36.ndp())
+            )
+            if (isLandscape(configuration) && !isImage) {
+                Box(
+                    modifier = Modifier
+                        .width(rightPadding)
+                )
+            }
         }
     }
 }
@@ -158,74 +454,154 @@ fun BofAvgScreen(vm: BofViewModel) {
 fun BofEntryRowAvg(
     entry: BofEntryShow,
     index: Int,
-    oldThre: Int,
-    isCompare: Boolean
+    maxAvg: Double,
+    isCompare: Boolean = true,
+    isImage: Boolean = false,
+    rowWidth: Dp,
+    barWidth: Float,
+    textWidth: Dp,
+    configuration: Configuration = LocalConfiguration.current,
+    leftPadding: Dp = 0.dp,
+    rightPadding: Dp = 0.dp,
+    highlightedText: String = "",
+    thresholdImprOld: Int
 ) {
     val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
-    val barWidthFraction = (entry.avg.toFloat() / 1000) * 1f
-    var rowHeight = remember { mutableIntStateOf(0) }
+    val newBarWidth = if (entry.avg == 0.0) 0f
+    else entry.avg.toFloat() / maxAvg.toFloat() * barWidth
+    val oldBarWidth = if (entry.avg == 0.0) 0f
+    else entry.oldAvg.toFloat() / maxAvg.toFloat() * barWidth
+
+    val annotatedString = buildAnnotatedString {
+        if (highlightedText.isNotEmpty()) {
+            var startIndex = entry.title.indexOf(highlightedText, ignoreCase = true)
+            var currentIndex = 0
+            while (startIndex >= 0) {
+                append(entry.title.substring(currentIndex, startIndex))
+                withStyle(style = SpanStyle(background = Color.Red)) {
+                    append(entry.title.substring(startIndex, startIndex + highlightedText.length))
+                }
+                currentIndex = startIndex + highlightedText.length
+                startIndex = entry.title.indexOf(
+                    highlightedText,
+                    startIndex + highlightedText.length,
+                    ignoreCase = true
+                )
+            }
+            append(entry.title.substring(currentIndex))
+        } else {
+            append(entry.title)
+        }
+    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(36.ndp())
             .background(backgroundColor)
-            .onGloballyPositioned { coordinates ->
-                rowHeight.intValue = coordinates.size.height
-            }
     ) {
-        if (isCompare) {
-            Icon(
-                painter = entry.avgDiff.let {
-                    if (it > 0 || entry.oldImpr < oldThre) {
-                        painterResource(id = R.drawable.ic_wind_up)
-                    } else if (it < 0) {
-                        painterResource(id = R.drawable.ic_wind_down)
-                    } else {
-                        painterResource(id = R.drawable.ic_flat)
-                    }
-                },
-                contentDescription = null,
-                tint = if (entry.avgDiff > 0 || entry.oldImpr < oldThre)
-                    RANKING_GREEN
-                else if (entry.avgDiff < 0)
-                    RANKING_RED
-                else
-                    RANKING_YELLOW,
+        if (isLandscape(configuration) && !isImage) {
+            Box(
                 modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .width(30.ndp())
-            )
-            Text(
-                text = if (entry.oldImpr < oldThre) "NEW" else entry.avgDiff.toString(),
-                fontFamily = sarasaFont,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.nsp(),
-                color = if (entry.avgDiff > 0 || entry.oldImpr < oldThre)
-                    RANKING_GREEN
-                else if (entry.avgDiff < 0)
-                    RANKING_RED
-                else
-                    RANKING_YELLOW,
-                textAlign = TextAlign.Start,
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .width(32.ndp())
+                    .width(leftPadding)
+                    .height(36.ndp())
             )
         }
-        Text(
-            text = entry.index.toString(),
-            fontFamily = sarasaFont,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.nsp(),
-            color = Color.White,
-            textAlign = TextAlign.End,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .width(36.ndp())
-        )
-        Column {
+        if (rowWidth < 800.dp && isCompare) {
+            Column {
+                Row(
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Icon(
+                        painter = entry.avgDiff.let {
+                            if (it > 0) painterResource(id = R.drawable.ic_wind_up)
+                            else if (it < 0) painterResource(id = R.drawable.ic_wind_down)
+                            else painterResource(id = R.drawable.ic_flat)
+                        },
+                        contentDescription = null,
+                        tint = if (entry.avgDiff > 0) RANKING_GREEN else if (entry.avgDiff < 0) RANKING_RED else RANKING_YELLOW,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(end = 2.ndp(), start = 8.ndp())
+                            .width(16.ndp())
+                    )
+                    Text(
+                        text = if (entry.oldImpr < thresholdImprOld) "NEW" else entry.avgDiff.toString(),
+                        fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.nsp(),
+                        color = if (entry.avgDiff > 0) RANKING_GREEN else if (entry.avgDiff < 0) RANKING_RED else RANKING_YELLOW,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .width(32.ndp())
+                    )
+                }
+                Text(
+                    text = entry.index.toString(),
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.nsp(),
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.width(36.ndp())
+                )
+            }
+        } else {
+            if (isCompare) {
+                Icon(
+                    painter = entry.avgDiff.let {
+                        if (it > 0) painterResource(id = R.drawable.ic_wind_up)
+                        else if (it < 0) painterResource(id = R.drawable.ic_wind_down)
+                        else painterResource(id = R.drawable.ic_flat)
+                    },
+                    contentDescription = null,
+                    tint = if (entry.avgDiff > 0) RANKING_GREEN else if (entry.avgDiff < 0) RANKING_RED else RANKING_YELLOW,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(30.ndp())
+                )
+                Text(
+                    text = if (entry.oldAvg < thresholdImprOld) "NEW" else entry.avgDiff.toString(),
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.nsp(),
+                    color = if (entry.avgDiff > 0) RANKING_GREEN else if (entry.avgDiff < 0) RANKING_RED else RANKING_YELLOW,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(32.ndp())
+                )
+            }
             Text(
-                text = entry.title,
+                text = entry.index.toString(),
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .padding(end = 4.ndp())
+                    .width(36.ndp())
+            )
+        }
+        Column {
+            val textMod = @Composable { top: Dp, height: Dp ->
+                Modifier
+                    .width(textWidth)
+                    .padding(end = 8.ndp(), top = top)
+                    .height(height)
+                    .then(
+                        if (!isImage) {
+                            Modifier.basicMarquee(spacing = MarqueeSpacing(15.ndp()))
+                        } else {
+                            Modifier
+                        }
+                    )
+            }
+            Text(
+                text = annotatedString,
                 fontSize = 15.nsp(),
                 lineHeight = 16.nsp(),
                 fontFamily = sarasaFont,
@@ -234,14 +610,7 @@ fun BofEntryRowAvg(
                 color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .padding(end = 8.ndp(), top = 2.ndp())
-                    .fillMaxWidth(0.5f)
-                    .horizontalScroll(rememberScrollState())
-                // use horizontalScroll for capturing, basicMarquee is more useful
-//                    .basicMarquee(
-//                        spacing = MarqueeSpacing(10.dp)
-//                    )
+                modifier = textMod(2.ndp(), 18.ndp())
             )
             Text(
                 text = entry.artist,
@@ -252,51 +621,40 @@ fun BofEntryRowAvg(
                 color = TEXT_GRAY,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .padding(end = 8.ndp())
-                    .fillMaxWidth(0.5f)
-                    .horizontalScroll(rememberScrollState())
-                // use horizontalScroll for capturing, basicMarquee is more useful
-//                    .basicMarquee(
-//                        spacing = MarqueeSpacing(10.dp)
-//                    )
+                modifier = textMod(0.ndp(), 16.ndp())
             )
         }
         Column {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .background(
-                        color = Color.Transparent,
-                    )
+                    .width(barWidth.ndp())
+                    .background(color = Color.Transparent)
             ) {
                 Box(
                     Modifier
                         .padding(top = 2.ndp())
-                        .background(
-                            color = Color.Transparent,
-                        )
+                        .background(color = Color.Transparent)
                 ) {
                     Box(
                         modifier = Modifier
+                            .width(newBarWidth.ndp())
                             .padding(end = 20.ndp())
-                            .fillMaxWidth(barWidthFraction)
-//                            .height(18.ndp())
-                            .height(32.ndp())
+                            .height(if (isCompare) 18.ndp() else 34.ndp())
                             .background(
-                                color = Color.Red,
-                                shape = RoundedCornerShape(topEnd = 50.ndp(), bottomEnd = 50.ndp())
+                                color = RANKING_RED,
+                                shape = RoundedCornerShape(
+                                    topEnd = 50.ndp(),
+                                    bottomEnd = 50.ndp()
+                                )
                             )
                     )
                     Text(
-                        text = CommonUtils.formatNumber(entry.avg),
+                        text = entry.avg.toString(),
                         color = Color.White,
-                        fontWeight = FontWeight.Bold,
-//                        fontSize = 14.nsp(),
-//                        lineHeight = 18.nsp(),
-                        fontSize = 22.nsp(),
-                        lineHeight = 24.nsp(),
+                        fontSize = if (isCompare) 14.nsp() else 20.nsp(),
+                        lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
                         fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
                         overflow = TextOverflow.Visible,
                         maxLines = 1,
                         modifier = Modifier
@@ -305,43 +663,43 @@ fun BofEntryRowAvg(
                     )
                 }
             }
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth(0.8f)
-//                    .background(
-//                        color = Color.Transparent,
-//                    )
-//            ) {
-//                Box(
-//                    Modifier
-//                        .background(
-//                            color = Color.Transparent,
-//                        )
-//                ) {
-//                    Box(
-//                        modifier = Modifier
-//                            .padding(end = 20.ndp())
-//                            .fillMaxWidth(barWidthOldFaction)
-//                            .height(14.ndp())
-//                            .background(
-//                                color = Color.Blue,
-//                                shape = RoundedCornerShape(topEnd = 10.ndp(), bottomEnd = 10.ndp())
-//                            )
-//                    )
-//                    Text(
-//                        text = entry.oldTotal.toString(),
-//                        color = Color.White,
-//                        fontSize = 12.nsp(),
-//                        lineHeight = 14.nsp(),
-//                        fontFamily = sarasaFont,
-//                        overflow = TextOverflow.Visible,
-//                        maxLines = 1,
-//                        modifier = Modifier
-//                            .padding(end = 24.ndp())
-//                            .align(Alignment.CenterEnd)
-//                    )
-//                }
-//            }
+            if (isCompare) {
+                Box(
+                    modifier = Modifier
+                        .width(barWidth.ndp())
+                        .background(color = Color.Transparent)
+                ) {
+                    Box(
+                        Modifier.background(color = Color.Transparent)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .width(oldBarWidth.ndp())
+                                .padding(end = 20.ndp())
+                                .height(14.ndp())
+                                .background(
+                                    color = RANKING_BLUE,
+                                    shape = RoundedCornerShape(
+                                        topEnd = 10.ndp(),
+                                        bottomEnd = 10.ndp()
+                                    )
+                                )
+                        )
+                        Text(
+                            text = entry.oldAvg.toString(),
+                            color = Color.White,
+                            fontSize = 12.nsp(),
+                            lineHeight = 14.nsp(),
+                            fontFamily = sarasaFont,
+                            overflow = TextOverflow.Visible,
+                            maxLines = 1,
+                            modifier = Modifier
+                                .padding(end = 24.ndp())
+                                .align(Alignment.CenterEnd)
+                        )
+                    }
+                }
+            }
         }
         Text(
             text = entry.impr.toString(),
@@ -354,5 +712,12 @@ fun BofEntryRowAvg(
                 .align(Alignment.CenterVertically)
                 .width(36.ndp())
         )
+        if (isLandscape(configuration) && !isImage) {
+            Box(
+                modifier = Modifier
+                    .width(rightPadding)
+                    .height(36.ndp())
+            )
+        }
     }
 }

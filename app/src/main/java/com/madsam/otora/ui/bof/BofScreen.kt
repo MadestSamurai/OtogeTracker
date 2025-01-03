@@ -84,9 +84,22 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
     val selectedTabIndex = vm.selectedTab.asStateFlow().collectAsState().value
     val searchText = remember { mutableStateOf("") }
 
-    val listState = rememberLazyListState()
-    val currentIndex = vm.currentIndex.asStateFlow().collectAsState().value
-    val scrollList = vm.scrollToIndexList.asStateFlow().collectAsState().value
+    val listStateTotal = rememberLazyListState()
+    val listStateAvg = rememberLazyListState()
+    val listStateMedian = rememberLazyListState()
+    val listStateDiff = rememberLazyListState()
+    val listStateTeam = rememberLazyListState()
+
+    val currentIndexTotal = vm.currentIndexTotal.asStateFlow().collectAsState().value
+    val scrollListTotal = vm.scrollToIndexListTotal.asStateFlow().collectAsState().value
+    val currentIndexAvg = vm.currentIndexAvg.asStateFlow().collectAsState().value
+    val scrollListAvg = vm.scrollToIndexListAvg.asStateFlow().collectAsState().value
+    val currentIndexMedian = vm.currentIndexMedian.asStateFlow().collectAsState().value
+    val scrollListMedian = vm.scrollToIndexListMedian.asStateFlow().collectAsState().value
+    val currentIndexDiff = vm.currentIndexDiff.asStateFlow().collectAsState().value
+    val scrollListDiff = vm.scrollToIndexListDiff.asStateFlow().collectAsState().value
+    val currentIndexTeam = vm.currentIndexTeam.asStateFlow().collectAsState().value
+    val scrollListTeam = vm.scrollToIndexListTeam.asStateFlow().collectAsState().value
 
     fun selectTime() {
         val calendar = Calendar.getInstance()
@@ -117,11 +130,50 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
         }
     }
 
-    LaunchedEffect(scrollList, currentIndex) {
-        if (currentIndex < scrollList.size)
-            listState.scrollToItem(scrollList[currentIndex]+1)
-        else
-            listState.scrollToItem(0)
+    LaunchedEffect(
+        selectedTabIndex,
+        currentIndexTotal, scrollListTotal,
+        currentIndexAvg, scrollListAvg,
+        currentIndexMedian, scrollListMedian,
+        currentIndexDiff, scrollListDiff,
+        currentIndexTeam, scrollListTeam
+    ) {
+        when (selectedTabIndex) {
+            0 -> {
+                if (currentIndexTotal < scrollListTotal.size)
+                    listStateTotal.scrollToItem(scrollListTotal[currentIndexTotal] + 1)
+                else
+                    listStateTotal.scrollToItem(0)
+            }
+
+            1 -> {
+                if (currentIndexAvg < scrollListAvg.size)
+                    listStateAvg.scrollToItem(scrollListAvg[currentIndexAvg] + 1)
+                else
+                    listStateAvg.scrollToItem(0)
+            }
+
+            2 -> {
+                if (currentIndexMedian < scrollListMedian.size)
+                    listStateMedian.scrollToItem(scrollListMedian[currentIndexMedian] + 1)
+                else
+                    listStateMedian.scrollToItem(0)
+            }
+
+            3 -> {
+                if (currentIndexDiff < scrollListDiff.size)
+                    listStateDiff.scrollToItem(scrollListDiff[currentIndexDiff] + 1)
+                else
+                    listStateDiff.scrollToItem(0)
+            }
+
+            4 -> {
+                if (currentIndexTeam < scrollListTeam.size)
+                    listStateTeam.scrollToItem(scrollListTeam[currentIndexTeam] + 1)
+                else
+                    listStateTeam.scrollToItem(0)
+            }
+        }
     }
 
     val tabTitles = listOf("Total", "Avg", "Median", "Diff", "Team")
@@ -133,7 +185,8 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                 .background(Color.Black)
         ) {
             Row(
-                Modifier.background(Purple700)
+                Modifier
+                    .background(Purple700)
                     .fillMaxWidth()
             ) {
                 val focusManager = LocalFocusManager.current
@@ -142,7 +195,12 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                     value = searchText.value,
                     onValueChange = {
                         searchText.value = it
-                        vm.findItemIndex(it, vm.totalData.value)
+                        when (selectedTabIndex) {
+                            0 -> vm.findItemIndex(it, vm.totalData.value, selectedTabIndex)
+                            1 -> vm.findItemIndex(it, vm.avgData.value, selectedTabIndex)
+                            2 -> vm.findItemIndex(it, vm.medianData.value, selectedTabIndex)
+                            3 -> vm.findItemIndex(it, vm.diffData.value, selectedTabIndex)
+                        }
                     },
                     textStyle = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Normal),
                     placeholder = { Text("Search", color = Color.White, fontSize = 18.sp) },
@@ -191,18 +249,20 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                         painter = painterResource(id = R.drawable.ic_arrow_up),
                         contentDescription = "Previous",
                         tint = Color.White,
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier
+                            .padding(16.dp)
                             .size(25.dp)
-                            .clickable(onClick = { vm.scrollToPrevious() })
+                            .clickable(onClick = { vm.scrollToPrevious(selectedTabIndex) })
                             .align(Alignment.CenterVertically)
                     )
                     Icon(
                         painter = painterResource(id = R.drawable.ic_arrow_down),
                         contentDescription = "Next",
                         tint = Color.White,
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier
+                            .padding(16.dp)
                             .size(25.dp)
-                            .clickable(onClick = { vm.scrollToNext() })
+                            .clickable(onClick = { vm.scrollToNext(selectedTabIndex) })
                             .align(Alignment.CenterVertically)
                     )
                 } else {
@@ -210,7 +270,8 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                         painter = painterResource(id = R.drawable.ic_calendar),
                         contentDescription = "Date&Time",
                         tint = Color.White,
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier
+                            .padding(16.dp)
                             .size(25.dp)
                             .clickable(onClick = { selectTime() })
                             .align(Alignment.CenterVertically)
@@ -219,18 +280,23 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                         painter = painterResource(id = R.drawable.ic_rotate_arrow),
                         contentDescription = "Refresh",
                         tint = Color.White,
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier
+                            .padding(16.dp)
                             .size(25.dp)
                             .clickable(onClick = { refreshData() })
                             .align(Alignment.CenterVertically)
                     )
                 }
             }
-            NavHost(navController = navController, startDestination = "Total", modifier = Modifier.weight(1f)) {
-                composable("Total") { BofTotalScreen(vm, snackbarHostState, listState) }
-                composable("Avg") { BofAvgScreen(vm) }
-                composable("Median") { BofMedianScreen(vm) }
-                composable("Diff") { BofDiffScreen(vm) }
+            NavHost(
+                navController = navController,
+                startDestination = "Total",
+                modifier = Modifier.weight(1f)
+            ) {
+                composable("Total") { BofTotalScreen(vm, snackbarHostState, listStateTotal) }
+                composable("Avg") { BofAvgScreen(vm, snackbarHostState, listStateAvg) }
+                composable("Median") { BofMedianScreen(vm, snackbarHostState, listStateMedian) }
+                composable("Diff") { BofDiffScreen(vm, snackbarHostState, listStateDiff) }
                 composable("Team") { BofTeamScreen(vm) }
             }
         }
@@ -254,10 +320,12 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                                 navController.navigate(title)
                             }
                         },
-                        text = { Text(
-                            text = title,
-                            color = if (selectedTabIndex == index) Color.Black else Color.Gray,
-                        ) }
+                        text = {
+                            Text(
+                                text = title,
+                                color = if (selectedTabIndex == index) Color.Black else Color.Gray,
+                            )
+                        }
                     )
                 }
             }

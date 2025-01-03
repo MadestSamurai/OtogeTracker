@@ -79,6 +79,8 @@ dependencies {
     // Compose Screenshot
     implementation(libs.shreyaspatil.capturable)
     implementation(libs.androidx.foundation.android)
+    implementation(libs.androidx.foundation.layout.android)
+    implementation(libs.androidx.ui.android)
 
     debugImplementation(libs.androidx.ui.tooling)
 
