@@ -711,7 +711,7 @@ fun BofEntryRowMedian(
                             )
                     )
                     Text(
-                        text = CommonUtils.formatNumber(entry.median),
+                        text = CommonUtils.truncateToTwoDecimalPlaces(entry.median),
                         color = Color.White,
                         fontSize = if (isCompare) 14.nsp() else 20.nsp(),
                         lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
@@ -747,7 +747,7 @@ fun BofEntryRowMedian(
                                 )
                         )
                         Text(
-                            text = CommonUtils.formatNumber(entry.oldMedian),
+                            text = CommonUtils.truncateToTwoDecimalPlaces(entry.oldMedian),
                             color = Color.White,
                             fontSize = 12.nsp(),
                             lineHeight = 14.nsp(),

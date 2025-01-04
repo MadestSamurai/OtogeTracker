@@ -8,7 +8,6 @@ import com.squareup.moshi.Types
 object ShareUtil {
     private var sps: SharedPreferences?=null
     private val moshi: Moshi = Moshi.Builder()
-
         .build()
 
     private fun getSps(context: Context):SharedPreferences{

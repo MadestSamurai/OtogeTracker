@@ -711,7 +711,7 @@ fun BofEntryRowAvg(
                             )
                     )
                     Text(
-                        text = CommonUtils.formatNumber(entry.avg),
+                        text = CommonUtils.truncateToTwoDecimalPlaces(entry.avg),
                         color = Color.White,
                         fontSize = if (isCompare) 14.nsp() else 20.nsp(),
                         lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
@@ -747,7 +747,7 @@ fun BofEntryRowAvg(
                                 )
                         )
                         Text(
-                            text = CommonUtils.formatNumber(entry.oldAvg),
+                            text = CommonUtils.truncateToTwoDecimalPlaces(entry.oldAvg),
                             color = Color.White,
                             fontSize = 12.nsp(),
                             lineHeight = 14.nsp(),

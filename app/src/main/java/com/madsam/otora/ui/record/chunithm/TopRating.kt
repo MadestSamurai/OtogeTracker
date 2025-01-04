@@ -253,7 +253,7 @@ fun ChuniRatingItemCard(
                 )
                 Text(
                     text = "${item.levelValue} -> ${
-                        CommonUtils.formatNumber(
+                        CommonUtils.truncateToTwoDecimalPlaces(
                             CalcUtils.calcChuniRating(
                                 CommonUtils.bigNumberToInt(item.score),
                                 item.levelValue

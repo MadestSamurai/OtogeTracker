@@ -828,7 +828,7 @@ fun BofEntryRowTotal(
                     .width(36.ndp())
             )
             Text(
-                text = CommonUtils.formatNumber(entry.median),
+                text = CommonUtils.truncateToTwoDecimalPlaces(entry.median),
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
@@ -843,7 +843,7 @@ fun BofEntryRowTotal(
                     .padding(end = 4.ndp())
             )
             Text(
-                text = CommonUtils.formatNumber(entry.avg),
+                text = CommonUtils.truncateToTwoDecimalPlaces(entry.avg),
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),

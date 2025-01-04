@@ -119,7 +119,6 @@ object CommonUtils {
         return offsetDateTime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
     }
 
-
     /**
      * 日期码转换为最近时间
      * 少于30秒显示刚刚,少于1分钟显示秒,少于1小时显示分钟,少于1天显示小时,少于1周显示天,少于1月显示周,少于1年显示月,否则显示年
@@ -211,14 +210,15 @@ object CommonUtils {
      * @param value 长整型
      * @return 两位小数字符串
      */
-    fun formatNumber(number: Double): String {
-        return if (number == number.toInt().toDouble()) {
-            number.toInt().toString()
+    fun truncateToTwoDecimalPlaces(number: Double): String {
+        val numberStr = String.format(Locale.getDefault(), "%.3f", number)
+        val dotIndex = numberStr.indexOf('.')
+        return if (dotIndex != -1 && numberStr.length > dotIndex + 2) {
+            numberStr.substring(0, dotIndex + 3)
         } else {
-            String.format("%.2f", number).replace(Regex("0*$"), "").replace(Regex("\\.$"), "")
+            numberStr
         }
     }
-
     /**
      * 大数字符串转换为整型
      *

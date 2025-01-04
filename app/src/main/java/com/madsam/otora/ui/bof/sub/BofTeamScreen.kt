@@ -667,7 +667,7 @@ fun BofTeamRowTotal(
                             )
                     )
                     Text(
-                        text = CommonUtils.formatNumber(entry.total),
+                        text = CommonUtils.truncateToTwoDecimalPlaces(entry.total),
                         color = Color.White,
                         fontSize = if (isCompare) 14.nsp() else 20.nsp(),
                         lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
@@ -705,7 +705,7 @@ fun BofTeamRowTotal(
                                 )
                         )
                         Text(
-                            text = CommonUtils.formatNumber(entry.oldTotal),
+                            text = CommonUtils.truncateToTwoDecimalPlaces(entry.oldTotal),
                             color = Color.White,
                             fontSize = 12.nsp(),
                             lineHeight = 14.nsp(),
@@ -807,7 +807,7 @@ fun BofTeamRowTotal(
         val medianValue = entry.median.toDoubleOrNull()
         if (medianValue != null) {
             Text(
-                text = CommonUtils.formatNumber(medianValue),
+                text = CommonUtils.truncateToTwoDecimalPlaces(medianValue),
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.nsp(),
