@@ -43,9 +43,11 @@ class BofViewModel(
     var thresholdImprOld = MutableStateFlow(1)
 
     var selectedTab = MutableStateFlow(0)
-    var selectedDate = MutableStateFlow(LocalDate.now())
-    var selectedTime = MutableStateFlow("-1")
-    var selectedTimeStr = MutableStateFlow("")
+    var selectedStartDate = MutableStateFlow(LocalDate.now())
+    var selectedStartTime = MutableStateFlow("-1")
+    var selectedEndDate = MutableStateFlow(LocalDate.now())
+    var selectedEndTime = MutableStateFlow("-1")
+    var selectedEndTimeStr = MutableStateFlow("")
 
     val leftPadding = MutableStateFlow(0.dp)
     val rightPadding = MutableStateFlow(0.dp)
@@ -139,31 +141,35 @@ class BofViewModel(
     }
 
     fun generateSelectedTimeStr() {
-        selectedTimeStr.update {
-            if (selectedTime.value == "-1") {
+        selectedEndTimeStr.update {
+            if (selectedEndTime.value == "-1") {
                 if (totalData.value.isEmpty()) {
                     ""
                 } else {
                     CommonUtils.roundDownToNearestFiveMinutes(totalData.value.first().time)
                 }
             } else {
-                CommonUtils.roundDownToNearestFiveMinutes(selectedTime.value)
+                CommonUtils.roundDownToNearestFiveMinutes(selectedEndTime.value)
             }
         }
     }
 
     suspend fun <T> fetchData(
         fetchLatest: suspend () -> List<T>,
-        fetchByTime: suspend (Long) -> List<T>
+        fetchByTime: suspend (Long, Long) -> List<T>
     ): List<T> {
-        return if (selectedTime.value == "-1") {
+        return if (selectedEndTime.value == "-1") {
             fetchLatest()
         } else {
-            val timeInMillis = CommonUtils.ymdToMillis(
-                selectedDate.value.toString(),
-                CommonUtils.roundDownToNearestFiveMinutes(selectedTime.value)
+            val compareTime = CommonUtils.ymdToMillis(
+                selectedStartDate.value.toString(),
+                CommonUtils.roundDownToNearestFiveMinutes(selectedStartTime.value)
             )
-            fetchByTime(timeInMillis)
+            val nowTime = CommonUtils.ymdToMillis(
+                selectedEndDate.value.toString(),
+                CommonUtils.roundDownToNearestFiveMinutes(selectedEndTime.value)
+            )
+            fetchByTime(nowTime, compareTime)
         }
     }
 
@@ -211,7 +217,7 @@ class BofViewModel(
     suspend fun requestTotalData() {
         val data = fetchData(
             { bofDataRequestService.getBofttEntryLatest() },
-            { time -> bofDataRequestService.getBofttEntryByTime(time) }
+            { time, compareTime -> bofDataRequestService.getBofttEntryByTime(time, compareTime) }
         )
 
         if (data.isEmpty()) {
@@ -234,7 +240,7 @@ class BofViewModel(
     suspend fun requestAvgData() {
         val data = fetchData(
             { bofDataRequestService.getBofttEntryLatest() },
-            { time -> bofDataRequestService.getBofttEntryByTime(time) }
+            { time, compareTime -> bofDataRequestService.getBofttEntryByTime(time, compareTime) }
         )
         calculateThresholds(data)
         if (data.isEmpty()) {
@@ -257,7 +263,7 @@ class BofViewModel(
     suspend fun requestMedianData() {
         val data = fetchData(
             { bofDataRequestService.getBofttEntryLatest() },
-            { time -> bofDataRequestService.getBofttEntryByTime(time) }
+            { time, compareTime -> bofDataRequestService.getBofttEntryByTime(time, compareTime) }
         )
         calculateThresholds(data)
         if (data.isEmpty()) {
@@ -280,7 +286,7 @@ class BofViewModel(
     suspend fun requestDiffData() {
         val data = fetchData(
             { bofDataRequestService.getBofttEntryLatest() },
-            { time -> bofDataRequestService.getBofttEntryByTime(time) }
+            { time, compareTime -> bofDataRequestService.getBofttEntryByTime(time, compareTime) }
         )
         data.forEach {
             it.totalDiff = it.total - it.oldTotal
@@ -302,7 +308,7 @@ class BofViewModel(
     suspend fun requestTeamData() {
         val data = fetchData(
             { bofDataRequestService.getBofttTeamLatest() },
-            { time -> bofDataRequestService.getBofttTeamByTime(time) }
+            { time, compareTime -> bofDataRequestService.getBofttTeamByTime(time) }
         )
 
         if (data.isEmpty()) {

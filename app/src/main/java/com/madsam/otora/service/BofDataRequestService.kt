@@ -250,18 +250,22 @@ class BofDataRequestService(private val context: Context) {
     }
 
     // Get BOF data from the database
-    suspend fun getBofttEntryByTime(time: Long): List<BofEntryShow> {
+    suspend fun getBofttEntryByTime(time: Long, compareTime: Long): List<BofEntryShow> {
         return withContext(Dispatchers.IO) {
             val realm = Realm.open(realmConfig)
             try {
-                val startTime = time - 48 * 60 * 60 * 1000 // 48 hours in milliseconds
-                val oldTimeLimit = time - 24 * 60 * 60 * 1000 // 24 hours in milliseconds
-
+                val startTime = time - 24 * 60 * 60 * 1000 // 48 hours in milliseconds
+                val startTimeCompare = compareTime - 24 * 60 * 60 * 1000 // 48 hours in milliseconds
                 // Fetch points within the time range
                 val points = realm.query<BofPointEntity>(
                     clazz = BofPointEntity::class,
                     query = "time >= $0 AND time <= $1",
                     startTime, time
+                ).find()
+                val pointsCompare = realm.query<BofPointEntity>(
+                    clazz = BofPointEntity::class,
+                    query = "time >= $0 AND time <= $1",
+                    startTimeCompare, compareTime
                 ).find()
 
                 if (points.isEmpty()) {
@@ -269,7 +273,6 @@ class BofDataRequestService(private val context: Context) {
                     return@withContext emptyList<BofEntryShow>()
                 }
 
-                // Fetch entries for the given date
                 val date = CommonUtils.millisToYmd(time).substring(0, 10)
                 val entries = realm.query<BofEntryEntity>(
                     clazz = BofEntryEntity::class,
@@ -279,15 +282,17 @@ class BofDataRequestService(private val context: Context) {
 
                 // Create a map of entryId to points for quick access
                 val pointsMap = points.groupBy { it.no }
+                val pointsMapCompare = pointsCompare.groupBy { it.no }
 
                 entries.map { entry ->
                     val entryPoints = pointsMap[entry.no] ?: emptyList()
+                    val entryPointsCompare = pointsMapCompare[entry.no] ?: emptyList()
                     val closestPoint = entryPoints
                         .filter { it.time <= time }
                         .minByOrNull { abs(it.time - time) }
-                    val oldClosestPoint = entryPoints
-                        .filter { it.time <= oldTimeLimit }
-                        .minByOrNull { abs(it.time - oldTimeLimit) }
+                    val closestPointCompare = entryPointsCompare
+                        .filter { it.time <= compareTime }
+                        .minByOrNull { abs(it.time - compareTime) }
 
                     BofEntryShow(
                         oldIndex = 0,
@@ -302,10 +307,10 @@ class BofDataRequestService(private val context: Context) {
                         total = closestPoint?.total ?: 0,
                         median = closestPoint?.median ?: 0.0,
                         avg = closestPoint?.avg ?: 0.0,
-                        oldImpr = oldClosestPoint?.impr ?: 0,
-                        oldTotal = oldClosestPoint?.total ?: 0,
-                        oldMedian = oldClosestPoint?.median ?: 0.0,
-                        oldAvg = oldClosestPoint?.avg ?: 0.0,
+                        oldImpr = closestPointCompare?.impr ?: 0,
+                        oldTotal = closestPointCompare?.total ?: 0,
+                        oldMedian = closestPointCompare?.median ?: 0.0,
+                        oldAvg = closestPointCompare?.avg ?: 0.0,
                         time = CommonUtils.millisToYmd(time).substring(11, 16)
                     )
                 }
@@ -404,7 +409,8 @@ class BofDataRequestService(private val context: Context) {
         return withContext(Dispatchers.IO) {
             try {
                 val currentTime = System.currentTimeMillis()
-                getBofttEntryByTime(currentTime)
+                val compareTime = currentTime - 24 * 60 * 60 * 1000
+                getBofttEntryByTime(currentTime, compareTime)
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching latest entry: ${e.message}")
                 emptyList()

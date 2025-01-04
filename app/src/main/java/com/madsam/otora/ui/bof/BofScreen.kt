@@ -1,7 +1,5 @@
 package com.madsam.otora.ui.bof
 
-import android.app.DatePickerDialog
-import android.app.TimePickerDialog
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,6 +15,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
@@ -26,9 +25,11 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +49,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.R
 import com.madsam.otora.components.CustomTabRow
+import com.madsam.otora.components.DateTimeRangePicker
 import com.madsam.otora.consts.Purple700
 import com.madsam.otora.service.BofDataRequestService
 import com.madsam.otora.ui.bof.sub.BofAvgScreen
@@ -59,7 +61,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.util.Calendar
 
 /**
  * 项目名: OtogeTracker
@@ -69,7 +70,7 @@ import java.util.Calendar
  * 描述: BOF数据展示界面
  */
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun BofScreen(snackbarHostState: SnackbarHostState) {
     val navController = rememberNavController()
@@ -101,20 +102,17 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
     val currentIndexTeam = vm.currentIndexTeam.asStateFlow().collectAsState().value
     val scrollListTeam = vm.scrollToIndexListTeam.asStateFlow().collectAsState().value
 
+    var showDateTimeRangePicker by remember { mutableStateOf(false) }
+
     fun selectTime() {
-        val calendar = Calendar.getInstance()
-        DatePickerDialog(
-            context,
-            { _, year, month, dayOfMonth ->
-                vm.selectedDate.update { LocalDate.of(year, month + 1, dayOfMonth) }
-                TimePickerDialog(context, { _, hourOfDay, minute ->
-                    vm.selectedTime.update { String.format("%02d:%02d", hourOfDay, minute) }
-                }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show()
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
+        showDateTimeRangePicker = true
+    }
+
+    if (showDateTimeRangePicker) {
+        DateTimeRangePicker(
+            vm = vm,
+            onDismissRequest = { showDateTimeRangePicker = false }
+        )
     }
 
     fun refreshData() {

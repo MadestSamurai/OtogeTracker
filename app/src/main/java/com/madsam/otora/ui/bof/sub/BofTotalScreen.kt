@@ -103,9 +103,9 @@ fun BofTotalScreen(
         totalData.value.maxOfOrNull { it.total } ?: 1,
         totalData.value.maxOfOrNull { it.oldTotal } ?: 1
     )
-    val selectedDate = vm.selectedDate.asStateFlow().collectAsState().value
-    val selectedTime = vm.selectedTime.asStateFlow().collectAsState().value
-    val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
+    val selectedDate = vm.selectedEndDate.asStateFlow().collectAsState().value
+    val selectedTime = vm.selectedEndTime.asStateFlow().collectAsState().value
+    val selectedTimeStr = vm.selectedEndTimeStr.asStateFlow().collectAsState().value
     val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
     val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 

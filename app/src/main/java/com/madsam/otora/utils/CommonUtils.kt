@@ -169,6 +169,17 @@ object CommonUtils {
     }
 
     /**
+     * 毫秒数时间戳转换为年月日
+     *
+     * @param millis 毫秒数时间戳
+     * @return 年月日
+     */
+    fun convertMillisToDate(millis: Long): LocalDate {
+        val localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), java.time.ZoneId.systemDefault())
+        return localDateTime.toLocalDate()
+    }
+
+    /**
      * 时间向下取整到最近的五分钟
      *
      * @param value 时间 格式 11:21
