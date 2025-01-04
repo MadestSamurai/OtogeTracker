@@ -50,9 +50,7 @@ class BofViewModel(
     val leftPadding = MutableStateFlow(0.dp)
     val rightPadding = MutableStateFlow(0.dp)
 
-    val highlightedIndices = MutableStateFlow(listOf<Int>())
     val highlightedText = MutableStateFlow("")
-
     val scrollToIndexListTotal = MutableStateFlow(listOf<Int>())
     val currentIndexTotal = MutableStateFlow(0)
     val scrollToIndexListAvg = MutableStateFlow(listOf<Int>())
@@ -86,11 +84,16 @@ class BofViewModel(
             }
         }
         highlightedText.update { query }
-        highlightedIndices.update {
+    }
+
+    fun findTeamItemIndex(query: String, originalData: List<BofTeamShow>) {
+        currentIndexTeam.update { 0 }
+        scrollToIndexListTeam.update {
             originalData.mapIndexedNotNull { index, item ->
-                if (item.title.contains(query, ignoreCase = true)) index else null
+                if (item.team.contains(query, ignoreCase = true)) index else null
             }
         }
+        highlightedText.update { query }
     }
 
     fun scrollToPrevious(pageIndex: Int) {

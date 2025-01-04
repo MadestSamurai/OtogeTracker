@@ -39,6 +39,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -61,8 +62,9 @@ import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.ui.bof.BofViewModel
-import com.madsam.otora.ui.record.osu.saveImageBitmapToFile
-import com.madsam.otora.ui.record.osu.saveImageToGallery
+import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.utils.ImageUtils.saveBitmapToFile
+import com.madsam.otora.utils.ImageUtils.saveImageToGallery
 import com.madsam.otora.utils.ScreenUtil.isLandscape
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
@@ -307,9 +309,9 @@ fun MedianCapture(
                         scope.launch {
                             val bitmapAsync = captureController.captureAsync()
                             try {
-                                val bitmap = bitmapAsync.await()
+                                val bitmap = bitmapAsync.await().asAndroidBitmap()
                                 val file = File(context.cacheDir, "bof_median.png")
-                                saveImageBitmapToFile(bitmap, file)
+                                saveBitmapToFile(bitmap, file)
                                 saveImageToGallery(context, file, "bof_median")
                                 snackbarHostState.showSnackbar("Captured content saved to gallery")
                             } catch (error: Throwable) {
@@ -587,6 +589,9 @@ fun BofEntryRowMedian(
             )
         }
         Column {
+            /**
+             * Please add (topPadding,height) in the round bracket.
+             */
             val textMod = @Composable { top: Dp, height: Dp ->
                 Modifier
                     .width(textWidth)
@@ -638,7 +643,6 @@ fun BofEntryRowMedian(
                     Box(
                         modifier = Modifier
                             .width(newBarWidth.ndp())
-                            .padding(end = 20.ndp())
                             .height(if (isCompare) 18.ndp() else 34.ndp())
                             .background(
                                 color = RANKING_RED,
@@ -649,7 +653,7 @@ fun BofEntryRowMedian(
                             )
                     )
                     Text(
-                        text = entry.median.toString(),
+                        text = CommonUtils.formatNumber(entry.median),
                         color = Color.White,
                         fontSize = if (isCompare) 14.nsp() else 20.nsp(),
                         lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
@@ -658,7 +662,7 @@ fun BofEntryRowMedian(
                         overflow = TextOverflow.Visible,
                         maxLines = 1,
                         modifier = Modifier
-                            .padding(end = 24.ndp())
+                            .padding(end = 4.ndp())
                             .align(Alignment.CenterEnd)
                     )
                 }
@@ -675,7 +679,6 @@ fun BofEntryRowMedian(
                         Box(
                             modifier = Modifier
                                 .width(oldBarWidth.ndp())
-                                .padding(end = 20.ndp())
                                 .height(14.ndp())
                                 .background(
                                     color = RANKING_BLUE,
@@ -686,7 +689,7 @@ fun BofEntryRowMedian(
                                 )
                         )
                         Text(
-                            text = entry.oldMedian.toString(),
+                            text = CommonUtils.formatNumber(entry.oldMedian),
                             color = Color.White,
                             fontSize = 12.nsp(),
                             lineHeight = 14.nsp(),
@@ -694,7 +697,7 @@ fun BofEntryRowMedian(
                             overflow = TextOverflow.Visible,
                             maxLines = 1,
                             modifier = Modifier
-                                .padding(end = 24.ndp())
+                                .padding(end = 4.ndp())
                                 .align(Alignment.CenterEnd)
                         )
                     }

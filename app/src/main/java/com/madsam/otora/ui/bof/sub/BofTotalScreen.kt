@@ -2,6 +2,8 @@ package com.madsam.otora.ui.bof.sub
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeSpacing
@@ -39,6 +41,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -61,17 +64,16 @@ import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.ui.bof.BofViewModel
-import com.madsam.otora.ui.record.osu.saveImageBitmapToFile
-import com.madsam.otora.ui.record.osu.saveImageToGallery
 import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.utils.ImageUtils.saveBitmapToGallery
 import com.madsam.otora.utils.ScreenUtil.isLandscape
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
 import dev.shreyaspatil.capturable.capturable
+import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
 import java.time.LocalDate
 import kotlin.math.max
 
@@ -121,22 +123,25 @@ fun BofTotalScreen(
 
     val isCompare = totalData.value.isNotEmpty() && totalData.value[0].oldTotal != 0
 
-    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val screenWidthDp = configuration.screenWidthDp.dp
     val barWidth = when (screenWidthDp) {
-        in 0.dp..400.dp -> (screenWidthDp.value * 0.4f)
-        in 400.dp..800.dp -> ((screenWidthDp.value - 400) * 0.3f + 160)
-        else -> 280f
+        in 0.dp..400.dp -> screenWidthDp.value * 0.4
+        in 400.dp..800.dp -> (screenWidthDp.value - 400) * 0.3 + 160
+        else -> 280.0
     }
     val textWidth = when {
         screenWidthDp > 800.dp && isCompare ->
             // Compare: 62, Rank: 40, Impr: 36, Median: 82, Avg: 74
             screenWidthDp - 294.ndp() - barWidth.ndp()
+
         screenWidthDp > 800.dp && !isCompare ->
             // Rank: 40, Impr: 36, Median: 82, Avg: 74
             screenWidthDp - 232.ndp() - barWidth.ndp()
+
         screenWidthDp < 800.dp && isCompare ->
             // Rank: 58,
             screenWidthDp - 58.ndp() - barWidth.ndp()
+
         else ->
             // Rank: 40,
             screenWidthDp - 40.ndp() - barWidth.ndp()
@@ -242,11 +247,14 @@ fun TotalCapture(
     rightPadding: Dp,
 ) {
     val screenWidthImage = 1000.dp
-    val barWidthImage = 280f
+    val barWidthImage = 280.0
     val textWidthImage = 1000.dp - 294.ndp() - barWidthImage.ndp()
     val scope = rememberCoroutineScope()
     if (showDialog.value) {
-        val captureController = rememberCaptureController()
+        val captureControllerList = mutableListOf<CaptureController>()
+        repeat(totalData.size / 100 + 1) {
+            captureControllerList.add(rememberCaptureController())
+        }
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
             title = { Text(text = "Capture Content") },
@@ -259,45 +267,46 @@ fun TotalCapture(
                                 "including the parts that are not visible on the screen.",
                         modifier = Modifier.padding(8.dp)
                     )
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(15.dp))
-                            .height(250.dp)
-                            .requiredHeight(10000.dp)
-                            .requiredWidth(screenWidthImage)
-                    ) {
-                        Column(
+                    for (i in 0 until totalData.size / 100 + 1) {
+                        Box(
                             modifier = Modifier
-                                .capturable(captureController)
-                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(15.dp))
+                                .height(0.dp)
+                                .requiredHeight(5000.dp)
+                                .requiredWidth(screenWidthImage)
                         ) {
-                            TotalHeader(
-                                configuration = configuration,
-                                leftPadding = leftPadding,
-                                rightPadding = rightPadding,
-                                screenWidthDp = screenWidthImage,
-                                isCompare = isCompare,
-                                barWidth = barWidthImage,
-                                textWidth = textWidthImage,
-                                isImage = true,
-                                totalData = totalData,
-                                selectedDate = selectedDate,
-                                selectedTimeStr = selectedTimeStr,
-                            )
-                            if (totalData.isNotEmpty()) {
-                                for ((index, entry) in totalData.withIndex()) {
-                                    if (entry.index > 475) break
-                                    BofEntryRowTotal(
-                                        entry = entry,
-                                        index = index + 1,
-                                        maxTotal = maxTotal,
+                            Column(
+                                modifier = Modifier
+                                    .capturable(captureControllerList[i])
+                                    .fillMaxWidth()
+                            ) {
+                                if (i == 0)
+                                    TotalHeader(
+                                        configuration = configuration,
+                                        leftPadding = leftPadding,
+                                        rightPadding = rightPadding,
+                                        screenWidthDp = screenWidthImage,
                                         isCompare = isCompare,
-                                        isImage = true,
-                                        rowWidth = screenWidthImage,
                                         barWidth = barWidthImage,
                                         textWidth = textWidthImage,
+                                        isImage = true,
+                                        totalData = totalData,
+                                        selectedDate = selectedDate,
+                                        selectedTimeStr = selectedTimeStr,
                                     )
-                                }
+                                if (totalData.isNotEmpty())
+                                    for ((index, entry) in totalData.withIndex())
+                                        if (entry.index in i * 100..(i + 1) * 100)
+                                            BofEntryRowTotal(
+                                                entry = entry,
+                                                index = index + 1,
+                                                maxTotal = maxTotal,
+                                                isCompare = isCompare,
+                                                isImage = true,
+                                                rowWidth = screenWidthImage,
+                                                barWidth = barWidthImage,
+                                                textWidth = textWidthImage,
+                                            )
                             }
                         }
                     }
@@ -306,19 +315,56 @@ fun TotalCapture(
             confirmButton = {
                 Button(
                     onClick = {
+                        val bitmapList = mutableListOf<Bitmap>()
                         scope.launch {
-                            val bitmapAsync = captureController.captureAsync()
-                            try {
-                                val bitmap = bitmapAsync.await()
-                                val file = File(context.cacheDir, "bof_total.png")
-                                saveImageBitmapToFile(bitmap, file)
-                                saveImageToGallery(context, file, "bof_total")
-                                snackbarHostState.showSnackbar("Captured content saved to gallery")
-                            } catch (error: Throwable) {
-                                Log.e("Capture", "Error capturing content", error)
-                                snackbarHostState.showSnackbar("Error capturing content")
-                                error.printStackTrace()
+                            for (captureController in captureControllerList) {
+                                val bitmapAsync = captureController.captureAsync()
+                                try {
+                                    bitmapList.add(bitmapAsync.await().asAndroidBitmap())
+                                } catch (error: Throwable) {
+                                    Log.e("Capture", "Error capturing content", error)
+                                    snackbarHostState.showSnackbar("Error capturing content")
+                                    error.printStackTrace()
+                                }
                             }
+                            val totalHeight = bitmapList.sumOf { it.height }
+                            val maxHeight = 32000
+                            val bitmap = if (totalHeight > maxHeight) {
+                                val scaleFactor = maxHeight.toFloat() / totalHeight
+                                val newWidth = (bitmapList[0].width * scaleFactor).toInt()
+                                val newHeight = maxHeight
+                                Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888).apply {
+                                    val canvas = Canvas(this)
+                                    var currentHeight = 0
+                                    for (hardwareBitmap in bitmapList) {
+                                        val scaledBitmap = Bitmap.createScaledBitmap(
+                                            hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
+                                            newWidth,
+                                            (hardwareBitmap.height * scaleFactor).toInt(),
+                                            true
+                                        )
+                                        canvas.drawBitmap(scaledBitmap, 0f, currentHeight.toFloat(), null)
+                                        currentHeight += scaledBitmap.height
+                                    }
+                                }
+                            } else {
+                                Bitmap.createBitmap(bitmapList[0].width, totalHeight, Bitmap.Config.ARGB_8888).apply {
+                                    val canvas = Canvas(this)
+                                    var currentHeight = 0
+                                    for (hardwareBitmap in bitmapList) {
+                                        val softwareBitmap = hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                        canvas.drawBitmap(softwareBitmap, 0f, currentHeight.toFloat(), null)
+                                        currentHeight += softwareBitmap.height
+                                    }
+                                }
+                            }
+                            saveBitmapToGallery(
+                                context,
+                                bitmap,
+                                "bof_total_${selectedDate}_$selectedTimeStr",
+                                "BOF Total Score Ranking"
+                            )
+                            snackbarHostState.showSnackbar("Image saved to gallery")
                         }
                         showDialog.value = false
                     }
@@ -346,7 +392,7 @@ fun TotalHeader(
     rightPadding: Dp,
     screenWidthDp: Dp,
     isCompare: Boolean,
-    barWidth: Float,
+    barWidth: Double,
     textWidth: Dp,
     isImage: Boolean = false,
     totalData: List<BofEntryShow> = emptyList(),
@@ -477,7 +523,7 @@ fun BofEntryRowTotal(
     isCompare: Boolean = true,
     isImage: Boolean = false,
     rowWidth: Dp,
-    barWidth: Float,
+    barWidth: Double,
     textWidth: Dp,
     configuration: Configuration = LocalConfiguration.current,
     leftPadding: Dp = 0.dp,
@@ -487,10 +533,10 @@ fun BofEntryRowTotal(
 ) {
     val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
 
-    val newBarWidth = if (maxTotal == 0) 0f
-    else entry.total.toFloat() / maxTotal * barWidth
-    val oldBarWidth = if (maxTotal == 0) 0f
-    else entry.oldTotal.toFloat() / maxTotal * barWidth
+    val newBarWidth = if (maxTotal == 0) 0.0
+    else entry.total.toDouble() / maxTotal * barWidth
+    val oldBarWidth = if (maxTotal == 0) 0.0
+    else entry.oldTotal.toDouble() / maxTotal * barWidth
 
     val annotatedString = buildAnnotatedString {
         if (highlightedText.isNotEmpty()) {
@@ -502,7 +548,11 @@ fun BofEntryRowTotal(
                     append(entry.title.substring(startIndex, startIndex + highlightedText.length))
                 }
                 currentIndex = startIndex + highlightedText.length
-                startIndex = entry.title.indexOf(highlightedText, startIndex + highlightedText.length, ignoreCase = true)
+                startIndex = entry.title.indexOf(
+                    highlightedText,
+                    startIndex + highlightedText.length,
+                    ignoreCase = true
+                )
             }
             append(entry.title.substring(currentIndex))
         } else {
@@ -672,21 +722,16 @@ fun BofEntryRowTotal(
                 Box(
                     modifier = Modifier
                         .width(barWidth.ndp())
-                        .background(
-                            color = Color.Transparent,
-                        )
+                        .background(color = Color.Transparent)
                 ) {
                     Box(
                         Modifier
                             .padding(top = 2.ndp())
-                            .background(
-                                color = Color.Transparent,
-                            )
+                            .background(color = Color.Transparent)
                     ) {
                         Box(
                             modifier = Modifier
                                 .width(newBarWidth.ndp())
-                                .padding(end = 20.ndp())
                                 .height(if (isCompare) 18.ndp() else 34.ndp())
                                 .background(
                                     color = RANKING_RED,
@@ -706,7 +751,7 @@ fun BofEntryRowTotal(
                             overflow = TextOverflow.Visible,
                             maxLines = 1,
                             modifier = Modifier
-                                .padding(end = 24.ndp())
+                                .padding(end = 4.ndp())
                                 .align(Alignment.CenterEnd)
                         )
                     }
@@ -728,7 +773,6 @@ fun BofEntryRowTotal(
                             Box(
                                 modifier = Modifier
                                     .width(oldBarWidth.ndp())
-                                    .padding(end = 20.ndp())
                                     .height(14.ndp())
                                     .background(
                                         color = RANKING_BLUE,
@@ -747,7 +791,7 @@ fun BofEntryRowTotal(
                                 overflow = TextOverflow.Visible,
                                 maxLines = 1,
                                 modifier = Modifier
-                                    .padding(end = 24.ndp())
+                                    .padding(end = 4.ndp())
                                     .align(Alignment.CenterEnd)
                             )
                         }

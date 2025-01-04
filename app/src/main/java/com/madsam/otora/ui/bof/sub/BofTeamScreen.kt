@@ -1,8 +1,13 @@
 package com.madsam.otora.ui.bof.sub
 
+import android.content.Context
+import android.content.res.Configuration
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,32 +15,45 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.R
 import com.madsam.otora.consts.BG_DARK_GRAY
@@ -48,10 +66,17 @@ import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofTeamShow
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.utils.ImageUtils.saveBitmapToFile
+import com.madsam.otora.utils.ImageUtils.saveImageToGallery
+import com.madsam.otora.utils.ScreenUtil.isLandscape
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
+import dev.shreyaspatil.capturable.capturable
+import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.io.File
+import java.time.LocalDate
 import kotlin.math.max
 
 /**
@@ -61,115 +86,332 @@ import kotlin.math.max
  * 创建时间: 2024/10/23
  * 描述: BOF团队数据展示界面
  */
+
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun BofTeamScreen(vm: BofViewModel) {
+fun BofTeamScreen(
+    vm: BofViewModel,
+    snackbarHostState: SnackbarHostState,
+    listState: LazyListState
+) {
+    val scope = rememberCoroutineScope()
+
+    val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val view = LocalView.current
+
     val teamData = vm.teamData.asStateFlow().collectAsState()
-    val maxTotal = max(teamData.value.maxOfOrNull { it.total } ?: 1.0, teamData.value.maxOfOrNull { it.oldTotal } ?: 1.0)
+    val maxTotal = max(
+        teamData.value.maxOfOrNull { it.total } ?: 0.0,
+        teamData.value.maxOfOrNull { it.oldTotal } ?: 0.0
+    )
     val selectedDate = vm.selectedDate.asStateFlow().collectAsState().value
     val selectedTime = vm.selectedTime.asStateFlow().collectAsState().value
+    val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
+    val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
+    val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 
-    val scope = rememberCoroutineScope()
+    val highlightedText = vm.highlightedText.asStateFlow().collectAsState().value
+
     LaunchedEffect(selectedDate, selectedTime) {
         scope.launch {
             vm.requestTeamData()
+            vm.generateSelectedTimeStr()
         }
     }
 
-    val selectedTimeStr: String = if (selectedTime == "-1") {
-        if (teamData.value.isEmpty()) {
-            ""
-        } else {
-            CommonUtils.roundDownToNearestFiveMinutes(teamData.value.first().time)
-        }
-    } else {
-        CommonUtils.roundDownToNearestFiveMinutes(selectedTime)
+    val showDialog = remember { mutableStateOf(false) }
+
+    val isCompare = teamData.value.isNotEmpty() && teamData.value[0].oldTotal != 0.0
+
+    val screenWidthDp = configuration.screenWidthDp.dp
+    val textWidth = when {
+        screenWidthDp > 800.dp && isCompare ->
+            // Compare: 62, Rank: 36, Impr: 36, Median: 110
+            screenWidthDp - 244.ndp()
+        screenWidthDp <= 800.dp && isCompare ->
+            // Compare: 58, Impr: 36, Median: 110
+            screenWidthDp - 204.ndp()
+        else ->
+            // Rank: 36, Impr: 36, Median: 110
+            screenWidthDp - 182.ndp()
     }
+    val barWidth = textWidth.value.toDouble()
+
+    LaunchedEffect(configuration) {
+        vm.updatePadding(view)
+    }
+
+    TeamCapture(
+        showDialog = showDialog,
+        context = context,
+        snackbarHostState = snackbarHostState,
+        teamData = teamData.value,
+        selectedDate = selectedDate,
+        selectedTimeStr = selectedTimeStr,
+        maxTotal = maxTotal,
+        isCompare = isCompare,
+        configuration = configuration,
+        leftPadding = leftPadding,
+        rightPadding = rightPadding
+    )
 
     Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn {
-            var isCompare: Boolean = if (teamData.value.isNotEmpty()) {
-                teamData.value[0].oldTotal >= 1.0
-            } else {
-                false
-            }
+        LazyColumn(state = listState) {
             item {
-                if (teamData.value.isEmpty()) {
-                    Text(text = "No Data at $selectedDate $selectedTimeStr")
-                } else {
-                    Text(
-                        text = "Total Team Score Ranking",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.Black)
-                            .padding(top = 10.ndp())
+                Box {
+                    TeamHeader(
+                        configuration = configuration,
+                        leftPadding = leftPadding,
+                        rightPadding = rightPadding,
+                        screenWidthDp = screenWidthDp,
+                        isCompare = isCompare,
+                        textWidth = textWidth,
+                        teamData = teamData.value,
+                        selectedDate = selectedDate,
+                        selectedTimeStr = selectedTimeStr
                     )
-                    Text(
-                        text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
-                        fontFamily = sarasaFont,
-                        fontSize = 12.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.End,
+                    Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.Black)
+                            .height(40.dp)
+                            .align(Alignment.TopEnd)
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_picture),
+                            contentDescription = "Capture",
+                            tint = Color.White,
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .size(22.dp)
+                                .clickable(onClick = { showDialog.value = true })
+                        )
+                    }
+                }
+            }
+            if (teamData.value.isNotEmpty()) {
+                itemsIndexed(teamData.value) { index, entry ->
+                    BofTeamRowTotal(
+                        entry = entry,
+                        index = index + 1,
+                        maxTotal = maxTotal,
+                        rowWidth = screenWidthDp,
+                        barWidth = barWidth,
+                        textWidth = textWidth,
+                        configuration = configuration,
+                        leftPadding = leftPadding,
+                        rightPadding = rightPadding,
+                        highlightedText = highlightedText
                     )
                 }
             }
-            item {
-                Row(
-                    modifier = Modifier
-                        .background(BG_DARK_GRAY)
-                        .fillMaxWidth()
+        }
+    }
+}
+
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+fun TeamCapture(
+    showDialog: MutableState<Boolean>,
+    context: Context,
+    snackbarHostState: SnackbarHostState,
+    teamData: List<BofTeamShow>,
+    selectedDate: LocalDate,
+    selectedTimeStr: String,
+    maxTotal: Double,
+    isCompare: Boolean,
+    configuration: Configuration,
+    leftPadding: Dp,
+    rightPadding: Dp,
+) {
+    val screenWidthImage = 1000.dp
+    val textWidthImage = 1000.dp - 244.ndp()
+    val barWidthImage = textWidthImage.value.toDouble()
+    val scope = rememberCoroutineScope()
+    if (showDialog.value) {
+        val captureController = rememberCaptureController()
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text(text = "Capture Content") },
+            modifier = Modifier.height(500.dp),
+            text = {
+                Column {
+                    Text(
+                        text = "Capturing content will save the current content to your gallery. " +
+                                "Image may be too large to show in the dialog, " +
+                                "including the parts that are not visible on the screen.",
+                        modifier = Modifier.padding(8.dp)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(15.dp))
+                            .height(250.dp)
+                            .requiredHeight(10000.dp)
+                            .requiredWidth(screenWidthImage)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .capturable(captureController)
+                                .fillMaxWidth()
+                        ) {
+                            TeamHeader(
+                                configuration = configuration,
+                                leftPadding = leftPadding,
+                                rightPadding = rightPadding,
+                                screenWidthDp = screenWidthImage,
+                                isCompare = isCompare,
+                                textWidth = textWidthImage,
+                                isImage = true,
+                                teamData = teamData,
+                                selectedDate = selectedDate,
+                                selectedTimeStr = selectedTimeStr,
+                            )
+                            if (teamData.isNotEmpty()) {
+                                for ((index, entry) in teamData.withIndex()) {
+                                    if (entry.index > 475) break
+                                    BofTeamRowTotal(
+                                        entry = entry,
+                                        index = index + 1,
+                                        maxTotal = maxTotal,
+                                        isCompare = isCompare,
+                                        isImage = true,
+                                        rowWidth = screenWidthImage,
+                                        barWidth = barWidthImage,
+                                        textWidth = textWidthImage,
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        scope.launch {
+                            val bitmapAsync = captureController.captureAsync()
+                            try {
+                                val bitmap = bitmapAsync.await().asAndroidBitmap()
+                                val file = File(context.cacheDir, "bof_team.png")
+                                saveBitmapToFile(bitmap, file)
+                                saveImageToGallery(context, file, "bof_team")
+                                snackbarHostState.showSnackbar("Captured content saved to gallery")
+                            } catch (error: Throwable) {
+                                Log.e("Capture", "Error capturing content", error)
+                                snackbarHostState.showSnackbar("Error capturing content")
+                                error.printStackTrace()
+                            }
+                        }
+                        showDialog.value = false
+                    }
                 ) {
-                    Text(
-                        text = "",
-                        modifier = Modifier
-                            .width(if (isCompare) 98.ndp() else 38.ndp())
-                    )
-                    Text(
-                        text = "",
-                        modifier = Modifier
-                            .padding(end = 8.dp, top = 2.dp)
-                            .fillMaxWidth(0.7f)
-                    )
-                    Text(
-                        text = " ",
-                        modifier = Modifier
-                            .fillMaxWidth(0.3f)
-                    )
-                    Text(
-                        text = "Impr",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 26.ndp())
-                            .width(36.ndp())
-                    )
-                    Text(
-                        text = "Median",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.nsp(),
-                        color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(start = 44.ndp())
-                            .width(70.ndp())
-                    )
+                    Text(text = "Capture")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = {
+                        showDialog.value = false
+                    }
+                ) {
+                    Text(text = "Cancel")
                 }
             }
-            itemsIndexed(teamData.value) { index, entry ->
-                BofTeamRowTotal(entry, index + 1, maxTotal, isCompare)
+        )
+    }
+}
+
+@Composable
+fun TeamHeader(
+    configuration: Configuration,
+    leftPadding: Dp,
+    rightPadding: Dp,
+    screenWidthDp: Dp,
+    isCompare: Boolean,
+    textWidth: Dp,
+    isImage: Boolean = false,
+    teamData: List<BofTeamShow> = emptyList(),
+    selectedDate: LocalDate = LocalDate.now(),
+    selectedTimeStr: String = ""
+) {
+    Column {
+        if (teamData.isEmpty() || teamData[0].total == 0.0) {
+            Text(text = "No Data at $selectedDate $selectedTimeStr")
+        } else {
+            Text(
+                text = "Total Team Score Ranking",
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Black)
+                    .padding(top = 10.ndp())
+            )
+            Text(
+                text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
+                fontFamily = sarasaFont,
+                fontSize = 12.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Black)
+                    .padding(end = if (isLandscape(configuration) && !isImage) rightPadding else 0.dp)
+            )
+        }
+        Row(
+            modifier = Modifier
+                .background(BG_DARK_GRAY)
+                .fillMaxWidth()
+        ) {
+            if (isLandscape(configuration) && !isImage) {
+                Box(
+                    modifier = Modifier
+                        .width(leftPadding)
+                )
+            }
+            Text(
+                text = "Rank",
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .padding(end = if (screenWidthDp < 800.dp && isCompare) 22.ndp() else 0.dp)
+                    .width(if (screenWidthDp >= 800.dp && isCompare) 98.ndp() else 36.ndp())
+            )
+            Text(
+                text = "",
+                modifier = Modifier
+                    .width(textWidth)
+                    .padding(start = 13.ndp(), end = 8.ndp(), top = 2.ndp())
+            )
+            Text(
+                text = "Impr",
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.nsp(),
+                color = Color.White,
+                modifier = Modifier
+                    .width(36.ndp())
+            )
+            Text(
+                text = "Median",
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.nsp(),
+                color = Color.White,
+                modifier = Modifier
+                    .width(102.ndp())
+            )
+            if (isLandscape(configuration) && !isImage) {
+                Box(
+                    modifier = Modifier
+                        .width(rightPadding)
+                )
             }
         }
     }
@@ -181,12 +423,42 @@ fun BofTeamRowTotal(
     entry: BofTeamShow,
     index: Int,
     maxTotal: Double,
-    isCompare: Boolean
+    isCompare: Boolean = true,
+    isImage: Boolean = false,
+    rowWidth: Dp,
+    barWidth: Double,
+    textWidth: Dp,
+    configuration: Configuration = LocalConfiguration.current,
+    leftPadding: Dp = 0.dp,
+    rightPadding: Dp = 0.dp,
+    highlightedText: String = ""
 ) {
     val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
-    val barWidthFraction = if(maxTotal == 0.0) 0f else (entry.total / maxTotal) * 1f
-    val barWidthOldFaction = if(maxTotal == 0.0) 0f else ((entry.oldTotal) / maxTotal) * 1f
+
+    val newBarWidth = if (maxTotal == 0.0) 0.0
+    else entry.total / maxTotal * barWidth
+    val oldBarWidth = if (maxTotal == 0.0) 0.0
+    else entry.oldTotal / maxTotal * barWidth
+
     var rowHeight = remember { mutableIntStateOf(0) }
+
+    val annotatedString = buildAnnotatedString {
+        if (highlightedText.isNotEmpty()) {
+            var startIndex = entry.team.indexOf(highlightedText, ignoreCase = true)
+            var currentIndex = 0
+            while (startIndex >= 0) {
+                append(entry.team.substring(currentIndex, startIndex))
+                withStyle(style = SpanStyle(background = Color.Red)) {
+                    append(entry.team.substring(startIndex, startIndex + highlightedText.length))
+                }
+                currentIndex = startIndex + highlightedText.length
+                startIndex = entry.team.indexOf(highlightedText, startIndex + highlightedText.length, ignoreCase = true)
+            }
+            append(entry.team.substring(currentIndex))
+        } else {
+            append(entry.team)
+        }
+    }
 
     fun calculateColor(value: Double): Color {
         val normalizedValue = value.toInt().coerceIn(0, 1000) / 1000f
@@ -201,66 +473,124 @@ fun BofTeamRowTotal(
                 rowHeight.intValue = coordinates.size.height
             }
     ) {
-        if (isCompare) {
-            Icon(
-                painter = entry.rankDiff.let {
-                    if (it > 0) {
-                        painterResource(id = R.drawable.ic_wind_up)
-                    } else if (it < 0) {
-                        painterResource(id = R.drawable.ic_wind_down)
-                    } else {
-                        painterResource(id = R.drawable.ic_flat)
-                    }
-                },
-                contentDescription = null,
-                tint = if (entry.rankDiff < 0) RANKING_RED else if (entry.rankDiff > 0) RANKING_GREEN else RANKING_YELLOW,
+        if (isLandscape(configuration) && isImage) {
+            Box(
                 modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .width(30.ndp())
-            )
-            Text(
-                text = if (entry.oldTotal < 1.0) "NEW" else entry.rankDiff.toString(),
-                fontFamily = sarasaFont,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.nsp(),
-                color = if (entry.rankDiff < 0) RANKING_RED else if (entry.rankDiff > 0) RANKING_GREEN else RANKING_YELLOW,
-                textAlign = TextAlign.Start,
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .width(32.ndp())
+                    .width(leftPadding)
+                    .height(36.ndp())
             )
         }
-        Text(
-            text = entry.index.toString(),
-            fontFamily = sarasaFont,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.nsp(),
-            color = Color.White,
-            textAlign = TextAlign.End,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .width(36.ndp())
-        )
+        if (rowWidth < 800.dp && isCompare) {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.End)
+                ) {
+                    Icon(
+                        painter = entry.rankDiff.let {
+                            if (it > 0) {
+                                painterResource(id = R.drawable.ic_wind_up)
+                            } else if (it < 0) {
+                                painterResource(id = R.drawable.ic_wind_down)
+                            } else {
+                                painterResource(id = R.drawable.ic_flat)
+                            }
+                        },
+                        contentDescription = null,
+                        tint = if (entry.rankDiff < 0) RANKING_RED
+                        else if (entry.rankDiff > 0) RANKING_GREEN
+                        else RANKING_YELLOW,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .padding(end = 2.ndp(), start = 8.ndp())
+                            .width(16.ndp())
+                    )
+                    Text(
+                        text = if (entry.oldTotal == 0.0) "NEW" else entry.rankDiff.toString(),
+                        fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 12.nsp(),
+                        color = if (entry.rankDiff < 0) RANKING_RED
+                        else if (entry.rankDiff > 0) RANKING_GREEN
+                        else RANKING_YELLOW,
+                        textAlign = TextAlign.Start,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .width(32.ndp())
+                    )
+                }
+                Text(
+                    text = entry.index.toString(),
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.nsp(),
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .width(36.ndp())
+                )
+            }
+        } else {
+            if (isCompare) {
+                Icon(
+                    painter = entry.rankDiff.let {
+                        if (it > 0) {
+                            painterResource(id = R.drawable.ic_wind_up)
+                        } else if (it < 0) {
+                            painterResource(id = R.drawable.ic_wind_down)
+                        } else {
+                            painterResource(id = R.drawable.ic_flat)
+                        }
+                    },
+                    contentDescription = null,
+                    tint = if (entry.rankDiff < 0) RANKING_RED
+                    else if (entry.rankDiff > 0) RANKING_GREEN
+                    else RANKING_YELLOW,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(30.ndp())
+                )
+                Text(
+                    text = if (entry.oldTotal == 0.0) "NEW" else entry.rankDiff.toString(),
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.nsp(),
+                    color = if (entry.rankDiff < 0) RANKING_RED
+                    else if (entry.rankDiff > 0) RANKING_GREEN
+                    else RANKING_YELLOW,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(32.ndp())
+                )
+            }
+            Text(
+                text = entry.index.toString(),
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .width(36.ndp())
+            )
+        }
         Column {
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .background(
-                        color = Color.Transparent,
-                    )
+                    .width(barWidth.dp)
+                    .background(color = Color.Transparent)
                     .padding(start = 13.ndp())
             ) {
                 Box(
                     Modifier
                         .padding(top = 2.ndp())
-                        .background(
-                            color = Color.Transparent,
-                        )
+                        .background(color = Color.Transparent)
                 ) {
                     Box(
                         modifier = Modifier
-                            .padding(end = 20.ndp())
-                            .fillMaxWidth(barWidthFraction.toFloat())
+                            .width(newBarWidth.dp)
                             .height(if (isCompare) 18.ndp() else 34.ndp())
                             .background(
                                 color = RANKING_RED,
@@ -274,13 +604,13 @@ fun BofTeamRowTotal(
                         text = CommonUtils.formatNumber(entry.total),
                         color = Color.White,
                         fontSize = if (isCompare) 14.nsp() else 20.nsp(),
-                        lineHeight = if (isCompare) 16.nsp() else 28.nsp(),
+                        lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
                         fontFamily = sarasaFont,
                         fontWeight = FontWeight.Bold,
                         overflow = TextOverflow.Visible,
                         maxLines = 1,
                         modifier = Modifier
-                            .padding(end = 24.ndp())
+                            .padding(end = 4.ndp())
                             .align(Alignment.CenterEnd)
                     )
                 }
@@ -288,22 +618,17 @@ fun BofTeamRowTotal(
             if (isCompare) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .background(
-                            color = Color.Transparent,
-                        )
+                        .width(barWidth.dp)
+                        .background(color = Color.Transparent,)
                         .padding(start = 13.ndp())
                 ) {
                     Box(
                         Modifier
-                            .background(
-                                color = Color.Transparent,
-                            )
+                            .background(color = Color.Transparent,)
                     ) {
                         Box(
                             modifier = Modifier
-                                .padding(end = 20.ndp())
-                                .fillMaxWidth(barWidthOldFaction.toFloat())
+                                .width(oldBarWidth.dp)
                                 .height(14.ndp())
                                 .background(
                                     color = RANKING_BLUE,
@@ -322,14 +647,14 @@ fun BofTeamRowTotal(
                             overflow = TextOverflow.Visible,
                             maxLines = 1,
                             modifier = Modifier
-                                .padding(end = 24.ndp())
+                                .padding(end = 4.ndp())
                                 .align(Alignment.CenterEnd)
                         )
                     }
                 }
             }
             Text(
-                text = entry.team,
+                text = annotatedString,
                 fontSize = 16.nsp(),
                 lineHeight = 16.nsp(),
                 fontFamily = sarasaFont,
@@ -339,15 +664,16 @@ fun BofTeamRowTotal(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
+                    .width(textWidth)
                     .padding(start = 13.ndp(), end = 8.ndp(), top = 2.ndp())
-                    .fillMaxWidth(0.8f)
-                    .horizontalScroll(rememberScrollState())
-                // use horizontalScroll for capturing, basicMarquee is more useful
-//                    .basicMarquee(
-//                        spacing = MarqueeSpacing(10.dp)
-//                    )
+                    .then(
+                        if (!isImage) {
+                            Modifier.basicMarquee(spacing = MarqueeSpacing(15.ndp()))
+                        } else {
+                            Modifier
+                        }
+                    )
             )
-
             val titles = listOf(entry.title1, entry.title2, entry.title3, entry.title4)
             val artists = listOf(entry.artist1, entry.artist2, entry.artist3, entry.artist4)
             val fss = listOf(entry.fs1, entry.fs2, entry.fs3, entry.fs4)
@@ -355,28 +681,16 @@ fun BofTeamRowTotal(
 
             titles.forEachIndexed { index, title ->
                 if (title.isNotEmpty()) {
-                    val inlineContent = mapOf(
-                        "icon" to InlineTextContent(
-                            Placeholder(
-                                width = 13.nsp(),
-                                height = 11.nsp(),
-                                placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
-                            )
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_star),
-                                contentDescription = null,
-                                tint = if (fss[index] == "1") RANKING_YELLOW else Color.Transparent,
-                            )
-                        }
-                    )
                     Row {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_star),
+                            contentDescription = "Final Striker",
+                            tint = if (fss[index] == "1") RANKING_YELLOW else Color.Transparent,
+                            modifier = Modifier
+                                .size(13.ndp())
+                        )
                         Text(
-                            text = buildAnnotatedString {
-                                appendInlineContent("icon", "[icon]")
-                                append("$title - ${artists[index]}")
-                            },
-                            inlineContent = inlineContent,
+                            text = "$title - ${artists[index]}",
                             fontSize = 11.nsp(),
                             lineHeight = 13.nsp(),
                             fontFamily = sarasaFont,
@@ -386,12 +700,14 @@ fun BofTeamRowTotal(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier
                                 .padding(end = 10.ndp())
-                                .fillMaxWidth(0.72f)
-                                .horizontalScroll(rememberScrollState())
-                                // use horizontalScroll for capturing, basicMarquee is more useful
-//                                .basicMarquee(
-//                                    spacing = MarqueeSpacing(10.dp)
-//                                )
+                                .width(textWidth - 81.ndp())
+                                .then(
+                                    if (!isImage) {
+                                        Modifier.basicMarquee(spacing = MarqueeSpacing(15.ndp()))
+                                    } else {
+                                        Modifier
+                                    }
+                                )
                         )
                         Text(
                             text = totals[index],
@@ -405,25 +721,22 @@ fun BofTeamRowTotal(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier
                                 .padding(end = 8.ndp())
-                                .fillMaxWidth(0.22f)
-                                .horizontalScroll(rememberScrollState())
-                                // use horizontalScroll for capturing, basicMarquee is more useful
+                                .width(50.ndp())
                         )
                     }
                 }
             }
         }
-
         Text(
             text = entry.impr.toString(),
             fontFamily = sarasaFont,
             fontWeight = FontWeight.Bold,
-            fontSize = 24.nsp(),
+            fontSize = 20.nsp(),
             color = Color.White,
             textAlign = TextAlign.End,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
-                .width(48.ndp())
+                .width(36.ndp())
         )
         val medianValue = entry.median.toDoubleOrNull()
         if (medianValue != null) {
@@ -438,7 +751,7 @@ fun BofTeamRowTotal(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .padding(start = 8.ndp())
-                    .width(110.ndp())
+                    .width(102.ndp())
                     .background(calculateColor(medianValue))
                     .padding(end = 4.ndp())
             )
@@ -447,16 +760,23 @@ fun BofTeamRowTotal(
                 text = entry.median,
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.nsp(),
+                fontSize = 15.nsp(),
                 lineHeight = 114.nsp(),
                 color = Color.White,
                 textAlign = TextAlign.End,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .padding(start = 8.ndp())
-                    .width(110.ndp())
+                    .width(102.ndp())
                     .background(Color.Black)
                     .padding(end = 4.ndp())
+            )
+        }
+        if (isLandscape(configuration) && isImage) {
+            Box(
+                modifier = Modifier
+                    .width(rightPadding)
+                    .height(36.ndp())
             )
         }
     }

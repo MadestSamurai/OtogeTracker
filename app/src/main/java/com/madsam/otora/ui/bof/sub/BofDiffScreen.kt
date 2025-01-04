@@ -39,6 +39,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -58,8 +59,8 @@ import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.ui.bof.BofViewModel
-import com.madsam.otora.ui.record.osu.saveImageBitmapToFile
-import com.madsam.otora.ui.record.osu.saveImageToGallery
+import com.madsam.otora.utils.ImageUtils.saveBitmapToFile
+import com.madsam.otora.utils.ImageUtils.saveImageToGallery
 import com.madsam.otora.utils.ScreenUtil.isLandscape
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
@@ -110,10 +111,10 @@ fun BofDiffScreen(
 
     val showDialog = remember { mutableStateOf(false) }
 
-    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val screenWidthDp = configuration.screenWidthDp.dp
     val barWidth = when (screenWidthDp) {
-        in 0.dp..800.dp -> (screenWidthDp.value * 0.3f)
-        else -> 240f
+        in 0.dp..800.dp -> (screenWidthDp.value * 0.3)
+        else -> 240.0
     }
 
     // Rank: 40, ImprDiff: 36
@@ -200,7 +201,7 @@ fun DiffCapture(
     rightPadding: Dp,
 ) {
     val screenWidthImage = 1000.dp
-    val barWidthImage = 280f
+    val barWidthImage = 280.0
     val textWidthImage = 1000.dp - 232.ndp() - barWidthImage.ndp()
     val scope = rememberCoroutineScope()
     if (showDialog.value) {
@@ -263,9 +264,9 @@ fun DiffCapture(
                         scope.launch {
                             val bitmapAsync = captureController.captureAsync()
                             try {
-                                val bitmap = bitmapAsync.await()
-                                val file = File(context.cacheDir, "bof_diff.png")
-                                saveImageBitmapToFile(bitmap, file)
+                                val bitmap = bitmapAsync.await().asAndroidBitmap()
+                                val file = File(context.cacheDir, "bof_diff.jpg")
+                                saveBitmapToFile(bitmap, file)
                                 saveImageToGallery(context, file, "bof_diff")
                                 snackbarHostState.showSnackbar("Captured content saved to gallery")
                             } catch (error: Throwable) {
@@ -298,7 +299,7 @@ fun DiffHeader(
     configuration: Configuration,
     leftPadding: Dp,
     rightPadding: Dp,
-    barWidth: Float,
+    barWidth: Double,
     textWidth: Dp,
     isImage: Boolean = false,
     diffData: List<BofEntryShow> = emptyList(),
@@ -398,7 +399,7 @@ fun BofEntryRowDiff(
     index: Int,
     maxDiff: Int,
     isImage: Boolean = false,
-    barWidth: Float,
+    barWidth: Double,
     textWidth: Dp,
     configuration: Configuration = LocalConfiguration.current,
     leftPadding: Dp = 0.dp,
@@ -407,8 +408,8 @@ fun BofEntryRowDiff(
 ) {
     val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
 
-    val newBarWidth = if (maxDiff == 0) 0f
-    else entry.totalDiff.toFloat() / maxDiff * barWidth
+    val newBarWidth = if (maxDiff == 0) 0.0
+    else entry.totalDiff.toDouble() / maxDiff * barWidth
 
     val annotatedString = buildAnnotatedString {
         if (highlightedText.isNotEmpty()) {
@@ -458,6 +459,9 @@ fun BofEntryRowDiff(
                 .width(36.ndp())
         )
         Column {
+            /**
+             * Please add (topPadding,height) in the round bracket.
+             */
             val textMod = @Composable { top: Dp, height: Dp ->
                 Modifier
                     .width(textWidth)

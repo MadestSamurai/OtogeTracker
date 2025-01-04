@@ -1,9 +1,5 @@
 package com.madsam.otora.ui.record.osu
 
-import android.content.ContentValues
-import android.content.Context
-import android.graphics.Bitmap
-import android.provider.MediaStore
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,7 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -59,13 +54,13 @@ import com.madsam.otora.consts.DARK_RED_TEXT
 import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
 import com.madsam.otora.consts.OSU_BRIGHT_RED
 import com.madsam.otora.model.osu.web.OsuGroup
+import com.madsam.otora.utils.ImageUtils.saveBitmapToFile
+import com.madsam.otora.utils.ImageUtils.saveImageToGallery
 import dev.shreyaspatil.capturable.capturable
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -456,9 +451,9 @@ fun Card(
             scope.launch {
                 val bitmapAsync = captureController.captureAsync()
                 try {
-                    val bitmap = bitmapAsync.await()
+                    val bitmap = bitmapAsync.await().asAndroidBitmap()
                     val file = File(context.cacheDir, "osu_card.png")
-                    saveImageBitmapToFile(bitmap, file)
+                    saveBitmapToFile(bitmap, file)
                     saveImageToGallery(context, file, "osu_card")
                 } catch (error: Throwable) {
                     error.printStackTrace()
@@ -467,49 +462,5 @@ fun Card(
         }) {
             Text("Capture Card")
         }
-    }
-}
-
-fun saveImageBitmapToFile(imageBitmap: ImageBitmap, file: File) {
-    val bitmap = imageBitmap.asAndroidBitmap()
-    var out: FileOutputStream? = null
-    try {
-        out = FileOutputStream(file)
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-    } catch (e: IOException) {
-        e.printStackTrace()
-    } finally {
-        try {
-            out?.close()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-    }
-}
-
-fun saveImageToGallery(context: Context, sourceFile: File, fileName: String): Boolean {
-    val contentValues = ContentValues().apply {
-        put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-        put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-        put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/MyApp")
-    }
-
-    val resolver = context.contentResolver
-    val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-
-    return if (uri != null) {
-        try {
-            resolver.openOutputStream(uri).use { outputStream ->
-                sourceFile.inputStream().use { inputStream ->
-                    inputStream.copyTo(outputStream!!)
-                }
-            }
-            true
-        } catch (e: IOException) {
-            e.printStackTrace()
-            false
-        }
-    } else {
-        false
     }
 }

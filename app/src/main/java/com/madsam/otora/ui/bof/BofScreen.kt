@@ -200,6 +200,7 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                             1 -> vm.findItemIndex(it, vm.avgData.value, selectedTabIndex)
                             2 -> vm.findItemIndex(it, vm.medianData.value, selectedTabIndex)
                             3 -> vm.findItemIndex(it, vm.diffData.value, selectedTabIndex)
+                            4 -> vm.findTeamItemIndex(it, vm.teamData.value)
                         }
                     },
                     textStyle = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Normal),
@@ -297,7 +298,7 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                 composable("Avg") { BofAvgScreen(vm, snackbarHostState, listStateAvg) }
                 composable("Median") { BofMedianScreen(vm, snackbarHostState, listStateMedian) }
                 composable("Diff") { BofDiffScreen(vm, snackbarHostState, listStateDiff) }
-                composable("Team") { BofTeamScreen(vm) }
+                composable("Team") { BofTeamScreen(vm, snackbarHostState, listStateTeam) }
             }
         }
         Box(
