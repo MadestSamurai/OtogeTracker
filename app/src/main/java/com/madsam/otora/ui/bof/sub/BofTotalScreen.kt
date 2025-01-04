@@ -258,7 +258,7 @@ fun TotalCapture(
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
             title = { Text(text = "Capture Content") },
-            modifier = Modifier.height(500.dp),
+            modifier = Modifier.height(300.dp),
             text = {
                 Column {
                     Text(
@@ -296,7 +296,7 @@ fun TotalCapture(
                                     )
                                 if (totalData.isNotEmpty())
                                     for ((index, entry) in totalData.withIndex())
-                                        if (entry.index in i * 100..(i + 1) * 100)
+                                        if (index in i * 100..(i + 1) * 100 - 1)
                                             BofEntryRowTotal(
                                                 entry = entry,
                                                 index = index + 1,
@@ -333,27 +333,43 @@ fun TotalCapture(
                                 val scaleFactor = maxHeight.toFloat() / totalHeight
                                 val newWidth = (bitmapList[0].width * scaleFactor).toInt()
                                 val newHeight = maxHeight
-                                Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888).apply {
-                                    val canvas = Canvas(this)
-                                    var currentHeight = 0
-                                    for (hardwareBitmap in bitmapList) {
-                                        val scaledBitmap = Bitmap.createScaledBitmap(
-                                            hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
-                                            newWidth,
-                                            (hardwareBitmap.height * scaleFactor).toInt(),
-                                            true
-                                        )
-                                        canvas.drawBitmap(scaledBitmap, 0f, currentHeight.toFloat(), null)
-                                        currentHeight += scaledBitmap.height
+                                Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+                                    .apply {
+                                        val canvas = Canvas(this)
+                                        var currentHeight = 0
+                                        for (hardwareBitmap in bitmapList) {
+                                            val scaledBitmap = Bitmap.createScaledBitmap(
+                                                hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
+                                                newWidth,
+                                                (hardwareBitmap.height * scaleFactor).toInt(),
+                                                true
+                                            )
+                                            canvas.drawBitmap(
+                                                scaledBitmap,
+                                                0f,
+                                                currentHeight.toFloat(),
+                                                null
+                                            )
+                                            currentHeight += scaledBitmap.height
+                                        }
                                     }
-                                }
                             } else {
-                                Bitmap.createBitmap(bitmapList[0].width, totalHeight, Bitmap.Config.ARGB_8888).apply {
+                                Bitmap.createBitmap(
+                                    bitmapList[0].width,
+                                    totalHeight,
+                                    Bitmap.Config.ARGB_8888
+                                ).apply {
                                     val canvas = Canvas(this)
                                     var currentHeight = 0
                                     for (hardwareBitmap in bitmapList) {
-                                        val softwareBitmap = hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
-                                        canvas.drawBitmap(softwareBitmap, 0f, currentHeight.toFloat(), null)
+                                        val softwareBitmap =
+                                            hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                        canvas.drawBitmap(
+                                            softwareBitmap,
+                                            0f,
+                                            currentHeight.toFloat(),
+                                            null
+                                        )
                                         currentHeight += softwareBitmap.height
                                     }
                                 }

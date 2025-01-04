@@ -202,10 +202,10 @@ class BofViewModel(
 
     fun calculateThresholds(data: List<BofEntryShow>) {
         val sortedDataByOldImpr = data.sortedByDescending { it.oldImpr }
-        thresholdImprOld.update { max(sortedDataByOldImpr.getOrNull(199)?.oldImpr ?: 0, 3) }
+        thresholdImprOld.update { max(sortedDataByOldImpr.getOrNull(239)?.oldImpr ?: 0, 3) }
 
         val sortedDataByImpr = data.sortedByDescending { it.impr }
-        thresholdImpr.update { max(sortedDataByImpr.getOrNull(199)?.impr ?: 0, 3) }
+        thresholdImpr.update { max(sortedDataByImpr.getOrNull(239)?.impr ?: 0, 3) }
     }
 
     suspend fun requestTotalData() {

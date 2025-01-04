@@ -2,6 +2,8 @@ package com.madsam.otora.ui.bof.sub
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeSpacing
@@ -59,16 +61,15 @@ import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.ui.bof.BofViewModel
-import com.madsam.otora.utils.ImageUtils.saveBitmapToFile
-import com.madsam.otora.utils.ImageUtils.saveImageToGallery
+import com.madsam.otora.utils.ImageUtils.saveBitmapToGallery
 import com.madsam.otora.utils.ScreenUtil.isLandscape
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
 import dev.shreyaspatil.capturable.capturable
+import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
 import java.time.LocalDate
 
 /**
@@ -202,14 +203,17 @@ fun DiffCapture(
 ) {
     val screenWidthImage = 1000.dp
     val barWidthImage = 280.0
-    val textWidthImage = 1000.dp - 232.ndp() - barWidthImage.ndp()
+    val textWidthImage = 1000.dp - 138.ndp() - barWidthImage.ndp()
     val scope = rememberCoroutineScope()
     if (showDialog.value) {
-        val captureController = rememberCaptureController()
+        val captureControllerList = mutableListOf<CaptureController>()
+        repeat(diffData.size / 100 + 1) {
+            captureControllerList.add(rememberCaptureController())
+        }
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
             title = { Text(text = "Capture Content") },
-            modifier = Modifier.height(500.dp),
+            modifier = Modifier.height(300.dp),
             text = {
                 Column {
                     Text(
@@ -218,41 +222,42 @@ fun DiffCapture(
                                 "including the parts that are not visible on the screen.",
                         modifier = Modifier.padding(8.dp)
                     )
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(15.dp))
-                            .height(250.dp)
-                            .requiredHeight(10000.dp)
-                            .requiredWidth(screenWidthImage)
-                    ) {
-                        Column(
+                    for (i in 0 until diffData.size / 100 + 1) {
+                        Box(
                             modifier = Modifier
-                                .capturable(captureController)
-                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(15.dp))
+                                .height(0.dp)
+                                .requiredHeight(5000.dp)
+                                .requiredWidth(screenWidthImage)
                         ) {
-                            DiffHeader(
-                                configuration = configuration,
-                                leftPadding = leftPadding,
-                                rightPadding = rightPadding,
-                                barWidth = barWidthImage,
-                                textWidth = textWidthImage,
-                                isImage = true,
-                                diffData = diffData,
-                                selectedDate = selectedDate,
-                                selectedTimeStr = selectedTimeStr,
-                            )
-                            if (diffData.isNotEmpty()) {
-                                for ((index, entry) in diffData.withIndex()) {
-                                    if (entry.index > 475) break
-                                    BofEntryRowDiff(
-                                        entry = entry,
-                                        index = index + 1,
-                                        maxDiff = maxDiff,
-                                        isImage = true,
+                            Column(
+                                modifier = Modifier
+                                    .capturable(captureControllerList[i])
+                                    .fillMaxWidth()
+                            ) {
+                                if (i == 0)
+                                    DiffHeader(
+                                        configuration = configuration,
+                                        leftPadding = leftPadding,
+                                        rightPadding = rightPadding,
                                         barWidth = barWidthImage,
                                         textWidth = textWidthImage,
+                                        isImage = true,
+                                        diffData = diffData,
+                                        selectedDate = selectedDate,
+                                        selectedTimeStr = selectedTimeStr
                                     )
-                                }
+                                if (diffData.isNotEmpty())
+                                    for ((index, entry) in diffData.withIndex())
+                                        if (index in i * 100..(i + 1) * 100 - 1)
+                                            BofEntryRowDiff(
+                                                entry = entry,
+                                                index = index + 1,
+                                                maxDiff = maxDiff,
+                                                isImage = true,
+                                                barWidth = barWidthImage,
+                                                textWidth = textWidthImage
+                                            )
                             }
                         }
                     }
@@ -261,19 +266,56 @@ fun DiffCapture(
             confirmButton = {
                 Button(
                     onClick = {
+                        val bitmapList = mutableListOf<Bitmap>()
                         scope.launch {
-                            val bitmapAsync = captureController.captureAsync()
-                            try {
-                                val bitmap = bitmapAsync.await().asAndroidBitmap()
-                                val file = File(context.cacheDir, "bof_diff.jpg")
-                                saveBitmapToFile(bitmap, file)
-                                saveImageToGallery(context, file, "bof_diff")
-                                snackbarHostState.showSnackbar("Captured content saved to gallery")
-                            } catch (error: Throwable) {
-                                Log.e("Capture", "Error capturing content", error)
-                                snackbarHostState.showSnackbar("Error capturing content")
-                                error.printStackTrace()
+                            for (captureController in captureControllerList) {
+                                val bitmapAsync = captureController.captureAsync()
+                                try {
+                                    bitmapList.add(bitmapAsync.await().asAndroidBitmap())
+                                } catch (error: Throwable) {
+                                    Log.e("Capture", "Error capturing content", error)
+                                    snackbarHostState.showSnackbar("Error capturing content")
+                                    error.printStackTrace()
+                                }
                             }
+                            val totalHeight = bitmapList.sumOf { it.height }
+                            val maxHeight = 32000
+                            val bitmap = if (totalHeight > maxHeight) {
+                                val scaleFactor = maxHeight.toFloat() / totalHeight
+                                val newWidth = (bitmapList[0].width * scaleFactor).toInt()
+                                val newHeight = maxHeight
+                                Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888).apply {
+                                    val canvas = Canvas(this)
+                                    var currentHeight = 0
+                                    for (hardwareBitmap in bitmapList) {
+                                        val scaledBitmap = Bitmap.createScaledBitmap(
+                                            hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
+                                            newWidth,
+                                            (hardwareBitmap.height * scaleFactor).toInt(),
+                                            true
+                                        )
+                                        canvas.drawBitmap(scaledBitmap, 0f, currentHeight.toFloat(), null)
+                                        currentHeight += scaledBitmap.height
+                                    }
+                                }
+                            } else {
+                                Bitmap.createBitmap(bitmapList[0].width, totalHeight, Bitmap.Config.ARGB_8888).apply {
+                                    val canvas = Canvas(this)
+                                    var currentHeight = 0
+                                    for (hardwareBitmap in bitmapList) {
+                                        val softwareBitmap = hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                        canvas.drawBitmap(softwareBitmap, 0f, currentHeight.toFloat(), null)
+                                        currentHeight += softwareBitmap.height
+                                    }
+                                }
+                            }
+                            saveBitmapToGallery(
+                                context,
+                                bitmap,
+                                "bof_diff_${selectedDate}_$selectedTimeStr",
+                                "BOF Diff Score Ranking"
+                            )
+                            snackbarHostState.showSnackbar("Image saved to gallery")
                         }
                         showDialog.value = false
                     }

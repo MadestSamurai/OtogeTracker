@@ -2,6 +2,8 @@ package com.madsam.otora.ui.bof.sub
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeSpacing
@@ -66,16 +68,15 @@ import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofTeamShow
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.utils.CommonUtils
-import com.madsam.otora.utils.ImageUtils.saveBitmapToFile
-import com.madsam.otora.utils.ImageUtils.saveImageToGallery
+import com.madsam.otora.utils.ImageUtils.saveBitmapToGallery
 import com.madsam.otora.utils.ScreenUtil.isLandscape
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
 import dev.shreyaspatil.capturable.capturable
+import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
 import java.time.LocalDate
 import kotlin.math.max
 
@@ -129,9 +130,11 @@ fun BofTeamScreen(
         screenWidthDp > 800.dp && isCompare ->
             // Compare: 62, Rank: 36, Impr: 36, Median: 110
             screenWidthDp - 244.ndp()
+
         screenWidthDp <= 800.dp && isCompare ->
             // Compare: 58, Impr: 36, Median: 110
             screenWidthDp - 204.ndp()
+
         else ->
             // Rank: 36, Impr: 36, Median: 110
             screenWidthDp - 182.ndp()
@@ -228,11 +231,14 @@ fun TeamCapture(
     val barWidthImage = textWidthImage.value.toDouble()
     val scope = rememberCoroutineScope()
     if (showDialog.value) {
-        val captureController = rememberCaptureController()
+        val captureControllerList = mutableListOf<CaptureController>()
+        repeat(teamData.size / 40 + 1) {
+            captureControllerList.add(rememberCaptureController())
+        }
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
             title = { Text(text = "Capture Content") },
-            modifier = Modifier.height(500.dp),
+            modifier = Modifier.height(300.dp),
             text = {
                 Column {
                     Text(
@@ -241,44 +247,45 @@ fun TeamCapture(
                                 "including the parts that are not visible on the screen.",
                         modifier = Modifier.padding(8.dp)
                     )
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(15.dp))
-                            .height(250.dp)
-                            .requiredHeight(10000.dp)
-                            .requiredWidth(screenWidthImage)
-                    ) {
-                        Column(
+                    for (i in 0 until teamData.size / 40 + 1) {
+                        Box(
                             modifier = Modifier
-                                .capturable(captureController)
-                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(15.dp))
+                                .height(0.dp)
+                                .requiredHeight(5000.dp)
+                                .requiredWidth(screenWidthImage)
                         ) {
-                            TeamHeader(
-                                configuration = configuration,
-                                leftPadding = leftPadding,
-                                rightPadding = rightPadding,
-                                screenWidthDp = screenWidthImage,
-                                isCompare = isCompare,
-                                textWidth = textWidthImage,
-                                isImage = true,
-                                teamData = teamData,
-                                selectedDate = selectedDate,
-                                selectedTimeStr = selectedTimeStr,
-                            )
-                            if (teamData.isNotEmpty()) {
-                                for ((index, entry) in teamData.withIndex()) {
-                                    if (entry.index > 475) break
-                                    BofTeamRowTotal(
-                                        entry = entry,
-                                        index = index + 1,
-                                        maxTotal = maxTotal,
+                            Column(
+                                modifier = Modifier
+                                    .capturable(captureControllerList[i])
+                                    .fillMaxWidth()
+                            ) {
+                                if (i == 0)
+                                    TeamHeader(
+                                        configuration = configuration,
+                                        leftPadding = leftPadding,
+                                        rightPadding = rightPadding,
+                                        screenWidthDp = screenWidthImage,
                                         isCompare = isCompare,
-                                        isImage = true,
-                                        rowWidth = screenWidthImage,
-                                        barWidth = barWidthImage,
                                         textWidth = textWidthImage,
+                                        isImage = true,
+                                        teamData = teamData,
+                                        selectedDate = selectedDate,
+                                        selectedTimeStr = selectedTimeStr,
                                     )
-                                }
+                                if (teamData.isNotEmpty())
+                                    for ((index, entry) in teamData.withIndex())
+                                        if (index in i * 40..(i + 1) * 40 - 1)
+                                            BofTeamRowTotal(
+                                                entry = entry,
+                                                index = index + 1,
+                                                maxTotal = maxTotal,
+                                                isCompare = isCompare,
+                                                isImage = true,
+                                                rowWidth = screenWidthImage,
+                                                barWidth = barWidthImage,
+                                                textWidth = textWidthImage,
+                                            )
                             }
                         }
                     }
@@ -287,19 +294,72 @@ fun TeamCapture(
             confirmButton = {
                 Button(
                     onClick = {
+                        val bitmapList = mutableListOf<Bitmap>()
                         scope.launch {
-                            val bitmapAsync = captureController.captureAsync()
-                            try {
-                                val bitmap = bitmapAsync.await().asAndroidBitmap()
-                                val file = File(context.cacheDir, "bof_team.png")
-                                saveBitmapToFile(bitmap, file)
-                                saveImageToGallery(context, file, "bof_team")
-                                snackbarHostState.showSnackbar("Captured content saved to gallery")
-                            } catch (error: Throwable) {
-                                Log.e("Capture", "Error capturing content", error)
-                                snackbarHostState.showSnackbar("Error capturing content")
-                                error.printStackTrace()
+                            for (captureController in captureControllerList) {
+                                val bitmapAsync = captureController.captureAsync()
+                                try {
+                                    bitmapList.add(bitmapAsync.await().asAndroidBitmap())
+                                } catch (error: Throwable) {
+                                    Log.e("Capture", "Error capturing content", error)
+                                    snackbarHostState.showSnackbar("Error capturing content")
+                                    error.printStackTrace()
+                                }
                             }
+                            val totalHeight = bitmapList.sumOf { it.height }
+                            val maxHeight = 32000
+                            val bitmap = if (totalHeight > maxHeight) {
+                                val scaleFactor = maxHeight.toFloat() / totalHeight
+                                val newWidth = (bitmapList[0].width * scaleFactor).toInt()
+                                val newHeight = maxHeight
+                                Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+                                    .apply {
+                                        val canvas = Canvas(this)
+                                        var currentHeight = 0
+                                        for (hardwareBitmap in bitmapList) {
+                                            val scaledBitmap = Bitmap.createScaledBitmap(
+                                                hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
+                                                newWidth,
+                                                (hardwareBitmap.height * scaleFactor).toInt(),
+                                                true
+                                            )
+                                            canvas.drawBitmap(
+                                                scaledBitmap,
+                                                0f,
+                                                currentHeight.toFloat(),
+                                                null
+                                            )
+                                            currentHeight += scaledBitmap.height
+                                        }
+                                    }
+                            } else {
+                                Bitmap.createBitmap(
+                                    bitmapList[0].width,
+                                    totalHeight,
+                                    Bitmap.Config.ARGB_8888
+                                ).apply {
+                                    val canvas = Canvas(this)
+                                    var currentHeight = 0
+                                    for (hardwareBitmap in bitmapList) {
+                                        val softwareBitmap =
+                                            hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                        canvas.drawBitmap(
+                                            softwareBitmap,
+                                            0f,
+                                            currentHeight.toFloat(),
+                                            null
+                                        )
+                                        currentHeight += softwareBitmap.height
+                                    }
+                                }
+                            }
+                            saveBitmapToGallery(
+                                context,
+                                bitmap,
+                                "bof_team_${selectedDate}_$selectedTimeStr",
+                                "BOF Team Score Ranking"
+                            )
+                            snackbarHostState.showSnackbar("Image saved to gallery")
                         }
                         showDialog.value = false
                     }
@@ -403,8 +463,10 @@ fun TeamHeader(
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
+                textAlign = TextAlign.End,
                 color = Color.White,
                 modifier = Modifier
+                    .padding(start = 8.ndp())
                     .width(102.ndp())
             )
             if (isLandscape(configuration) && !isImage) {
@@ -452,7 +514,11 @@ fun BofTeamRowTotal(
                     append(entry.team.substring(startIndex, startIndex + highlightedText.length))
                 }
                 currentIndex = startIndex + highlightedText.length
-                startIndex = entry.team.indexOf(highlightedText, startIndex + highlightedText.length, ignoreCase = true)
+                startIndex = entry.team.indexOf(
+                    highlightedText,
+                    startIndex + highlightedText.length,
+                    ignoreCase = true
+                )
             }
             append(entry.team.substring(currentIndex))
         } else {
@@ -619,12 +685,12 @@ fun BofTeamRowTotal(
                 Box(
                     modifier = Modifier
                         .width(barWidth.dp)
-                        .background(color = Color.Transparent,)
+                        .background(color = Color.Transparent)
                         .padding(start = 13.ndp())
                 ) {
                     Box(
                         Modifier
-                            .background(color = Color.Transparent,)
+                            .background(color = Color.Transparent)
                     ) {
                         Box(
                             modifier = Modifier
