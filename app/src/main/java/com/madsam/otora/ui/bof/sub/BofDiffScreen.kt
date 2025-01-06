@@ -95,9 +95,10 @@ fun BofDiffScreen(
 
     val diffData = vm.diffData.asStateFlow().collectAsState()
     val maxDiff = diffData.value.maxOfOrNull { it.totalDiff } ?: 1
-    val selectedDate = vm.selectedEndDate.asStateFlow().collectAsState().value
-    val selectedTime = vm.selectedEndTime.asStateFlow().collectAsState().value
-    val selectedTimeStr = vm.selectedEndTimeStr.asStateFlow().collectAsState().value
+    val isReverse = vm.isDiffReverse.asStateFlow().collectAsState().value
+    val selectedDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
+    val selectedTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
+    val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
     val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
     val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 
@@ -135,7 +136,8 @@ fun BofDiffScreen(
         maxDiff = maxDiff,
         configuration = configuration,
         leftPadding = leftPadding,
-        rightPadding = rightPadding
+        rightPadding = rightPadding,
+        isReverse = isReverse
     )
 
     LazyColumn(state = listState) {
@@ -148,8 +150,8 @@ fun BofDiffScreen(
                     barWidth = barWidth,
                     textWidth = textWidth,
                     diffData = diffData.value,
-                    selectedDate = selectedDate,
-                    selectedTimeStr = selectedTimeStr
+                    selectedTimeStr = selectedTimeStr,
+                    isReverse = isReverse
                 )
                 Row(
                     modifier = Modifier
@@ -200,6 +202,7 @@ fun DiffCapture(
     configuration: Configuration,
     leftPadding: Dp,
     rightPadding: Dp,
+    isReverse: Boolean
 ) {
     val screenWidthImage = 1000.dp
     val barWidthImage = 280.0
@@ -244,8 +247,8 @@ fun DiffCapture(
                                         textWidth = textWidthImage,
                                         isImage = true,
                                         diffData = diffData,
-                                        selectedDate = selectedDate,
-                                        selectedTimeStr = selectedTimeStr
+                                        selectedTimeStr = selectedTimeStr,
+                                        isReverse = isReverse
                                     )
                                 if (diffData.isNotEmpty())
                                     for ((index, entry) in diffData.withIndex())
@@ -345,15 +348,15 @@ fun DiffHeader(
     textWidth: Dp,
     isImage: Boolean = false,
     diffData: List<BofEntryShow> = emptyList(),
-    selectedDate: LocalDate = LocalDate.now(),
-    selectedTimeStr: String = ""
+    selectedTimeStr: String = "",
+    isReverse: Boolean = false
 ) {
     Column {
         if (diffData.isEmpty()) {
-            Text(text = "No Data at $selectedDate $selectedTimeStr")
+            Text(text = "No ${selectedTimeStr.split(",")[0]}")
         } else {
             Text(
-                text = "Total Difference Ranking",
+                text = "Total ${if (isReverse) "Nerf" else "Difference"} Ranking",
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.nsp(),
@@ -365,7 +368,7 @@ fun DiffHeader(
                     .padding(top = 10.ndp())
             )
             Text(
-                text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
+                text = selectedTimeStr,
                 fontFamily = sarasaFont,
                 fontSize = 12.nsp(),
                 color = Color.White,
@@ -405,7 +408,7 @@ fun DiffHeader(
                     .padding(end = 8.ndp(), top = 2.ndp())
             )
             Text(
-                text = "Diff",
+                text = if (isReverse) "Nerf" else "Diff",
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
@@ -414,7 +417,7 @@ fun DiffHeader(
                     .width(barWidth.ndp() - 36.ndp())
             )
             Text(
-                text = "ImprDiff",
+                text = "Impr${if (isReverse) "Nerf" else "Diff"}",
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
@@ -555,7 +558,6 @@ fun BofEntryRowDiff(
                     Box(
                         modifier = Modifier
                             .width(newBarWidth.ndp())
-                            .padding(end = 20.ndp())
                             .height(32.ndp())
                             .background(
                                 color = RANKING_RED,
@@ -575,7 +577,7 @@ fun BofEntryRowDiff(
                         overflow = TextOverflow.Visible,
                         maxLines = 1,
                         modifier = Modifier
-                            .padding(end = 24.ndp())
+                            .padding(end = 4.ndp())
                             .align(Alignment.CenterEnd)
                     )
                 }

@@ -250,17 +250,16 @@ class BofDataRequestService(private val context: Context) {
     }
 
     // Get BOF data from the database
-    suspend fun getBofttEntryByTime(time: Long, compareTime: Long): List<BofEntryShow> {
+    suspend fun getBofttEntryByTime(currentTime: Long, compareTime: Long): List<BofEntryShow> {
         return withContext(Dispatchers.IO) {
             val realm = Realm.open(realmConfig)
             try {
-                val startTime = time - 24 * 60 * 60 * 1000 // 48 hours in milliseconds
-                val startTimeCompare = compareTime - 24 * 60 * 60 * 1000 // 48 hours in milliseconds
-                // Fetch points within the time range
+                val startTime = currentTime - 24 * 60 * 60 * 1000
+                val startTimeCompare = compareTime - 24 * 60 * 60 * 1000
                 val points = realm.query<BofPointEntity>(
                     clazz = BofPointEntity::class,
                     query = "time >= $0 AND time <= $1",
-                    startTime, time
+                    startTime, currentTime
                 ).find()
                 val pointsCompare = realm.query<BofPointEntity>(
                     clazz = BofPointEntity::class,
@@ -273,7 +272,7 @@ class BofDataRequestService(private val context: Context) {
                     return@withContext emptyList<BofEntryShow>()
                 }
 
-                val date = CommonUtils.millisToYmd(time).substring(0, 10)
+                val date = CommonUtils.millisToYmd(currentTime).substring(0, 10)
                 val entries = realm.query<BofEntryEntity>(
                     clazz = BofEntryEntity::class,
                     query = "date == $0",
@@ -288,8 +287,8 @@ class BofDataRequestService(private val context: Context) {
                     val entryPoints = pointsMap[entry.no] ?: emptyList()
                     val entryPointsCompare = pointsMapCompare[entry.no] ?: emptyList()
                     val closestPoint = entryPoints
-                        .filter { it.time <= time }
-                        .minByOrNull { abs(it.time - time) }
+                        .filter { it.time <= currentTime }
+                        .minByOrNull { abs(it.time - currentTime) }
                     val closestPointCompare = entryPointsCompare
                         .filter { it.time <= compareTime }
                         .minByOrNull { abs(it.time - compareTime) }
@@ -311,7 +310,7 @@ class BofDataRequestService(private val context: Context) {
                         oldTotal = closestPointCompare?.total ?: 0,
                         oldMedian = closestPointCompare?.median ?: 0.0,
                         oldAvg = closestPointCompare?.avg ?: 0.0,
-                        time = CommonUtils.millisToYmd(time).substring(11, 16)
+                        time = CommonUtils.millisToYmd(currentTime).substring(11, 16)
                     )
                 }
             } catch (e: Exception) {
@@ -323,18 +322,22 @@ class BofDataRequestService(private val context: Context) {
         }
     }
 
-    suspend fun getBofttTeamByTime(time: Long): List<BofTeamShow> {
+    suspend fun getBofttTeamByTime(currentTime: Long, compareTime: Long): List<BofTeamShow> {
         return withContext(Dispatchers.IO) {
             val realm = Realm.open(realmConfig)
             try {
-                val startTime = time - 48 * 60 * 60 * 1000 // 48 hours in milliseconds
-                val oldTimeLimit = time - 24 * 60 * 60 * 1000 // 24 hours in milliseconds
+                val startTime = currentTime - 24 * 60 * 60 * 1000
+                val startTimeCompare = compareTime - 24 * 60 * 60 * 1000
 
-                // Fetch points within the time range
                 val points = realm.query<BofTeamPointEntity>(
                     clazz = BofTeamPointEntity::class,
                     query = "time >= $0 AND time <= $1",
-                    startTime, time
+                    startTime, currentTime
+                ).find()
+                val pointsCompare = realm.query<BofTeamPointEntity>(
+                    clazz = BofTeamPointEntity::class,
+                    query = "time >= $0 AND time <= $1",
+                    startTimeCompare, compareTime
                 ).find()
 
                 if (points.isEmpty()) {
@@ -342,25 +345,25 @@ class BofDataRequestService(private val context: Context) {
                     return@withContext emptyList<BofTeamShow>()
                 }
 
-                // Fetch teams for the given date
-                val date = CommonUtils.millisToYmd(time).substring(0, 10)
+                val date = CommonUtils.millisToYmd(currentTime).substring(0, 10)
                 val teams = realm.query<BofTeamEntity>(
                     clazz = BofTeamEntity::class,
                     query = "date == $0",
                     date
                 ).find()
 
-                // Create a map of teamId to points for quick access
                 val pointsMap = points.groupBy { it.team }
+                val pointsMapCompare = pointsCompare.groupBy { it.team }
 
                 teams.map { team ->
                     val teamPoints = pointsMap[team.team] ?: emptyList()
+                    val teamPointsCompare = pointsMapCompare[team.team] ?: emptyList()
                     val closestPoint = teamPoints
-                        .filter { it.time <= time }
-                        .minByOrNull { abs(it.time - time) }
-                    val oldClosestPoint = teamPoints
-                        .filter { it.time <= oldTimeLimit }
-                        .minByOrNull { abs(it.time - oldTimeLimit) }
+                        .filter { it.time <= currentTime }
+                        .minByOrNull { abs(it.time - currentTime) }
+                    val closestPointCompare = teamPointsCompare
+                        .filter { it.time <= compareTime }
+                        .minByOrNull { abs(it.time - compareTime) }
 
                     BofTeamShow(
                         oldIndex = 0,
@@ -389,10 +392,10 @@ class BofDataRequestService(private val context: Context) {
                         median3 = closestPoint?.median3 ?: "",
                         total4 = closestPoint?.total4 ?: "",
                         median4 = closestPoint?.median4 ?: "",
-                        oldImpr = oldClosestPoint?.impr ?: 0,
-                        oldTotal = oldClosestPoint?.total ?: 0.0,
-                        oldMedian = oldClosestPoint?.median ?: "",
-                        time = CommonUtils.millisToYmd(time).substring(11, 16)
+                        oldImpr = closestPointCompare?.impr ?: 0,
+                        oldTotal = closestPointCompare?.total ?: 0.0,
+                        oldMedian = closestPointCompare?.median ?: "",
+                        time = CommonUtils.millisToYmd(currentTime).substring(11, 16)
                     )
                 }
             } catch (e: Exception) {
@@ -422,7 +425,8 @@ class BofDataRequestService(private val context: Context) {
         return withContext(Dispatchers.IO) {
             try {
                 val currentTime = System.currentTimeMillis()
-                getBofttTeamByTime(currentTime)
+                val compareTime = currentTime - 24 * 60 * 60 * 1000
+                getBofttTeamByTime(currentTime, compareTime)
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching latest team: ${e.message}")
                 emptyList()

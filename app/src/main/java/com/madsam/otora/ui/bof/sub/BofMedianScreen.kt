@@ -103,9 +103,9 @@ fun BofMedianScreen(
         medianData.value.maxOfOrNull { it.median } ?: 1.0,
         medianData.value.maxOfOrNull { it.oldMedian } ?: 1.0
     )
-    val selectedDate = vm.selectedEndDate.asStateFlow().collectAsState().value
-    val selectedTime = vm.selectedEndTime.asStateFlow().collectAsState().value
-    val selectedTimeStr = vm.selectedEndTimeStr.asStateFlow().collectAsState().value
+    val selectedDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
+    val selectedTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
+    val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
     val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
     val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 
@@ -180,7 +180,6 @@ fun BofMedianScreen(
                     barWidth = barWidth,
                     textWidth = textWidth,
                     medianData = medianData.value,
-                    selectedDate = selectedDate,
                     selectedTimeStr = selectedTimeStr,
                     thresholdImpr = thresholdImpr.value
                 )
@@ -285,7 +284,6 @@ fun MedianCapture(
                                         textWidth = textWidthImage,
                                         isImage = true,
                                         medianData = medianData,
-                                        selectedDate = selectedDate,
                                         selectedTimeStr = selectedTimeStr,
                                         thresholdImpr = thresholdImpr
                                     )
@@ -408,13 +406,12 @@ fun MedianHeader(
     textWidth: Dp,
     isImage: Boolean = false,
     medianData: List<BofEntryShow> = emptyList(),
-    selectedDate: LocalDate = LocalDate.now(),
     selectedTimeStr: String = "",
     thresholdImpr: Int
 ) {
     Column {
         if (medianData.isEmpty() || medianData[0].median == 0.0) {
-            Text(text = "No Data at $selectedDate $selectedTimeStr")
+            Text(text = "No ${selectedTimeStr.split(",")[0]}")
         } else {
             Text(
                 text = "Median Score Ranking",
@@ -440,7 +437,7 @@ fun MedianHeader(
                     .background(Color.Black)
             )
             Text(
-                text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
+                text = selectedTimeStr,
                 fontFamily = sarasaFont,
                 fontSize = 12.nsp(),
                 color = Color.White,

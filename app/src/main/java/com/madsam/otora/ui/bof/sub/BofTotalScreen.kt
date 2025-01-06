@@ -103,15 +103,17 @@ fun BofTotalScreen(
         totalData.value.maxOfOrNull { it.total } ?: 1,
         totalData.value.maxOfOrNull { it.oldTotal } ?: 1
     )
-    val selectedDate = vm.selectedEndDate.asStateFlow().collectAsState().value
-    val selectedTime = vm.selectedEndTime.asStateFlow().collectAsState().value
-    val selectedTimeStr = vm.selectedEndTimeStr.asStateFlow().collectAsState().value
+    val currentDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
+    val currentTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
+    val compareDate = vm.selectedCompareDate.asStateFlow().collectAsState().value
+    val compareTime = vm.selectedCompareTime.asStateFlow().collectAsState().value
+    val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
     val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
     val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 
     val highlightedText = vm.highlightedText.asStateFlow().collectAsState().value
 
-    LaunchedEffect(selectedDate, selectedTime) {
+    LaunchedEffect(currentDate, currentTime, compareDate, compareTime) {
         scope.launch {
             vm.requestTotalData()
             vm.generateSelectedTimeStr()
@@ -156,7 +158,7 @@ fun BofTotalScreen(
         context = context,
         snackbarHostState = snackbarHostState,
         totalData = totalData.value,
-        selectedDate = selectedDate,
+        selectedDate = currentDate,
         selectedTimeStr = selectedTimeStr,
         maxTotal = maxTotal,
         isCompare = isCompare,
@@ -177,7 +179,6 @@ fun BofTotalScreen(
                     barWidth = barWidth,
                     textWidth = textWidth,
                     totalData = totalData.value,
-                    selectedDate = selectedDate,
                     selectedTimeStr = selectedTimeStr,
                     dataSwitch = dataSwitch.value
                 )
@@ -291,7 +292,6 @@ fun TotalCapture(
                                         textWidth = textWidthImage,
                                         isImage = true,
                                         totalData = totalData,
-                                        selectedDate = selectedDate,
                                         selectedTimeStr = selectedTimeStr,
                                     )
                                 if (totalData.isNotEmpty())
@@ -412,13 +412,12 @@ fun TotalHeader(
     textWidth: Dp,
     isImage: Boolean = false,
     totalData: List<BofEntryShow> = emptyList(),
-    selectedDate: LocalDate = LocalDate.now(),
     selectedTimeStr: String = "",
     dataSwitch: Boolean = false
 ) {
     Column {
         if (totalData.isEmpty() || totalData[0].total == 0) {
-            Text(text = "No Data at $selectedDate $selectedTimeStr")
+            Text(text = "No ${selectedTimeStr.split(",")[0]}")
         } else {
             Text(
                 text = "Total Score Ranking",
@@ -433,7 +432,7 @@ fun TotalHeader(
                     .padding(top = 10.ndp())
             )
             Text(
-                text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
+                text = selectedTimeStr,
                 fontFamily = sarasaFont,
                 fontSize = 12.nsp(),
                 color = Color.White,

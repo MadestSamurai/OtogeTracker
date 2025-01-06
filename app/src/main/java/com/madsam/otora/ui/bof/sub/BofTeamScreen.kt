@@ -106,9 +106,9 @@ fun BofTeamScreen(
         teamData.value.maxOfOrNull { it.total } ?: 0.0,
         teamData.value.maxOfOrNull { it.oldTotal } ?: 0.0
     )
-    val selectedDate = vm.selectedEndDate.asStateFlow().collectAsState().value
-    val selectedTime = vm.selectedEndTime.asStateFlow().collectAsState().value
-    val selectedTimeStr = vm.selectedEndTimeStr.asStateFlow().collectAsState().value
+    val selectedDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
+    val selectedTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
+    val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
     val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
     val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 
@@ -395,7 +395,7 @@ fun TeamHeader(
 ) {
     Column {
         if (teamData.isEmpty() || teamData[0].total == 0.0) {
-            Text(text = "No Data at $selectedDate $selectedTimeStr")
+            Text(text = "No ${selectedTimeStr.split(",")[0]}")
         } else {
             Text(
                 text = "Total Team Score Ranking",
@@ -410,7 +410,7 @@ fun TeamHeader(
                     .padding(top = 10.ndp())
             )
             Text(
-                text = "Updated at $selectedDate $selectedTimeStr, all data by MadSamurai",
+                text = selectedTimeStr,
                 fontFamily = sarasaFont,
                 fontSize = 12.nsp(),
                 color = Color.White,

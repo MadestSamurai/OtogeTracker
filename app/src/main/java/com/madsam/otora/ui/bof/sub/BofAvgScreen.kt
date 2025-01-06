@@ -103,9 +103,9 @@ fun BofAvgScreen(
         avgData.value.maxOfOrNull { it.avg } ?: 1.0,
         avgData.value.maxOfOrNull { it.oldAvg } ?: 1.0
     )
-    val selectedDate = vm.selectedEndDate.asStateFlow().collectAsState().value
-    val selectedTime = vm.selectedEndTime.asStateFlow().collectAsState().value
-    val selectedTimeStr = vm.selectedEndTimeStr.asStateFlow().collectAsState().value
+    val selectedDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
+    val selectedTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
+    val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
     val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
     val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 
@@ -180,7 +180,6 @@ fun BofAvgScreen(
                     barWidth = barWidth,
                     textWidth = textWidth,
                     avgData = avgData.value,
-                    selectedDate = selectedDate,
                     selectedTimeStr = selectedTimeStr,
                     thresholdImpr = thresholdImpr.value,
                 )
@@ -285,7 +284,6 @@ fun AvgCapture(
                                         textWidth = textWidthImage,
                                         isImage = true,
                                         avgData = avgData,
-                                        selectedDate = selectedDate,
                                         selectedTimeStr = selectedTimeStr,
                                         thresholdImpr = thresholdImpr
                                     )
@@ -408,13 +406,12 @@ fun AvgHeader(
     textWidth: Dp,
     isImage: Boolean = false,
     avgData: List<BofEntryShow> = emptyList(),
-    selectedDate: LocalDate = LocalDate.now(),
     selectedTimeStr: String = "",
     thresholdImpr: Int
 ) {
     Column {
         if (avgData.isEmpty() || avgData[0].avg == 0.0) {
-            Text(text = "No Data at $selectedDate $selectedTimeStr")
+            Text(text = "No ${selectedTimeStr.split(",")[0]}")
         } else {
             Text(
                 text = "Average Score Ranking",
@@ -440,7 +437,7 @@ fun AvgHeader(
                     .background(Color.Black)
             )
             Text(
-                text = "Data at $selectedDate $selectedTimeStr, compare with ",
+                text = selectedTimeStr,
                 fontFamily = sarasaFont,
                 fontSize = 12.nsp(),
                 color = Color.White,

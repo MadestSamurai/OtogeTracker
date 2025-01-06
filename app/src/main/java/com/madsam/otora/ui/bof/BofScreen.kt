@@ -49,7 +49,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.R
 import com.madsam.otora.components.CustomTabRow
-import com.madsam.otora.components.DateTimeRangePicker
+import com.madsam.otora.ui.bof.sub.DateTimeRangePicker
 import com.madsam.otora.consts.Purple700
 import com.madsam.otora.service.BofDataRequestService
 import com.madsam.otora.ui.bof.sub.BofAvgScreen

@@ -37,17 +37,18 @@ class BofViewModel(
     val avgData = MutableStateFlow(listOf<BofEntryShow>())
     val medianData = MutableStateFlow(listOf<BofEntryShow>())
     val diffData = MutableStateFlow(listOf<BofEntryShow>())
+    val isDiffReverse = MutableStateFlow(false)
     val teamData = MutableStateFlow(listOf<BofTeamShow>())
 
     var thresholdImpr = MutableStateFlow(1)
     var thresholdImprOld = MutableStateFlow(1)
 
     var selectedTab = MutableStateFlow(0)
-    var selectedStartDate = MutableStateFlow(LocalDate.now())
-    var selectedStartTime = MutableStateFlow("-1")
-    var selectedEndDate = MutableStateFlow(LocalDate.now())
-    var selectedEndTime = MutableStateFlow("-1")
-    var selectedEndTimeStr = MutableStateFlow("")
+    var selectedCurrentDate = MutableStateFlow(LocalDate.now())
+    var selectedCurrentTime = MutableStateFlow("-1")
+    var selectedCompareDate = MutableStateFlow(LocalDate.now())
+    var selectedCompareTime = MutableStateFlow("-1")
+    var selectedTimeStr = MutableStateFlow("")
 
     val leftPadding = MutableStateFlow(0.dp)
     val rightPadding = MutableStateFlow(0.dp)
@@ -141,15 +142,26 @@ class BofViewModel(
     }
 
     fun generateSelectedTimeStr() {
-        selectedEndTimeStr.update {
-            if (selectedEndTime.value == "-1") {
-                if (totalData.value.isEmpty()) {
-                    ""
-                } else {
-                    CommonUtils.roundDownToNearestFiveMinutes(totalData.value.first().time)
-                }
+        if (selectedCurrentTime.value == "-1") {
+            if (totalData.value.isEmpty()) {
+                selectedTimeStr.update { "" }
             } else {
-                CommonUtils.roundDownToNearestFiveMinutes(selectedEndTime.value)
+                val currentTime = CommonUtils.roundDownToNearestFiveMinutes(totalData.value.first().time)
+                val compareTime = currentTime
+                val compareDate = selectedCurrentDate.value.minusDays(1)
+                selectedTimeStr.update {
+                    "Data at ${selectedCurrentDate.value} $currentTime, " +
+                            "compare with $compareDate $compareTime, " +
+                            "all data scraped by MadSamurai."
+                }
+            }
+        } else {
+            val currentTime = CommonUtils.roundDownToNearestFiveMinutes(selectedCurrentTime.value)
+            val compareTime = CommonUtils.roundDownToNearestFiveMinutes(selectedCompareTime.value)
+            selectedTimeStr.update {
+                "Data at ${selectedCurrentDate.value} $currentTime, " +
+                        "compare with ${selectedCompareDate.value} $compareTime, " +
+                        "all data scraped by MadSamurai."
             }
         }
     }
@@ -158,18 +170,18 @@ class BofViewModel(
         fetchLatest: suspend () -> List<T>,
         fetchByTime: suspend (Long, Long) -> List<T>
     ): List<T> {
-        return if (selectedEndTime.value == "-1") {
+        return if (selectedCurrentTime.value == "-1") {
             fetchLatest()
         } else {
+            val currentTime = CommonUtils.ymdToMillis(
+                selectedCurrentDate.value.toString(),
+                CommonUtils.roundDownToNearestFiveMinutes(selectedCurrentTime.value)
+            )
             val compareTime = CommonUtils.ymdToMillis(
-                selectedStartDate.value.toString(),
-                CommonUtils.roundDownToNearestFiveMinutes(selectedStartTime.value)
+                selectedCompareDate.value.toString(),
+                CommonUtils.roundDownToNearestFiveMinutes(selectedCompareTime.value)
             )
-            val nowTime = CommonUtils.ymdToMillis(
-                selectedEndDate.value.toString(),
-                CommonUtils.roundDownToNearestFiveMinutes(selectedEndTime.value)
-            )
-            fetchByTime(nowTime, compareTime)
+            fetchByTime(currentTime, compareTime)
         }
     }
 
@@ -217,7 +229,7 @@ class BofViewModel(
     suspend fun requestTotalData() {
         val data = fetchData(
             { bofDataRequestService.getBofttEntryLatest() },
-            { time, compareTime -> bofDataRequestService.getBofttEntryByTime(time, compareTime) }
+            { currentTime, compareTime -> bofDataRequestService.getBofttEntryByTime(currentTime, compareTime) }
         )
 
         if (data.isEmpty()) {
@@ -302,13 +314,23 @@ class BofViewModel(
             { true },
             { it.imprDiff }
         )
-        diffData.update { updatedData }
+        val maxTotalDiff = updatedData.maxOfOrNull { it.totalDiff } ?: 0
+        val minTotalDiff = updatedData.minOfOrNull { it.totalDiff } ?: 0
+        if (minTotalDiff < 0 && maxTotalDiff == 0) {
+            val reverseData = updatedData.map {
+                it.totalDiff = -it.totalDiff
+                it.imprDiff = -it.imprDiff
+                it
+            }.sortedByDescending { it.totalDiff }
+            isDiffReverse.update { true }
+            diffData.update { reverseData }
+        } else diffData.update { updatedData }
     }
 
     suspend fun requestTeamData() {
         val data = fetchData(
             { bofDataRequestService.getBofttTeamLatest() },
-            { time, compareTime -> bofDataRequestService.getBofttTeamByTime(time) }
+            { currentTime, compareTime -> bofDataRequestService.getBofttTeamByTime(currentTime, compareTime) }
         )
 
         if (data.isEmpty()) {

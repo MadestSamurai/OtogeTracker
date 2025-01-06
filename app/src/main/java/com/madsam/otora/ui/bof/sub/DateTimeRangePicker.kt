@@ -1,4 +1,4 @@
-package com.madsam.otora.components
+package com.madsam.otora.ui.bof.sub
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,7 +28,7 @@ import java.util.Locale
 
 /**
  * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.components.DateTimeRangePicker
+ * 文件名: com.madsam.otora.ui.bof.sub.DateTimeRangePicker
  * 创建者: MadSamurai
  * 创建时间: 2025/1/4
  * 描述: 日期时间范围选择器
@@ -39,119 +39,114 @@ fun DateTimeRangePicker(
     vm: BofViewModel,
     onDismissRequest: () -> Unit
 ) {
-    var showStartDatePicker by remember { mutableStateOf(false) }
-    var showStartTimePicker by remember { mutableStateOf(false) }
-    var showEndDatePicker by remember { mutableStateOf(false) }
-    var showEndTimePicker by remember { mutableStateOf(false) }
+    var showCompareDatePicker by remember { mutableStateOf(false) }
+    var showCompareTimePicker by remember { mutableStateOf(false) }
+    var showCurrentDatePicker by remember { mutableStateOf(false) }
+    var showCurrentTimePicker by remember { mutableStateOf(false) }
 
-    val startDatePickerState = rememberDatePickerState()
-    val endDatePickerState = rememberDatePickerState()
-    val startTimePickerState = rememberTimePickerState()
-    val endTimePickerState = rememberTimePickerState()
+    val compareDatePickerState = rememberDatePickerState()
+    val currentDatePickerState = rememberDatePickerState()
+    val compareTimePickerState = rememberTimePickerState()
+    val currentTimePickerState = rememberTimePickerState()
 
-    var startDateText by remember { mutableStateOf(LocalDate.now()) }
-    var startTimeText by remember { mutableStateOf("00:00:00") }
-    var endDateText by remember { mutableStateOf(LocalDate.now()) }
-    var endTimeText by remember { mutableStateOf("00:00:00") }
+    var compareDateText by remember { mutableStateOf(LocalDate.now()) }
+    var compareTimeText by remember { mutableStateOf("00:00:00") }
+    var currentDateText by remember { mutableStateOf(LocalDate.now()) }
+    var currentTimeText by remember { mutableStateOf("00:00:00") }
 
-
-    if (showStartDatePicker) {
+    if (showCurrentDatePicker) {
         DatePickerDialog(
-            onDismissRequest = { showStartDatePicker = false },
+            onDismissRequest = { showCurrentTimePicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    startDateText = startDatePickerState.selectedDateMillis?.let {
+                    currentDateText = currentDatePickerState.selectedDateMillis?.let {
                         convertMillisToDate(it)
                     } ?: LocalDate.now()
-                    showStartDatePicker = false
-                    showStartTimePicker = true
+                    showCurrentDatePicker = false
+                    showCurrentTimePicker = true
                 }) {
                     Text("OK")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showStartDatePicker = false }) {
+                TextButton(onClick = { showCurrentDatePicker = false }) {
                     Text("Cancel")
                 }
             }
         ) {
-            DatePicker(state = startDatePickerState)
+            DatePicker(state = currentDatePickerState)
         }
     }
 
-    if (showStartTimePicker) {
+    if (showCurrentTimePicker) {
         AlertDialog(
-            onDismissRequest = { showStartTimePicker = false },
+            onDismissRequest = { showCurrentTimePicker = false },
             dismissButton = {
-                TextButton(onClick = { showStartTimePicker = false }) {
+                TextButton(onClick = { showCurrentTimePicker = false }) {
                     Text("Dismiss")
                 }
             },
             confirmButton = {
                 TextButton(onClick = {
-                    startTimeText = String.format(
-                        Locale.getDefault(), "%02d:%02d", startTimePickerState.hour, startTimePickerState.minute
+                    currentTimeText = String.format(
+                        Locale.getDefault(), "%02d:%02d", currentTimePickerState.hour, currentTimePickerState.minute
                     )
-                    showStartTimePicker = false
-                    showEndDatePicker = true
+                    showCurrentTimePicker = false
+                    showCompareDatePicker = true
                 }) {
                     Text("OK")
                 }
             },
             text = {
-                TimePicker(
-                    state = startTimePickerState
-                )
+                TimePicker(state = currentTimePickerState)
             }
         )
     }
 
-    if (showEndDatePicker) {
+    if (showCompareDatePicker) {
         DatePickerDialog(
-            onDismissRequest = { showEndTimePicker = false },
+            onDismissRequest = { showCompareDatePicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    endDateText = endDatePickerState.selectedDateMillis?.let {
+                    compareDateText = compareDatePickerState.selectedDateMillis?.let {
                         convertMillisToDate(it)
                     } ?: LocalDate.now()
-                    showEndDatePicker = false
-                    showEndTimePicker = true
+                    showCompareDatePicker = false
+                    showCompareTimePicker = true
                 }) {
                     Text("OK")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showEndDatePicker = false }) {
+                TextButton(onClick = { showCompareDatePicker = false }) {
                     Text("Cancel")
                 }
             }
         ) {
-            DatePicker(state = endDatePickerState)
+            DatePicker(state = compareDatePickerState)
         }
     }
 
-    if (showEndTimePicker) {
+    if (showCompareTimePicker) {
         AlertDialog(
-            onDismissRequest = { showEndTimePicker = false },
+            onDismissRequest = { showCompareTimePicker = false },
             dismissButton = {
-                TextButton(onClick = { showEndTimePicker = false }) {
+                TextButton(onClick = { showCompareTimePicker = false }) {
                     Text("Dismiss")
                 }
             },
             confirmButton = {
                 TextButton(onClick = {
-                    endTimeText = String.format(
-                        Locale.getDefault(), "%02d:%02d", endTimePickerState.hour, endTimePickerState.minute
+                    compareTimeText = String.format(
+                        Locale.getDefault(), "%02d:%02d", compareTimePickerState.hour, compareTimePickerState.minute
                     )
-                    showEndTimePicker = false
+                    showCompareTimePicker = false
                 }) {
                     Text("OK")
                 }
             },
             text = {
-                TimePicker(
-                    state = endTimePickerState
-                )
+                TimePicker(state = compareTimePickerState)
             }
         )
     }
@@ -163,28 +158,28 @@ fun DateTimeRangePicker(
         text = {
             Column {
                 Row {
-                    Text("Start Date: $startDateText")
+                    Text("Current Date: $currentDateText")
                 }
                 Row {
-                    Text("Start Time: $startTimeText")
+                    Text("Current Time: $currentTimeText")
                 }
                 Row {
-                    Text("End Date: $endDateText")
+                    Text("Compare Date: $compareDateText")
                 }
                 Row {
-                    Text("End Time: $endTimeText")
+                    Text("Compare Time: $compareTimeText")
                 }
-                Button(onClick = { showStartDatePicker = true }) {
+                Button(onClick = { showCurrentDatePicker = true }) {
                     Text(text = "Select Date Time Range")
                 }
             }
         },
         confirmButton = {
             Button(onClick = {
-                vm.selectedStartDate.update { startDateText }
-                vm.selectedStartTime.update { startTimeText }
-                vm.selectedEndDate.update { endDateText }
-                vm.selectedEndTime.update { endTimeText }
+                vm.selectedCurrentDate.update { currentDateText }
+                vm.selectedCurrentTime.update { currentTimeText }
+                vm.selectedCompareDate.update { compareDateText }
+                vm.selectedCompareTime.update { compareTimeText }
                 onDismissRequest()
             }) {
                 Text(text = "Confirm")
