@@ -70,3 +70,35 @@ class BofTeamPointEntity : RealmObject {
     var total4: String = ""
     var median4: String = ""
 }
+
+class BofCommentEntity : RealmObject {
+    @PrimaryKey
+    var id: String = ""
+    var date: String = ""
+    var user: String = ""
+    var pattern: String = ""
+    var country: String = ""
+    var vote: Int = 0
+    var voteTotal: Int = 0
+    var voteAve: Double = 0.0
+    var short: Int = 0
+    var shortTotal: Int = 0
+    var shortAve: Double = 0.0
+    var shortComment: Int = 0
+    var long: Int = 0
+    var longTotal: Int = 0
+    var longAve: Double = 0.0
+    var longComment: Int = 0
+    var total: Int = 0
+    var totalAve: Double = 0.0
+}
+
+class BofCommentDetailEntity : RealmObject {
+    @PrimaryKey
+    var id: String = ""
+    var user: String = ""
+    var score: Int = 0
+    var code: String = ""
+    var country: String = ""
+    var workNumber: Int = 0
+}

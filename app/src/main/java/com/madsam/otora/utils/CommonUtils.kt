@@ -21,6 +21,7 @@ import com.madsam.otora.consts.OSU_LEVEL_SILVER_1
 import com.madsam.otora.consts.OSU_LEVEL_WHITE_1
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.text.DecimalFormat
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -216,19 +217,14 @@ object CommonUtils {
     }
 
     /**
-     * 浮点数格式化成两位小数
+     * 浮点数格式化成最多两位小数
      *
      * @param value 长整型
-     * @return 两位小数字符串
+     * @return 最多两位小数字符串
      */
     fun truncateToTwoDecimalPlaces(number: Double): String {
-        val numberStr = String.format(Locale.getDefault(), "%.3f", number)
-        val dotIndex = numberStr.indexOf('.')
-        return if (dotIndex != -1 && numberStr.length > dotIndex + 2) {
-            numberStr.substring(0, dotIndex + 3)
-        } else {
-            numberStr
-        }
+        val decimalFormat = DecimalFormat("#.##")
+        return decimalFormat.format(number)
     }
     /**
      * 大数字符串转换为整型

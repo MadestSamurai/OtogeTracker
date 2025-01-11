@@ -102,9 +102,10 @@ fun BofTeamScreen(
     val view = LocalView.current
 
     val teamData = vm.teamData.asStateFlow().collectAsState()
+    val oldMax = teamData.value.maxOfOrNull { it.oldTotal } ?: 0.0
     val maxTotal = max(
         teamData.value.maxOfOrNull { it.total } ?: 0.0,
-        teamData.value.maxOfOrNull { it.oldTotal } ?: 0.0
+        oldMax
     )
     val selectedDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
     val selectedTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
@@ -123,7 +124,8 @@ fun BofTeamScreen(
 
     val showDialog = remember { mutableStateOf(false) }
 
-    val isCompare = teamData.value.isNotEmpty() && teamData.value[0].oldTotal != 0.0
+    val isCompare = teamData.value.isNotEmpty() && oldMax != 0.0
+    println(isCompare)
 
     val screenWidthDp = configuration.screenWidthDp.dp
     val textWidth = when {
@@ -132,14 +134,19 @@ fun BofTeamScreen(
             screenWidthDp - 244.ndp()
 
         screenWidthDp <= 800.dp && isCompare ->
-            // Compare: 58, Impr: 36, Median: 110
-            screenWidthDp - 204.ndp()
+            // Compare: 58, Median: 96
+            screenWidthDp - 154.ndp()
 
-        else ->
-            // Rank: 36, Impr: 36, Median: 110
-            screenWidthDp - 182.ndp()
+        screenWidthDp <= 800.dp && !isCompare ->
+            // Rank: 36, Median: 96
+            screenWidthDp - 132.ndp()
+
+        // Rank: 36, Impr: 36, Median: 96
+        else -> screenWidthDp - 168.ndp()
     }
-    val barWidth = textWidth.value.toDouble()
+    // Impr: 36
+    val barWidth = if (screenWidthDp <= 800.dp) (textWidth - 36.ndp()).value.toDouble()
+    else textWidth.value.toDouble()
 
     LaunchedEffect(configuration) {
         vm.updatePadding(view)
@@ -169,9 +176,8 @@ fun BofTeamScreen(
                         rightPadding = rightPadding,
                         screenWidthDp = screenWidthDp,
                         isCompare = isCompare,
-                        textWidth = textWidth,
+                        barWidth = barWidth,
                         teamData = teamData.value,
-                        selectedDate = selectedDate,
                         selectedTimeStr = selectedTimeStr
                     )
                     Row(
@@ -198,6 +204,7 @@ fun BofTeamScreen(
                         index = index + 1,
                         maxTotal = maxTotal,
                         rowWidth = screenWidthDp,
+                        isCompare = isCompare,
                         barWidth = barWidth,
                         textWidth = textWidth,
                         configuration = configuration,
@@ -230,154 +237,156 @@ fun TeamCapture(
     val textWidthImage = 1000.dp - 244.ndp()
     val barWidthImage = textWidthImage.value.toDouble()
     val scope = rememberCoroutineScope()
-    if (showDialog.value) {
-        val captureControllerList = mutableListOf<CaptureController>()
-        repeat(teamData.size / 40 + 1) {
-            captureControllerList.add(rememberCaptureController())
-        }
-        AlertDialog(
-            onDismissRequest = { showDialog.value = false },
-            title = { Text(text = "Capture Content") },
-            modifier = Modifier.height(300.dp),
-            text = {
-                Column {
-                    Text(
-                        text = "Capturing content will save the current content to your gallery. " +
-                                "Image may be too large to show in the dialog, " +
-                                "including the parts that are not visible on the screen.",
-                        modifier = Modifier.padding(8.dp)
-                    )
-                    for (i in 0 until teamData.size / 40 + 1) {
-                        Box(
+    if (!showDialog.value) {
+        return
+    }
+    val captureControllerList = mutableListOf<CaptureController>()
+    repeat(teamData.size / 40 + 1) {
+        captureControllerList.add(rememberCaptureController())
+    }
+    AlertDialog(
+        onDismissRequest = { showDialog.value = false },
+        title = { Text(text = "Capture Content") },
+        modifier = Modifier.height(300.dp),
+        text = {
+            Column {
+                Text(
+                    text = "Capturing content will save the current content to your gallery. " +
+                            "Image may be too large to show in the dialog, " +
+                            "including the parts that are not visible on the screen.",
+                    modifier = Modifier.padding(8.dp)
+                )
+                for (i in 0 until teamData.size / 40 + 1) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(15.dp))
+                            .height(0.dp)
+                            .requiredHeight(5000.dp)
+                            .requiredWidth(screenWidthImage)
+                    ) {
+                        Column(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(15.dp))
-                                .height(0.dp)
-                                .requiredHeight(5000.dp)
-                                .requiredWidth(screenWidthImage)
+                                .capturable(captureControllerList[i])
+                                .fillMaxWidth()
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .capturable(captureControllerList[i])
-                                    .fillMaxWidth()
-                            ) {
-                                if (i == 0)
-                                    TeamHeader(
-                                        configuration = configuration,
-                                        leftPadding = leftPadding,
-                                        rightPadding = rightPadding,
-                                        screenWidthDp = screenWidthImage,
-                                        isCompare = isCompare,
-                                        textWidth = textWidthImage,
-                                        isImage = true,
-                                        teamData = teamData,
-                                        selectedDate = selectedDate,
-                                        selectedTimeStr = selectedTimeStr,
-                                    )
-                                if (teamData.isNotEmpty())
-                                    for ((index, entry) in teamData.withIndex())
-                                        if (index in i * 40..(i + 1) * 40 - 1)
-                                            BofTeamRowTotal(
-                                                entry = entry,
-                                                index = index + 1,
-                                                maxTotal = maxTotal,
-                                                isCompare = isCompare,
-                                                isImage = true,
-                                                rowWidth = screenWidthImage,
-                                                barWidth = barWidthImage,
-                                                textWidth = textWidthImage,
-                                            )
+                            if (i == 0) {
+                                TeamHeader(
+                                    configuration = configuration,
+                                    leftPadding = leftPadding,
+                                    rightPadding = rightPadding,
+                                    screenWidthDp = screenWidthImage,
+                                    isCompare = isCompare,
+                                    barWidth = barWidthImage,
+                                    isImage = true,
+                                    teamData = teamData,
+                                    selectedTimeStr = selectedTimeStr,
+                                )
+                            }
+                            if (teamData.isEmpty()) return@Column
+                            for ((index, entry) in teamData.withIndex()) {
+                                if (index !in i * 40..(i + 1) * 40 - 1) continue
+                                BofTeamRowTotal(
+                                    entry = entry,
+                                    index = index + 1,
+                                    maxTotal = maxTotal,
+                                    isCompare = isCompare,
+                                    isImage = true,
+                                    rowWidth = screenWidthImage,
+                                    barWidth = barWidthImage,
+                                    textWidth = textWidthImage,
+                                )
                             }
                         }
                     }
                 }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val bitmapList = mutableListOf<Bitmap>()
-                        scope.launch {
-                            for (captureController in captureControllerList) {
-                                val bitmapAsync = captureController.captureAsync()
-                                try {
-                                    bitmapList.add(bitmapAsync.await().asAndroidBitmap())
-                                } catch (error: Throwable) {
-                                    Log.e("Capture", "Error capturing content", error)
-                                    snackbarHostState.showSnackbar("Error capturing content")
-                                    error.printStackTrace()
-                                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val bitmapList = mutableListOf<Bitmap>()
+                    scope.launch {
+                        for (captureController in captureControllerList) {
+                            val bitmapAsync = captureController.captureAsync()
+                            try {
+                                bitmapList.add(bitmapAsync.await().asAndroidBitmap())
+                            } catch (error: Throwable) {
+                                Log.e("Capture", "Error capturing content", error)
+                                snackbarHostState.showSnackbar("Error capturing content")
+                                error.printStackTrace()
                             }
-                            val totalHeight = bitmapList.sumOf { it.height }
-                            val maxHeight = 32000
-                            val bitmap = if (totalHeight > maxHeight) {
-                                val scaleFactor = maxHeight.toFloat() / totalHeight
-                                val newWidth = (bitmapList[0].width * scaleFactor).toInt()
-                                val newHeight = maxHeight
-                                Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
-                                    .apply {
-                                        val canvas = Canvas(this)
-                                        var currentHeight = 0
-                                        for (hardwareBitmap in bitmapList) {
-                                            val scaledBitmap = Bitmap.createScaledBitmap(
-                                                hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
-                                                newWidth,
-                                                (hardwareBitmap.height * scaleFactor).toInt(),
-                                                true
-                                            )
-                                            canvas.drawBitmap(
-                                                scaledBitmap,
-                                                0f,
-                                                currentHeight.toFloat(),
-                                                null
-                                            )
-                                            currentHeight += scaledBitmap.height
-                                        }
-                                    }
-                            } else {
-                                Bitmap.createBitmap(
-                                    bitmapList[0].width,
-                                    totalHeight,
-                                    Bitmap.Config.ARGB_8888
-                                ).apply {
+                        }
+                        val totalHeight = bitmapList.sumOf { it.height }
+                        val maxHeight = 32000
+                        val bitmap = if (totalHeight > maxHeight) {
+                            val scaleFactor = maxHeight.toFloat() / totalHeight
+                            val newWidth = (bitmapList[0].width * scaleFactor).toInt()
+                            val newHeight = maxHeight
+                            Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+                                .apply {
                                     val canvas = Canvas(this)
                                     var currentHeight = 0
                                     for (hardwareBitmap in bitmapList) {
-                                        val softwareBitmap =
-                                            hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                        val scaledBitmap = Bitmap.createScaledBitmap(
+                                            hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
+                                            newWidth,
+                                            (hardwareBitmap.height * scaleFactor).toInt(),
+                                            true
+                                        )
                                         canvas.drawBitmap(
-                                            softwareBitmap,
+                                            scaledBitmap,
                                             0f,
                                             currentHeight.toFloat(),
                                             null
                                         )
-                                        currentHeight += softwareBitmap.height
+                                        currentHeight += scaledBitmap.height
                                     }
                                 }
+                        } else {
+                            Bitmap.createBitmap(
+                                bitmapList[0].width,
+                                totalHeight,
+                                Bitmap.Config.ARGB_8888
+                            ).apply {
+                                val canvas = Canvas(this)
+                                var currentHeight = 0
+                                for (hardwareBitmap in bitmapList) {
+                                    val softwareBitmap =
+                                        hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                    canvas.drawBitmap(
+                                        softwareBitmap,
+                                        0f,
+                                        currentHeight.toFloat(),
+                                        null
+                                    )
+                                    currentHeight += softwareBitmap.height
+                                }
                             }
-                            saveBitmapToGallery(
-                                context,
-                                bitmap,
-                                "bof_team_${selectedDate}_$selectedTimeStr",
-                                "BOF Team Score Ranking"
-                            )
-                            snackbarHostState.showSnackbar("Image saved to gallery")
                         }
-                        showDialog.value = false
+                        saveBitmapToGallery(
+                            context,
+                            bitmap,
+                            "bof_team_${selectedDate}_$selectedTimeStr",
+                            "BOF Team Score Ranking"
+                        )
+                        snackbarHostState.showSnackbar("Image saved to gallery")
                     }
-                ) {
-                    Text(text = "Capture")
+                    showDialog.value = false
                 }
-            },
-            dismissButton = {
-                Button(
-                    onClick = {
-                        showDialog.value = false
-                    }
-                ) {
-                    Text(text = "Cancel")
-                }
+            ) {
+                Text(text = "Capture")
             }
-        )
-    }
+        },
+        dismissButton = {
+            Button(
+                onClick = {
+                    showDialog.value = false
+                }
+            ) {
+                Text(text = "Cancel")
+            }
+        }
+    )
 }
 
 @Composable
@@ -387,10 +396,9 @@ fun TeamHeader(
     rightPadding: Dp,
     screenWidthDp: Dp,
     isCompare: Boolean,
-    textWidth: Dp,
+    barWidth: Double,
     isImage: Boolean = false,
     teamData: List<BofTeamShow> = emptyList(),
-    selectedDate: LocalDate = LocalDate.now(),
     selectedTimeStr: String = ""
 ) {
     Column {
@@ -446,7 +454,7 @@ fun TeamHeader(
             Text(
                 text = "",
                 modifier = Modifier
-                    .width(textWidth)
+                    .width(barWidth.dp)
                     .padding(start = 13.ndp(), end = 8.ndp(), top = 2.ndp())
             )
             Text(
@@ -643,80 +651,97 @@ fun BofTeamRowTotal(
             )
         }
         Column {
-            Box(
-                modifier = Modifier
-                    .width(barWidth.dp)
-                    .background(color = Color.Transparent)
-                    .padding(start = 13.ndp())
-            ) {
-                Box(
-                    Modifier
-                        .padding(top = 2.ndp())
-                        .background(color = Color.Transparent)
-                ) {
+            Row {
+                Column {
                     Box(
                         modifier = Modifier
-                            .width(newBarWidth.dp)
-                            .height(if (isCompare) 18.ndp() else 34.ndp())
-                            .background(
-                                color = RANKING_RED,
-                                shape = RoundedCornerShape(
-                                    topEnd = 50.ndp(),
-                                    bottomEnd = 50.ndp()
-                                )
-                            )
-                    )
-                    Text(
-                        text = CommonUtils.truncateToTwoDecimalPlaces(entry.total),
-                        color = Color.White,
-                        fontSize = if (isCompare) 14.nsp() else 20.nsp(),
-                        lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        overflow = TextOverflow.Visible,
-                        maxLines = 1,
-                        modifier = Modifier
-                            .padding(end = 4.ndp())
-                            .align(Alignment.CenterEnd)
-                    )
-                }
-            }
-            if (isCompare) {
-                Box(
-                    modifier = Modifier
-                        .width(barWidth.dp)
-                        .background(color = Color.Transparent)
-                        .padding(start = 13.ndp())
-                ) {
-                    Box(
-                        Modifier
+                            .width(barWidth.dp)
                             .background(color = Color.Transparent)
+                            .padding(start = 13.ndp())
                     ) {
                         Box(
-                            modifier = Modifier
-                                .width(oldBarWidth.dp)
-                                .height(14.ndp())
-                                .background(
-                                    color = RANKING_BLUE,
-                                    shape = RoundedCornerShape(
-                                        topEnd = 10.ndp(),
-                                        bottomEnd = 10.ndp()
+                            Modifier
+                                .padding(top = 2.ndp())
+                                .background(color = Color.Transparent)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .width(newBarWidth.dp)
+                                    .height(if (isCompare) 18.ndp() else 34.ndp())
+                                    .background(
+                                        color = RANKING_RED,
+                                        shape = RoundedCornerShape(
+                                            topEnd = 50.ndp(),
+                                            bottomEnd = 50.ndp()
+                                        )
                                     )
-                                )
-                        )
-                        Text(
-                            text = CommonUtils.truncateToTwoDecimalPlaces(entry.oldTotal),
-                            color = Color.White,
-                            fontSize = 12.nsp(),
-                            lineHeight = 14.nsp(),
-                            fontFamily = sarasaFont,
-                            overflow = TextOverflow.Visible,
-                            maxLines = 1,
-                            modifier = Modifier
-                                .padding(end = 4.ndp())
-                                .align(Alignment.CenterEnd)
-                        )
+                            )
+                            Text(
+                                text = CommonUtils.truncateToTwoDecimalPlaces(entry.total),
+                                color = Color.White,
+                                fontSize = if (isCompare) 14.nsp() else 20.nsp(),
+                                lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
+                                fontFamily = sarasaFont,
+                                fontWeight = FontWeight.Bold,
+                                overflow = TextOverflow.Visible,
+                                maxLines = 1,
+                                modifier = Modifier
+                                    .padding(end = 4.ndp())
+                                    .align(Alignment.CenterEnd)
+                            )
+                        }
                     }
+                    if (isCompare) {
+                        Box(
+                            modifier = Modifier
+                                .width(barWidth.dp)
+                                .background(color = Color.Transparent)
+                                .padding(start = 13.ndp())
+                        ) {
+                            Box(
+                                Modifier
+                                    .background(color = Color.Transparent)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(oldBarWidth.dp)
+                                        .height(14.ndp())
+                                        .background(
+                                            color = RANKING_BLUE,
+                                            shape = RoundedCornerShape(
+                                                topEnd = 10.ndp(),
+                                                bottomEnd = 10.ndp()
+                                            )
+                                        )
+                                )
+                                Text(
+                                    text = CommonUtils.truncateToTwoDecimalPlaces(entry.oldTotal),
+                                    color = Color.White,
+                                    fontSize = 12.nsp(),
+                                    lineHeight = 14.nsp(),
+                                    fontFamily = sarasaFont,
+                                    overflow = TextOverflow.Visible,
+                                    maxLines = 1,
+                                    modifier = Modifier
+                                        .padding(end = 4.ndp())
+                                        .align(Alignment.CenterEnd)
+                                )
+                            }
+                        }
+                    }
+                }
+                if (rowWidth < 800.dp) {
+                    Text(
+                        text = entry.impr.toString(),
+                        fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.nsp(),
+                        lineHeight = 34.nsp(),
+                        color = Color.White,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier
+                            .width(36.ndp())
+                    )
                 }
             }
             Text(
@@ -793,18 +818,21 @@ fun BofTeamRowTotal(
                 }
             }
         }
-        Text(
-            text = entry.impr.toString(),
-            fontFamily = sarasaFont,
-            fontWeight = FontWeight.Bold,
-            fontSize = 20.nsp(),
-            color = Color.White,
-            textAlign = TextAlign.End,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .width(36.ndp())
-        )
+        if (rowWidth >= 800.dp) {
+            Text(
+                text = entry.impr.toString(),
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .width(36.ndp())
+            )
+        }
         val medianValue = entry.median.toDoubleOrNull()
+        val width = if (rowWidth < 800.dp) 88.ndp() else 102.ndp()
         if (medianValue != null) {
             Text(
                 text = CommonUtils.truncateToTwoDecimalPlaces(medianValue),
@@ -817,7 +845,7 @@ fun BofTeamRowTotal(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .padding(start = 8.ndp())
-                    .width(102.ndp())
+                    .width(width)
                     .background(calculateColor(medianValue))
                     .padding(end = 4.ndp())
             )
@@ -826,14 +854,14 @@ fun BofTeamRowTotal(
                 text = entry.median,
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
-                fontSize = 15.nsp(),
+                fontSize = 13.nsp(),
                 lineHeight = 114.nsp(),
                 color = Color.White,
                 textAlign = TextAlign.End,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .padding(start = 8.ndp())
-                    .width(102.ndp())
+                    .width(width)
                     .background(Color.Black)
                     .padding(end = 4.ndp())
             )

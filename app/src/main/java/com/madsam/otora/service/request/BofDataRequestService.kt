@@ -1,13 +1,13 @@
-package com.madsam.otora.service
+package com.madsam.otora.service.request
 
 import android.content.Context
 import android.util.Log
+import com.madsam.otora.entity.BofCommentDetailEntity
+import com.madsam.otora.entity.BofCommentEntity
 import com.madsam.otora.entity.BofEntryEntity
 import com.madsam.otora.entity.BofPointEntity
 import com.madsam.otora.entity.BofTeamEntity
 import com.madsam.otora.entity.BofTeamPointEntity
-import com.madsam.otora.model.bof.ui.BofEntryShow
-import com.madsam.otora.model.bof.ui.BofTeamShow
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ShareUtil
 import com.madsam.otora.web.Api
@@ -15,13 +15,13 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
+import io.realm.kotlin.UpdatePolicy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
-import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -29,11 +29,11 @@ import java.io.IOException
 import java.net.SocketTimeoutException
 import java.time.LocalDate
 import java.util.concurrent.Executors
-import kotlin.math.abs
+import kotlin.collections.forEach
 
 /**
  * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.service.BofDataRequestService
+ * 文件名: com.madsam.otora.service.request.BofDataRequestService
  * 创建者: MadSamurai
  * 创建时间: 2024/10/13
  * 描述: BOF数据请求服务
@@ -49,8 +49,8 @@ class BofDataRequestService(private val context: Context) {
 
     private val retrofit = Retrofit.Builder()
         .baseUrl("http://blog.madsam.work/")
-        .addConverterFactory(MoshiConverterFactory.create(moshi)) // Moshi
-        .addCallAdapterFactory(RxJava3CallAdapterFactory.create()) // RxJava
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
         .build()
 
     private val api = retrofit.create(Api::class.java)
@@ -63,16 +63,16 @@ class BofDataRequestService(private val context: Context) {
             BofEntryEntity::class,
             BofPointEntity::class,
             BofTeamEntity::class,
-            BofTeamPointEntity::class
+            BofTeamPointEntity::class,
+            BofCommentEntity::class,
+            BofCommentDetailEntity::class
         )
     )
         .name("otoge-tracker-bof.realm")
         .schemaVersion(1)
         .build()
 
-    // Request BOF data from the server
     private suspend fun requestBofttEntryData(date: String) {
-        println("Requesting data for $date")
         val bofCall = api.getBofttData(date)
         val response = try {
             bofCall.execute()
@@ -107,7 +107,7 @@ class BofDataRequestService(private val context: Context) {
                         regist = entry.regist
                         update = entry.update
                     }
-                    this.copyToRealm(entity)
+                    this.copyToRealm(entity, UpdatePolicy.ALL)
                     entry.total.forEach { point ->
                         val timeInMillis = CommonUtils.ymdToMillis(date, point.time)
                         val pointEntity = BofPointEntity().apply {
@@ -122,7 +122,7 @@ class BofDataRequestService(private val context: Context) {
                             avg = entry.avg.find { it.time == point.time }?.value
                                 ?: entry.avg.lastOrNull { it.time < point.time }?.value ?: 0.0
                         }
-                        this.copyToRealm(pointEntity)
+                        this.copyToRealm(pointEntity, UpdatePolicy.ALL)
                     }
                 }
             }
@@ -168,7 +168,7 @@ class BofDataRequestService(private val context: Context) {
                         this.fs3 = team.fs3
                         this.fs4 = team.fs4
                     }
-                    this.copyToRealm(entity)
+                    this.copyToRealm(entity, UpdatePolicy.ALL)
                     team.total.forEach { point ->
                         val timeInMillis = CommonUtils.ymdToMillis(date, point.time)
                         val pointEntity = BofTeamPointEntity().apply {
@@ -197,7 +197,7 @@ class BofDataRequestService(private val context: Context) {
                             median4 = team.median4.find { it.time == point.time }?.value
                                 ?: team.median4.lastOrNull { it.time < point.time }?.value ?: ""
                         }
-                        this.copyToRealm(pointEntity)
+                        this.copyToRealm(pointEntity, UpdatePolicy.ALL)
                     }
                 }
             }
@@ -208,8 +208,72 @@ class BofDataRequestService(private val context: Context) {
         }
     }
 
-    // Get BOF data from the server
-    fun getBofttData(dateTime: LocalDate, onComplete: () -> Unit) {
+    suspend fun requestBofttCommentData(date: String) {
+        val bofCommentCall = api.getBofttComment(date)
+        val response = bofCommentCall.execute()
+        if (!response.isSuccessful) {
+            Log.e(TAG, "Response is not successful")
+            return
+        }
+
+        val bofCommentList = response.body()
+        if (bofCommentList == null) {
+            Log.e(TAG, "Response body is null")
+            return
+        }
+
+        val realm = Realm.open(realmConfig)
+        try {
+            realm.write {
+                bofCommentList.forEach { comment ->
+                    val entity = BofCommentEntity().apply {
+                        id = "${date}_${comment.user}${if (comment.pattern != null) "_${comment.pattern}" else ""}"
+                        this.date = date
+                        user = comment.user
+                        pattern = if (comment.pattern != null) comment.pattern.toString() else ""
+                        country = comment.country
+                        vote = comment.vote
+                        voteTotal = comment.voteTotal
+                        voteAve = comment.voteAve
+                        short = comment.short
+                        shortTotal = comment.shortTotal
+                        shortAve = comment.shortAve
+                        shortComment = comment.shortComment
+                        long = comment.long
+                        longTotal = comment.longTotal
+                        longAve = comment.longAve
+                        longComment = comment.longComment
+                        total = comment.total
+                        totalAve = comment.totalAve
+                    }
+                    this.copyToRealm(entity, UpdatePolicy.ALL)
+                    val details = listOf(comment.voteDetail, comment.shortDetail, comment.longDetail)
+
+                    details.forEach { detailList ->
+                        if (detailList.isNotEmpty()) {
+                            detailList.forEach { detail ->
+                                val detailEntity = BofCommentDetailEntity().apply {
+                                    id = "${detail.evalNumber}_${detail.workNumber}"
+                                    user = comment.user
+                                    score = detail.score
+                                    code = detail.evalNumber
+                                    country = detail.evalPosition
+                                    workNumber = detail.workNumber
+                                }
+                                this.copyToRealm(detailEntity, UpdatePolicy.ALL)
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException: ${e.message}")
+        } finally {
+            realm.close()
+        }
+    }
+
+    fun requestBofttData(dateTime: LocalDate, onComplete: () -> Unit) {
         val startDate = LocalDate.parse("2024-10-16")
         var currentDate = dateTime
         while (currentDate.isAfter(startDate)) {
@@ -229,7 +293,7 @@ class BofDataRequestService(private val context: Context) {
         }
     }
 
-    fun getBofttTeamData(dateTime: LocalDate, onComplete: () -> Unit) {
+    fun requestBofttTeamData(dateTime: LocalDate, onComplete: () -> Unit) {
         val startDate = LocalDate.parse("2024-10-16")
         var currentDate = dateTime
         while (currentDate.isAfter(startDate)) {
@@ -249,188 +313,10 @@ class BofDataRequestService(private val context: Context) {
         }
     }
 
-    // Get BOF data from the database
-    suspend fun getBofttEntryByTime(currentTime: Long, compareTime: Long): List<BofEntryShow> {
-        return withContext(Dispatchers.IO) {
-            val realm = Realm.open(realmConfig)
-            try {
-                val startTime = currentTime - 24 * 60 * 60 * 1000
-                val startTimeCompare = compareTime - 24 * 60 * 60 * 1000
-                val points = realm.query<BofPointEntity>(
-                    clazz = BofPointEntity::class,
-                    query = "time >= $0 AND time <= $1",
-                    startTime, currentTime
-                ).find()
-                val pointsCompare = realm.query<BofPointEntity>(
-                    clazz = BofPointEntity::class,
-                    query = "time >= $0 AND time <= $1",
-                    startTimeCompare, compareTime
-                ).find()
-
-                if (points.isEmpty()) {
-                    realm.close()
-                    return@withContext emptyList<BofEntryShow>()
-                }
-
-                val date = CommonUtils.millisToYmd(currentTime).substring(0, 10)
-                val entries = realm.query<BofEntryEntity>(
-                    clazz = BofEntryEntity::class,
-                    query = "date == $0",
-                    date
-                ).find()
-
-                // Create a map of entryId to points for quick access
-                val pointsMap = points.groupBy { it.no }
-                val pointsMapCompare = pointsCompare.groupBy { it.no }
-
-                entries.map { entry ->
-                    val entryPoints = pointsMap[entry.no] ?: emptyList()
-                    val entryPointsCompare = pointsMapCompare[entry.no] ?: emptyList()
-                    val closestPoint = entryPoints
-                        .filter { it.time <= currentTime }
-                        .minByOrNull { abs(it.time - currentTime) }
-                    val closestPointCompare = entryPointsCompare
-                        .filter { it.time <= compareTime }
-                        .minByOrNull { abs(it.time - compareTime) }
-
-                    BofEntryShow(
-                        oldIndex = 0,
-                        index = 0,
-                        team = entry.team,
-                        artist = entry.artist,
-                        genre = entry.genre,
-                        title = entry.title,
-                        regist = entry.regist,
-                        update = entry.update,
-                        impr = closestPoint?.impr ?: 0,
-                        total = closestPoint?.total ?: 0,
-                        median = closestPoint?.median ?: 0.0,
-                        avg = closestPoint?.avg ?: 0.0,
-                        oldImpr = closestPointCompare?.impr ?: 0,
-                        oldTotal = closestPointCompare?.total ?: 0,
-                        oldMedian = closestPointCompare?.median ?: 0.0,
-                        oldAvg = closestPointCompare?.avg ?: 0.0,
-                        time = CommonUtils.millisToYmd(currentTime).substring(11, 16)
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching entry by time: ${e.message}")
-                emptyList()
-            } finally {
-                realm.close()
-            }
-        }
-    }
-
-    suspend fun getBofttTeamByTime(currentTime: Long, compareTime: Long): List<BofTeamShow> {
-        return withContext(Dispatchers.IO) {
-            val realm = Realm.open(realmConfig)
-            try {
-                val startTime = currentTime - 24 * 60 * 60 * 1000
-                val startTimeCompare = compareTime - 24 * 60 * 60 * 1000
-
-                val points = realm.query<BofTeamPointEntity>(
-                    clazz = BofTeamPointEntity::class,
-                    query = "time >= $0 AND time <= $1",
-                    startTime, currentTime
-                ).find()
-                val pointsCompare = realm.query<BofTeamPointEntity>(
-                    clazz = BofTeamPointEntity::class,
-                    query = "time >= $0 AND time <= $1",
-                    startTimeCompare, compareTime
-                ).find()
-
-                if (points.isEmpty()) {
-                    realm.close()
-                    return@withContext emptyList<BofTeamShow>()
-                }
-
-                val date = CommonUtils.millisToYmd(currentTime).substring(0, 10)
-                val teams = realm.query<BofTeamEntity>(
-                    clazz = BofTeamEntity::class,
-                    query = "date == $0",
-                    date
-                ).find()
-
-                val pointsMap = points.groupBy { it.team }
-                val pointsMapCompare = pointsCompare.groupBy { it.team }
-
-                teams.map { team ->
-                    val teamPoints = pointsMap[team.team] ?: emptyList()
-                    val teamPointsCompare = pointsMapCompare[team.team] ?: emptyList()
-                    val closestPoint = teamPoints
-                        .filter { it.time <= currentTime }
-                        .minByOrNull { abs(it.time - currentTime) }
-                    val closestPointCompare = teamPointsCompare
-                        .filter { it.time <= compareTime }
-                        .minByOrNull { abs(it.time - compareTime) }
-
-                    BofTeamShow(
-                        oldIndex = 0,
-                        index = 0,
-                        team = team.team,
-                        title1 = team.title1,
-                        title2 = team.title2,
-                        title3 = team.title3,
-                        title4 = team.title4,
-                        artist1 = team.artist1,
-                        artist2 = team.artist2,
-                        artist3 = team.artist3,
-                        artist4 = team.artist4,
-                        fs1 = team.fs1,
-                        fs2 = team.fs2,
-                        fs3 = team.fs3,
-                        fs4 = team.fs4,
-                        impr = closestPoint?.impr ?: 0,
-                        total = closestPoint?.total ?: 0.0,
-                        median = closestPoint?.median ?: "",
-                        total1 = closestPoint?.total1 ?: "",
-                        median1 = closestPoint?.median1 ?: "",
-                        total2 = closestPoint?.total2 ?: "",
-                        median2 = closestPoint?.median2 ?: "",
-                        total3 = closestPoint?.total3 ?: "",
-                        median3 = closestPoint?.median3 ?: "",
-                        total4 = closestPoint?.total4 ?: "",
-                        median4 = closestPoint?.median4 ?: "",
-                        oldImpr = closestPointCompare?.impr ?: 0,
-                        oldTotal = closestPointCompare?.total ?: 0.0,
-                        oldMedian = closestPointCompare?.median ?: "",
-                        time = CommonUtils.millisToYmd(currentTime).substring(11, 16)
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching team by time: ${e.message}")
-                emptyList()
-            } finally {
-                realm.close()
-            }
-        }
-    }
-
-    // Get BOF data from the database
-    suspend fun getBofttEntryLatest(): List<BofEntryShow> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val currentTime = System.currentTimeMillis()
-                val compareTime = currentTime - 24 * 60 * 60 * 1000
-                getBofttEntryByTime(currentTime, compareTime)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching latest entry: ${e.message}")
-                emptyList()
-            }
-        }
-    }
-
-    suspend fun getBofttTeamLatest(): List<BofTeamShow> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val currentTime = System.currentTimeMillis()
-                val compareTime = currentTime - 24 * 60 * 60 * 1000
-                getBofttTeamByTime(currentTime, compareTime)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching latest team: ${e.message}")
-                emptyList()
-            }
+    fun requestBofttCommentData(dateTime: LocalDate, onComplete: () -> Unit) {
+        serviceScope.launch(dispatcher) {
+            requestBofttCommentData("2025-01-08") //TODO: 2025-01-08
+            onComplete()
         }
     }
 }

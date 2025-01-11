@@ -49,9 +49,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.R
 import com.madsam.otora.components.CustomTabRow
-import com.madsam.otora.ui.bof.sub.DateTimeRangePicker
 import com.madsam.otora.consts.Purple700
-import com.madsam.otora.service.BofDataRequestService
+import com.madsam.otora.service.request.BofDataRequestService
 import com.madsam.otora.ui.bof.sub.BofAvgScreen
 import com.madsam.otora.ui.bof.sub.BofDiffScreen
 import com.madsam.otora.ui.bof.sub.BofMedianScreen
@@ -80,7 +79,7 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
 
     val bofDataRequestService = BofDataRequestService(context)
 
-    val vm: BofViewModel = viewModel(factory = BofViewModelFactory(context))
+    val vm: BofViewModel = viewModel(factory = BofViewModelFactory())
 
     val selectedTabIndex = vm.selectedTab.asStateFlow().collectAsState().value
     val searchText = remember { mutableStateOf("") }
@@ -116,12 +115,17 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
     }
 
     fun refreshData() {
-        bofDataRequestService.getBofttData(dateTime) {
+        bofDataRequestService.requestBofttData(dateTime) {
             coroutineScope.launch {
                 vm.requestTotalData()
             }
         }
-        bofDataRequestService.getBofttTeamData(dateTime) {
+        bofDataRequestService.requestBofttTeamData(dateTime) {
+            coroutineScope.launch {
+                vm.requestTotalData()
+            }
+        }
+        bofDataRequestService.requestBofttCommentData(dateTime) {
             coroutineScope.launch {
                 vm.requestTotalData()
             }

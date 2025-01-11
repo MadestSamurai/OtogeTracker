@@ -1,6 +1,5 @@
 package com.madsam.otora.ui.bof
 
-import android.content.Context
 import android.util.Log
 import android.view.View
 import androidx.compose.ui.unit.dp
@@ -9,7 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.model.bof.ui.BofTeamShow
 import com.madsam.otora.model.bof.ui.Rankable
-import com.madsam.otora.service.BofDataRequestService
+import com.madsam.otora.service.database.BofDatabaseService
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ScreenUtil.getSafeInsetLeftDp
 import com.madsam.otora.utils.ScreenUtil.getSafeInsetRightDp
@@ -25,14 +24,12 @@ import kotlin.math.max
  * 创建时间: 2024/12/15
  * 描述: BOF视图模型
  */
-class BofViewModel(
-    context: Context
-) : ViewModel() {
+class BofViewModel() : ViewModel() {
     companion object {
         private const val TAG = "BofViewModel"
     }
 
-    val bofDataRequestService = BofDataRequestService(context)
+    val bofDatabaseService = BofDatabaseService()
     val totalData = MutableStateFlow(listOf<BofEntryShow>())
     val avgData = MutableStateFlow(listOf<BofEntryShow>())
     val medianData = MutableStateFlow(listOf<BofEntryShow>())
@@ -228,8 +225,8 @@ class BofViewModel(
 
     suspend fun requestTotalData() {
         val data = fetchData(
-            { bofDataRequestService.getBofttEntryLatest() },
-            { currentTime, compareTime -> bofDataRequestService.getBofttEntryByTime(currentTime, compareTime) }
+            { bofDatabaseService.getBofttEntryLatest() },
+            { currentTime, compareTime -> bofDatabaseService.getBofttEntryByTime(currentTime, compareTime) }
         )
 
         if (data.isEmpty()) {
@@ -251,8 +248,8 @@ class BofViewModel(
 
     suspend fun requestAvgData() {
         val data = fetchData(
-            { bofDataRequestService.getBofttEntryLatest() },
-            { time, compareTime -> bofDataRequestService.getBofttEntryByTime(time, compareTime) }
+            { bofDatabaseService.getBofttEntryLatest() },
+            { time, compareTime -> bofDatabaseService.getBofttEntryByTime(time, compareTime) }
         )
         calculateThresholds(data)
         if (data.isEmpty()) {
@@ -274,8 +271,8 @@ class BofViewModel(
 
     suspend fun requestMedianData() {
         val data = fetchData(
-            { bofDataRequestService.getBofttEntryLatest() },
-            { time, compareTime -> bofDataRequestService.getBofttEntryByTime(time, compareTime) }
+            { bofDatabaseService.getBofttEntryLatest() },
+            { time, compareTime -> bofDatabaseService.getBofttEntryByTime(time, compareTime) }
         )
         calculateThresholds(data)
         if (data.isEmpty()) {
@@ -297,8 +294,8 @@ class BofViewModel(
 
     suspend fun requestDiffData() {
         val data = fetchData(
-            { bofDataRequestService.getBofttEntryLatest() },
-            { time, compareTime -> bofDataRequestService.getBofttEntryByTime(time, compareTime) }
+            { bofDatabaseService.getBofttEntryLatest() },
+            { time, compareTime -> bofDatabaseService.getBofttEntryByTime(time, compareTime) }
         )
         data.forEach {
             it.totalDiff = it.total - it.oldTotal
@@ -329,8 +326,8 @@ class BofViewModel(
 
     suspend fun requestTeamData() {
         val data = fetchData(
-            { bofDataRequestService.getBofttTeamLatest() },
-            { currentTime, compareTime -> bofDataRequestService.getBofttTeamByTime(currentTime, compareTime) }
+            { bofDatabaseService.getBofttTeamLatest() },
+            { currentTime, compareTime -> bofDatabaseService.getBofttTeamByTime(currentTime, compareTime) }
         )
 
         if (data.isEmpty()) {
@@ -349,15 +346,17 @@ class BofViewModel(
         )
         teamData.update { updatedData }
     }
+
+    suspend fun requestCommentData() {
+
+    }
 }
 
-class BofViewModelFactory(
-    private val context: Context
-) : ViewModelProvider.Factory {
+class BofViewModelFactory() : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(BofViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return BofViewModel(context) as T
+            return BofViewModel() as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

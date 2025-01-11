@@ -1,5 +1,6 @@
 package com.madsam.otora.web
 
+import com.madsam.otora.model.bof.web.BofComment
 import com.madsam.otora.model.bof.web.BofEntry
 import com.madsam.otora.model.bof.web.BofTeam
 import com.madsam.otora.model.chuni.web.lxns.ChuniAliases
@@ -75,6 +76,11 @@ interface Api {
     fun getBofttTeamData(
         @Path("date") date: String
     ): Call<List<BofTeam>>
+
+    @GET("bofttcomment/user{date}.json")
+    fun getBofttComment(
+        @Path("date") date: String
+    ): Call<List<BofComment>>
 
     // Chunithm API
     @GET("chunithm/data.json")
