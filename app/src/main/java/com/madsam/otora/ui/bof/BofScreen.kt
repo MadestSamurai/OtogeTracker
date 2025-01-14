@@ -52,6 +52,7 @@ import com.madsam.otora.components.CustomTabRow
 import com.madsam.otora.consts.Purple700
 import com.madsam.otora.service.request.BofDataRequestService
 import com.madsam.otora.ui.bof.sub.BofAvgScreen
+import com.madsam.otora.ui.bof.sub.BofCommentScreen
 import com.madsam.otora.ui.bof.sub.BofDiffScreen
 import com.madsam.otora.ui.bof.sub.BofMedianScreen
 import com.madsam.otora.ui.bof.sub.BofTeamScreen
@@ -89,6 +90,7 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
     val listStateMedian = rememberLazyListState()
     val listStateDiff = rememberLazyListState()
     val listStateTeam = rememberLazyListState()
+    val listStateComment = rememberLazyListState()
 
     val currentIndexTotal = vm.currentIndexTotal.asStateFlow().collectAsState().value
     val scrollListTotal = vm.scrollToIndexListTotal.asStateFlow().collectAsState().value
@@ -100,6 +102,8 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
     val scrollListDiff = vm.scrollToIndexListDiff.asStateFlow().collectAsState().value
     val currentIndexTeam = vm.currentIndexTeam.asStateFlow().collectAsState().value
     val scrollListTeam = vm.scrollToIndexListTeam.asStateFlow().collectAsState().value
+    val currentIndexComment = vm.currentIndexComment.asStateFlow().collectAsState().value
+    val scrollListComment = vm.scrollToIndexListComment.asStateFlow().collectAsState().value
 
     var showDateTimeRangePicker by remember { mutableStateOf(false) }
 
@@ -178,7 +182,7 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
         }
     }
 
-    val tabTitles = listOf("Total", "Avg", "Median", "Diff", "Team")
+    val tabTitles = listOf("Total", "Avg", "Median", "Diff", "Team", "Comment")
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -301,6 +305,7 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                 composable("Median") { BofMedianScreen(vm, snackbarHostState, listStateMedian) }
                 composable("Diff") { BofDiffScreen(vm, snackbarHostState, listStateDiff) }
                 composable("Team") { BofTeamScreen(vm, snackbarHostState, listStateTeam) }
+                composable("Comment") { BofCommentScreen(vm, snackbarHostState, listStateComment) }
             }
         }
         Box(

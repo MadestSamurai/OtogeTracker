@@ -1,6 +1,7 @@
 package com.madsam.otora.service.database
 
 import android.util.Log
+import com.madsam.otora.entity.BofCommentDetailEntity
 import com.madsam.otora.entity.BofCommentEntity
 import com.madsam.otora.entity.BofEntryEntity
 import com.madsam.otora.entity.BofPointEntity
@@ -26,7 +27,7 @@ import kotlin.math.abs
  */
 class BofDatabaseService {
     companion object {
-        const val TAG = "BofDataService"
+        const val TAG = "BofDatabaseService"
     }
 
     private val realmConfig = RealmConfiguration.Builder(
@@ -34,7 +35,9 @@ class BofDatabaseService {
             BofEntryEntity::class,
             BofPointEntity::class,
             BofTeamEntity::class,
-            BofTeamPointEntity::class
+            BofTeamPointEntity::class,
+            BofCommentEntity::class,
+            BofCommentDetailEntity::class
         )
     )
         .name("otoge-tracker-bof.realm")
@@ -212,6 +215,14 @@ class BofDatabaseService {
                     return@withContext emptyList<BofCommentShow>()
                 }
                 comments.map { entry ->
+                    val commentsDetail = realm.query<BofCommentDetailEntity>(
+                        clazz = BofCommentDetailEntity::class,
+                        query = "user == $0 AND date == $1",
+                        entry.user, currentDate
+                    ).find()
+                    val vote = commentsDetail.filter { it.type == "vote" }
+                    val short = commentsDetail.filter { it.type == "short" }
+                    val long = commentsDetail.filter { it.type == "long" }
                     BofCommentShow(
                         user = entry.user,
                         pattern = entry.pattern,
@@ -219,18 +230,22 @@ class BofDatabaseService {
                         vote = entry.vote,
                         voteTotal = entry.voteTotal,
                         voteAve = entry.voteAve,
+                        voteChartData = vote.sortedBy { it.score }.map { it.score },
                         short = entry.short,
                         shortTotal = entry.shortTotal,
                         shortAve = entry.shortAve,
                         shortComment = entry.shortComment,
+                        shortChartData = short.sortedBy { it.score }.map { it.score },
                         long = entry.long,
                         longTotal = entry.longTotal,
                         longAve = entry.longAve,
                         longComment = entry.longComment,
+                        longChartData = long.sortedBy { it.score }.map { it.score },
                         total = entry.total,
                         totalAve = entry.totalAve
                     )
                 }
+
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching comment by time: ${e.message}")
                 emptyList()

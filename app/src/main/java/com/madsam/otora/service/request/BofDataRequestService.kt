@@ -259,6 +259,10 @@ class BofDataRequestService(private val context: Context) {
                                     code = detail.evalNumber
                                     country = detail.evalPosition
                                     workNumber = detail.workNumber
+                                    this.date = date
+                                    type = if (detailList == comment.voteDetail) "vote"
+                                    else if (detailList == comment.shortDetail) "short"
+                                    else "long"
                                 }
                                 this.copyToRealm(detailEntity, UpdatePolicy.ALL)
                             }

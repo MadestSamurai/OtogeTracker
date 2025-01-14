@@ -101,4 +101,6 @@ class BofCommentDetailEntity : RealmObject {
     var code: String = ""
     var country: String = ""
     var workNumber: Int = 0
+    var date: String = ""
+    var type: String = ""
 }

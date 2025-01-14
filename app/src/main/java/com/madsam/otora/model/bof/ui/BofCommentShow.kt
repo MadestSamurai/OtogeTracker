@@ -8,7 +8,7 @@ package com.madsam.otora.model.bof.ui
  * 描述: BOF评论展示实体
  */
 data class BofCommentShow(
-    var no: Int = 0,
+    var index: Int = 0,
     var user: String = "",
     var pattern: String = "",
     var country: String = "",

@@ -5,6 +5,7 @@ import android.view.View
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.madsam.otora.model.bof.ui.BofCommentShow
 import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.model.bof.ui.BofTeamShow
 import com.madsam.otora.model.bof.ui.Rankable
@@ -36,6 +37,7 @@ class BofViewModel() : ViewModel() {
     val diffData = MutableStateFlow(listOf<BofEntryShow>())
     val isDiffReverse = MutableStateFlow(false)
     val teamData = MutableStateFlow(listOf<BofTeamShow>())
+    val commentData = MutableStateFlow(listOf<BofCommentShow>())
 
     var thresholdImpr = MutableStateFlow(1)
     var thresholdImprOld = MutableStateFlow(1)
@@ -61,6 +63,8 @@ class BofViewModel() : ViewModel() {
     val currentIndexDiff = MutableStateFlow(0)
     val scrollToIndexListTeam = MutableStateFlow(listOf<Int>())
     val currentIndexTeam = MutableStateFlow(0)
+    val scrollToIndexListComment = MutableStateFlow(listOf<Int>())
+    val currentIndexComment = MutableStateFlow(0)
 
     fun findItemIndex(query: String, originalData: List<BofEntryShow>, pageIndex: Int) {
         val scrollToIndexList = when (pageIndex) {
@@ -348,7 +352,26 @@ class BofViewModel() : ViewModel() {
     }
 
     suspend fun requestCommentData() {
-
+        val data = fetchData(
+            { bofDatabaseService.getBofttCommentLatest() },
+            { currentTime, compareTime -> bofDatabaseService.getBofttCommentByTime("2025-01-08") }
+        )
+        if (data.isEmpty()) {
+            Log.d(TAG, "No comment data available for the selected date and time.")
+            return
+        }
+        val updatedData = data.sortedWith(compareByDescending(BofCommentShow::total)
+                .thenByDescending(BofCommentShow::long)
+                .thenByDescending(BofCommentShow::short)
+                .thenByDescending(BofCommentShow::vote))
+        var currentRank = 1
+        updatedData.forEachIndexed { index, entry ->
+            if (index > 0 && updatedData[index - 1].total != entry.total) {
+                currentRank = index + 1
+            }
+            entry.index = currentRank
+        }
+        commentData.update { updatedData }
     }
 }
 

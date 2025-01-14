@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -56,18 +57,36 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.R
 import com.madsam.otora.consts.BG_DARK_GRAY
+import com.madsam.otora.consts.RANKING_BLUE
 import com.madsam.otora.consts.RANKING_GREEN
 import com.madsam.otora.consts.RANKING_RED
-import com.madsam.otora.consts.RANKING_YELLOW
 import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
-import com.madsam.otora.model.bof.ui.BofEntryShow
+import com.madsam.otora.model.bof.ui.BofCommentShow
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ImageUtils.saveBitmapToGallery
 import com.madsam.otora.utils.ScreenUtil.isLandscape
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
+import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberTop
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
+import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
+import com.patrykandpatrick.vico.compose.common.fill
+import com.patrykandpatrick.vico.core.cartesian.Zoom
+import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
+import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
+import com.patrykandpatrick.vico.core.common.data.ExtraStore
+import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
 import dev.shreyaspatil.capturable.capturable
 import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
@@ -96,8 +115,8 @@ fun BofCommentScreen(
     val configuration = LocalConfiguration.current
     val view = LocalView.current
 
-    val totalData = vm.totalData.asStateFlow().collectAsState()
-    val maxComment = totalData.value.maxOfOrNull { it.total } ?: 1
+    val commentData = vm.commentData.asStateFlow().collectAsState()
+    val maxComment = commentData.value.maxOfOrNull { it.total } ?: 0
     val currentDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
     val currentTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
     val compareDate = vm.selectedCompareDate.asStateFlow().collectAsState().value
@@ -140,8 +159,8 @@ fun BofCommentScreen(
             screenWidthDp - 58.ndp() - barWidth.ndp()
 
         else ->
-            // Rank: 40,
-            screenWidthDp - 40.ndp() - barWidth.ndp()
+            // Rank: 40, Country: 40
+            screenWidthDp - 80.ndp() - barWidth.ndp()
     }
 
     LaunchedEffect(configuration) {
@@ -152,7 +171,7 @@ fun BofCommentScreen(
         showDialog = showDialog,
         context = context,
         snackbarHostState = snackbarHostState,
-        totalData = totalData.value,
+        commentData = commentData.value,
         selectedDate = currentDate,
         selectedTimeStr = selectedTimeStr,
         maxComment = maxComment,
@@ -173,7 +192,7 @@ fun BofCommentScreen(
                     isCompare = isCompare,
                     barWidth = barWidth,
                     textWidth = textWidth,
-                    totalData = totalData.value,
+                    commentData = commentData.value,
                     selectedTimeStr = selectedTimeStr,
                     dataSwitch = dataSwitch.value
                 )
@@ -205,8 +224,8 @@ fun BofCommentScreen(
                 }
             }
         }
-        if (totalData.value.isNotEmpty()) {
-            itemsIndexed(totalData.value) { index, entry ->
+        if (commentData.value.isNotEmpty()) {
+            itemsIndexed(commentData.value) { index, entry ->
                 BofEntryRowComment(
                     entry = entry,
                     index = index + 1,
@@ -233,7 +252,7 @@ fun CommentCapture(
     showDialog: MutableState<Boolean>,
     context: Context,
     snackbarHostState: SnackbarHostState,
-    totalData: List<BofEntryShow>,
+    commentData: List<BofCommentShow>,
     selectedDate: LocalDate,
     selectedTimeStr: String,
     maxComment: Int,
@@ -248,7 +267,7 @@ fun CommentCapture(
     val scope = rememberCoroutineScope()
     if (showDialog.value) {
         val captureControllerList = mutableListOf<CaptureController>()
-        repeat(totalData.size / 100 + 1) {
+        repeat(commentData.size / 100 + 1) {
             captureControllerList.add(rememberCaptureController())
         }
         AlertDialog(
@@ -263,7 +282,7 @@ fun CommentCapture(
                                 "including the parts that are not visible on the screen.",
                         modifier = Modifier.padding(8.dp)
                     )
-                    for (i in 0 until totalData.size / 100 + 1) {
+                    for (i in 0 until commentData.size / 100 + 1) {
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(15.dp))
@@ -286,11 +305,11 @@ fun CommentCapture(
                                         barWidth = barWidthImage,
                                         textWidth = textWidthImage,
                                         isImage = true,
-                                        totalData = totalData,
+                                        commentData = commentData,
                                         selectedTimeStr = selectedTimeStr,
                                     )
-                                if (totalData.isNotEmpty())
-                                    for ((index, entry) in totalData.withIndex())
+                                if (commentData.isNotEmpty())
+                                    for ((index, entry) in commentData.withIndex())
                                         if (index in i * 100..(i + 1) * 100 - 1)
                                             BofEntryRowComment(
                                                 entry = entry,
@@ -322,10 +341,10 @@ fun CommentCapture(
                                     error.printStackTrace()
                                 }
                             }
-                            val totalHeight = bitmapList.sumOf { it.height }
+                            val commentHeight = bitmapList.sumOf { it.height }
                             val maxHeight = 32000
-                            val bitmap = if (totalHeight > maxHeight) {
-                                val scaleFactor = maxHeight.toFloat() / totalHeight
+                            val bitmap = if (commentHeight > maxHeight) {
+                                val scaleFactor = maxHeight.toFloat() / commentHeight
                                 val newWidth = (bitmapList[0].width * scaleFactor).toInt()
                                 val newHeight = maxHeight
                                 Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
@@ -351,7 +370,7 @@ fun CommentCapture(
                             } else {
                                 Bitmap.createBitmap(
                                     bitmapList[0].width,
-                                    totalHeight,
+                                    commentHeight,
                                     Bitmap.Config.ARGB_8888
                                 ).apply {
                                     val canvas = Canvas(this)
@@ -372,7 +391,7 @@ fun CommentCapture(
                             saveBitmapToGallery(
                                 context,
                                 bitmap,
-                                "bof_total_${selectedDate}_$selectedTimeStr",
+                                "bof_comment_${selectedDate}_$selectedTimeStr",
                                 "BOF Comment Score Ranking"
                             )
                             snackbarHostState.showSnackbar("Image saved to gallery")
@@ -406,12 +425,12 @@ fun CommentHeader(
     barWidth: Double,
     textWidth: Dp,
     isImage: Boolean = false,
-    totalData: List<BofEntryShow> = emptyList(),
+    commentData: List<BofCommentShow> = emptyList(),
     selectedTimeStr: String = "",
     dataSwitch: Boolean = false
 ) {
     Column {
-        if (totalData.isEmpty() || totalData[0].total == 0) {
+        if (commentData.isEmpty() || commentData[0].total == 0) {
             Text(text = "No ${selectedTimeStr.split(",")[0]}")
         } else {
             Text(
@@ -527,7 +546,7 @@ fun CommentHeader(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BofEntryRowComment(
-    entry: BofEntryShow,
+    entry: BofCommentShow,
     index: Int,
     maxComment: Int,
     isCompare: Boolean = true,
@@ -543,28 +562,34 @@ fun BofEntryRowComment(
 ) {
     val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
 
-    val newBarWidth = if (maxComment == 0) 0.0
+    val totalBarWidth = if (maxComment == 0) 0.0
     else entry.total.toDouble() / maxComment * barWidth
+    val voteBarWidth = if (maxComment == 0) 0.0
+    else entry.vote.toDouble() / maxComment * barWidth
+    val shortBarWidth = if (maxComment == 0) 0.0
+    else entry.short.toDouble() / maxComment * barWidth
+    val longBarWidth = if (maxComment == 0) 0.0
+    else entry.long.toDouble() / maxComment * barWidth
 
     val annotatedString = buildAnnotatedString {
         if (highlightedText.isNotEmpty()) {
-            var startIndex = entry.title.indexOf(highlightedText, ignoreCase = true)
+            var startIndex = entry.user.indexOf(highlightedText, ignoreCase = true)
             var currentIndex = 0
             while (startIndex >= 0) {
-                append(entry.title.substring(currentIndex, startIndex))
+                append(entry.user.substring(currentIndex, startIndex))
                 withStyle(style = SpanStyle(background = Color.Red)) {
-                    append(entry.title.substring(startIndex, startIndex + highlightedText.length))
+                    append(entry.user.substring(startIndex, startIndex + highlightedText.length))
                 }
                 currentIndex = startIndex + highlightedText.length
-                startIndex = entry.title.indexOf(
+                startIndex = entry.user.indexOf(
                     highlightedText,
                     startIndex + highlightedText.length,
                     ignoreCase = true
                 )
             }
-            append(entry.title.substring(currentIndex))
+            append(entry.user.substring(currentIndex))
         } else {
-            append(entry.title)
+            append(entry.user)
         }
     }
 
@@ -588,30 +613,30 @@ fun BofEntryRowComment(
         }
         if (rowWidth < 800.dp && isCompare) {
             Column {
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.End)
-                ) {
-                    Icon(
-                        painter = entry.rankDiff.let {
-                            if (it > 0) {
-                                painterResource(id = R.drawable.ic_wind_up)
-                            } else if (it < 0) {
-                                painterResource(id = R.drawable.ic_wind_down)
-                            } else {
-                                painterResource(id = R.drawable.ic_flat)
-                            }
-                        },
-                        contentDescription = null,
-                        tint = if (entry.rankDiff < 0) RANKING_RED
-                        else if (entry.rankDiff > 0) RANKING_GREEN
-                        else RANKING_YELLOW,
-                        modifier = Modifier
-                            .align(Alignment.CenterVertically)
-                            .padding(end = 2.ndp(), start = 8.ndp())
-                            .width(16.ndp())
-                    )
-                }
+//                Row(
+//                    modifier = Modifier
+//                        .align(Alignment.End)
+//                ) {
+//                    Icon(
+//                        painter = entry.rankDiff.let {
+//                            if (it > 0) {
+//                                painterResource(id = R.drawable.ic_wind_up)
+//                            } else if (it < 0) {
+//                                painterResource(id = R.drawable.ic_wind_down)
+//                            } else {
+//                                painterResource(id = R.drawable.ic_flat)
+//                            }
+//                        },
+//                        contentDescription = null,
+//                        tint = if (entry.rankDiff < 0) RANKING_RED
+//                        else if (entry.rankDiff > 0) RANKING_GREEN
+//                        else RANKING_YELLOW,
+//                        modifier = Modifier
+//                            .align(Alignment.CenterVertically)
+//                            .padding(end = 2.ndp(), start = 8.ndp())
+//                            .width(16.ndp())
+//                    )
+//                }
                 Text(
                     text = entry.index.toString(),
                     fontFamily = sarasaFont,
@@ -624,26 +649,26 @@ fun BofEntryRowComment(
                 )
             }
         } else {
-            if (isCompare) {
-                Icon(
-                    painter = entry.rankDiff.let {
-                        if (it > 0) {
-                            painterResource(id = R.drawable.ic_wind_up)
-                        } else if (it < 0) {
-                            painterResource(id = R.drawable.ic_wind_down)
-                        } else {
-                            painterResource(id = R.drawable.ic_flat)
-                        }
-                    },
-                    contentDescription = null,
-                    tint = if (entry.rankDiff < 0) RANKING_RED
-                    else if (entry.rankDiff > 0) RANKING_GREEN
-                    else RANKING_YELLOW,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .width(30.ndp())
-                )
-            }
+//            if (isCompare) {
+//                Icon(
+//                    painter = entry.rankDiff.let {
+//                        if (it > 0) {
+//                            painterResource(id = R.drawable.ic_wind_up)
+//                        } else if (it < 0) {
+//                            painterResource(id = R.drawable.ic_wind_down)
+//                        } else {
+//                            painterResource(id = R.drawable.ic_flat)
+//                        }
+//                    },
+//                    contentDescription = null,
+//                    tint = if (entry.rankDiff < 0) RANKING_RED
+//                    else if (entry.rankDiff > 0) RANKING_GREEN
+//                    else RANKING_YELLOW,
+//                    modifier = Modifier
+//                        .align(Alignment.CenterVertically)
+//                        .width(30.ndp())
+//                )
+//            }
             Text(
                 text = entry.index.toString(),
                 fontFamily = sarasaFont,
@@ -688,7 +713,7 @@ fun BofEntryRowComment(
             )
 
             Text(
-                text = entry.artist,
+                text = entry.pattern,
                 fontSize = 12.nsp(),
                 lineHeight = 13.nsp(),
                 fontFamily = sarasaFont,
@@ -699,6 +724,20 @@ fun BofEntryRowComment(
                 modifier = textMod(0.ndp(), 16.ndp())
             )
         }
+        Text(
+            text = entry.country,
+            color = Color.White,
+            fontSize = 20.nsp(),
+            lineHeight = 24.nsp(),
+            fontFamily = sarasaFont,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.End,
+            maxLines = 1,
+            modifier = Modifier
+                .width(36.ndp())
+                .align(Alignment.CenterVertically)
+                .padding(end = 8.ndp())
+        )
         if (rowWidth > 800.dp || !dataSwitch) {
             Column {
                 Box(
@@ -706,36 +745,139 @@ fun BofEntryRowComment(
                         .width(barWidth.ndp())
                         .background(color = Color.Transparent)
                 ) {
-                    Box(
-                        Modifier
-                            .padding(top = 2.ndp())
-                            .background(color = Color.Transparent)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .width(newBarWidth.ndp())
-                                .height(if (isCompare) 18.ndp() else 34.ndp())
-                                .background(
-                                    color = RANKING_RED,
-                                    shape = RoundedCornerShape(
-                                        topEnd = 50.ndp(),
-                                        bottomEnd = 50.ndp()
+                    if (entry.index <= 50) {
+                        Row {
+                            if (entry.vote != 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(voteBarWidth.ndp())
+                                        .height(if (isCompare) 18.ndp() else 34.ndp())
+                                ) {
+                                    ScoreChart(
+                                        dataList = entry.voteChartData,
+                                        height = if (isCompare) 18.ndp() else 34.ndp(),
+                                        width = voteBarWidth.ndp(),
+                                        color = RANKING_GREEN
                                     )
-                                )
-                        )
-                        Text(
-                            text = entry.total.toString(),
-                            color = Color.White,
-                            fontSize = if (isCompare) 14.nsp() else 20.nsp(),
-                            lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
-                            fontFamily = sarasaFont,
-                            fontWeight = FontWeight.Bold,
-                            overflow = TextOverflow.Visible,
-                            maxLines = 1,
-                            modifier = Modifier
-                                .padding(end = 4.ndp())
-                                .align(Alignment.CenterEnd)
-                        )
+                                }
+//                            Box(
+//                                Modifier
+//                                    .padding(top = 2.ndp())
+//                                    .background(color = Color.Transparent)
+//                            ) {
+//                                Text(
+//                                    text = entry.vote.toString(),
+//                                    color = Color.White,
+//                                    fontSize = if (isCompare) 14.nsp() else 20.nsp(),
+//                                    lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
+//                                    fontFamily = sarasaFont,
+//                                    fontWeight = FontWeight.Bold,
+//                                    overflow = TextOverflow.Visible,
+//                                    maxLines = 1,
+//                                    modifier = Modifier
+//                                        .align(Alignment.Center)
+//                                )
+//                            }
+                            }
+                            if (entry.short != 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(shortBarWidth.ndp())
+                                        .height(if (isCompare) 18.ndp() else 34.ndp())
+                                ) {
+                                    ScoreChart(
+                                        dataList = entry.shortChartData,
+                                        height = if (isCompare) 18.ndp() else 34.ndp(),
+                                        width = shortBarWidth.ndp(),
+                                        color = RANKING_BLUE
+                                    )
+                                }
+//                            Box(
+//                                Modifier
+//                                    .padding(top = 2.ndp())
+//                                    .background(color = Color.Transparent)
+//                            ) {
+//
+//                                Text(
+//                                    text = entry.short.toString(),
+//                                    color = Color.White,
+//                                    fontSize = if (isCompare) 14.nsp() else 20.nsp(),
+//                                    lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
+//                                    fontFamily = sarasaFont,
+//                                    fontWeight = FontWeight.Bold,
+//                                    overflow = TextOverflow.Visible,
+//                                    maxLines = 1,
+//                                    modifier = Modifier
+//                                        .align(Alignment.Center)
+//                                )
+//                            }
+                            }
+                            if (entry.long != 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(longBarWidth.ndp())
+                                        .height(if (isCompare) 18.ndp() else 34.ndp())
+                                ) {
+                                    ScoreChart(
+                                        dataList = entry.longChartData,
+                                        height = if (isCompare) 18.ndp() else 34.ndp(),
+                                        width = longBarWidth.ndp(),
+                                        color = RANKING_RED
+                                    )
+                                }
+//                            Box(
+//                                Modifier
+//                                    .padding(top = 2.ndp())
+//                                    .background(color = Color.Transparent)
+//                            ) {
+//
+//                                Text(
+//                                    text = entry.long.toString(),
+//                                    color = Color.White,
+//                                    fontSize = if (isCompare) 14.nsp() else 20.nsp(),
+//                                    lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
+//                                    fontFamily = sarasaFont,
+//                                    fontWeight = FontWeight.Bold,
+//                                    overflow = TextOverflow.Visible,
+//                                    maxLines = 1,
+//                                    modifier = Modifier
+//                                        .align(Alignment.Center)
+//                                )
+//                            }
+                            }
+                        }
+                    } else {
+                        Box(
+                            Modifier
+                                .padding(top = 2.ndp())
+                                .background(color = Color.Transparent)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .width(totalBarWidth.ndp())
+                                    .height(if (isCompare) 18.ndp() else 34.ndp())
+                                    .background(
+                                        color = RANKING_RED,
+                                        shape = RoundedCornerShape(
+                                            topEnd = 50.ndp(),
+                                            bottomEnd = 50.ndp()
+                                        )
+                                    )
+                            )
+                            Text(
+                                text = entry.total.toString(),
+                                color = Color.White,
+                                fontSize = if (isCompare) 14.nsp() else 20.nsp(),
+                                lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
+                                fontFamily = sarasaFont,
+                                fontWeight = FontWeight.Bold,
+                                overflow = TextOverflow.Visible,
+                                maxLines = 1,
+                                modifier = Modifier
+                                    .padding(end = 4.ndp())
+                                    .align(Alignment.CenterEnd)
+                            )
+                        }
                     }
                 }
                 if (isCompare) {
@@ -752,7 +894,7 @@ fun BofEntryRowComment(
         }
         if (rowWidth > 800.dp || dataSwitch) {
             Text(
-                text = entry.impr.toString(),
+                text = entry.vote.toString(),
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
@@ -763,7 +905,7 @@ fun BofEntryRowComment(
                     .width(36.ndp())
             )
             Text(
-                text = CommonUtils.truncateToTwoDecimalPlaces(entry.median),
+                text = CommonUtils.truncateToTwoDecimalPlaces(entry.longAve),
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
@@ -774,11 +916,11 @@ fun BofEntryRowComment(
                     .align(Alignment.CenterVertically)
                     .padding(start = 8.ndp())
                     .width(74.ndp())
-                    .background(calculateColor(entry.median))
+                    .background(calculateColor(entry.longAve))
                     .padding(end = 4.ndp())
             )
             Text(
-                text = CommonUtils.truncateToTwoDecimalPlaces(entry.avg),
+                text = CommonUtils.truncateToTwoDecimalPlaces(entry.shortAve),
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
@@ -788,7 +930,7 @@ fun BofEntryRowComment(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .width(74.ndp())
-                    .background(calculateColor(entry.avg))
+                    .background(calculateColor(entry.shortAve))
                     .padding(end = 4.ndp())
             )
         }
@@ -800,4 +942,66 @@ fun BofEntryRowComment(
             )
         }
     }
+}
+
+@Composable
+fun ScoreChart(
+    dataList: List<Int>,
+    height: Dp,
+    width: Dp,
+    color: Color
+) {
+    val modelProducer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(dataList) {
+        modelProducer.runTransaction {
+            lineSeries {
+                series(dataList.map { it })
+            }
+        }
+    }
+    CartesianChartHost(
+        modifier = Modifier
+            .height(height)
+            .width(width),
+        zoomState = rememberVicoZoomState(
+            zoomEnabled = false,
+            initialZoom = Zoom.x(dataList.size.toDouble())
+        ),
+        scrollState = rememberVicoScrollState(
+            scrollEnabled = false
+        ),
+        chart = rememberCartesianChart(
+            rememberLineCartesianLayer(
+                lineProvider = LineCartesianLayer.LineProvider.series(
+                    LineCartesianLayer.rememberLine(
+                        fill = LineCartesianLayer.LineFill.single(fill(color)),
+                        areaFill = LineCartesianLayer.AreaFill.single(
+                            fill(
+                                ShaderProvider.verticalGradient(
+                                    Color.Transparent.toArgb(), color.toArgb()
+                                )
+                            )
+                        ),
+                    )
+                ),
+                rangeProvider = object : CartesianLayerRangeProvider {
+                    override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) = 0.0
+                    override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore) = 1000.0
+                },
+            ),
+            startAxis = VerticalAxis.rememberStart(
+                guideline = null,
+                tick = null,
+                line = null,
+                label = null,
+            ),
+            topAxis = HorizontalAxis.rememberTop(
+                guideline = null,
+                tick = null,
+                line = null,
+                label = null,
+            )
+        ),
+        modelProducer = modelProducer,
+    )
 }
