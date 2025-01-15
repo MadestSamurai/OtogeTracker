@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Log
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
@@ -40,14 +41,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asAndroidBitmap
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -69,30 +73,13 @@ import com.madsam.otora.utils.ImageUtils.saveBitmapToGallery
 import com.madsam.otora.utils.ScreenUtil.isLandscape
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
-import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberTop
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
-import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
-import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
-import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
-import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
-import com.patrykandpatrick.vico.compose.common.fill
-import com.patrykandpatrick.vico.core.cartesian.Zoom
-import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
-import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
-import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.core.common.data.ExtraStore
-import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
 import dev.shreyaspatil.capturable.capturable
 import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import kotlin.math.max
 
 /**
  * 项目名: OtogeTracker
@@ -140,27 +127,19 @@ fun BofCommentScreen(
     val isCompare = false
 
     val screenWidthDp = configuration.screenWidthDp.dp
-    val barWidth = when (screenWidthDp) {
-        in 0.dp..400.dp -> screenWidthDp.value * 0.4
-        in 400.dp..800.dp -> (screenWidthDp.value - 400) * 0.3 + 160
-        else -> 280.0
+    val barWidth = when {
+        screenWidthDp >= 1000.dp -> 280.0
+        screenWidthDp in 800.dp..999.dp -> 186.0 + (screenWidthDp.value - 800) / 200.0 * 94.0
+        else -> 186.0
     }
     val textWidth = when {
-        screenWidthDp > 800.dp && isCompare ->
-            // Compare: 62, Rank: 40, Impr: 36, Median: 82, Avg: 74
-            screenWidthDp - 294.ndp() - barWidth.ndp()
-
-        screenWidthDp > 800.dp && !isCompare ->
-            // Rank: 40, Impr: 36, Median: 82, Avg: 74
-            screenWidthDp - 232.ndp() - barWidth.ndp()
-
-        screenWidthDp < 800.dp && isCompare ->
-            // Rank: 58,
-            screenWidthDp - 58.ndp() - barWidth.ndp()
+        screenWidthDp > 800.dp ->
+            // Rank: 40, Country: 36, Impr: 74, Median: 74, Avg: 74, Total: 36
+            screenWidthDp - 334.ndp() - barWidth.ndp()
 
         else ->
-            // Rank: 40, Country: 40
-            screenWidthDp - 80.ndp() - barWidth.ndp()
+            // Rank: 40, Country: 36, Impr: 74, Median: 74, Avg: 74
+            screenWidthDp - 298.ndp()
     }
 
     LaunchedEffect(configuration) {
@@ -562,8 +541,6 @@ fun BofEntryRowComment(
 ) {
     val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
 
-    val totalBarWidth = if (maxComment == 0) 0.0
-    else entry.total.toDouble() / maxComment * barWidth
     val voteBarWidth = if (maxComment == 0) 0.0
     else entry.vote.toDouble() / maxComment * barWidth
     val shortBarWidth = if (maxComment == 0) 0.0
@@ -611,77 +588,18 @@ fun BofEntryRowComment(
                     .height(36.ndp())
             )
         }
-        if (rowWidth < 800.dp && isCompare) {
-            Column {
-//                Row(
-//                    modifier = Modifier
-//                        .align(Alignment.End)
-//                ) {
-//                    Icon(
-//                        painter = entry.rankDiff.let {
-//                            if (it > 0) {
-//                                painterResource(id = R.drawable.ic_wind_up)
-//                            } else if (it < 0) {
-//                                painterResource(id = R.drawable.ic_wind_down)
-//                            } else {
-//                                painterResource(id = R.drawable.ic_flat)
-//                            }
-//                        },
-//                        contentDescription = null,
-//                        tint = if (entry.rankDiff < 0) RANKING_RED
-//                        else if (entry.rankDiff > 0) RANKING_GREEN
-//                        else RANKING_YELLOW,
-//                        modifier = Modifier
-//                            .align(Alignment.CenterVertically)
-//                            .padding(end = 2.ndp(), start = 8.ndp())
-//                            .width(16.ndp())
-//                    )
-//                }
-                Text(
-                    text = entry.index.toString(),
-                    fontFamily = sarasaFont,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.nsp(),
-                    color = Color.White,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .width(36.ndp())
-                )
-            }
-        } else {
-//            if (isCompare) {
-//                Icon(
-//                    painter = entry.rankDiff.let {
-//                        if (it > 0) {
-//                            painterResource(id = R.drawable.ic_wind_up)
-//                        } else if (it < 0) {
-//                            painterResource(id = R.drawable.ic_wind_down)
-//                        } else {
-//                            painterResource(id = R.drawable.ic_flat)
-//                        }
-//                    },
-//                    contentDescription = null,
-//                    tint = if (entry.rankDiff < 0) RANKING_RED
-//                    else if (entry.rankDiff > 0) RANKING_GREEN
-//                    else RANKING_YELLOW,
-//                    modifier = Modifier
-//                        .align(Alignment.CenterVertically)
-//                        .width(30.ndp())
-//                )
-//            }
-            Text(
-                text = entry.index.toString(),
-                fontFamily = sarasaFont,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.nsp(),
-                color = Color.White,
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .padding(end = 4.ndp())
-                    .width(36.ndp())
-            )
-        }
+        Text(
+            text = entry.index.toString(),
+            fontFamily = sarasaFont,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.nsp(),
+            color = Color.White,
+            textAlign = TextAlign.End,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .padding(end = 4.ndp())
+                .width(36.ndp())
+        )
         Column {
             /**
              * Please add (topPadding,height) in the round bracket.
@@ -701,28 +619,31 @@ fun BofEntryRowComment(
             }
             Text(
                 text = annotatedString,
-                fontSize = 15.nsp(),
-                lineHeight = 16.nsp(),
+                fontSize = if (entry.pattern.isEmpty()) 20.nsp() else 15.nsp(),
+                lineHeight = if (entry.pattern.isEmpty()) 36.nsp() else 16.nsp(),
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.End,
                 color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = textMod(2.ndp(), 18.ndp())
+                modifier = textMod(
+                    if (entry.pattern.isEmpty()) 0.ndp() else 2.ndp(),
+                    if (entry.pattern.isEmpty()) 36.ndp() else 18.ndp())
             )
-
-            Text(
-                text = entry.pattern,
-                fontSize = 12.nsp(),
-                lineHeight = 13.nsp(),
-                fontFamily = sarasaFont,
-                textAlign = TextAlign.End,
-                color = TEXT_GRAY,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = textMod(0.ndp(), 16.ndp())
-            )
+            if (entry.pattern.isNotEmpty()) {
+                Text(
+                    text = entry.pattern,
+                    fontSize = 12.nsp(),
+                    lineHeight = 13.nsp(),
+                    fontFamily = sarasaFont,
+                    textAlign = TextAlign.End,
+                    color = TEXT_GRAY,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = textMod(0.ndp(), 16.ndp())
+                )
+            }
         }
         Text(
             text = entry.country,
@@ -751,161 +672,172 @@ fun BofEntryRowComment(
                                 Box(
                                     modifier = Modifier
                                         .width(voteBarWidth.ndp())
-                                        .height(if (isCompare) 18.ndp() else 34.ndp())
+                                        .height(34.ndp())
                                 ) {
                                     ScoreChart(
                                         dataList = entry.voteChartData,
-                                        height = if (isCompare) 18.ndp() else 34.ndp(),
+                                        height = 34.ndp(),
                                         width = voteBarWidth.ndp(),
                                         color = RANKING_GREEN
                                     )
                                 }
-//                            Box(
-//                                Modifier
-//                                    .padding(top = 2.ndp())
-//                                    .background(color = Color.Transparent)
-//                            ) {
-//                                Text(
-//                                    text = entry.vote.toString(),
-//                                    color = Color.White,
-//                                    fontSize = if (isCompare) 14.nsp() else 20.nsp(),
-//                                    lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
-//                                    fontFamily = sarasaFont,
-//                                    fontWeight = FontWeight.Bold,
-//                                    overflow = TextOverflow.Visible,
-//                                    maxLines = 1,
-//                                    modifier = Modifier
-//                                        .align(Alignment.Center)
-//                                )
-//                            }
                             }
                             if (entry.short != 0) {
                                 Box(
                                     modifier = Modifier
                                         .width(shortBarWidth.ndp())
-                                        .height(if (isCompare) 18.ndp() else 34.ndp())
+                                        .height(34.ndp())
                                 ) {
                                     ScoreChart(
                                         dataList = entry.shortChartData,
-                                        height = if (isCompare) 18.ndp() else 34.ndp(),
+                                        height = 34.ndp(),
                                         width = shortBarWidth.ndp(),
                                         color = RANKING_BLUE
                                     )
                                 }
-//                            Box(
-//                                Modifier
-//                                    .padding(top = 2.ndp())
-//                                    .background(color = Color.Transparent)
-//                            ) {
-//
-//                                Text(
-//                                    text = entry.short.toString(),
-//                                    color = Color.White,
-//                                    fontSize = if (isCompare) 14.nsp() else 20.nsp(),
-//                                    lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
-//                                    fontFamily = sarasaFont,
-//                                    fontWeight = FontWeight.Bold,
-//                                    overflow = TextOverflow.Visible,
-//                                    maxLines = 1,
-//                                    modifier = Modifier
-//                                        .align(Alignment.Center)
-//                                )
-//                            }
                             }
                             if (entry.long != 0) {
                                 Box(
                                     modifier = Modifier
                                         .width(longBarWidth.ndp())
-                                        .height(if (isCompare) 18.ndp() else 34.ndp())
+                                        .height(34.ndp())
                                 ) {
                                     ScoreChart(
                                         dataList = entry.longChartData,
-                                        height = if (isCompare) 18.ndp() else 34.ndp(),
+                                        height = 34.ndp(),
                                         width = longBarWidth.ndp(),
                                         color = RANKING_RED
                                     )
                                 }
-//                            Box(
-//                                Modifier
-//                                    .padding(top = 2.ndp())
-//                                    .background(color = Color.Transparent)
-//                            ) {
-//
-//                                Text(
-//                                    text = entry.long.toString(),
-//                                    color = Color.White,
-//                                    fontSize = if (isCompare) 14.nsp() else 20.nsp(),
-//                                    lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
-//                                    fontFamily = sarasaFont,
-//                                    fontWeight = FontWeight.Bold,
-//                                    overflow = TextOverflow.Visible,
-//                                    maxLines = 1,
-//                                    modifier = Modifier
-//                                        .align(Alignment.Center)
-//                                )
-//                            }
+                            }
+                        }
+                        Row {
+                            val voteMinWidth = when {
+                                entry.vote >= 100 -> 30.0
+                                entry.vote >= 10 -> 20.0
+                                entry.vote == 0 -> voteBarWidth
+                                else -> 10.0
+                            }
+                            val voteDelta = voteMinWidth - voteBarWidth
+                            val shortMinWidth = when {
+                                entry.short >= 100 -> 30.0
+                                entry.short >= 10 -> 20.0
+                                entry.short == 0 -> shortBarWidth
+                                else -> 10.0
+                            }
+                            val shortDelta = shortMinWidth - shortBarWidth
+                            val longMinWidth = when {
+                                entry.long >= 100 -> 30.0
+                                entry.long >= 10 -> 20.0
+                                entry.long == 0 -> longBarWidth
+                                else -> 10.0
+                            }
+                            val longDelta = longMinWidth - longBarWidth
+                            var voteTextWidth = voteBarWidth + max(voteDelta, 0.0)
+                            var shortTextWidth = shortBarWidth + max(shortDelta, 0.0)
+                            var longTextWidth = longBarWidth + max(longDelta, 0.0)
+                            if (shortDelta < 0)
+                                shortTextWidth -= (max(voteDelta, 0.0) + max(longDelta, 0.0))
+                            if (voteDelta < 0 && shortDelta >= 0 && longDelta < 0) {
+                                voteTextWidth -= (max(shortDelta, 0.0) + max(longDelta, 0.0)) / 2
+                                longTextWidth -= (max(voteDelta, 0.0) + max(shortDelta, 0.0)) / 2
+                            }
+                            if (voteDelta >= 0 && shortDelta >= 0 && longDelta < 0)
+                                longTextWidth -= (max(voteDelta, 0.0) + max(shortDelta, 0.0))
+                            if (voteDelta < 0 && shortDelta >= 0 && longDelta >= 0)
+                                voteTextWidth -= (max(shortDelta, 0.0) + max(longDelta, 0.0))
+                            if (entry.vote != 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .height(if (isCompare) 18.ndp() else 34.ndp())
+                                ) {
+                                    ScoreText(
+                                        text = entry.vote.toString(),
+                                        color = RANKING_GREEN,
+                                        textAlign = if (voteDelta >= 0) TextAlign.Start else TextAlign.End,
+                                        modifier = Modifier
+                                            .width(voteTextWidth.ndp())
+                                            .align(Alignment.BottomEnd)
+                                    )
+                                }
+                            }
+                            if (entry.short != 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .height(if (isCompare) 18.ndp() else 34.ndp())
+                                ) {
+                                    ScoreText(
+                                        text = entry.short.toString(),
+                                        color = RANKING_BLUE,
+                                        textAlign = if (shortDelta >= 0 && entry.long != 0 && entry.vote == 0) TextAlign.Start else TextAlign.End,
+                                        modifier = Modifier
+                                            .width(shortTextWidth.ndp())
+                                            .align(Alignment.BottomEnd)
+                                    )
+                                }
+                            }
+                            if (entry.long != 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .height(if (isCompare) 18.ndp() else 34.ndp())
+                                ) {
+                                    ScoreText(
+                                        text = entry.long.toString(),
+                                        color = RANKING_RED,
+                                        textAlign = TextAlign.End,
+                                        modifier = Modifier
+                                            .width(longTextWidth.ndp())
+                                            .align(Alignment.BottomEnd)
+                                    )
+                                }
                             }
                         }
                     } else {
-                        Box(
+                        Row(
                             Modifier
                                 .padding(top = 2.ndp())
                                 .background(color = Color.Transparent)
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .width(totalBarWidth.ndp())
-                                    .height(if (isCompare) 18.ndp() else 34.ndp())
-                                    .background(
-                                        color = RANKING_RED,
-                                        shape = RoundedCornerShape(
-                                            topEnd = 50.ndp(),
-                                            bottomEnd = 50.ndp()
-                                        )
-                                    )
+                                    .width(voteBarWidth.ndp())
+                                    .height(34.ndp())
+                                    .background(color = RANKING_GREEN)
                             )
-                            Text(
-                                text = entry.total.toString(),
-                                color = Color.White,
-                                fontSize = if (isCompare) 14.nsp() else 20.nsp(),
-                                lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
-                                fontFamily = sarasaFont,
-                                fontWeight = FontWeight.Bold,
-                                overflow = TextOverflow.Visible,
-                                maxLines = 1,
+                            Box(
                                 modifier = Modifier
-                                    .padding(end = 4.ndp())
-                                    .align(Alignment.CenterEnd)
+                                    .width(shortBarWidth.ndp())
+                                    .height(34.ndp())
+                                    .background(color = RANKING_BLUE)
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .width(longBarWidth.ndp())
+                                    .height(34.ndp())
+                                    .background(color = RANKING_RED)
                             )
                         }
                     }
                 }
-                if (isCompare) {
-                    Box(
-                        modifier = Modifier
-                            .width(barWidth.ndp())
-                            .background(
-                                color = Color.Transparent,
-                            )
-                    ) {
-                    }
-                }
             }
+            Text(
+                text = entry.total.toString(),
+                color = Color.White,
+                fontSize = 20.nsp(),
+                lineHeight = 24.nsp(),
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.End,
+                maxLines = 1,
+                modifier = Modifier
+                    .width(36.ndp())
+                    .align(Alignment.CenterVertically)
+                    .padding(end = 2.ndp())
+            )
         }
         if (rowWidth > 800.dp || dataSwitch) {
             Text(
-                text = entry.vote.toString(),
-                fontFamily = sarasaFont,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.nsp(),
-                color = Color.White,
-                textAlign = TextAlign.End,
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .width(36.ndp())
-            )
-            Text(
-                text = CommonUtils.truncateToTwoDecimalPlaces(entry.longAve),
+                text = CommonUtils.truncateToTwoDecimalPlaces(entry.voteAve),
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
@@ -914,9 +846,8 @@ fun BofEntryRowComment(
                 textAlign = TextAlign.End,
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
-                    .padding(start = 8.ndp())
                     .width(74.ndp())
-                    .background(calculateColor(entry.longAve))
+                    .background(calculateColor(entry.voteAve))
                     .padding(end = 4.ndp())
             )
             Text(
@@ -931,6 +862,20 @@ fun BofEntryRowComment(
                     .align(Alignment.CenterVertically)
                     .width(74.ndp())
                     .background(calculateColor(entry.shortAve))
+                    .padding(end = 4.ndp())
+            )
+            Text(
+                text = CommonUtils.truncateToTwoDecimalPlaces(entry.longAve),
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.nsp(),
+                lineHeight = 36.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .width(74.ndp())
+                    .background(calculateColor(entry.longAve))
                     .padding(end = 4.ndp())
             )
         }
@@ -951,57 +896,76 @@ fun ScoreChart(
     width: Dp,
     color: Color
 ) {
-    val modelProducer = remember { CartesianChartModelProducer() }
-    LaunchedEffect(dataList) {
-        modelProducer.runTransaction {
-            lineSeries {
-                series(dataList.map { it })
+    Canvas(modifier = Modifier.size(width, height)) {
+        val maxDataValue = 1000
+        val stepX = size.width / (dataList.size - 1)
+        val stepY = size.height / maxDataValue
+
+        val path = Path().apply {
+            moveTo(0f, size.height)
+            for (i in dataList.indices) {
+                val x = i * stepX
+                val y = size.height - (dataList[i] * stepY)
+                lineTo(x, y)
             }
+            lineTo(size.width, size.height)
+            close()
+        }
+
+        val fillColor = color.copy(alpha = 1.0f).copy(
+            red = color.red * 0.5f,
+            green = color.green * 0.5f,
+            blue = color.blue * 0.5f
+        )
+
+        drawPath(
+            path = path,
+            color = fillColor
+        )
+
+        for (i in 0 until dataList.size - 1) {
+            val startX = i * stepX
+            val startY = size.height - (dataList[i] * stepY)
+            val endX = (i + 1) * stepX
+            val endY = size.height - (dataList[i + 1] * stepY)
+
+            drawLine(
+                color = color,
+                start = Offset(startX, startY),
+                end = Offset(endX, endY),
+                strokeWidth = 4f
+            )
         }
     }
-    CartesianChartHost(
-        modifier = Modifier
-            .height(height)
-            .width(width),
-        zoomState = rememberVicoZoomState(
-            zoomEnabled = false,
-            initialZoom = Zoom.x(dataList.size.toDouble())
+}
+
+@Composable
+fun ScoreText(
+    text: String,
+    color: Color,
+    textAlign: TextAlign,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = text,
+        color = color.copy(alpha = 1.0f).copy(
+            red = color.red * 2f,
+            green = color.green * 2f,
+            blue = color.blue * 2f
         ),
-        scrollState = rememberVicoScrollState(
-            scrollEnabled = false
-        ),
-        chart = rememberCartesianChart(
-            rememberLineCartesianLayer(
-                lineProvider = LineCartesianLayer.LineProvider.series(
-                    LineCartesianLayer.rememberLine(
-                        fill = LineCartesianLayer.LineFill.single(fill(color)),
-                        areaFill = LineCartesianLayer.AreaFill.single(
-                            fill(
-                                ShaderProvider.verticalGradient(
-                                    Color.Transparent.toArgb(), color.toArgb()
-                                )
-                            )
-                        ),
-                    )
-                ),
-                rangeProvider = object : CartesianLayerRangeProvider {
-                    override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) = 0.0
-                    override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore) = 1000.0
-                },
-            ),
-            startAxis = VerticalAxis.rememberStart(
-                guideline = null,
-                tick = null,
-                line = null,
-                label = null,
-            ),
-            topAxis = HorizontalAxis.rememberTop(
-                guideline = null,
-                tick = null,
-                line = null,
-                label = null,
+        fontSize = 14.nsp(),
+        fontFamily = sarasaFont,
+        fontWeight = FontWeight.Bold,
+        style = TextStyle(
+            shadow = Shadow(
+                color = color,
+                offset = Offset(0f, 0f),
+                blurRadius = 20f
             )
         ),
-        modelProducer = modelProducer,
+        overflow = TextOverflow.Visible,
+        maxLines = 1,
+        textAlign = textAlign,
+        modifier = modifier
     )
 }
