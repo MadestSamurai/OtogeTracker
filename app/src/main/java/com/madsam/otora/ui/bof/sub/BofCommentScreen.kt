@@ -242,7 +242,7 @@ fun CommentCapture(
 ) {
     val screenWidthImage = 1000.dp
     val barWidthImage = 280.0
-    val textWidthImage = 1000.dp - 294.ndp() - barWidthImage.ndp()
+    val textWidthImage = 1000.dp - 334.ndp() - barWidthImage.ndp()
     val scope = rememberCoroutineScope()
     if (showDialog.value) {
         val captureControllerList = mutableListOf<CaptureController>()
