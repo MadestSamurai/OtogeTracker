@@ -108,7 +108,7 @@ fun BofCommentScreen(
     val currentTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
     val compareDate = vm.selectedCompareDate.asStateFlow().collectAsState().value
     val compareTime = vm.selectedCompareTime.asStateFlow().collectAsState().value
-    val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
+    val selectedTimeStrNoComp = vm.selectedTimeStrNoComp.asStateFlow().collectAsState().value
     val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
     val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 
@@ -152,7 +152,7 @@ fun BofCommentScreen(
         snackbarHostState = snackbarHostState,
         commentData = commentData.value,
         selectedDate = currentDate,
-        selectedTimeStr = selectedTimeStr,
+        selectedTimeStr = selectedTimeStrNoComp,
         maxComment = maxComment,
         isCompare = isCompare,
         configuration = configuration,
@@ -168,11 +168,10 @@ fun BofCommentScreen(
                     leftPadding = leftPadding,
                     rightPadding = rightPadding,
                     screenWidthDp = screenWidthDp,
-                    isCompare = isCompare,
                     barWidth = barWidth,
                     textWidth = textWidth,
                     commentData = commentData.value,
-                    selectedTimeStr = selectedTimeStr,
+                    selectedTimeStr = selectedTimeStrNoComp,
                     dataSwitch = dataSwitch.value
                 )
                 Row(
@@ -280,7 +279,6 @@ fun CommentCapture(
                                         leftPadding = leftPadding,
                                         rightPadding = rightPadding,
                                         screenWidthDp = screenWidthImage,
-                                        isCompare = isCompare,
                                         barWidth = barWidthImage,
                                         textWidth = textWidthImage,
                                         isImage = true,
@@ -400,7 +398,6 @@ fun CommentHeader(
     leftPadding: Dp,
     rightPadding: Dp,
     screenWidthDp: Dp,
-    isCompare: Boolean,
     barWidth: Double,
     textWidth: Dp,
     isImage: Boolean = false,
@@ -455,52 +452,92 @@ fun CommentHeader(
                 color = Color.White,
                 textAlign = TextAlign.End,
                 modifier = Modifier
-                    .padding(end = if (screenWidthDp < 800.dp && isCompare) 22.ndp() else 4.dp)
-                    .width(if (screenWidthDp >= 800.dp && isCompare) 98.ndp() else 36.ndp())
+                    .padding(end = 4.ndp())
+                    .width(36.ndp())
             )
             Text(
-                text = "",
+                text = "Region",
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.nsp(),
+                color = Color.White,
+                textAlign = TextAlign.End,
                 modifier = Modifier
-                    .width(textWidth)
-                    .padding(end = 8.ndp(), top = 2.ndp())
+                    .width(textWidth + 36.ndp())
+                    .padding(end = 6.ndp())
             )
             if (!dataSwitch) {
+                Row(
+                    modifier = Modifier
+                        .width(barWidth.ndp()-5.ndp())
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(14.ndp())
+                            .background(RANKING_GREEN)
+                            .align(Alignment.CenterVertically)
+                    )
+                    Text(
+                        text = "Vote",
+                        fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.nsp(),
+                        color = Color.White,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .width(40.ndp())
+                            .padding(start = 2.ndp())
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(14.ndp())
+                            .background(RANKING_BLUE)
+                            .align(Alignment.CenterVertically)
+                    )
+                    Text(
+                        text = "Short",
+                        fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.nsp(),
+                        color = Color.White,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .width(48.ndp())
+                            .padding(start = 2.ndp())
+                    )
+                    Box(
+                        modifier = Modifier
+                            .size(14.ndp())
+                            .background(RANKING_RED)
+                            .align(Alignment.CenterVertically)
+                    )
+                    Text(
+                        text = "Long",
+                        fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.nsp(),
+                        color = Color.White,
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .width(40.ndp())
+                            .padding(start = 2.ndp())
+                    )
+                }
                 Text(
-                    text = "Comment",
+                    text = "Total",
                     fontFamily = sarasaFont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
                     color = Color.White,
+                    textAlign = TextAlign.End,
                     modifier = Modifier
-                        .width(barWidth.ndp())
+                        .align(Alignment.CenterVertically)
+                        .width(41.ndp())
                 )
             }
             if (screenWidthDp > 800.dp || dataSwitch) {
                 Text(
-                    text = "Impr",
-                    fontFamily = sarasaFont,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.nsp(),
-                    color = Color.White,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .width(36.ndp())
-                )
-                Text(
-                    text = "Median",
-                    fontFamily = sarasaFont,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.nsp(),
-                    color = Color.White,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(start = 8.ndp())
-                        .width(70.ndp())
-                )
-                Text(
-                    text = "Avg",
+                    text = "VoteAvg",
                     fontFamily = sarasaFont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
@@ -509,7 +546,28 @@ fun CommentHeader(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .width(74.ndp())
-                        .padding(end = 4.ndp())
+                )
+                Text(
+                    text = "ShortAvg",
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.nsp(),
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(74.ndp())
+                )
+                Text(
+                    text = "LongAvg",
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.nsp(),
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .width(74.ndp())
                 )
             }
             if (isLandscape(configuration) && !isImage) {
@@ -629,7 +687,8 @@ fun BofEntryRowComment(
                 overflow = TextOverflow.Ellipsis,
                 modifier = textMod(
                     if (entry.pattern.isEmpty()) 0.ndp() else 2.ndp(),
-                    if (entry.pattern.isEmpty()) 36.ndp() else 18.ndp())
+                    if (entry.pattern.isEmpty()) 36.ndp() else 18.ndp()
+                )
             )
             if (entry.pattern.isNotEmpty()) {
                 Text(

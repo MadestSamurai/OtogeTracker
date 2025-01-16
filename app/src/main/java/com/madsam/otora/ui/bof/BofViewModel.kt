@@ -48,6 +48,7 @@ class BofViewModel() : ViewModel() {
     var selectedCompareDate = MutableStateFlow(LocalDate.now())
     var selectedCompareTime = MutableStateFlow("-1")
     var selectedTimeStr = MutableStateFlow("")
+    var selectedTimeStrNoComp = MutableStateFlow("")
 
     val leftPadding = MutableStateFlow(0.dp)
     val rightPadding = MutableStateFlow(0.dp)
@@ -155,6 +156,10 @@ class BofViewModel() : ViewModel() {
                             "compare with $compareDate $compareTime, " +
                             "all data scraped by MadSamurai."
                 }
+                selectedTimeStrNoComp.update {
+                    "Data at ${selectedCurrentDate.value} $currentTime, " +
+                            "all data scraped by MadSamurai."
+                }
             }
         } else {
             val currentTime = CommonUtils.roundDownToNearestFiveMinutes(selectedCurrentTime.value)
@@ -162,6 +167,10 @@ class BofViewModel() : ViewModel() {
             selectedTimeStr.update {
                 "Data at ${selectedCurrentDate.value} $currentTime, " +
                         "compare with ${selectedCompareDate.value} $compareTime, " +
+                        "all data scraped by MadSamurai."
+            }
+            selectedTimeStrNoComp.update {
+                "Data at ${selectedCurrentDate.value} $currentTime, " +
                         "all data scraped by MadSamurai."
             }
         }
