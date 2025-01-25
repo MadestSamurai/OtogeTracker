@@ -11,7 +11,12 @@ import androidx.compose.ui.graphics.Color
  * 描述: 颜色常量类
  */
 
+val Purple200 = Color(0xFFBB86FC)
+val Purple500 = Color(0xFF6200EE)
 val Purple700 = Color(0xFF3700B3)
+val PurpleTheme = Color(0xFF674FA3)
+val Black333 = Color(0xFF333333)
+val White1000: Color = Color(0xFFFFFFFF)
 val TEXT_WHITE: Color = Color(0xFFE0E0E0)
 val BG_HALF_TRANS_BLACK: Color = Color(0xAA000000)
 val DARK_RED_DEEP: Color = Color(0xFF2B0F0F)
@@ -54,7 +59,6 @@ val OSU_HEART_RED: Color = Color(0xFFFF66AB)
 val OSU_ARROW_YELLOW: Color = Color(0xFFFFD966)
 
 val OSU_X_BG: Color = Color(0xFF000000)
-val OSU_X_TEXT: Color = Color(0xFFFFFFFF)
 val OSU_DISCORD_BG: Color = Color(0xFF5865F2)
 val OSU_DISCORD_TEXT: Color = Color(0xFFFFFFFF)
 

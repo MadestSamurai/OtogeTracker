@@ -67,17 +67,17 @@ interface Api {
     fun getOsuKudosu(@Path("user") user: String, @Query("mode") mode: String): Call<String>
 
     // Bof API
-    @GET("bofttjson/{date}.json")
+    @GET("bof/tt/work/{date}.json")
     fun getBofttData(
         @Path("date") date: String
     ): Call<List<BofEntry>>
 
-    @GET("bofttteamjson/{date}.json")
+    @GET("bof/tt/team/{date}.json")
     fun getBofttTeamData(
         @Path("date") date: String
     ): Call<List<BofTeam>>
 
-    @GET("bofttcomment/user{date}.json")
+    @GET("bof/tt/comment/user{date}.json")
     fun getBofttComment(
         @Path("date") date: String
     ): Call<List<BofComment>>

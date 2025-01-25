@@ -30,7 +30,7 @@ class BofViewModel() : ViewModel() {
         private const val TAG = "BofViewModel"
     }
 
-    val bofDatabaseService = BofDatabaseService()
+    private val bofDatabaseService = BofDatabaseService()
     val totalData = MutableStateFlow(listOf<BofEntryShow>())
     val avgData = MutableStateFlow(listOf<BofEntryShow>())
     val medianData = MutableStateFlow(listOf<BofEntryShow>())
@@ -43,6 +43,7 @@ class BofViewModel() : ViewModel() {
     var thresholdImprOld = MutableStateFlow(1)
 
     var selectedTab = MutableStateFlow(0)
+    var selectedSubTab = MutableStateFlow(0)
     var selectedCurrentDate = MutableStateFlow(LocalDate.now())
     var selectedCurrentTime = MutableStateFlow("-1")
     var selectedCompareDate = MutableStateFlow(LocalDate.now())
@@ -149,11 +150,10 @@ class BofViewModel() : ViewModel() {
                 selectedTimeStr.update { "" }
             } else {
                 val currentTime = CommonUtils.roundDownToNearestFiveMinutes(totalData.value.first().time)
-                val compareTime = currentTime
                 val compareDate = selectedCurrentDate.value.minusDays(1)
                 selectedTimeStr.update {
                     "Data at ${selectedCurrentDate.value} $currentTime, " +
-                            "compare with $compareDate $compareTime, " +
+                            "compare with $compareDate $currentTime, " +
                             "all data scraped by MadSamurai."
                 }
                 selectedTimeStrNoComp.update {
@@ -195,7 +195,7 @@ class BofViewModel() : ViewModel() {
         }
     }
 
-    fun <T, R : Comparable<R>> updateRanks(
+    private fun <T, R : Comparable<R>> updateRanks(
         data: List<T>,
         oldSelector: (T) -> R,
         selector: (T) -> R,
@@ -205,7 +205,7 @@ class BofViewModel() : ViewModel() {
         filter: (T) -> Boolean,
         reviewCountSelector: (T) -> Int
     ): List<T> where T : Rankable {
-        var sortedDataOld = data.sortedWith(compareByDescending(oldSelector)).filter { filter(it) }
+        val sortedDataOld = data.sortedWith(compareByDescending(oldSelector)).filter { filter(it) }
         var currentOldRank = 1
         sortedDataOld.forEachIndexed { index, entry ->
             if (index > 0 && oldSelector(sortedDataOld[index - 1]) != oldSelector(entry)) {
@@ -213,7 +213,7 @@ class BofViewModel() : ViewModel() {
             }
             oldRankSetter(entry, currentOldRank)
         }
-        var sortedData =
+        val sortedData =
             sortedDataOld.sortedWith(compareByDescending(selector).thenByDescending(reviewCountSelector))
         var currentRank = 1
         sortedData.forEachIndexed { index, entry ->

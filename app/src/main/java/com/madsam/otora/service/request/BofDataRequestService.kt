@@ -72,7 +72,7 @@ class BofDataRequestService(private val context: Context) {
         .schemaVersion(1)
         .build()
 
-    private suspend fun requestBofttEntryData(date: String) {
+    private suspend fun requestBofttEntryData(date: String, onComplete: () -> Unit) {
         val bofCall = api.getBofttData(date)
         val response = try {
             bofCall.execute()
@@ -126,6 +126,7 @@ class BofDataRequestService(private val context: Context) {
                     }
                 }
             }
+            onComplete()
         } catch (e: IOException) {
             Log.e(TAG, "IOException: ${e.message}")
         } finally {
@@ -208,7 +209,7 @@ class BofDataRequestService(private val context: Context) {
         }
     }
 
-    suspend fun requestBofttCommentData(date: String) {
+    private suspend fun requestBofttCommentData(date: String) {
         val bofCommentCall = api.getBofttComment(date)
         val response = bofCommentCall.execute()
         if (!response.isSuccessful) {
@@ -285,11 +286,12 @@ class BofDataRequestService(private val context: Context) {
             if (!ShareUtil.findStringArray("dates", dateToRequest, context)) {
                 serviceScope.launch(dispatcher) {
                     semaphore.withPermit {
-                        requestBofttEntryData(dateToRequest)
-                        if (currentDate.isBefore(dateTime)) {
-                            ShareUtil.insertStringArray("dates", dateToRequest, context)
+                        requestBofttEntryData(dateToRequest) {
+                            if (currentDate.isBefore(dateTime)) {
+                                ShareUtil.insertStringArray("dates", dateToRequest, context)
+                            }
+                            onComplete()
                         }
-                        onComplete()
                     }
                 }
             }

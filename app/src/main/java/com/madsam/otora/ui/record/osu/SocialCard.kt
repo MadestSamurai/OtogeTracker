@@ -30,7 +30,7 @@ import com.madsam.otora.consts.OSU_BRIGHT_RED
 import com.madsam.otora.consts.OSU_DISCORD_BG
 import com.madsam.otora.consts.OSU_DISCORD_TEXT
 import com.madsam.otora.consts.OSU_X_BG
-import com.madsam.otora.consts.OSU_X_TEXT
+import com.madsam.otora.consts.White1000
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -200,7 +200,7 @@ fun SocialCard(
                         Image(
                             painter = painterResource(id = com.madsam.otora.R.drawable.ic_x_logo),
                             contentDescription = "Twitter",
-                            colorFilter = ColorFilter.tint(OSU_X_TEXT),
+                            colorFilter = ColorFilter.tint(White1000),
                             modifier = Modifier
                                 .size(50.dp)
                                 .padding(start = 18.dp, top = 12.dp, bottom = 12.dp)
@@ -210,7 +210,7 @@ fun SocialCard(
                             text = "@${osuSocialCardData["twitter"]!!}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp,
-                            color = OSU_X_TEXT,
+                            color = White1000,
                             modifier = Modifier
                                 .padding(start = 12.dp)
                                 .align(Alignment.CenterVertically)

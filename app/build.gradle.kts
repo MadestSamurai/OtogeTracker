@@ -70,6 +70,9 @@ dependencies {
     implementation(libs.vico.core)
     implementation(libs.vico.views)
 
+    // DateTimePicker
+    implementation(libs.composedatepicker)
+
     // BOM
     implementation(platform(libs.kotlin.bom))
     implementation(platform(libs.androidx.compose.compose.bom))

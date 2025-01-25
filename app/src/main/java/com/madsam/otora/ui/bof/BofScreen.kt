@@ -1,6 +1,6 @@
 package com.madsam.otora.ui.bof
 
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -9,13 +9,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
@@ -70,7 +70,6 @@ import java.time.LocalDate
  * 描述: BOF数据展示界面
  */
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun BofScreen(snackbarHostState: SnackbarHostState) {
     val navController = rememberNavController()
@@ -83,6 +82,7 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
     val vm: BofViewModel = viewModel(factory = BofViewModelFactory())
 
     val selectedTabIndex = vm.selectedTab.asStateFlow().collectAsState().value
+    val selectedSubTabIndex = vm.selectedSubTab.asStateFlow().collectAsState().value
     val searchText = remember { mutableStateOf("") }
 
     val listStateTotal = rememberLazyListState()
@@ -106,6 +106,9 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
     val scrollListComment = vm.scrollToIndexListComment.asStateFlow().collectAsState().value
 
     var showDateTimeRangePicker by remember { mutableStateOf(false) }
+    var isTabRowVisible by remember { mutableStateOf(true) }
+
+    val scrollThreshold = 50f
 
     fun selectTime() {
         showDateTimeRangePicker = true
@@ -182,7 +185,14 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
         }
     }
 
-    val tabTitles = listOf("Total", "Avg", "Median", "Diff", "Team", "Comment")
+    val tabTitles = mapOf(
+        "Entry" to listOf("Total", "Avg", "Median", "Diff"),
+        "Team" to listOf("Total"),
+        "Comment" to listOf("Total")
+    )
+
+    val mainTabTitles = tabTitles.keys.toList()
+    val subTabTitles = tabTitles[mainTabTitles[selectedTabIndex]] ?: emptyList()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -297,44 +307,91 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
             }
             NavHost(
                 navController = navController,
-                startDestination = "Total",
+                startDestination = "${mainTabTitles[selectedTabIndex]}/${subTabTitles.getOrNull(selectedSubTabIndex) ?: ""}",
                 modifier = Modifier.weight(1f)
             ) {
-                composable("Total") { BofTotalScreen(vm, snackbarHostState, listStateTotal) }
-                composable("Avg") { BofAvgScreen(vm, snackbarHostState, listStateAvg) }
-                composable("Median") { BofMedianScreen(vm, snackbarHostState, listStateMedian) }
-                composable("Diff") { BofDiffScreen(vm, snackbarHostState, listStateDiff) }
-                composable("Team") { BofTeamScreen(vm, snackbarHostState, listStateTeam) }
-                composable("Comment") { BofCommentScreen(vm, snackbarHostState, listStateComment) }
+                tabTitles.forEach { (mainTab, subTabs) ->
+                    subTabs.forEach { subTab ->
+                        composable("$mainTab/$subTab") {
+                            when (mainTab) {
+                                "Entry" -> when (subTab) {
+                                    "Total" -> BofTotalScreen(vm, snackbarHostState, listStateTotal, scrollThreshold) { isTabRowVisible = it }
+                                    "Avg" -> BofAvgScreen(vm, snackbarHostState, listStateAvg)
+                                    "Median" -> BofMedianScreen(vm, snackbarHostState, listStateMedian)
+                                    "Diff" -> BofDiffScreen(vm, snackbarHostState, listStateDiff)
+                                }
+                                "Team" -> when (subTab) {
+                                    "Total" -> BofTeamScreen(vm, snackbarHostState, listStateTeam)
+                                }
+                                "Comment" -> when (subTab) {
+                                    "Total" -> BofCommentScreen(vm, snackbarHostState, listStateComment)
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
-        Box(
+        AnimatedVisibility(
+            visible = isTabRowVisible,
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(8.dp)
-                .clip(RoundedCornerShape(50.dp))
-                .background(Color.White)
+                .padding(bottom = 10.dp)
+                .clip(RoundedCornerShape(20.dp))
         ) {
-            CustomTabRow(
-                selectedTabIndex = selectedTabIndex,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                tabTitles.forEachIndexed { index, title ->
-                    Tab(
-                        selected = selectedTabIndex == index,
-                        onClick = {
-                            if (selectedTabIndex != index) {
-                                vm.selectedTab.update { index }
-                                navController.navigate(title)
-                            }
-                        },
-                        text = {
-                            Text(
-                                text = title,
-                                color = if (selectedTabIndex == index) Color.Black else Color.Gray,
-                            )
-                        }
-                    )
+            Column {
+                CustomTabRow(
+                    selectedTabIndex = selectedSubTabIndex,
+                    modifier = Modifier
+                        .padding(3.dp)
+                        .clip(RoundedCornerShape(50.dp))
+                        .background(Color.White)
+                ) {
+                    subTabTitles.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedSubTabIndex == index,
+                            onClick = {
+                                if (selectedSubTabIndex != index) {
+                                    vm.selectedSubTab.update { index }
+                                    navController.navigate("${mainTabTitles[selectedTabIndex]}/$title")
+                                }
+                            },
+                            text = {
+                                Text(
+                                    text = title,
+                                    color = if (selectedSubTabIndex == index) Color.Black else Color.Gray
+                                )
+                            },
+                            modifier = Modifier.height(35.dp)
+                        )
+                    }
+                }
+                CustomTabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    modifier = Modifier
+                        .padding(3.dp)
+                        .clip(RoundedCornerShape(50.dp))
+                        .background(Color.White),
+                ) {
+                    mainTabTitles.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = {
+                                if (selectedTabIndex != index) {
+                                    vm.selectedTab.update { index }
+                                    vm.selectedSubTab.update { 0 } // Reset sub-tab index
+                                    navController.navigate("${title}/${subTabTitles.firstOrNull() ?: ""}")
+                                }
+                            },
+                            text = {
+                                Text(
+                                    text = title,
+                                    color = if (selectedTabIndex == index) Color.Black else Color.Gray,
+                                )
+                            },
+                            modifier = Modifier.height(40.dp)
+                        )
+                    }
                 }
             }
         }

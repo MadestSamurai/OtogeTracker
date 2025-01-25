@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -27,7 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -54,13 +52,7 @@ import com.madsam.otora.consts.DARK_RED_TEXT
 import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
 import com.madsam.otora.consts.OSU_BRIGHT_RED
 import com.madsam.otora.model.osu.web.OsuGroup
-import com.madsam.otora.utils.ImageUtils.saveBitmapToFile
-import com.madsam.otora.utils.ImageUtils.saveImageToGallery
-import dev.shreyaspatil.capturable.capturable
-import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
-import java.io.File
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -73,7 +65,6 @@ fun Card(
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
 
-    val captureController = rememberCaptureController()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
@@ -84,7 +75,6 @@ fun Card(
                     start = 16.dp,
                     bottom = 12.dp
                 )
-                .capturable(captureController)
                 .clip(RoundedCornerShape(20.dp))
                 .background(DARK_RED_DEEP)
         ) {
@@ -445,22 +435,6 @@ fun Card(
                     Alignment.TopCenter
                 )
             }
-        }
-        Button(onClick = {
-            // Capture content
-            scope.launch {
-                val bitmapAsync = captureController.captureAsync()
-                try {
-                    val bitmap = bitmapAsync.await().asAndroidBitmap()
-                    val file = File(context.cacheDir, "osu_card.png")
-                    saveBitmapToFile(bitmap, file)
-                    saveImageToGallery(context, file, "osu_card")
-                } catch (error: Throwable) {
-                    error.printStackTrace()
-                }
-            }
-        }) {
-            Text("Capture Card")
         }
     }
 }

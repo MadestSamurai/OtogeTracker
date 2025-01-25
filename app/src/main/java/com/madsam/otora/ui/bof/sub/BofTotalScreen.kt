@@ -5,7 +5,6 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Log
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -40,8 +39,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -85,12 +88,13 @@ import kotlin.math.max
  * 描述: BOF数据展示界面
  */
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BofTotalScreen(
     vm: BofViewModel,
     snackbarHostState: SnackbarHostState,
-    listState: LazyListState
+    listState: LazyListState,
+    scrollThreshold: Float,
+    setIsTabRowVisible: (Boolean) -> Unit
 ) {
     val scope = rememberCoroutineScope()
 
@@ -167,7 +171,25 @@ fun BofTotalScreen(
         rightPadding = rightPadding
     )
 
-    LazyColumn(state = listState) {
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .nestedScroll(object : NestedScrollConnection {
+                private var totalScroll = 0f
+
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    totalScroll += available.y
+                    if (totalScroll < -scrollThreshold) {
+                        setIsTabRowVisible(false)
+                        totalScroll = 0f
+                    } else if (totalScroll > scrollThreshold) {
+                        setIsTabRowVisible(true)
+                        totalScroll = 0f
+                    }
+                    return Offset.Zero
+                }
+            })
+    ) {
         item {
             Box {
                 TotalHeader(
@@ -296,7 +318,7 @@ fun TotalCapture(
                                     )
                                 if (totalData.isNotEmpty())
                                     for ((index, entry) in totalData.withIndex())
-                                        if (index in i * 100..(i + 1) * 100 - 1)
+                                        if (index in i * 100..< (i + 1) * 100)
                                             BofEntryRowTotal(
                                                 entry = entry,
                                                 index = index + 1,
@@ -332,8 +354,7 @@ fun TotalCapture(
                             val bitmap = if (totalHeight > maxHeight) {
                                 val scaleFactor = maxHeight.toFloat() / totalHeight
                                 val newWidth = (bitmapList[0].width * scaleFactor).toInt()
-                                val newHeight = maxHeight
-                                Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+                                Bitmap.createBitmap(newWidth, maxHeight, Bitmap.Config.ARGB_8888)
                                     .apply {
                                         val canvas = Canvas(this)
                                         var currentHeight = 0
@@ -529,7 +550,6 @@ fun TotalHeader(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BofEntryRowTotal(
     entry: BofEntryShow,

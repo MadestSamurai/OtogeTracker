@@ -50,12 +50,12 @@ class BofDatabaseService {
             try {
                 val startTime = currentTime - 24 * 60 * 60 * 1000
                 val startTimeCompare = compareTime - 24 * 60 * 60 * 1000
-                val points = realm.query<BofPointEntity>(
+                val points = realm.query(
                     clazz = BofPointEntity::class,
                     query = "time >= $0 AND time <= $1",
                     startTime, currentTime
                 ).find()
-                val pointsCompare = realm.query<BofPointEntity>(
+                val pointsCompare = realm.query(
                     clazz = BofPointEntity::class,
                     query = "time >= $0 AND time <= $1",
                     startTimeCompare, compareTime
