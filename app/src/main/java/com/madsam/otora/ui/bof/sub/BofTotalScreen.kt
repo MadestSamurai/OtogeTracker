@@ -70,6 +70,7 @@ import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ImageUtils.saveBitmapToGallery
 import com.madsam.otora.utils.ScreenUtil.isLandscape
+import com.madsam.otora.utils.ScreenUtil.isPortrait
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
 import dev.shreyaspatil.capturable.capturable
@@ -77,7 +78,8 @@ import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.max
 
 /**
@@ -107,16 +109,16 @@ fun BofTotalScreen(
         totalData.value.maxOfOrNull { it.total } ?: 1,
         totalData.value.maxOfOrNull { it.oldTotal } ?: 1
     )
-    val currentDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
-    val currentTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
-    val compareDate = vm.selectedCompareDate.asStateFlow().collectAsState().value
-    val compareTime = vm.selectedCompareTime.asStateFlow().collectAsState().value
     val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
     val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
     val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 
     val highlightedText = vm.highlightedText.asStateFlow().collectAsState().value
 
+    val currentDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
+    val currentTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
+    val compareDate = vm.selectedCompareDate.asStateFlow().collectAsState().value
+    val compareTime = vm.selectedCompareTime.asStateFlow().collectAsState().value
     LaunchedEffect(currentDate, currentTime, compareDate, compareTime) {
         scope.launch {
             vm.requestTotalData()
@@ -131,18 +133,18 @@ fun BofTotalScreen(
 
     val screenWidthDp = configuration.screenWidthDp.dp
     val barWidth = when (screenWidthDp) {
-        in 0.dp..400.dp -> screenWidthDp.value * 0.4
-        in 400.dp..800.dp -> (screenWidthDp.value - 400) * 0.3 + 160
+        in 0.dp..445.dp -> 178.0
+        in 445.dp..800.dp -> (screenWidthDp.value - 445) * 0.3 + 160
         else -> 280.0
     }
     val textWidth = when {
         screenWidthDp > 800.dp && isCompare ->
-            // Compare: 62, Rank: 40, Impr: 36, Median: 82, Avg: 74
-            screenWidthDp - 294.ndp() - barWidth.ndp()
+            // Compare: 62, Rank: 40, Impr: 36, Median: 68, Avg: 74
+            screenWidthDp - 280.ndp() - barWidth.ndp()
 
         screenWidthDp > 800.dp && !isCompare ->
-            // Rank: 40, Impr: 36, Median: 82, Avg: 74
-            screenWidthDp - 232.ndp() - barWidth.ndp()
+            // Rank: 40, Impr: 36, Median: 68, Avg: 74
+            screenWidthDp - 218.ndp() - barWidth.ndp()
 
         screenWidthDp < 800.dp && isCompare ->
             // Rank: 58,
@@ -162,7 +164,6 @@ fun BofTotalScreen(
         context = context,
         snackbarHostState = snackbarHostState,
         totalData = totalData.value,
-        selectedDate = currentDate,
         selectedTimeStr = selectedTimeStr,
         maxTotal = maxTotal,
         isCompare = isCompare,
@@ -204,6 +205,8 @@ fun BofTotalScreen(
                     selectedTimeStr = selectedTimeStr,
                     dataSwitch = dataSwitch.value
                 )
+
+                if (totalData.value.isEmpty() || totalData.value[0].total == 0) return@Box
                 Row(
                     modifier = Modifier
                         .height(40.dp)
@@ -261,7 +264,6 @@ fun TotalCapture(
     context: Context,
     snackbarHostState: SnackbarHostState,
     totalData: List<BofEntryShow>,
-    selectedDate: LocalDate,
     selectedTimeStr: String,
     maxTotal: Int,
     isCompare: Boolean,
@@ -285,9 +287,7 @@ fun TotalCapture(
             text = {
                 Column {
                     Text(
-                        text = "Capturing content will save the current content to your gallery. " +
-                                "Image may be too large to show in the dialog, " +
-                                "including the parts that are not visible on the screen.",
+                        text = "Capturing content will save the current content to your gallery.",
                         modifier = Modifier.padding(8.dp)
                     )
                     for (i in 0 until totalData.size / 100 + 1) {
@@ -316,19 +316,20 @@ fun TotalCapture(
                                         totalData = totalData,
                                         selectedTimeStr = selectedTimeStr,
                                     )
-                                if (totalData.isNotEmpty())
-                                    for ((index, entry) in totalData.withIndex())
-                                        if (index in i * 100..< (i + 1) * 100)
-                                            BofEntryRowTotal(
-                                                entry = entry,
-                                                index = index + 1,
-                                                maxTotal = maxTotal,
-                                                isCompare = isCompare,
-                                                isImage = true,
-                                                rowWidth = screenWidthImage,
-                                                barWidth = barWidthImage,
-                                                textWidth = textWidthImage,
-                                            )
+                                if (totalData.isEmpty()) return@Box
+                                for ((index, entry) in totalData.withIndex()) {
+                                    if (index !in i * 100..<(i + 1) * 100) continue
+                                    BofEntryRowTotal(
+                                        entry = entry,
+                                        index = index + 1,
+                                        maxTotal = maxTotal,
+                                        isCompare = isCompare,
+                                        isImage = true,
+                                        rowWidth = screenWidthImage,
+                                        barWidth = barWidthImage,
+                                        textWidth = textWidthImage,
+                                    )
+                                }
                             }
                         }
                     }
@@ -395,10 +396,13 @@ fun TotalCapture(
                                     }
                                 }
                             }
+                            val current = LocalDateTime.now()
+                            val formatter = DateTimeFormatter.ofPattern("MMddHHmm")
+                            val timeStr = current.format(formatter)
                             saveBitmapToGallery(
                                 context,
                                 bitmap,
-                                "bof_total_${selectedDate}_$selectedTimeStr",
+                                "bof_total_${timeStr}_$selectedTimeStr",
                                 "BOF Total Score Ranking"
                             )
                             snackbarHostState.showSnackbar("Image saved to gallery")
@@ -438,7 +442,12 @@ fun TotalHeader(
 ) {
     Column {
         if (totalData.isEmpty() || totalData[0].total == 0) {
-            Text(text = "No ${selectedTimeStr.split(",")[0]}")
+            Text(
+                text = selectedTimeStr,
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+            )
         } else {
             Text(
                 text = "Total Score Ranking",
@@ -464,15 +473,15 @@ fun TotalHeader(
                     .padding(end = if (isLandscape(configuration) && !isImage) rightPadding else 0.dp)
             )
         }
+        if (totalData.isEmpty() || totalData[0].total == 0) return
         Row(
             modifier = Modifier
                 .background(BG_DARK_GRAY)
                 .fillMaxWidth()
         ) {
-            if (isLandscape(configuration) && !isImage) {
+            if (isPortrait(configuration) || isImage) {
                 Box(
-                    modifier = Modifier
-                        .width(leftPadding)
+                    modifier = Modifier.width(leftPadding)
                 )
             }
             Text(
@@ -525,7 +534,7 @@ fun TotalHeader(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .padding(start = 8.ndp())
-                        .width(70.ndp())
+                        .width(56.ndp())
                 )
                 Text(
                     text = "Avg",
@@ -540,12 +549,11 @@ fun TotalHeader(
                         .padding(end = 4.ndp())
                 )
             }
-            if (isLandscape(configuration) && !isImage) {
-                Box(
-                    modifier = Modifier
-                        .width(rightPadding)
-                )
-            }
+            if (isPortrait(configuration) || !isImage) return
+            Box(
+                modifier = Modifier
+                    .width(rightPadding)
+            )
         }
     }
 }
@@ -621,13 +629,9 @@ fun BofEntryRowTotal(
                 ) {
                     Icon(
                         painter = entry.rankDiff.let {
-                            if (it > 0) {
-                                painterResource(id = R.drawable.ic_wind_up)
-                            } else if (it < 0) {
-                                painterResource(id = R.drawable.ic_wind_down)
-                            } else {
-                                painterResource(id = R.drawable.ic_flat)
-                            }
+                            if (it > 0) painterResource(id = R.drawable.ic_wind_up)
+                            else if (it < 0) painterResource(id = R.drawable.ic_wind_down)
+                            else painterResource(id = R.drawable.ic_flat)
                         },
                         contentDescription = null,
                         tint = if (entry.rankDiff < 0) RANKING_RED
@@ -659,21 +663,16 @@ fun BofEntryRowTotal(
                     fontSize = 16.nsp(),
                     color = Color.White,
                     textAlign = TextAlign.End,
-                    modifier = Modifier
-                        .width(36.ndp())
+                    modifier = Modifier.width(36.ndp())
                 )
             }
         } else {
             if (isCompare) {
                 Icon(
                     painter = entry.rankDiff.let {
-                        if (it > 0) {
-                            painterResource(id = R.drawable.ic_wind_up)
-                        } else if (it < 0) {
-                            painterResource(id = R.drawable.ic_wind_down)
-                        } else {
-                            painterResource(id = R.drawable.ic_flat)
-                        }
+                        if (it > 0) painterResource(id = R.drawable.ic_wind_up)
+                        else if (it < 0) painterResource(id = R.drawable.ic_wind_down)
+                        else painterResource(id = R.drawable.ic_flat)
                     },
                     contentDescription = null,
                     tint = if (entry.rankDiff < 0) RANKING_RED
@@ -857,7 +856,7 @@ fun BofEntryRowTotal(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
                     .padding(start = 8.ndp())
-                    .width(74.ndp())
+                    .width(60.ndp())
                     .background(calculateColor(entry.median))
                     .padding(end = 4.ndp())
             )

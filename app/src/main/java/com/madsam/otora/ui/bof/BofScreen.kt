@@ -51,6 +51,7 @@ import com.madsam.otora.R
 import com.madsam.otora.components.CustomTabRow
 import com.madsam.otora.consts.Purple700
 import com.madsam.otora.service.request.BofDataRequestService
+import com.madsam.otora.ui.bof.component.DateTimeRangePicker
 import com.madsam.otora.ui.bof.sub.BofAvgScreen
 import com.madsam.otora.ui.bof.sub.BofCommentScreen
 import com.madsam.otora.ui.bof.sub.BofDiffScreen
@@ -316,15 +317,15 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                             when (mainTab) {
                                 "Entry" -> when (subTab) {
                                     "Total" -> BofTotalScreen(vm, snackbarHostState, listStateTotal, scrollThreshold) { isTabRowVisible = it }
-                                    "Avg" -> BofAvgScreen(vm, snackbarHostState, listStateAvg)
-                                    "Median" -> BofMedianScreen(vm, snackbarHostState, listStateMedian)
-                                    "Diff" -> BofDiffScreen(vm, snackbarHostState, listStateDiff)
+                                    "Avg" -> BofAvgScreen(vm, snackbarHostState, listStateAvg, scrollThreshold) { isTabRowVisible = it }
+                                    "Median" -> BofMedianScreen(vm, snackbarHostState, listStateMedian, scrollThreshold) { isTabRowVisible = it }
+                                    "Diff" -> BofDiffScreen(vm, snackbarHostState, listStateDiff, scrollThreshold) { isTabRowVisible = it }
                                 }
                                 "Team" -> when (subTab) {
-                                    "Total" -> BofTeamScreen(vm, snackbarHostState, listStateTeam)
+                                    "Total" -> BofTeamScreen(vm, snackbarHostState, listStateTeam, scrollThreshold) { isTabRowVisible = it }
                                 }
                                 "Comment" -> when (subTab) {
-                                    "Total" -> BofCommentScreen(vm, snackbarHostState, listStateComment)
+                                    "Total" -> BofCommentScreen(vm, snackbarHostState, listStateComment, scrollThreshold) { isTabRowVisible = it }
                                 }
                             }
                         }

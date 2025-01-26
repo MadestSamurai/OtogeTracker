@@ -5,7 +5,6 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Log
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -13,7 +12,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -42,8 +40,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -77,7 +79,8 @@ import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.max
 
 /**
@@ -88,12 +91,13 @@ import kotlin.math.max
  * 描述: BOF团队数据展示界面
  */
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BofTeamScreen(
     vm: BofViewModel,
     snackbarHostState: SnackbarHostState,
-    listState: LazyListState
+    listState: LazyListState,
+    scrollThreshold: Float,
+    setIsTabRowVisible: (Boolean) -> Unit
 ) {
     val scope = rememberCoroutineScope()
 
@@ -107,15 +111,17 @@ fun BofTeamScreen(
         teamData.value.maxOfOrNull { it.total } ?: 0.0,
         oldMax
     )
-    val selectedDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
-    val selectedTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
     val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
     val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
     val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 
     val highlightedText = vm.highlightedText.asStateFlow().collectAsState().value
 
-    LaunchedEffect(selectedDate, selectedTime) {
+    val currentDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
+    val currentTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
+    val compareDate = vm.selectedCompareDate.asStateFlow().collectAsState().value
+    val compareTime = vm.selectedCompareTime.asStateFlow().collectAsState().value
+    LaunchedEffect(currentDate, currentTime, compareDate, compareTime) {
         scope.launch {
             vm.requestTeamData()
             vm.generateSelectedTimeStr()
@@ -157,7 +163,6 @@ fun BofTeamScreen(
         context = context,
         snackbarHostState = snackbarHostState,
         teamData = teamData.value,
-        selectedDate = selectedDate,
         selectedTimeStr = selectedTimeStr,
         maxTotal = maxTotal,
         isCompare = isCompare,
@@ -165,54 +170,70 @@ fun BofTeamScreen(
         leftPadding = leftPadding,
         rightPadding = rightPadding
     )
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .nestedScroll(object : NestedScrollConnection {
+                private var totalScroll = 0f
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(state = listState) {
-            item {
-                Box {
-                    TeamHeader(
-                        configuration = configuration,
-                        leftPadding = leftPadding,
-                        rightPadding = rightPadding,
-                        screenWidthDp = screenWidthDp,
-                        isCompare = isCompare,
-                        barWidth = barWidth,
-                        teamData = teamData.value,
-                        selectedTimeStr = selectedTimeStr
-                    )
-                    Row(
-                        modifier = Modifier
-                            .height(40.dp)
-                            .align(Alignment.TopEnd)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_picture),
-                            contentDescription = "Capture",
-                            tint = Color.White,
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .size(22.dp)
-                                .clickable(onClick = { showDialog.value = true })
-                        )
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    totalScroll += available.y
+                    if (totalScroll < -scrollThreshold) {
+                        setIsTabRowVisible(false)
+                        totalScroll = 0f
+                    } else if (totalScroll > scrollThreshold) {
+                        setIsTabRowVisible(true)
+                        totalScroll = 0f
                     }
+                    return Offset.Zero
+                }
+            })
+    ) {
+        item {
+            Box {
+                TeamHeader(
+                    configuration = configuration,
+                    leftPadding = leftPadding,
+                    rightPadding = rightPadding,
+                    screenWidthDp = screenWidthDp,
+                    isCompare = isCompare,
+                    barWidth = barWidth,
+                    teamData = teamData.value,
+                    selectedTimeStr = selectedTimeStr
+                )
+                if (teamData.value.isEmpty()) return@Box
+                Row(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .align(Alignment.TopEnd)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_picture),
+                        contentDescription = "Capture",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .size(22.dp)
+                            .clickable(onClick = { showDialog.value = true })
+                    )
                 }
             }
-            if (teamData.value.isNotEmpty()) {
-                itemsIndexed(teamData.value) { index, entry ->
-                    BofTeamRowTotal(
-                        entry = entry,
-                        index = index + 1,
-                        maxTotal = maxTotal,
-                        rowWidth = screenWidthDp,
-                        isCompare = isCompare,
-                        barWidth = barWidth,
-                        textWidth = textWidth,
-                        configuration = configuration,
-                        leftPadding = leftPadding,
-                        rightPadding = rightPadding,
-                        highlightedText = highlightedText
-                    )
-                }
+        }
+        if (teamData.value.isNotEmpty()) {
+            itemsIndexed(teamData.value) { index, entry ->
+                BofTeamRowTotal(
+                    entry = entry,
+                    index = index + 1,
+                    maxTotal = maxTotal,
+                    rowWidth = screenWidthDp,
+                    isCompare = isCompare,
+                    barWidth = barWidth,
+                    textWidth = textWidth,
+                    configuration = configuration,
+                    leftPadding = leftPadding,
+                    rightPadding = rightPadding,
+                    highlightedText = highlightedText
+                )
             }
         }
     }
@@ -225,7 +246,6 @@ fun TeamCapture(
     context: Context,
     snackbarHostState: SnackbarHostState,
     teamData: List<BofTeamShow>,
-    selectedDate: LocalDate,
     selectedTimeStr: String,
     maxTotal: Double,
     isCompare: Boolean,
@@ -237,9 +257,7 @@ fun TeamCapture(
     val textWidthImage = 1000.dp - 244.ndp()
     val barWidthImage = textWidthImage.value.toDouble()
     val scope = rememberCoroutineScope()
-    if (!showDialog.value) {
-        return
-    }
+    if (!showDialog.value) return
     val captureControllerList = mutableListOf<CaptureController>()
     repeat(teamData.size / 40 + 1) {
         captureControllerList.add(rememberCaptureController())
@@ -251,12 +269,10 @@ fun TeamCapture(
         text = {
             Column {
                 Text(
-                    text = "Capturing content will save the current content to your gallery. " +
-                            "Image may be too large to show in the dialog, " +
-                            "including the parts that are not visible on the screen.",
+                    text = "Capturing content will save the current content to your gallery.",
                     modifier = Modifier.padding(8.dp)
                 )
-                for (i in 0 until teamData.size / 40 + 1) {
+                for (i in 0..teamData.size / 40) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(15.dp))
@@ -269,7 +285,7 @@ fun TeamCapture(
                                 .capturable(captureControllerList[i])
                                 .fillMaxWidth()
                         ) {
-                            if (i == 0) {
+                            if (i == 0)
                                 TeamHeader(
                                     configuration = configuration,
                                     leftPadding = leftPadding,
@@ -281,10 +297,9 @@ fun TeamCapture(
                                     teamData = teamData,
                                     selectedTimeStr = selectedTimeStr,
                                 )
-                            }
-                            if (teamData.isEmpty()) return@Column
+                            if (teamData.isEmpty()) return@Box
                             for ((index, entry) in teamData.withIndex()) {
-                                if (index !in i * 40..(i + 1) * 40 - 1) continue
+                                if (index !in i * 40..<(i + 1) * 40) continue
                                 BofTeamRowTotal(
                                     entry = entry,
                                     index = index + 1,
@@ -321,8 +336,7 @@ fun TeamCapture(
                         val bitmap = if (totalHeight > maxHeight) {
                             val scaleFactor = maxHeight.toFloat() / totalHeight
                             val newWidth = (bitmapList[0].width * scaleFactor).toInt()
-                            val newHeight = maxHeight
-                            Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+                            Bitmap.createBitmap(newWidth, maxHeight, Bitmap.Config.ARGB_8888)
                                 .apply {
                                     val canvas = Canvas(this)
                                     var currentHeight = 0
@@ -363,10 +377,13 @@ fun TeamCapture(
                                 }
                             }
                         }
+                        val current = LocalDateTime.now()
+                        val formatter = DateTimeFormatter.ofPattern("MMddHHmm")
+                        val timeStr = current.format(formatter)
                         saveBitmapToGallery(
                             context,
                             bitmap,
-                            "bof_team_${selectedDate}_$selectedTimeStr",
+                            "bof_team_${timeStr}_$selectedTimeStr",
                             "BOF Team Score Ranking"
                         )
                         snackbarHostState.showSnackbar("Image saved to gallery")
@@ -403,7 +420,12 @@ fun TeamHeader(
 ) {
     Column {
         if (teamData.isEmpty() || teamData[0].total == 0.0) {
-            Text(text = "No ${selectedTimeStr.split(",")[0]}")
+            Text(
+                text = selectedTimeStr,
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+            )
         } else {
             Text(
                 text = "Total Team Score Ranking",
@@ -429,6 +451,7 @@ fun TeamHeader(
                     .padding(end = if (isLandscape(configuration) && !isImage) rightPadding else 0.dp)
             )
         }
+        if (teamData.isEmpty()) return
         Row(
             modifier = Modifier
                 .background(BG_DARK_GRAY)
@@ -487,7 +510,6 @@ fun TeamHeader(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BofTeamRowTotal(
     entry: BofTeamShow,
@@ -510,7 +532,7 @@ fun BofTeamRowTotal(
     val oldBarWidth = if (maxTotal == 0.0) 0.0
     else entry.oldTotal / maxTotal * barWidth
 
-    var rowHeight = remember { mutableIntStateOf(0) }
+    val rowHeight = remember { mutableIntStateOf(0) }
 
     val annotatedString = buildAnnotatedString {
         if (highlightedText.isNotEmpty()) {

@@ -5,7 +5,6 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Log
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -40,8 +39,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -63,6 +66,7 @@ import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.utils.ImageUtils.saveBitmapToGallery
 import com.madsam.otora.utils.ScreenUtil.isLandscape
+import com.madsam.otora.utils.ScreenUtil.isPortrait
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
 import dev.shreyaspatil.capturable.capturable
@@ -70,7 +74,8 @@ import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 /**
  * 项目名: OtogeTracker
@@ -80,12 +85,13 @@ import java.time.LocalDate
  * 描述: BOF数据展示界面
  */
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BofDiffScreen(
     vm: BofViewModel,
     snackbarHostState: SnackbarHostState,
-    listState: LazyListState
+    listState: LazyListState,
+    scrollThreshold: Float,
+    setIsTabRowVisible: (Boolean) -> Unit
 ) {
     val scope = rememberCoroutineScope()
 
@@ -96,15 +102,18 @@ fun BofDiffScreen(
     val diffData = vm.diffData.asStateFlow().collectAsState()
     val maxDiff = diffData.value.maxOfOrNull { it.totalDiff } ?: 1
     val isReverse = vm.isDiffReverse.asStateFlow().collectAsState().value
-    val selectedDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
-    val selectedTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
+
     val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
     val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
     val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 
     val highlightedText = vm.highlightedText.asStateFlow().collectAsState().value
 
-    LaunchedEffect(selectedDate, selectedTime) {
+    val currentDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
+    val currentTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
+    val compareDate = vm.selectedCompareDate.asStateFlow().collectAsState().value
+    val compareTime = vm.selectedCompareTime.asStateFlow().collectAsState().value
+    LaunchedEffect(currentDate, currentTime, compareDate, compareTime) {
         scope.launch {
             vm.requestDiffData()
             vm.generateSelectedTimeStr()
@@ -131,7 +140,6 @@ fun BofDiffScreen(
         context = context,
         snackbarHostState = snackbarHostState,
         diffData = diffData.value,
-        selectedDate = selectedDate,
         selectedTimeStr = selectedTimeStr,
         maxDiff = maxDiff,
         configuration = configuration,
@@ -140,7 +148,25 @@ fun BofDiffScreen(
         isReverse = isReverse
     )
 
-    LazyColumn(state = listState) {
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .nestedScroll(object : NestedScrollConnection {
+                private var totalScroll = 0f
+
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    totalScroll += available.y
+                    if (totalScroll < -scrollThreshold) {
+                        setIsTabRowVisible(false)
+                        totalScroll = 0f
+                    } else if (totalScroll > scrollThreshold) {
+                        setIsTabRowVisible(true)
+                        totalScroll = 0f
+                    }
+                    return Offset.Zero
+                }
+            })
+    ) {
         item {
             Box {
                 DiffHeader(
@@ -153,6 +179,8 @@ fun BofDiffScreen(
                     selectedTimeStr = selectedTimeStr,
                     isReverse = isReverse
                 )
+
+                if (diffData.value.isEmpty()) return@Box
                 Row(
                     modifier = Modifier
                         .height(40.dp)
@@ -196,7 +224,6 @@ fun DiffCapture(
     context: Context,
     snackbarHostState: SnackbarHostState,
     diffData: List<BofEntryShow>,
-    selectedDate: LocalDate,
     selectedTimeStr: String,
     maxDiff: Int,
     configuration: Configuration,
@@ -220,12 +247,10 @@ fun DiffCapture(
             text = {
                 Column {
                     Text(
-                        text = "Capturing content will save the current content to your gallery. " +
-                                "Image may be too large to show in the dialog, " +
-                                "including the parts that are not visible on the screen.",
+                        text = "Capturing content will save the current content to your gallery.",
                         modifier = Modifier.padding(8.dp)
                     )
-                    for (i in 0 until diffData.size / 100 + 1) {
+                    for (i in 0..diffData.size / 100) {
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(15.dp))
@@ -250,17 +275,18 @@ fun DiffCapture(
                                         selectedTimeStr = selectedTimeStr,
                                         isReverse = isReverse
                                     )
-                                if (diffData.isNotEmpty())
-                                    for ((index, entry) in diffData.withIndex())
-                                        if (index in i * 100..(i + 1) * 100 - 1)
-                                            BofEntryRowDiff(
-                                                entry = entry,
-                                                index = index + 1,
-                                                maxDiff = maxDiff,
-                                                isImage = true,
-                                                barWidth = barWidthImage,
-                                                textWidth = textWidthImage
-                                            )
+                                if (diffData.isEmpty()) return@Box
+                                for ((index, entry) in diffData.withIndex()) {
+                                    if (index !in i * 100..<(i + 1) * 100) continue
+                                    BofEntryRowDiff(
+                                        entry = entry,
+                                        index = index + 1,
+                                        maxDiff = maxDiff,
+                                        isImage = true,
+                                        barWidth = barWidthImage,
+                                        textWidth = textWidthImage
+                                    )
+                                }
                             }
                         }
                     }
@@ -286,36 +312,54 @@ fun DiffCapture(
                             val bitmap = if (totalHeight > maxHeight) {
                                 val scaleFactor = maxHeight.toFloat() / totalHeight
                                 val newWidth = (bitmapList[0].width * scaleFactor).toInt()
-                                val newHeight = maxHeight
-                                Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888).apply {
-                                    val canvas = Canvas(this)
-                                    var currentHeight = 0
-                                    for (hardwareBitmap in bitmapList) {
-                                        val scaledBitmap = Bitmap.createScaledBitmap(
-                                            hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
-                                            newWidth,
-                                            (hardwareBitmap.height * scaleFactor).toInt(),
-                                            true
-                                        )
-                                        canvas.drawBitmap(scaledBitmap, 0f, currentHeight.toFloat(), null)
-                                        currentHeight += scaledBitmap.height
+                                Bitmap.createBitmap(newWidth, maxHeight, Bitmap.Config.ARGB_8888)
+                                    .apply {
+                                        val canvas = Canvas(this)
+                                        var currentHeight = 0
+                                        for (hardwareBitmap in bitmapList) {
+                                            val scaledBitmap = Bitmap.createScaledBitmap(
+                                                hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
+                                                newWidth,
+                                                (hardwareBitmap.height * scaleFactor).toInt(),
+                                                true
+                                            )
+                                            canvas.drawBitmap(
+                                                scaledBitmap,
+                                                0f,
+                                                currentHeight.toFloat(),
+                                                null
+                                            )
+                                            currentHeight += scaledBitmap.height
+                                        }
                                     }
-                                }
                             } else {
-                                Bitmap.createBitmap(bitmapList[0].width, totalHeight, Bitmap.Config.ARGB_8888).apply {
+                                Bitmap.createBitmap(
+                                    bitmapList[0].width,
+                                    totalHeight,
+                                    Bitmap.Config.ARGB_8888
+                                ).apply {
                                     val canvas = Canvas(this)
                                     var currentHeight = 0
                                     for (hardwareBitmap in bitmapList) {
-                                        val softwareBitmap = hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
-                                        canvas.drawBitmap(softwareBitmap, 0f, currentHeight.toFloat(), null)
+                                        val softwareBitmap =
+                                            hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                        canvas.drawBitmap(
+                                            softwareBitmap,
+                                            0f,
+                                            currentHeight.toFloat(),
+                                            null
+                                        )
                                         currentHeight += softwareBitmap.height
                                     }
                                 }
                             }
+                            val current = LocalDateTime.now()
+                            val formatter = DateTimeFormatter.ofPattern("MMddHHmm")
+                            val timeStr = current.format(formatter)
                             saveBitmapToGallery(
                                 context,
                                 bitmap,
-                                "bof_diff_${selectedDate}_$selectedTimeStr",
+                                "bof_diff_${timeStr}_$selectedTimeStr",
                                 "BOF Diff Score Ranking"
                             )
                             snackbarHostState.showSnackbar("Image saved to gallery")
@@ -353,7 +397,12 @@ fun DiffHeader(
 ) {
     Column {
         if (diffData.isEmpty()) {
-            Text(text = "No ${selectedTimeStr.split(",")[0]}")
+            Text(
+                text = selectedTimeStr,
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+            )
         } else {
             Text(
                 text = "Total ${if (isReverse) "Nerf" else "Difference"} Ranking",
@@ -379,6 +428,7 @@ fun DiffHeader(
                     .padding(end = if (isLandscape(configuration) && !isImage) rightPadding else 0.dp)
             )
         }
+        if (diffData.isEmpty()) return
         Row(
             modifier = Modifier
                 .background(BG_DARK_GRAY)
@@ -386,8 +436,7 @@ fun DiffHeader(
         ) {
             if (isLandscape(configuration) && !isImage) {
                 Box(
-                    modifier = Modifier
-                        .width(leftPadding)
+                    modifier = Modifier.width(leftPadding)
                 )
             }
             Text(
@@ -427,17 +476,15 @@ fun DiffHeader(
                     .align(Alignment.CenterVertically)
                     .width(72.ndp())
             )
-            if (isLandscape(configuration) && !isImage) {
-                Box(
-                    modifier = Modifier
-                        .width(rightPadding)
-                )
-            }
+            if (isPortrait(configuration) || !isImage) return
+            Box(
+                modifier = Modifier
+                    .width(rightPadding)
+            )
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BofEntryRowDiff(
     entry: BofEntryShow,
@@ -452,7 +499,6 @@ fun BofEntryRowDiff(
     highlightedText: String = ""
 ) {
     val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
-
     val newBarWidth = if (maxDiff == 0) 0.0
     else entry.totalDiff.toDouble() / maxDiff * barWidth
 

@@ -38,11 +38,10 @@ import kotlin.collections.forEach
  * 创建时间: 2024/10/13
  * 描述: BOF数据请求服务
  */
-class BofDataRequestService(private val context: Context) {
-    companion object {
-        const val TAG = "BofDataRequestService"
-    }
 
+private const val TAG = "BofDataRequestService"
+
+class BofDataRequestService(private val context: Context) {
     private val moshi = Moshi.Builder()
         .addLast(KotlinJsonAdapterFactory())
         .build()
@@ -261,9 +260,11 @@ class BofDataRequestService(private val context: Context) {
                                     country = detail.evalPosition
                                     workNumber = detail.workNumber
                                     this.date = date
-                                    type = if (detailList == comment.voteDetail) "vote"
-                                    else if (detailList == comment.shortDetail) "short"
-                                    else "long"
+                                    type = when (detailList) {
+                                        comment.voteDetail -> "vote"
+                                        comment.shortDetail -> "short"
+                                        else -> "long"
+                                    }
                                 }
                                 this.copyToRealm(detailEntity, UpdatePolicy.ALL)
                             }

@@ -17,8 +17,8 @@ import java.io.IOException
 
 fun exportChuniSongsToCSV(realmConfig: RealmConfiguration, filePath: String, fileNameSongs: String, fileNameSheets: String) {
     val realm = Realm.open(realmConfig)
-    val chuniSongs = realm.query<ChuniSongsEntity>(clazz = ChuniSongsEntity::class).find()
-    val chuniSheets = realm.query<ChuniSheetsEntity>(clazz = ChuniSheetsEntity::class).find()
+    val chuniSongs = realm.query(clazz = ChuniSongsEntity::class).find()
+    val chuniSheets = realm.query(clazz = ChuniSheetsEntity::class).find()
 
     fun escapeCsvField(field: String): String {
         return if (field.contains(",") || field.contains("\"")) {

@@ -125,9 +125,9 @@ private enum class TabSlots {
     Indicator
 }
 
-class CustomTabPosition internal constructor(val left: Dp, val width: Dp, val contentWidth: Dp) {
+class CustomTabPosition internal constructor(val left: Dp, val width: Dp, private val contentWidth: Dp) {
 
-    val right: Dp
+    private val right: Dp
         get() = left + width
 
     override fun equals(other: Any?): Boolean {

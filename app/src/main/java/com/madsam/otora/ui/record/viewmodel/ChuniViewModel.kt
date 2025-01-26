@@ -16,7 +16,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
  * 创建时间: 2024/12/14
  * 描述: Chunithm视图模型
  */
-class ChuniViewModel() : ViewModel() {
+class ChuniViewModel : ViewModel() {
     fun requestChuniSongData(context: Context, onComplete: () -> Unit) {
         val chuniDataRequestService = ChuniDataRequestService(context)
         chuniDataRequestService.getChuniSongsData()
@@ -41,7 +41,7 @@ class ChuniViewModel() : ViewModel() {
     }
 }
 
-class ChuniViewModelFactory() : ViewModelProvider.Factory {
+class ChuniViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ChuniViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

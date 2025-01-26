@@ -5,9 +5,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.os.Environment
 import android.provider.MediaStore
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 import java.io.OutputStream
 
 /**
@@ -18,50 +15,7 @@ import java.io.OutputStream
  * 描述: Image工具类
  */
 object ImageUtils {
-    fun saveBitmapToFile(bitmap: Bitmap, file: File) {
-        var out: FileOutputStream? = null
-        try {
-            out = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 95, out)
-        } catch (e: IOException) {
-            e.printStackTrace()
-        } finally {
-            try {
-                out?.close()
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    fun saveImageToGallery(context: Context, sourceFile: File, fileName: String): Boolean {
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-            put(MediaStore.MediaColumns.MIME_TYPE, "image/png")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, "Pictures/MyApp")
-        }
-
-        val resolver = context.contentResolver
-        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-
-        return if (uri != null) {
-            try {
-                resolver.openOutputStream(uri).use { outputStream ->
-                    sourceFile.inputStream().use { inputStream ->
-                        inputStream.copyTo(outputStream!!)
-                    }
-                }
-                true
-            } catch (e: IOException) {
-                e.printStackTrace()
-                false
-            }
-        } else {
-            false
-        }
-    }
-
-    fun resizeBitmapIfNeeded(bitmap: Bitmap, maxHeight: Int): Bitmap {
+    private fun resizeBitmapIfNeeded(bitmap: Bitmap, maxHeight: Int): Bitmap {
         return if (bitmap.height > maxHeight) {
             val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
             val newWidth = (maxHeight * aspectRatio).toInt()

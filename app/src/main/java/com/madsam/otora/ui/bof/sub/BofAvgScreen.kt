@@ -5,7 +5,6 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Log
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -40,8 +39,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -64,9 +67,10 @@ import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.ui.bof.BofViewModel
-import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.utils.CommonUtils.truncateToTwoDecimalPlaces
 import com.madsam.otora.utils.ImageUtils.saveBitmapToGallery
 import com.madsam.otora.utils.ScreenUtil.isLandscape
+import com.madsam.otora.utils.ScreenUtil.isPortrait
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
 import dev.shreyaspatil.capturable.capturable
@@ -74,7 +78,8 @@ import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.max
 
 /**
@@ -85,12 +90,13 @@ import kotlin.math.max
  * 描述: BOF数据展示界面
  */
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BofAvgScreen(
     vm: BofViewModel,
     snackbarHostState: SnackbarHostState,
-    listState: LazyListState
+    listState: LazyListState,
+    scrollThreshold: Float,
+    setIsTabRowVisible: (Boolean) -> Unit
 ) {
     val scope = rememberCoroutineScope()
 
@@ -103,23 +109,25 @@ fun BofAvgScreen(
         avgData.value.maxOfOrNull { it.avg } ?: 1.0,
         avgData.value.maxOfOrNull { it.oldAvg } ?: 1.0
     )
-    val selectedDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
-    val selectedTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
     val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
     val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
     val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 
-    val thresholdImpr = vm.thresholdImpr.asStateFlow().collectAsState()
-    val thresholdImprOld = vm.thresholdImprOld.asStateFlow().collectAsState()
-
     val highlightedText = vm.highlightedText.asStateFlow().collectAsState().value
 
-    LaunchedEffect(selectedDate, selectedTime) {
+    val currentDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
+    val currentTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
+    val compareDate = vm.selectedCompareDate.asStateFlow().collectAsState().value
+    val compareTime = vm.selectedCompareTime.asStateFlow().collectAsState().value
+    LaunchedEffect(currentDate, currentTime, compareDate, compareTime) {
         scope.launch {
             vm.requestAvgData()
             vm.generateSelectedTimeStr()
         }
     }
+
+    val thresholdImpr = vm.thresholdImpr.asStateFlow().collectAsState()
+    val thresholdImprOld = vm.thresholdImprOld.asStateFlow().collectAsState()
 
     val showDialog = remember { mutableStateOf(false) }
 
@@ -157,7 +165,6 @@ fun BofAvgScreen(
         context = context,
         snackbarHostState = snackbarHostState,
         avgData = avgData.value,
-        selectedDate = selectedDate,
         selectedTimeStr = selectedTimeStr,
         maxAvg = maxAvg,
         isCompare = isCompare,
@@ -168,7 +175,25 @@ fun BofAvgScreen(
         thresholdImprOld = thresholdImprOld.value
     )
 
-    LazyColumn(state = listState) {
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .nestedScroll(object : NestedScrollConnection {
+                private var totalScroll = 0f
+
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    totalScroll += available.y
+                    if (totalScroll < -scrollThreshold) {
+                        setIsTabRowVisible(false)
+                        totalScroll = 0f
+                    } else if (totalScroll > scrollThreshold) {
+                        setIsTabRowVisible(true)
+                        totalScroll = 0f
+                    }
+                    return Offset.Zero
+                }
+            })
+    ) {
         item {
             Box {
                 AvgHeader(
@@ -183,6 +208,8 @@ fun BofAvgScreen(
                     selectedTimeStr = selectedTimeStr,
                     thresholdImpr = thresholdImpr.value,
                 )
+
+                if (avgData.value.isEmpty()) return@Box
                 Row(
                     modifier = Modifier
                         .height(40.dp)
@@ -229,7 +256,6 @@ fun AvgCapture(
     context: Context,
     snackbarHostState: SnackbarHostState,
     avgData: List<BofEntryShow>,
-    selectedDate: LocalDate,
     selectedTimeStr: String,
     maxAvg: Double,
     isCompare: Boolean,
@@ -243,156 +269,156 @@ fun AvgCapture(
     val barWidthImage = 280.0
     val textWidthImage = 1000.dp - 138.ndp() - barWidthImage.ndp()
     val scope = rememberCoroutineScope()
-    if (showDialog.value) {
-        val captureControllerList = mutableListOf<CaptureController>()
-        repeat(avgData.size / 100 + 1) {
-            captureControllerList.add(rememberCaptureController())
-        }
-        AlertDialog(
-            onDismissRequest = { showDialog.value = false },
-            title = { Text(text = "Capture Content") },
-            modifier = Modifier.height(300.dp),
-            text = {
-                Column {
-                    Text(
-                        text = "Capturing content will save the current content to your gallery. " +
-                                "Image may be too large to show in the dialog, " +
-                                "including the parts that are not visible on the screen.",
-                        modifier = Modifier.padding(8.dp)
-                    )
-                    for (i in 0 until avgData.size / 100 + 1) {
-                        Box(
+    if (!showDialog.value) return
+    val captureControllerList = mutableListOf<CaptureController>()
+    repeat(avgData.size / 100 + 1) {
+        captureControllerList.add(rememberCaptureController())
+    }
+    AlertDialog(
+        onDismissRequest = { showDialog.value = false },
+        title = { Text(text = "Capture Content") },
+        modifier = Modifier.height(300.dp),
+        text = {
+            Column {
+                Text(
+                    text = "Capturing content will save the current content to your gallery. ",
+                    modifier = Modifier.padding(8.dp)
+                )
+                for (i in 0..avgData.size / 100) {
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(15.dp))
+                            .height(0.dp)
+                            .requiredHeight(5000.dp)
+                            .requiredWidth(screenWidthImage)
+                    ) {
+                        Column(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(15.dp))
-                                .height(0.dp)
-                                .requiredHeight(5000.dp)
-                                .requiredWidth(screenWidthImage)
+                                .capturable(captureControllerList[i])
+                                .fillMaxWidth()
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .capturable(captureControllerList[i])
-                                    .fillMaxWidth()
-                            ) {
-                                if (i == 0)
-                                    AvgHeader(
-                                        configuration = configuration,
-                                        leftPadding = leftPadding,
-                                        rightPadding = rightPadding,
-                                        screenWidthDp = screenWidthImage,
-                                        isCompare = isCompare,
-                                        barWidth = barWidthImage,
-                                        textWidth = textWidthImage,
-                                        isImage = true,
-                                        avgData = avgData,
-                                        selectedTimeStr = selectedTimeStr,
-                                        thresholdImpr = thresholdImpr
-                                    )
-                                if (avgData.isNotEmpty())
-                                    for ((index, entry) in avgData.withIndex())
-                                        if (index in i * 100..(i + 1) * 100 - 1)
-                                            BofEntryRowAvg(
-                                                entry = entry,
-                                                index = index + 1,
-                                                maxAvg = maxAvg,
-                                                isCompare = isCompare,
-                                                isImage = true,
-                                                rowWidth = screenWidthImage,
-                                                barWidth = barWidthImage,
-                                                textWidth = textWidthImage,
-                                                thresholdImprOld = thresholdImprOld
-                                            )
+                            if (i == 0)
+                                AvgHeader(
+                                    configuration = configuration,
+                                    leftPadding = leftPadding,
+                                    rightPadding = rightPadding,
+                                    screenWidthDp = screenWidthImage,
+                                    isCompare = isCompare,
+                                    barWidth = barWidthImage,
+                                    textWidth = textWidthImage,
+                                    isImage = true,
+                                    avgData = avgData,
+                                    selectedTimeStr = selectedTimeStr,
+                                    thresholdImpr = thresholdImpr
+                                )
+                            if (avgData.isEmpty()) return@Box
+                            for ((index, entry) in avgData.withIndex()) {
+                                if (index !in i * 100..<(i + 1) * 100) continue
+                                BofEntryRowAvg(
+                                    entry = entry,
+                                    index = index + 1,
+                                    maxAvg = maxAvg,
+                                    isCompare = isCompare,
+                                    isImage = true,
+                                    rowWidth = screenWidthImage,
+                                    barWidth = barWidthImage,
+                                    textWidth = textWidthImage,
+                                    thresholdImprOld = thresholdImprOld
+                                )
                             }
                         }
                     }
                 }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        val bitmapList = mutableListOf<Bitmap>()
-                        scope.launch {
-                            for (captureController in captureControllerList) {
-                                val bitmapAsync = captureController.captureAsync()
-                                try {
-                                    bitmapList.add(bitmapAsync.await().asAndroidBitmap())
-                                } catch (error: Throwable) {
-                                    Log.e("Capture", "Error capturing content", error)
-                                    snackbarHostState.showSnackbar("Error capturing content")
-                                    error.printStackTrace()
-                                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val bitmapList = mutableListOf<Bitmap>()
+                    scope.launch {
+                        for (captureController in captureControllerList) {
+                            val bitmapAsync = captureController.captureAsync()
+                            try {
+                                bitmapList.add(bitmapAsync.await().asAndroidBitmap())
+                            } catch (error: Throwable) {
+                                Log.e("Capture", "Error capturing content", error)
+                                snackbarHostState.showSnackbar("Error capturing content")
+                                error.printStackTrace()
                             }
-                            val totalHeight = bitmapList.sumOf { it.height }
-                            val maxHeight = 32000
-                            val bitmap = if (totalHeight > maxHeight) {
-                                val scaleFactor = maxHeight.toFloat() / totalHeight
-                                val newWidth = (bitmapList[0].width * scaleFactor).toInt()
-                                val newHeight = maxHeight
-                                Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
-                                    .apply {
-                                        val canvas = Canvas(this)
-                                        var currentHeight = 0
-                                        for (hardwareBitmap in bitmapList) {
-                                            val scaledBitmap = Bitmap.createScaledBitmap(
-                                                hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
-                                                newWidth,
-                                                (hardwareBitmap.height * scaleFactor).toInt(),
-                                                true
-                                            )
-                                            canvas.drawBitmap(
-                                                scaledBitmap,
-                                                0f,
-                                                currentHeight.toFloat(),
-                                                null
-                                            )
-                                            currentHeight += scaledBitmap.height
-                                        }
-                                    }
-                            } else {
-                                Bitmap.createBitmap(
-                                    bitmapList[0].width,
-                                    totalHeight,
-                                    Bitmap.Config.ARGB_8888
-                                ).apply {
+                        }
+                        val totalHeight = bitmapList.sumOf { it.height }
+                        val maxHeight = 32000
+                        val bitmap = if (totalHeight > maxHeight) {
+                            val scaleFactor = maxHeight.toFloat() / totalHeight
+                            val newWidth = (bitmapList[0].width * scaleFactor).toInt()
+                            Bitmap.createBitmap(newWidth, maxHeight, Bitmap.Config.ARGB_8888)
+                                .apply {
                                     val canvas = Canvas(this)
                                     var currentHeight = 0
                                     for (hardwareBitmap in bitmapList) {
-                                        val softwareBitmap =
-                                            hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                        val scaledBitmap = Bitmap.createScaledBitmap(
+                                            hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
+                                            newWidth,
+                                            (hardwareBitmap.height * scaleFactor).toInt(),
+                                            true
+                                        )
                                         canvas.drawBitmap(
-                                            softwareBitmap,
+                                            scaledBitmap,
                                             0f,
                                             currentHeight.toFloat(),
                                             null
                                         )
-                                        currentHeight += softwareBitmap.height
+                                        currentHeight += scaledBitmap.height
                                     }
                                 }
+                        } else {
+                            Bitmap.createBitmap(
+                                bitmapList[0].width,
+                                totalHeight,
+                                Bitmap.Config.ARGB_8888
+                            ).apply {
+                                val canvas = Canvas(this)
+                                var currentHeight = 0
+                                for (hardwareBitmap in bitmapList) {
+                                    val softwareBitmap =
+                                        hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                    canvas.drawBitmap(
+                                        softwareBitmap,
+                                        0f,
+                                        currentHeight.toFloat(),
+                                        null
+                                    )
+                                    currentHeight += softwareBitmap.height
+                                }
                             }
-                            saveBitmapToGallery(
-                                context,
-                                bitmap,
-                                "bof_avg_${selectedDate}_$selectedTimeStr",
-                                "BOF Average Score Ranking"
-                            )
-                            snackbarHostState.showSnackbar("Image saved to gallery")
                         }
-                        showDialog.value = false
+                        val current = LocalDateTime.now()
+                        val formatter = DateTimeFormatter.ofPattern("MMddHHmm")
+                        val timeStr = current.format(formatter)
+                        saveBitmapToGallery(
+                            context,
+                            bitmap,
+                            "bof_avg_${timeStr}_$selectedTimeStr",
+                            "BOF Average Score Ranking"
+                        )
+                        snackbarHostState.showSnackbar("Image saved to gallery")
                     }
-                ) {
-                    Text(text = "Capture")
+                    showDialog.value = false
                 }
-            },
-            dismissButton = {
-                Button(
-                    onClick = {
-                        showDialog.value = false
-                    }
-                ) {
-                    Text(text = "Cancel")
-                }
+            ) {
+                Text(text = "Capture")
             }
-        )
-    }
+        },
+        dismissButton = {
+            Button(
+                onClick = {
+                    showDialog.value = false
+                }
+            ) {
+                Text(text = "Cancel")
+            }
+        }
+    )
 }
 
 @Composable
@@ -411,7 +437,12 @@ fun AvgHeader(
 ) {
     Column {
         if (avgData.isEmpty() || avgData[0].avg == 0.0) {
-            Text(text = "No ${selectedTimeStr.split(",")[0]}")
+            Text(
+                text = selectedTimeStr,
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+            )
         } else {
             Text(
                 text = "Average Score Ranking",
@@ -448,6 +479,7 @@ fun AvgHeader(
                     .padding(end = if (isLandscape(configuration) && !isImage) rightPadding else 0.dp)
             )
         }
+        if (avgData.isEmpty()) return
         Row(
             modifier = Modifier
                 .background(BG_DARK_GRAY)
@@ -455,8 +487,7 @@ fun AvgHeader(
         ) {
             if (isLandscape(configuration) && !isImage) {
                 Box(
-                    modifier = Modifier
-                        .width(leftPadding)
+                    modifier = Modifier.width(leftPadding)
                 )
             }
             Text(
@@ -496,17 +527,15 @@ fun AvgHeader(
                     .align(Alignment.CenterVertically)
                     .width(36.ndp())
             )
-            if (isLandscape(configuration) && !isImage) {
-                Box(
-                    modifier = Modifier
-                        .width(rightPadding)
-                )
-            }
+            if (isPortrait(configuration) || !isImage) return
+            Box(
+                modifier = Modifier
+                    .width(rightPadding)
+            )
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BofEntryRowAvg(
     entry: BofEntryShow,
@@ -576,7 +605,9 @@ fun BofEntryRowAvg(
                             else painterResource(id = R.drawable.ic_flat)
                         },
                         contentDescription = null,
-                        tint = if (entry.avgDiff > 0) RANKING_GREEN else if (entry.avgDiff < 0) RANKING_RED else RANKING_YELLOW,
+                        tint = if (entry.avgDiff < 0) RANKING_RED
+                        else if (entry.avgDiff > 0) RANKING_GREEN
+                        else RANKING_YELLOW,
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
                             .padding(end = 2.ndp(), start = 8.ndp())
@@ -587,7 +618,9 @@ fun BofEntryRowAvg(
                         fontFamily = sarasaFont,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.nsp(),
-                        color = if (entry.avgDiff > 0) RANKING_GREEN else if (entry.avgDiff < 0) RANKING_RED else RANKING_YELLOW,
+                        color = if (entry.avgDiff < 0) RANKING_RED
+                        else if (entry.avgDiff > 0) RANKING_GREEN
+                        else RANKING_YELLOW,
                         textAlign = TextAlign.Start,
                         modifier = Modifier
                             .align(Alignment.CenterVertically)
@@ -613,7 +646,9 @@ fun BofEntryRowAvg(
                         else painterResource(id = R.drawable.ic_flat)
                     },
                     contentDescription = null,
-                    tint = if (entry.avgDiff > 0) RANKING_GREEN else if (entry.avgDiff < 0) RANKING_RED else RANKING_YELLOW,
+                    tint = if (entry.avgDiff < 0) RANKING_RED
+                    else if (entry.avgDiff > 0) RANKING_GREEN
+                    else RANKING_YELLOW,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
                         .width(30.ndp())
@@ -623,7 +658,9 @@ fun BofEntryRowAvg(
                     fontFamily = sarasaFont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.nsp(),
-                    color = if (entry.avgDiff > 0) RANKING_GREEN else if (entry.avgDiff < 0) RANKING_RED else RANKING_YELLOW,
+                    color = if (entry.avgDiff > 0) RANKING_GREEN
+                    else if (entry.avgDiff < 0) RANKING_RED
+                    else RANKING_YELLOW,
                     textAlign = TextAlign.Start,
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
@@ -708,7 +745,7 @@ fun BofEntryRowAvg(
                             )
                     )
                     Text(
-                        text = CommonUtils.truncateToTwoDecimalPlaces(entry.avg),
+                        text = truncateToTwoDecimalPlaces(entry.avg),
                         color = Color.White,
                         fontSize = if (isCompare) 14.nsp() else 20.nsp(),
                         lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
@@ -744,7 +781,7 @@ fun BofEntryRowAvg(
                                 )
                         )
                         Text(
-                            text = CommonUtils.truncateToTwoDecimalPlaces(entry.oldAvg),
+                            text = truncateToTwoDecimalPlaces(entry.oldAvg),
                             color = Color.White,
                             fontSize = 12.nsp(),
                             lineHeight = 14.nsp(),

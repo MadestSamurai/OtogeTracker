@@ -33,13 +33,13 @@ object ShareUtil {
         return null
     }
 
-    fun putStringArray(key: String, array: List<String>, context: Context) {
+    private fun putStringArray(key: String, array: List<String>, context: Context) {
         val jsonAdapter = moshi.adapter<List<String>>(Types.newParameterizedType(List::class.java, String::class.java))
         val json = jsonAdapter.toJson(array)
         putString(key, json, context)
     }
 
-    fun getStringArray(key: String, context: Context): List<String>? {
+    private fun getStringArray(key: String, context: Context): List<String>? {
         val json = getString(key, context)
         return if (json != null) {
             val type = Types.newParameterizedType(List::class.java, String::class.java)

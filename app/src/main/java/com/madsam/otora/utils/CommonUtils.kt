@@ -183,11 +183,11 @@ object CommonUtils {
     /**
      * 时间向下取整到最近的五分钟
      *
-     * @param value 时间 格式 11:21
+     * @param hm 时间 格式 11:21
      * @return 时间 格式 11:20:00
      */
-    fun roundDownToNearestFiveMinutes(hms: String): String {
-        val parts = hms.split(":").map { it.toInt() }
+    fun roundDownToNearestFiveMinutes(hm: String): String {
+        val parts = hm.split(":").map { it.toInt() }
         if (parts.size != 2) {
             return "Invalid Time"
         }
@@ -219,7 +219,7 @@ object CommonUtils {
     /**
      * 浮点数格式化成最多两位小数
      *
-     * @param value 长整型
+     * @param number 长整型
      * @return 最多两位小数字符串
      */
     fun truncateToTwoDecimalPlaces(number: Double): String {

@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Log
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -46,6 +45,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -78,7 +80,8 @@ import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.max
 
 /**
@@ -89,12 +92,13 @@ import kotlin.math.max
  * 描述: BOF评论界面
  */
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BofCommentScreen(
     vm: BofViewModel,
     snackbarHostState: SnackbarHostState,
-    listState: LazyListState
+    listState: LazyListState,
+    scrollThreshold: Float,
+    setIsTabRowVisible: (Boolean) -> Unit
 ) {
     val scope = rememberCoroutineScope()
 
@@ -104,16 +108,17 @@ fun BofCommentScreen(
 
     val commentData = vm.commentData.asStateFlow().collectAsState()
     val maxComment = commentData.value.maxOfOrNull { it.total } ?: 0
-    val currentDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
-    val currentTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
-    val compareDate = vm.selectedCompareDate.asStateFlow().collectAsState().value
-    val compareTime = vm.selectedCompareTime.asStateFlow().collectAsState().value
+
     val selectedTimeStrNoComp = vm.selectedTimeStrNoComp.asStateFlow().collectAsState().value
     val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
     val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 
     val highlightedText = vm.highlightedText.asStateFlow().collectAsState().value
 
+    val currentDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
+    val currentTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
+    val compareDate = vm.selectedCompareDate.asStateFlow().collectAsState().value
+    val compareTime = vm.selectedCompareTime.asStateFlow().collectAsState().value
     LaunchedEffect(currentDate, currentTime, compareDate, compareTime) {
         scope.launch {
             vm.requestCommentData()
@@ -151,7 +156,6 @@ fun BofCommentScreen(
         context = context,
         snackbarHostState = snackbarHostState,
         commentData = commentData.value,
-        selectedDate = currentDate,
         selectedTimeStr = selectedTimeStrNoComp,
         maxComment = maxComment,
         isCompare = isCompare,
@@ -160,7 +164,25 @@ fun BofCommentScreen(
         rightPadding = rightPadding
     )
 
-    LazyColumn(state = listState) {
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .nestedScroll(object : NestedScrollConnection {
+                private var totalScroll = 0f
+
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    totalScroll += available.y
+                    if (totalScroll < -scrollThreshold) {
+                        setIsTabRowVisible(false)
+                        totalScroll = 0f
+                    } else if (totalScroll > scrollThreshold) {
+                        setIsTabRowVisible(true)
+                        totalScroll = 0f
+                    }
+                    return Offset.Zero
+                }
+            })
+    ) {
         item {
             Box {
                 CommentHeader(
@@ -174,6 +196,7 @@ fun BofCommentScreen(
                     selectedTimeStr = selectedTimeStrNoComp,
                     dataSwitch = dataSwitch.value
                 )
+                if (commentData.value.isEmpty()) return@Box
                 Row(
                     modifier = Modifier
                         .height(40.dp)
@@ -231,7 +254,6 @@ fun CommentCapture(
     context: Context,
     snackbarHostState: SnackbarHostState,
     commentData: List<BofCommentShow>,
-    selectedDate: LocalDate,
     selectedTimeStr: String,
     maxComment: Int,
     isCompare: Boolean,
@@ -255,12 +277,10 @@ fun CommentCapture(
             text = {
                 Column {
                     Text(
-                        text = "Capturing content will save the current content to your gallery. " +
-                                "Image may be too large to show in the dialog, " +
-                                "including the parts that are not visible on the screen.",
+                        text = "Capturing content will save the current content to your gallery.",
                         modifier = Modifier.padding(8.dp)
                     )
-                    for (i in 0 until commentData.size / 100 + 1) {
+                    for (i in 0..commentData.size / 100) {
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(15.dp))
@@ -285,19 +305,20 @@ fun CommentCapture(
                                         commentData = commentData,
                                         selectedTimeStr = selectedTimeStr,
                                     )
-                                if (commentData.isNotEmpty())
-                                    for ((index, entry) in commentData.withIndex())
-                                        if (index in i * 100..(i + 1) * 100 - 1)
-                                            BofEntryRowComment(
-                                                entry = entry,
-                                                index = index + 1,
-                                                maxComment = maxComment,
-                                                isCompare = isCompare,
-                                                isImage = true,
-                                                rowWidth = screenWidthImage,
-                                                barWidth = barWidthImage,
-                                                textWidth = textWidthImage,
-                                            )
+                                if (commentData.isEmpty()) return@Box
+                                for ((index, entry) in commentData.withIndex()) {
+                                    if (index !in i * 100..<(i + 1) * 100) continue
+                                    BofEntryRowComment(
+                                        entry = entry,
+                                        index = index + 1,
+                                        maxComment = maxComment,
+                                        isCompare = isCompare,
+                                        isImage = true,
+                                        rowWidth = screenWidthImage,
+                                        barWidth = barWidthImage,
+                                        textWidth = textWidthImage,
+                                    )
+                                }
                             }
                         }
                     }
@@ -323,8 +344,7 @@ fun CommentCapture(
                             val bitmap = if (commentHeight > maxHeight) {
                                 val scaleFactor = maxHeight.toFloat() / commentHeight
                                 val newWidth = (bitmapList[0].width * scaleFactor).toInt()
-                                val newHeight = maxHeight
-                                Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+                                Bitmap.createBitmap(newWidth, maxHeight, Bitmap.Config.ARGB_8888)
                                     .apply {
                                         val canvas = Canvas(this)
                                         var currentHeight = 0
@@ -365,10 +385,13 @@ fun CommentCapture(
                                     }
                                 }
                             }
+                            val current = LocalDateTime.now()
+                            val formatter = DateTimeFormatter.ofPattern("MMddHHmm")
+                            val timeStr = current.format(formatter)
                             saveBitmapToGallery(
                                 context,
                                 bitmap,
-                                "bof_comment_${selectedDate}_$selectedTimeStr",
+                                "bof_comment_${timeStr}_$selectedTimeStr",
                                 "BOF Comment Score Ranking"
                             )
                             snackbarHostState.showSnackbar("Image saved to gallery")
@@ -407,7 +430,12 @@ fun CommentHeader(
 ) {
     Column {
         if (commentData.isEmpty() || commentData[0].total == 0) {
-            Text(text = "No ${selectedTimeStr.split(",")[0]}")
+            Text(
+                text = selectedTimeStr,
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+            )
         } else {
             Text(
                 text = "Comment Score Ranking",
@@ -433,6 +461,7 @@ fun CommentHeader(
                     .padding(end = if (isLandscape(configuration) && !isImage) rightPadding else 0.dp)
             )
         }
+        if (commentData.isEmpty()) return
         Row(
             modifier = Modifier
                 .background(BG_DARK_GRAY)
@@ -469,7 +498,7 @@ fun CommentHeader(
             if (!dataSwitch) {
                 Row(
                     modifier = Modifier
-                        .width(barWidth.ndp()-5.ndp())
+                        .width(barWidth.ndp() - 5.ndp())
                 ) {
                     Box(
                         modifier = Modifier
@@ -580,7 +609,6 @@ fun CommentHeader(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BofEntryRowComment(
     entry: BofCommentShow,
@@ -598,7 +626,6 @@ fun BofEntryRowComment(
     highlightedText: String = ""
 ) {
     val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
-
     val voteBarWidth = if (maxComment == 0) 0.0
     else entry.vote.toDouble() / maxComment * barWidth
     val shortBarWidth = if (maxComment == 0) 0.0

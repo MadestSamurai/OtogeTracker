@@ -5,7 +5,6 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Log
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -40,8 +39,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -67,6 +70,7 @@ import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ImageUtils.saveBitmapToGallery
 import com.madsam.otora.utils.ScreenUtil.isLandscape
+import com.madsam.otora.utils.ScreenUtil.isPortrait
 import com.madsam.otora.utils.ndp
 import com.madsam.otora.utils.nsp
 import dev.shreyaspatil.capturable.capturable
@@ -74,7 +78,8 @@ import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.max
 
 /**
@@ -85,12 +90,13 @@ import kotlin.math.max
  * 描述: BOF数据展示界面
  */
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BofMedianScreen(
     vm: BofViewModel,
     snackbarHostState: SnackbarHostState,
-    listState: LazyListState
+    listState: LazyListState,
+    scrollThreshold: Float,
+    setIsTabRowVisible: (Boolean) -> Unit
 ) {
     val scope = rememberCoroutineScope()
 
@@ -103,23 +109,25 @@ fun BofMedianScreen(
         medianData.value.maxOfOrNull { it.median } ?: 1.0,
         medianData.value.maxOfOrNull { it.oldMedian } ?: 1.0
     )
-    val selectedDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
-    val selectedTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
     val selectedTimeStr = vm.selectedTimeStr.asStateFlow().collectAsState().value
     val leftPadding = vm.leftPadding.asStateFlow().collectAsState().value
     val rightPadding = vm.rightPadding.asStateFlow().collectAsState().value
 
-    val thresholdImpr = vm.thresholdImpr.asStateFlow().collectAsState()
-    val thresholdImprOld = vm.thresholdImprOld.asStateFlow().collectAsState()
-
     val highlightedText = vm.highlightedText.asStateFlow().collectAsState().value
 
-    LaunchedEffect(selectedDate, selectedTime) {
+    val currentDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
+    val currentTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
+    val compareDate = vm.selectedCompareDate.asStateFlow().collectAsState().value
+    val compareTime = vm.selectedCompareTime.asStateFlow().collectAsState().value
+    LaunchedEffect(currentDate, currentTime, compareDate, compareTime) {
         scope.launch {
             vm.requestMedianData()
             vm.generateSelectedTimeStr()
         }
     }
+
+    val thresholdImpr = vm.thresholdImpr.asStateFlow().collectAsState()
+    val thresholdImprOld = vm.thresholdImprOld.asStateFlow().collectAsState()
 
     val showDialog = remember { mutableStateOf(false) }
 
@@ -157,7 +165,6 @@ fun BofMedianScreen(
         context = context,
         snackbarHostState = snackbarHostState,
         medianData = medianData.value,
-        selectedDate = selectedDate,
         selectedTimeStr = selectedTimeStr,
         maxMedian = maxMedian,
         isCompare = isCompare,
@@ -168,7 +175,25 @@ fun BofMedianScreen(
         thresholdImprOld = thresholdImprOld.value
     )
 
-    LazyColumn(state = listState) {
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .nestedScroll(object : NestedScrollConnection {
+                private var totalScroll = 0f
+
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    totalScroll += available.y
+                    if (totalScroll < -scrollThreshold) {
+                        setIsTabRowVisible(false)
+                        totalScroll = 0f
+                    } else if (totalScroll > scrollThreshold) {
+                        setIsTabRowVisible(true)
+                        totalScroll = 0f
+                    }
+                    return Offset.Zero
+                }
+            })
+    ) {
         item {
             Box {
                 MedianHeader(
@@ -183,6 +208,8 @@ fun BofMedianScreen(
                     selectedTimeStr = selectedTimeStr,
                     thresholdImpr = thresholdImpr.value
                 )
+
+                if (medianData.value.isEmpty()) return@Box
                 Row(
                     modifier = Modifier
                         .height(40.dp)
@@ -229,7 +256,6 @@ fun MedianCapture(
     context: Context,
     snackbarHostState: SnackbarHostState,
     medianData: List<BofEntryShow>,
-    selectedDate: LocalDate,
     selectedTimeStr: String,
     maxMedian: Double,
     isCompare: Boolean,
@@ -255,12 +281,10 @@ fun MedianCapture(
             text = {
                 Column {
                     Text(
-                        text = "Capturing content will save the current content to your gallery. " +
-                                "Image may be too large to show in the dialog, " +
-                                "including the parts that are not visible on the screen.",
+                        text = "Capturing content will save the current content to your gallery. ",
                         modifier = Modifier.padding(8.dp)
                     )
-                    for (i in 0 until medianData.size / 100 + 1) {
+                    for (i in 0..medianData.size / 100) {
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(15.dp))
@@ -287,20 +311,21 @@ fun MedianCapture(
                                         selectedTimeStr = selectedTimeStr,
                                         thresholdImpr = thresholdImpr
                                     )
-                                if (medianData.isNotEmpty())
-                                    for ((index, entry) in medianData.withIndex())
-                                        if (index in i * 100..(i + 1) * 100 - 1)
-                                            BofEntryRowMedian(
-                                                entry = entry,
-                                                index = index + 1,
-                                                maxMedian = maxMedian,
-                                                isCompare = isCompare,
-                                                isImage = true,
-                                                rowWidth = screenWidthImage,
-                                                barWidth = barWidthImage,
-                                                textWidth = textWidthImage,
-                                                thresholdImprOld = thresholdImprOld
-                                            )
+                                if (medianData.isEmpty()) return@Box
+                                for ((index, entry) in medianData.withIndex()) {
+                                    if (index !in i * 100..<(i + 1) * 100) continue
+                                    BofEntryRowMedian(
+                                        entry = entry,
+                                        index = index + 1,
+                                        maxMedian = maxMedian,
+                                        isCompare = isCompare,
+                                        isImage = true,
+                                        rowWidth = screenWidthImage,
+                                        barWidth = barWidthImage,
+                                        textWidth = textWidthImage,
+                                        thresholdImprOld = thresholdImprOld
+                                    )
+                                }
                             }
                         }
                     }
@@ -326,8 +351,7 @@ fun MedianCapture(
                             val bitmap = if (totalHeight > maxHeight) {
                                 val scaleFactor = maxHeight.toFloat() / totalHeight
                                 val newWidth = (bitmapList[0].width * scaleFactor).toInt()
-                                val newHeight = maxHeight
-                                Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+                                Bitmap.createBitmap(newWidth, maxHeight, Bitmap.Config.ARGB_8888)
                                     .apply {
                                         val canvas = Canvas(this)
                                         var currentHeight = 0
@@ -368,10 +392,13 @@ fun MedianCapture(
                                     }
                                 }
                             }
+                            val current = LocalDateTime.now()
+                            val formatter = DateTimeFormatter.ofPattern("MMddHHmm")
+                            val timeStr = current.format(formatter)
                             saveBitmapToGallery(
                                 context,
                                 bitmap,
-                                "bof_median_${selectedDate}_$selectedTimeStr",
+                                "bof_median_${timeStr}_$selectedTimeStr",
                                 "BOF Median Score Ranking"
                             )
                             snackbarHostState.showSnackbar("Image saved to gallery")
@@ -411,7 +438,12 @@ fun MedianHeader(
 ) {
     Column {
         if (medianData.isEmpty() || medianData[0].median == 0.0) {
-            Text(text = "No ${selectedTimeStr.split(",")[0]}")
+            Text(
+                text = selectedTimeStr,
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+            )
         } else {
             Text(
                 text = "Median Score Ranking",
@@ -448,6 +480,7 @@ fun MedianHeader(
                     .padding(end = if (isLandscape(configuration) && !isImage) rightPadding else 0.dp)
             )
         }
+        if (medianData.isEmpty()) return
         Row(
             modifier = Modifier
                 .background(BG_DARK_GRAY)
@@ -455,8 +488,7 @@ fun MedianHeader(
         ) {
             if (isLandscape(configuration) && !isImage) {
                 Box(
-                    modifier = Modifier
-                        .width(leftPadding)
+                    modifier = Modifier.width(leftPadding)
                 )
             }
             Text(
@@ -496,17 +528,15 @@ fun MedianHeader(
                     .align(Alignment.CenterVertically)
                     .width(36.ndp())
             )
-            if (isLandscape(configuration) && !isImage) {
-                Box(
-                    modifier = Modifier
-                        .width(rightPadding)
-                )
-            }
+            if (isPortrait(configuration) || !isImage) return
+            Box(
+                modifier = Modifier
+                    .width(rightPadding)
+            )
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BofEntryRowMedian(
     entry: BofEntryShow,

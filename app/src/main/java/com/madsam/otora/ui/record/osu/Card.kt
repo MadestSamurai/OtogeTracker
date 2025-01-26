@@ -21,7 +21,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -54,7 +53,6 @@ import com.madsam.otora.consts.OSU_BRIGHT_RED
 import com.madsam.otora.model.osu.web.OsuGroup
 import kotlinx.coroutines.flow.MutableStateFlow
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Card(
     osuCardData: MutableStateFlow<Map<String, String>>,

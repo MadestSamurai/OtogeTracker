@@ -1,4 +1,4 @@
-package com.madsam.otora.ui.bof
+package com.madsam.otora.ui.bof.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,12 +24,14 @@ import androidx.compose.ui.window.DialogProperties
 import com.madsam.otora.consts.Black333
 import com.madsam.otora.consts.PurpleTheme
 import com.madsam.otora.consts.White1000
+import com.madsam.otora.ui.bof.BofViewModel
 import com.vsnappy1.datepicker.DatePicker
 import com.vsnappy1.datepicker.data.DefaultDatePickerConfig
 import com.vsnappy1.datepicker.data.model.DatePickerDate
 import com.vsnappy1.datepicker.data.model.SelectionLimiter
 import com.vsnappy1.datepicker.ui.model.DatePickerConfiguration
 import com.vsnappy1.timepicker.TimePicker
+import com.vsnappy1.timepicker.data.model.TimePickerTime
 import com.vsnappy1.timepicker.enums.MinuteGap
 import kotlinx.coroutines.flow.update
 import java.time.LocalDate
@@ -42,6 +44,7 @@ import java.util.Locale
  * 创建时间: 2025/1/4
  * 描述: 日期时间范围选择器
  */
+
 @Composable
 fun DateTimeRangePicker(
     vm: BofViewModel,
@@ -51,9 +54,9 @@ fun DateTimeRangePicker(
     var showCurrentDatePicker by remember { mutableStateOf(false) }
 
     var currentDateState by remember { mutableStateOf(DatePickerDate(2025, 0, 8)) }
-    var currentTimeState by remember { mutableStateOf("00:00") }
+    var currentTimeState by remember { mutableStateOf(TimePickerTime(0, 0)) }
     var compareDateState by remember { mutableStateOf(DatePickerDate(2025, 0, 8)) }
-    var compareTimeState by remember { mutableStateOf("00:00") }
+    var compareTimeState by remember { mutableStateOf(TimePickerTime(0, 0)) }
 
     var currentDateText by remember { mutableStateOf(LocalDate.now()) }
     var currentTimeText by remember { mutableStateOf("00:00") }
@@ -76,7 +79,10 @@ fun DateTimeRangePicker(
                         currentDateState.month+1,
                         currentDateState.day
                     )
-                    currentTimeText = currentTimeState
+                    currentTimeText = String.format(
+                        Locale.getDefault(), "%02d:%02d",
+                        currentTimeState.hour, currentTimeState.minute
+                    )
                     showCurrentDatePicker = false
                 }) {
                     Text("OK")
@@ -129,11 +135,11 @@ fun DateTimeRangePicker(
                         }
                         TimePicker(
                             onTimeSelected = { hour, minute ->
-                                currentTimeState =
-                                    String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
+                                currentTimeState = TimePickerTime(hour, minute)
 
                             },
-                            minuteGap = MinuteGap.FIVE
+                            minuteGap = MinuteGap.FIVE,
+                            time = currentTimeState
                         )
                     }
                 }
@@ -156,7 +162,10 @@ fun DateTimeRangePicker(
                         compareDateState.month+1,
                         compareDateState.day
                     )
-                    compareTimeText = compareTimeState
+                    compareTimeText = String.format(
+                        Locale.getDefault(), "%02d:%02d",
+                        compareTimeState.hour, compareTimeState.minute
+                    )
                     showCompareDatePicker = false
                 }) {
                     Text("OK")
@@ -209,10 +218,11 @@ fun DateTimeRangePicker(
                         }
                         TimePicker(
                             onTimeSelected = { hour, minute ->
-                                compareTimeState =
-                                    String.format(Locale.getDefault(), "%02d:%02d", hour, minute)
+                                compareTimeState = TimePickerTime(hour, minute)
+
                             },
-                            minuteGap = MinuteGap.FIVE
+                            minuteGap = MinuteGap.FIVE,
+                            time = compareTimeState
                         )
                     }
                 }

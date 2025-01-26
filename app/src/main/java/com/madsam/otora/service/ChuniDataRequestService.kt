@@ -49,12 +49,11 @@ import kotlin.reflect.jvm.jvmErasure
  * 创建时间: 2024/9/4
  * 描述: 中二节奏数据请求服务
  */
-class ChuniDataRequestService(private val context: Context) {
-    companion object {
-        const val TAG = "ChuniDataRequestService"
-        const val URL = "https://chunithm.wahlap.com/mobile/"
-    }
 
+private const val TAG = "ChuniDataRequestService"
+private const val URL = "https://chunithm.wahlap.com/mobile/"
+
+class ChuniDataRequestService(private val context: Context) {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
     private val mutex = Mutex()
     private val userAgent = ShareUtil.getString("chuniUserAgent", context) ?: ""
@@ -698,9 +697,9 @@ class ChuniDataRequestService(private val context: Context) {
                     isNew = chuniSongZ.isNew
                     isLocked = chuniSongZ.isLocked
                     comment = chuniSongZ.comment
-                    cnId = if (chuniSongL == null) -1 else chuniSongL.id
-                    map = if (chuniSongL == null) "-" else chuniSongL.map
-                    aliases = if (chuniSongL == null) "" else chuniSongL.aliases
+                    cnId = chuniSongL?.id ?: -1
+                    map = chuniSongL?.map ?: "-"
+                    aliases = chuniSongL?.aliases ?: ""
                 }
                 this.copyToRealm(chuniSongData, UpdatePolicy.ALL)
 
@@ -739,10 +738,10 @@ class ChuniDataRequestService(private val context: Context) {
                         levelValueJp = sheet.levelValue
                         internalLevelJp = sheet.internalLevel
                         internalLevelValueJp = sheet.internalLevelValue
-                        levelCn = if (chuniSheetL == null) "" else chuniSheetL.level
-                        levelValueCn = if (chuniSheetL == null) 0.0 else chuniSheetL.levelValue
+                        levelCn = chuniSheetL?.level ?: ""
+                        levelValueCn = chuniSheetL?.levelValue ?: 0.0
                         noteDesigner =
-                            if (chuniSheetL == null) sheet.noteDesigner else chuniSheetL.noteDesigner
+                            chuniSheetL?.noteDesigner ?: sheet.noteDesigner
                         tap = sheet.noteCounts.tap
                         hold = sheet.noteCounts.hold
                         slide = sheet.noteCounts.slide
@@ -753,10 +752,10 @@ class ChuniDataRequestService(private val context: Context) {
                         intl = sheet.regions.intl
                         cn = chuniSheetL != null
                         isSpecial = sheet.isSpecial
-                        version = if (chuniSheetL == null) -1 else chuniSheetL.version
-                        originId = if (chuniSheetL == null) -1 else chuniSheetL.originId
-                        kanji = if (chuniSheetL == null) "-" else chuniSheetL.kanji
-                        star = if (chuniSheetL == null) 0 else chuniSheetL.star
+                        version = chuniSheetL?.version ?: -1
+                        originId = chuniSheetL?.originId ?: -1
+                        kanji = chuniSheetL?.kanji ?: "-"
+                        star = chuniSheetL?.star ?: 0
                     }
                     this.copyToRealm(chuniSheetData, UpdatePolicy.ALL)
                 }
@@ -803,7 +802,7 @@ class ChuniDataRequestService(private val context: Context) {
         return withContext(Dispatchers.IO) {
             val realm = Realm.open(realmConfig)
             try {
-                val song = realm.query<ChuniSongsEntity>(
+                val song = realm.query(
                     clazz = ChuniSongsEntity::class,
                     query = "id == $0",
                     title
@@ -836,7 +835,7 @@ class ChuniDataRequestService(private val context: Context) {
         return withContext(Dispatchers.IO) {
             val realm = Realm.open(realmConfig)
             try {
-                val sheet = realm.query<ChuniSheetsEntity>(
+                val sheet = realm.query(
                     clazz = ChuniSheetsEntity::class,
                     query = "id == $0",
                     "${title}_${diff}"

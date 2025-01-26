@@ -25,11 +25,10 @@ import kotlin.math.abs
  * 创建时间: 2025/1/10
  * 描述: BOF数据库服务
  */
-class BofDatabaseService {
-    companion object {
-        const val TAG = "BofDatabaseService"
-    }
 
+private const val TAG = "BofDatabaseService"
+
+class BofDatabaseService {
     private val realmConfig = RealmConfiguration.Builder(
         schema = setOf(
             BofEntryEntity::class,
@@ -67,7 +66,7 @@ class BofDatabaseService {
                 }
 
                 val date = CommonUtils.millisToYmd(currentTime).substring(0, 10)
-                val entries = realm.query<BofEntryEntity>(
+                val entries = realm.query(
                     clazz = BofEntryEntity::class,
                     query = "date == $0",
                     date
@@ -122,12 +121,12 @@ class BofDatabaseService {
                 val startTime = currentTime - 24 * 60 * 60 * 1000
                 val startTimeCompare = compareTime - 24 * 60 * 60 * 1000
 
-                val points = realm.query<BofTeamPointEntity>(
+                val points = realm.query(
                     clazz = BofTeamPointEntity::class,
                     query = "time >= $0 AND time <= $1",
                     startTime, currentTime
                 ).find()
-                val pointsCompare = realm.query<BofTeamPointEntity>(
+                val pointsCompare = realm.query(
                     clazz = BofTeamPointEntity::class,
                     query = "time >= $0 AND time <= $1",
                     startTimeCompare, compareTime
@@ -139,7 +138,7 @@ class BofDatabaseService {
                 }
 
                 val date = CommonUtils.millisToYmd(currentTime).substring(0, 10)
-                val teams = realm.query<BofTeamEntity>(
+                val teams = realm.query(
                     clazz = BofTeamEntity::class,
                     query = "date == $0",
                     date
@@ -204,7 +203,7 @@ class BofDatabaseService {
         return withContext(Dispatchers.IO) {
             val realm = Realm.open(realmConfig)
             try {
-                val comments = realm.query<BofCommentEntity>(
+                val comments = realm.query(
                     clazz = BofCommentEntity::class,
                     query = "date == $0",
                     currentDate
@@ -215,7 +214,7 @@ class BofDatabaseService {
                     return@withContext emptyList<BofCommentShow>()
                 }
                 comments.map { entry ->
-                    val commentsDetail = realm.query<BofCommentDetailEntity>(
+                    val commentsDetail = realm.query(
                         clazz = BofCommentDetailEntity::class,
                         query = "user == $0 AND date == $1",
                         entry.user, currentDate

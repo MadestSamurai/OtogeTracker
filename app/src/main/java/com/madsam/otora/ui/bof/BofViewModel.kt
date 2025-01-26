@@ -25,11 +25,10 @@ import kotlin.math.max
  * 创建时间: 2024/12/15
  * 描述: BOF视图模型
  */
-class BofViewModel() : ViewModel() {
-    companion object {
-        private const val TAG = "BofViewModel"
-    }
 
+private const val TAG = "BofViewModel"
+
+class BofViewModel : ViewModel() {
     private val bofDatabaseService = BofDatabaseService()
     val totalData = MutableStateFlow(listOf<BofEntryShow>())
     val avgData = MutableStateFlow(listOf<BofEntryShow>())
@@ -45,9 +44,9 @@ class BofViewModel() : ViewModel() {
     var selectedTab = MutableStateFlow(0)
     var selectedSubTab = MutableStateFlow(0)
     var selectedCurrentDate = MutableStateFlow(LocalDate.now())
-    var selectedCurrentTime = MutableStateFlow("-1")
-    var selectedCompareDate = MutableStateFlow(LocalDate.now())
-    var selectedCompareTime = MutableStateFlow("-1")
+    var selectedCurrentTime = MutableStateFlow("00:00")
+    var selectedCompareDate = MutableStateFlow(LocalDate.now().minusDays(1))
+    var selectedCompareTime = MutableStateFlow("00:00")
     var selectedTimeStr = MutableStateFlow("")
     var selectedTimeStrNoComp = MutableStateFlow("")
 
@@ -145,21 +144,9 @@ class BofViewModel() : ViewModel() {
     }
 
     fun generateSelectedTimeStr() {
-        if (selectedCurrentTime.value == "-1") {
-            if (totalData.value.isEmpty()) {
-                selectedTimeStr.update { "" }
-            } else {
-                val currentTime = CommonUtils.roundDownToNearestFiveMinutes(totalData.value.first().time)
-                val compareDate = selectedCurrentDate.value.minusDays(1)
-                selectedTimeStr.update {
-                    "Data at ${selectedCurrentDate.value} $currentTime, " +
-                            "compare with $compareDate $currentTime, " +
-                            "all data scraped by MadSamurai."
-                }
-                selectedTimeStrNoComp.update {
-                    "Data at ${selectedCurrentDate.value} $currentTime, " +
-                            "all data scraped by MadSamurai."
-                }
+        if (totalData.value.isEmpty()) {
+            selectedTimeStr.update {
+                "No data available for the selected date and time."
             }
         } else {
             val currentTime = CommonUtils.roundDownToNearestFiveMinutes(selectedCurrentTime.value)
@@ -176,7 +163,7 @@ class BofViewModel() : ViewModel() {
         }
     }
 
-    suspend fun <T> fetchData(
+    private suspend fun <T> fetchData(
         fetchLatest: suspend () -> List<T>,
         fetchByTime: suspend (Long, Long) -> List<T>
     ): List<T> {
@@ -228,7 +215,7 @@ class BofViewModel() : ViewModel() {
         return sortedData
     }
 
-    fun calculateThresholds(data: List<BofEntryShow>) {
+    private fun calculateThresholds(data: List<BofEntryShow>) {
         val sortedDataByOldImpr = data.sortedByDescending { it.oldImpr }
         thresholdImprOld.update { max(sortedDataByOldImpr.getOrNull(239)?.oldImpr ?: 0, 3) }
 
@@ -384,7 +371,7 @@ class BofViewModel() : ViewModel() {
     }
 }
 
-class BofViewModelFactory() : ViewModelProvider.Factory {
+class BofViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(BofViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

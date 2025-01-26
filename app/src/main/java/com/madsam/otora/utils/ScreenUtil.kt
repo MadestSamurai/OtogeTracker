@@ -19,6 +19,10 @@ object ScreenUtil {
         return configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     }
 
+    fun isPortrait(configuration: Configuration): Boolean {
+        return configuration.orientation == Configuration.ORIENTATION_PORTRAIT
+    }
+
     fun getSafeInsetLeftDp(view: View): Dp {
         val insets = ViewCompat.getRootWindowInsets(view)
         val safeInsetLeftPx = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
