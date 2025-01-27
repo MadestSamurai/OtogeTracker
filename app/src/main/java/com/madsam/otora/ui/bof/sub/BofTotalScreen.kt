@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -67,6 +68,7 @@ import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.ui.bof.BofViewModel
+import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ImageUtils.saveBitmapToGallery
 import com.madsam.otora.utils.ScreenUtil.isLandscape
@@ -213,7 +215,7 @@ fun BofTotalScreen(
                         .align(Alignment.TopEnd)
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_picture),
+                        painter = rememberVectorPainter(image = Filled.Picture),
                         contentDescription = "Capture",
                         tint = Color.White,
                         modifier = Modifier
@@ -223,7 +225,7 @@ fun BofTotalScreen(
                     )
                     if (screenWidthDp <= 800.dp) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_switch_arrow),
+                            painter = rememberVectorPainter(image = Filled.SwitchArrow),
                             contentDescription = "Capture",
                             tint = Color.White,
                             modifier = Modifier

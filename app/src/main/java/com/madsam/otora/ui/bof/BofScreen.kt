@@ -34,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -58,6 +59,7 @@ import com.madsam.otora.ui.bof.sub.BofDiffScreen
 import com.madsam.otora.ui.bof.sub.BofMedianScreen
 import com.madsam.otora.ui.bof.sub.BofTeamScreen
 import com.madsam.otora.ui.bof.sub.BofTotalScreen
+import com.madsam.otora.ui.icon.Filled
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -285,7 +287,7 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                     )
                 } else {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_calendar),
+                        painter = rememberVectorPainter(image = Filled.Calendar),
                         contentDescription = "Date&Time",
                         tint = Color.White,
                         modifier = Modifier

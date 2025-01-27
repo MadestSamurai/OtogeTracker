@@ -19,12 +19,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -51,6 +51,7 @@ import com.madsam.otora.consts.DARK_RED_TEXT
 import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
 import com.madsam.otora.consts.OSU_BRIGHT_RED
 import com.madsam.otora.model.osu.web.OsuGroup
+import com.madsam.otora.ui.icon.Filled
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -62,9 +63,6 @@ fun Card(
     val groupListData = osuGroupList.collectAsState(initial = emptyList()).value
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
-
-    val scope = rememberCoroutineScope()
-    val context = LocalContext.current
 
     Column {
         ConstraintLayout(
@@ -313,12 +311,12 @@ fun Card(
                         .background(OSU_BRIGHT_RED)
                 ) {
                     Image(
-                        painter = painterResource(
-                            id = when (cardData["supporterRank"]) {
-                                "1" -> R.drawable.ic_support_1
-                                "2" -> R.drawable.ic_support_2
-                                "3" -> R.drawable.ic_support_3
-                                else -> R.drawable.ic_support_1
+                        painter = rememberVectorPainter(
+                            image = when (cardData["supporterRank"]) {
+                                "1" -> Filled.Heart1
+                                "2" -> Filled.Heart2
+                                "3" -> Filled.Heart3
+                                else -> Filled.Heart1
                             }
                         ),
                         colorFilter = ColorFilter.tint(Color.White),

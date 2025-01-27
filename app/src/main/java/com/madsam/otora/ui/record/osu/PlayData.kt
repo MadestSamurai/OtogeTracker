@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -45,6 +46,7 @@ import com.madsam.otora.consts.DARK_RED
 import com.madsam.otora.consts.DARK_RED_DEEP
 import com.madsam.otora.consts.DARK_RED_DEEPER
 import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
+import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -77,7 +79,8 @@ fun PlayData(
 
         val iconModifier = Modifier
             .padding(top = 16.dp)
-            .height(26.dp)
+            .width(64.dp)
+            .height(32.dp)
 
         val iconTextSize = 16.sp
         val iconTextColor = DARK_RED_TEXT_LIGHT
@@ -95,17 +98,17 @@ fun PlayData(
         )
 
         val imageWithTextData = listOf(
-            Triple(R.drawable.ic_osu_ssh, "SSH", playData["sshCount"] ?: "0"),
-            Triple(R.drawable.ic_osu_ss, "SS", playData["ssCount"] ?: "0"),
-            Triple(R.drawable.ic_osu_sh, "SH", playData["shCount"] ?: "0"),
-            Triple(R.drawable.ic_osu_s, "S", playData["sCount"] ?: "0"),
-            Triple(R.drawable.ic_osu_a, "A", playData["aCount"] ?: "0")
+            Triple(Filled.OsuSsh, "SSH", playData["sshCount"] ?: "0"),
+            Triple(Filled.OsuSs, "SS", playData["ssCount"] ?: "0"),
+            Triple(Filled.OsuSh, "SH", playData["shCount"] ?: "0"),
+            Triple(Filled.OsuS, "S", playData["sCount"] ?: "0"),
+            Triple(Filled.OsuA, "A", playData["aCount"] ?: "0")
         )
 
         imageWithTextData.forEachIndexed { index, data ->
             val (imageRes, contentDescription, text) = data
             ImageWithText(
-                painter = painterResource(id = imageRes),
+                painter = rememberVectorPainter(image = imageRes),
                 contentDescription = contentDescription,
                 text = text,
                 textSize = iconTextSize,

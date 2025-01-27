@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +32,7 @@ import com.madsam.otora.consts.OSU_DISCORD_BG
 import com.madsam.otora.consts.OSU_DISCORD_TEXT
 import com.madsam.otora.consts.OSU_X_BG
 import com.madsam.otora.consts.White1000
+import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -227,7 +229,7 @@ fun SocialCard(
                 ) {
                     Row {
                         Image(
-                            painter = painterResource(id = com.madsam.otora.R.drawable.ic_discord),
+                            painter = rememberVectorPainter(image = Filled.Discord),
                             contentDescription = "Discord",
                             colorFilter = ColorFilter.tint(OSU_DISCORD_TEXT),
                             modifier = Modifier
@@ -256,7 +258,7 @@ fun SocialCard(
                 ) {
                     Row {
                         Image(
-                            painter = painterResource(id = com.madsam.otora.R.drawable.ic_link),
+                            painter = rememberVectorPainter(image = Filled.Link),
                             contentDescription = "Website",
                             colorFilter = ColorFilter.tint(Color.White),
                             modifier = Modifier

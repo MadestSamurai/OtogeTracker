@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -39,6 +40,7 @@ import com.madsam.otora.consts.OSU_ARROW_YELLOW
 import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
 import com.madsam.otora.consts.OSU_HEART_RED
 import com.madsam.otora.consts.OSU_ROTATE_GREEN
+import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -227,16 +229,16 @@ fun Recent(
                                 when (recentActivity["type"]) {
                                     "rank" -> {
                                         Image(
-                                            painter = painterResource(id = when (recentActivity["scoreRank"]) {
-                                                "XH" -> com.madsam.otora.R.drawable.ic_osu_ssh
-                                                "X" -> com.madsam.otora.R.drawable.ic_osu_ss
-                                                "SH" -> com.madsam.otora.R.drawable.ic_osu_sh
-                                                "S" -> com.madsam.otora.R.drawable.ic_osu_s
-                                                "A" -> com.madsam.otora.R.drawable.ic_osu_a
-                                                "B" -> com.madsam.otora.R.drawable.ic_osu_b
-                                                "C" -> com.madsam.otora.R.drawable.ic_osu_c
-                                                "D" -> com.madsam.otora.R.drawable.ic_osu_d
-                                                else -> com.madsam.otora.R.drawable.ic_osu_f
+                                            painter = rememberVectorPainter(image = when (recentActivity["rank"]) {
+                                                "XH" -> Filled.OsuSsh
+                                                "X" -> Filled.OsuSh
+                                                "SH" -> Filled.OsuSs
+                                                "S" -> Filled.OsuS
+                                                "A" -> Filled.OsuA
+                                                "B" -> Filled.OsuB
+                                                "C" -> Filled.OsuC
+                                                "D" -> Filled.OsuD
+                                                else -> Filled.OsuF
                                             }),
                                             contentDescription = "Osu Mode",
                                             modifier = Modifier.padding(end = 4.dp)
@@ -283,7 +285,7 @@ fun Recent(
 
                                     "userSupportAgain" -> {
                                         Icon(
-                                            painter = painterResource(id = com.madsam.otora.R.drawable.ic_support_1),
+                                            painter = rememberVectorPainter(image = Filled.Heart1),
                                             contentDescription = "Osu Mode",
                                             tint = OSU_HEART_RED,
                                             modifier = Modifier.padding(end = 4.dp)

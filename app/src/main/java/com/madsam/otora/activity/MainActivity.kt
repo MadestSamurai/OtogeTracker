@@ -7,10 +7,14 @@ import android.view.animation.AccelerateInterpolator
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -21,14 +25,15 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.ui.bof.BofScreen
 import com.madsam.otora.ui.record.RecordScreen
@@ -44,30 +49,31 @@ const val KEY_ROUTE = "route"
 
 @Composable
 fun MainActivityScreen() {
+    var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf(Screen.RecordScreen, Screen.ReportScreen, Screen.BOFScreen)
+    val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.Favorite, Icons.Filled.Star)
+    val unselectedIcons =
+        listOf(Icons.Outlined.Home, Icons.Outlined.FavoriteBorder, Icons.Outlined.Star)
     val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
-            NavigationBar(
-                Modifier.height(56.dp)
-            ) {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry?.arguments?.getString(KEY_ROUTE)
-                items.forEach { screen ->
+            NavigationBar {
+                items.forEachIndexed { index, screen ->
                     NavigationBarItem(
                         icon = {
                             Icon(
-                                Icons.Filled.Favorite,
-                                contentDescription = null,
+                                if (selectedItem == index) selectedIcons[index] else unselectedIcons[index],
+                                contentDescription = screen.label,
                                 modifier = Modifier.padding(bottom = 2.dp)
                             )
                         },
                         label = { Text(screen.label) },
                         alwaysShowLabel = false,
-                        selected = currentRoute == screen.route,
+                        selected = selectedItem == index,
                         onClick = {
+                            selectedItem = index
                             navController.navigate(screen.route) {
                                 navController.graph.startDestinationRoute?.let {
                                     popUpTo(it) {
