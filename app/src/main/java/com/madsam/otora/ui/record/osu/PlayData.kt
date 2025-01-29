@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
@@ -39,7 +38,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.madsam.otora.R
 import com.madsam.otora.components.ImageWithText
 import com.madsam.otora.components.TitleText
 import com.madsam.otora.consts.DARK_RED
@@ -247,7 +245,7 @@ fun PlayData(
                     }
                 }
             }
-            val placeholderHeight = 20.sp
+            val placeholderHeight = 15.sp
             val density = LocalDensity.current
             val inlineContent = mapOf(
                 "icon" to InlineTextContent(
@@ -258,7 +256,7 @@ fun PlayData(
                     )
                 ) {
                     Image(
-                        painter = painterResource(id = if (shown) R.drawable.ic_arrow_up else R.drawable.ic_arrow_down),
+                        painter = rememberVectorPainter(image = if (shown) Filled.ChevronUp else Filled.ChevronDown),
                         colorFilter = ColorFilter.tint(DARK_RED_TEXT_LIGHT),
                         contentDescription = "Show More",
                         modifier = Modifier.size(with(density) { placeholderHeight.toDp() })

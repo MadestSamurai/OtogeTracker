@@ -21,10 +21,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import com.madsam.otora.activity.BofScreenState
 import com.madsam.otora.consts.Black333
 import com.madsam.otora.consts.PurpleTheme
 import com.madsam.otora.consts.White1000
-import com.madsam.otora.ui.bof.BofViewModel
 import com.vsnappy1.datepicker.DatePicker
 import com.vsnappy1.datepicker.data.DefaultDatePickerConfig
 import com.vsnappy1.datepicker.data.model.DatePickerDate
@@ -47,7 +47,7 @@ import java.util.Locale
 
 @Composable
 fun DateTimeRangePicker(
-    vm: BofViewModel,
+    bofScreenState: BofScreenState,
     onDismissRequest: () -> Unit
 ) {
     var showCompareDatePicker by remember { mutableStateOf(false) }
@@ -251,10 +251,10 @@ fun DateTimeRangePicker(
         },
         confirmButton = {
             Button(onClick = {
-                vm.selectedCurrentDate.update { currentDateText }
-                vm.selectedCurrentTime.update { currentTimeText }
-                vm.selectedCompareDate.update { compareDateText }
-                vm.selectedCompareTime.update { compareTimeText }
+                bofScreenState.selectedCurrentDate.update { currentDateText }
+                bofScreenState.selectedCurrentTime.update { currentTimeText }
+                bofScreenState.selectedCompareDate.update { compareDateText }
+                bofScreenState.selectedCompareTime.update { compareTimeText }
                 onDismissRequest()
             }) {
                 Text(text = "Confirm")

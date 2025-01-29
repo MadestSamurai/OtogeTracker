@@ -18,7 +18,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
@@ -200,7 +199,7 @@ fun SocialCard(
                 ) {
                     Row {
                         Image(
-                            painter = painterResource(id = com.madsam.otora.R.drawable.ic_x_logo),
+                            painter = rememberVectorPainter(image = Filled.XLogo),
                             contentDescription = "Twitter",
                             colorFilter = ColorFilter.tint(White1000),
                             modifier = Modifier

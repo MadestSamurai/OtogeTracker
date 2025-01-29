@@ -23,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
@@ -195,13 +194,13 @@ fun Recent(
                                 )
                             ) {
                                 Icon(
-                                    painter = painterResource(
-                                        id = when (recentActivity["mode"]) {
-                                            "mania" -> com.madsam.otora.R.drawable.ic_osumode_mania
-                                            "osu" -> com.madsam.otora.R.drawable.ic_osumode_std
-                                            "taiko" -> com.madsam.otora.R.drawable.ic_osumode_taiko
-                                            "fruits" -> com.madsam.otora.R.drawable.ic_osumode_ctb
-                                            else -> com.madsam.otora.R.drawable.ic_osumode_std
+                                    painter = rememberVectorPainter(
+                                        image = when (recentActivity["mode"]) {
+                                            "mania" -> Filled.OsumodeMania
+                                            "osu" -> Filled.OsumodeStd
+                                            "taiko" -> Filled.OsumodeTaiko
+                                            "fruits" -> Filled.OsumodeCtb
+                                            else -> Filled.OsumodeStd
                                         }
                                     ),
                                     contentDescription = "Osu Mode",
@@ -247,7 +246,7 @@ fun Recent(
 
                                     "rankLost" -> {
                                         Icon(
-                                            painter = painterResource(id = com.madsam.otora.R.drawable.ic_double_down),
+                                            painter = rememberVectorPainter(image = Filled.DoubleDown),
                                             contentDescription = "Osu Mode",
                                             tint = Color.White,
                                             modifier = Modifier.padding(end = 4.dp)
@@ -256,12 +255,11 @@ fun Recent(
 
                                     "beatmapsetUpload", "beatmapsetUpdate" -> {
                                         Icon(
-                                            painter =
-                                            painterResource(
-                                                id = when (recentActivity["type"]) {
-                                                    "beatmapsetUpload" -> com.madsam.otora.R.drawable.ic_up_arrow
-                                                    "beatmapsetUpdate" -> com.madsam.otora.R.drawable.ic_rotate_arrow
-                                                    else -> com.madsam.otora.R.drawable.ic_up_arrow
+                                            painter = rememberVectorPainter(
+                                                image = when (recentActivity["type"]) {
+                                                    "beatmapsetUpload" -> Filled.ArrowUp
+                                                    "beatmapsetUpdate" -> Filled.ArrowRotate
+                                                    else -> Filled.ArrowUp
                                                 }
                                             ),
                                             contentDescription = "Beatmap Upload",
@@ -276,7 +274,7 @@ fun Recent(
 
                                     "userSupportGift" -> {
                                         Icon(
-                                            painter = painterResource(id = com.madsam.otora.R.drawable.ic_gift),
+                                            painter = rememberVectorPainter(image = Filled.Gift),
                                             contentDescription = "Osu Mode",
                                             tint = OSU_HEART_RED,
                                             modifier = Modifier.padding(end = 4.dp)
@@ -294,7 +292,7 @@ fun Recent(
 
                                     "beatmapsetApprove" -> {
                                         Icon(
-                                            painter = painterResource(id = com.madsam.otora.R.drawable.ic_tick),
+                                            painter = rememberVectorPainter(image = Filled.Tick),
                                             contentDescription = "Osu Mode",
                                             tint = when (recentActivity["approval"]) {
                                                 "qualified" -> OSU_HEART_RED
@@ -308,7 +306,7 @@ fun Recent(
 
                                     "beatmapsetRevive" -> {
                                         Icon(
-                                            painter = painterResource(id = com.madsam.otora.R.drawable.ic_trash_arrow_up),
+                                            painter = rememberVectorPainter(image = Filled.TrashArrowUp),
                                             contentDescription = "Osu Mode",
                                             tint = Color.White,
                                             modifier = Modifier.padding(end = 4.dp)

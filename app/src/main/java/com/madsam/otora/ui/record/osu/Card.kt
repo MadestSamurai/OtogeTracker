@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -28,7 +29,6 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
@@ -108,11 +108,9 @@ fun Card(
                         placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
                     )
                 ) {
-                    Image(
-                        painter = painterResource(
-                            id =
-                            if (cardData["isOnline"] == "true") R.drawable.ic_osu_online else R.drawable.ic_osu_offline
-                        ),
+                    Icon(
+                        painter = rememberVectorPainter(image = Filled.OsuOnline),
+                        tint = if (cardData["isOnline"] == "true") Color(0xFF8DC63F) else Color(0xFF565656),
                         contentDescription = stringResource(id = R.string.online_mark),
                         modifier = Modifier.padding(end = 5.dp)
                     )

@@ -20,7 +20,7 @@ val SwitchArrow: ImageVector
             return _SwitchArrow!!
         }
         _SwitchArrow = ImageVector.Builder(
-            name = "SwitchArrow1",
+            name = "SwitchArrow",
             defaultWidth = 14.dp,
             defaultHeight = 16.dp,
             viewportWidth = 14f,

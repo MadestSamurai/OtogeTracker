@@ -61,6 +61,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.madsam.otora.activity.BofScreenState
 import com.madsam.otora.consts.BG_DARK_GRAY
 import com.madsam.otora.consts.RANKING_BLUE
 import com.madsam.otora.consts.RANKING_GREEN
@@ -98,6 +99,7 @@ fun BofCommentScreen(
     snackbarHostState: SnackbarHostState,
     listState: LazyListState,
     scrollThreshold: Float,
+    bofScreenState: BofScreenState,
     setIsTabRowVisible: (Boolean) -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -115,10 +117,10 @@ fun BofCommentScreen(
 
     val highlightedText = vm.highlightedText.asStateFlow().collectAsState().value
 
-    val currentDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
-    val currentTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
-    val compareDate = vm.selectedCompareDate.asStateFlow().collectAsState().value
-    val compareTime = vm.selectedCompareTime.asStateFlow().collectAsState().value
+    val currentDate = bofScreenState.selectedCurrentDate.asStateFlow().collectAsState().value
+    val currentTime = bofScreenState.selectedCurrentTime.asStateFlow().collectAsState().value
+    val compareDate = bofScreenState.selectedCompareDate.asStateFlow().collectAsState().value
+    val compareTime = bofScreenState.selectedCompareTime.asStateFlow().collectAsState().value
     LaunchedEffect(currentDate, currentTime, compareDate, compareTime) {
         scope.launch {
             vm.requestCommentData()

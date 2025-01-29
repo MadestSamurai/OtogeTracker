@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -38,17 +39,16 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.madsam.otora.R
+import com.madsam.otora.activity.BofScreenState
 import com.madsam.otora.components.CustomTabRow
 import com.madsam.otora.consts.Purple700
 import com.madsam.otora.service.request.BofDataRequestService
@@ -74,18 +74,21 @@ import java.time.LocalDate
  */
 
 @Composable
-fun BofScreen(snackbarHostState: SnackbarHostState) {
-    val navController = rememberNavController()
+fun BofScreen(
+    snackbarHostState: SnackbarHostState,
+    navController: NavHostController,
+    bofScreenState: BofScreenState
+) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val dateTime = LocalDate.now()
 
     val bofDataRequestService = BofDataRequestService(context)
 
-    val vm: BofViewModel = viewModel(factory = BofViewModelFactory())
+    val vm: BofViewModel = viewModel(factory = BofViewModelFactory(bofScreenState))
 
-    val selectedTabIndex = vm.selectedTab.asStateFlow().collectAsState().value
-    val selectedSubTabIndex = vm.selectedSubTab.asStateFlow().collectAsState().value
+    val selectedTabIndex = bofScreenState.selectedTab.asStateFlow().collectAsState().value
+    val selectedSubTabIndex = bofScreenState.selectedSubTab.asStateFlow().collectAsState().value
     val searchText = remember { mutableStateOf("") }
 
     val listStateTotal = rememberLazyListState()
@@ -119,7 +122,7 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
 
     if (showDateTimeRangePicker) {
         DateTimeRangePicker(
-            vm = vm,
+            bofScreenState = bofScreenState,
             onDismissRequest = { showDateTimeRangePicker = false }
         )
     }
@@ -226,7 +229,7 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                     placeholder = { Text("Search", color = Color.White, fontSize = 18.sp) },
                     leadingIcon = {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_magnify),
+                            painter = rememberVectorPainter(image = Filled.Magnify),
                             contentDescription = "Search Icon",
                             modifier = Modifier.size(24.dp)
                         )
@@ -266,22 +269,24 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                 Spacer(modifier = Modifier.weight(1f))
                 if (searchText.value.isNotEmpty()) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_arrow_up),
+                        painter = rememberVectorPainter(image = Filled.ChevronUp),
                         contentDescription = "Previous",
                         tint = Color.White,
                         modifier = Modifier
                             .padding(16.dp)
-                            .size(25.dp)
+                            .width(20.dp)
+                            .height(25.dp)
                             .clickable(onClick = { vm.scrollToPrevious(selectedTabIndex) })
                             .align(Alignment.CenterVertically)
                     )
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_arrow_down),
+                        painter = rememberVectorPainter(image = Filled.ChevronDown),
                         contentDescription = "Next",
                         tint = Color.White,
                         modifier = Modifier
                             .padding(16.dp)
-                            .size(25.dp)
+                            .width(20.dp)
+                            .height(25.dp)
                             .clickable(onClick = { vm.scrollToNext(selectedTabIndex) })
                             .align(Alignment.CenterVertically)
                     )
@@ -297,7 +302,7 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                             .align(Alignment.CenterVertically)
                     )
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_rotate_arrow),
+                        painter = rememberVectorPainter(image = Filled.ArrowRotate),
                         contentDescription = "Refresh",
                         tint = Color.White,
                         modifier = Modifier
@@ -318,16 +323,16 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                         composable("$mainTab/$subTab") {
                             when (mainTab) {
                                 "Entry" -> when (subTab) {
-                                    "Total" -> BofTotalScreen(vm, snackbarHostState, listStateTotal, scrollThreshold) { isTabRowVisible = it }
-                                    "Avg" -> BofAvgScreen(vm, snackbarHostState, listStateAvg, scrollThreshold) { isTabRowVisible = it }
-                                    "Median" -> BofMedianScreen(vm, snackbarHostState, listStateMedian, scrollThreshold) { isTabRowVisible = it }
-                                    "Diff" -> BofDiffScreen(vm, snackbarHostState, listStateDiff, scrollThreshold) { isTabRowVisible = it }
+                                    "Total" -> BofTotalScreen(vm, snackbarHostState, listStateTotal, scrollThreshold, bofScreenState) { isTabRowVisible = it }
+                                    "Avg" -> BofAvgScreen(vm, snackbarHostState, listStateAvg, scrollThreshold, bofScreenState) { isTabRowVisible = it }
+                                    "Median" -> BofMedianScreen(vm, snackbarHostState, listStateMedian, scrollThreshold, bofScreenState) { isTabRowVisible = it }
+                                    "Diff" -> BofDiffScreen(vm, snackbarHostState, listStateDiff, scrollThreshold, bofScreenState) { isTabRowVisible = it }
                                 }
                                 "Team" -> when (subTab) {
-                                    "Total" -> BofTeamScreen(vm, snackbarHostState, listStateTeam, scrollThreshold) { isTabRowVisible = it }
+                                    "Total" -> BofTeamScreen(vm, snackbarHostState, listStateTeam, scrollThreshold, bofScreenState) { isTabRowVisible = it }
                                 }
                                 "Comment" -> when (subTab) {
-                                    "Total" -> BofCommentScreen(vm, snackbarHostState, listStateComment, scrollThreshold) { isTabRowVisible = it }
+                                    "Total" -> BofCommentScreen(vm, snackbarHostState, listStateComment, scrollThreshold, bofScreenState) { isTabRowVisible = it }
                                 }
                             }
                         }
@@ -355,7 +360,7 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                             selected = selectedSubTabIndex == index,
                             onClick = {
                                 if (selectedSubTabIndex != index) {
-                                    vm.selectedSubTab.update { index }
+                                    bofScreenState.selectedSubTab.update { index }
                                     navController.navigate("${mainTabTitles[selectedTabIndex]}/$title")
                                 }
                             },
@@ -381,8 +386,8 @@ fun BofScreen(snackbarHostState: SnackbarHostState) {
                             selected = selectedTabIndex == index,
                             onClick = {
                                 if (selectedTabIndex != index) {
-                                    vm.selectedTab.update { index }
-                                    vm.selectedSubTab.update { 0 } // Reset sub-tab index
+                                    bofScreenState.selectedTab.update { index }
+                                    bofScreenState.selectedSubTab.update { 0 } // Reset sub-tab index
                                     navController.navigate("${title}/${subTabTitles.firstOrNull() ?: ""}")
                                 }
                             },

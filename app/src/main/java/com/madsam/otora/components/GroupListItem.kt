@@ -18,13 +18,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.R
 import com.madsam.otora.consts.BG_HALF_TRANS_BLACK
 import com.madsam.otora.consts.TEXT_WHITE
 import com.madsam.otora.model.osu.web.OsuGroup
+import com.madsam.otora.ui.icon.Filled
 import kotlinx.coroutines.delay
 
 /**
@@ -79,13 +79,13 @@ fun GroupListItem(
 
         if (osuGroup.hasPlaymodes) {
             Image(
-                painter = painterResource(
-                    id = when (osuGroup.playmodes[0]) {
-                        "osu" -> R.drawable.ic_osumode_std
-                        "taiko" -> R.drawable.ic_osumode_taiko
-                        "fruits" -> R.drawable.ic_osumode_ctb
-                        "mania" -> R.drawable.ic_osumode_mania
-                        else -> R.drawable.ic_osumode_std
+                painter = rememberVectorPainter(
+                    image = when (osuGroup.playmodes[0]) {
+                        "osu" -> Filled.OsumodeStd
+                        "taiko" -> Filled.OsumodeTaiko
+                        "fruits" -> Filled.OsumodeCtb
+                        "mania" -> Filled.OsumodeMania
+                        else -> Filled.OsumodeStd
                     }
                 ),
                 colorFilter = ColorFilter.tint(TEXT_WHITE),

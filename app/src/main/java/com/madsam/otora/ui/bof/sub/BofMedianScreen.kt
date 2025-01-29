@@ -49,7 +49,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -58,7 +57,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.R
+import com.madsam.otora.activity.BofScreenState
 import com.madsam.otora.consts.BG_DARK_GRAY
 import com.madsam.otora.consts.RANKING_BLUE
 import com.madsam.otora.consts.RANKING_GREEN
@@ -98,6 +97,7 @@ fun BofMedianScreen(
     snackbarHostState: SnackbarHostState,
     listState: LazyListState,
     scrollThreshold: Float,
+    bofScreenState: BofScreenState,
     setIsTabRowVisible: (Boolean) -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -117,10 +117,10 @@ fun BofMedianScreen(
 
     val highlightedText = vm.highlightedText.asStateFlow().collectAsState().value
 
-    val currentDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
-    val currentTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
-    val compareDate = vm.selectedCompareDate.asStateFlow().collectAsState().value
-    val compareTime = vm.selectedCompareTime.asStateFlow().collectAsState().value
+    val currentDate = bofScreenState.selectedCurrentDate.asStateFlow().collectAsState().value
+    val currentTime = bofScreenState.selectedCurrentTime.asStateFlow().collectAsState().value
+    val compareDate = bofScreenState.selectedCompareDate.asStateFlow().collectAsState().value
+    val compareTime = bofScreenState.selectedCompareTime.asStateFlow().collectAsState().value
     LaunchedEffect(currentDate, currentTime, compareDate, compareTime) {
         scope.launch {
             vm.requestMedianData()
@@ -603,9 +603,9 @@ fun BofEntryRowMedian(
                 ) {
                     Icon(
                         painter = entry.medianDiff.let {
-                            if (it > 0) painterResource(id = R.drawable.ic_wind_up)
-                            else if (it < 0) painterResource(id = R.drawable.ic_wind_down)
-                            else painterResource(id = R.drawable.ic_flat)
+                            if (it > 0) rememberVectorPainter(image = Filled.ArrowWindUp)
+                            else if (it < 0) rememberVectorPainter(image = Filled.ArrowWindDown)
+                            else rememberVectorPainter(image = Filled.ArrowFlat)
                         },
                         contentDescription = null,
                         tint = if (entry.medianDiff > 0) RANKING_GREEN else if (entry.medianDiff < 0) RANKING_RED else RANKING_YELLOW,
@@ -640,9 +640,9 @@ fun BofEntryRowMedian(
             if (isCompare) {
                 Icon(
                     painter = entry.medianDiff.let {
-                        if (it > 0) painterResource(id = R.drawable.ic_wind_up)
-                        else if (it < 0) painterResource(id = R.drawable.ic_wind_down)
-                        else painterResource(id = R.drawable.ic_flat)
+                        if (it > 0) rememberVectorPainter(image = Filled.ArrowWindUp)
+                        else if (it < 0) rememberVectorPainter(image = Filled.ArrowWindDown)
+                        else rememberVectorPainter(image = Filled.ArrowFlat)
                     },
                     contentDescription = null,
                     tint = if (entry.medianDiff > 0) RANKING_GREEN else if (entry.medianDiff < 0) RANKING_RED else RANKING_YELLOW,

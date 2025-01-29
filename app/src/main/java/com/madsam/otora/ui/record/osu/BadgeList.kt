@@ -17,13 +17,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.R
 import com.madsam.otora.consts.DARK_RED_DEEP
+import com.madsam.otora.ui.icon.Filled
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -66,7 +66,7 @@ fun BadgeList(
             Row {
                 if (badgeListData.size > imageCount) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_chevron_left),
+                        painter = rememberVectorPainter(image = Filled.ChevronLeft),
                         contentDescription = "Previous",
                         contentScale = ContentScale.FillHeight,
                         modifier = Modifier
@@ -110,7 +110,7 @@ fun BadgeList(
                 }
                 if (badgeListData.size > imageCount) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_chevron_right),
+                        painter = rememberVectorPainter(image = Filled.ChevronRight),
                         contentDescription = "Next",
                         contentScale = ContentScale.FillHeight,
                         modifier = Modifier

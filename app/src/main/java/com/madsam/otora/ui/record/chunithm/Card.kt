@@ -18,10 +18,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +43,7 @@ import com.madsam.otora.consts.OSU_LEVEL_GOLD_1
 import com.madsam.otora.consts.OSU_LEVEL_PLATINUM_1
 import com.madsam.otora.consts.OSU_LEVEL_SILVER_1
 import com.madsam.otora.model.chuni.net.ChuniCard
+import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -156,7 +157,7 @@ fun Card(
             }
 
             Image(
-                painter = painterResource(id = com.madsam.otora.R.drawable.ic_star),
+                painter = rememberVectorPainter(image = Filled.Star),
                 colorFilter = ColorFilter.tint(OSU_LEVEL_GOLD_1),
                 contentDescription = "Reborn",
                 modifier = Modifier

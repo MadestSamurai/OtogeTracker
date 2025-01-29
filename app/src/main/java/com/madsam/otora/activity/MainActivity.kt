@@ -24,6 +24,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -32,11 +33,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.ui.bof.BofScreen
 import com.madsam.otora.ui.record.RecordScreen
+import kotlinx.coroutines.flow.MutableStateFlow
+import java.time.LocalDate
 
 /**
  * 项目名: OtogeTracker
@@ -45,17 +49,28 @@ import com.madsam.otora.ui.record.RecordScreen
  * 创建时间: 2023/2/24 17:10
  * 描述: 客户端主Activity
  */
-const val KEY_ROUTE = "route"
 
 @Composable
-fun MainActivityScreen() {
+fun MainActivityScreen(navController: NavHostController) {
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf(Screen.RecordScreen, Screen.ReportScreen, Screen.BOFScreen)
     val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.Favorite, Icons.Filled.Star)
     val unselectedIcons =
         listOf(Icons.Outlined.Home, Icons.Outlined.FavoriteBorder, Icons.Outlined.Star)
-    val navController = rememberNavController()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Observe the NavController's back stack
+    LaunchedEffect(navController) {
+        navController.currentBackStackEntryFlow.collect { backStackEntry ->
+            selectedItem = when (backStackEntry.destination.route) {
+                Screen.RecordScreen.route -> 0
+                Screen.ReportScreen.route -> 1
+                Screen.BOFScreen.route -> 2
+                else -> 0
+            }
+        }
+    }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
@@ -73,12 +88,11 @@ fun MainActivityScreen() {
                         alwaysShowLabel = false,
                         selected = selectedItem == index,
                         onClick = {
+                            if (selectedItem == index) return@NavigationBarItem
                             selectedItem = index
                             navController.navigate(screen.route) {
-                                navController.graph.startDestinationRoute?.let {
-                                    popUpTo(it) {
-                                        inclusive = true
-                                    }
+                                popUpTo(navController.graph.startDestinationId) {
+                                    inclusive = false
                                 }
                                 launchSingleTop = true
                             }
@@ -90,14 +104,13 @@ fun MainActivityScreen() {
     ) { contentPadding ->
         Box(modifier = Modifier.padding(contentPadding)) {
             NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
-                composable(Screen.RecordScreen.route) {
-                    RecordScreen(snackbarHostState)
-                }
-                composable(Screen.ReportScreen.route) {
-                    Screen2()
-                }
+                lateinit var bofNavController: NavHostController
+                val bofScreenState = BofScreenState()
+                composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
+                composable(Screen.ReportScreen.route) { Screen2() }
                 composable(Screen.BOFScreen.route) {
-                    BofScreen(snackbarHostState)
+                    bofNavController = rememberNavController()
+                    BofScreen(snackbarHostState, bofNavController, bofScreenState)
                 }
             }
         }
@@ -105,6 +118,8 @@ fun MainActivityScreen() {
 }
 
 class MainActivity : AppCompatActivity() {
+    private lateinit var navController: NavHostController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -122,8 +137,9 @@ class MainActivity : AppCompatActivity() {
             fadeOut.start()
         }
         setContent {
+            navController = rememberNavController()
             Surface(tonalElevation = 5.dp) {
-                MainActivityScreen()
+                MainActivityScreen(navController)
             }
         }
     }
@@ -138,4 +154,13 @@ sealed class Screen(val route: String, val label: String) {
 @Composable
 fun Screen2() {
     Text(text = "Report Page")
+}
+
+class BofScreenState {
+    var selectedTab = MutableStateFlow(0)
+    var selectedSubTab = MutableStateFlow(0)
+    var selectedCurrentDate = MutableStateFlow(LocalDate.now())
+    var selectedCurrentTime = MutableStateFlow("00:00")
+    var selectedCompareDate = MutableStateFlow(LocalDate.now().minusDays(1))
+    var selectedCompareTime = MutableStateFlow("00:00")
 }

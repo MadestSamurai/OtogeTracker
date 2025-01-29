@@ -51,7 +51,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -60,7 +59,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.R
+import com.madsam.otora.activity.BofScreenState
 import com.madsam.otora.consts.BG_DARK_GRAY
 import com.madsam.otora.consts.RANKING_BLUE
 import com.madsam.otora.consts.RANKING_GREEN
@@ -99,6 +98,7 @@ fun BofTeamScreen(
     snackbarHostState: SnackbarHostState,
     listState: LazyListState,
     scrollThreshold: Float,
+    bofScreenState: BofScreenState,
     setIsTabRowVisible: (Boolean) -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -119,10 +119,10 @@ fun BofTeamScreen(
 
     val highlightedText = vm.highlightedText.asStateFlow().collectAsState().value
 
-    val currentDate = vm.selectedCurrentDate.asStateFlow().collectAsState().value
-    val currentTime = vm.selectedCurrentTime.asStateFlow().collectAsState().value
-    val compareDate = vm.selectedCompareDate.asStateFlow().collectAsState().value
-    val compareTime = vm.selectedCompareTime.asStateFlow().collectAsState().value
+    val currentDate = bofScreenState.selectedCurrentDate.asStateFlow().collectAsState().value
+    val currentTime = bofScreenState.selectedCurrentTime.asStateFlow().collectAsState().value
+    val compareDate = bofScreenState.selectedCompareDate.asStateFlow().collectAsState().value
+    val compareTime = bofScreenState.selectedCompareTime.asStateFlow().collectAsState().value
     LaunchedEffect(currentDate, currentTime, compareDate, compareTime) {
         scope.launch {
             vm.requestTeamData()
@@ -586,13 +586,9 @@ fun BofTeamRowTotal(
                 ) {
                     Icon(
                         painter = entry.rankDiff.let {
-                            if (it > 0) {
-                                painterResource(id = R.drawable.ic_wind_up)
-                            } else if (it < 0) {
-                                painterResource(id = R.drawable.ic_wind_down)
-                            } else {
-                                painterResource(id = R.drawable.ic_flat)
-                            }
+                            if (it > 0) rememberVectorPainter(image = Filled.ArrowWindUp)
+                            else if (it < 0) rememberVectorPainter(image = Filled.ArrowWindDown)
+                            else rememberVectorPainter(image = Filled.ArrowFlat)
                         },
                         contentDescription = null,
                         tint = if (entry.rankDiff < 0) RANKING_RED
@@ -633,11 +629,11 @@ fun BofTeamRowTotal(
                 Icon(
                     painter = entry.rankDiff.let {
                         if (it > 0) {
-                            painterResource(id = R.drawable.ic_wind_up)
+                            rememberVectorPainter(image = Filled.ArrowWindUp)
                         } else if (it < 0) {
-                            painterResource(id = R.drawable.ic_wind_down)
+                            rememberVectorPainter(image = Filled.ArrowWindDown)
                         } else {
-                            painterResource(id = R.drawable.ic_flat)
+                            rememberVectorPainter(image = Filled.ArrowFlat)
                         }
                     },
                     contentDescription = null,
@@ -798,7 +794,7 @@ fun BofTeamRowTotal(
                 if (title.isNotEmpty()) {
                     Row {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_star),
+                            painter = rememberVectorPainter(image = Filled.Star),
                             contentDescription = "Final Striker",
                             tint = if (fss[index] == "1") RANKING_YELLOW else Color.Transparent,
                             modifier = Modifier

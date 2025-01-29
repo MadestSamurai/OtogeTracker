@@ -5,6 +5,7 @@ import android.view.View
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.madsam.otora.activity.BofScreenState
 import com.madsam.otora.model.bof.ui.BofCommentShow
 import com.madsam.otora.model.bof.ui.BofEntryShow
 import com.madsam.otora.model.bof.ui.BofTeamShow
@@ -15,7 +16,6 @@ import com.madsam.otora.utils.ScreenUtil.getSafeInsetLeftDp
 import com.madsam.otora.utils.ScreenUtil.getSafeInsetRightDp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
-import java.time.LocalDate
 import kotlin.math.max
 
 /**
@@ -28,7 +28,9 @@ import kotlin.math.max
 
 private const val TAG = "BofViewModel"
 
-class BofViewModel : ViewModel() {
+class BofViewModel(
+    private val bofScreenState: BofScreenState
+) : ViewModel() {
     private val bofDatabaseService = BofDatabaseService()
     val totalData = MutableStateFlow(listOf<BofEntryShow>())
     val avgData = MutableStateFlow(listOf<BofEntryShow>())
@@ -41,12 +43,6 @@ class BofViewModel : ViewModel() {
     var thresholdImpr = MutableStateFlow(1)
     var thresholdImprOld = MutableStateFlow(1)
 
-    var selectedTab = MutableStateFlow(0)
-    var selectedSubTab = MutableStateFlow(0)
-    var selectedCurrentDate = MutableStateFlow(LocalDate.now())
-    var selectedCurrentTime = MutableStateFlow("00:00")
-    var selectedCompareDate = MutableStateFlow(LocalDate.now().minusDays(1))
-    var selectedCompareTime = MutableStateFlow("00:00")
     var selectedTimeStr = MutableStateFlow("")
     var selectedTimeStrNoComp = MutableStateFlow("")
 
@@ -149,15 +145,15 @@ class BofViewModel : ViewModel() {
                 "No data available for the selected date and time."
             }
         } else {
-            val currentTime = CommonUtils.roundDownToNearestFiveMinutes(selectedCurrentTime.value)
-            val compareTime = CommonUtils.roundDownToNearestFiveMinutes(selectedCompareTime.value)
+            val currentTime = CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
+            val compareTime = CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
             selectedTimeStr.update {
-                "Data at ${selectedCurrentDate.value} $currentTime, " +
-                        "compare with ${selectedCompareDate.value} $compareTime, " +
+                "Data at ${bofScreenState.selectedCurrentDate.value} $currentTime, " +
+                        "compare with ${bofScreenState.selectedCompareDate.value} $compareTime, " +
                         "all data scraped by MadSamurai."
             }
             selectedTimeStrNoComp.update {
-                "Data at ${selectedCurrentDate.value} $currentTime, " +
+                "Data at ${bofScreenState.selectedCurrentDate.value} $currentTime, " +
                         "all data scraped by MadSamurai."
             }
         }
@@ -167,16 +163,16 @@ class BofViewModel : ViewModel() {
         fetchLatest: suspend () -> List<T>,
         fetchByTime: suspend (Long, Long) -> List<T>
     ): List<T> {
-        return if (selectedCurrentTime.value == "-1") {
+        return if (bofScreenState.selectedCurrentTime.value == "-1") {
             fetchLatest()
         } else {
             val currentTime = CommonUtils.ymdToMillis(
-                selectedCurrentDate.value.toString(),
-                CommonUtils.roundDownToNearestFiveMinutes(selectedCurrentTime.value)
+                bofScreenState.selectedCurrentDate.value.toString(),
+                CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
             )
             val compareTime = CommonUtils.ymdToMillis(
-                selectedCompareDate.value.toString(),
-                CommonUtils.roundDownToNearestFiveMinutes(selectedCompareTime.value)
+                bofScreenState.selectedCompareDate.value.toString(),
+                CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
             )
             fetchByTime(currentTime, compareTime)
         }
@@ -371,11 +367,13 @@ class BofViewModel : ViewModel() {
     }
 }
 
-class BofViewModelFactory : ViewModelProvider.Factory {
+class BofViewModelFactory(
+    private val bofScreenState: BofScreenState
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(BofViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return BofViewModel() as T
+            return BofViewModel(bofScreenState) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
