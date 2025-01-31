@@ -1,20 +1,35 @@
 package com.madsam.otora.ui.record
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.ui.record.chunithm.TopRating
 import com.madsam.otora.ui.record.sub.ChunithmUserPage
@@ -26,40 +41,113 @@ import kotlinx.coroutines.launch
 fun RecordScreen(
     snackbarHostState : SnackbarHostState
 ) {
-    val navController = rememberNavController()
     val tabs = listOf(Screen.Page1, Screen.Page2, Screen.Page3, Screen.Page4)
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val coroutineScope = rememberCoroutineScope()
 
-    Column {
-        TabRow(selectedTabIndex = pagerState.currentPage) {
-            tabs.forEachIndexed { index, screen ->
-                Tab(
-                    text = { Text(text = screen.route) },
-                    selected = pagerState.currentPage == index,
-                    onClick = {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(index)
+    var showOsuDialog by remember { mutableStateOf(false) }
+    var showMaimaiDialog by remember { mutableStateOf(false) }
+    var showChunithmDialog by remember { mutableStateOf(false) }
+    var showChunithmTopRating by remember { mutableStateOf(false) }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column {
+            TabRow(selectedTabIndex = pagerState.currentPage) {
+                tabs.forEachIndexed { index, screen ->
+                    Tab(
+                        text = { Text(text = screen.route) },
+                        selected = pagerState.currentPage == index,
+                        onClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        }
+                    )
+                }
+            }
+
+            HorizontalPager(state = pagerState) { page ->
+                when (tabs[page]) {
+                    is Screen.Page1 -> OsuUserPage(
+                        showOsuDialog,
+                        onDismissDialog = { showOsuDialog = false }
+                    )
+                    is Screen.Page2 -> MaimaiUserPage(
+                        showMaimaiDialog,
+                        onDismissDialog = { showMaimaiDialog = false }
+                    )
+                    is Screen.Page3 -> {
+                        AnimatedVisibility(
+                            visible = showChunithmTopRating,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            TopRating(onBack = { showChunithmTopRating = false })
+                        }
+                        AnimatedVisibility(
+                            visible = !showChunithmTopRating,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            ChunithmUserPage(
+                                onNavigateToTopRating = { showChunithmTopRating = true },
+                                snackbarHostState = snackbarHostState,
+                                showDialog = showChunithmDialog,
+                                onDismissDialog = { showChunithmDialog = false }
+                            )
                         }
                     }
-                )
+                    is Screen.Page4 -> TestPage4()
+                }
             }
         }
 
-        HorizontalPager(state = pagerState) { page ->
-            when (tabs[page]) {
-                is Screen.Page1 -> OsuUserPage()
-                is Screen.Page2 -> MaimaiUserPage()
-                is Screen.Page3 -> NavHost(navController, startDestination = "chunithmUserPage") {
-                    composable("chunithmUserPage") { ChunithmUserPage(navController, snackbarHostState) }
-                    composable("topRating") { TopRating() }
+        // Floating Action Button
+        when (pagerState.currentPage) {
+            0 -> {
+                FloatingActionButton(
+                    onClick = { showOsuDialog = true },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add")
                 }
-                is Screen.Page4 -> TestPage4()
+            }
+            1 -> {
+                FloatingActionButton(
+                    onClick = { showMaimaiDialog = true },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp)
+                ) {
+                    Icon(Icons.Default.Edit, contentDescription = "Edit")
+                }
+            }
+
+            2 -> {
+                FloatingActionButton(
+                    onClick = { showChunithmDialog = true },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp)
+                ) {
+                    Icon(Icons.Default.Share, contentDescription = "Share")
+                }
+            }
+
+            3 -> {
+                FloatingActionButton(
+                    onClick = { /* Action for Page 4 */ },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(16.dp)
+                ) {
+                    Icon(Icons.Default.Delete, contentDescription = "Delete")
+                }
             }
         }
     }
-
-
 }
 
 @Composable

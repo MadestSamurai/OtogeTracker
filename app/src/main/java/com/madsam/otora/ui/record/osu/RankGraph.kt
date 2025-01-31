@@ -4,9 +4,10 @@ import android.text.Layout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -28,13 +30,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import com.madsam.otora.R
 import com.madsam.otora.components.DoubleCircleIndicator
 import com.madsam.otora.consts.DARK_RED_DEEP
 import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
 import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
 import com.madsam.otora.consts.OSU_BRIGHT_YELLOW_HALF_TRANS
+import com.madsam.otora.consts.TEXT_GRAY
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
@@ -64,6 +66,7 @@ import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
+import com.valentinilk.shimmer.shimmer
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.text.DecimalFormat
 
@@ -72,65 +75,44 @@ fun RankGraph(
     osuRankGraphData: MutableStateFlow<List<Int>>,
     osuRankHighestData: MutableStateFlow<Map<String, String>>
 ) {
+    val configuration = LocalConfiguration.current
+    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+
     val rankGraphData by osuRankGraphData.collectAsState()
     val highestData by osuRankHighestData.collectAsState()
-    if (rankGraphData.isEmpty() && highestData.isEmpty()) {
-        return
-    }
 
-    ConstraintLayout(
+    val cardWidthDp = screenWidthDp - 32.dp
+    Column(
         modifier = Modifier
             .padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
+            .width(cardWidthDp)
             .clip(
                 RoundedCornerShape(
                     topStart = 20.dp, topEnd = 20.dp,
                     bottomStart = 6.dp, bottomEnd = 6.dp
                 )
             )
-            .background(DARK_RED_DEEP)
+            .background(DARK_RED_DEEP),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val (
-            rankGraph,
-            title,
-            subtitle,
-            highestRank
-        ) = createRefs()
-
         Text(
             text = stringResource(id = R.string.global_ranking),
             color = DARK_RED_TEXT_LIGHT,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            modifier = Modifier
-                .constrainAs(title) {
-                    top.linkTo(parent.top, margin = 10.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }
-                .fillMaxWidth()
+            modifier = Modifier.padding(top = 10.dp)
         )
 
         Text(
             text = stringResource(id = R.string.recent_90_days),
             color = DARK_RED_TEXT_LIGHT,
-            fontSize = 16.sp,
-            modifier = Modifier
-                .constrainAs(subtitle) {
-                    top.linkTo(title.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }
+            fontSize = 16.sp
         )
 
         if (rankGraphData.isEmpty()) {
             Box(
                 modifier = Modifier
-                    .constrainAs(rankGraph) {
-                        top.linkTo(subtitle.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
                     .padding(
                         start = 15.dp,
                         end = 15.dp
@@ -144,6 +126,16 @@ fun RankGraph(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
+
+            Box(
+                modifier = Modifier
+                    .shimmer()
+                    .padding(bottom = 10.dp)
+                    .width(150.dp)
+                    .height(24.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(TEXT_GRAY)
+            )
         } else {
             val modelProducer = remember { CartesianChartModelProducer() }
             LaunchedEffect(rankGraphData) {
@@ -161,14 +153,10 @@ fun RankGraph(
 
             CartesianChartHost(
                 modifier = Modifier
-                    .constrainAs(rankGraph) {
-                        top.linkTo(subtitle.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
                     .padding(
                         start = 15.dp,
-                        end = 15.dp
+                        end = 15.dp,
+                        top = 4.dp
                     )
                     .height(100.dp)
                     .pointerInput(Unit) {
@@ -191,16 +179,26 @@ fun RankGraph(
                                 areaFill = LineCartesianLayer.AreaFill.single(
                                     fill(
                                         ShaderProvider.verticalGradient(
-                                            Color.Transparent.toArgb(), OSU_BRIGHT_YELLOW_HALF_TRANS.toArgb()
+                                            Color.Transparent.toArgb(),
+                                            OSU_BRIGHT_YELLOW_HALF_TRANS.toArgb()
                                         )
                                     )
                                 ),
                             )
                         ),
                         rangeProvider = object : CartesianLayerRangeProvider {
-                            override fun getMinY(minY: Double, maxY: Double, extraStore: ExtraStore) =
+                            override fun getMinY(
+                                minY: Double,
+                                maxY: Double,
+                                extraStore: ExtraStore
+                            ) =
                                 (osuRankGraphData.value.maxOrNull()?.toFloat() ?: -100f) * 1.03
-                            override fun getMaxY(minY: Double, maxY: Double, extraStore: ExtraStore) =
+
+                            override fun getMaxY(
+                                minY: Double,
+                                maxY: Double,
+                                extraStore: ExtraStore
+                            ) =
                                 (osuRankGraphData.value.minOrNull()?.toFloat() ?: 0f) * 0.97
                         },
                     ),
@@ -259,7 +257,7 @@ fun RankGraph(
         }
 
         if ((highestData["rank"] == null || highestData["rank"] == "0" || highestData["rank"] == "") && (highestData["date"] == null || highestData["date"] == "")) {
-            return@ConstraintLayout
+            return@Column
         }
         Text(
             text = buildAnnotatedString {
@@ -287,15 +285,7 @@ fun RankGraph(
             },
             color = DARK_RED_TEXT_LIGHT,
             fontSize = 16.sp,
-            modifier = Modifier
-                .constrainAs(highestRank) {
-                    top.linkTo(rankGraph.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }
-                .padding(
-                    bottom = 10.dp
-                )
+            modifier = Modifier.padding(bottom = 10.dp)
         )
     }
 }

@@ -13,11 +13,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.madsam.otora.consts.BRIGHT_RED
-import com.madsam.otora.entity.ChuniSheetsEntity
-import com.madsam.otora.entity.ChuniSongsEntity
-import com.madsam.otora.exporter.exportChuniSongsToCSV
 import com.madsam.otora.model.chuni.net.ChuniCard
 import com.madsam.otora.model.chuni.net.ChuniGenre
 import com.madsam.otora.ui.record.chunithm.Card
@@ -29,20 +25,19 @@ import com.madsam.otora.utils.JsonUtil
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import io.realm.kotlin.RealmConfiguration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 @Composable
 fun ChunithmUserPage(
-    navController: NavController,
-    snackbarHostState: SnackbarHostState
+    onNavigateToTopRating: () -> Unit,
+    snackbarHostState: SnackbarHostState,
+    showDialog: Boolean,
+    onDismissDialog: () -> Unit
 ) {
     val context = LocalContext.current
-
     val chuniViewModel: ChuniViewModel = viewModel(factory = ChuniViewModelFactory())
-    val showDialog = remember { mutableStateOf(false) }
     val chuniCard = MutableStateFlow(ChuniCard())
     val chuniMasterRecord = remember { mutableStateOf(listOf<ChuniGenre>()) }
     val moshi = Moshi.Builder()
@@ -73,8 +68,8 @@ fun ChunithmUserPage(
         modifier = Modifier.background(color = BRIGHT_RED)
     ) {
         item {
-            Button(onClick = { showDialog.value = true }) {
-                Text("Input Cookies")
+            Button(onClick = { onNavigateToTopRating() }) {
+                Text("Go to Top Rating")
             }
         }
         item {
@@ -96,30 +91,23 @@ fun ChunithmUserPage(
                 Text("Update Song Data")
             }
         }
-        item {
-            Button(onClick = {
-                navController.navigate("topRating")
-            }) {
-                Text("Go to Top Rating")
-            }
-        }
-        item {
-            Button(onClick = {
-                val realmConfig = RealmConfiguration.Builder(
-                    schema = setOf(
-                        ChuniSongsEntity::class,
-                        ChuniSheetsEntity::class,
-                    )
-                )
-                    .name("otoge-tracker-chuni.realm")
-                    .schemaVersion(1)
-                    .build()
-                val filePath = "${context.filesDir}/"
-                exportChuniSongsToCSV(realmConfig, filePath, "chuniSongs.csv", "chuniSheets.csv")
-            }) {
-                Text("Export to CSV")
-            }
-        }
+//        item {
+//            Button(onClick = {
+//                val realmConfig = RealmConfiguration.Builder(
+//                    schema = setOf(
+//                        ChuniSongsEntity::class,
+//                        ChuniSheetsEntity::class,
+//                    )
+//                )
+//                    .name("otoge-tracker-chuni.realm")
+//                    .schemaVersion(1)
+//                    .build()
+//                val filePath = "${context.filesDir}/"
+//                exportChuniSongsToCSV(realmConfig, filePath, "chuniSongs.csv", "chuniSheets.csv")
+//            }) {
+//                Text("Export to CSV")
+//            }
+//        }
         item {
             Card(chuniCard = chuniCard)
         }
@@ -134,9 +122,9 @@ fun ChunithmUserPage(
         }
     }
 
-    if (showDialog.value) {
+    if (showDialog) {
         CookieDialog(
-            showDialog = showDialog,
+            showDialog = remember { mutableStateOf(showDialog) },
             context = context,
             snackbarHostState = snackbarHostState,
             onResult = { success ->
@@ -145,6 +133,7 @@ fun ChunithmUserPage(
                         snackbarHostState.showSnackbar("Cookies Saved")
                     }
                 }
+                onDismissDialog()
             }
         )
     }

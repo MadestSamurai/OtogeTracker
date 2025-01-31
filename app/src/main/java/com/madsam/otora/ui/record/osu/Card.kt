@@ -68,8 +68,8 @@ fun Card(
         ConstraintLayout(
             modifier = Modifier
                 .padding(
-                    start = 16.dp,
-                    bottom = 12.dp
+                    horizontal = 16.dp,
+                    vertical = 12.dp
                 )
                 .clip(RoundedCornerShape(20.dp))
                 .background(DARK_RED_DEEP)

@@ -12,8 +12,8 @@ import com.madsam.otora.model.chuni.net.ChuniGenre
 import com.madsam.otora.model.chuni.net.ChuniPenguin
 import com.madsam.otora.model.chuni.net.ChuniScore
 import com.madsam.otora.model.chuni.web.lxns.ChuniAliases
-import com.madsam.otora.model.chuni.web.lxns.LxnsDatas
-import com.madsam.otora.model.chuni.web.zetaraku.ZetarakuDatas
+import com.madsam.otora.model.chuni.web.lxns.LxnsData
+import com.madsam.otora.model.chuni.web.jp.ChuniJpData
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.JsonUtil
 import com.madsam.otora.utils.SafeSoupUtil.safeFirst
@@ -544,32 +544,32 @@ class ChuniDataRequestService(private val context: Context) {
         }
     }
 
-    private suspend fun requestSongsDatas() {
+    private suspend fun requestSongsData() {
         val retrofitZ = Retrofit.Builder()
-            .baseUrl("https://dp4p6x0xfi5o9.cloudfront.net")
+            .baseUrl("https://blog.madsam.work/")
             .addConverterFactory(MoshiConverterFactory.create(moshi)) // Moshi
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create()) // RxJava
             .build()
         val apiZ = retrofitZ.create(Api::class.java)
-        var chuniZetarakuDatas = ZetarakuDatas()
+        var chuniChuniJpData = ChuniJpData()
         try {
-            val chuniSongsCall = apiZ.getChunithmSongsZetaraku()
+            val chuniSongsCall = apiZ.getChunithmSongsJp()
             val response = chuniSongsCall.execute()
             if (!response.isSuccessful) {
                 Log.e(TAG, "Failed to get the songs data")
                 return
             }
-            val chuniDatas = response.body()
-            if (chuniDatas == null) {
+            val chuniData = response.body()
+            if (chuniData == null) {
                 Log.e(TAG, "Failed to get the songs data")
                 return
             }
-            chuniZetarakuDatas = chuniDatas
+            chuniChuniJpData = chuniData
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in ChuniData-requestSongsDatas: ${e.message}")
+            Log.e(TAG, "IOException occurred in ChuniData-requestSongsData: ${e.message}")
         }
-        if (chuniZetarakuDatas.songs.isEmpty()) {
-            Log.e(TAG, "No songs data found in Zetaraku")
+        if (chuniChuniJpData.songs.isEmpty()) {
+            Log.e(TAG, "No songs data found in ChuniJp")
         }
 
         val retrofitL = Retrofit.Builder()
@@ -578,7 +578,7 @@ class ChuniDataRequestService(private val context: Context) {
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create()) // RxJava
             .build()
         val apiL = retrofitL.create(Api::class.java)
-        var chuniLxnsDatas = LxnsDatas()
+        var chuniLxnsData = LxnsData()
         var chuniAliases = ChuniAliases()
         try {
             val chuniSongsCall = apiL.getChunithmSongsLxns()
@@ -589,29 +589,29 @@ class ChuniDataRequestService(private val context: Context) {
                 Log.e(TAG, "Failed to get the songs data, ${responseSongs.code()}, ${responseAlias.code()}")
                 return
             }
-            val chuniDatas = responseSongs.body()
-            val chuniAliasDatas = responseAlias.body()
-            if (chuniDatas == null || chuniAliasDatas == null) {
+            val chuniData = responseSongs.body()
+            val chuniAliasData = responseAlias.body()
+            if (chuniData == null || chuniAliasData == null) {
                 Log.e(TAG, "Failed to get the songs data, data is null")
                 return
             }
-            chuniLxnsDatas = chuniDatas
-            chuniAliases = chuniAliasDatas
+            chuniLxnsData = chuniData
+            chuniAliases = chuniAliasData
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in ChuniData-requestSongsDatas: ${e.message}")
+            Log.e(TAG, "IOException occurred in ChuniData-requestSongsData: ${e.message}")
         }
 
-        if (chuniLxnsDatas.songs.isEmpty() || chuniAliases.aliases.isEmpty()) {
+        if (chuniLxnsData.songs.isEmpty() || chuniAliases.aliases.isEmpty()) {
             Log.e(TAG, "No alias data found in Lxns")
         }
-        if (chuniZetarakuDatas.songs.isEmpty() && chuniLxnsDatas.songs.isEmpty() || chuniAliases.aliases.isEmpty()) {
-            Log.e(TAG, "No songs data found in both Zetaraku and Lxns, check the api")
+        if (chuniChuniJpData.songs.isEmpty() && chuniLxnsData.songs.isEmpty() || chuniAliases.aliases.isEmpty()) {
+            Log.e(TAG, "No songs data found in both ChuniJp and Lxns, check the api")
             return
         }
 
-        val chuniSongsLMapI = mutableMapOf<Int, LxnsDatas.ChuniSong>()
-        for (song in chuniLxnsDatas.songs) {
-            val chuniSong = LxnsDatas.ChuniSong().apply {
+        val chuniSongsLMapI = mutableMapOf<Int, LxnsData.ChuniSong>()
+        for (song in chuniLxnsData.songs) {
+            val chuniSong = LxnsData.ChuniSong().apply {
                 id = song.id
                 genre = song.genre
                 title = song.title
@@ -631,7 +631,7 @@ class ChuniDataRequestService(private val context: Context) {
             }
             chuniAliasMapI[alias.id] = chuniAliasData
         }
-        for (song in chuniLxnsDatas.songs) {
+        for (song in chuniLxnsData.songs) {
             val chuniSong = chuniSongsLMapI[song.id]
             val chuniAliasData = chuniAliasMapI[song.id]
             if (chuniSong != null && chuniAliasData != null) {
@@ -640,9 +640,9 @@ class ChuniDataRequestService(private val context: Context) {
             song.aliases = chuniSong?.aliases ?: ""
         }
 
-        val chuniSongsZMap = mutableMapOf<String, ZetarakuDatas.ChuniSong>()
-        for (song in chuniZetarakuDatas.songs) {
-            val chuniSong = ZetarakuDatas.ChuniSong().apply {
+        val chuniSongsZMap = mutableMapOf<String, ChuniJpData.ChuniSong>()
+        for (song in chuniChuniJpData.songs) {
+            val chuniSong = ChuniJpData.ChuniSong().apply {
                 songId = song.songId
                 category = song.category
                 title = song.title
@@ -658,12 +658,12 @@ class ChuniDataRequestService(private val context: Context) {
             }
             chuniSongsZMap[song.songId] = chuniSong
         }
-        val chuniSongsLMapT = mutableMapOf<String, LxnsDatas.ChuniSong>()
-        for (song in chuniLxnsDatas.songs) {
+        val chuniSongsLMapT = mutableMapOf<String, LxnsData.ChuniSong>()
+        for (song in chuniLxnsData.songs) {
             if (song.difficulties.size == 1) {
                 song.title = "(WE) ${song.title}"
             }
-            val chuniSong = LxnsDatas.ChuniSong().apply {
+            val chuniSong = LxnsData.ChuniSong().apply {
                 id = song.id
                 genre = song.genre
                 title = song.title
@@ -678,11 +678,11 @@ class ChuniDataRequestService(private val context: Context) {
         }
         val realm = Realm.open(realmConfig)
         realm.write {
-            for (song in chuniZetarakuDatas.songs) {
+            for (song in chuniChuniJpData.songs) {
                 val chuniSongZ = chuniSongsZMap[song.songId]
                 val chuniSongL = chuniSongsLMapT[song.songId]
                 if (chuniSongZ == null) {
-                    Log.e(TAG, "Failed to get the song data from Zetaraku")
+                    Log.e(TAG, "Failed to get the song data from ChuniJp")
                     continue
                 }
                 val chuniSongData = ChuniSongsEntity().apply {
@@ -707,7 +707,7 @@ class ChuniDataRequestService(private val context: Context) {
                     val chuniSheetL = if (chuniSongL == null) {
                         null
                     } else {
-                        var chuniSheet = LxnsDatas.ChuniSong.Difficulty()
+                        var chuniSheet = LxnsData.ChuniSong.Difficulty()
                         try {
                             chuniSheet = chuniSongL.difficulties[
                                 when (sheet.difficulty) {
@@ -794,7 +794,7 @@ class ChuniDataRequestService(private val context: Context) {
     }
 
     fun getChuniSongsData() {
-        serviceScope.launch { mutex.withLock { requestSongsDatas() } }
+        serviceScope.launch { mutex.withLock { requestSongsData() } }
     }
 
     // Get songs data from the database

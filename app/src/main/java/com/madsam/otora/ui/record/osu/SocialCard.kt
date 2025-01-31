@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -18,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
@@ -42,17 +44,24 @@ import kotlinx.coroutines.flow.MutableStateFlow
  * 创建时间: 2024/8/3
  * 描述: osu!社交卡片
  */
+
 @Composable
 fun SocialCard(
     osuSocialCard: MutableStateFlow<Map<String, String>>,
 ) {
+    val configuration = LocalConfiguration.current
+    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+
     val osuSocialCardData = osuSocialCard.collectAsState(initial = emptyMap()).value
+
+    val cardWidthDp = screenWidthDp - 32.dp
     ConstraintLayout(
         modifier = Modifier
             .padding(
                 start = 16.dp,
                 end = 16.dp
             )
+            .width(cardWidthDp)
             .clip(
                 RoundedCornerShape(
                     topStart = 6.dp,

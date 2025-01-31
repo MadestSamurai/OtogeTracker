@@ -4,8 +4,8 @@ import com.madsam.otora.model.bof.web.BofComment
 import com.madsam.otora.model.bof.web.BofEntry
 import com.madsam.otora.model.bof.web.BofTeam
 import com.madsam.otora.model.chuni.web.lxns.ChuniAliases
-import com.madsam.otora.model.chuni.web.lxns.LxnsDatas
-import com.madsam.otora.model.chuni.web.zetaraku.ZetarakuDatas
+import com.madsam.otora.model.chuni.web.lxns.LxnsData
+import com.madsam.otora.model.chuni.web.jp.ChuniJpData
 import com.madsam.otora.model.osu.web.OsuCardList
 import com.madsam.otora.model.osu.web.OsuHistorical
 import com.madsam.otora.model.osu.web.OsuRecentActivity
@@ -83,11 +83,11 @@ interface Api {
     ): Call<List<BofComment>>
 
     // Chunithm API
-    @GET("chunithm/data.json")
-    fun getChunithmSongsZetaraku(): Call<ZetarakuDatas>
+    @GET("chuni/jp.json")
+    fun getChunithmSongsJp(): Call<ChuniJpData>
 
     @GET("chunithm/song/list")
-    fun getChunithmSongsLxns(): Call<LxnsDatas>
+    fun getChunithmSongsLxns(): Call<LxnsData>
 
     @GET("chunithm/alias/list")
     fun getChunithmAliasList(): Call<ChuniAliases>

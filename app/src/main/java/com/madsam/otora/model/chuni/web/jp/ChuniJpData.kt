@@ -1,4 +1,4 @@
-package com.madsam.otora.model.chuni.web.zetaraku
+package com.madsam.otora.model.chuni.web.jp
 
 import com.squareup.moshi.Json
 
@@ -7,9 +7,9 @@ import com.squareup.moshi.Json
  * 文件名: com.madsam.otora.model.chuni.web.zetaraku.ChuniDatas
  * 创建者: MadSamurai
  * 创建时间: 2024/11/15
- * 描述: Chunithm数据(Zetaraku API)
+ * 描述: Chunithm数据(ChuniJp API)
  */
-data class ZetarakuDatas(
+data class ChuniJpData(
     @Json(name = "songs") var songs: List<ChuniSong> = listOf(),
     @Json(name = "categories") var categories: List<Category> = listOf(),
     @Json(name = "versions") var versions: List<Version> = listOf(),

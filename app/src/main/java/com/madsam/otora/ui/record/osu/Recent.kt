@@ -228,7 +228,7 @@ fun Recent(
                                 when (recentActivity["type"]) {
                                     "rank" -> {
                                         Image(
-                                            painter = rememberVectorPainter(image = when (recentActivity["rank"]) {
+                                            painter = rememberVectorPainter(image = when (recentActivity["scoreRank"]) {
                                                 "XH" -> Filled.OsuSsh
                                                 "X" -> Filled.OsuSh
                                                 "SH" -> Filled.OsuSs

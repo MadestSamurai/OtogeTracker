@@ -9,7 +9,7 @@ import com.squareup.moshi.Json
  * 创建时间: 2024/12/26
  * 描述: Chunithm数据(LXNS API)
  */
-data class LxnsDatas(
+data class LxnsData(
     var songs: List<ChuniSong> = listOf(),
     var genres: List<Genre> = listOf(),
     var versions: List<Version> = listOf(),

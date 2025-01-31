@@ -3,18 +3,27 @@ package com.madsam.otora.ui.record.chunithm
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
@@ -59,66 +68,96 @@ import kotlinx.coroutines.flow.update
  * 描述: Chunithm顶级成绩
  */
 @Composable
-fun TopRating() {
+fun TopRating(
+    onBack: () -> Unit
+) {
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     val chuniDataRequestService = ChuniDataRequestService(context)
 
-    val chuniRatingBest = MutableStateFlow(listOf<ChuniScore>())
-    val moshi = Moshi.Builder()
-        .addLast(KotlinJsonAdapterFactory())
-        .build()
-
-    val ratingBestListType = Types.newParameterizedType(List::class.java, ChuniScore::class.java)
-    val ratingBestJsonAdapter = moshi.adapter<List<ChuniScore>>(ratingBestListType)
-    val ratingBestJson = JsonUtil.readJsonFromFile(context, "chuniRatingDetailBest.json")
-    if (ratingBestJson != null) {
-        chuniRatingBest.update { ratingBestJsonAdapter.fromJson(ratingBestJson) ?: listOf() }
-    }
-
-    LazyColumn(
-        modifier = Modifier.padding(8.dp)
-    ) {
-        items(chuniRatingBest.value.size) { index ->
-            val songData = remember { mutableStateOf(ChuniSongsEntity()) }
-            val songSheetData = remember { mutableStateOf(ChuniSheetsEntity()) }
-            val topRating = remember { mutableStateOf(ChuniScoreShow()) }
-            LaunchedEffect(Unit) {
-                songData.value = chuniDataRequestService.getChuniSongData(chuniRatingBest.value[index].title)
-                val diff = when (chuniRatingBest.value[index].diff) {
-                    "0" -> "basic"
-                    "1" -> "advanced"
-                    "2" -> "expert"
-                    "3" -> "master"
-                    "4" -> "ultima"
-                    else -> "master"
-                }
-                songSheetData.value =
-                    chuniDataRequestService.getChuniSongSheetData(chuniRatingBest.value[index].title, diff)
-                topRating.value = ChuniScoreShow(
-                    title = songData.value.title,
-                    artist = songData.value.artist,
-                    noteDesigner = songSheetData.value.noteDesigner,
-                    genre = songData.value.genre,
-                    diff = diff,
-                    level = songSheetData.value.levelCn,
-                    levelValue = songSheetData.value.levelValueCn,
-                    score = chuniRatingBest.value[index].highScore,
-                    rank = CalcUtils.calcChuniRank(CommonUtils.bigNumberToInt(chuniRatingBest.value[index].highScore)),
-                    jacket = songData.value.imageName,
-                    tap = songSheetData.value.tap,
-                    hold = songSheetData.value.hold,
-                    slide = songSheetData.value.slide,
-                    air = songSheetData.value.air,
-                    flick = songSheetData.value.flick,
-                    total = songSheetData.value.total
+    Column {
+        // 添加顶部导航栏
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onBack) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = DARK_RED_TEXT_LIGHT
                 )
             }
-            ChuniRatingItemCard(
-                item = topRating.value,
-                itemWidth = screenWidthDp
+            Text(
+                text = "Top Rating",
+                color = DARK_RED_TEXT_LIGHT,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
             )
+            // 添加一个空的Box来保持对称
+            Box(modifier = Modifier.width(48.dp))
+        }
+
+        // 原有的评分列表内容
+        val chuniRatingBest = MutableStateFlow(listOf<ChuniScore>())
+        val moshi = Moshi.Builder()
+            .addLast(KotlinJsonAdapterFactory())
+            .build()
+
+        val ratingBestListType = Types.newParameterizedType(List::class.java, ChuniScore::class.java)
+        val ratingBestJsonAdapter = moshi.adapter<List<ChuniScore>>(ratingBestListType)
+        val ratingBestJson = JsonUtil.readJsonFromFile(context, "chuniRatingDetailBest.json")
+        if (ratingBestJson != null) {
+            chuniRatingBest.update { ratingBestJsonAdapter.fromJson(ratingBestJson) ?: listOf() }
+        }
+
+        LazyColumn(
+            modifier = Modifier.padding(8.dp)
+        ) {
+            items(chuniRatingBest.value.size) { index ->
+                val songData = remember { mutableStateOf(ChuniSongsEntity()) }
+                val songSheetData = remember { mutableStateOf(ChuniSheetsEntity()) }
+                val topRating = remember { mutableStateOf(ChuniScoreShow()) }
+                LaunchedEffect(Unit) {
+                    songData.value = chuniDataRequestService.getChuniSongData(chuniRatingBest.value[index].title)
+                    val diff = when (chuniRatingBest.value[index].diff) {
+                        "0" -> "basic"
+                        "1" -> "advanced"
+                        "2" -> "expert"
+                        "3" -> "master"
+                        "4" -> "ultima"
+                        else -> "master"
+                    }
+                    songSheetData.value =
+                        chuniDataRequestService.getChuniSongSheetData(chuniRatingBest.value[index].title, diff)
+                    topRating.value = ChuniScoreShow(
+                        title = songData.value.title,
+                        artist = songData.value.artist,
+                        noteDesigner = songSheetData.value.noteDesigner,
+                        genre = songData.value.genre,
+                        diff = diff,
+                        level = songSheetData.value.levelCn,
+                        levelValue = songSheetData.value.levelValueCn,
+                        score = chuniRatingBest.value[index].highScore,
+                        rank = CalcUtils.calcChuniRank(CommonUtils.bigNumberToInt(chuniRatingBest.value[index].highScore)),
+                        jacket = songData.value.imageName,
+                        tap = songSheetData.value.tap,
+                        hold = songSheetData.value.hold,
+                        slide = songSheetData.value.slide,
+                        air = songSheetData.value.air,
+                        flick = songSheetData.value.flick,
+                        total = songSheetData.value.total
+                    )
+                }
+                ChuniRatingItemCard(
+                    item = topRating.value,
+                    itemWidth = screenWidthDp
+                )
+            }
         }
     }
 }

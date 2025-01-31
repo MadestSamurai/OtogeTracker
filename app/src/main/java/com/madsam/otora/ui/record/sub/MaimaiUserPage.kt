@@ -11,7 +11,10 @@ import androidx.compose.ui.platform.LocalContext
 import com.madsam.otora.utils.ShareUtil
 
 @Composable
-fun MaimaiUserPage() {
+fun MaimaiUserPage(
+    showDialog: Boolean,
+    onDismissDialog: () -> Unit
+) {
     val context = LocalContext.current
     val state = remember { mutableStateOf("init") }
     state.value = ShareUtil.getString("chuniCard", context) ?: "null"

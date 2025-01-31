@@ -42,9 +42,10 @@ fun CookieDialog(
     val requestError = remember { mutableStateOf(false) }
     val responseError = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+
     AlertDialog(
         onDismissRequest = { showDialog.value = false },
-        title = { Text("Input Cookies") },
+        title = { Text("Enter Cookies") },
         text = {
             Column {
                 TextField(
@@ -53,7 +54,7 @@ fun CookieDialog(
                         requestState.value = it
                         requestError.value = it.isEmpty()
                     },
-                    label = { Text("Input Request Cookies") },
+                    label = { Text("Enter Request Cookies") },
                     isError = requestError.value,
                     modifier = Modifier.fillMaxWidth(),
                     colors = TextFieldDefaults.colors(
@@ -72,7 +73,7 @@ fun CookieDialog(
                         responseState.value = it
                         responseError.value = it.isEmpty()
                     },
-                    label = { Text("Input Response Cookies") },
+                    label = { Text("Enter Response Cookies") },
                     isError = responseError.value,
                     modifier = Modifier.fillMaxWidth(),
                     colors = TextFieldDefaults.colors(
@@ -88,7 +89,7 @@ fun CookieDialog(
                 TextField(
                     value = uaState.value,
                     onValueChange = { uaState.value = it },
-                    label = { Text("Input User-Agent") },
+                    label = { Text("Enter User-Agent") },
                     modifier = Modifier.fillMaxWidth(),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,

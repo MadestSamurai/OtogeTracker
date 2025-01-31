@@ -61,9 +61,11 @@ fun BadgeList(
             val listState = rememberLazyListState()
             if (badgeListData.size <= imageCount) {
                 listWidthDp = cardWidthDp - 16.dp
-                imagePadding = (listWidthDp / badgeListData.size) - 68.dp
+                imagePadding = (listWidthDp / imageCount) - 68.dp
             }
-            Row {
+            Row(
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
                 if (badgeListData.size > imageCount) {
                     Image(
                         painter = rememberVectorPainter(image = Filled.ChevronLeft),
@@ -86,22 +88,15 @@ fun BadgeList(
                 }
                 LazyRow(
                     state = listState,
-                    modifier = Modifier
-                        .padding(
-                            vertical = 8.dp,
-                            horizontal = if (badgeListData.size > imageCount) 0.dp else 8.dp
-                        )
-                        .width(listWidthDp)
+                    modifier = Modifier.weight(1f)
                 ) {
                     items(badgeListData) { badge ->
                         Image(
-                            painter = rememberAsyncImagePainter(
-                                model = badge["image2xUrl"],
-                            ),
+                            painter = rememberAsyncImagePainter(model = badge["image2xUrl"]),
                             contentScale = ContentScale.FillHeight,
-                            contentDescription = badge["description"],
+                            contentDescription = badge["name"],
                             modifier = Modifier
-                                .padding(vertical = 4.dp, horizontal = imagePadding / 2)
+                                .padding(horizontal = imagePadding / 2)
                                 .clip(RoundedCornerShape(6.dp))
                                 .height(32.dp)
                                 .width(68.dp)

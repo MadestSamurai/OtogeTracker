@@ -1,16 +1,20 @@
 package com.madsam.otora.ui.record.sub
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -32,8 +36,12 @@ import com.madsam.otora.ui.record.viewmodel.OsuViewModel
 import com.madsam.otora.ui.record.viewmodel.OsuViewModelFactory
 import com.madsam.otora.utils.ShareUtil
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OsuUserPage() {
+fun OsuUserPage(
+    showOsuDialog: Boolean,
+    onDismissDialog: () -> Unit
+) {
     val context = LocalContext.current
 
     val osuViewModel: OsuViewModel = viewModel(factory = OsuViewModelFactory(
@@ -47,53 +55,84 @@ fun OsuUserPage() {
     val isClicked = remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
 
+    if (showOsuDialog) {
+        AlertDialog(
+            onDismissRequest = { onDismissDialog() },
+            title = { Text(text = "Enter osu details") },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TextField(
+                        value = userState.value,
+                        onValueChange = { userState.value = it },
+                        label = { Text("Enter osu id") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    
+                    ExposedDropdownMenuBox(
+                        expanded = isClicked.value,
+                        onExpandedChange = { isClicked.value = it },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        TextField(
+                            value = modeState.value,
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Game Mode") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isClicked.value)
+                            },
+                            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = isClicked.value,
+                            onDismissRequest = { isClicked.value = false }
+                        ) {
+                            items.forEach { mode ->
+                                DropdownMenuItem(
+                                    text = { Text(mode) },
+                                    onClick = {
+                                        modeState.value = mode
+                                        isClicked.value = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Button(
+                        onClick = {
+                            ShareUtil.putString("userId", userState.value, context)
+                            ShareUtil.putString("mode", modeState.value, context)
+                            osuViewModel.requestOsuData(userState.value, modeState.value, context)
+                            onDismissDialog()
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Confirm")
+                    }
+                }
+            },
+            confirmButton = {},
+            dismissButton = {
+                TextButton(onClick = { onDismissDialog() }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     Column(
         modifier = Modifier
             .background(color = BRIGHT_RED)
             .verticalScroll(scrollState)
     ) {
-        TextField(
-            value = userState.value,
-            onValueChange = { userState.value = it },
-            label = { Text("Enter osu id") },
-            modifier = Modifier.fillMaxWidth()
-        )
-        Row {
-            Column {
-                Button(
-                    onClick = { isClicked.value = !isClicked.value },
-                    content = {
-                        Text(modeState.value)
-                    },
-                    //TODO make button like a text field
-                )
-                DropdownMenu(
-                    expanded = isClicked.value,
-                    onDismissRequest = { isClicked.value = false },
-                    content = {
-                        items.forEach {
-                            DropdownMenuItem(
-                                onClick = {
-                                    modeState.value = it
-                                    isClicked.value = false
-                                },
-                                text = { Text(it) }
-                            )
-                        }
-                    }
-                )
-            }
-            Button(
-                onClick = {
-                    ShareUtil.putString("userId", userState.value, context)
-                    ShareUtil.putString("mode", modeState.value, context)
-                    osuViewModel.requestOsuData(userState.value, modeState.value, context)
-                },
-                modifier = Modifier.padding(start = 10.dp)
-            ) {
-                Text("Confirm")
-            }
-        }
         Card(osuViewModel.osuCardData, osuViewModel.osuGroupList)
         BadgeList(osuViewModel.osuBadgeList)
         RankGraph(osuViewModel.osuRankGraphData, osuViewModel.osuRankHighestData)
