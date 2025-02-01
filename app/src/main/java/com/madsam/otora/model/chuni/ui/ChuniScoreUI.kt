@@ -7,7 +7,7 @@ package com.madsam.otora.model.chuni.ui
  * 创建时间: 2024/11/20
  * 描述: Chunithm成绩显示
  */
-data class ChuniScoreShow (
+data class ChuniScoreUI (
     var title : String = "",
     var artist : String = "",
     var noteDesigner: String = "",

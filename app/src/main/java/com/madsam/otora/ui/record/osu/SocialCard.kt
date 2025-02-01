@@ -33,6 +33,7 @@ import com.madsam.otora.consts.OSU_DISCORD_BG
 import com.madsam.otora.consts.OSU_DISCORD_TEXT
 import com.madsam.otora.consts.OSU_X_BG
 import com.madsam.otora.consts.White1000
+import com.madsam.otora.model.osu.ui.OsuSocialUI
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,12 +48,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun SocialCard(
-    osuSocialCard: MutableStateFlow<Map<String, String>>,
+    osuSocialCard: MutableStateFlow<OsuSocialUI>,
 ) {
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
 
-    val osuSocialCardData = osuSocialCard.collectAsState(initial = emptyMap()).value
+    val data = osuSocialCard.collectAsState(initial = OsuSocialUI()).value
 
     val cardWidthDp = screenWidthDp - 32.dp
     ConstraintLayout(
@@ -101,7 +102,7 @@ fun SocialCard(
                     ) {
                         append(
                             CommonUtils.dateCodeToYMDHMSU(
-                                osuSocialCardData["joinDate"] ?: "1970-01-01T00:00:00+00:00"
+                                data.joinDate
                             )
                         )
                     }
@@ -128,7 +129,7 @@ fun SocialCard(
                     ) {
                         append(
                             CommonUtils.dateCodeToRecent(
-                                osuSocialCardData["lastVisit"] ?: "1970-01-01T00:00:00+00:00"
+                                data.lastVisit
                             )
                         )
                     }
@@ -139,7 +140,7 @@ fun SocialCard(
                 modifier = Modifier
                     .padding(start = 16.dp)
             )
-            if ((osuSocialCardData["location"] ?: "").isNotEmpty()) {
+            if (data.location.isNotEmpty()) {
                 Text(
                     text = buildAnnotatedString {
                         withStyle(
@@ -154,7 +155,7 @@ fun SocialCard(
                                 fontWeight = FontWeight.Bold
                             )
                         ) {
-                            append(osuSocialCardData["location"] ?: "???")
+                            append(data.location)
                         }
                     },
                     fontWeight = FontWeight.Normal,
@@ -164,7 +165,7 @@ fun SocialCard(
                         .padding(start = 16.dp)
                 )
             }
-            if ((osuSocialCardData["playStyle"] ?: "").isNotEmpty()) {
+            if (data.playStyle.isNotEmpty()) {
                 Text(
                     text = buildAnnotatedString {
                         withStyle(
@@ -179,7 +180,7 @@ fun SocialCard(
                                 fontWeight = FontWeight.Bold
                             )
                         ) {
-                            append(osuSocialCardData["playStyle"] ?: "???")
+                            append(data.playStyle)
                         }
                     },
                     fontWeight = FontWeight.Normal,
@@ -199,7 +200,7 @@ fun SocialCard(
                 }
                 .padding(bottom = 16.dp)
         ) {
-            if ((osuSocialCardData["twitter"] ?: "").isNotEmpty()) {
+            if (data.twitter.isNotEmpty()) {
                 Surface(
                     color = OSU_X_BG,
                     modifier = Modifier
@@ -217,7 +218,7 @@ fun SocialCard(
                                 .align(Alignment.CenterVertically)
                         )
                         Text(
-                            text = "@${osuSocialCardData["twitter"]!!}",
+                            text = "@${data.twitter}",
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp,
                             color = White1000,
@@ -228,7 +229,7 @@ fun SocialCard(
                     }
                 }
             }
-            if ((osuSocialCardData["discord"] ?: "").isNotEmpty()) {
+            if (data.discord.isNotEmpty()) {
                 Surface(
                     color = OSU_DISCORD_BG,
                     modifier = Modifier
@@ -246,7 +247,7 @@ fun SocialCard(
                                 .align(Alignment.CenterVertically)
                         )
                         Text(
-                            text = osuSocialCardData["discord"]!!,
+                            text = data.discord,
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp,
                             color = OSU_DISCORD_TEXT,
@@ -257,7 +258,7 @@ fun SocialCard(
                     }
                 }
             }
-            if ((osuSocialCardData["website"] ?: "").isNotEmpty()) {
+            if (data.website.isNotEmpty()) {
                 Surface(
                     color = OSU_BRIGHT_RED,
                     modifier = Modifier
@@ -275,7 +276,7 @@ fun SocialCard(
                                 .align(Alignment.CenterVertically)
                         )
                         Text(
-                            text = osuSocialCardData["website"]!!,
+                            text = data.website,
                             fontSize = 16.sp,
                             color = Color.White,
                             modifier = Modifier

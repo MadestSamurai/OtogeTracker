@@ -7,7 +7,7 @@ package com.madsam.otora.model.bof.ui
  * 创建时间: 2024/10/23
  * 描述: BOF团队数据展示实体
  */
-data class BofTeamShow(
+data class BofTeamUI(
     override var oldIndex: Int,
     override var index: Int,
     var team: String = "",

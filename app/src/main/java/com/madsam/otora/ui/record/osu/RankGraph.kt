@@ -37,6 +37,7 @@ import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
 import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
 import com.madsam.otora.consts.OSU_BRIGHT_YELLOW_HALF_TRANS
 import com.madsam.otora.consts.TEXT_GRAY
+import com.madsam.otora.model.osu.ui.OsuTopRankUI
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
@@ -73,7 +74,7 @@ import java.text.DecimalFormat
 @Composable
 fun RankGraph(
     osuRankGraphData: MutableStateFlow<List<Int>>,
-    osuRankHighestData: MutableStateFlow<Map<String, String>>
+    osuRankHighestData: MutableStateFlow<OsuTopRankUI>
 ) {
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
@@ -256,7 +257,7 @@ fun RankGraph(
             )
         }
 
-        if ((highestData["rank"] == null || highestData["rank"] == "0" || highestData["rank"] == "") && (highestData["date"] == null || highestData["date"] == "")) {
+        if (highestData.rank == "" && highestData.date.isEmpty()) {
             return@Column
         }
         Text(
@@ -268,9 +269,7 @@ fun RankGraph(
                         fontSize = 16.sp
                     )
                 ) {
-                    if (highestData["rank"] != null) {
-                        append("${stringResource(id = R.string.highest_rank)}: #${highestData["rank"]}")
-                    }
+                    append("${stringResource(id = R.string.highest_rank)}: #${highestData.rank}")
                 }
                 withStyle(
                     style = SpanStyle(
@@ -278,9 +277,7 @@ fun RankGraph(
                         fontSize = 14.sp
                     )
                 ) {
-                    if (highestData["date"] != null) {
-                        append(" (${highestData["date"]!!.split("T")[0]})")
-                    }
+                    append(" (${highestData.date.split("T")[0]})")
                 }
             },
             color = DARK_RED_TEXT_LIGHT,

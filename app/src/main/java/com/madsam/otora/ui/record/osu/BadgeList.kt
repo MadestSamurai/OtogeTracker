@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.consts.DARK_RED_DEEP
+import com.madsam.otora.model.osu.ui.OsuBadgeUI
 import com.madsam.otora.ui.icon.Filled
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -37,7 +38,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun BadgeList(
-    osuBadgeList: MutableStateFlow<List<Map<String, String>>>
+    osuBadgeList: MutableStateFlow<List<OsuBadgeUI>>
 ) {
     val badgeListData = osuBadgeList.collectAsState(initial = emptyList()).value
     val coroutineScope = rememberCoroutineScope()
@@ -92,9 +93,9 @@ fun BadgeList(
                 ) {
                     items(badgeListData) { badge ->
                         Image(
-                            painter = rememberAsyncImagePainter(model = badge["image2xUrl"]),
+                            painter = rememberAsyncImagePainter(model = badge.image2xUrl),
                             contentScale = ContentScale.FillHeight,
-                            contentDescription = badge["name"],
+                            contentDescription = badge.description,
                             modifier = Modifier
                                 .padding(horizontal = imagePadding / 2)
                                 .clip(RoundedCornerShape(6.dp))

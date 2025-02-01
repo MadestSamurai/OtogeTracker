@@ -6,9 +6,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.madsam.otora.activity.BofScreenState
-import com.madsam.otora.model.bof.ui.BofCommentShow
-import com.madsam.otora.model.bof.ui.BofEntryShow
-import com.madsam.otora.model.bof.ui.BofTeamShow
+import com.madsam.otora.model.bof.ui.BofCommentUI
+import com.madsam.otora.model.bof.ui.BofEntryUI
+import com.madsam.otora.model.bof.ui.BofTeamUI
 import com.madsam.otora.model.bof.ui.Rankable
 import com.madsam.otora.service.database.BofDatabaseService
 import com.madsam.otora.utils.CommonUtils
@@ -32,13 +32,13 @@ class BofViewModel(
     private val bofScreenState: BofScreenState
 ) : ViewModel() {
     private val bofDatabaseService = BofDatabaseService()
-    val totalData = MutableStateFlow(listOf<BofEntryShow>())
-    val avgData = MutableStateFlow(listOf<BofEntryShow>())
-    val medianData = MutableStateFlow(listOf<BofEntryShow>())
-    val diffData = MutableStateFlow(listOf<BofEntryShow>())
+    val totalData = MutableStateFlow(listOf<BofEntryUI>())
+    val avgData = MutableStateFlow(listOf<BofEntryUI>())
+    val medianData = MutableStateFlow(listOf<BofEntryUI>())
+    val diffData = MutableStateFlow(listOf<BofEntryUI>())
     val isDiffReverse = MutableStateFlow(false)
-    val teamData = MutableStateFlow(listOf<BofTeamShow>())
-    val commentData = MutableStateFlow(listOf<BofCommentShow>())
+    val teamData = MutableStateFlow(listOf<BofTeamUI>())
+    val commentData = MutableStateFlow(listOf<BofCommentUI>())
 
     var thresholdImpr = MutableStateFlow(1)
     var thresholdImprOld = MutableStateFlow(1)
@@ -63,7 +63,7 @@ class BofViewModel(
     val scrollToIndexListComment = MutableStateFlow(listOf<Int>())
     val currentIndexComment = MutableStateFlow(0)
 
-    fun findItemIndex(query: String, originalData: List<BofEntryShow>, pageIndex: Int) {
+    fun findItemIndex(query: String, originalData: List<BofEntryUI>, pageIndex: Int) {
         val scrollToIndexList = when (pageIndex) {
             0 -> scrollToIndexListTotal
             1 -> scrollToIndexListAvg
@@ -87,7 +87,7 @@ class BofViewModel(
         highlightedText.update { query }
     }
 
-    fun findTeamItemIndex(query: String, originalData: List<BofTeamShow>) {
+    fun findTeamItemIndex(query: String, originalData: List<BofTeamUI>) {
         currentIndexTeam.update { 0 }
         scrollToIndexListTeam.update {
             originalData.mapIndexedNotNull { index, item ->
@@ -211,7 +211,7 @@ class BofViewModel(
         return sortedData
     }
 
-    private fun calculateThresholds(data: List<BofEntryShow>) {
+    private fun calculateThresholds(data: List<BofEntryUI>) {
         val sortedDataByOldImpr = data.sortedByDescending { it.oldImpr }
         thresholdImprOld.update { max(sortedDataByOldImpr.getOrNull(239)?.oldImpr ?: 0, 3) }
 
@@ -352,10 +352,10 @@ class BofViewModel(
             Log.d(TAG, "No comment data available for the selected date and time.")
             return
         }
-        val updatedData = data.sortedWith(compareByDescending(BofCommentShow::total)
-                .thenByDescending(BofCommentShow::long)
-                .thenByDescending(BofCommentShow::short)
-                .thenByDescending(BofCommentShow::vote))
+        val updatedData = data.sortedWith(compareByDescending(BofCommentUI::total)
+                .thenByDescending(BofCommentUI::long)
+                .thenByDescending(BofCommentUI::short)
+                .thenByDescending(BofCommentUI::vote))
         var currentRank = 1
         updatedData.forEachIndexed { index, entry ->
             if (index > 0 && updatedData[index - 1].total != entry.total) {

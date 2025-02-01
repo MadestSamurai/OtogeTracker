@@ -133,7 +133,7 @@ fun OsuUserPage(
             .background(color = BRIGHT_RED)
             .verticalScroll(scrollState)
     ) {
-        Card(osuViewModel.osuCardData, osuViewModel.osuGroupList)
+        Card(osuViewModel.osuCardUI, osuViewModel.osuGroupList)
         BadgeList(osuViewModel.osuBadgeList)
         RankGraph(osuViewModel.osuRankGraphData, osuViewModel.osuRankHighestData)
         Level(osuViewModel.osuLevelData)

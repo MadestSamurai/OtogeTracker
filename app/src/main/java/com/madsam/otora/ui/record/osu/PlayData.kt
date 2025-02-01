@@ -44,15 +44,16 @@ import com.madsam.otora.consts.DARK_RED
 import com.madsam.otora.consts.DARK_RED_DEEP
 import com.madsam.otora.consts.DARK_RED_DEEPER
 import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
+import com.madsam.otora.model.osu.ui.OsuPlayUI
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun PlayData(
-    osuPlayData: MutableStateFlow<Map<String, String>>,
+    osuPlayData: MutableStateFlow<OsuPlayUI>,
 ) {
-    val playData = osuPlayData.collectAsState(initial = emptyMap()).value
+    val playData = osuPlayData.collectAsState(initial = OsuPlayUI()).value
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     ConstraintLayout(
@@ -96,11 +97,11 @@ fun PlayData(
         )
 
         val imageWithTextData = listOf(
-            Triple(Filled.OsuSsh, "SSH", playData["sshCount"] ?: "0"),
-            Triple(Filled.OsuSs, "SS", playData["ssCount"] ?: "0"),
-            Triple(Filled.OsuSh, "SH", playData["shCount"] ?: "0"),
-            Triple(Filled.OsuS, "S", playData["sCount"] ?: "0"),
-            Triple(Filled.OsuA, "A", playData["aCount"] ?: "0")
+            Triple(Filled.OsuSsh, "SSH", playData.sshCount.toString()),
+            Triple(Filled.OsuSs, "SS", playData.ssCount.toString()),
+            Triple(Filled.OsuSh, "SH", playData.shCount.toString()),
+            Triple(Filled.OsuS, "S", playData.sCount.toString()),
+            Triple(Filled.OsuA, "A", playData.aCount.toString())
         )
 
         imageWithTextData.forEachIndexed { index, data ->
@@ -159,20 +160,22 @@ fun PlayData(
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
             ) {
-                val playTimeStr = playData["playTime"]?.split(",")
+                val playTimeStr = playData.playTime.split(",").let {
+                    if (it.size < 4) List(4) { "0" } else it
+                }
                 val dayHourLabels = listOf("D", "H")
                 val monthSecondLabels = listOf("M", "S")
                 TitleText(
                     textTitle = "Play Time",
                     text = buildAnnotatedString {
                         val styles = listOf(
-                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold) to (playTimeStr?.get(0) ?: "0"),
+                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold) to (playTimeStr[0]),
                             SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${dayHourLabels[0]} ",
-                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold) to (playTimeStr?.get(1) ?: "0"),
+                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold) to (playTimeStr[1]),
                             SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${dayHourLabels[1]} ",
-                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold) to (playTimeStr?.get(2) ?: "0"),
+                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold) to (playTimeStr[2]),
                             SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${monthSecondLabels[0]} ",
-                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold) to (playTimeStr?.get(3) ?: "0"),
+                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold) to (playTimeStr[3]),
                             SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to monthSecondLabels[1]
                         )
                         styles.forEach { (style, text) ->
@@ -188,7 +191,7 @@ fun PlayData(
                         .padding(start = 10.dp)
                         .width(textWidth)
                 )
-                val ppSplit = playData["pp"]?.split(".")
+                val ppSplit = (if (playData.pp == 0.0) "0.00" else "%.2f".format(playData.pp)).split(".")
                 TitleText(
                     textTitle = "PP",
                     text = buildAnnotatedString {
@@ -198,7 +201,7 @@ fun PlayData(
                                 fontWeight = FontWeight.Bold
                             )
                         ) {
-                            append(ppSplit?.get(0) ?: "0")
+                            append(ppSplit[0])
                         }
                         withStyle(
                             style = SpanStyle(
@@ -206,7 +209,7 @@ fun PlayData(
                                 fontWeight = FontWeight.Normal
                             )
                         ) {
-                            append(".${ppSplit?.get(1) ?: "00"}")
+                            append(".${ppSplit[1]}")
                         }
                     },
                     titleSize = titleSize,
@@ -228,7 +231,21 @@ fun PlayData(
                     ) {
                         pair.forEach { (title, key) ->
                             val text = CommonUtils.bigNumberTextFormat(
-                                playData[key] ?: "0",
+                                when (key) {
+                                    "rankedScore" -> playData.rankedScore
+                                    "totalScore" -> playData.totalScore
+                                    "playCount" -> playData.playCount
+                                    "totalHits" -> playData.totalHits
+                                    "hitAccuracy" -> playData.hitAccuracy
+                                    "maximumCombo" -> playData.maximumCombo
+                                    "medalCount" -> playData.medalCount.toString()
+                                    "replaysWatchedByOthers" -> playData.replaysWatchedByOthers
+                                    "followerCount" -> playData.followerCount
+                                    "mappingFollowerCount" -> playData.mappingFollowerCount
+                                    "postCount" -> playData.postCount
+                                    "commentsCount" -> playData.commentsCount
+                                    else -> "0.0"
+                                },
                                 textSize
                             )
                             TitleText(

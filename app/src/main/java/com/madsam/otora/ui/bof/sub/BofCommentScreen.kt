@@ -68,7 +68,7 @@ import com.madsam.otora.consts.RANKING_GREEN
 import com.madsam.otora.consts.RANKING_RED
 import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
-import com.madsam.otora.model.bof.ui.BofCommentShow
+import com.madsam.otora.model.bof.ui.BofCommentUI
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
@@ -255,7 +255,7 @@ fun CommentCapture(
     showDialog: MutableState<Boolean>,
     context: Context,
     snackbarHostState: SnackbarHostState,
-    commentData: List<BofCommentShow>,
+    commentData: List<BofCommentUI>,
     selectedTimeStr: String,
     maxComment: Int,
     isCompare: Boolean,
@@ -426,7 +426,7 @@ fun CommentHeader(
     barWidth: Double,
     textWidth: Dp,
     isImage: Boolean = false,
-    commentData: List<BofCommentShow> = emptyList(),
+    commentData: List<BofCommentUI> = emptyList(),
     selectedTimeStr: String = "",
     dataSwitch: Boolean = false
 ) {
@@ -613,7 +613,7 @@ fun CommentHeader(
 
 @Composable
 fun BofEntryRowComment(
-    entry: BofCommentShow,
+    entry: BofCommentUI,
     index: Int,
     maxComment: Int,
     isCompare: Boolean = true,

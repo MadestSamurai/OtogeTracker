@@ -62,7 +62,7 @@ import com.madsam.otora.consts.BG_DARK_GRAY
 import com.madsam.otora.consts.RANKING_RED
 import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
-import com.madsam.otora.model.bof.ui.BofEntryShow
+import com.madsam.otora.model.bof.ui.BofEntryUI
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.ImageUtils.saveBitmapToGallery
@@ -225,7 +225,7 @@ fun DiffCapture(
     showDialog: MutableState<Boolean>,
     context: Context,
     snackbarHostState: SnackbarHostState,
-    diffData: List<BofEntryShow>,
+    diffData: List<BofEntryUI>,
     selectedTimeStr: String,
     maxDiff: Int,
     configuration: Configuration,
@@ -393,7 +393,7 @@ fun DiffHeader(
     barWidth: Double,
     textWidth: Dp,
     isImage: Boolean = false,
-    diffData: List<BofEntryShow> = emptyList(),
+    diffData: List<BofEntryUI> = emptyList(),
     selectedTimeStr: String = "",
     isReverse: Boolean = false
 ) {
@@ -489,7 +489,7 @@ fun DiffHeader(
 
 @Composable
 fun BofEntryRowDiff(
-    entry: BofEntryShow,
+    entry: BofEntryUI,
     index: Int,
     maxDiff: Int,
     isImage: Boolean = false,

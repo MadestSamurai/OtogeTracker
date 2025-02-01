@@ -65,7 +65,7 @@ import com.madsam.otora.consts.RANKING_RED
 import com.madsam.otora.consts.RANKING_YELLOW
 import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
-import com.madsam.otora.model.bof.ui.BofEntryShow
+import com.madsam.otora.model.bof.ui.BofEntryUI
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
@@ -265,7 +265,7 @@ fun TotalCapture(
     showDialog: MutableState<Boolean>,
     context: Context,
     snackbarHostState: SnackbarHostState,
-    totalData: List<BofEntryShow>,
+    totalData: List<BofEntryUI>,
     selectedTimeStr: String,
     maxTotal: Int,
     isCompare: Boolean,
@@ -438,7 +438,7 @@ fun TotalHeader(
     barWidth: Double,
     textWidth: Dp,
     isImage: Boolean = false,
-    totalData: List<BofEntryShow> = emptyList(),
+    totalData: List<BofEntryUI> = emptyList(),
     selectedTimeStr: String = "",
     dataSwitch: Boolean = false
 ) {
@@ -562,7 +562,7 @@ fun TotalHeader(
 
 @Composable
 fun BofEntryRowTotal(
-    entry: BofEntryShow,
+    entry: BofEntryUI,
     index: Int,
     maxTotal: Int,
     isCompare: Boolean = true,

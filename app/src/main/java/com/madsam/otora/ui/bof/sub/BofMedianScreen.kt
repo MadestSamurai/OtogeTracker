@@ -65,7 +65,7 @@ import com.madsam.otora.consts.RANKING_RED
 import com.madsam.otora.consts.RANKING_YELLOW
 import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
-import com.madsam.otora.model.bof.ui.BofEntryShow
+import com.madsam.otora.model.bof.ui.BofEntryUI
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
@@ -257,7 +257,7 @@ fun MedianCapture(
     showDialog: MutableState<Boolean>,
     context: Context,
     snackbarHostState: SnackbarHostState,
-    medianData: List<BofEntryShow>,
+    medianData: List<BofEntryUI>,
     selectedTimeStr: String,
     maxMedian: Double,
     isCompare: Boolean,
@@ -434,7 +434,7 @@ fun MedianHeader(
     barWidth: Double,
     textWidth: Dp,
     isImage: Boolean = false,
-    medianData: List<BofEntryShow> = emptyList(),
+    medianData: List<BofEntryUI> = emptyList(),
     selectedTimeStr: String = "",
     thresholdImpr: Int
 ) {
@@ -541,7 +541,7 @@ fun MedianHeader(
 
 @Composable
 fun BofEntryRowMedian(
-    entry: BofEntryShow,
+    entry: BofEntryUI,
     index: Int,
     maxMedian: Double,
     isCompare: Boolean = true,

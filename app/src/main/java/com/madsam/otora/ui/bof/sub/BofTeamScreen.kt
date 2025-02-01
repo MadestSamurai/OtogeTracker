@@ -67,7 +67,7 @@ import com.madsam.otora.consts.RANKING_RED
 import com.madsam.otora.consts.RANKING_YELLOW
 import com.madsam.otora.consts.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
-import com.madsam.otora.model.bof.ui.BofTeamShow
+import com.madsam.otora.model.bof.ui.BofTeamUI
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
@@ -247,7 +247,7 @@ fun TeamCapture(
     showDialog: MutableState<Boolean>,
     context: Context,
     snackbarHostState: SnackbarHostState,
-    teamData: List<BofTeamShow>,
+    teamData: List<BofTeamUI>,
     selectedTimeStr: String,
     maxTotal: Double,
     isCompare: Boolean,
@@ -417,7 +417,7 @@ fun TeamHeader(
     isCompare: Boolean,
     barWidth: Double,
     isImage: Boolean = false,
-    teamData: List<BofTeamShow> = emptyList(),
+    teamData: List<BofTeamUI> = emptyList(),
     selectedTimeStr: String = ""
 ) {
     Column {
@@ -514,7 +514,7 @@ fun TeamHeader(
 
 @Composable
 fun BofTeamRowTotal(
-    entry: BofTeamShow,
+    entry: BofTeamUI,
     index: Int,
     maxTotal: Double,
     isCompare: Boolean = true,

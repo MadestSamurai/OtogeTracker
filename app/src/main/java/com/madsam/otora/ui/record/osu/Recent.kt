@@ -39,6 +39,7 @@ import com.madsam.otora.consts.OSU_ARROW_YELLOW
 import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
 import com.madsam.otora.consts.OSU_HEART_RED
 import com.madsam.otora.consts.OSU_ROTATE_GREEN
+import com.madsam.otora.model.osu.ui.OsuRecentUI
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,12 +54,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun Recent(
-    recentActivityList: MutableStateFlow<List<Map<String, String>>>
+    recentActivityList: MutableStateFlow<List<OsuRecentUI>>
 ) {
-    val recentActivities = recentActivityList.collectAsState(initial = emptyList()).value
-    if (recentActivities.isEmpty() || recentActivities[0].isEmpty()) {
-        return
-    }
+    val activities = recentActivityList.collectAsState(initial = emptyList()).value
+    if (activities.isEmpty()) return
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     Surface(
@@ -88,18 +87,18 @@ fun Recent(
             ) {
                 val cardWidthDp = screenWidthDp - 32.dp
 
-                items(recentActivities) { recentActivity ->
+                items(activities) { activity ->
                     val textFormat =
                         buildAnnotatedString {
-                            appendInlineContent("icon", "[${recentActivity["type"]}]")
-                            when (recentActivity["type"]) {
+                            appendInlineContent("icon", "[${activity.type}]")
+                            when (activity.type) {
                                 "rank" -> {
                                     withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
-                                        append("achieved #${recentActivity["rank"]} on ")
+                                        append("achieved #${activity.rank} on ")
                                     }
-                                    appendInlineContent("mode", "[${recentActivity["mode"]}]")
+                                    appendInlineContent("mode", "[${activity.mode}]")
                                     withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
-                                        append(recentActivity["beatmapTitle"])
+                                        append(activity.beatmapTitle)
                                     }
                                 }
 
@@ -107,9 +106,9 @@ fun Recent(
                                     withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
                                         append("lost first place on ")
                                     }
-                                    appendInlineContent("mode", "[${recentActivity["mode"]}]")
+                                    appendInlineContent("mode", "[${activity.mode}]")
                                     withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
-                                        append(recentActivity["beatmapTitle"])
+                                        append(activity.beatmapTitle)
                                     }
                                 }
 
@@ -118,7 +117,7 @@ fun Recent(
                                         append("submitted a new beatmap ")
                                     }
                                     withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
-                                        append(recentActivity["beatmapSetTitle"])
+                                        append(activity.beatmapSetTitle)
                                     }
                                 }
 
@@ -127,7 +126,7 @@ fun Recent(
                                         append("updated a beatmap ")
                                     }
                                     withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
-                                        append(recentActivity["beatmapSetTitle"])
+                                        append(activity.beatmapSetTitle)
                                     }
                                 }
 
@@ -148,16 +147,16 @@ fun Recent(
                                         append("revived a beatmap ")
                                     }
                                     withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
-                                        append(recentActivity["beatmapSetTitle"])
+                                        append(activity.beatmapSetTitle)
                                     }
                                 }
 
                                 "beatmapsetApprove" -> {
                                     withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
-                                        append(recentActivity["beatmapSetTitle"])
+                                        append(activity.beatmapSetTitle)
                                     }
                                     withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
-                                        append(" has been ${recentActivity["approval"]}")
+                                        append(" has been ${activity.approval}")
                                     }
                                 }
 
@@ -166,13 +165,13 @@ fun Recent(
                                         append("achieved ")
                                     }
                                     withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
-                                        append(recentActivity["achievement"])
+                                        append(activity.achievement)
                                     }
                                 }
 
                                 else -> {
                                     withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
-                                        append("achieved #${recentActivity["rank"]} on ${recentActivity["beatmapTitle"]}")
+                                        append("achieved #${activity.rank} on ${activity.beatmapTitle}")
                                     }
                                 }
                             }
@@ -195,7 +194,7 @@ fun Recent(
                             ) {
                                 Icon(
                                     painter = rememberVectorPainter(
-                                        image = when (recentActivity["mode"]) {
+                                        image = when (activity.mode) {
                                             "mania" -> Filled.OsumodeMania
                                             "osu" -> Filled.OsumodeStd
                                             "taiko" -> Filled.OsumodeTaiko
@@ -210,25 +209,25 @@ fun Recent(
                             },
                             "icon" to InlineTextContent(
                                 Placeholder(
-                                    width = when (recentActivity["type"]) {
+                                    width = when (activity.type) {
                                         "rank" -> 28.sp
                                         "achievement" -> 24.sp
                                         else -> 18.sp
                                     },
-                                    height = when (recentActivity["type"]) {
+                                    height = when (activity.type) {
                                         "achievement" -> 20.sp
                                         else -> 14.sp
                                     },
-                                    placeholderVerticalAlign = when (recentActivity["type"]) {
+                                    placeholderVerticalAlign = when (activity.type) {
                                         "achievement" -> PlaceholderVerticalAlign.TextTop
                                         else -> PlaceholderVerticalAlign.TextBottom
                                     }
                                 )
                             ) {
-                                when (recentActivity["type"]) {
+                                when (activity.type) {
                                     "rank" -> {
                                         Image(
-                                            painter = rememberVectorPainter(image = when (recentActivity["scoreRank"]) {
+                                            painter = rememberVectorPainter(image = when (activity.scoreRank) {
                                                 "XH" -> Filled.OsuSsh
                                                 "X" -> Filled.OsuSh
                                                 "SH" -> Filled.OsuSs
@@ -256,14 +255,14 @@ fun Recent(
                                     "beatmapsetUpload", "beatmapsetUpdate" -> {
                                         Icon(
                                             painter = rememberVectorPainter(
-                                                image = when (recentActivity["type"]) {
+                                                image = when (activity.type) {
                                                     "beatmapsetUpload" -> Filled.ArrowUp
                                                     "beatmapsetUpdate" -> Filled.ArrowRotate
                                                     else -> Filled.ArrowUp
                                                 }
                                             ),
                                             contentDescription = "Beatmap Upload",
-                                            tint = when (recentActivity["type"]) {
+                                            tint = when (activity.type) {
                                                 "beatmapsetUpload" -> OSU_ARROW_YELLOW
                                                 "beatmapsetUpdate" -> OSU_ROTATE_GREEN
                                                 else -> Color.White
@@ -294,7 +293,7 @@ fun Recent(
                                         Icon(
                                             painter = rememberVectorPainter(image = Filled.Tick),
                                             contentDescription = "Osu Mode",
-                                            tint = when (recentActivity["approval"]) {
+                                            tint = when (activity.approval) {
                                                 "qualified" -> OSU_HEART_RED
                                                 "approved" -> OSU_HEART_RED
                                                 "loved" -> OSU_HEART_RED
@@ -316,7 +315,7 @@ fun Recent(
                                     "achievement" -> {
                                         Image(
                                             painter = rememberAsyncImagePainter(
-                                                model = recentActivity["achievementIcon"] ?: "",
+                                                model = activity.achievementIcon,
                                                 contentScale = ContentScale.Fit
                                             ),
                                             contentScale = ContentScale.Fit,
@@ -339,7 +338,7 @@ fun Recent(
                         )
                         Text(
                             text = CommonUtils.dateCodeToRecent(
-                                recentActivity["createdAt"] ?: "1970-01-01T00:00:00+00:00"
+                                activity.createdAt
                             ),
                             fontSize = 12.sp,
                             lineHeight = 14.sp,

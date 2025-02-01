@@ -7,9 +7,9 @@ import com.madsam.otora.entity.BofEntryEntity
 import com.madsam.otora.entity.BofPointEntity
 import com.madsam.otora.entity.BofTeamEntity
 import com.madsam.otora.entity.BofTeamPointEntity
-import com.madsam.otora.model.bof.ui.BofCommentShow
-import com.madsam.otora.model.bof.ui.BofEntryShow
-import com.madsam.otora.model.bof.ui.BofTeamShow
+import com.madsam.otora.model.bof.ui.BofCommentUI
+import com.madsam.otora.model.bof.ui.BofEntryUI
+import com.madsam.otora.model.bof.ui.BofTeamUI
 import com.madsam.otora.utils.CommonUtils
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
@@ -43,7 +43,7 @@ class BofDatabaseService {
         .schemaVersion(1)
         .build()
 
-    suspend fun getBofttEntryByTime(currentTime: Long, compareTime: Long): List<BofEntryShow> {
+    suspend fun getBofttEntryByTime(currentTime: Long, compareTime: Long): List<BofEntryUI> {
         return withContext(Dispatchers.IO) {
             val realm = Realm.open(realmConfig)
             try {
@@ -62,7 +62,7 @@ class BofDatabaseService {
 
                 if (points.isEmpty()) {
                     realm.close()
-                    return@withContext emptyList<BofEntryShow>()
+                    return@withContext emptyList<BofEntryUI>()
                 }
 
                 val date = CommonUtils.millisToYmd(currentTime).substring(0, 10)
@@ -85,7 +85,7 @@ class BofDatabaseService {
                         .filter { it.time <= compareTime }
                         .minByOrNull { abs(it.time - compareTime) }
 
-                    BofEntryShow(
+                    BofEntryUI(
                         oldIndex = 0,
                         index = 0,
                         team = entry.team,
@@ -114,7 +114,7 @@ class BofDatabaseService {
         }
     }
 
-    suspend fun getBofttTeamByTime(currentTime: Long, compareTime: Long): List<BofTeamShow> {
+    suspend fun getBofttTeamByTime(currentTime: Long, compareTime: Long): List<BofTeamUI> {
         return withContext(Dispatchers.IO) {
             val realm = Realm.open(realmConfig)
             try {
@@ -134,7 +134,7 @@ class BofDatabaseService {
 
                 if (points.isEmpty()) {
                     realm.close()
-                    return@withContext emptyList<BofTeamShow>()
+                    return@withContext emptyList<BofTeamUI>()
                 }
 
                 val date = CommonUtils.millisToYmd(currentTime).substring(0, 10)
@@ -157,7 +157,7 @@ class BofDatabaseService {
                         .filter { it.time <= compareTime }
                         .minByOrNull { abs(it.time - compareTime) }
 
-                    BofTeamShow(
+                    BofTeamUI(
                         oldIndex = 0,
                         index = 0,
                         team = team.team,
@@ -199,7 +199,7 @@ class BofDatabaseService {
         }
     }
 
-    suspend fun getBofttCommentByTime(currentDate: String): List<BofCommentShow> {
+    suspend fun getBofttCommentByTime(currentDate: String): List<BofCommentUI> {
         return withContext(Dispatchers.IO) {
             val realm = Realm.open(realmConfig)
             try {
@@ -211,7 +211,7 @@ class BofDatabaseService {
 
                 if (comments.isEmpty()) {
                     realm.close()
-                    return@withContext emptyList<BofCommentShow>()
+                    return@withContext emptyList<BofCommentUI>()
                 }
                 comments.map { entry ->
                     val commentsDetail = realm.query(
@@ -222,7 +222,7 @@ class BofDatabaseService {
                     val vote = commentsDetail.filter { it.type == "vote" }
                     val short = commentsDetail.filter { it.type == "short" }
                     val long = commentsDetail.filter { it.type == "long" }
-                    BofCommentShow(
+                    BofCommentUI(
                         user = entry.user,
                         pattern = entry.pattern,
                         country = entry.country,
@@ -254,7 +254,7 @@ class BofDatabaseService {
         }
     }
 
-    suspend fun getBofttEntryLatest(): List<BofEntryShow> {
+    suspend fun getBofttEntryLatest(): List<BofEntryUI> {
         return withContext(Dispatchers.IO) {
             try {
                 val currentTime = System.currentTimeMillis()
@@ -267,7 +267,7 @@ class BofDatabaseService {
         }
     }
 
-    suspend fun getBofttTeamLatest(): List<BofTeamShow> {
+    suspend fun getBofttTeamLatest(): List<BofTeamUI> {
         return withContext(Dispatchers.IO) {
             try {
                 val currentTime = System.currentTimeMillis()
@@ -280,7 +280,7 @@ class BofDatabaseService {
         }
     }
 
-    suspend fun getBofttCommentLatest(): List<BofCommentShow> {
+    suspend fun getBofttCommentLatest(): List<BofCommentUI> {
         return withContext(Dispatchers.IO) {
             try {
                 getBofttCommentByTime("2025-01-08") //TODO: 从数据库中获取最新评论

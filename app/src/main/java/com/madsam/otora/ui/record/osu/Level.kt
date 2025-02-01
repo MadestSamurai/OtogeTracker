@@ -24,14 +24,15 @@ import com.madsam.otora.consts.DARKER_RED
 import com.madsam.otora.consts.DARK_RED_DEEP
 import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
 import com.madsam.otora.consts.OSU_DARK_RED
+import com.madsam.otora.model.osu.ui.OsuLevelUI
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun Level(
-    osuLevelData: MutableStateFlow<Map<String, String>>
+    osuLevelData: MutableStateFlow<OsuLevelUI>
 ) {
-    val levelData = osuLevelData.collectAsState(initial = emptyMap()).value
+    val levelData = osuLevelData.collectAsState(initial = OsuLevelUI()).value
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     ConstraintLayout(
@@ -63,7 +64,7 @@ fun Level(
                     bottom.linkTo(parent.bottom, margin = 16.dp)
                 }
         ) {
-            val levelBrush = CommonUtils.getLevelBrush((levelData["level"] ?: "0").toInt())
+            val levelBrush = CommonUtils.getLevelBrush(levelData.level.toInt())
             GradientBorderCircle(
                 gradient = levelBrush,
                 borderSize = 3.dp,
@@ -71,7 +72,7 @@ fun Level(
             ) {
                 Text(
                     textAlign = TextAlign.Center,
-                    text = levelData["level"] ?: "0",
+                    text = levelData.level.toString(),
                     color = DARK_RED_TEXT_LIGHT,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
@@ -99,7 +100,7 @@ fun Level(
             modifier = Modifier
                 .height(25.dp)
                 .width(
-                    (cardWidthDp - 103.dp) * (levelData["levelProgress"]?.toFloat() ?: 0f) / 100f
+                    (cardWidthDp - 103.dp) * (levelData.levelProgress / 100f)
                 )
                 .constrainAs(levelProgress) {
                     start.linkTo(levelProgressBar.start)
@@ -110,11 +111,11 @@ fun Level(
 
         Text(
             textAlign = TextAlign.Center,
-            text = (levelData["levelProgress"] ?: "0") + "%",
+            text = "${levelData.levelProgress}%",
             color = DARK_RED_TEXT_LIGHT,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            modifier = if ((levelData["levelProgress"]?.toInt() ?: 0) < 15) {
+            modifier = if (levelData.levelProgress < 15) {
                 Modifier
                     .constrainAs(levelProgressText) {
                         start.linkTo(levelProgress.start, margin = 8.dp)

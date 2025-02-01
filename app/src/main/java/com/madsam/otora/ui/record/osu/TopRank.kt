@@ -35,6 +35,7 @@ import com.madsam.otora.consts.DARK_RED_DEEP
 import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
 import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
 import com.madsam.otora.consts.OsuDiffColor
+import com.madsam.otora.model.osu.ui.OsuTopRankUI
 import com.madsam.otora.ui.icon.Filled
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -48,9 +49,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun TopRank(
-    pinnedMaps : MutableStateFlow<List<Map<String, String>>>,
-    topMaps : MutableStateFlow<List<Map<String, String>>>,
-    firstMaps : MutableStateFlow<List<Map<String, String>>>
+    pinnedMaps: MutableStateFlow<List<OsuTopRankUI>>,
+    topMaps: MutableStateFlow<List<OsuTopRankUI>>,
+    firstMaps: MutableStateFlow<List<OsuTopRankUI>>
 ) {
     val pinned = pinnedMaps.collectAsState(initial = emptyList()).value
     val top = topMaps.collectAsState(initial = emptyList()).value
@@ -122,7 +123,7 @@ fun TopRank(
 
 @Composable
 fun OsuTopRankItemContent(
-    items: List<Map<String, String>>,
+    items: List<OsuTopRankUI>,
     title: String,
     cardWidth: Dp
 ) {
@@ -152,7 +153,7 @@ fun OsuTopRankItemContent(
 
 @Composable
 fun OsuTopRankItemCard(
-    item: Map<String, String>,
+    item: OsuTopRankUI,
     itemWidth: Dp
 ) {
     Surface(
@@ -174,7 +175,7 @@ fun OsuTopRankItemCard(
             ) = createRefs()
             Image(
                 painter = rememberAsyncImagePainter(
-                    model = item["bg2x"] ?: "",
+                    model = item.bg2x,
                     contentScale = ContentScale.Crop
                 ),
                 contentDescription = "Cover",
@@ -204,7 +205,7 @@ fun OsuTopRankItemCard(
             ) {
                 Image(
                     painter = rememberAsyncImagePainter(
-                        model = item["cover2x"] ?: "",
+                        model = item.cover2x,
                         contentScale = ContentScale.Crop
                     ),
                     contentDescription = "Cover",
@@ -214,7 +215,7 @@ fun OsuTopRankItemCard(
             val inlineContent = mapOf(
                 "icon" to InlineTextContent(
                     Placeholder(
-                        width = 14.sp,
+                        width = 16.sp,
                         height = 14.sp,
                         placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
                     )
@@ -222,29 +223,35 @@ fun OsuTopRankItemCard(
                     Icon(
                         painter = rememberVectorPainter(image = Filled.Star),
                         contentDescription = null,
-                        tint = OsuDiffColor.mapValueToTextColor(item["difficultyRating"]?.toFloat() ?: 0f),
+                        tint = OsuDiffColor.mapValueToTextColor(
+                            item.difficultyRating.toFloat()
+                        ),
+                        modifier = Modifier.padding(end = 2.dp)
                     )
                 }
             )
             Text(
                 text = buildAnnotatedString {
                     appendInlineContent("icon", "[icon]")
-                    append(item["difficultyRating"] ?: "")
+                    append(item.difficultyRating.toString())
                 },
                 inlineContent = inlineContent,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                color = OsuDiffColor.mapValueToTextColor(item["difficultyRating"]?.toFloat() ?: 0f),
+                color = OsuDiffColor.mapValueToTextColor(item.difficultyRating.toFloat()),
                 modifier = Modifier
                     .constrainAs(diff) {
                         top.linkTo(parent.top, 4.dp)
                         start.linkTo(cover.start, 4.dp)
                     }
                     .background(
-                        color = OsuDiffColor.mapValueToColor(item["difficultyRating"]?.toFloat() ?: 0f),
+                        color = OsuDiffColor.mapValueToColor(
+                            item.difficultyRating.toFloat()
+                        ),
                         shape = RoundedCornerShape(100.dp)
                     )
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                    .alpha(0.7f)
             )
             Column(
                 modifier = Modifier
@@ -254,7 +261,8 @@ fun OsuTopRankItemCard(
                         end.linkTo(parent.end)
                     }
             ) {
-                Text(text = item["beatmapSetTitleUnicode"] ?: "",
+                Text(
+                    text = item.beatmapSetTitleUnicode,
                     color = DARK_RED_TEXT_LIGHT,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
@@ -263,33 +271,33 @@ fun OsuTopRankItemCard(
                     modifier = Modifier
                         .width(itemWidth - 124.dp)
                 )
-                Text(text = item["artist"] ?: "",
-                    color = DARK_RED_TEXT_LIGHT,
-                    fontSize = 14.sp,
-                    lineHeight = 22.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .width(itemWidth - 124.dp)
-                )
-                Text(text = item["beatmapSubTitle"] ?: "",
+                Text(
+                    text = item.beatmapSubTitle,
                     color = OSU_BRIGHT_YELLOW,
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .width(itemWidth - 124.dp)
+                    overflow = TextOverflow.Clip,
                 )
-                Text(text = ("mapped by ${item["creator"]}"),
-                    color = DARK_RED_TEXT_LIGHT,
-                    fontSize = 14.sp,
-                    lineHeight = 22.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .width(itemWidth - 124.dp)
-                )
+
+//                Text(
+//                    text = item["artist"] ?: "",
+//                    color = DARK_RED_TEXT_LIGHT,
+//                    fontSize = 14.sp,
+//                    lineHeight = 22.sp,
+//                    maxLines = 1,
+//                    overflow = TextOverflow.Ellipsis,
+//                )
+//                Text(
+//                    text = ("mapped by ${item["creator"]}"),
+//                    color = DARK_RED_TEXT_LIGHT,
+//                    fontSize = 14.sp,
+//                    lineHeight = 22.sp,
+//                    maxLines = 1,
+//                    overflow = TextOverflow.Ellipsis,
+//                    modifier = Modifier
+//                        .width(itemWidth - 124.dp)
+//                )
             }
         }
     }

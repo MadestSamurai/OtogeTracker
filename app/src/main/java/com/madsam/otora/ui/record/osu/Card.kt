@@ -50,16 +50,17 @@ import com.madsam.otora.consts.DARK_RED_DEEP
 import com.madsam.otora.consts.DARK_RED_TEXT
 import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
 import com.madsam.otora.consts.OSU_BRIGHT_RED
+import com.madsam.otora.model.osu.ui.OsuCardUI
 import com.madsam.otora.model.osu.web.OsuGroup
 import com.madsam.otora.ui.icon.Filled
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun Card(
-    osuCardData: MutableStateFlow<Map<String, String>>,
+    osuCardData: MutableStateFlow<OsuCardUI>,
     osuGroupList: MutableStateFlow<List<OsuGroup>>,
 ) {
-    val cardData = osuCardData.collectAsState(initial = emptyMap()).value
+    val cardData = osuCardData.collectAsState(initial = OsuCardUI()).value
     val groupListData = osuGroupList.collectAsState(initial = emptyList()).value
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
@@ -110,7 +111,7 @@ fun Card(
                 ) {
                     Icon(
                         painter = rememberVectorPainter(image = Filled.OsuOnline),
-                        tint = if (cardData["isOnline"] == "true") Color(0xFF8DC63F) else Color(0xFF565656),
+                        tint = if (cardData.isOnline) Color(0xFF8DC63F) else Color(0xFF565656),
                         contentDescription = stringResource(id = R.string.online_mark),
                         modifier = Modifier.padding(end = 5.dp)
                     )
@@ -124,7 +125,7 @@ fun Card(
                 ) {
                     Image(
                         painter = rememberAsyncImagePainter(
-                            model = cardData["flagUrl"],
+                            model = cardData.flagUrl,
                             imageLoader = svgLoader,
                             contentScale = ContentScale.Fit
                         ),
@@ -153,7 +154,7 @@ fun Card(
             ) {
                 Image(
                     painter = rememberAsyncImagePainter(
-                        model = cardData["coverUrl"],
+                        model = cardData.coverUrl,
                         contentScale = ContentScale.Crop
                     ),
                     contentDescription = "Cover Image",
@@ -164,7 +165,7 @@ fun Card(
 
             Image(
                 painter = rememberAsyncImagePainter(
-                    model = cardData["tournamentBannerImage2x"],
+                    model = cardData.tournamentBannerImage2x,
                     contentScale = ContentScale.Crop
                 ),
                 contentDescription = "Tournament Banner",
@@ -172,9 +173,9 @@ fun Card(
                 modifier = Modifier
                     .width(cardWidthDp)
                     .height(
-                        if ((cardData["tournamentBannerImage2x"]
-                                ?: "").isNotEmpty()
-                        ) cardWidthDp / 50 * 3 else 0.dp
+                        if (cardData.tournamentBannerImage2x.isNotEmpty()) 
+                            cardWidthDp / 50 * 3 
+                        else 0.dp
                     )
                     .constrainAs(tournamentBanner) {
                         top.linkTo(coverImage.bottom)
@@ -210,7 +211,7 @@ fun Card(
             ) {
                 Image(
                     painter = rememberAsyncImagePainter(
-                        model = cardData["avatarUrl"],
+                        model = cardData.avatarUrl,
                         imageLoader = gifLoader,
                         contentScale = ContentScale.Crop
                     ),
@@ -219,12 +220,12 @@ fun Card(
                     modifier = Modifier.fillMaxSize()
                 )
             }
-            if (cardData["isTitle"] == "true") {
+            if (cardData.isTitle) {
                 Text(
-                    text = cardData["title"] ?: "",
+                    text = cardData.title,
                     color = Color(
                         android.graphics.Color.parseColor(
-                            cardData["profileColour"] ?: "#FFFFFF"
+                            cardData.profileColour
                         )
                     ),
                     fontSize = 16.sp,
@@ -260,7 +261,7 @@ fun Card(
             }
             val formerUsernameShowPopup = remember { MutableTransitionState(false) }
             Text(
-                text = cardData["username"] ?: "",
+                text = cardData.username,
                 color = DARK_RED_TEXT_LIGHT,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
@@ -279,7 +280,7 @@ fun Card(
                         "onlineMark",
                         "[${stringResource(id = R.string.online_mark)}]"
                     )
-                    append(stringResource(id = if (cardData["isOnline"] == "true") R.string.online else R.string.offline))
+                    append(stringResource(id = if (cardData.isOnline) R.string.online else R.string.offline))
                 },
                 inlineContent = inlineContent,
                 modifier = Modifier
@@ -293,7 +294,7 @@ fun Card(
                 fontSize = 18.sp
             )
             val supporterShowPopup = remember { MutableTransitionState(false) }
-            if (cardData["isSupporter"] == "true") {
+            if (cardData.isSupporter) {
                 Box(
                     modifier = Modifier
                         .constrainAs(supporterRank) {
@@ -310,10 +311,10 @@ fun Card(
                 ) {
                     Image(
                         painter = rememberVectorPainter(
-                            image = when (cardData["supporterRank"]) {
-                                "1" -> Filled.Heart1
-                                "2" -> Filled.Heart2
-                                "3" -> Filled.Heart3
+                            image = when (cardData.supporterRank) {
+                                1 -> Filled.Heart1
+                                2 -> Filled.Heart2
+                                3 -> Filled.Heart3
                                 else -> Filled.Heart1
                             }
                         ),
@@ -330,7 +331,7 @@ fun Card(
             }
             val modeGlobalRankShowPopup = remember { MutableTransitionState(false) }
             Text(
-                text = cardData["rank"] ?: "",
+                text = cardData.rank,
                 color = DARK_RED_TEXT_LIGHT,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
@@ -359,7 +360,7 @@ fun Card(
                 Text(
                     text = buildAnnotatedString {
                         appendInlineContent("flag", "[Flag]")
-                        append(cardData["country"] ?: "")
+                        append(cardData.country)
                     },
                     inlineContent = inlineContent,
                     color = DARK_RED_TEXT,
@@ -367,7 +368,7 @@ fun Card(
                     lineHeight = 18.sp,
                 )
                 Text(
-                    text = cardData["countryRank"] ?: "",
+                    text = cardData.countryRank,
                     color = DARK_RED_TEXT_LIGHT,
                     fontSize = 16.sp,
                     lineHeight = 20.sp,
@@ -380,9 +381,9 @@ fun Card(
                 modeGlobalRankPopup,
                 modeCountryRankPopup,
             ) = refs
-            if (cardData["isSupporter"] == "true") {
+            if (cardData.isSupporter) {
                 PopupTip(
-                    "Supporter Rank  ${cardData["supporterRank"]}",
+                    "Supporter Rank ${cardData.supporterRank}",
                     OSU_BRIGHT_RED,
                     Modifier.constrainAs(supporterPopup) {
                         top.linkTo(supporterRank.bottom, margin = 4.dp)
@@ -393,9 +394,9 @@ fun Card(
                     Alignment.TopCenter
                 )
             }
-            if ((cardData["formerUsernames"] ?: "").isNotEmpty()) {
+            if (cardData.formerUsernames.isNotEmpty()) {
                 PopupTip(
-                    "formerly known as:\n${cardData["formerUsernames"]}",
+                    "formerly known as:\n${cardData.formerUsernames}",
                     DARK_RED_TEXT_LIGHT,
                     Modifier.constrainAs(formerUsernamePopup) {
                         top.linkTo(nameplateName.bottom, margin = 4.dp)
@@ -405,9 +406,9 @@ fun Card(
                     Alignment.TopStart
                 )
             }
-            if (cardData["currentMode"] == "mania") {
+            if (cardData.currentMode == "mania") {
                 PopupTip(
-                    cardData["maniaModeGlobalRank"] ?: "",
+                    cardData.maniaModeGlobalRank,
                     DARK_RED_TEXT_LIGHT,
                     Modifier.constrainAs(modeGlobalRankPopup) {
                         top.linkTo(rank.bottom, margin = 4.dp)
@@ -418,7 +419,7 @@ fun Card(
                     Alignment.TopCenter
                 )
                 PopupTip(
-                    cardData["maniaModeCountryRank"] ?: "",
+                    cardData.maniaModeCountryRank,
                     DARK_RED_TEXT_LIGHT,
                     Modifier.constrainAs(modeCountryRankPopup) {
                         top.linkTo(country.bottom, margin = 4.dp)

@@ -49,7 +49,7 @@ import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
 import com.madsam.otora.entity.ChuniSheetsEntity
 import com.madsam.otora.entity.ChuniSongsEntity
 import com.madsam.otora.model.chuni.net.ChuniScore
-import com.madsam.otora.model.chuni.ui.ChuniScoreShow
+import com.madsam.otora.model.chuni.ui.ChuniScoreUI
 import com.madsam.otora.service.ChuniDataRequestService
 import com.madsam.otora.utils.CalcUtils
 import com.madsam.otora.utils.CommonUtils
@@ -77,7 +77,6 @@ fun TopRating(
     val chuniDataRequestService = ChuniDataRequestService(context)
 
     Column {
-        // 添加顶部导航栏
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -98,11 +97,9 @@ fun TopRating(
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
-            // 添加一个空的Box来保持对称
             Box(modifier = Modifier.width(48.dp))
         }
 
-        // 原有的评分列表内容
         val chuniRatingBest = MutableStateFlow(listOf<ChuniScore>())
         val moshi = Moshi.Builder()
             .addLast(KotlinJsonAdapterFactory())
@@ -121,7 +118,7 @@ fun TopRating(
             items(chuniRatingBest.value.size) { index ->
                 val songData = remember { mutableStateOf(ChuniSongsEntity()) }
                 val songSheetData = remember { mutableStateOf(ChuniSheetsEntity()) }
-                val topRating = remember { mutableStateOf(ChuniScoreShow()) }
+                val topRating = remember { mutableStateOf(ChuniScoreUI()) }
                 LaunchedEffect(Unit) {
                     songData.value = chuniDataRequestService.getChuniSongData(chuniRatingBest.value[index].title)
                     val diff = when (chuniRatingBest.value[index].diff) {
@@ -134,7 +131,7 @@ fun TopRating(
                     }
                     songSheetData.value =
                         chuniDataRequestService.getChuniSongSheetData(chuniRatingBest.value[index].title, diff)
-                    topRating.value = ChuniScoreShow(
+                    topRating.value = ChuniScoreUI(
                         title = songData.value.title,
                         artist = songData.value.artist,
                         noteDesigner = songSheetData.value.noteDesigner,
@@ -164,7 +161,7 @@ fun TopRating(
 
 @Composable
 fun ChuniRatingItemCard(
-    item: ChuniScoreShow,
+    item: ChuniScoreUI,
     itemWidth: Dp
 ) {
     val url = "https://dp4p6x0xfi5o9.cloudfront.net/chunithm"

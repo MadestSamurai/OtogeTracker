@@ -7,7 +7,7 @@ package com.madsam.otora.model.bof.ui
  * 创建时间: 2025/1/11
  * 描述: BOF评论展示实体
  */
-data class BofCommentShow(
+data class BofCommentUI(
     var index: Int = 0,
     var user: String = "",
     var pattern: String = "",
