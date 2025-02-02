@@ -44,7 +44,7 @@ import coil.decode.SvgDecoder
 import com.madsam.otora.R
 import com.madsam.otora.components.GroupListItem
 import com.madsam.otora.components.PopupTip
-import com.madsam.otora.consts.BG_HALF_TRANS_BLACK
+import com.madsam.otora.consts.BlackAlpha80
 import com.madsam.otora.consts.DARK_RED
 import com.madsam.otora.consts.DARK_RED_DEEP
 import com.madsam.otora.consts.DARK_RED_TEXT
@@ -236,7 +236,7 @@ fun Card(
                             start.linkTo(coverImage.start, margin = 12.dp)
                         }
                         .clip(RoundedCornerShape(6.dp))
-                        .background(BG_HALF_TRANS_BLACK)
+                        .background(BlackAlpha80)
                         .padding(
                             horizontal = 5.dp,
                             vertical = 2.dp

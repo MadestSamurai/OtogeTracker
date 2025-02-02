@@ -28,13 +28,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext  // 正确导入
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.ui.record.chunithm.TopRating
 import com.madsam.otora.ui.record.sub.ChunithmUserPage
 import com.madsam.otora.ui.record.sub.MaimaiUserPage
 import com.madsam.otora.ui.record.sub.OsuUserPage
+import com.madsam.otora.ui.record.viewmodel.OsuViewModel
+import com.madsam.otora.ui.record.viewmodel.OsuViewModelFactory
+import com.madsam.otora.utils.ShareUtil
 import kotlinx.coroutines.launch
 
 @Composable
@@ -44,6 +49,7 @@ fun RecordScreen(
     val tabs = listOf(Screen.Page1, Screen.Page2, Screen.Page3, Screen.Page4)
     val pagerState = rememberPagerState(pageCount = { tabs.size })
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     var showOsuDialog by remember { mutableStateOf(false) }
     var showMaimaiDialog by remember { mutableStateOf(false) }
@@ -66,10 +72,17 @@ fun RecordScreen(
                 }
             }
 
+            val osuViewModel: OsuViewModel = viewModel(factory = OsuViewModelFactory(
+                userId = ShareUtil.getString("userId", context) ?: "2",
+                mode = ShareUtil.getString("mode", context) ?: "osu",
+                context = context
+            ))
+
             HorizontalPager(state = pagerState) { page ->
                 when (tabs[page]) {
                     is Screen.Page1 -> OsuUserPage(
                         showOsuDialog,
+                        osuViewModel,
                         onDismissDialog = { showOsuDialog = false }
                     )
                     is Screen.Page2 -> MaimaiUserPage(

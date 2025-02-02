@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -23,6 +24,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.consts.DARK_RED_DEEP
+import com.madsam.otora.consts.White1000
 import com.madsam.otora.model.osu.ui.OsuBadgeUI
 import com.madsam.otora.ui.icon.Filled
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,13 +70,13 @@ fun BadgeList(
                 modifier = Modifier.padding(vertical = 8.dp)
             ) {
                 if (badgeListData.size > imageCount) {
-                    Image(
+                    Icon(
                         painter = rememberVectorPainter(image = Filled.ChevronLeft),
                         contentDescription = "Previous",
-                        contentScale = ContentScale.FillHeight,
+                        tint = White1000,
                         modifier = Modifier
-                            .padding(start = 8.dp)
-                            .width(20.dp)
+                            .padding(start = 13.dp, end = 5.dp)
+                            .width(10.dp)
                             .height(30.dp)
                             .align(Alignment.CenterVertically)
                             .clickable {
@@ -82,6 +84,9 @@ fun BadgeList(
                                     val currentIndex = listState.firstVisibleItemIndex
                                     if (currentIndex > 0) {
                                         listState.animateScrollToItem(currentIndex - 1)
+                                    }
+                                    if (currentIndex == 0) {
+                                        listState.animateScrollToItem(0)
                                     }
                                 }
                             }
@@ -105,13 +110,13 @@ fun BadgeList(
                     }
                 }
                 if (badgeListData.size > imageCount) {
-                    Image(
+                    Icon(
                         painter = rememberVectorPainter(image = Filled.ChevronRight),
                         contentDescription = "Next",
-                        contentScale = ContentScale.FillHeight,
+                        tint = White1000,
                         modifier = Modifier
-                            .padding(end = 8.dp)
-                            .width(20.dp)
+                            .padding(start = 5.dp, end = 13.dp)
+                            .width(10.dp)
                             .height(30.dp)
                             .align(Alignment.CenterVertically)
                             .clickable {

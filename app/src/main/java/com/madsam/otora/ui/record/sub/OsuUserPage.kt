@@ -1,11 +1,9 @@
 package com.madsam.otora.ui.record.sub
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
@@ -21,8 +19,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.consts.BRIGHT_RED
 import com.madsam.otora.ui.record.osu.BadgeList
 import com.madsam.otora.ui.record.osu.Card
@@ -33,113 +29,142 @@ import com.madsam.otora.ui.record.osu.Recent
 import com.madsam.otora.ui.record.osu.SocialCard
 import com.madsam.otora.ui.record.osu.TopRank
 import com.madsam.otora.ui.record.viewmodel.OsuViewModel
-import com.madsam.otora.ui.record.viewmodel.OsuViewModelFactory
 import com.madsam.otora.utils.ShareUtil
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OsuUserPage(
     showOsuDialog: Boolean,
+    viewModel: OsuViewModel,
     onDismissDialog: () -> Unit
 ) {
-    val context = LocalContext.current
+    OsuSettingsDialog(
+        showDialog = showOsuDialog,
+        onDismiss = onDismissDialog,
+        viewModel = viewModel
+    )
 
-    val osuViewModel: OsuViewModel = viewModel(factory = OsuViewModelFactory(
-        userId = ShareUtil.getString("userId", context) ?: "2",
-        mode = ShareUtil.getString("mode", context) ?: "osu",
-        context = context
-    ))
-    val userState = remember { mutableStateOf("") }
-    val modeState = remember { mutableStateOf("osu") }
-    val items = listOf("mania", "osu", "taiko", "fruits")
-    val isClicked = remember { mutableStateOf(false) }
-    val scrollState = rememberScrollState()
-
-    if (showOsuDialog) {
-        AlertDialog(
-            onDismissRequest = { onDismissDialog() },
-            title = { Text(text = "Enter osu details") },
-            text = {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    TextField(
-                        value = userState.value,
-                        onValueChange = { userState.value = it },
-                        label = { Text("Enter osu id") },
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    
-                    ExposedDropdownMenuBox(
-                        expanded = isClicked.value,
-                        onExpandedChange = { isClicked.value = it },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        TextField(
-                            value = modeState.value,
-                            onValueChange = {},
-                            readOnly = true,
-                            label = { Text("Game Mode") },
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = isClicked.value)
-                            },
-                            colors = ExposedDropdownMenuDefaults.textFieldColors(),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
-                        )
-
-                        ExposedDropdownMenu(
-                            expanded = isClicked.value,
-                            onDismissRequest = { isClicked.value = false }
-                        ) {
-                            items.forEach { mode ->
-                                DropdownMenuItem(
-                                    text = { Text(mode) },
-                                    onClick = {
-                                        modeState.value = mode
-                                        isClicked.value = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    Button(
-                        onClick = {
-                            ShareUtil.putString("userId", userState.value, context)
-                            ShareUtil.putString("mode", modeState.value, context)
-                            osuViewModel.requestOsuData(userState.value, modeState.value, context)
-                            onDismissDialog()
-                        },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Confirm")
-                    }
-                }
-            },
-            confirmButton = {},
-            dismissButton = {
-                TextButton(onClick = { onDismissDialog() }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-
-    Column(
+    LazyColumn(
         modifier = Modifier
             .background(color = BRIGHT_RED)
-            .verticalScroll(scrollState)
     ) {
-        Card(osuViewModel.osuCardUI, osuViewModel.osuGroupList)
-        BadgeList(osuViewModel.osuBadgeList)
-        RankGraph(osuViewModel.osuRankGraphData, osuViewModel.osuRankHighestData)
-        Level(osuViewModel.osuLevelData)
-        PlayData(osuViewModel.osuPlayData)
-        SocialCard(osuViewModel.osuSocialCardData)
-        Recent(osuViewModel.osuRecentActivityData)
-        TopRank(osuViewModel.osuPinnedMapData, osuViewModel.osuBestMapData, osuViewModel.osuFirstMapData)
+        // Card Section
+        item(key = "card_data") {
+            Card(
+                viewModel.osuCardUI,
+                viewModel.osuGroupList
+            )
+        }
+        // Badge Section
+        item(key = "badge_list") {
+            BadgeList(
+                viewModel.osuBadgeList
+            )
+        }
+        // Rank and Level Section
+        item(key = "rank_graph") {
+            RankGraph(
+                viewModel.osuRankGraphData,
+                viewModel.osuRankHighestData
+            )
+            Level(viewModel.osuLevelData)
+        }
+        // Play Data Section
+        item(key = "play_data") {
+            PlayData(viewModel.osuPlayData)
+        }
+        // Social and Recent Section
+        item(key = "social") {
+            SocialCard(viewModel.osuSocialCardData)
+        }
+        item(key = "recent") {
+            Recent(viewModel.osuRecentActivityData)
+        }
+        // Top Rank Section
+        item(key = "top_rank") {
+            TopRank(
+                viewModel.osuPinnedMapData,
+                viewModel.osuBestMapData,
+                viewModel.osuFirstMapData
+            )
+        }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun OsuSettingsDialog(
+    showDialog: Boolean,
+    onDismiss: () -> Unit,
+    viewModel: OsuViewModel
+) {
+    if (!showDialog) return
+
+    val context = LocalContext.current
+    val userState = remember { mutableStateOf("") }
+    val modeState = remember { mutableStateOf("osu") }
+    val isClicked = remember { mutableStateOf(false) }
+    val items = remember { listOf("mania", "osu", "taiko", "fruits") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Enter osu details") },
+        text = {
+            Column {
+                TextField(
+                    value = userState.value,
+                    onValueChange = { userState.value = it },
+                    label = { Text("Enter osu id") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                ExposedDropdownMenuBox(
+                    expanded = isClicked.value,
+                    onExpandedChange = { isClicked.value = it },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TextField(
+                        value = modeState.value,
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isClicked.value) },
+                        modifier = Modifier
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = isClicked.value,
+                        onDismissRequest = { isClicked.value = false }
+                    ) {
+                        items.forEach { mode ->
+                            DropdownMenuItem(
+                                text = { Text(mode) },
+                                onClick = {
+                                    modeState.value = mode
+                                    isClicked.value = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Button(
+                    onClick = {
+                        ShareUtil.putString("userId", userState.value, context)
+                        ShareUtil.putString("mode", modeState.value, context)
+                        viewModel.requestOsuData(userState.value, modeState.value, context)
+                        onDismiss()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Confirm")
+                }
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }

@@ -36,6 +36,7 @@ import com.madsam.otora.consts.White1000
 import com.madsam.otora.model.osu.ui.OsuSocialUI
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.utils.CommonUtils.dateCodeToRecent
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -128,9 +129,7 @@ fun SocialCard(
                         )
                     ) {
                         append(
-                            CommonUtils.dateCodeToRecent(
-                                data.lastVisit
-                            )
+                            dateCodeToRecent(data.lastVisit)
                         )
                     }
                 },

@@ -82,7 +82,8 @@ fun Recent(
             )
             LazyColumn(
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .clip(RoundedCornerShape(6.dp))
                     .height(200.dp)
             ) {
                 val cardWidthDp = screenWidthDp - 32.dp
@@ -178,7 +179,7 @@ fun Recent(
                         }
                     Column(
                         modifier = Modifier
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .padding(vertical = 4.dp)
                             .clip(RoundedCornerShape(6.dp))
                             .background(DARK_RED_DEEPER)
                             .padding(2.dp)
@@ -238,7 +239,7 @@ fun Recent(
                                                 "D" -> Filled.OsuD
                                                 else -> Filled.OsuF
                                             }),
-                                            contentDescription = "Osu Mode",
+                                            contentDescription = "Rank",
                                             modifier = Modifier.padding(end = 4.dp)
                                         )
                                     }
@@ -337,9 +338,7 @@ fun Recent(
                                 .padding(start = 8.dp, top = 4.dp, end = 8.dp)
                         )
                         Text(
-                            text = CommonUtils.dateCodeToRecent(
-                                activity.createdAt
-                            ),
+                            text = CommonUtils.dateCodeToRecent(activity.createdAt),
                             fontSize = 12.sp,
                             lineHeight = 14.sp,
                             color = Color.Gray,

@@ -161,7 +161,7 @@ class OsuViewModel(
             date = item.endedAt,
             maxCombo = item.maxCombo,
             score = item.legacyTotalScore,
-            mods = item.mods.joinToString(", "),
+            mods = item.mods.map { it.acronym },
             totalScore = CommonUtils.formatNumberThousand(item.totalScore),
             weight = item.weight.percentage,
             weightPP = item.weight.pp,

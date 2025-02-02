@@ -213,7 +213,7 @@ object CommonUtils {
      * @return 百分比字符串
      */
     fun formatPercent(value: Double): String {
-        return String.format(Locale.getDefault(), "%.2f%%", value)
+        return String.format(Locale.getDefault(), "%.2f%%", value*100)
     }
 
     /**

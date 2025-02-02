@@ -86,10 +86,10 @@ data class OsuTopRankUI(
     val date: String = "",
     val maxCombo: Long = 0,
     val score: Long = 0,
-    val mods: String = "",
     val totalScore: String = "",
     val weight: Double = 0.0,
     val weightPP: Double = 0.0,
+    val mods: List<String> = listOf(),
     val beatmapId: Long = 0,
     val beatmapSetId: Long = 0,
     val status: String = ""
