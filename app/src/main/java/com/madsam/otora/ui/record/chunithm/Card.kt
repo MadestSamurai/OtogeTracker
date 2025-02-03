@@ -2,8 +2,6 @@ package com.madsam.otora.ui.record.chunithm
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -88,47 +86,14 @@ fun Card(
                 }
                 .build()
 
-            Box(
-                modifier = Modifier
-                    .constrainAs(charaImage) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                        bottom.linkTo(parent.bottom)
-                    }
-                    .size(120.dp)
-                    .clip(
-                        RoundedCornerShape(
-                            topEnd = 5.dp,
-                            bottomEnd = 5.dp
-                        )
-                    )
-                    .background(
-                        when (cardData.value.charaBase) {
-                            "silver" -> OSU_LEVEL_SILVER_1
-                            else -> {
-                                DARKER_RED
-                            }
-                        }
-                    )
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = cardData.value.charaInfo,
-                        imageLoader = imageLoader
-                    ),
-                    contentDescription = "Cover Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-
-            Box(
+            Text(
+                text = cardData.value.honorText,
                 modifier = Modifier
                     .constrainAs(honor) {
                         top.linkTo(parent.top)
-                        start.linkTo(charaImage.end)
-                        end.linkTo(parent.end)
+                        start.linkTo(parent.start)
                     }
+                    .width(surfaceWidthDp)
                     .padding(5.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .background(
@@ -140,21 +105,38 @@ fun Card(
                                 DARKER_RED
                             }
                         }
-                    )
-            ) {
-                Text(
-                    text = cardData.value.honorText,
-                    modifier = Modifier
-                        .width(surfaceWidthDp - 130.dp)
-                        .padding(2.dp),
-                    textAlign = TextAlign.Center,
-                    color = Color.Black,
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
                     ),
-                )
-            }
+                textAlign = TextAlign.Center,
+                color = Color.Black,
+                style = androidx.compose.ui.text.TextStyle(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+            )
+
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = cardData.value.charaInfo,
+                    imageLoader = imageLoader
+                ),
+                contentDescription = "Cover Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .constrainAs(charaImage) {
+                        top.linkTo(honor.bottom)
+                        start.linkTo(parent.start)
+                        bottom.linkTo(parent.bottom)
+                    }
+                    .size(120.dp)
+                    .padding(start = 5.dp, bottom = 5.dp)
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(
+                        when (cardData.value.charaBase) {
+                            "silver" -> OSU_LEVEL_SILVER_1
+                            else -> DARKER_RED
+                        }
+                    )
+            )
 
             Image(
                 painter = rememberVectorPainter(image = Filled.Star),
@@ -178,7 +160,7 @@ fun Card(
                     },
                 text = cardData.value.reborn.toString(),
                 color = DARK_RED,
-                    fontSize = 12.sp,
+                fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
             )
 
@@ -231,12 +213,11 @@ fun Card(
                 modifier = Modifier
                     .padding(horizontal = 5.dp)
                     .constrainAs(classEmblemBase) {
-                        top.linkTo(username.top)
-                        bottom.linkTo(username.bottom)
+                        top.linkTo(honor.bottom)
                         end.linkTo(parent.end)
                     }
+                    .width(60.dp)
                     .height(30.dp)
-
             )
 
             Image(

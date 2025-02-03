@@ -1,6 +1,8 @@
 package com.madsam.otora.ui.record.viewmodel
 
 import android.content.Context
+import android.view.View
+import androidx.compose.ui.unit.dp
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -23,6 +25,8 @@ import com.madsam.otora.service.OsuDataRequestService
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.CommonUtils.formatNumberThousand
 import com.madsam.otora.utils.CommonUtils.formatPercent
+import com.madsam.otora.utils.ScreenUtil.getSafeInsetLeftDp
+import com.madsam.otora.utils.ScreenUtil.getSafeInsetRightDp
 import com.madsam.otora.utils.ShareUtil
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -63,11 +67,19 @@ class OsuViewModel(
 
     private val osuGlanceData = MutableStateFlow(OsuGlanceUI())
 
+    val leftPadding = MutableStateFlow(0.dp)
+    val rightPadding = MutableStateFlow(0.dp)
+
     init {
         requestOsuData(userId, mode, context)
     }
 
     private val serviceScope = CoroutineScope(Dispatchers.IO)
+
+    fun updatePadding(view: View) {
+        leftPadding.update { getSafeInsetLeftDp(view) }
+        rightPadding.update { getSafeInsetRightDp(view) }
+    }
 
     fun requestOsuData(userId: String, mode: String, context: Context) {
         val osuDataRequestService = OsuDataRequestService()

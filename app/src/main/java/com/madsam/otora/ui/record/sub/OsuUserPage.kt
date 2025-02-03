@@ -16,10 +16,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.consts.BRIGHT_RED
 import com.madsam.otora.ui.record.osu.BadgeList
@@ -31,7 +35,9 @@ import com.madsam.otora.ui.record.osu.Recent
 import com.madsam.otora.ui.record.osu.SocialCard
 import com.madsam.otora.ui.record.osu.TopRank
 import com.madsam.otora.ui.record.viewmodel.OsuViewModel
+import com.madsam.otora.utils.ScreenUtil.isLandscape
 import com.madsam.otora.utils.ShareUtil
+import kotlinx.coroutines.flow.asStateFlow
 
 @Composable
 fun OsuUserPage(
@@ -45,10 +51,22 @@ fun OsuUserPage(
         viewModel = viewModel
     )
 
+    val configuration = LocalConfiguration.current
+    val view = LocalView.current
+    val leftPadding = viewModel.leftPadding.asStateFlow().collectAsState().value
+    val rightPadding = viewModel.rightPadding.asStateFlow().collectAsState().value
+
+    LaunchedEffect(configuration) {
+        viewModel.updatePadding(view)
+    }
+
     LazyColumn(
         modifier = Modifier
             .background(color = BRIGHT_RED)
-            .padding(horizontal = 12.dp)
+            .padding(
+                start = 12.dp + if (isLandscape(configuration)) leftPadding else 0.dp,
+                end = 12.dp + if (isLandscape(configuration)) rightPadding else 0.dp
+            )
     ) {
         item(key = "card_data") {
             Card(viewModel.osuCardUI, viewModel.osuGroupList)
