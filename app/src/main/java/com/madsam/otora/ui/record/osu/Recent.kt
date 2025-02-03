@@ -60,14 +60,12 @@ fun Recent(
     if (activities.isEmpty()) return
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val cardWidthDp = screenWidthDp - 24.dp
+
     Surface(
         Modifier
             .width(screenWidthDp)
-            .padding(
-                start = 16.dp,
-                top = 12.dp,
-                end = 16.dp
-            ),
+            .padding(top = 12.dp),
         RoundedCornerShape(20.dp),
         DARK_RED_DEEP
     ) {
@@ -86,8 +84,6 @@ fun Recent(
                     .clip(RoundedCornerShape(6.dp))
                     .height(200.dp)
             ) {
-                val cardWidthDp = screenWidthDp - 32.dp
-
                 items(activities) { activity ->
                     val textFormat =
                         buildAnnotatedString {
@@ -230,8 +226,8 @@ fun Recent(
                                         Image(
                                             painter = rememberVectorPainter(image = when (activity.scoreRank) {
                                                 "XH" -> Filled.OsuSsh
-                                                "X" -> Filled.OsuSh
-                                                "SH" -> Filled.OsuSs
+                                                "X" -> Filled.OsuSs
+                                                "SH" -> Filled.OsuSh
                                                 "S" -> Filled.OsuS
                                                 "A" -> Filled.OsuA
                                                 "B" -> Filled.OsuB

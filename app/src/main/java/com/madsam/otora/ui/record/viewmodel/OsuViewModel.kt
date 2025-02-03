@@ -21,6 +21,8 @@ import com.madsam.otora.model.osu.web.OsuRecentActivity
 import com.madsam.otora.model.osu.web.OsuTopRankItem
 import com.madsam.otora.service.OsuDataRequestService
 import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.utils.CommonUtils.formatNumberThousand
+import com.madsam.otora.utils.CommonUtils.formatPercent
 import com.madsam.otora.utils.ShareUtil
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -145,6 +147,13 @@ class OsuViewModel(
     }
 
     private fun setOsuTopRankItem(item: OsuTopRankItem): OsuTopRankUI {
+        val stats = item.statistics
+        val accuracy = if (item.beatmap.mode == "mania") {
+            ((stats.perfect + stats.great) + stats.good*2/3.0 + stats.ok/3.0 + stats.meh/6.0) /
+                    item.maximumStatistics.perfect.toDouble()
+        } else {
+            item.accuracy
+        }
         return OsuTopRankUI(
             cover2x = item.beatmapSet.covers.list2x,
             bg2x = item.beatmapSet.covers.card2x,
@@ -154,15 +163,17 @@ class OsuViewModel(
             artist = item.beatmapSet.artist,
             artistUnicode = item.beatmapSet.artistUnicode,
             creator = item.beatmapSet.creator,
+            mode = item.beatmap.mode,
             difficultyRating = item.beatmap.difficultyRating,
             pp = item.pp,
-            accuracy = CommonUtils.formatPercent(item.accuracy),
+            accuracy = formatPercent(accuracy),
+            accuracyV2 = formatPercent(item.accuracy),
             rank = item.rank,
             date = item.endedAt,
             maxCombo = item.maxCombo,
             score = item.legacyTotalScore,
+            scoreV2 = item.totalScore,
             mods = item.mods.map { it.acronym },
-            totalScore = CommonUtils.formatNumberThousand(item.totalScore),
             weight = item.weight.percentage,
             weightPP = item.weight.pp,
             beatmapId = item.beatmap.id,
@@ -231,17 +242,17 @@ class OsuViewModel(
                 medalCount = osuInfo.user.userAchievements.size,
                 pp = osuInfo.user.statistics.pp,
                 playTime = playTime,
-                rankedScore = CommonUtils.formatNumberThousand(osuInfo.user.statistics.rankedScore),
-                hitAccuracy = CommonUtils.formatPercent(osuInfo.user.statistics.hitAccuracy),
-                playCount = CommonUtils.formatNumberThousand(osuInfo.user.statistics.playCount.toLong()),
-                totalScore = CommonUtils.formatNumberThousand(osuInfo.user.statistics.totalScore),
-                totalHits = CommonUtils.formatNumberThousand(osuInfo.user.statistics.totalHits),
-                maximumCombo = CommonUtils.formatNumberThousand(osuInfo.user.statistics.maximumCombo.toLong()),
-                replaysWatchedByOthers = CommonUtils.formatNumberThousand(osuInfo.user.statistics.replaysWatchedByOthers.toLong()),
-                followerCount = CommonUtils.formatNumberThousand(osuInfo.user.followerCount.toLong()),
-                mappingFollowerCount = CommonUtils.formatNumberThousand(osuInfo.user.mappingFollowerCount.toLong()),
-                postCount = CommonUtils.formatNumberThousand(osuInfo.user.postCount.toLong()),
-                commentsCount = CommonUtils.formatNumberThousand(osuInfo.user.commentsCount.toLong())
+                rankedScore = formatNumberThousand(osuInfo.user.statistics.rankedScore),
+                hitAccuracy = formatPercent(osuInfo.user.statistics.hitAccuracy),
+                playCount = formatNumberThousand(osuInfo.user.statistics.playCount.toLong()),
+                totalScore = formatNumberThousand(osuInfo.user.statistics.totalScore),
+                totalHits = formatNumberThousand(osuInfo.user.statistics.totalHits),
+                maximumCombo = formatNumberThousand(osuInfo.user.statistics.maximumCombo.toLong()),
+                replaysWatchedByOthers = formatNumberThousand(osuInfo.user.statistics.replaysWatchedByOthers.toLong()),
+                followerCount = formatNumberThousand(osuInfo.user.followerCount.toLong()),
+                mappingFollowerCount = formatNumberThousand(osuInfo.user.mappingFollowerCount.toLong()),
+                postCount = formatNumberThousand(osuInfo.user.postCount.toLong()),
+                commentsCount = formatNumberThousand(osuInfo.user.commentsCount.toLong())
             )
         }
 

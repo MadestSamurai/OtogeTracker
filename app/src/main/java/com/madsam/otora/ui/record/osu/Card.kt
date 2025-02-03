@@ -64,14 +64,12 @@ fun Card(
     val groupListData = osuGroupList.collectAsState(initial = emptyList()).value
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val cardWidthDp = screenWidthDp - 24.dp
 
     Column {
         ConstraintLayout(
             modifier = Modifier
-                .padding(
-                    horizontal = 16.dp,
-                    vertical = 12.dp
-                )
+                .padding(vertical = 12.dp)
                 .clip(RoundedCornerShape(20.dp))
                 .background(DARK_RED_DEEP)
         ) {
@@ -135,7 +133,6 @@ fun Card(
                     )
                 }
             )
-            val cardWidthDp = screenWidthDp - 32.dp
             Box(
                 modifier = Modifier
                     .width(cardWidthDp)

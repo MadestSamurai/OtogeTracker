@@ -47,13 +47,10 @@ fun BadgeList(
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     if (badgeListData.isNotEmpty()) {
-        val cardWidthDp = screenWidthDp - 32.dp
+        val cardWidthDp = screenWidthDp - 24.dp
         Surface(
             Modifier
-                .padding(
-                    start = 16.dp,
-                    bottom = 12.dp
-                )
+                .padding(bottom = 12.dp)
                 .width(cardWidthDp),
             RoundedCornerShape(20.dp),
             DARK_RED_DEEP

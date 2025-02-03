@@ -82,10 +82,10 @@ fun RankGraph(
     val rankGraphData by osuRankGraphData.collectAsState()
     val highestData by osuRankHighestData.collectAsState()
 
-    val cardWidthDp = screenWidthDp - 32.dp
+    val cardWidthDp = screenWidthDp - 24.dp
     Column(
         modifier = Modifier
-            .padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
+            .padding(bottom = 4.dp)
             .width(cardWidthDp)
             .clip(
                 RoundedCornerShape(

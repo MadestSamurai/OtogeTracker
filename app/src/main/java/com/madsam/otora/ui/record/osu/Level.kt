@@ -35,17 +35,15 @@ fun Level(
     val levelData = osuLevelData.collectAsState(initial = OsuLevelUI()).value
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val cardWidthDp = screenWidthDp - 24.dp
+
     ConstraintLayout(
         modifier = Modifier
-            .padding(
-                start = 16.dp,
-                bottom = 4.dp
-            )
+            .padding(bottom = 4.dp)
             .clip(RoundedCornerShape(6.dp))
             .background(DARK_RED_DEEP)
-            .width(screenWidthDp - 32.dp)
+            .width(cardWidthDp)
     ) {
-        val cardWidthDp = screenWidthDp - 32.dp
         val refs = createRefs()
         val (
             levelText,

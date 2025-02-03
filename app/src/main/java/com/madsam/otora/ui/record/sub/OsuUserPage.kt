@@ -3,6 +3,7 @@ package com.madsam.otora.ui.record.sub
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -19,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import com.madsam.otora.consts.BRIGHT_RED
 import com.madsam.otora.ui.record.osu.BadgeList
 import com.madsam.otora.ui.record.osu.Card
@@ -46,46 +48,29 @@ fun OsuUserPage(
     LazyColumn(
         modifier = Modifier
             .background(color = BRIGHT_RED)
+            .padding(horizontal = 12.dp)
     ) {
-        // Card Section
         item(key = "card_data") {
-            Card(
-                viewModel.osuCardUI,
-                viewModel.osuGroupList
-            )
+            Card(viewModel.osuCardUI, viewModel.osuGroupList)
         }
-        // Badge Section
         item(key = "badge_list") {
-            BadgeList(
-                viewModel.osuBadgeList
-            )
+            BadgeList(viewModel.osuBadgeList)
         }
-        // Rank and Level Section
         item(key = "rank_graph") {
-            RankGraph(
-                viewModel.osuRankGraphData,
-                viewModel.osuRankHighestData
-            )
+            RankGraph(viewModel.osuRankGraphData, viewModel.osuRankHighestData)
             Level(viewModel.osuLevelData)
         }
-        // Play Data Section
         item(key = "play_data") {
             PlayData(viewModel.osuPlayData)
         }
-        // Social and Recent Section
         item(key = "social") {
             SocialCard(viewModel.osuSocialCardData)
         }
         item(key = "recent") {
             Recent(viewModel.osuRecentActivityData)
         }
-        // Top Rank Section
         item(key = "top_rank") {
-            TopRank(
-                viewModel.osuPinnedMapData,
-                viewModel.osuBestMapData,
-                viewModel.osuFirstMapData
-            )
+            TopRank(viewModel.osuPinnedMapData, viewModel.osuBestMapData, viewModel.osuFirstMapData)
         }
     }
 }

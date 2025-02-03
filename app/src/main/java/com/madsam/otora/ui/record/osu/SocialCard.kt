@@ -56,13 +56,9 @@ fun SocialCard(
 
     val data = osuSocialCard.collectAsState(initial = OsuSocialUI()).value
 
-    val cardWidthDp = screenWidthDp - 32.dp
+    val cardWidthDp = screenWidthDp - 24.dp
     ConstraintLayout(
         modifier = Modifier
-            .padding(
-                start = 16.dp,
-                end = 16.dp
-            )
             .width(cardWidthDp)
             .clip(
                 RoundedCornerShape(

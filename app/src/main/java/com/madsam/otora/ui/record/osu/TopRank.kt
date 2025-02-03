@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
@@ -40,7 +41,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.consts.BlackAlpha50
 import com.madsam.otora.consts.DARK_RED_DEEP
@@ -76,20 +76,15 @@ fun TopRank(
 
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val cardWidth = screenWidthDp - 24.dp
 
     Surface(
         Modifier
             .width(screenWidthDp)
-            .padding(
-                start = 16.dp,
-                end = 16.dp,
-                bottom = 12.dp,
-                top = 12.dp
-            ),
+            .padding(vertical = 12.dp),
         RoundedCornerShape(20.dp),
         DARK_RED_DEEP
     ) {
-        val cardWidth = screenWidthDp - 32.dp
         Column(
             modifier = Modifier.padding(top = 16.dp)
         ) {
@@ -237,17 +232,19 @@ fun OsuTopRankItemCard(
                     )
                 ) {
                     Image(
-                        painter = rememberVectorPainter(image = when (item.rank) {
-                            "XH" -> Filled.OsuSsh
-                            "X" -> Filled.OsuSh
-                            "SH" -> Filled.OsuSs
-                            "S" -> Filled.OsuS
-                            "A" -> Filled.OsuA
-                            "B" -> Filled.OsuB
-                            "C" -> Filled.OsuC
-                            "D" -> Filled.OsuD
-                            else -> Filled.OsuF
-                        }),
+                        painter = rememberVectorPainter(
+                            image = when (item.rank) {
+                                "XH" -> Filled.OsuSsh
+                                "X" -> Filled.OsuSs
+                                "SH" -> Filled.OsuSh
+                                "S" -> Filled.OsuS
+                                "A" -> Filled.OsuA
+                                "B" -> Filled.OsuB
+                                "C" -> Filled.OsuC
+                                "D" -> Filled.OsuD
+                                else -> Filled.OsuF
+                            }
+                        ),
                         contentDescription = "Rank",
                         modifier = Modifier.padding(horizontal = 2.dp)
                     )
@@ -307,15 +304,53 @@ fun OsuTopRankItemCard(
                     modifier = Modifier
                         .width(itemWidth - 124.dp)
                 )
+                val score = if ("CL" in item.mods) {
+                    item.score
+                } else {
+                    item.scoreV2
+                }
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold)) {
-                            append(formatNumberThousand(item.score))
-                        }
-                        if (item.accuracy != "0.00%") {
-                            appendInlineContent("rank", "[rank]")
-                            withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
+                        if (item.mode == "osu" || item.mode == "fruits") {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
                                 append(item.accuracy)
+                            }
+                            appendInlineContent("rank", "[rank]")
+                            if (score != 0L) {
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Normal
+                                    )
+                                ) {
+                                    append(formatNumberThousand(score))
+                                }
+                            }
+                        }
+                        if (item.mode == "mania" || item.mode == "taiko") {
+                            withStyle(
+                                style = SpanStyle(
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            ) {
+                                append(formatNumberThousand(item.score))
+                            }
+                            if (item.accuracy != "0.00%") {
+                                appendInlineContent("rank", "[rank]")
+                                withStyle(
+                                    style = SpanStyle(
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Normal
+                                    )
+                                ) {
+                                    append(item.accuracy)
+                                }
                             }
                         }
                     },
@@ -331,17 +366,22 @@ fun OsuTopRankItemCard(
                     .constrainAs(mods) {
                         bottom.linkTo(parent.bottom, margin = 4.dp)
                         start.linkTo(cover.end, margin = 8.dp)
-                        end.linkTo(date.start, margin = 4.dp)
-                        width = Dimension.fillToConstraints
                     },
-                horizontalArrangement = if (item.mods.size > 3) Arrangement.SpaceBetween
-                else Arrangement.spacedBy(1.dp)
+                horizontalArrangement = Arrangement.Start
             ) {
-                for (mod in item.mods) {
+                val itemCount = item.mods.size.toDouble()
+                val overlap = if (itemCount > 1) {
+                    ((itemCount * 25 - 100) / (itemCount - 1)).coerceAtLeast(0.0)
+                } else 0.0
+
+                for ((index, mod) in item.mods.withIndex()) {
                     Box(
-                        contentAlignment = Alignment.CenterStart
+                        contentAlignment = Alignment.CenterStart,
+                        modifier = Modifier.offset(
+                            x = (-overlap * index).dp
+                        )
                     ) {
-                        val modLink = when(mod) {
+                        val modLink = when (mod) {
                             "EZ" -> "easy@2x.62c646c1"
                             "NF" -> "no-fail@2x.e98cfc89"
                             "HT" -> "half@2x.bb7209f6"
