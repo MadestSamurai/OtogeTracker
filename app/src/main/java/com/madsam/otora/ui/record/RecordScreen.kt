@@ -37,6 +37,8 @@ import com.madsam.otora.ui.record.chunithm.TopRating
 import com.madsam.otora.ui.record.sub.ChunithmUserPage
 import com.madsam.otora.ui.record.sub.MaimaiUserPage
 import com.madsam.otora.ui.record.sub.OsuUserPage
+import com.madsam.otora.ui.record.viewmodel.ChuniViewModel
+import com.madsam.otora.ui.record.viewmodel.ChuniViewModelFactory
 import com.madsam.otora.ui.record.viewmodel.OsuViewModel
 import com.madsam.otora.ui.record.viewmodel.OsuViewModelFactory
 import com.madsam.otora.utils.ShareUtil
@@ -77,6 +79,7 @@ fun RecordScreen(
                 mode = ShareUtil.getString("mode", context) ?: "osu",
                 context = context
             ))
+            val chuniViewModel: ChuniViewModel = viewModel(factory = ChuniViewModelFactory(context))
 
             HorizontalPager(state = pagerState) { page ->
                 when (tabs[page]) {
@@ -103,6 +106,7 @@ fun RecordScreen(
                             exit = fadeOut()
                         ) {
                             ChunithmUserPage(
+                                chuniViewModel,
                                 onNavigateToTopRating = { showChunithmTopRating = true },
                                 snackbarHostState = snackbarHostState,
                                 showDialog = showChunithmDialog,

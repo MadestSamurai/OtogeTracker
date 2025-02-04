@@ -176,7 +176,7 @@ class ChuniDataRequestService(private val context: Context) {
             chuniPenguin.face =
                 doc.getElementsByClass("avatar_face").select("img").safeFirstAttr("src")
             chuniPenguin.faceCover =
-                doc.getElementsByClass("avatar_face_cover").select("img").safeFirstAttr("src")
+                doc.getElementsByClass("avatar_faceCover").select("img").safeFirstAttr("src")
             chuniPenguin.head =
                 doc.getElementsByClass("avatar_head").select("img").safeFirstAttr("src")
             chuniPenguin.handR =

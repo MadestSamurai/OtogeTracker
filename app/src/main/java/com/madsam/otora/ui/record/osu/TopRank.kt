@@ -20,6 +20,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -70,9 +71,9 @@ fun TopRank(
     topMaps: MutableStateFlow<List<OsuTopRankUI>>,
     firstMaps: MutableStateFlow<List<OsuTopRankUI>>
 ) {
-    val pinned = pinnedMaps.collectAsState(initial = emptyList()).value
-    val top = topMaps.collectAsState(initial = emptyList()).value
-    val first = firstMaps.collectAsState(initial = emptyList()).value
+    val pinnedData by pinnedMaps.collectAsState()
+    val topData by topMaps.collectAsState()
+    val firstData by firstMaps.collectAsState()
 
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
@@ -88,7 +89,7 @@ fun TopRank(
         Column(
             modifier = Modifier.padding(top = 16.dp)
         ) {
-            if (pinned.isEmpty() && top.isEmpty() && first.isEmpty()) {
+            if (pinnedData.isEmpty() && topData.isEmpty() && firstData.isEmpty()) {
                 Text(
                     text = "No play records",
                     color = DARK_RED_TEXT_LIGHT,
@@ -98,14 +99,14 @@ fun TopRank(
                 )
                 return@Column
             }
-            if (pinned.isNotEmpty()) {
-                OsuTopRankItemContent(pinned, "Pinned", cardWidth)
+            if (pinnedData.isNotEmpty()) {
+                OsuTopRankItemContent(pinnedData, "Pinned", cardWidth)
             }
-            if (top.isNotEmpty()) {
-                OsuTopRankItemContent(top, "Top", cardWidth)
+            if (topData.isNotEmpty()) {
+                OsuTopRankItemContent(topData, "Top", cardWidth)
             }
-            if (first.isNotEmpty()) {
-                OsuTopRankItemContent(first, "First", cardWidth)
+            if (firstData.isNotEmpty()) {
+                OsuTopRankItemContent(firstData, "First", cardWidth)
             }
         }
     }

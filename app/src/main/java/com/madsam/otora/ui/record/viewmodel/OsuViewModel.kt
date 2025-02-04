@@ -49,7 +49,6 @@ class OsuViewModel(
     mode: String,
     context: Context
 ) : ViewModel() {
-    // Replace Map with UI models
     val osuCardUI = MutableStateFlow(OsuCardUI())
     val osuBadgeList = MutableStateFlow<List<OsuBadgeUI>>(emptyList())
     val osuGroupList = MutableStateFlow<List<OsuGroup>>(emptyList())
@@ -84,33 +83,22 @@ class OsuViewModel(
     fun requestOsuData(userId: String, mode: String, context: Context) {
         val osuDataRequestService = OsuDataRequestService()
         osuDataRequestService.getOsuMedals(
-            { osuInfo: OsuInfo -> setOsuMedals(osuInfo, context) },
-            userId,
-            mode
+            { osuInfo: OsuInfo -> setOsuMedals(osuInfo, context) }, userId, mode
         )
         osuDataRequestService.getOsuCard(
-            { osuCardList: OsuCardList -> setOsuCard(osuCardList) },
-            userId
+            { osuCardList: OsuCardList -> setOsuCard(osuCardList) }, userId
         )
         osuDataRequestService.getOsuRecentActivity({ osuRecentActivity: List<OsuRecentActivity> ->
-            setOsuRecentActivity(
-                osuRecentActivity
-            )
+            setOsuRecentActivity(osuRecentActivity)
         }, userId)
         osuDataRequestService.getOsuPinnedMap({ osuPinnedMap: List<OsuTopRankItem> ->
-            setOsuPinnedMap(
-                osuPinnedMap
-            )
+            setOsuPinnedMap(osuPinnedMap)
         }, userId, mode)
         osuDataRequestService.getOsuFirstMap({ osuFirstMap: List<OsuTopRankItem> ->
-            setOsuFirstMap(
-                osuFirstMap
-            )
+            setOsuFirstMap(osuFirstMap)
         }, userId, mode)
         osuDataRequestService.getOsuBestMap({ osuBestMap: List<OsuTopRankItem> ->
-            setOsuBestMap(
-                osuBestMap
-            )
+            setOsuBestMap(osuBestMap)
         }, userId, mode)
 //        osuDataRequestService.getOsuBeatmap({ osuUserBeatmap: OsuUserBeatmap -> setOsuUserBeatmap(osuUserBeatmap) }, userId, mode)
 //        osuDataRequestService.getOsuHistorical({ osuHistorical: OsuHistorical -> setOsuHistorical(osuHistorical) }, userId, mode)

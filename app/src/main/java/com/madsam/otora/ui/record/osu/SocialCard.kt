@@ -13,6 +13,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,12 +52,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 fun SocialCard(
     osuSocialCard: MutableStateFlow<OsuSocialUI>,
 ) {
+    val data by osuSocialCard.collectAsState()
+
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
-
-    val data = osuSocialCard.collectAsState(initial = OsuSocialUI()).value
-
     val cardWidthDp = screenWidthDp - 24.dp
+
     ConstraintLayout(
         modifier = Modifier
             .width(cardWidthDp)

@@ -10,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,7 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 fun Level(
     osuLevelData: MutableStateFlow<OsuLevelUI>
 ) {
-    val levelData = osuLevelData.collectAsState(initial = OsuLevelUI()).value
+    val levelData by osuLevelData.collectAsState()
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     val cardWidthDp = screenWidthDp - 24.dp

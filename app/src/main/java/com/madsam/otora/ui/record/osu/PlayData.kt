@@ -53,7 +53,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 fun PlayData(
     osuPlayData: MutableStateFlow<OsuPlayUI>,
 ) {
-    val playData = osuPlayData.collectAsState(initial = OsuPlayUI()).value
+    val playData by osuPlayData.collectAsState()
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     val cardWidthDp = screenWidthDp - 24.dp

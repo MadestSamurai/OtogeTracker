@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +43,7 @@ import kotlinx.coroutines.launch
 fun BadgeList(
     osuBadgeList: MutableStateFlow<List<OsuBadgeUI>>
 ) {
-    val badgeListData = osuBadgeList.collectAsState(initial = emptyList()).value
+    val badgeListData by osuBadgeList.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp

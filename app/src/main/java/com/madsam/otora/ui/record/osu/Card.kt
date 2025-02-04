@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,7 +61,7 @@ fun Card(
     osuCardData: MutableStateFlow<OsuCardUI>,
     osuGroupList: MutableStateFlow<List<OsuGroup>>,
 ) {
-    val cardData = osuCardData.collectAsState(initial = OsuCardUI()).value
+    val cardData by osuCardData.collectAsState()
     val groupListData = osuGroupList.collectAsState(initial = emptyList()).value
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp

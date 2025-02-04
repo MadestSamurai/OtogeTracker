@@ -175,7 +175,7 @@ object CommonUtils {
      * @param millis 毫秒数时间戳
      * @return 年月日
      */
-    fun convertMillisToDate(millis: Long): LocalDate {
+    fun millisToDate(millis: Long): LocalDate {
         val localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), java.time.ZoneId.systemDefault())
         return localDateTime.toLocalDate()
     }

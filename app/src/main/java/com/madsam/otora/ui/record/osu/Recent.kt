@@ -16,6 +16,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,7 +57,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 fun Recent(
     recentActivityList: MutableStateFlow<List<OsuRecentUI>>
 ) {
-    val activities = recentActivityList.collectAsState(initial = emptyList()).value
+    val activities by recentActivityList.collectAsState()
     if (activities.isEmpty()) return
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp

@@ -244,9 +244,7 @@ fun RankGraph(
                                         throw IllegalArgumentException("Unexpected `CartesianMarker.Target` implementation.")
                                     }
                                     "${decimalFormatY.format(yValue)} - ${
-                                        decimalFormatX.format(
-                                            xValue
-                                        )
+                                        decimalFormatX.format(xValue)
                                     } days ago"
                                 }
                             }
