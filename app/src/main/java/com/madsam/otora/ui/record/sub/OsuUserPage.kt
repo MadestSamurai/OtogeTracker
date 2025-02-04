@@ -69,26 +69,26 @@ fun OsuUserPage(
             )
     ) {
         item(key = "card_data") {
-            Card(viewModel.osuCardUI, viewModel.osuGroupList)
+            Card(viewModel.cardUI, viewModel.groupListUI)
         }
         item(key = "badge_list") {
-            BadgeList(viewModel.osuBadgeList)
+            BadgeList(viewModel.badgeUI)
         }
         item(key = "rank_graph") {
-            RankGraph(viewModel.osuRankGraphData, viewModel.osuRankHighestData)
-            Level(viewModel.osuLevelData)
+            RankGraph(viewModel.rankGraphUI, viewModel.topRankUI)
+            Level(viewModel.levelUI)
         }
         item(key = "play_data") {
-            PlayData(viewModel.osuPlayData)
+            PlayData(viewModel.playUI)
         }
         item(key = "social") {
-            SocialCard(viewModel.osuSocialCardData)
+            SocialCard(viewModel.socialUI)
         }
         item(key = "recent") {
-            Recent(viewModel.osuRecentActivityData)
+            Recent(viewModel.recentUI)
         }
         item(key = "top_rank") {
-            TopRank(viewModel.osuPinnedMapData, viewModel.osuBestMapData, viewModel.osuFirstMapData)
+            TopRank(viewModel.pinnedUI, viewModel.bestUI, viewModel.firstUI)
         }
     }
 }
@@ -154,7 +154,7 @@ private fun OsuSettingsDialog(
                     onClick = {
                         ShareUtil.putString("userId", userState.value, context)
                         ShareUtil.putString("mode", modeState.value, context)
-                        viewModel.requestOsuData(userState.value, modeState.value, context)
+                        viewModel.loadData(userState.value, modeState.value, context)
                         onDismiss()
                     },
                     modifier = Modifier.fillMaxWidth()

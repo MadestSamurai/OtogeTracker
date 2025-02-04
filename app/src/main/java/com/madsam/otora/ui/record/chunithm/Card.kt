@@ -2,6 +2,7 @@ package com.madsam.otora.ui.record.chunithm
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,7 +21,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -29,10 +29,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
-import coil.decode.GifDecoder
-import coil.decode.SvgDecoder
 import com.madsam.otora.consts.DARKER_RED
 import com.madsam.otora.consts.DARK_RED
 import com.madsam.otora.consts.DARK_RED_DEEP
@@ -41,16 +38,16 @@ import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
 import com.madsam.otora.consts.OSU_LEVEL_GOLD_1
 import com.madsam.otora.consts.OSU_LEVEL_PLATINUM_1
 import com.madsam.otora.consts.OSU_LEVEL_SILVER_1
-import com.madsam.otora.model.chuni.net.ChuniCard
+import com.madsam.otora.model.chuni.ui.ChuniCardUI
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun Card(
-    chuniCard: MutableStateFlow<ChuniCard>
+    chuniCardUI: MutableStateFlow<ChuniCardUI>
 ) {
-    val cardData by chuniCard.collectAsState()
+    val cardData by chuniCardUI.collectAsState()
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     Surface(
@@ -76,15 +73,8 @@ fun Card(
                 classEmblemBase,
                 classEmblem,
                 rating,
-                overpower,
-                lastPlay,
+                playData
             ) = createRefs()
-            val imageLoader = ImageLoader.Builder(LocalContext.current)
-                .components {
-                    add(SvgDecoder.Factory())
-                    add(GifDecoder.Factory())
-                }
-                .build()
 
             Text(
                 text = cardData.honorText,
@@ -115,10 +105,7 @@ fun Card(
             )
 
             Image(
-                painter = rememberAsyncImagePainter(
-                    model = cardData.charaInfo,
-                    imageLoader = imageLoader
-                ),
+                painter = rememberAsyncImagePainter(cardData.charaInfo),
                 contentDescription = "Cover Image",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -127,7 +114,7 @@ fun Card(
                         start.linkTo(parent.start)
                         bottom.linkTo(parent.bottom)
                     }
-                    .size(100.dp)
+                    .size(110.dp)
                     .padding(start = 5.dp, bottom = 5.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .background(
@@ -204,10 +191,7 @@ fun Card(
             )
 
             Image(
-                painter = rememberAsyncImagePainter(
-                    model = "https://chunithm.wahlap.com/mobile/images/classemblem_base_0${cardData.classEmblemBase}.png",
-                    imageLoader = imageLoader
-                ),
+                painter = rememberAsyncImagePainter("https://chunithm.wahlap.com/mobile/images/classemblem_base_0${cardData.classEmblemBase}.png"),
                 contentDescription = "Class Emblem",
                 contentScale = ContentScale.FillHeight,
                 modifier = Modifier
@@ -221,10 +205,7 @@ fun Card(
             )
 
             Image(
-                painter = rememberAsyncImagePainter(
-                    model = "https://chunithm.wahlap.com/mobile/images/classemblem_medal_0${cardData.classEmblemTop}.png",
-                    imageLoader = imageLoader
-                ),
+                painter = rememberAsyncImagePainter("https://chunithm.wahlap.com/mobile/images/classemblem_medal_0${cardData.classEmblemTop}.png"),
                 contentDescription = "Class Emblem",
                 contentScale = ContentScale.FillHeight,
                 modifier = Modifier
@@ -279,55 +260,78 @@ fun Card(
                     .padding(start = 5.dp, top = 2.dp)
             )
 
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        style = SpanStyle(
-                            color = DARK_RED_TEXT,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                    ) {
-                        append("OVERPOWER ")
-                    }
-                    append(cardData.overpower)
-                },
-                color = DARK_RED_TEXT_LIGHT,
-                fontSize = 12.sp,
-                lineHeight = 14.sp,
-                fontWeight = FontWeight.Bold,
+            Column(
                 modifier = Modifier
-                    .constrainAs(overpower) {
+                    .constrainAs(playData) {
                         top.linkTo(rating.bottom)
-                        start.linkTo(charaImage.end)
+                        start.linkTo(charaImage.end, 5.dp)
                     }
-                    .padding(start = 5.dp)
-            )
-
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        style = SpanStyle(
-                            color = DARK_RED_TEXT,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Normal
-                        )
-                    ) {
-                        append("LAST PLAY ")
-                    }
-                    append(cardData.lastPlay)
-                },
-                color = DARK_RED_TEXT_LIGHT,
-                fontSize = 12.sp,
-                lineHeight = 16.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier
-                    .constrainAs(lastPlay) {
-                        top.linkTo(overpower.bottom)
-                        start.linkTo(charaImage.end)
-                    }
-                    .padding(start = 5.dp)
-            )
+            ) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                color = DARK_RED_TEXT,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Normal
+                            )
+                        ) { append("OVERPOWER ") }
+                        append(cardData.overpower)
+                    },
+                    color = DARK_RED_TEXT_LIGHT,
+                    fontSize = 12.sp,
+                    lineHeight = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                color = DARK_RED_TEXT,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Normal
+                            )
+                        ) { append("LAST PLAY ") }
+                        append(cardData.lastPlay)
+                    },
+                    color = DARK_RED_TEXT_LIGHT,
+                    fontSize = 12.sp,
+                    lineHeight = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                color = DARK_RED_TEXT,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Normal
+                            )
+                        ) { append("PLAY COUNT ") }
+                        append(cardData.playCount)
+                    },
+                    color = DARK_RED_TEXT_LIGHT,
+                    fontSize = 12.sp,
+                    lineHeight = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                color = DARK_RED_TEXT,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Normal
+                            )
+                        ) { append("POINTS ") }
+                        append("${cardData.point}/${cardData.totalPoint}")
+                    },
+                    color = DARK_RED_TEXT_LIGHT,
+                    fontSize = 12.sp,
+                    lineHeight = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
         }
     }
 }

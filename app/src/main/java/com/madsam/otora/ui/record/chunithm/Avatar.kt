@@ -24,20 +24,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.consts.DARK_RED_DEEP
-import com.madsam.otora.model.chuni.net.ChuniPenguin
+import com.madsam.otora.model.chuni.ui.ChuniAvatarUI
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun AvatarLayout(
-    chuniAvatar: MutableStateFlow<ChuniPenguin>
+    chuniAvatarUI: MutableStateFlow<ChuniAvatarUI>
 ) {
-    val avatarData by chuniAvatar.collectAsState()
+    val avatarData by chuniAvatarUI.collectAsState()
 
     Surface (
         modifier = Modifier
             .padding(horizontal = 12.dp)
             .clip(RoundedCornerShape(10.dp))
-            .scaledLayout(0.9f)
+            .scaledLayout(0.8f)
             .background(DARK_RED_DEEP)
     ) {
         Box(
@@ -64,7 +64,7 @@ fun AvatarLayout(
                     .zIndex(101f)
             ) {
                 Image(
-                    painter = rememberAsyncImagePainter(avatarData.skinfootL),
+                    painter = rememberAsyncImagePainter(avatarData.footL),
                     contentDescription = "Avatar Skinfoot Left",
                     modifier = Modifier
                         .offset(x = 43.dp, y = (-102).dp)
@@ -81,7 +81,7 @@ fun AvatarLayout(
                     .zIndex(102f)
             ) {
                 Image(
-                    painter = rememberAsyncImagePainter(avatarData.skinfootR),
+                    painter = rememberAsyncImagePainter(avatarData.footR),
                     contentDescription = "Avatar Skinfoot Right",
                     modifier = Modifier
                         .offset(x = 1.dp, y = (-102).dp)

@@ -7,7 +7,7 @@ package com.madsam.otora.model.chuni.net
  * 创建时间: 2024/7/25
  * 描述: Chunithm卡片
  */
-data class ChuniCard(
+data class ChuniUser(
     var charaInfo: String = "",
     var charaBase: String = "",
     var honorBase: String = "",

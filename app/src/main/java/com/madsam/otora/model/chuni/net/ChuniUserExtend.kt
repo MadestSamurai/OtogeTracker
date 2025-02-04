@@ -7,7 +7,7 @@ package com.madsam.otora.model.chuni.net
  * 创建时间: 2024/9/16
  * 描述: 中二节奏数据扩展
  */
-data class ChuniDataExtend(
+data class ChuniUserExtend(
     var friendCode : String = "",
     var point : String = "",
     var totalPoint : String = "",

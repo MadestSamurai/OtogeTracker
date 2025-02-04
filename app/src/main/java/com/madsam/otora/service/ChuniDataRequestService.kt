@@ -4,9 +4,9 @@ import android.content.Context
 import android.util.Log
 import com.madsam.otora.entity.ChuniSheetsEntity
 import com.madsam.otora.entity.ChuniSongsEntity
-import com.madsam.otora.model.chuni.net.ChuniCard
+import com.madsam.otora.model.chuni.net.ChuniUser
 import com.madsam.otora.model.chuni.net.ChuniCookie
-import com.madsam.otora.model.chuni.net.ChuniDataExtend
+import com.madsam.otora.model.chuni.net.ChuniUserExtend
 import com.madsam.otora.model.chuni.net.ChuniFullScore
 import com.madsam.otora.model.chuni.net.ChuniGenre
 import com.madsam.otora.model.chuni.net.ChuniPenguin
@@ -101,33 +101,33 @@ class ChuniDataRequestService(private val context: Context) {
             val doc = response.parse()
             updateCookie(response)
             // Parse the player data
-            val chuniCard = ChuniCard()
-            chuniCard.charaInfo =
+            val chuniUser = ChuniUser()
+            chuniUser.charaInfo =
                 doc.getElementsByClass("player_chara_info").select("img").safeFirstAttr("src")
-            chuniCard.charaBase = doc.getElementsByClass("player_chara_info").safeFirstAttr("style")
+            chuniUser.charaBase = doc.getElementsByClass("player_chara_info").safeFirstAttr("style")
                 .split("/").last()
                 .split(".").first()
                 .split("_").last()
-            chuniCard.honorBase =
+            chuniUser.honorBase =
                 doc.getElementsByClass("player_honor_short").safeFirstAttr("style")
                     .split("/").last()
                     .split(".").first()
                     .split("_").last()
-            chuniCard.honorText = doc.getElementsByClass("player_honor_text").safeFirstText()
-            chuniCard.reborn = doc.getElementsByClass("player_reborn").safeFirstText()
+            chuniUser.honorText = doc.getElementsByClass("player_honor_text").safeFirstText()
+            chuniUser.reborn = doc.getElementsByClass("player_reborn").safeFirstText()
                 .toIntOrNull() ?: 0
-            chuniCard.lv = doc.getElementsByClass("player_lv").safeFirstText()
+            chuniUser.lv = doc.getElementsByClass("player_lv").safeFirstText()
                 .toIntOrNull() ?: 0
-            chuniCard.nameIn = doc.getElementsByClass("player_name_in").safeFirstText()
+            chuniUser.nameIn = doc.getElementsByClass("player_name_in").safeFirstText()
             val playerClassEmblemBaseBlock = doc.getElementsByClass("player_classemblem_base")
-            chuniCard.classEmblemBase =
+            chuniUser.classEmblemBase =
                 playerClassEmblemBaseBlock.select("img").safeFirstAttr("src")
                     .split("/").last()
                     .split(".").first()
                     .split("_").last()
                     .toIntOrNull() ?: 0
             val playerClassEmblemTopBlock = doc.getElementsByClass("player_classemblem_top")
-            chuniCard.classEmblemTop = playerClassEmblemTopBlock.select("img").safeFirstAttr("src")
+            chuniUser.classEmblemTop = playerClassEmblemTopBlock.select("img").safeFirstAttr("src")
                 .split("/").last()
                 .split(".").first()
                 .split("_").last()
@@ -137,7 +137,7 @@ class ChuniDataRequestService(private val context: Context) {
             // Find the comma separator
             val commaSeparator = doc.getElementsByClass("player_rating_comma").first()
             val commaIndex = ratingImages.indexOf(commaSeparator.safePreviousElementSibling()) + 1
-            chuniCard.rating = ratingImages.joinToString("") {
+            chuniUser.rating = ratingImages.joinToString("") {
                 if (ratingImages.indexOf(it) == commaIndex) {
                     "."
                 } else {
@@ -148,18 +148,18 @@ class ChuniDataRequestService(private val context: Context) {
                         .toInt().toString()
                 }
             }
-            chuniCard.ratingMax = doc.getElementsByClass("player_rating_max").safeFirstText()
-            chuniCard.overpower = doc.getElementsByClass("player_overpower_text").safeFirstText()
-            chuniCard.lastPlay = doc.getElementsByClass("player_lastplaydate_text").safeFirstText()
-            val emptyCount = chuniCard::class.memberProperties.count {
-                it.returnType.jvmErasure == String::class && it.getter.call(chuniCard) == ""
+            chuniUser.ratingMax = doc.getElementsByClass("player_rating_max").safeFirstText()
+            chuniUser.overpower = doc.getElementsByClass("player_overpower_text").safeFirstText()
+            chuniUser.lastPlay = doc.getElementsByClass("player_lastplaydate_text").safeFirstText()
+            val emptyCount = chuniUser::class.memberProperties.count {
+                it.returnType.jvmErasure == String::class && it.getter.call(chuniUser) == ""
             }
             if (emptyCount > 5) {
                 println("Empty fields found in the file")
             } else {
-                val jsonAdapterCard = moshi.adapter(ChuniCard::class.java)
-                val jsonCard = jsonAdapterCard.toJson(chuniCard)
-                JsonUtil.saveJsonToFile(context, "chuniCard.json", jsonCard)
+                val jsonAdapterCard = moshi.adapter(ChuniUser::class.java)
+                val jsonCard = jsonAdapterCard.toJson(chuniUser)
+                JsonUtil.saveJsonToFile(context, "chuniUser.json", jsonCard)
             }
             // Parse the penguin data
             val chuniPenguin = ChuniPenguin()
@@ -191,17 +191,17 @@ class ChuniDataRequestService(private val context: Context) {
             val jsonPenguin = jsonAdapterPenguin.toJson(chuniPenguin)
             JsonUtil.saveJsonToFile(context, "chuniPenguin.json", jsonPenguin)
             // Parse the extend data
-            val chuniDataExtend = ChuniDataExtend()
-            chuniDataExtend.friendCode = doc.getElementsByClass("user_data_friend_code").safeFirst()
+            val chuniUserExtend = ChuniUserExtend()
+            chuniUserExtend.friendCode = doc.getElementsByClass("user_data_friend_code").safeFirst()
                 .getElementsByAttributeValue("style", "display:none;").text()
-            chuniDataExtend.point = doc.getElementsByClass("user_data_point").safeFirstText()
-            chuniDataExtend.totalPoint =
+            chuniUserExtend.point = doc.getElementsByClass("user_data_point").safeFirstText()
+            chuniUserExtend.totalPoint =
                 doc.getElementsByClass("user_data_total_point").safeFirstText()
-            chuniDataExtend.playCount =
+            chuniUserExtend.playCount =
                 doc.getElementsByClass("user_data_play_count").safeFirstText()
-            val jsonAdapterExtend = moshi.adapter(ChuniDataExtend::class.java)
-            val jsonExtend = jsonAdapterExtend.toJson(chuniDataExtend)
-            JsonUtil.saveJsonToFile(context, "chuniDataExtend.json", jsonExtend)
+            val jsonAdapterExtend = moshi.adapter(ChuniUserExtend::class.java)
+            val jsonExtend = jsonAdapterExtend.toJson(chuniUserExtend)
+            JsonUtil.saveJsonToFile(context, "chuniUserExt.json", jsonExtend)
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in ChuniData-requestPlayerData: ${e.message}")
         }

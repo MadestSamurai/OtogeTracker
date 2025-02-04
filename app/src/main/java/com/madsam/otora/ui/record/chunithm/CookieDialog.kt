@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,10 +29,10 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun CookieDialog(
-    showDialog: MutableState<Boolean>,
     context: Context,
     snackbarHostState: SnackbarHostState,
-    onResult: (Boolean) -> Unit
+    onResult: (Boolean) -> Unit,
+    onDismiss: () -> Unit
 ) {
     val requestState = remember { mutableStateOf("") }
     val responseState = remember { mutableStateOf("") }
@@ -44,7 +43,7 @@ fun CookieDialog(
     val scope = rememberCoroutineScope()
 
     AlertDialog(
-        onDismissRequest = { showDialog.value = false },
+        onDismissRequest = onDismiss,
         title = { Text("Enter Cookies") },
         text = {
             Column {
@@ -123,16 +122,12 @@ fun CookieDialog(
                 ShareUtil.putString("chuniPath", responseCookieMap["path"] ?: "", context)
                 ShareUtil.putString("chuniSameSite", responseCookieMap["SameSite"] ?: "", context)
                 onResult(true)
-                showDialog.value = false
             }) {
                 Text("Save Cookies")
             }
         },
         dismissButton = {
-            Button(onClick = {
-                onResult(false)
-                showDialog.value = false
-            }) {
+            Button(onClick = { onResult(false) }) {
                 Text("Cancel")
             }
         }
