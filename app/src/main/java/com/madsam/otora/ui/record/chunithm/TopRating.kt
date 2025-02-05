@@ -107,7 +107,7 @@ fun TopRating(
 
         val ratingBestListType = Types.newParameterizedType(List::class.java, ChuniScore::class.java)
         val ratingBestJsonAdapter = moshi.adapter<List<ChuniScore>>(ratingBestListType)
-        val ratingBestJson = JsonUtil.readJsonFromFile(context, "chuniRatingDetailBest.json")
+        val ratingBestJson = JsonUtil.readJsonFromFile(context, "chuniRatingBest.json")
         if (ratingBestJson != null) {
             chuniRatingBest.update { ratingBestJsonAdapter.fromJson(ratingBestJson) ?: listOf() }
         }

@@ -225,13 +225,13 @@ fun BofScreen(
                             4 -> vm.findTeamItemIndex(it, vm.teamData.value)
                         }
                     },
-                    textStyle = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Normal),
-                    placeholder = { Text("Search", color = Color.White, fontSize = 18.sp) },
+                    textStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Normal),
+                    placeholder = { Text("Search", color = Color.White, fontSize = 16.sp) },
                     leadingIcon = {
                         Icon(
                             painter = rememberVectorPainter(image = Filled.Magnify),
                             contentDescription = "Search Icon",
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                     },
                     singleLine = true,
@@ -274,7 +274,7 @@ fun BofScreen(
                         tint = Color.White,
                         modifier = Modifier
                             .padding(16.dp)
-                            .width(20.dp)
+                            .width(16.dp)
                             .height(25.dp)
                             .clickable(onClick = { vm.scrollToPrevious(selectedTabIndex) })
                             .align(Alignment.CenterVertically)
@@ -285,7 +285,7 @@ fun BofScreen(
                         tint = Color.White,
                         modifier = Modifier
                             .padding(16.dp)
-                            .width(20.dp)
+                            .width(16.dp)
                             .height(25.dp)
                             .clickable(onClick = { vm.scrollToNext(selectedTabIndex) })
                             .align(Alignment.CenterVertically)
@@ -297,7 +297,8 @@ fun BofScreen(
                         tint = Color.White,
                         modifier = Modifier
                             .padding(16.dp)
-                            .size(25.dp)
+                            .width(16.dp)
+                            .height(25.dp)
                             .clickable(onClick = { selectTime() })
                             .align(Alignment.CenterVertically)
                     )
@@ -306,8 +307,9 @@ fun BofScreen(
                         contentDescription = "Refresh",
                         tint = Color.White,
                         modifier = Modifier
-                            .padding(16.dp)
-                            .size(25.dp)
+                            .padding(start = 8.dp, end = 20.dp)
+                            .width(18.dp)
+                            .height(25.dp)
                             .clickable(onClick = { refreshData() })
                             .align(Alignment.CenterVertically)
                     )

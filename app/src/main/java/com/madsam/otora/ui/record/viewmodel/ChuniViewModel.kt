@@ -39,9 +39,9 @@ class ChuniViewModel(
     }
 
     fun loadData(context: Context) {
-        getCardFromLocal(context)
-        getAvatarFromLocal(context)
-        getMasterFromLocal(context)
+        loadCardFromLocal(context)
+        loadAvatarFromLocal(context)
+        loadMasterFromLocal(context)
     }
 
     fun fetchSongData(context: Context) {
@@ -52,10 +52,10 @@ class ChuniViewModel(
     fun fetchUserData(context: Context) {
         val chuniDataRequestService = ChuniDataRequestService(context)
         chuniDataRequestService.getUserData()
-        getCardFromLocal(context)
+        loadCardFromLocal(context)
     }
 
-    private fun getCardFromLocal(context: Context) {
+    private fun loadCardFromLocal(context: Context) {
         val jsonUser = JsonUtil.readJsonFromFile(context, "chuniUser.json")
         val jsonUserExt = JsonUtil.readJsonFromFile(context, "chuniUserExt.json")
         if (jsonUser.isNullOrEmpty() || jsonUserExt.isNullOrEmpty()) return
@@ -68,7 +68,7 @@ class ChuniViewModel(
         chuniCardUI.update { ChuniCardUI(chuniUser, chuniUserExt) }
     }
 
-    private fun getAvatarFromLocal(context: Context) {
+    private fun loadAvatarFromLocal(context: Context) {
         val json = JsonUtil.readJsonFromFile(context, "chuniPenguin.json")
         if (json.isNullOrEmpty()) return
         val chuniPenguin = Moshi.Builder()
@@ -77,7 +77,7 @@ class ChuniViewModel(
         chuniAvatarUI.update { ChuniAvatarUI(chuniPenguin) }
     }
 
-    private fun getMasterFromLocal(context: Context){
+    private fun loadMasterFromLocal(context: Context){
         val moshi = Moshi.Builder()
             .addLast(KotlinJsonAdapterFactory())
             .build()
@@ -90,6 +90,7 @@ class ChuniViewModel(
         var totalScore = 0
         for (masterScore in chuniMasterRecord.value) {
             for (fullScore in masterScore.fullScoreList) {
+                if (fullScore.score.isEmpty()) continue
                 totalScore += CommonUtils.bigNumberToInt(fullScore.score)
             }
         }

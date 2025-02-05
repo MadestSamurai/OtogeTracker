@@ -100,14 +100,14 @@ fun MainActivityScreen(navController: NavHostController) {
                             Icon(
                                 if (selectedItem == index) selectedIcons[index] else unselectedIcons[index],
                                 contentDescription = screen.label,
-                                modifier = Modifier.padding(0.dp)  // 移除所有padding
+                                modifier = Modifier.padding(0.dp)
                             )
                         },
                         label = { 
                             Text(
                                 text = screen.label,
-                                fontSize = 12.sp,
-                                modifier = Modifier.padding(0.dp)  // 移除所有padding
+                                fontSize = 13.sp,
+                                modifier = Modifier.padding(0.dp)
                             ) 
                         },
                         colors = NavigationBarItemDefaults.colors(
