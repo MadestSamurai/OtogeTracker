@@ -46,7 +46,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun RecordScreen(
-    snackbarHostState : SnackbarHostState
+    snackbarHostState: SnackbarHostState
 ) {
     val tabs = listOf(Screen.Page1, Screen.Page2, Screen.Page3, Screen.Page4)
     val pagerState = rememberPagerState(pageCount = { tabs.size })
@@ -74,11 +74,13 @@ fun RecordScreen(
                 }
             }
 
-            val osuViewModel: OsuViewModel = viewModel(factory = OsuViewModelFactory(
-                userId = ShareUtil.getString("userId", context) ?: "2",
-                mode = ShareUtil.getString("mode", context) ?: "osu",
-                context = context
-            ))
+            val osuViewModel: OsuViewModel = viewModel(
+                factory = OsuViewModelFactory(
+                    userId = ShareUtil.getString("userId", context) ?: "2",
+                    mode = ShareUtil.getString("mode", context) ?: "osu",
+                    context = context
+                )
+            )
             val chuniViewModel: ChuniViewModel = viewModel(factory = ChuniViewModelFactory(context))
 
             HorizontalPager(state = pagerState) { page ->
@@ -88,10 +90,12 @@ fun RecordScreen(
                         osuViewModel,
                         onDismissDialog = { showOsuDialog = false }
                     )
+
                     is Screen.Page2 -> MaimaiUserPage(
                         showMaimaiDialog,
                         onDismissDialog = { showMaimaiDialog = false }
                     )
+
                     is Screen.Page3 -> {
                         AnimatedVisibility(
                             visible = showChunithmTopRating,
@@ -114,6 +118,7 @@ fun RecordScreen(
                             )
                         }
                     }
+
                     is Screen.Page4 -> TestPage4()
                 }
             }
@@ -131,6 +136,7 @@ fun RecordScreen(
                     Icon(Icons.Default.Add, contentDescription = "Add")
                 }
             }
+
             1 -> {
                 FloatingActionButton(
                     onClick = { showMaimaiDialog = true },
@@ -169,7 +175,8 @@ fun RecordScreen(
 
 @Composable
 fun TestPage4() {
-    Text(text = "TestPage4",
+    Text(
+        text = "TestPage4",
         modifier = Modifier.fillMaxSize(),
         fontFamily = sarasaFont,
         fontSize = 20.sp

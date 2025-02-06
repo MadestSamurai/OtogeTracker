@@ -8,14 +8,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import com.madsam.otora.consts.BRIGHT_RED
 import com.madsam.otora.ui.record.chunithm.AvatarLayout
 import com.madsam.otora.ui.record.chunithm.Card
 import com.madsam.otora.ui.record.chunithm.CookieDialog
+import com.madsam.otora.ui.record.chunithm.PlayDataList
 import com.madsam.otora.ui.record.viewmodel.ChuniViewModel
 import kotlinx.coroutines.launch
 
@@ -29,7 +31,8 @@ fun ChunithmUserPage(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val totalScore = viewModel.totalMasterScore.collectAsState().value
+    val configuration = LocalConfiguration.current
+    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
 
     LazyColumn(
         modifier = Modifier
@@ -79,17 +82,13 @@ fun ChunithmUserPage(
         }
         item {
             Row {
-                AvatarLayout(viewModel.chuniAvatarUI)
+                AvatarLayout(viewModel.chuniAvatarUI) // width: 224, height: 264
+                val playDataWidth = screenWidthDp - 224.dp - 24.dp - 12.dp
+                PlayDataList(
+                    width = playDataWidth,
+                    chuniPlayDataUI = viewModel.chuniPlayDataUI
+                )
             }
-        }
-        item {
-            Text(text = "Chunithm Master Record")
-        }
-        item {
-            Text(text = "Total Master Score: $totalScore")
-        }
-        item {
-            Text(text = "Chunithm Record")
         }
     }
 

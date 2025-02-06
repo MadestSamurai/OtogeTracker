@@ -4,11 +4,12 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.madsam.otora.model.chuni.net.ChuniGenre
-import com.madsam.otora.model.chuni.net.ChuniUser
 import com.madsam.otora.model.chuni.net.ChuniPenguin
+import com.madsam.otora.model.chuni.net.ChuniUser
 import com.madsam.otora.model.chuni.net.ChuniUserExtend
 import com.madsam.otora.model.chuni.ui.ChuniAvatarUI
 import com.madsam.otora.model.chuni.ui.ChuniCardUI
+import com.madsam.otora.model.chuni.ui.ChuniPlayDataUI
 import com.madsam.otora.service.ChuniDataRequestService
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.JsonUtil
@@ -31,8 +32,12 @@ class ChuniViewModel(
     val chuniCardUI = MutableStateFlow(ChuniCardUI())
     val chuniAvatarUI = MutableStateFlow(ChuniAvatarUI())
 
+    val chuniPlayDataUI = MutableStateFlow(ChuniPlayDataUI())
+    val chuniBasicRecord = MutableStateFlow(listOf<ChuniGenre>())
+    val chuniAdvancedRecord = MutableStateFlow(listOf<ChuniGenre>())
+    val chuniExpertRecord = MutableStateFlow(listOf<ChuniGenre>())
     val chuniMasterRecord = MutableStateFlow(listOf<ChuniGenre>())
-    val totalMasterScore = MutableStateFlow(0)
+    val chuniUltimaRecord = MutableStateFlow(listOf<ChuniGenre>())
 
     init {
         loadData(context)
@@ -41,7 +46,7 @@ class ChuniViewModel(
     fun loadData(context: Context) {
         loadCardFromLocal(context)
         loadAvatarFromLocal(context)
-        loadMasterFromLocal(context)
+        loadPlayDataFromLocal(context)
     }
 
     fun fetchSongData(context: Context) {
@@ -77,33 +82,84 @@ class ChuniViewModel(
         chuniAvatarUI.update { ChuniAvatarUI(chuniPenguin) }
     }
 
-    private fun loadMasterFromLocal(context: Context){
+    private fun loadPlayDataFromLocal(context: Context) {
         val moshi = Moshi.Builder()
             .addLast(KotlinJsonAdapterFactory())
             .build()
-        val masterRecordListType = Types.newParameterizedType(List::class.java, ChuniGenre::class.java)
-        val masterRecordJsonAdapter = moshi.adapter<List<ChuniGenre>>(masterRecordListType)
-        val masterRecordJson = JsonUtil.readJsonFromFile(context, "chuniPlayRecordMaster.json")
-        if (masterRecordJson != null) {
-            chuniMasterRecord.update { masterRecordJsonAdapter.fromJson(masterRecordJson) ?: listOf() }
-        }
-        var totalScore = 0
-        for (masterScore in chuniMasterRecord.value) {
-            for (fullScore in masterScore.fullScoreList) {
-                if (fullScore.score.isEmpty()) continue
-                totalScore += CommonUtils.bigNumberToInt(fullScore.score)
+        val diffArray = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
+        for (diff in diffArray) {
+            val playRecordListType =
+                Types.newParameterizedType(List::class.java, ChuniGenre::class.java)
+            val playRecordJsonAdapter = moshi.adapter<List<ChuniGenre>>(playRecordListType)
+            val playRecordJson = JsonUtil.readJsonFromFile(context, "chuniPlayRecord$diff.json")
+            if (playRecordJson != null) {
+                val playRecordList = playRecordJsonAdapter.fromJson(playRecordJson)
+                if (playRecordList != null) {
+                    var totalScore = 0L
+                    for (score in playRecordList) {
+                        for (fullScore in score.fullScoreList) {
+                            if (fullScore.score.isEmpty()) continue
+                            totalScore += CommonUtils.bigNumberToInt(fullScore.score)
+                        }
+                    }
+                    when (diff) {
+                        "Basic" -> {
+                            chuniBasicRecord.update { playRecordList }
+                            val playData = ChuniPlayDataUI.ChuniPlayDataItemUI()
+                            playData.scoreTotal = totalScore
+                            chuniPlayDataUI.update {
+                                it.copy(basicPlayData = playData)
+                            }
+                        }
+
+                        "Advanced" -> {
+                            chuniAdvancedRecord.update { playRecordList }
+                            val playData = ChuniPlayDataUI.ChuniPlayDataItemUI()
+                            playData.scoreTotal = totalScore
+                            chuniPlayDataUI.update {
+                                it.copy(advancedPlayData = playData)
+                            }
+                        }
+
+                        "Expert" -> {
+                            chuniExpertRecord.update { playRecordList }
+                            val playData = ChuniPlayDataUI.ChuniPlayDataItemUI()
+                            playData.scoreTotal = totalScore
+                            chuniPlayDataUI.update {
+                                it.copy(expertPlayData = playData)
+                            }
+                        }
+
+                        "Master" -> {
+                            chuniMasterRecord.update { playRecordList }
+                            val playData = ChuniPlayDataUI.ChuniPlayDataItemUI()
+                            playData.scoreTotal = totalScore
+                            chuniPlayDataUI.update {
+                                it.copy(masterPlayData = playData)
+                            }
+                        }
+
+                        "Ultima" -> {
+                            chuniUltimaRecord.update { playRecordList }
+                            val playData = ChuniPlayDataUI.ChuniPlayDataItemUI()
+                            playData.scoreTotal = totalScore
+                            chuniPlayDataUI.update {
+                                it.copy(ultimaPlayData = playData)
+                            }
+                        }
+                    }
+                }
             }
         }
-        totalMasterScore.update { totalScore }
     }
 }
 
 class ChuniViewModelFactory(
     private val context: Context
 ) : ViewModelProvider.Factory {
+    @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ChuniViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
             return ChuniViewModel(context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

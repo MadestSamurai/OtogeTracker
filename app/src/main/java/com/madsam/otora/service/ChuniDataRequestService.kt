@@ -2,6 +2,8 @@ package com.madsam.otora.service
 
 import android.content.Context
 import android.util.Log
+import androidx.compose.ui.text.intl.Locale
+import androidx.compose.ui.text.toLowerCase
 import com.madsam.otora.entity.ChuniSheetsEntity
 import com.madsam.otora.entity.ChuniSongsEntity
 import com.madsam.otora.model.chuni.net.ChuniCookie
@@ -383,12 +385,13 @@ class ChuniDataRequestService(private val context: Context) {
         saveDataToLocal(parsePlayLog(doc), "chuniPlayLog.json")
     }
 
-    private fun parsePlayRecord(doc: Document): List<ChuniGenre> {
+    private fun parsePlayRecord(doc: Document, diff: String): List<ChuniGenre> {
         val allGenre = doc.getElementsByClass("box05 w400")
         val chuniGenre = mutableListOf<ChuniGenre>()
         for (genre in allGenre) {
             val genreName = genre.getElementsByClass("genre scroll_point text_white").text()
-            val genreScore = genre.getElementsByClass("w388 musiclist_box bg_master") // TODO: 分难度处理
+            val diffLower = diff.toLowerCase(Locale.current)
+            val genreScore = genre.getElementsByClass("w388 musiclist_box bg_$diffLower")
             val chuniScore = mutableListOf<ChuniFullScore>()
             for (score in genreScore) {
                 val highScore = score.getElementsByClass("play_musicdata_highscore")
@@ -447,7 +450,7 @@ class ChuniDataRequestService(private val context: Context) {
                 requestBody = "genre=99&token=${cookie.token}",
                 method = Method.POST
             )
-            saveDataToLocal(parsePlayRecord(doc), "chuniPlayRecord$diff.json")
+            saveDataToLocal(parsePlayRecord(doc, diff), "chuniPlayRecord$diff.json")
         }
     }
 

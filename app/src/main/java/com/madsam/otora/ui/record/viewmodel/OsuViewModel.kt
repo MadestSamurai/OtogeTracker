@@ -210,10 +210,12 @@ class OsuViewModel(
                 countryRank = "#${osuInfo.user.statistics.countryRank}",
                 formerUsernames = osuInfo.user.previousUsernames.joinToString(", "),
                 maniaModeGlobalRank = if (osuInfo.currentMode == "mania") {
-                    "4K: #${osuInfo.user.statistics.variants[0].globalRank}\n7K: #${osuInfo.user.statistics.variants[1].globalRank}"
+                    "4K: #${osuInfo.user.statistics.variants[0].globalRank}\n" +
+                            "7K: #${osuInfo.user.statistics.variants[1].globalRank}"
                 } else "",
                 maniaModeCountryRank = if (osuInfo.currentMode == "mania") {
-                    "4K: #${osuInfo.user.statistics.variants[0].countryRank}\n7K: #${osuInfo.user.statistics.variants[1].countryRank}"
+                    "4K: #${osuInfo.user.statistics.variants[0].countryRank}\n" +
+                            "7K: #${osuInfo.user.statistics.variants[1].countryRank}"
                 } else "",
                 tournamentBannerImage2x = osuInfo.user.activeTournamentBanner.image2x
             )
@@ -259,9 +261,7 @@ class OsuViewModel(
                 OsuBadgeUI(
                     awardedAt = badge.awardedAt,
                     description = badge.description,
-                    image2xUrl = badge.image2xUrl.ifEmpty {
-                        badge.imageUrl
-                    },
+                    image2xUrl = badge.image2xUrl.ifEmpty { badge.imageUrl },
                     url = badge.url
                 )
             }

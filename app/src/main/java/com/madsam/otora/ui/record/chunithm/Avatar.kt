@@ -8,11 +8,12 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
@@ -33,11 +34,13 @@ fun AvatarLayout(
 ) {
     val avatarData by chuniAvatarUI.collectAsState()
 
-    Surface (
+    Box (
+        contentAlignment = Alignment.Center,
         modifier = Modifier
             .padding(horizontal = 12.dp)
             .clip(RoundedCornerShape(10.dp))
-            .scaledLayout(0.8f)
+            .scaledLayout(0.8f) // width: 224, height: 264
+            .width(280.dp)
             .background(DARK_RED_DEEP)
     ) {
         Box(
@@ -50,7 +53,7 @@ fun AvatarLayout(
                 contentDescription = "Avatar Back",
                 contentScale = ContentScale.FillHeight,
                 modifier = Modifier
-                    .size(272.dp, 330.dp)
+                    .size(272.dp, 294.dp)
                     .offset(y = 25.dp)
                     .zIndex(100f)
             )
@@ -240,7 +243,6 @@ fun Modifier.scaledLayout(scale: Float): Modifier = this
         val scaledWidth = (placeable.width * scale).toInt()
         val scaledHeight = (placeable.height * scale).toInt()
         layout(scaledWidth, scaledHeight) {
-            // 这里直接放置子元素，graphicsLayer 已经处理缩放绘制
             placeable.placeRelative(0, 0)
         }
     }
