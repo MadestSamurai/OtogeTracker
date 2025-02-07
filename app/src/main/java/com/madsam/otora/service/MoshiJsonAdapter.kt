@@ -10,10 +10,12 @@ import com.madsam.otora.model.osu.web.OsuUserExtend
 import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonReader
+import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.ToJson
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
-class NullToDefaultStringAdapter {
+class SafeStringAdapter {
     @FromJson
     @Suppress("unused")
     fun fromJson(reader: JsonReader): String {
@@ -26,7 +28,7 @@ class NullToDefaultStringAdapter {
     }
 }
 
-class NullToDefaultIntAdapter {
+class SafeIntAdapter {
     @FromJson
     @Suppress("unused")
     fun fromJson(reader: JsonReader): Int {
@@ -39,7 +41,7 @@ class NullToDefaultIntAdapter {
     }
 }
 
-class NullToDefaultLongAdapter {
+class SafeLongAdapter {
     @FromJson
     @Suppress("unused")
     fun fromJson(reader: JsonReader): Long {
@@ -52,7 +54,7 @@ class NullToDefaultLongAdapter {
     }
 }
 
-class NullToDefaultDoubleAdapter {
+class SafeDoubleAdapter {
     @FromJson
     @Suppress("unused")
     fun fromJson(reader: JsonReader): Double {
@@ -65,7 +67,7 @@ class NullToDefaultDoubleAdapter {
     }
 }
 
-class NullToDefaultBooleanAdapter {
+class SafeBooleanAdapter {
     @FromJson
     @Suppress("unused")
     fun fromJson(reader: JsonReader): Boolean {
@@ -78,10 +80,10 @@ class NullToDefaultBooleanAdapter {
     }
 }
 
-class NullToDefaultActiveTournamentBannerAdapter {
+class SafeTournamentBannerAdapter {
     private val moshi: Moshi = Moshi.Builder()
-        .add(NullToDefaultStringAdapter())
-        .add(NullToDefaultLongAdapter())
+        .add(SafeStringAdapter())
+        .add(SafeLongAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val activeTournamentBannerAdapter: JsonAdapter<OsuUserExtend.ActiveTournamentBanner> = moshi.adapter(OsuUserExtend.ActiveTournamentBanner::class.java)
@@ -98,9 +100,9 @@ class NullToDefaultActiveTournamentBannerAdapter {
     }
 }
 
-class NullToDefaultCountryAdapter {
+class SafeCountryAdapter {
     private val moshi: Moshi = Moshi.Builder()
-        .add(NullToDefaultStringAdapter())
+        .add(SafeStringAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val countryAdapter: JsonAdapter<OsuCard.Country> = moshi.adapter(OsuCard.Country::class.java)
@@ -117,9 +119,9 @@ class NullToDefaultCountryAdapter {
     }
 }
 
-class NullToDefaultCountryExtendAdapter {
+class SafeCountryExtendAdapter {
     private val moshi: Moshi = Moshi.Builder()
-        .add(NullToDefaultStringAdapter())
+        .add(SafeStringAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val countryAdapter: JsonAdapter<OsuUserExtend.Country> = moshi.adapter(OsuUserExtend.Country::class.java)
@@ -136,10 +138,10 @@ class NullToDefaultCountryExtendAdapter {
     }
 }
 
-class NullToDefaultRankHighestAdapter {
+class SafeRankHighestAdapter {
     private val moshi: Moshi = Moshi.Builder()
-        .add(NullToDefaultStringAdapter())
-        .add(NullToDefaultIntAdapter())
+        .add(SafeStringAdapter())
+        .add(SafeIntAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val rankHighestAdapter: JsonAdapter<OsuUserExtend.RankHighest> = moshi.adapter(OsuUserExtend.RankHighest::class.java)
@@ -156,10 +158,10 @@ class NullToDefaultRankHighestAdapter {
     }
 }
 
-class NullToDefaultHypeAdapter {
+class SafeHypeAdapter {
     private val moshi: Moshi = Moshi.Builder()
-        .add(NullToDefaultStringAdapter())
-        .add(NullToDefaultIntAdapter())
+        .add(SafeStringAdapter())
+        .add(SafeIntAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val hypeAdapter: JsonAdapter<OsuBeatmapSet.Hype> = moshi.adapter(OsuBeatmapSet.Hype::class.java)
@@ -176,11 +178,11 @@ class NullToDefaultHypeAdapter {
     }
 }
 
-class NullToDefaultRankHistoryAdapter {
+class SafeRankHistoryAdapter {
     private val moshi: Moshi = Moshi.Builder()
-        .add(NullToDefaultStringAdapter())
-        .add(NullToDefaultIntAdapter())
-        .add(NullToEmptyIntListAdapter())
+        .add(SafeStringAdapter())
+        .add(SafeIntAdapter())
+        .add(SafeIntListAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val rankHistoryAdapter: JsonAdapter<OsuUserExtend.RankHistory> = moshi.adapter(OsuUserExtend.RankHistory::class.java)
@@ -198,7 +200,7 @@ class NullToDefaultRankHistoryAdapter {
 
 }
 
-class NullToEmptyStringListAdapter {
+class SafeStringListAdapter {
     @FromJson
     @Suppress("unused")
     fun fromJson(reader: JsonReader): List<String> {
@@ -217,7 +219,7 @@ class NullToEmptyStringListAdapter {
     }
 }
 
-class NullToEmptyIntListAdapter {
+class SafeIntListAdapter {
     @FromJson
     @Suppress("unused")
     fun fromJson(reader: JsonReader): List<Int> {
@@ -236,12 +238,12 @@ class NullToEmptyIntListAdapter {
     }
 }
 
-class NullToDefaultGroupListAdapter {
+class SafeGroupListAdapter {
     private val moshi: Moshi = Moshi.Builder()
-        .add(NullToDefaultStringAdapter())
-        .add(NullToDefaultBooleanAdapter())
-        .add(NullToDefaultIntAdapter())
-        .add(NullToEmptyStringListAdapter())
+        .add(SafeStringAdapter())
+        .add(SafeBooleanAdapter())
+        .add(SafeIntAdapter())
+        .add(SafeStringListAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val osuGroupAdapter: JsonAdapter<OsuGroup> = moshi.adapter(OsuGroup::class.java)
@@ -267,10 +269,10 @@ class NullToDefaultGroupListAdapter {
     }
 }
 
-class NullToDefaultMedalItemListAdapter {
+class SafeMedalItemListAdapter {
     private val moshi: Moshi = Moshi.Builder()
-        .add(NullToDefaultStringAdapter())
-        .add(NullToDefaultLongAdapter())
+        .add(SafeStringAdapter())
+        .add(SafeLongAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val osuMedalItemAdapter: JsonAdapter<OsuMedalItem> = moshi.adapter(OsuMedalItem::class.java)
@@ -296,10 +298,10 @@ class NullToDefaultMedalItemListAdapter {
     }
 }
 
-class NullToDefaultActiveTournamentBannerListAdapter {
+class SafeTournamentBannerListAdapter {
     private val moshi: Moshi = Moshi.Builder()
-        .add(NullToDefaultStringAdapter())
-        .add(NullToDefaultLongAdapter())
+        .add(SafeStringAdapter())
+        .add(SafeLongAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val activeTournamentBannerAdapter: JsonAdapter<OsuUserExtend.ActiveTournamentBanner> = moshi.adapter(OsuUserExtend.ActiveTournamentBanner::class.java)
@@ -325,9 +327,9 @@ class NullToDefaultActiveTournamentBannerListAdapter {
     }
 }
 
-class NullToDefaultBadgeListAdapter {
+class SafeBadgeListAdapter {
     private val moshi: Moshi = Moshi.Builder()
-        .add(NullToDefaultStringAdapter())
+        .add(SafeStringAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val badgeAdapter: JsonAdapter<OsuUserExtend.Badge> = moshi.adapter(OsuUserExtend.Badge::class.java)
@@ -353,11 +355,11 @@ class NullToDefaultBadgeListAdapter {
     }
 }
 
-class NullToDefaultVariantListAdapter {
+class SafeVariantListAdapter {
     private val moshi: Moshi = Moshi.Builder()
-        .add(NullToDefaultStringAdapter())
-        .add(NullToDefaultIntAdapter())
-        .add(NullToDefaultDoubleAdapter())
+        .add(SafeStringAdapter())
+        .add(SafeIntAdapter())
+        .add(SafeDoubleAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val variantAdapter: JsonAdapter<OsuStatistics.Variant> = moshi.adapter(OsuStatistics.Variant::class.java)
@@ -383,9 +385,9 @@ class NullToDefaultVariantListAdapter {
     }
 }
 
-class NullToDefaultUserAchievementListAdapter {
+class SafeAchievementListAdapter {
     private val moshi: Moshi = Moshi.Builder()
-        .add(NullToDefaultStringAdapter())
+        .add(SafeStringAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val userAchievementAdapter: JsonAdapter<OsuUserExtend.UserAchievement> = moshi.adapter(OsuUserExtend.UserAchievement::class.java)
@@ -411,11 +413,11 @@ class NullToDefaultUserAchievementListAdapter {
     }
 }
 
-class NullToDefaultRecentActivityListAdapter {
+class SafeRecentActivityListAdapter {
     private val moshi: Moshi = Moshi.Builder()
-        .add(NullToDefaultStringAdapter())
-        .add(NullToDefaultIntAdapter())
-        .add(NullToDefaultBooleanAdapter())
+        .add(SafeStringAdapter())
+        .add(SafeIntAdapter())
+        .add(SafeBooleanAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val recentActivityAdapter: JsonAdapter<OsuRecentActivity> = moshi.adapter(OsuRecentActivity::class.java)
@@ -438,5 +440,34 @@ class NullToDefaultRecentActivityListAdapter {
             reader.endArray()
             list
         }
+    }
+}
+
+class IntPairAdapter {
+    @FromJson
+    @Suppress("unused")
+    fun fromJson(reader: JsonReader): Pair<Int, Int> {
+        var first = 0
+        var second = 0
+        
+        reader.beginArray()
+        if (reader.hasNext()) {
+            first = reader.nextInt()
+        }
+        if (reader.hasNext()) {
+            second = reader.nextInt()
+        }
+        reader.endArray()
+        
+        return Pair(first, second)
+    }
+
+    @ToJson
+    @Suppress("unused")
+    fun toJson(writer: JsonWriter, value: Pair<Int, Int>) {
+        writer.beginArray()
+        writer.value(value.first)
+        writer.value(value.second)
+        writer.endArray()
     }
 }

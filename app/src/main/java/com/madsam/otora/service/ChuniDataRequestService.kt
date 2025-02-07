@@ -14,6 +14,7 @@ import com.madsam.otora.model.chuni.net.ChuniLoginBonus
 import com.madsam.otora.model.chuni.net.ChuniMap
 import com.madsam.otora.model.chuni.net.ChuniMap.ChuniMapArea
 import com.madsam.otora.model.chuni.net.ChuniPenguin
+import com.madsam.otora.model.chuni.net.ChuniPlayRecord
 import com.madsam.otora.model.chuni.net.ChuniScore
 import com.madsam.otora.model.chuni.net.ChuniStatue
 import com.madsam.otora.model.chuni.net.ChuniUser
@@ -77,13 +78,14 @@ class ChuniDataRequestService(private val context: Context) {
         ShareUtil.getString("chuniFriendCodeList", context) ?: ""
     )
     private val moshi = Moshi.Builder()
-        .add(NullToDefaultStringAdapter())
-        .add(NullToDefaultLongAdapter())
-        .add(NullToDefaultIntAdapter())
-        .add(NullToDefaultDoubleAdapter())
-        .add(NullToDefaultBooleanAdapter())
-        .add(NullToEmptyStringListAdapter())
-        .add(NullToEmptyIntListAdapter())
+        .add(SafeStringAdapter())
+        .add(SafeLongAdapter())
+        .add(SafeIntAdapter())
+        .add(SafeDoubleAdapter())
+        .add(SafeBooleanAdapter())
+        .add(SafeStringListAdapter())
+        .add(SafeIntListAdapter())
+        .add(IntPairAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val realmConfig = RealmConfiguration.Builder(
@@ -385,9 +387,56 @@ class ChuniDataRequestService(private val context: Context) {
         saveDataToLocal(parsePlayLog(doc), "chuniPlayLog.json")
     }
 
-    private fun parsePlayRecord(doc: Document, diff: String): List<ChuniGenre> {
+    private fun parsePlayRecord(doc: Document, diff: String): ChuniPlayRecord {
+        val chuniPlayRecord = ChuniPlayRecord()
+
+        doc.select("div.score_list").forEach { scoreList ->
+            val imgSrc = scoreList.select("div.score_list_top img").attr("src")
+            val countText = scoreList.select("div.score_num_text").text()
+                .replace(",", "").trim()
+            val totalText = scoreList.select("div.score_all_text.font_small").text()
+                .replace("/", "").replace(",", "").trim()
+            
+            val count = countText.toIntOrNull() ?: 0
+            val total = totalText.toIntOrNull() ?: 0
+            
+            when {
+                // 评级统计
+                imgSrc.contains("rank_13") -> chuniPlayRecord.rateSSSp = Pair(count, total)  // SSS+
+                imgSrc.contains("rank_12") -> chuniPlayRecord.rateSSS = Pair(count, total)   // SSS
+                imgSrc.contains("rank_11") -> chuniPlayRecord.rateSSp = Pair(count, total)   // SS+
+                imgSrc.contains("rank_10") -> chuniPlayRecord.rateSS = Pair(count, total)    // SS
+                imgSrc.contains("rank_9") -> chuniPlayRecord.rateSp = Pair(count, total)     // S+
+                imgSrc.contains("rank_8") -> chuniPlayRecord.rateS = Pair(count, total)      // S
+                
+                // 达成统计
+                imgSrc.contains("clear") && !imgSrc.contains("fullchain") -> 
+                    chuniPlayRecord.rateClear = Pair(count, total)      // Clear
+                imgSrc.contains("fullcombo") ->
+                    chuniPlayRecord.rateFC = Pair(count, total)         // FC
+                imgSrc.contains("alljustice") && !imgSrc.contains("critical") -> 
+                    chuniPlayRecord.rateAJ = Pair(count, total)         // AJ
+                imgSrc.contains("alljusticecritical") ->
+                    chuniPlayRecord.rateAJC = Pair(count, total)        // AJC
+                imgSrc.contains("fullchain") && !imgSrc.contains("fullchain2") ->
+                    chuniPlayRecord.rateFChain = Pair(count, total)     // FChain
+                imgSrc.contains("fullchain2") ->
+                    chuniPlayRecord.rateFChainP = Pair(count, total)    // FChain+
+                
+                // 难度统计  
+                imgSrc.contains("hard") ->
+                    chuniPlayRecord.rateHard = Pair(count, total)       // Hard
+                imgSrc.contains("absolute") && !imgSrc.contains("absolutep") ->
+                    chuniPlayRecord.rateAbs = Pair(count, total)        // Abs
+                imgSrc.contains("absolutep") ->
+                    chuniPlayRecord.rateAbsP = Pair(count, total)       // Abs+
+                imgSrc.contains("catastrophy") ->
+                    chuniPlayRecord.rateCatas = Pair(count, total)      // Catastrophy
+            }
+        }
+
         val allGenre = doc.getElementsByClass("box05 w400")
-        val chuniGenre = mutableListOf<ChuniGenre>()
+        val genreList = mutableListOf<ChuniGenre>()
         for (genre in allGenre) {
             val genreName = genre.getElementsByClass("genre scroll_point text_white").text()
             val diffLower = diff.toLowerCase(Locale.current)
@@ -437,9 +486,10 @@ class ChuniDataRequestService(private val context: Context) {
                     )
                 )
             }
-            chuniGenre.add(ChuniGenre(genreName, chuniScore))
+            genreList.add(ChuniGenre(genreName, chuniScore))
         }
-        return chuniGenre
+        chuniPlayRecord.genreList = genreList
+        return chuniPlayRecord
     }
 
     private fun requestPlayRecord() {

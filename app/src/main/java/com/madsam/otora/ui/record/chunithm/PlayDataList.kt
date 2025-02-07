@@ -6,9 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,6 +47,27 @@ fun PlayDataList(
 ) {
     val playData by chuniPlayDataUI.collectAsState()
     val diffArray = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
+    val typeArray = arrayOf(
+        "Total",
+        "SSSp",
+        "SSS",
+        "SSp",
+        "SS",
+        "Sp",
+        "S",
+        "FC",
+        "AJ",
+        "AJC",
+        "FChain",
+        "FChainP",
+        "Clear",
+        "Hard",
+        "Abs",
+        "AbsP",
+        "Catas"
+    )
+    val pagerState = rememberPagerState(pageCount = { typeArray.size })
+
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(10.dp))
@@ -51,26 +75,33 @@ fun PlayDataList(
             .height(264.dp)
             .background(DARK_RED_DEEP)
     ) {
-        Column(
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
                 .padding(horizontal = 6.dp)
-                .height(264.dp),
-            verticalArrangement = Arrangement.SpaceEvenly
-        ) {
-            val itemWidth = width - 12.dp
-            for(diff in diffArray) {
-                PlayDataItem(
-                    width = itemWidth,
-                    diff = diff,
-                    playDataItem = when(diff) {
-                        "Basic" -> playData.basicPlayData
-                        "Advanced" -> playData.advancedPlayData
-                        "Expert" -> playData.expertPlayData
-                        "Master" -> playData.masterPlayData
-                        "Ultima" -> playData.ultimaPlayData
-                        else -> playData.masterPlayData
-                    }
-                )
+        ) { page ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .height(264.dp),
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
+                val itemWidth = width - 12.dp
+                for (diff in diffArray) {
+                    PlayDataItem(
+                        width = itemWidth,
+                        diff = diff,
+                        type = typeArray[page],
+                        playDataItem = when (diff) {
+                            "Basic" -> playData.basicPlayData
+                            "Advanced" -> playData.advancedPlayData
+                            "Expert" -> playData.expertPlayData
+                            "Master" -> playData.masterPlayData
+                            "Ultima" -> playData.ultimaPlayData
+                            else -> playData.masterPlayData
+                        }
+                    )
+                }
             }
         }
     }
@@ -80,6 +111,7 @@ fun PlayDataList(
 fun PlayDataItem(
     width: Dp,
     diff: String,
+    type: String,
     playDataItem: ChuniPlayDataUI.ChuniPlayDataItemUI
 ) {
     Column(
@@ -99,7 +131,7 @@ fun PlayDataItem(
                     .padding(2.dp)
                     .clip(RoundedCornerShape(3.dp))
                     .background(
-                        when(diff) {
+                        when (diff) {
                             "Basic" -> CHUNI_DIFF_BASIC
                             "Advanced" -> CHUNI_DIFF_ADVANCED
                             "Expert" -> CHUNI_DIFF_EXPERT
@@ -116,14 +148,52 @@ fun PlayDataItem(
                     .padding(vertical = 2.dp, horizontal = 6.dp)
             )
             Text(
-                text = "Total",
+                text = when (type) {
+                    "Total" -> "Total"
+                    "SSSp" -> "SSS+"
+                    "SSS" -> "SSS"
+                    "SSp" -> "SS+"
+                    "SS" -> "SS"
+                    "Sp" -> "S+"
+                    "S" -> "S"
+                    "FC" -> "Full Combo"
+                    "AJ" -> "All Justice"
+                    "AJC" -> "AJC"
+                    "FChain" -> "Full Chain"
+                    "FChainP" -> "Full Chain+"
+                    "Clear" -> "Clear"
+                    "Hard" -> "Hard"
+                    "Abs" -> "Absolute"
+                    "AbsP" -> "Absolute+"
+                    "Catas" -> "Catastrophy"
+                    else -> "未知"
+                },
                 fontSize = 12.sp,
                 color = White1000,
                 modifier = Modifier.padding(4.dp)
             )
         }
-        Text (
-            text = formatNumberThousand(playDataItem.scoreTotal),
+        Text(
+            text = when (type) {
+                "Total" -> formatNumberThousand(playDataItem.scoreTotal)
+                "SSSp" -> "${playDataItem.rateSSSp.first}/${playDataItem.rateSSSp.second}"
+                "SSS" -> "${playDataItem.rateSSS.first}/${playDataItem.rateSSS.second}"
+                "SSp" -> "${playDataItem.rateSSp.first}/${playDataItem.rateSSp.second}"
+                "SS" -> "${playDataItem.rateSS.first}/${playDataItem.rateSS.second}"
+                "Sp" -> "${playDataItem.rateSp.first}/${playDataItem.rateSp.second}"
+                "S" -> "${playDataItem.rateS.first}/${playDataItem.rateS.second}"
+                "FC" -> "${playDataItem.rateFC.first}/${playDataItem.rateFC.second}"
+                "AJ" -> "${playDataItem.rateAJ.first}/${playDataItem.rateAJ.second}"
+                "AJC" -> "${playDataItem.rateAJC.first}/${playDataItem.rateAJC.second}"
+                "FChain" -> "${playDataItem.rateFChain.first}/${playDataItem.rateFChain.second}"
+                "FChainP" -> "${playDataItem.rateFChainP.first}/${playDataItem.rateFChainP.second}"
+                "Clear" -> "${playDataItem.rateClear.first}/${playDataItem.rateClear.second}"
+                "Hard" -> "${playDataItem.rateHard.first}/${playDataItem.rateHard.second}"
+                "Abs" -> "${playDataItem.rateAbs.first}/${playDataItem.rateAbs.second}"
+                "AbsP" -> "${playDataItem.rateAbsP.first}/${playDataItem.rateAbsP.second}"
+                "Catas" -> "${playDataItem.rateCatas.first}/${playDataItem.rateCatas.second}"
+                else -> "0/0"
+            },
             fontSize = 16.sp,
             color = DARK_RED_TEXT,
             modifier = Modifier.padding(2.dp)

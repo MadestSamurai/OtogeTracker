@@ -445,7 +445,7 @@ fun OsuTopRankItemCard(
                             .height(20.dp)
                     )
                 }
-                if (item.status == "graveyard") {
+                if (item.status == "graveyard" || item.status == "pending") {
                     Text(
                         text = " - ",
                         color = DARK_RED_TEXT_LIGHT,
