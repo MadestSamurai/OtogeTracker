@@ -151,4 +151,15 @@ object GradientBrush {
             OSU_LEVEL_PURPLE_1,
         )
     )
+    val LEVEL_RAINBOW_TEXT: Brush = Brush.verticalGradient(
+        colors = listOf(
+            OSU_LEVEL_RED_1,
+            OSU_LEVEL_YELLOW_1,
+            OSU_LEVEL_BLUE_1,
+            OSU_LEVEL_GREEN_1,
+            OSU_LEVEL_PURPLE_1,
+        ),
+        startY = 0f,
+        endY = 25f
+    )
 }

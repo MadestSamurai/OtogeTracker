@@ -8,17 +8,18 @@ package com.madsam.otora.model.chuni.net
  * 描述: Chunithm卡片
  */
 data class ChuniUser(
-    var charaInfo: String = "",
-    var charaBase: String = "",
-    var honorBase: String = "",
-    var honorText: String = "",
-    var reborn: Int = 0,
-    var lv: Int = 0,
     var nameIn: String = "",
-    var classEmblemBase: Int = 0,
-    var classEmblemTop: Int = 0,
+    var profileBackground: String = "",
+    var reborn: Int = 0,
+    var level: Int = 0,
     var rating: String = "",
     var ratingMax: String = "",
     var overpower: String = "",
     var lastPlay: String = "",
+    var roleImageUrl: String = "",
+    var roleBase: String = "",
+    var classEmblemTop: String = "",
+    var classEmblemBase: String = "",
+    var honorText: String = "",
+    var honorBase: String = ""
 )

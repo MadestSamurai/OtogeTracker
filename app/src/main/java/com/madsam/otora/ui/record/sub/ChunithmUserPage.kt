@@ -17,6 +17,7 @@ import com.madsam.otora.consts.BRIGHT_RED
 import com.madsam.otora.ui.record.chunithm.AvatarLayout
 import com.madsam.otora.ui.record.chunithm.Card
 import com.madsam.otora.ui.record.chunithm.CookieDialog
+import com.madsam.otora.ui.record.chunithm.FriendList
 import com.madsam.otora.ui.record.chunithm.PlayDataList
 import com.madsam.otora.ui.record.viewmodel.ChuniViewModel
 import kotlinx.coroutines.launch
@@ -40,24 +41,22 @@ fun ChunithmUserPage(
             .fillMaxSize()
     ) {
         item {
-            Button(onClick = { onNavigateToTopRating() }) {
-                Text("Go to Top Rating")
-            }
-        }
-        item {
-            Button(onClick = {
-                viewModel.fetchUserData(context)
-                viewModel.loadData(context)
-            }) {
-                Text("Update Data")
-            }
-        }
-        item {
-            Button(onClick = {
-                viewModel.fetchSongData(context)
-                viewModel.loadData(context)
-            }) {
-                Text("Update Song Data")
+            Row {
+                Button(onClick = { onNavigateToTopRating() }) {
+                    Text("Top Rating")
+                }
+                Button(onClick = {
+                    viewModel.fetchUserData(context)
+                    viewModel.loadData(context)
+                }) {
+                    Text("Update Data")
+                }
+                Button(onClick = {
+                    viewModel.fetchSongData(context)
+                    viewModel.loadData(context)
+                }) {
+                    Text("Update Song Data")
+                }
             }
         }
 //        item {
@@ -89,6 +88,9 @@ fun ChunithmUserPage(
                     chuniPlayDataUI = viewModel.chuniPlayDataUI
                 )
             }
+        }
+        item {
+            FriendList(viewModel.chuniFriendDataUI)
         }
     }
 

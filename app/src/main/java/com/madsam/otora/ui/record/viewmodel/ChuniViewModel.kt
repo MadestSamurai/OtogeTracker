@@ -3,6 +3,7 @@ package com.madsam.otora.ui.record.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.madsam.otora.model.chuni.net.ChuniFriend
 import com.madsam.otora.model.chuni.net.ChuniGenre
 import com.madsam.otora.model.chuni.net.ChuniPenguin
 import com.madsam.otora.model.chuni.net.ChuniPlayRecord
@@ -10,6 +11,7 @@ import com.madsam.otora.model.chuni.net.ChuniUser
 import com.madsam.otora.model.chuni.net.ChuniUserExtend
 import com.madsam.otora.model.chuni.ui.ChuniAvatarUI
 import com.madsam.otora.model.chuni.ui.ChuniCardUI
+import com.madsam.otora.model.chuni.ui.ChuniFriendUI
 import com.madsam.otora.model.chuni.ui.ChuniPlayDataUI
 import com.madsam.otora.service.ChuniDataRequestService
 import com.madsam.otora.service.IntPairAdapter
@@ -17,6 +19,7 @@ import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.JsonUtil
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.squareup.moshi.Types
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 
@@ -34,6 +37,8 @@ class ChuniViewModel(
     val chuniAvatarUI = MutableStateFlow(ChuniAvatarUI())
 
     val chuniPlayDataUI = MutableStateFlow(ChuniPlayDataUI())
+    val chuniFriendDataUI = MutableStateFlow(listOf<ChuniFriendUI>())
+
     val chuniBasicRecord = MutableStateFlow(listOf<ChuniGenre>())
     val chuniAdvancedRecord = MutableStateFlow(listOf<ChuniGenre>())
     val chuniExpertRecord = MutableStateFlow(listOf<ChuniGenre>())
@@ -48,6 +53,7 @@ class ChuniViewModel(
         loadCardFromLocal(context)
         loadAvatarFromLocal(context)
         loadPlayDataFromLocal(context)
+        loadFriendDataFromLocal(context)
     }
 
     fun fetchSongData(context: Context) {
@@ -91,64 +97,80 @@ class ChuniViewModel(
         val diffArray = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
         for (diff in diffArray) {
             val playRecordJsonAdapter = moshi.adapter(ChuniPlayRecord::class.java)
-            val playRecordJson = JsonUtil.readJsonFromFile(context, "chuniPlayRecord$diff.json")
-            if (playRecordJson != null) {
-                val playRecord = playRecordJsonAdapter.fromJson(playRecordJson) ?: ChuniPlayRecord()
-                val playDataList = playRecord.genreList
-                var totalScore = 0L
-                for (score in playDataList) {
-                    for (fullScore in score.fullScoreList) {
-                        if (fullScore.score.isEmpty()) continue
-                        totalScore += CommonUtils.bigNumberToInt(fullScore.score)
-                    }
+            val playRecordJson =
+                JsonUtil.readJsonFromFile(context, "chuniPlayRecord$diff.json") ?: continue
+            val playRecord = playRecordJsonAdapter.fromJson(playRecordJson) ?: ChuniPlayRecord()
+            val playDataList = playRecord.genreList
+            var totalScore = 0L
+            for (score in playDataList) {
+                for (fullScore in score.fullScoreList) {
+                    if (fullScore.score.isEmpty()) continue
+                    totalScore += CommonUtils.bigNumberToInt(fullScore.score)
                 }
-                val playData = ChuniPlayDataUI.ChuniPlayDataItemUI().apply {
-                    this.scoreTotal = totalScore
-                    this.rateSSSp = playRecord.rateSSSp
-                    this.rateSSS = playRecord.rateSSS
-                    this.rateSSp = playRecord.rateSSp
-                    this.rateSS = playRecord.rateSS
-                    this.rateSp = playRecord.rateSp
-                    this.rateS = playRecord.rateS
-                    this.rateFC = playRecord.rateFC
-                    this.rateAJ = playRecord.rateAJ
-                    this.rateAJC = playRecord.rateAJC
-                    this.rateFChain = playRecord.rateFChain
-                    this.rateFChainP = playRecord.rateFChainP
-                    this.rateClear = playRecord.rateClear
-                    this.rateHard = playRecord.rateHard
-                    this.rateAbs = playRecord.rateAbs
-                    this.rateAbsP = playRecord.rateAbsP
-                    this.rateCatas = playRecord.rateCatas
+            }
+            val playData = ChuniPlayDataUI.ChuniPlayDataItemUI().apply {
+                this.scoreTotal = totalScore
+                this.rateSSSp = playRecord.rateSSSp
+                this.rateSSS = playRecord.rateSSS
+                this.rateSSp = playRecord.rateSSp
+                this.rateSS = playRecord.rateSS
+                this.rateSp = playRecord.rateSp
+                this.rateS = playRecord.rateS
+                this.rateFC = playRecord.rateFC
+                this.rateAJ = playRecord.rateAJ
+                this.rateAJC = playRecord.rateAJC
+                this.rateFChain = playRecord.rateFChain
+                this.rateFChainP = playRecord.rateFChainP
+                this.rateClear = playRecord.rateClear
+                this.rateHard = playRecord.rateHard
+                this.rateAbs = playRecord.rateAbs
+                this.rateAbsP = playRecord.rateAbsP
+                this.rateCatas = playRecord.rateCatas
+            }
+            when (diff) {
+                "Basic" -> {
+                    chuniBasicRecord.update { playDataList }
+                    chuniPlayDataUI.update { it.copy(basicPlayData = playData) }
                 }
-                when (diff) {
-                    "Basic" -> {
-                        chuniBasicRecord.update { playDataList }
-                        chuniPlayDataUI.update { it.copy(basicPlayData = playData) }
-                    }
 
-                    "Advanced" -> {
-                        chuniAdvancedRecord.update { playDataList }
-                        chuniPlayDataUI.update { it.copy(advancedPlayData = playData) }
-                    }
+                "Advanced" -> {
+                    chuniAdvancedRecord.update { playDataList }
+                    chuniPlayDataUI.update { it.copy(advancedPlayData = playData) }
+                }
 
-                    "Expert" -> {
-                        chuniExpertRecord.update { playDataList }
-                        chuniPlayDataUI.update { it.copy(expertPlayData = playData) }
-                    }
+                "Expert" -> {
+                    chuniExpertRecord.update { playDataList }
+                    chuniPlayDataUI.update { it.copy(expertPlayData = playData) }
+                }
 
-                    "Master" -> {
-                        chuniMasterRecord.update { playDataList }
-                        chuniPlayDataUI.update { it.copy(masterPlayData = playData) }
-                    }
+                "Master" -> {
+                    chuniMasterRecord.update { playDataList }
+                    chuniPlayDataUI.update { it.copy(masterPlayData = playData) }
+                }
 
-                    "Ultima" -> {
-                        chuniUltimaRecord.update { playDataList }
-                        chuniPlayDataUI.update { it.copy(ultimaPlayData = playData) }
-                    }
+                "Ultima" -> {
+                    chuniUltimaRecord.update { playDataList }
+                    chuniPlayDataUI.update { it.copy(ultimaPlayData = playData) }
                 }
             }
         }
+    }
+
+    private fun loadFriendDataFromLocal(context: Context) {
+        val json = JsonUtil.readJsonFromFile(context, "chuniFriend.json")
+        if (json.isNullOrEmpty()) return
+
+        val type = Types.newParameterizedType(List::class.java, ChuniFriend::class.java)
+
+        val friendList = Moshi.Builder()
+            .addLast(KotlinJsonAdapterFactory())
+            .build()
+            .adapter<List<ChuniFriend>>(type)
+            .fromJson(json)
+            ?.map { ChuniFriendUI(it) }
+            ?: emptyList()
+
+        chuniFriendDataUI.update { friendList }
     }
 }
 

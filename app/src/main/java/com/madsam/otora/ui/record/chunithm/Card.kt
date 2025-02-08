@@ -30,14 +30,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.consts.DARKER_RED
 import com.madsam.otora.consts.DARK_RED
 import com.madsam.otora.consts.DARK_RED_DEEP
 import com.madsam.otora.consts.DARK_RED_TEXT
 import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
+import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_GOLD
+import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_PLATINUM
+import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_RAINBOW
+import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_SILVER
+import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_WHITE
 import com.madsam.otora.consts.OSU_LEVEL_GOLD_1
-import com.madsam.otora.consts.OSU_LEVEL_PLATINUM_1
-import com.madsam.otora.consts.OSU_LEVEL_SILVER_1
 import com.madsam.otora.model.chuni.ui.ChuniCardUI
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
@@ -88,12 +90,11 @@ fun Card(
                     .clip(RoundedCornerShape(5.dp))
                     .background(
                         when (cardData.honorBase) {
-                            "silver" -> OSU_LEVEL_SILVER_1
-                            "gold" -> OSU_LEVEL_GOLD_1
-                            "platina" -> OSU_LEVEL_PLATINUM_1
-                            else -> {
-                                DARKER_RED
-                            }
+                            "silver" -> OSU_LEVEL_SILVER
+                            "gold" -> OSU_LEVEL_GOLD
+                            "platina" -> OSU_LEVEL_PLATINUM
+                            "rainbow" -> OSU_LEVEL_RAINBOW
+                            else -> OSU_LEVEL_WHITE
                         }
                     ),
                 textAlign = TextAlign.Center,
@@ -105,7 +106,7 @@ fun Card(
             )
 
             Image(
-                painter = rememberAsyncImagePainter(cardData.charaInfo),
+                painter = rememberAsyncImagePainter(cardData.roleImageUrl),
                 contentDescription = "Cover Image",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
@@ -118,9 +119,12 @@ fun Card(
                     .padding(start = 5.dp, bottom = 5.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .background(
-                        when (cardData.charaBase) {
-                            "silver" -> OSU_LEVEL_SILVER_1
-                            else -> DARKER_RED
+                        when (cardData.roleBase) {
+                            "silver" -> OSU_LEVEL_SILVER
+                            "gold" -> OSU_LEVEL_GOLD
+                            "platina" -> OSU_LEVEL_PLATINUM
+                            "rainbow" -> OSU_LEVEL_RAINBOW
+                            else -> OSU_LEVEL_WHITE
                         }
                     )
             )
@@ -163,7 +167,7 @@ fun Card(
             )
 
             Text(
-                text = cardData.lv.toString(),
+                text = cardData.level.toString(),
                 color = DARK_RED_TEXT_LIGHT,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
@@ -191,7 +195,7 @@ fun Card(
             )
 
             Image(
-                painter = rememberAsyncImagePainter("https://chunithm.wahlap.com/mobile/images/classemblem_base_0${cardData.classEmblemBase}.png"),
+                painter = rememberAsyncImagePainter(cardData.classEmblemBase),
                 contentDescription = "Class Emblem",
                 contentScale = ContentScale.FillHeight,
                 modifier = Modifier
@@ -205,7 +209,7 @@ fun Card(
             )
 
             Image(
-                painter = rememberAsyncImagePainter("https://chunithm.wahlap.com/mobile/images/classemblem_medal_0${cardData.classEmblemTop}.png"),
+                painter = rememberAsyncImagePainter(cardData.classEmblemTop),
                 contentDescription = "Class Emblem",
                 contentScale = ContentScale.FillHeight,
                 modifier = Modifier

@@ -25,10 +25,11 @@ import com.madsam.otora.model.chuni.web.lxns.ChuniAliases
 import com.madsam.otora.model.chuni.web.lxns.LxnsData
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.JsonUtil
+import com.madsam.otora.utils.SafeSoupUtil.safeAttr
 import com.madsam.otora.utils.SafeSoupUtil.safeFirst
-import com.madsam.otora.utils.SafeSoupUtil.safeFirstAttr
 import com.madsam.otora.utils.SafeSoupUtil.safeFirstText
-import com.madsam.otora.utils.SafeSoupUtil.safePreviousElementSibling
+import com.madsam.otora.utils.SafeSoupUtil.safeSelectFirst
+import com.madsam.otora.utils.SafeSoupUtil.safeText
 import com.madsam.otora.utils.ShareUtil
 import com.madsam.otora.web.Api
 import com.squareup.moshi.Moshi
@@ -101,7 +102,8 @@ class ChuniDataRequestService(private val context: Context) {
     private fun requestDataFromServer(
         link: String,
         requestBody: String = "",
-        method: Method = Method.GET): Document {
+        method: Method = Method.GET
+    ): Document {
         lateinit var doc: Document
         try {
             val connect = Jsoup.connect(CommonUtils.encodeURL(link))
@@ -125,7 +127,7 @@ class ChuniDataRequestService(private val context: Context) {
     }
 
     private inline fun <reified T> saveDataToLocal(data: T, filename: String) {
-        // Check if data is List and not empty
+        // 如果是空列表则不保存
         if (data is List<*> && data.isEmpty()) {
             Log.e(TAG, "Empty list data found in $filename")
             return
@@ -138,100 +140,72 @@ class ChuniDataRequestService(private val context: Context) {
 
     private fun parseChuniUser(doc: Document): ChuniUser {
         val chuniUser = ChuniUser()
-        chuniUser.charaInfo = doc.getElementsByClass("player_chara_info")
+        chuniUser.nameIn = doc.safeSelectFirst("div.player_name_in").safeText()
+
+        chuniUser.profileBackground = doc.safeSelectFirst("div.box_playerprofile")
+            .safeAttr("style")
+            .split("/").last()
+            .split(".").first()
+            .removePrefix("profile_")
+
+        chuniUser.reborn = doc.safeSelectFirst("div.player_reborn").safeText()
+            .toIntOrNull() ?: 0
+        chuniUser.level = doc.safeSelectFirst("div.player_lv").safeText()
+            .toIntOrNull() ?: 0
+
+        chuniUser.rating = doc.safeSelectFirst("div.player_rating_num_block")
             .select("img")
-            .safeFirstAttr("src")
-        chuniUser.charaBase = doc.getElementsByClass("player_chara_info")
-            .safeFirstAttr("style")
-            .split("/").last()
-            .split(".").first()
-            .split("_").last()
-        chuniUser.honorBase = doc.getElementsByClass("player_honor_short")
-            .safeFirstAttr("style")
-            .split("/").last()
-            .split(".").first()
-            .split("_").last()
-        chuniUser.honorText = doc.getElementsByClass("player_honor_text")
-            .safeFirstText()
-        chuniUser.reborn = doc.getElementsByClass("player_reborn")
-            .safeFirstText()
-            .toIntOrNull() ?: 0
-        chuniUser.lv = doc.getElementsByClass("player_lv")
-            .safeFirstText()
-            .toIntOrNull() ?: 0
-        chuniUser.nameIn = doc.getElementsByClass("player_name_in")
-            .safeFirstText()
+            .joinToString("") { img ->
+                val srcFile = img.safeAttr("src").split("/").last()
 
-        val playerClassEmblemBaseBlock = doc.getElementsByClass("player_classemblem_base")
-        chuniUser.classEmblemBase = playerClassEmblemBaseBlock.select("img")
-            .safeFirstAttr("src")
-            .split("/").last()
-            .split(".").first()
-            .split("_").last()
-            .toIntOrNull() ?: 0
-
-        val playerClassEmblemTopBlock = doc.getElementsByClass("player_classemblem_top")
-        chuniUser.classEmblemTop = playerClassEmblemTopBlock.select("img")
-            .safeFirstAttr("src")
-            .split("/").last()
-            .split(".").first()
-            .split("_").last()
-            .toIntOrNull() ?: 0
-
-        val playerRatingNumBlock = doc.getElementsByClass("player_rating_num_block")
-        val ratingImages = playerRatingNumBlock.select("img")
-        val commaSeparator = doc.getElementsByClass("player_rating_comma").first()
-        val commaIndex = ratingImages.indexOf(commaSeparator.safePreviousElementSibling()) + 1
-
-        chuniUser.rating = ratingImages.joinToString("") {
-            if (ratingImages.indexOf(it) == commaIndex) {
-                "."
-            } else {
-                it.attr("src")
-                    .split("/").last()
-                    .split(".").first()
-                    .split("_").last()
+                if (srcFile.contains("comma")) "."
+                else srcFile.split(".").first().split("_").last()
                     .toInt().toString()
             }
-        }
+        chuniUser.ratingMax = doc.safeSelectFirst("div.player_rating_max").safeText()
+        chuniUser.overpower = doc.safeSelectFirst("div.player_overpower_text").safeText()
+        chuniUser.lastPlay = doc.safeSelectFirst("div.player_lastplaydate_text").safeText()
 
-        chuniUser.ratingMax = doc.getElementsByClass("player_rating_max")
-            .safeFirstText()
-        chuniUser.overpower = doc.getElementsByClass("player_overpower_text")
-            .safeFirstText()
-        chuniUser.lastPlay = doc.getElementsByClass("player_lastplaydate_text")
-            .safeFirstText()
+        chuniUser.roleImageUrl = doc.safeSelectFirst("div.player_chara_info img")
+            .safeAttr("src")
+        chuniUser.roleBase = doc.safeSelectFirst("div.player_chara_info")
+            .safeAttr("style")
+            .split("/").last()
+            .split(".").first()
+            .split("_").last()
+
+        chuniUser.honorBase = doc.safeSelectFirst("div.player_honor_short")
+            .safeAttr("style")
+            .split("/").last()
+            .split(".").first()
+            .split("_").last()
+
+        chuniUser.honorText = doc.safeSelectFirst("div.player_honor_text").safeText()
+
+        chuniUser.classEmblemBase = doc.safeSelectFirst("div.player_classemblem_base")
+            .safeSelectFirst("img").safeAttr("src")
+
+        chuniUser.classEmblemTop = doc.safeSelectFirst("div.player_classemblem_top")
+            .safeSelectFirst("img").safeAttr("src")
 
         return chuniUser
     }
 
     private fun parseChuniPenguin(doc: Document): ChuniPenguin {
-        val chuniPenguin = ChuniPenguin()
-        chuniPenguin.back = doc.getElementsByClass("avatar_back")
-            .select("img").safeFirstAttr("src")
-        chuniPenguin.skinfootR = doc.getElementsByClass("avatar_skinfoot_r")
-            .select("img").safeFirstAttr("src")
-        chuniPenguin.skinfootL = doc.getElementsByClass("avatar_skinfoot_l")
-            .select("img").safeFirstAttr("src")
-        chuniPenguin.skin = doc.getElementsByClass("avatar_skin")
-            .select("img").safeFirstAttr("src")
-        chuniPenguin.wear = doc.getElementsByClass("avatar_wear")
-            .select("img").safeFirstAttr("src")
-        chuniPenguin.face = doc.getElementsByClass("avatar_face")
-            .select("img").safeFirstAttr("src")
-        chuniPenguin.faceCover = doc.getElementsByClass("avatar_faceCover")
-            .select("img").safeFirstAttr("src")
-        chuniPenguin.head = doc.getElementsByClass("avatar_head")
-            .select("img").safeFirstAttr("src")
-        chuniPenguin.handR = doc.getElementsByClass("avatar_hand_r")
-            .select("img").safeFirstAttr("src")
-        chuniPenguin.handL = doc.getElementsByClass("avatar_hand_l")
-            .select("img").safeFirstAttr("src")
-        chuniPenguin.itemR = doc.getElementsByClass("avatar_item_r")
-            .select("img").safeFirstAttr("src")
-        chuniPenguin.itemL = doc.getElementsByClass("avatar_item_l")
-            .select("img").safeFirstAttr("src")
-        return chuniPenguin
+        return ChuniPenguin().apply {
+            back = doc.safeSelectFirst("div.avatar_back img").safeAttr("src")
+            skinfootR = doc.safeSelectFirst("div.avatar_skinfoot_r img").safeAttr("src")
+            skinfootL = doc.safeSelectFirst("div.avatar_skinfoot_l img").safeAttr("src")
+            skin = doc.safeSelectFirst("div.avatar_skin img").safeAttr("src")
+            wear = doc.safeSelectFirst("div.avatar_wear img").safeAttr("src")
+            face = doc.safeSelectFirst("div.avatar_face img").safeAttr("src")
+            faceCover = doc.safeSelectFirst("div.avatar_faceCover img").safeAttr("src")
+            head = doc.safeSelectFirst("div.avatar_head img").safeAttr("src")
+            handR = doc.safeSelectFirst("div.avatar_hand_r img").safeAttr("src")
+            handL = doc.safeSelectFirst("div.avatar_hand_l img").safeAttr("src")
+            itemR = doc.safeSelectFirst("div.avatar_item_r img").safeAttr("src")
+            itemL = doc.safeSelectFirst("div.avatar_item_l img").safeAttr("src")
+        }
     }
 
     private fun parseChuniUserExtend(doc: Document): ChuniUserExtend {
@@ -396,10 +370,10 @@ class ChuniDataRequestService(private val context: Context) {
                 .replace(",", "").trim()
             val totalText = scoreList.select("div.score_all_text.font_small").text()
                 .replace("/", "").replace(",", "").trim()
-            
+
             val count = countText.toIntOrNull() ?: 0
             val total = totalText.toIntOrNull() ?: 0
-            
+
             when {
                 // 评级统计
                 imgSrc.contains("rank_13") -> chuniPlayRecord.rateSSSp = Pair(count, total)  // SSS+
@@ -408,13 +382,13 @@ class ChuniDataRequestService(private val context: Context) {
                 imgSrc.contains("rank_10") -> chuniPlayRecord.rateSS = Pair(count, total)    // SS
                 imgSrc.contains("rank_9") -> chuniPlayRecord.rateSp = Pair(count, total)     // S+
                 imgSrc.contains("rank_8") -> chuniPlayRecord.rateS = Pair(count, total)      // S
-                
+
                 // 达成统计
-                imgSrc.contains("clear") && !imgSrc.contains("fullchain") -> 
+                imgSrc.contains("clear") && !imgSrc.contains("fullchain") ->
                     chuniPlayRecord.rateClear = Pair(count, total)      // Clear
                 imgSrc.contains("fullcombo") ->
                     chuniPlayRecord.rateFC = Pair(count, total)         // FC
-                imgSrc.contains("alljustice") && !imgSrc.contains("critical") -> 
+                imgSrc.contains("alljustice") && !imgSrc.contains("critical") ->
                     chuniPlayRecord.rateAJ = Pair(count, total)         // AJ
                 imgSrc.contains("alljusticecritical") ->
                     chuniPlayRecord.rateAJC = Pair(count, total)        // AJC
@@ -422,7 +396,7 @@ class ChuniDataRequestService(private val context: Context) {
                     chuniPlayRecord.rateFChain = Pair(count, total)     // FChain
                 imgSrc.contains("fullchain2") ->
                     chuniPlayRecord.rateFChainP = Pair(count, total)    // FChain+
-                
+
                 // 难度统计  
                 imgSrc.contains("hard") ->
                     chuniPlayRecord.rateHard = Pair(count, total)       // Hard
@@ -505,11 +479,14 @@ class ChuniDataRequestService(private val context: Context) {
     }
 
     private fun parseChuniUserRole(doc: Document): ChuniUserRole {
-        val roleName = doc.selectFirst("div.character_image_box_name")?.text() ?: ""
-        val roleImageUrl = doc.selectFirst("div.character_image_box img")?.attr("src") ?: ""
-        val roleLevel = doc.select("div.character_lv_box_num img").mapNotNull { img ->
-            Regex("num_lv_(\\d+)").find(img.attr("src"))?.groupValues?.get(1)
-        }.joinToString(separator = "")
+        val roleName = doc.selectFirst("div.character_image_box_name").safeText()
+        val roleImageUrl = doc.selectFirst("div.character_image_box img").safeAttr("src")
+        val roleLevel = doc.select("div.character_lv_box_num img")
+            .joinToString(separator = "") { img ->
+                Regex("num_lv_(\\d+)")
+                    .find(img.safeAttr("src"))
+                    ?.groupValues?.get(1) ?: ""
+            }
 
         return ChuniUserRole(roleName, roleLevel, roleImageUrl)
     }
@@ -519,11 +496,12 @@ class ChuniDataRequestService(private val context: Context) {
         val penguinContainer = doc.select("div.box01_title.text_b")
             .firstOrNull { it.text().contains("企鹅雕像") }
             ?.parent()
+
         penguinContainer?.select("div.ticket_block_block")?.forEach { block ->
-            block.select("div.ticket_hold_mini span.font_large").forEach { span ->
-                val count = span.text().toIntOrNull() ?: 0
-                penguinCounts.add(count)
-            }
+            block.select("div.ticket_hold_mini span.font_large")
+                .forEach { span ->
+                    penguinCounts.add(span.safeText().toIntOrNull() ?: 0)
+                }
         }
 
         return ChuniStatue(
@@ -545,42 +523,79 @@ class ChuniDataRequestService(private val context: Context) {
 
         val friendBlocks = doc.select("div.friend_block")
         friendBlocks.forEach { block ->
-            val roleImageUrl = block.selectFirst("div.player_data_left div.player_chara_info img")
-                ?.attr("src")
-                ?: ""
-            val levelText = block.selectFirst("div.player_data_right div.player_name div.player_lv")
-                ?.text()
-                ?: "0"
-            val level = levelText.toIntOrNull() ?: 0
-            val friendName = block.selectFirst("div.player_data_right div.player_name_in a")
-                ?.text()
-                ?: ""
-            val ratingMax =
-                block.selectFirst("div.player_data_right div.player_rating div.player_rating_max")
-                    ?.text()
-                    ?: ""
-            val overpower =
-                block.selectFirst("div.player_data_right div.player_overpower div.player_overpower_text")
-                    ?.text()
-                    ?: ""
-            val lastPlayDate =
-                block.selectFirst("div.player_data_right div.player_lastplaydate div.player_lastplaydate_text")
-                    ?.text()
-                    ?: ""
-            val honorText =
-                block.selectFirst("div.player_data_right div.player_honor_short div.player_honor_text_view div.player_honor_text span")
-                    ?.text()
-                    ?: ""
+            // 获取角色相关信息
+            val roleImageUrl =
+                block.safeSelectFirst("div.player_data_left div.player_chara_info img")
+                    .safeAttr("src")
+
+            val roleBase = block.safeSelectFirst("div.player_data_left div.player_chara_info")
+                .safeAttr("style").split("/").last()
+                .split(".").first()
+                .split("_").last()
+
+            // 获取背景板信息
+            val profileBackground = block.safeSelectFirst("div.box_playerprofile")
+                .safeAttr("style").split("/").last()
+                .split(".").first()
+                .removePrefix("profile_")
+
+            // 获取荣誉相关信息
+            val honorText = block.safeSelectFirst("div.player_honor_text span").safeText()
+            val honorBase = block.safeSelectFirst("div.player_honor_short")
+                .safeAttr("style")
+                .split("/").last()
+                .split(".").first()
+                .split("_").last()
+
+            val classEmblemBase = block.safeSelectFirst("div.player_classemblem_base")
+                .safeSelectFirst("img").safeAttr("src")
+            val classEmblemTop = block.safeSelectFirst("div.player_classemblem_top")
+                .safeSelectFirst("img").safeAttr("src")
+
+            // 获取基本信息
+            val reborn = block.safeSelectFirst("div.player_reborn").safeText().toIntOrNull() ?: 0
+            val level = block.safeSelectFirst("div.player_lv").safeText().toIntOrNull() ?: 0
+            val friendName = block.safeSelectFirst("div.player_name_in form a").safeText()
+            val friendCode = block.safeSelectFirst("input[name=idx]").safeAttr("value")
+            val ratingMax = block.safeSelectFirst("div.player_rating_max").safeText()
+            val rating = block.safeSelectFirst("div.player_rating_num_block")
+                .select("img")
+                .joinToString("") { img ->
+                    val srcFile = img.safeAttr("src")
+                        .split("/").last()
+
+                    if (srcFile.contains("comma")) "."
+                    else srcFile.split(".").first()
+                        .split("_").last()
+                        .toInt()
+                        .toString()
+                }
+            val overpower = block.safeSelectFirst("div.player_overpower_text").safeText()
+            val lastPlayDate = block.safeSelectFirst("div.player_lastplaydate_text").safeText()
+
+            // 检查按钮状态
+            val isFavorite = block.selectFirst("div.friend_favorite_off") != null
+            val isScored = block.selectFirst("div.friend_score_off") != null
 
             friendList.add(
                 ChuniFriend(
                     friendName = friendName,
+                    friendCode = friendCode,
+                    profileBackground = profileBackground,
+                    reborn = reborn,
                     level = level,
+                    rating = rating,
                     ratingMax = ratingMax,
                     overpower = overpower,
-                    lastPlayDate = lastPlayDate,
+                    lastPlay = lastPlayDate,
                     roleImageUrl = roleImageUrl,
-                    honorText = honorText
+                    roleBase = roleBase,
+                    honorText = honorText,
+                    honorBase = honorBase,
+                    isFavorite = isFavorite,
+                    isScored = isScored,
+                    classEmblemBase = classEmblemBase,
+                    classEmblemTop = classEmblemTop
                 )
             )
         }
@@ -833,14 +848,16 @@ class ChuniDataRequestService(private val context: Context) {
     }
 
     private fun updateCookie(response: Connection.Response) {
-        if (response.cookie("_t") != null) {
-            cookie.token = response.cookie("_t")!!.toString()
-        }
-        if (response.cookie("expires") != null) {
-            cookie.expires = response.cookie("expires")!!.toString()
-        }
-        if (response.cookie("userId") != null) {
-            cookie.userId = response.cookie("userId")!!.toString()
+        // 获取所有cookies
+        val cookies = response.cookies()
+
+        // 遍历所有cookie，更新最新值
+        cookies.forEach { (name, value) ->
+            when (name) {
+                "_t" -> cookie.token = value
+                "expires" -> cookie.expires = value
+                "userId" -> cookie.userId = value
+            }
         }
     }
 
@@ -855,7 +872,7 @@ class ChuniDataRequestService(private val context: Context) {
         serviceScope.launch { mutex.withLock { requestCollection() } }
         serviceScope.launch { mutex.withLock { requestFriend() } }
         serviceScope.launch { mutex.withLock { requestLoginBonus() } }
-        // Save the cookies
+        // 保存cookie
         ShareUtil.putString("chuniToken", cookie.token, context)
         ShareUtil.putString("chuniExpires", cookie.expires, context)
         ShareUtil.putString("chuniUserId", cookie.userId, context)
@@ -865,7 +882,6 @@ class ChuniDataRequestService(private val context: Context) {
         serviceScope.launch { mutex.withLock { requestSongsData() } }
     }
 
-    // Get songs data from the database
     suspend fun getChuniSongData(title: String): ChuniSongsEntity {
         return withContext(Dispatchers.IO) {
             val realm = Realm.open(realmConfig)
