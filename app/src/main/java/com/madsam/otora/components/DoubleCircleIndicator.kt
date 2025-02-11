@@ -3,8 +3,8 @@ package com.madsam.otora.components
 import android.graphics.Paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
-import com.madsam.otora.consts.OSU_BRIGHT_YELLOW_HALF_TRANS
+import com.madsam.otora.ui.theme.OSU_BRIGHT_YELLOW
+import com.madsam.otora.ui.theme.OSU_BRIGHT_YELLOW_HALF_TRANS
 import com.patrykandpatrick.vico.core.common.DrawingContext
 import com.patrykandpatrick.vico.core.common.component.Component
 

@@ -21,8 +21,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.consts.BlackAlpha80
-import com.madsam.otora.consts.White800
+import com.madsam.otora.ui.theme.BlackAlpha80
+import com.madsam.otora.ui.theme.White800
 import com.madsam.otora.model.osu.web.OsuGroup
 import com.madsam.otora.ui.icon.Filled
 import kotlinx.coroutines.delay
@@ -91,7 +91,7 @@ fun GroupListItem(
                 colorFilter = ColorFilter.tint(White800),
                 contentDescription = "Playmodes",
                 modifier = Modifier
-                    .height(20.dp)
+                    .height(18.dp)
                     .padding(start = 8.dp)
                     .align(Alignment.CenterVertically)
             )

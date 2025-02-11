@@ -24,8 +24,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.consts.DARK_RED_DEEP
-import com.madsam.otora.consts.White1000
+import com.madsam.otora.ui.theme.Red700
+import com.madsam.otora.ui.theme.White1000
 import com.madsam.otora.model.osu.ui.OsuBadgeUI
 import com.madsam.otora.ui.icon.Filled
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,7 +54,7 @@ fun BadgeList(
                 .padding(bottom = 12.dp)
                 .width(cardWidthDp),
             RoundedCornerShape(20.dp),
-            DARK_RED_DEEP
+            Red700
         ) {
             var listWidthDp = cardWidthDp - 16.dp - 40.dp
             val imageCount = (listWidthDp / (68.dp + 12.dp)).toInt()

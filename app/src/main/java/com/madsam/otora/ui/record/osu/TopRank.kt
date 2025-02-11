@@ -43,11 +43,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.consts.BlackAlpha50
-import com.madsam.otora.consts.DARK_RED_DEEP
-import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
-import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
-import com.madsam.otora.consts.OSU_HEART_RED
+import com.madsam.otora.ui.theme.BlackAlpha50
+import com.madsam.otora.ui.theme.Red700
+import com.madsam.otora.ui.theme.Beige400
+import com.madsam.otora.ui.theme.OSU_BRIGHT_YELLOW
+import com.madsam.otora.ui.theme.OSU_HEART_RED
 import com.madsam.otora.consts.OsuDiffColor
 import com.madsam.otora.model.osu.ui.OsuTopRankUI
 import com.madsam.otora.ui.icon.Filled
@@ -84,7 +84,7 @@ fun TopRank(
             .width(screenWidthDp)
             .padding(vertical = 12.dp),
         RoundedCornerShape(20.dp),
-        DARK_RED_DEEP
+        Red700
     ) {
         Column(
             modifier = Modifier.padding(top = 16.dp)
@@ -92,7 +92,7 @@ fun TopRank(
             if (pinnedData.isEmpty() && topData.isEmpty() && firstData.isEmpty()) {
                 Text(
                     text = "No play records",
-                    color = DARK_RED_TEXT_LIGHT,
+                    color = Beige400,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(16.dp)
@@ -123,7 +123,7 @@ fun OsuTopRankItemContent(
             text = title,
             fontWeight = FontWeight.Bold,
             fontSize = 24.sp,
-            color = DARK_RED_TEXT_LIGHT,
+            color = Beige400,
             modifier = Modifier
                 .padding(start = 16.dp, bottom = 16.dp)
         )
@@ -157,7 +157,7 @@ fun OsuTopRankItemCard(
     ) {
         ConstraintLayout(
             modifier = Modifier
-                .background(DARK_RED_DEEP)
+                .background(Red700)
         ) {
             val (
                 cover,
@@ -283,7 +283,7 @@ fun OsuTopRankItemCard(
             ) {
                 Text(
                     text = item.beatmapSetTitleUnicode,
-                    color = DARK_RED_TEXT_LIGHT,
+                    color = Beige400,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -355,7 +355,7 @@ fun OsuTopRankItemCard(
                             }
                         }
                     },
-                    color = DARK_RED_TEXT_LIGHT,
+                    color = Beige400,
                     inlineContent = inlineContent,
                     maxLines = 1,
                     overflow = TextOverflow.Clip,
@@ -448,7 +448,7 @@ fun OsuTopRankItemCard(
                 if (item.status == "graveyard" || item.status == "pending") {
                     Text(
                         text = " - ",
-                        color = DARK_RED_TEXT_LIGHT,
+                        color = Beige400,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
@@ -458,7 +458,7 @@ fun OsuTopRankItemCard(
                 if (item.status == "ranked") {
                     Text(
                         text = String.format(Locale.US, "%.2fpp", item.pp),
-                        color = DARK_RED_TEXT_LIGHT,
+                        color = Beige400,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,

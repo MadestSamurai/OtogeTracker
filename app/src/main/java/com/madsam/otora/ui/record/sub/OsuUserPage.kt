@@ -25,7 +25,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.consts.BRIGHT_RED
+import com.madsam.otora.ui.theme.Beige300
 import com.madsam.otora.ui.record.osu.BadgeList
 import com.madsam.otora.ui.record.osu.Card
 import com.madsam.otora.ui.record.osu.Level
@@ -62,7 +62,7 @@ fun OsuUserPage(
 
     LazyColumn(
         modifier = Modifier
-            .background(color = BRIGHT_RED)
+            .background(Beige300)
             .padding(
                 start = 12.dp + if (isLandscape(configuration)) leftPadding else 0.dp,
                 end = 12.dp + if (isLandscape(configuration)) rightPadding else 0.dp

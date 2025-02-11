@@ -13,12 +13,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.consts.BRIGHT_RED
+import com.madsam.otora.ui.theme.Beige300
 import com.madsam.otora.ui.record.chunithm.AvatarLayout
 import com.madsam.otora.ui.record.chunithm.Card
 import com.madsam.otora.ui.record.chunithm.CookieDialog
 import com.madsam.otora.ui.record.chunithm.FriendList
 import com.madsam.otora.ui.record.chunithm.PlayDataList
+import com.madsam.otora.ui.record.chunithm.TopRank
 import com.madsam.otora.ui.record.viewmodel.ChuniViewModel
 import kotlinx.coroutines.launch
 
@@ -37,7 +38,7 @@ fun ChunithmUserPage(
 
     LazyColumn(
         modifier = Modifier
-            .background(color = BRIGHT_RED)
+            .background(color = Beige300)
             .fillMaxSize()
     ) {
         item {
@@ -78,6 +79,9 @@ fun ChunithmUserPage(
 //        }
         item {
             Card(viewModel.chuniCardUI)
+        }
+        item {
+            TopRank(viewModel.chuniTopRankUI)
         }
         item {
             Row {

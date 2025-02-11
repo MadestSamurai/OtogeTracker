@@ -1,11 +1,7 @@
 package com.madsam.otora.utils
 
-import android.content.Context
-import android.content.Intent
-import android.provider.Settings
 import android.util.Log
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -13,12 +9,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import androidx.core.app.NotificationManagerCompat
-import com.madsam.otora.consts.GradientBrush
-import com.madsam.otora.consts.OSU_LEVEL_GOLD_1
-import com.madsam.otora.consts.OSU_LEVEL_PLATINUM_1
-import com.madsam.otora.consts.OSU_LEVEL_SILVER_1
-import com.madsam.otora.consts.OSU_LEVEL_WHITE_1
+import com.madsam.otora.ui.theme.GradientBrush.BlueGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.BronzeGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.BronzeGradientText
+import com.madsam.otora.ui.theme.GradientBrush.GoldGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.GoldGradientText
+import com.madsam.otora.ui.theme.GradientBrush.GreenGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.GreenGradientText
+import com.madsam.otora.ui.theme.GradientBrush.PlatinumGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.PlatinumGradientText
+import com.madsam.otora.ui.theme.GradientBrush.PurpleGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.PurpleGradientText
+import com.madsam.otora.ui.theme.GradientBrush.RainbowGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.RainbowGradientText
+import com.madsam.otora.ui.theme.GradientBrush.RedGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.RedGradientText
+import com.madsam.otora.ui.theme.GradientBrush.SilverGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.SilverGradientText
+import com.madsam.otora.ui.theme.GradientBrush.WhiteGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.WhiteGradientText
+import com.madsam.otora.ui.theme.GradientBrush.YellowGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.YellowGradientText
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 import java.text.DecimalFormat
@@ -41,30 +52,6 @@ import java.util.TimeZone
  */
 
 object CommonUtils {
-    /**
-     * 是否开启通知权限
-     *
-     * @param context 上下文
-     */
-    fun isNotificationListenerEnabled(context: Context): Boolean {
-        val packageNames = NotificationManagerCompat.getEnabledListenerPackages(context)
-        return packageNames.contains(context.packageName)
-    }
-
-    /**
-     * 开启通知权限
-     *
-     * @param context 上下文
-     */
-    fun openNotificationListenSettings(context: Context) {
-        try {
-            val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
-            context.startActivity(intent)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
     /**
      * 秒转换为日时分秒
      *
@@ -128,18 +115,34 @@ object CommonUtils {
      * @return 最近时间
      */
     fun dateCodeToRecent(value: String): String {
-        val current = System.currentTimeMillis()
-        val delta = current - dateCodeToMillis(value)
-        return when {
-            delta < 30 * 1000 -> "recent"
-            delta < 60 * 1000 -> "${delta / 1000} seconds ago"
-            delta < 60L * 60 * 1000 -> "${delta / (60L * 1000)} minute${if (delta / (60L * 1000) > 1) "s" else ""} ago"
-            delta < 24L * 60 * 60 * 1000 -> "${delta / (60L * 60 * 1000)} hour${if (delta / (60L * 60 * 1000) > 1) "s" else ""} ago"
-            delta < 7L * 24 * 60 * 60 * 1000 -> "${delta / (24L * 60 * 60 * 1000)} day${if (delta / (24L * 60 * 60 * 1000) > 1) "s" else ""} ago"
-            delta < 30L * 24 * 60 * 60 * 1000 -> "${delta / (7L * 24 * 60 * 60 * 1000)} week${if (delta / (7L * 24 * 60 * 60 * 1000) > 1) "s" else ""} ago"
-            delta < 365L * 24 * 60 * 60 * 1000 -> "${delta / (30L * 24 * 60 * 60 * 1000)} month${if (delta / (30L * 24 * 60 * 60 * 1000) > 1) "s" else ""} ago"
-            delta >= 365L * 24 * 60 * 60 * 1000 * 10 -> "too long ago"
-            else -> "${delta / (365L * 24 * 60 * 60 * 1000)} year${if (delta / (365L * 24 * 60 * 60 * 1000) > 1) "s" else ""} ago"
+        val delta = System.currentTimeMillis() - dateCodeToMillis(value)
+
+        val timeMap = mapOf(
+            30 * 1000L to "recent",
+            60 * 1000L to "seconds",
+            60L * 60 * 1000 to "minute",
+            24L * 60 * 60 * 1000 to "hour",
+            7L * 24 * 60 * 60 * 1000 to "day",
+            30L * 24 * 60 * 60 * 1000 to "week",
+            365L * 24 * 60 * 60 * 1000 to "month"
+        )
+
+        timeMap.entries.find { delta < it.key }?.let { current ->
+            if (current.value == "recent") return "recent"
+
+            val prev = timeMap.entries.toList().getOrNull(
+                timeMap.entries.indexOf(current) - 1
+            ) ?: return "error"
+
+            val count = delta / prev.key
+            return "$count ${prev.value}${if (count > 1) "s" else ""} ago"
+        }
+
+        return if (delta >= 365L * 24 * 60 * 60 * 1000 * 10) {
+            "too long ago"
+        } else {
+            val years = delta / (365L * 24 * 60 * 60 * 1000)
+            "$years year${if (years > 1) "s" else ""} ago"
         }
     }
 
@@ -165,7 +168,8 @@ object CommonUtils {
      * @return 年月日时分秒
      */
     fun millisToYmd(millis: Long): String {
-        val localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), java.time.ZoneId.systemDefault())
+        val localDateTime =
+            LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), java.time.ZoneId.systemDefault())
         return localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
     }
 
@@ -176,7 +180,8 @@ object CommonUtils {
      * @return 年月日
      */
     fun millisToDate(millis: Long): LocalDate {
-        val localDateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), java.time.ZoneId.systemDefault())
+        val localDateTime =
+            LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), java.time.ZoneId.systemDefault())
         return localDateTime.toLocalDate()
     }
 
@@ -193,7 +198,7 @@ object CommonUtils {
         }
         val hours = parts[0]
         val minutes = parts[1] / 5 * 5
-        return String.format("%02d:%02d:00", hours, minutes)
+        return String.format(Locale.getDefault(), "%02d:%02d:00", hours, minutes)
     }
 
     /**
@@ -213,7 +218,7 @@ object CommonUtils {
      * @return 百分比字符串
      */
     fun formatPercent(value: Double): String {
-        return String.format(Locale.getDefault(), "%.2f%%", value*100)
+        return String.format(Locale.getDefault(), "%.2f%%", value * 100)
     }
 
     /**
@@ -226,6 +231,7 @@ object CommonUtils {
         val decimalFormat = DecimalFormat("#.##")
         return decimalFormat.format(number)
     }
+
     /**
      * 大数字符串转换为整型
      *
@@ -249,17 +255,17 @@ object CommonUtils {
      */
     fun getLevelBrush(value: Int): Brush {
         return when (value) {
-            in 0..14 -> GradientBrush.OSU_LEVEL_WHITE
-            in 15..29 -> GradientBrush.OSU_LEVEL_BLUE
-            in 30..44 -> GradientBrush.OSU_LEVEL_GREEN
-            in 45..59 -> GradientBrush.OSU_LEVEL_YELLOW
-            in 60..69 -> GradientBrush.OSU_LEVEL_RED
-            in 70..79 -> GradientBrush.OSU_LEVEL_PURPLE
-            in 80..89 -> GradientBrush.OSU_LEVEL_BRONZE
-            in 90..99 -> GradientBrush.OSU_LEVEL_SILVER
-            in 100..104 -> GradientBrush.OSU_LEVEL_GOLD
-            in 105..109 -> GradientBrush.OSU_LEVEL_PLATINUM
-            else -> GradientBrush.OSU_LEVEL_RAINBOW
+            in 0..14 -> WhiteGradientBg
+            in 15..29 -> BlueGradientBg
+            in 30..44 -> GreenGradientBg
+            in 45..59 -> YellowGradientBg
+            in 60..69 -> RedGradientBg
+            in 70..79 -> PurpleGradientBg
+            in 80..89 -> BronzeGradientBg
+            in 90..99 -> SilverGradientBg
+            in 100..104 -> GoldGradientBg
+            in 105..109 -> PlatinumGradientBg
+            else -> RainbowGradientBg
         }
     }
 
@@ -269,18 +275,24 @@ object CommonUtils {
      * @param value 字符串
      * @return 颜色值
      */
-    fun getRatingBrush(value: String): Color {
+    fun getRatingBrush(value: String): Brush {
         try {
             val valueFloat = value.toFloat()
             return when (valueFloat) {
-                in 15.25..16.00 -> OSU_LEVEL_PLATINUM_1
-                in 14.50..15.24 -> OSU_LEVEL_GOLD_1
-                in 14.25..14.49 -> OSU_LEVEL_SILVER_1
-                else -> OSU_LEVEL_WHITE_1
+                in 0.00..3.999 -> GreenGradientText
+                in 4.00..6.999 -> YellowGradientText
+                in 7.00..9.999 -> RedGradientText
+                in 10.00..11.999 -> PurpleGradientText
+                in 12.00..13.249 -> BronzeGradientText
+                in 13.25..14.499 -> SilverGradientText
+                in 14.50..15.249 -> GoldGradientText
+                in 15.25..15.999 -> PlatinumGradientText
+                in 16.00..18.000 -> RainbowGradientText
+                else -> WhiteGradientText
             }
         } catch (nfe: NumberFormatException) {
             Log.e("CommonUtils", "Rating value is not a number: $nfe")
-            return OSU_LEVEL_WHITE_1
+            return WhiteGradientText
         }
     }
 

@@ -26,16 +26,16 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.consts.CHUNI_DIFF_ADVANCED
-import com.madsam.otora.consts.CHUNI_DIFF_BASIC
-import com.madsam.otora.consts.CHUNI_DIFF_EXPERT
-import com.madsam.otora.consts.CHUNI_DIFF_MASTER
-import com.madsam.otora.consts.CHUNI_DIFF_ULTIMA_1
-import com.madsam.otora.consts.CHUNI_DIFF_ULTIMA_2
-import com.madsam.otora.consts.DARK_RED_DEEP
-import com.madsam.otora.consts.DARK_RED_DEEPER
-import com.madsam.otora.consts.DARK_RED_TEXT
-import com.madsam.otora.consts.White1000
+import com.madsam.otora.ui.theme.CHUNI_DIFF_ADVANCED
+import com.madsam.otora.ui.theme.CHUNI_DIFF_BASIC
+import com.madsam.otora.ui.theme.CHUNI_DIFF_EXPERT
+import com.madsam.otora.ui.theme.CHUNI_DIFF_MASTER
+import com.madsam.otora.ui.theme.CHUNI_DIFF_ULTIMA_1
+import com.madsam.otora.ui.theme.CHUNI_DIFF_ULTIMA_2
+import com.madsam.otora.ui.theme.Red700
+import com.madsam.otora.ui.theme.Red800
+import com.madsam.otora.ui.theme.Beige500
+import com.madsam.otora.ui.theme.White1000
 import com.madsam.otora.model.chuni.ui.ChuniPlayDataUI
 import com.madsam.otora.utils.CommonUtils.formatNumberThousand
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,25 +47,8 @@ fun PlayDataList(
 ) {
     val playData by chuniPlayDataUI.collectAsState()
     val diffArray = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
-    val typeArray = arrayOf(
-        "Total",
-        "SSSp",
-        "SSS",
-        "SSp",
-        "SS",
-        "Sp",
-        "S",
-        "FC",
-        "AJ",
-        "AJC",
-        "FChain",
-        "FChainP",
-        "Clear",
-        "Hard",
-        "Abs",
-        "AbsP",
-        "Catas"
-    )
+    val typeArray = arrayOf("Total", "SSSp", "SSS", "SSp", "SS", "Sp", "S", "FC", "AJ", "AJC",
+        "FChain", "FChainP", "Clear", "Hard", "Abs", "AbsP", "Catas")
     val pagerState = rememberPagerState(pageCount = { typeArray.size })
 
     Box(
@@ -73,7 +56,7 @@ fun PlayDataList(
             .clip(RoundedCornerShape(10.dp))
             .width(width)
             .height(264.dp)
-            .background(DARK_RED_DEEP)
+            .background(Red700)
     ) {
         HorizontalPager(
             state = pagerState,
@@ -119,7 +102,7 @@ fun PlayDataItem(
             .clip(RoundedCornerShape(5.dp))
             .width(width)
             .height(45.dp)
-            .background(DARK_RED_DEEPER)
+            .background(Red800)
     ) {
         Row {
             Text(
@@ -195,7 +178,7 @@ fun PlayDataItem(
                 else -> "0/0"
             },
             fontSize = 16.sp,
-            color = DARK_RED_TEXT,
+            color = Beige500,
             modifier = Modifier.padding(2.dp)
         )
     }

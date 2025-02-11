@@ -20,16 +20,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -37,28 +35,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.consts.CHUNI_DIFF_ADVANCED
-import com.madsam.otora.consts.CHUNI_DIFF_BASIC
-import com.madsam.otora.consts.CHUNI_DIFF_EXPERT
-import com.madsam.otora.consts.CHUNI_DIFF_MASTER
-import com.madsam.otora.consts.CHUNI_DIFF_ULTIMA_1
-import com.madsam.otora.consts.CHUNI_DIFF_ULTIMA_2
-import com.madsam.otora.consts.DARK_RED_DEEP
-import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
-import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
-import com.madsam.otora.entity.ChuniSheetsEntity
-import com.madsam.otora.entity.ChuniSongsEntity
-import com.madsam.otora.model.chuni.net.ChuniScore
+import com.madsam.otora.ui.theme.Beige400
+import com.madsam.otora.ui.theme.CHUNI_DIFF_ADVANCED
+import com.madsam.otora.ui.theme.CHUNI_DIFF_BASIC
+import com.madsam.otora.ui.theme.CHUNI_DIFF_EXPERT
+import com.madsam.otora.ui.theme.CHUNI_DIFF_MASTER
+import com.madsam.otora.ui.theme.CHUNI_DIFF_ULTIMA_1
+import com.madsam.otora.ui.theme.CHUNI_DIFF_ULTIMA_2
+import com.madsam.otora.ui.theme.OSU_BRIGHT_YELLOW
+import com.madsam.otora.ui.theme.Beige300
+import com.madsam.otora.ui.theme.Red700
 import com.madsam.otora.model.chuni.ui.ChuniScoreUI
-import com.madsam.otora.service.ChuniDataRequestService
-import com.madsam.otora.utils.CalcUtils
-import com.madsam.otora.utils.CommonUtils
-import com.madsam.otora.utils.JsonUtil
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import com.madsam.otora.model.chuni.ui.ChuniTopRankUI
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 
 /**
  * 项目名: OtogeTracker
@@ -69,14 +58,17 @@ import kotlinx.coroutines.flow.update
  */
 @Composable
 fun TopRating(
+    chuniTopRankUI: MutableStateFlow<ChuniTopRankUI>,
     onBack: () -> Unit
 ) {
-    val context = LocalContext.current
+    val topRank by chuniTopRankUI.collectAsState()
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
-    val chuniDataRequestService = ChuniDataRequestService(context)
 
-    Column {
+    Column(
+        modifier = Modifier
+            .background(Beige300)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -88,70 +80,24 @@ fun TopRating(
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = DARK_RED_TEXT_LIGHT
+                    tint = Beige400
                 )
             }
             Text(
                 text = "Top Rating",
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
             Box(modifier = Modifier.width(48.dp))
         }
 
-        val chuniRatingBest = MutableStateFlow(listOf<ChuniScore>())
-        val moshi = Moshi.Builder()
-            .addLast(KotlinJsonAdapterFactory())
-            .build()
-
-        val ratingBestListType = Types.newParameterizedType(List::class.java, ChuniScore::class.java)
-        val ratingBestJsonAdapter = moshi.adapter<List<ChuniScore>>(ratingBestListType)
-        val ratingBestJson = JsonUtil.readJsonFromFile(context, "chuniRatingBest.json")
-        if (ratingBestJson != null) {
-            chuniRatingBest.update { ratingBestJsonAdapter.fromJson(ratingBestJson) ?: listOf() }
-        }
-
         LazyColumn(
             modifier = Modifier.padding(8.dp)
         ) {
-            items(chuniRatingBest.value.size) { index ->
-                val songData = remember { mutableStateOf(ChuniSongsEntity()) }
-                val songSheetData = remember { mutableStateOf(ChuniSheetsEntity()) }
-                val topRating = remember { mutableStateOf(ChuniScoreUI()) }
-                LaunchedEffect(Unit) {
-                    songData.value = chuniDataRequestService.getChuniSongData(chuniRatingBest.value[index].title)
-                    val diff = when (chuniRatingBest.value[index].diff) {
-                        "0" -> "basic"
-                        "1" -> "advanced"
-                        "2" -> "expert"
-                        "3" -> "master"
-                        "4" -> "ultima"
-                        else -> "master"
-                    }
-                    songSheetData.value =
-                        chuniDataRequestService.getChuniSongSheetData(chuniRatingBest.value[index].title, diff)
-                    topRating.value = ChuniScoreUI(
-                        title = songData.value.title,
-                        artist = songData.value.artist,
-                        noteDesigner = songSheetData.value.noteDesigner,
-                        genre = songData.value.genre,
-                        diff = diff,
-                        level = songSheetData.value.levelCn,
-                        levelValue = songSheetData.value.levelValueCn,
-                        score = chuniRatingBest.value[index].highScore,
-                        rank = CalcUtils.calcChuniRank(CommonUtils.bigNumberToInt(chuniRatingBest.value[index].highScore)),
-                        jacket = songData.value.imageName,
-                        tap = songSheetData.value.tap,
-                        hold = songSheetData.value.hold,
-                        slide = songSheetData.value.slide,
-                        air = songSheetData.value.air,
-                        flick = songSheetData.value.flick,
-                        total = songSheetData.value.total
-                    )
-                }
+            items(topRank.bestList.size) { index ->
                 ChuniRatingItemCard(
-                    item = topRating.value,
+                    item = topRank.bestList[index],
                     itemWidth = screenWidthDp
                 )
             }
@@ -174,7 +120,7 @@ fun ChuniRatingItemCard(
     ) {
         ConstraintLayout(
             modifier = Modifier
-                .background(DARK_RED_DEEP)
+                .background(Red700)
         ) {
             val (
                 cover,
@@ -259,7 +205,7 @@ fun ChuniRatingItemCard(
             ) {
                 Text(
                     text = item.title,
-                    color = DARK_RED_TEXT_LIGHT,
+                    color = Beige400,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
@@ -269,7 +215,7 @@ fun ChuniRatingItemCard(
                 )
                 Text(
                     text = item.artist,
-                    color = DARK_RED_TEXT_LIGHT,
+                    color = Beige400,
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,
@@ -288,14 +234,8 @@ fun ChuniRatingItemCard(
                         .width(itemWidth - 144.dp)
                 )
                 Text(
-                    text = "${item.levelValue} -> ${
-                        CommonUtils.truncateToTwoDecimalPlaces(
-                            CalcUtils.calcChuniRating(
-                                CommonUtils.bigNumberToInt(item.score),
-                                item.levelValue
-                            )
-                        )}",
-                    color = DARK_RED_TEXT_LIGHT,
+                    text = "${item.levelValue} -> ${item.rating}",
+                    color = Beige400,
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,

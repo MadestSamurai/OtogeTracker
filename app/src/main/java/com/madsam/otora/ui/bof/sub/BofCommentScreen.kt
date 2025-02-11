@@ -62,11 +62,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.activity.BofScreenState
-import com.madsam.otora.consts.BG_DARK_GRAY
-import com.madsam.otora.consts.RANKING_BLUE
-import com.madsam.otora.consts.RANKING_GREEN
-import com.madsam.otora.consts.RANKING_RED
-import com.madsam.otora.consts.TEXT_GRAY
+import com.madsam.otora.ui.theme.BG_DARK_GRAY
+import com.madsam.otora.ui.theme.RANKING_BLUE
+import com.madsam.otora.ui.theme.RANKING_GREEN
+import com.madsam.otora.ui.theme.RANKING_RED
+import com.madsam.otora.ui.theme.TEXT_GRAY
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.model.bof.ui.BofCommentUI
 import com.madsam.otora.ui.bof.BofViewModel

@@ -35,20 +35,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.consts.DARK_RED
-import com.madsam.otora.consts.DARK_RED_DEEP
-import com.madsam.otora.consts.DARK_RED_DEEPER
-import com.madsam.otora.consts.DARK_RED_TEXT
-import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
-import com.madsam.otora.consts.GradientBrush.LEVEL_RAINBOW_TEXT
-import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_GOLD
-import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_PLATINUM
-import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_RAINBOW
-import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_SILVER
-import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_WHITE
-import com.madsam.otora.consts.OSU_LEVEL_GOLD_1
-import com.madsam.otora.consts.OSU_LEVEL_PLATINUM_1
-import com.madsam.otora.consts.RANKING_BLUE
+import com.madsam.otora.ui.theme.Beige400
+import com.madsam.otora.ui.theme.Beige500
+import com.madsam.otora.ui.theme.GradientBrush.GoldGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.PlatinumGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.RainbowGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.SilverGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.WhiteGradientBg
+import com.madsam.otora.ui.theme.OSU_LEVEL_GOLD_1
+import com.madsam.otora.ui.theme.OSU_LEVEL_PLATINUM_1
+import com.madsam.otora.ui.theme.RANKING_BLUE
+import com.madsam.otora.ui.theme.Red500
+import com.madsam.otora.ui.theme.Red700
+import com.madsam.otora.ui.theme.Red800
 import com.madsam.otora.model.chuni.ui.ChuniFriendUI
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils.getRatingBrush
@@ -72,7 +71,7 @@ fun FriendList(
             .fillMaxSize()
             .padding(12.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(DARK_RED_DEEP)
+            .background(Red700)
             .padding(vertical = 4.dp)
     ) {
         for (chuniFriend in scoredList) {
@@ -100,7 +99,7 @@ fun FriendCard(
                         "silver" -> RANKING_BLUE
                         "gold" -> OSU_LEVEL_GOLD_1
                         "platina" -> OSU_LEVEL_PLATINUM_1
-                        else -> DARK_RED_DEEPER
+                        else -> Red800
                     }
                 )
         ) {
@@ -134,11 +133,11 @@ fun FriendCard(
                     .clip(RoundedCornerShape(5.dp))
                     .background(
                         when (chuniFriend.roleBase) {
-                            "silver" -> OSU_LEVEL_SILVER
-                            "gold" -> OSU_LEVEL_GOLD
-                            "platina" -> OSU_LEVEL_PLATINUM
-                            "rainbow" -> OSU_LEVEL_RAINBOW
-                            else -> OSU_LEVEL_WHITE
+                            "silver" -> SilverGradientBg
+                            "gold" -> GoldGradientBg
+                            "platina" -> PlatinumGradientBg
+                            "rainbow" -> RainbowGradientBg
+                            else -> WhiteGradientBg
                         }
                     )
             )
@@ -156,11 +155,11 @@ fun FriendCard(
                     .clip(RoundedCornerShape(5.dp))
                     .background(
                         when (chuniFriend.honorBase) {
-                            "silver" -> OSU_LEVEL_SILVER
-                            "gold" -> OSU_LEVEL_GOLD
-                            "platina" -> OSU_LEVEL_PLATINUM
-                            "rainbow" -> OSU_LEVEL_RAINBOW
-                            else -> OSU_LEVEL_WHITE
+                            "silver" -> SilverGradientBg
+                            "gold" -> GoldGradientBg
+                            "platina" -> PlatinumGradientBg
+                            "rainbow" -> RainbowGradientBg
+                            else -> WhiteGradientBg
                         }
                     )
                     .basicMarquee(spacing = MarqueeSpacing(15.ndp())),
@@ -194,7 +193,7 @@ fun FriendCard(
                             end.linkTo(rebornBase.end)
                         },
                     text = chuniFriend.reborn.toString(),
-                    color = DARK_RED,
+                    color = Red500,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -202,7 +201,7 @@ fun FriendCard(
 
             Text(
                 text = "Lv.",
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .constrainAs(lvText) {
@@ -218,7 +217,7 @@ fun FriendCard(
 
             Text(
                 text = chuniFriend.level.toString(),
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -234,7 +233,7 @@ fun FriendCard(
 
             Text(
                 text = chuniFriend.friendName,
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 fontSize = 18.sp,
                 lineHeight = 22.sp,
                 fontWeight = FontWeight.Bold,
@@ -279,7 +278,7 @@ fun FriendCard(
                 text = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
-                            color = DARK_RED_TEXT,
+                            color = Beige500,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Normal
                         )
@@ -287,27 +286,18 @@ fun FriendCard(
                         append("RATING ")
                     }
                     withStyle(
-                        style =
-                        if (chuniFriend.rating.toDouble() >= 16) {
-                            SpanStyle(
-                                brush = LEVEL_RAINBOW_TEXT,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        } else {
-                            SpanStyle(
-                                color = getRatingBrush(chuniFriend.rating),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        style = SpanStyle(
+                            brush = getRatingBrush(chuniFriend.rating),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     ) {
                         append(chuniFriend.rating)
                     }
                     append(" (MAX ")
                     withStyle(
                         style = SpanStyle(
-                            color = DARK_RED_TEXT,
+                            color = Beige500,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -316,7 +306,7 @@ fun FriendCard(
                     }
                     append(")")
                 },
-                color = DARK_RED_TEXT,
+                color = Beige500,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .constrainAs(rating) {
@@ -329,7 +319,7 @@ fun FriendCard(
                 text = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
-                            color = DARK_RED_TEXT,
+                            color = Beige500,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Normal
                         )
@@ -338,7 +328,7 @@ fun FriendCard(
                     }
                     append(chuniFriend.overpower)
                 },
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 fontSize = 12.sp,
                 lineHeight = 14.sp,
                 fontWeight = FontWeight.Bold,
@@ -353,7 +343,7 @@ fun FriendCard(
                 text = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
-                            color = DARK_RED_TEXT,
+                            color = Beige500,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Normal
                         )
@@ -362,7 +352,7 @@ fun FriendCard(
                     }
                     append(chuniFriend.lastPlay)
                 },
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 fontSize = 12.sp,
                 lineHeight = 16.sp,
                 fontWeight = FontWeight.Bold,

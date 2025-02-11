@@ -40,10 +40,10 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.madsam.otora.components.ImageWithText
 import com.madsam.otora.components.TitleText
-import com.madsam.otora.consts.DARK_RED
-import com.madsam.otora.consts.DARK_RED_DEEP
-import com.madsam.otora.consts.DARK_RED_DEEPER
-import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
+import com.madsam.otora.ui.theme.Red500
+import com.madsam.otora.ui.theme.Red700
+import com.madsam.otora.ui.theme.Red800
+import com.madsam.otora.ui.theme.Beige400
 import com.madsam.otora.model.osu.ui.OsuPlayUI
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
@@ -62,7 +62,7 @@ fun PlayData(
         modifier = Modifier
             .padding(bottom = 4.dp)
             .clip(RoundedCornerShape(6.dp))
-            .background(DARK_RED_DEEP)
+            .background(Red700)
             .width(cardWidthDp)
     ) {
         val refs = createRefs()
@@ -80,7 +80,7 @@ fun PlayData(
             .height(32.dp)
 
         val iconTextSize = 16.sp
-        val iconTextColor = DARK_RED_TEXT_LIGHT
+        val iconTextColor = Beige400
         val iconTextModifier = Modifier.padding(top = 4.dp)
 
         Box(
@@ -88,7 +88,7 @@ fun PlayData(
                 .fillMaxWidth()
                 .height(80.dp)
                 .clip(RoundedCornerShape(6.dp))
-                .background(DARK_RED)
+                .background(Red500)
                 .constrainAs(judgeBackground) {
                     top.linkTo(parent.top)
                 }
@@ -272,7 +272,7 @@ fun PlayData(
                 ) {
                     Image(
                         painter = rememberVectorPainter(image = if (shown) Filled.ChevronUp else Filled.ChevronDown),
-                        colorFilter = ColorFilter.tint(DARK_RED_TEXT_LIGHT),
+                        colorFilter = ColorFilter.tint(Beige400),
                         contentDescription = "Show More",
                         modifier = Modifier.size(with(density) { placeholderHeight.toDp() })
                     )
@@ -291,11 +291,11 @@ fun PlayData(
                     }
                 },
                 fontSize = 18.sp,
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 inlineContent = inlineContent,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .background(DARK_RED_DEEPER)
+                    .background(Red800)
                     .clickable {
                         shown = !shown
                     }

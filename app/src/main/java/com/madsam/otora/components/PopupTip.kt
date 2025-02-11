@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
-import com.madsam.otora.consts.BlackAlpha80
+import com.madsam.otora.ui.theme.BlackAlpha80
 import kotlinx.coroutines.delay
 
 @Composable

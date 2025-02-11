@@ -22,7 +22,8 @@ object CalcUtils {
             in 1009001..1010000 -> level + 2.15
             else -> 0.0
         }
-        return if (rating < 0) 0.0 else rating
+        val flooredRating = kotlin.math.floor(if (rating < 0) 0.0 else rating * 100) / 100
+        return String.format(java.util.Locale.US, "%.2f", flooredRating).toDouble()
     }
     // Chuni Rank
     fun calcChuniRank(score: Int): String {

@@ -21,10 +21,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.madsam.otora.components.GradientBorderCircle
-import com.madsam.otora.consts.DARKER_RED
-import com.madsam.otora.consts.DARK_RED_DEEP
-import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
-import com.madsam.otora.consts.OSU_DARK_RED
+import com.madsam.otora.ui.theme.Red900
+import com.madsam.otora.ui.theme.Red700
+import com.madsam.otora.ui.theme.Beige400
+import com.madsam.otora.ui.theme.OSU_DARK_RED
 import com.madsam.otora.model.osu.ui.OsuLevelUI
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +42,7 @@ fun Level(
         modifier = Modifier
             .padding(bottom = 4.dp)
             .clip(RoundedCornerShape(6.dp))
-            .background(DARK_RED_DEEP)
+            .background(Red700)
             .width(cardWidthDp)
     ) {
         val refs = createRefs()
@@ -72,7 +72,7 @@ fun Level(
                 Text(
                     textAlign = TextAlign.Center,
                     text = levelData.level.toString(),
-                    color = DARK_RED_TEXT_LIGHT,
+                    color = Beige400,
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
                 )
@@ -81,7 +81,7 @@ fun Level(
 
         Surface(
             shape = RoundedCornerShape(4.dp),
-            color = DARKER_RED,
+            color = Red900,
             modifier = Modifier
                 .height(25.dp)
                 .width(cardWidthDp - 103.dp)
@@ -111,7 +111,7 @@ fun Level(
         Text(
             textAlign = TextAlign.Center,
             text = "${levelData.levelProgress}%",
-            color = DARK_RED_TEXT_LIGHT,
+            color = Beige400,
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             modifier = if (levelData.levelProgress < 15) {

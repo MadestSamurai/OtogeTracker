@@ -3,25 +3,32 @@ package com.madsam.otora.ui.record.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.madsam.otora.model.chuni.net.ChuniFriend
 import com.madsam.otora.model.chuni.net.ChuniGenre
 import com.madsam.otora.model.chuni.net.ChuniPenguin
 import com.madsam.otora.model.chuni.net.ChuniPlayRecord
+import com.madsam.otora.model.chuni.net.ChuniScore
 import com.madsam.otora.model.chuni.net.ChuniUser
 import com.madsam.otora.model.chuni.net.ChuniUserExtend
 import com.madsam.otora.model.chuni.ui.ChuniAvatarUI
 import com.madsam.otora.model.chuni.ui.ChuniCardUI
 import com.madsam.otora.model.chuni.ui.ChuniFriendUI
 import com.madsam.otora.model.chuni.ui.ChuniPlayDataUI
+import com.madsam.otora.model.chuni.ui.ChuniScoreUI
+import com.madsam.otora.model.chuni.ui.ChuniTopRankUI
 import com.madsam.otora.service.ChuniDataRequestService
 import com.madsam.otora.service.IntPairAdapter
-import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.utils.CalcUtils.calcChuniRank
+import com.madsam.otora.utils.CalcUtils.calcChuniRating
+import com.madsam.otora.utils.CommonUtils.bigNumberToInt
 import com.madsam.otora.utils.JsonUtil
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.squareup.moshi.Types
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * 项目名: OtogeTracker
@@ -39,6 +46,8 @@ class ChuniViewModel(
     val chuniPlayDataUI = MutableStateFlow(ChuniPlayDataUI())
     val chuniFriendDataUI = MutableStateFlow(listOf<ChuniFriendUI>())
 
+    val chuniTopRankUI = MutableStateFlow(ChuniTopRankUI())
+
     val chuniBasicRecord = MutableStateFlow(listOf<ChuniGenre>())
     val chuniAdvancedRecord = MutableStateFlow(listOf<ChuniGenre>())
     val chuniExpertRecord = MutableStateFlow(listOf<ChuniGenre>())
@@ -54,6 +63,7 @@ class ChuniViewModel(
         loadAvatarFromLocal(context)
         loadPlayDataFromLocal(context)
         loadFriendDataFromLocal(context)
+        loadTopRankDataFromLocal(context)
     }
 
     fun fetchSongData(context: Context) {
@@ -105,7 +115,7 @@ class ChuniViewModel(
             for (score in playDataList) {
                 for (fullScore in score.fullScoreList) {
                     if (fullScore.score.isEmpty()) continue
-                    totalScore += CommonUtils.bigNumberToInt(fullScore.score)
+                    totalScore += bigNumberToInt(fullScore.score)
                 }
             }
             val playData = ChuniPlayDataUI.ChuniPlayDataItemUI().apply {
@@ -171,6 +181,144 @@ class ChuniViewModel(
             ?: emptyList()
 
         chuniFriendDataUI.update { friendList }
+    }
+
+    private fun loadTopRankDataFromLocal(context: Context) {
+        viewModelScope.launch {
+            val chuniDataRequestService = ChuniDataRequestService(context)
+            val topRank = ChuniTopRankUI()
+            val moshi = Moshi.Builder()
+                .addLast(KotlinJsonAdapterFactory())
+                .build()
+            val ratingBestListType =
+                Types.newParameterizedType(List::class.java, ChuniScore::class.java)
+            val ratingBestJsonAdapter = moshi.adapter<List<ChuniScore>>(ratingBestListType)
+            val ratingBestJson = JsonUtil.readJsonFromFile(context, "chuniRatingBest.json")
+            if (ratingBestJson != null) {
+                val bestListData = ratingBestJsonAdapter.fromJson(ratingBestJson) ?: listOf()
+                val bestList = mutableListOf<ChuniScoreUI>()
+                for (best in bestListData) {
+                    val songData = chuniDataRequestService.getChuniSongData(best.title)
+                    val diff = when (best.diff) {
+                        "0" -> "basic"
+                        "1" -> "advanced"
+                        "2" -> "expert"
+                        "3" -> "master"
+                        "4" -> "ultima"
+                        else -> "master"
+                    }
+                    val songSheetData = chuniDataRequestService.getChuniSongSheetData(best.title, diff)
+                    bestList.add(
+                        ChuniScoreUI(
+                            title = songData.title,
+                            artist = songData.artist,
+                            noteDesigner = songSheetData.noteDesigner,
+                            genre = songData.genre,
+                            diff = diff,
+                            level = songSheetData.levelCn,
+                            levelValue = songSheetData.levelValueCn,
+                            score = best.highScore,
+                            rank = calcChuniRank(bigNumberToInt(best.highScore)),
+                            rating = calcChuniRating(bigNumberToInt(best.highScore), songSheetData.levelValueCn),
+                            jacket = songData.imageName,
+                            tap = songSheetData.tap,
+                            hold = songSheetData.hold,
+                            slide = songSheetData.slide,
+                            air = songSheetData.air,
+                            flick = songSheetData.flick,
+                            total = songSheetData.total
+                        )
+                    )
+                }
+                topRank.bestList = bestList
+                topRank.best30 = bestList.map { it.rating }.average()
+            }
+            val ratingRecentListType = Types.newParameterizedType(List::class.java, ChuniScore::class.java)
+            val ratingRecentJsonAdapter = moshi.adapter<List<ChuniScore>>(ratingRecentListType)
+            val ratingRecentJson = JsonUtil.readJsonFromFile(context, "chuniRatingRecent.json")
+            if (ratingRecentJson != null) {
+                val recentListData = ratingRecentJsonAdapter.fromJson(ratingRecentJson) ?: listOf()
+                val recentList = mutableListOf<ChuniScoreUI>()
+                for (recent in recentListData) {
+                    val songData = chuniDataRequestService.getChuniSongData(recent.title)
+                    val diff = when (recent.diff) {
+                        "0" -> "basic"
+                        "1" -> "advanced"
+                        "2" -> "expert"
+                        "3" -> "master"
+                        "4" -> "ultima"
+                        else -> "master"
+                    }
+                    val songSheetData = chuniDataRequestService.getChuniSongSheetData(recent.title, diff)
+                    recentList.add(
+                        ChuniScoreUI(
+                            title = songData.title,
+                            artist = songData.artist,
+                            noteDesigner = songSheetData.noteDesigner,
+                            genre = songData.genre,
+                            diff = diff,
+                            level = songSheetData.levelCn,
+                            levelValue = songSheetData.levelValueCn,
+                            score = recent.highScore,
+                            rank = calcChuniRank(bigNumberToInt(recent.highScore)),
+                            rating = calcChuniRating(bigNumberToInt(recent.highScore), songSheetData.levelValueCn),
+                            jacket = songData.imageName,
+                            tap = songSheetData.tap,
+                            hold = songSheetData.hold,
+                            slide = songSheetData.slide,
+                            air = songSheetData.air,
+                            flick = songSheetData.flick,
+                            total = songSheetData.total
+                        )
+                    )
+                }
+                topRank.recentList = recentList
+                topRank.recent10 = recentList.map { it.rating }.average()
+            }
+            val ratingSuggestListType = Types.newParameterizedType(List::class.java, ChuniScore::class.java)
+            val ratingSuggestJsonAdapter = moshi.adapter<List<ChuniScore>>(ratingSuggestListType)
+            val ratingSuggestJson = JsonUtil.readJsonFromFile(context, "chuniRatingNext.json")
+            if (ratingSuggestJson != null) {
+                val suggestListData = ratingSuggestJsonAdapter.fromJson(ratingSuggestJson) ?: listOf()
+                val suggestList = mutableListOf<ChuniScoreUI>()
+                for (suggest in suggestListData) {
+                    val songData = chuniDataRequestService.getChuniSongData(suggest.title)
+                    val diff = when (suggest.diff) {
+                        "0" -> "basic"
+                        "1" -> "advanced"
+                        "2" -> "expert"
+                        "3" -> "master"
+                        "4" -> "ultima"
+                        else -> "master"
+                    }
+                    val songSheetData = chuniDataRequestService.getChuniSongSheetData(suggest.title, diff)
+                    suggestList.add(
+                        ChuniScoreUI(
+                            title = songData.title,
+                            artist = songData.artist,
+                            noteDesigner = songSheetData.noteDesigner,
+                            genre = songData.genre,
+                            diff = diff,
+                            level = songSheetData.levelCn,
+                            levelValue = songSheetData.levelValueCn,
+                            score = suggest.highScore,
+                            rank = calcChuniRank(bigNumberToInt(suggest.highScore)),
+                            rating = calcChuniRating(bigNumberToInt(suggest.highScore), songSheetData.levelValueCn),
+                            jacket = songData.imageName,
+                            tap = songSheetData.tap,
+                            hold = songSheetData.hold,
+                            slide = songSheetData.slide,
+                            air = songSheetData.air,
+                            flick = songSheetData.flick,
+                            total = songSheetData.total
+                        )
+                    )
+                }
+                topRank.suggestList = suggestList
+                topRank.suggest10 = suggestList.map { it.rating }.average()
+            }
+            chuniTopRankUI.update { topRank }
+        }
     }
 }
 

@@ -32,11 +32,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.R
 import com.madsam.otora.components.DoubleCircleIndicator
-import com.madsam.otora.consts.DARK_RED_DEEP
-import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
-import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
-import com.madsam.otora.consts.OSU_BRIGHT_YELLOW_HALF_TRANS
-import com.madsam.otora.consts.TEXT_GRAY
+import com.madsam.otora.ui.theme.Red700
+import com.madsam.otora.ui.theme.Beige400
+import com.madsam.otora.ui.theme.OSU_BRIGHT_YELLOW
+import com.madsam.otora.ui.theme.OSU_BRIGHT_YELLOW_HALF_TRANS
+import com.madsam.otora.ui.theme.TEXT_GRAY
 import com.madsam.otora.model.osu.ui.OsuTopRankUI
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
@@ -93,12 +93,12 @@ fun RankGraph(
                     bottomStart = 6.dp, bottomEnd = 6.dp
                 )
             )
-            .background(DARK_RED_DEEP),
+            .background(Red700),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = stringResource(id = R.string.global_ranking),
-            color = DARK_RED_TEXT_LIGHT,
+            color = Beige400,
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
@@ -107,7 +107,7 @@ fun RankGraph(
 
         Text(
             text = stringResource(id = R.string.recent_90_days),
-            color = DARK_RED_TEXT_LIGHT,
+            color = Beige400,
             fontSize = 16.sp
         )
 
@@ -122,7 +122,7 @@ fun RankGraph(
             ) {
                 Text(
                     text = "Loading data...",
-                    color = DARK_RED_TEXT_LIGHT,
+                    color = Beige400,
                     fontSize = 16.sp,
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -278,7 +278,7 @@ fun RankGraph(
                     append(" (${highestData.date.split("T")[0]})")
                 }
             },
-            color = DARK_RED_TEXT_LIGHT,
+            color = Beige400,
             fontSize = 16.sp,
             modifier = Modifier.padding(bottom = 10.dp)
         )

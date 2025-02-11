@@ -20,8 +20,8 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.madsam.otora.consts.DARK_RED_DEEP
-import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
+import com.madsam.otora.ui.theme.Red700
+import com.madsam.otora.ui.theme.Beige400
 import com.madsam.otora.utils.ShareUtil
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -47,7 +47,7 @@ class SmallWidget : GlanceAppWidget() {
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .background(DARK_RED_DEEP),
+                .background(Red700),
             verticalAlignment = Alignment.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -56,7 +56,7 @@ class SmallWidget : GlanceAppWidget() {
                 modifier = GlanceModifier
                     .padding(12.dp),
                 style = TextStyle(
-                    color = MyColorProvider(DARK_RED_TEXT_LIGHT),
+                    color = MyColorProvider(Beige400),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -66,7 +66,7 @@ class SmallWidget : GlanceAppWidget() {
                 modifier = GlanceModifier
                     .padding(12.dp),
                 style = TextStyle(
-                    color = MyColorProvider(DARK_RED_TEXT_LIGHT),
+                    color = MyColorProvider(Beige400),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )

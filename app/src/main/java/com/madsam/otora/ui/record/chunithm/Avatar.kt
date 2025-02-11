@@ -24,7 +24,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.consts.DARK_RED_DEEP
+import com.madsam.otora.ui.theme.Red700
 import com.madsam.otora.model.chuni.ui.ChuniAvatarUI
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -34,14 +34,14 @@ fun AvatarLayout(
 ) {
     val avatarData by chuniAvatarUI.collectAsState()
 
-    Box (
+    Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .padding(horizontal = 12.dp)
             .clip(RoundedCornerShape(10.dp))
             .scaledLayout(0.8f) // width: 224, height: 264
             .width(280.dp)
-            .background(DARK_RED_DEEP)
+            .background(Red700)
     ) {
         Box(
             modifier = Modifier

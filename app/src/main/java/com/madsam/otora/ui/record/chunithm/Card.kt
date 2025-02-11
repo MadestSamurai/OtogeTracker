@@ -30,19 +30,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.consts.DARK_RED
-import com.madsam.otora.consts.DARK_RED_DEEP
-import com.madsam.otora.consts.DARK_RED_TEXT
-import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
-import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_GOLD
-import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_PLATINUM
-import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_RAINBOW
-import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_SILVER
-import com.madsam.otora.consts.GradientBrush.OSU_LEVEL_WHITE
-import com.madsam.otora.consts.OSU_LEVEL_GOLD_1
+import com.madsam.otora.ui.theme.Red500
+import com.madsam.otora.ui.theme.Red700
+import com.madsam.otora.ui.theme.Beige500
+import com.madsam.otora.ui.theme.Beige400
+import com.madsam.otora.ui.theme.GradientBrush.GoldGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.PlatinumGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.RainbowGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.SilverGradientBg
+import com.madsam.otora.ui.theme.GradientBrush.WhiteGradientBg
+import com.madsam.otora.ui.theme.OSU_LEVEL_GOLD_1
 import com.madsam.otora.model.chuni.ui.ChuniCardUI
 import com.madsam.otora.ui.icon.Filled
-import com.madsam.otora.utils.CommonUtils
+import com.madsam.otora.utils.CommonUtils.getRatingBrush
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -62,7 +62,7 @@ fun Card(
         val surfaceWidthDp = screenWidthDp - 24.dp
         ConstraintLayout(
             modifier = Modifier
-                .background(DARK_RED_DEEP)
+                .background(Red700)
         ) {
             val (
                 charaImage,
@@ -90,11 +90,11 @@ fun Card(
                     .clip(RoundedCornerShape(5.dp))
                     .background(
                         when (cardData.honorBase) {
-                            "silver" -> OSU_LEVEL_SILVER
-                            "gold" -> OSU_LEVEL_GOLD
-                            "platina" -> OSU_LEVEL_PLATINUM
-                            "rainbow" -> OSU_LEVEL_RAINBOW
-                            else -> OSU_LEVEL_WHITE
+                            "silver" -> SilverGradientBg
+                            "gold" -> GoldGradientBg
+                            "platina" -> PlatinumGradientBg
+                            "rainbow" -> RainbowGradientBg
+                            else -> WhiteGradientBg
                         }
                     ),
                 textAlign = TextAlign.Center,
@@ -120,11 +120,11 @@ fun Card(
                     .clip(RoundedCornerShape(5.dp))
                     .background(
                         when (cardData.roleBase) {
-                            "silver" -> OSU_LEVEL_SILVER
-                            "gold" -> OSU_LEVEL_GOLD
-                            "platina" -> OSU_LEVEL_PLATINUM
-                            "rainbow" -> OSU_LEVEL_RAINBOW
-                            else -> OSU_LEVEL_WHITE
+                            "silver" -> SilverGradientBg
+                            "gold" -> GoldGradientBg
+                            "platina" -> PlatinumGradientBg
+                            "rainbow" -> RainbowGradientBg
+                            else -> WhiteGradientBg
                         }
                     )
             )
@@ -150,14 +150,14 @@ fun Card(
                         end.linkTo(rebornBase.end)
                     },
                 text = cardData.reborn.toString(),
-                color = DARK_RED,
+                color = Red500,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
             )
 
             Text(
                 text = "Lv.",
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .constrainAs(lvText) {
@@ -168,7 +168,7 @@ fun Card(
 
             Text(
                 text = cardData.level.toString(),
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -181,7 +181,7 @@ fun Card(
 
             Text(
                 text = cardData.nameIn,
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 fontSize = 18.sp,
                 lineHeight = 22.sp,
                 fontWeight = FontWeight.Bold,
@@ -226,7 +226,7 @@ fun Card(
                 text = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
-                            color = DARK_RED_TEXT,
+                            color = Beige500,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Normal
                         )
@@ -235,7 +235,7 @@ fun Card(
                     }
                     withStyle(
                         style = SpanStyle(
-                            color = CommonUtils.getRatingBrush(cardData.rating),
+                            brush = getRatingBrush(cardData.rating),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -245,7 +245,7 @@ fun Card(
                     append(" (MAX ")
                     withStyle(
                         style = SpanStyle(
-                            color = DARK_RED_TEXT,
+                            color = Beige500,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -254,7 +254,7 @@ fun Card(
                     }
                     append(")")
                 },
-                color = DARK_RED_TEXT,
+                color = Beige500,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .constrainAs(rating) {
@@ -275,14 +275,14 @@ fun Card(
                     text = buildAnnotatedString {
                         withStyle(
                             style = SpanStyle(
-                                color = DARK_RED_TEXT,
+                                color = Beige500,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Normal
                             )
                         ) { append("OVERPOWER ") }
                         append(cardData.overpower)
                     },
-                    color = DARK_RED_TEXT_LIGHT,
+                    color = Beige400,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
                     fontWeight = FontWeight.Bold,
@@ -291,14 +291,14 @@ fun Card(
                     text = buildAnnotatedString {
                         withStyle(
                             style = SpanStyle(
-                                color = DARK_RED_TEXT,
+                                color = Beige500,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Normal
                             )
                         ) { append("LAST PLAY ") }
                         append(cardData.lastPlay)
                     },
-                    color = DARK_RED_TEXT_LIGHT,
+                    color = Beige400,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
                     fontWeight = FontWeight.Bold,
@@ -307,14 +307,14 @@ fun Card(
                     text = buildAnnotatedString {
                         withStyle(
                             style = SpanStyle(
-                                color = DARK_RED_TEXT,
+                                color = Beige500,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Normal
                             )
                         ) { append("PLAY COUNT ") }
                         append(cardData.playCount)
                     },
-                    color = DARK_RED_TEXT_LIGHT,
+                    color = Beige400,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
                     fontWeight = FontWeight.Bold,
@@ -323,14 +323,14 @@ fun Card(
                     text = buildAnnotatedString {
                         withStyle(
                             style = SpanStyle(
-                                color = DARK_RED_TEXT,
+                                color = Beige500,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Normal
                             )
                         ) { append("POINTS ") }
                         append("${cardData.point}/${cardData.totalPoint}")
                     },
-                    color = DARK_RED_TEXT_LIGHT,
+                    color = Beige400,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
                     fontWeight = FontWeight.Bold,

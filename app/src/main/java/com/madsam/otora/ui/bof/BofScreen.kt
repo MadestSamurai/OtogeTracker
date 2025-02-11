@@ -50,7 +50,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.madsam.otora.activity.BofScreenState
 import com.madsam.otora.components.CustomTabRow
-import com.madsam.otora.consts.Purple700
+import com.madsam.otora.ui.theme.Purple700
 import com.madsam.otora.service.request.BofDataRequestService
 import com.madsam.otora.ui.bof.component.DateTimeRangePicker
 import com.madsam.otora.ui.bof.sub.BofAvgScreen

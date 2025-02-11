@@ -45,12 +45,12 @@ import coil.decode.SvgDecoder
 import com.madsam.otora.R
 import com.madsam.otora.components.GroupListItem
 import com.madsam.otora.components.PopupTip
-import com.madsam.otora.consts.BlackAlpha80
-import com.madsam.otora.consts.DARK_RED
-import com.madsam.otora.consts.DARK_RED_DEEP
-import com.madsam.otora.consts.DARK_RED_TEXT
-import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
-import com.madsam.otora.consts.OSU_BRIGHT_RED
+import com.madsam.otora.ui.theme.BlackAlpha80
+import com.madsam.otora.ui.theme.Red500
+import com.madsam.otora.ui.theme.Red700
+import com.madsam.otora.ui.theme.Beige500
+import com.madsam.otora.ui.theme.Beige400
+import com.madsam.otora.ui.theme.OSU_BRIGHT_RED
 import com.madsam.otora.model.osu.ui.OsuCardUI
 import com.madsam.otora.model.osu.web.OsuGroup
 import com.madsam.otora.ui.icon.Filled
@@ -72,7 +72,7 @@ fun Card(
             modifier = Modifier
                 .padding(vertical = 12.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .background(DARK_RED_DEEP)
+                .background(Red700)
         ) {
             val refs = createRefs()
             val (
@@ -191,7 +191,7 @@ fun Card(
                     .width(cardWidthDp)
                     .height(80.dp)
                     .clip(RoundedCornerShape(bottomEnd = 15.dp))
-                    .background(DARK_RED)
+                    .background(Red500)
             )
             Box(
                 modifier = Modifier
@@ -260,7 +260,7 @@ fun Card(
             val formerUsernameShowPopup = remember { MutableTransitionState(false) }
             Text(
                 text = cardData.username,
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -288,7 +288,7 @@ fun Card(
                         bottom.linkTo(baseBackground.bottom)
                     }
                     .padding(start = 5.dp),
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 fontSize = 18.sp
             )
             val supporterShowPopup = remember { MutableTransitionState(false) }
@@ -330,7 +330,7 @@ fun Card(
             val modeGlobalRankShowPopup = remember { MutableTransitionState(false) }
             Text(
                 text = cardData.rank,
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -361,13 +361,13 @@ fun Card(
                         append(cardData.country)
                     },
                     inlineContent = inlineContent,
-                    color = DARK_RED_TEXT,
+                    color = Beige500,
                     fontSize = 14.sp,
                     lineHeight = 18.sp,
                 )
                 Text(
                     text = cardData.countryRank,
-                    color = DARK_RED_TEXT_LIGHT,
+                    color = Beige400,
                     fontSize = 16.sp,
                     lineHeight = 20.sp,
                 )
@@ -395,7 +395,7 @@ fun Card(
             if (cardData.formerUsernames.isNotEmpty()) {
                 PopupTip(
                     "formerly known as:\n${cardData.formerUsernames}",
-                    DARK_RED_TEXT_LIGHT,
+                    Beige400,
                     Modifier.constrainAs(formerUsernamePopup) {
                         top.linkTo(nameplateName.bottom, margin = 4.dp)
                         start.linkTo(nameplateName.start)
@@ -407,7 +407,7 @@ fun Card(
             if (cardData.currentMode == "mania") {
                 PopupTip(
                     cardData.maniaModeGlobalRank,
-                    DARK_RED_TEXT_LIGHT,
+                    Beige400,
                     Modifier.constrainAs(modeGlobalRankPopup) {
                         top.linkTo(rank.bottom, margin = 4.dp)
                         start.linkTo(rank.start)
@@ -418,7 +418,7 @@ fun Card(
                 )
                 PopupTip(
                     cardData.maniaModeCountryRank,
-                    DARK_RED_TEXT_LIGHT,
+                    Beige400,
                     Modifier.constrainAs(modeCountryRankPopup) {
                         top.linkTo(country.bottom, margin = 4.dp)
                         start.linkTo(country.start)

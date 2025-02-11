@@ -33,8 +33,8 @@ import androidx.compose.ui.util.fastFold
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.util.fastMap
-import com.madsam.otora.consts.tab_background
-import com.madsam.otora.consts.tab_indicator_background
+import com.madsam.otora.ui.theme.tab_background
+import com.madsam.otora.ui.theme.tab_indicator_background
 
 /**
  * 项目名: OtogeTracker

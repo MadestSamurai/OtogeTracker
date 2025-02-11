@@ -27,13 +27,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.madsam.otora.consts.DARK_RED_DEEP
-import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
-import com.madsam.otora.consts.OSU_BRIGHT_RED
-import com.madsam.otora.consts.OSU_DISCORD_BG
-import com.madsam.otora.consts.OSU_DISCORD_TEXT
-import com.madsam.otora.consts.OSU_X_BG
-import com.madsam.otora.consts.White1000
+import com.madsam.otora.ui.theme.Red700
+import com.madsam.otora.ui.theme.Beige400
+import com.madsam.otora.ui.theme.OSU_BRIGHT_RED
+import com.madsam.otora.ui.theme.OSU_DISCORD_BG
+import com.madsam.otora.ui.theme.OSU_DISCORD_TEXT
+import com.madsam.otora.ui.theme.OSU_X_BG
+import com.madsam.otora.ui.theme.White1000
 import com.madsam.otora.model.osu.ui.OsuSocialUI
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
@@ -69,7 +69,7 @@ fun SocialCard(
                     bottomEnd = 20.dp
                 )
             )
-            .background(DARK_RED_DEEP)
+            .background(Red700)
     ) {
         val (
             playInfo,
@@ -107,7 +107,7 @@ fun SocialCard(
                 },
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 modifier = Modifier
                     .padding(start = 16.dp, top = 16.dp)
             )
@@ -132,7 +132,7 @@ fun SocialCard(
                 },
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp,
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 modifier = Modifier
                     .padding(start = 16.dp)
             )
@@ -156,7 +156,7 @@ fun SocialCard(
                     },
                     fontWeight = FontWeight.Normal,
                     fontSize = 16.sp,
-                    color = DARK_RED_TEXT_LIGHT,
+                    color = Beige400,
                     modifier = Modifier
                         .padding(start = 16.dp)
                 )
@@ -181,7 +181,7 @@ fun SocialCard(
                     },
                     fontWeight = FontWeight.Normal,
                     fontSize = 16.sp,
-                    color = DARK_RED_TEXT_LIGHT,
+                    color = Beige400,
                     modifier = Modifier
                         .padding(start = 16.dp, bottom = 4.dp)
                 )

@@ -33,13 +33,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.consts.DARK_RED_DEEP
-import com.madsam.otora.consts.DARK_RED_DEEPER
-import com.madsam.otora.consts.DARK_RED_TEXT_LIGHT
-import com.madsam.otora.consts.OSU_ARROW_YELLOW
-import com.madsam.otora.consts.OSU_BRIGHT_YELLOW
-import com.madsam.otora.consts.OSU_HEART_RED
-import com.madsam.otora.consts.OSU_ROTATE_GREEN
+import com.madsam.otora.ui.theme.Red700
+import com.madsam.otora.ui.theme.Red800
+import com.madsam.otora.ui.theme.Beige400
+import com.madsam.otora.ui.theme.OSU_ARROW_YELLOW
+import com.madsam.otora.ui.theme.OSU_BRIGHT_YELLOW
+import com.madsam.otora.ui.theme.OSU_HEART_RED
+import com.madsam.otora.ui.theme.OSU_ROTATE_GREEN
 import com.madsam.otora.model.osu.ui.OsuRecentUI
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
@@ -68,14 +68,14 @@ fun Recent(
             .width(screenWidthDp)
             .padding(top = 12.dp),
         RoundedCornerShape(20.dp),
-        DARK_RED_DEEP
+        Red700
     ) {
         Column {
             Text(
                 text = "Recent",
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp,
-                color = DARK_RED_TEXT_LIGHT,
+                color = Beige400,
                 modifier = Modifier
                     .padding(start = 16.dp, top = 16.dp)
             )
@@ -91,7 +91,7 @@ fun Recent(
                             appendInlineContent("icon", "[${activity.type}]")
                             when (activity.type) {
                                 "rank" -> {
-                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = Beige400)) {
                                         append("achieved #${activity.rank} on ")
                                     }
                                     appendInlineContent("mode", "[${activity.mode}]")
@@ -101,7 +101,7 @@ fun Recent(
                                 }
 
                                 "rankLost" -> {
-                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = Beige400)) {
                                         append("lost first place on ")
                                     }
                                     appendInlineContent("mode", "[${activity.mode}]")
@@ -111,7 +111,7 @@ fun Recent(
                                 }
 
                                 "beatmapsetUpload" -> {
-                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = Beige400)) {
                                         append("submitted a new beatmap ")
                                     }
                                     withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
@@ -120,7 +120,7 @@ fun Recent(
                                 }
 
                                 "beatmapsetUpdate" -> {
-                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = Beige400)) {
                                         append("updated a beatmap ")
                                     }
                                     withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
@@ -129,19 +129,19 @@ fun Recent(
                                 }
 
                                 "userSupportGift" -> {
-                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = Beige400)) {
                                         append("received the gift of osu!supporter")
                                     }
                                 }
 
                                 "userSupportAgain" -> {
-                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = Beige400)) {
                                         append("support osu! again")
                                     }
                                 }
 
                                 "beatmapsetRevive" -> {
-                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = Beige400)) {
                                         append("revived a beatmap ")
                                     }
                                     withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
@@ -153,13 +153,13 @@ fun Recent(
                                     withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
                                         append(activity.beatmapSetTitle)
                                     }
-                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = Beige400)) {
                                         append(" has been ${activity.approval}")
                                     }
                                 }
 
                                 "achievement" -> {
-                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = Beige400)) {
                                         append("achieved ")
                                     }
                                     withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
@@ -168,7 +168,7 @@ fun Recent(
                                 }
 
                                 else -> {
-                                    withStyle(style = SpanStyle(color = DARK_RED_TEXT_LIGHT)) {
+                                    withStyle(style = SpanStyle(color = Beige400)) {
                                         append("achieved #${activity.rank} on ${activity.beatmapTitle}")
                                     }
                                 }
@@ -178,7 +178,7 @@ fun Recent(
                         modifier = Modifier
                             .padding(vertical = 4.dp)
                             .clip(RoundedCornerShape(6.dp))
-                            .background(DARK_RED_DEEPER)
+                            .background(Red800)
                             .padding(2.dp)
                     ) {
                         val textWidth = cardWidthDp - 8.dp
