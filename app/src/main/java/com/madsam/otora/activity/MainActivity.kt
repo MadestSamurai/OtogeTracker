@@ -4,12 +4,14 @@ import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AccelerateInterpolator
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
@@ -23,7 +25,6 @@ import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -48,7 +49,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.ui.bof.BofScreen
 import com.madsam.otora.ui.record.RecordScreen
+import com.madsam.otora.ui.theme.Beige500
+import com.madsam.otora.ui.theme.Beige600
 import com.madsam.otora.ui.theme.OtogeTrackerTheme
+import com.madsam.otora.ui.theme.Red800
+import com.madsam.otora.ui.theme.Red900
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDate
 
@@ -91,9 +96,9 @@ fun MainActivityScreen(navController: NavHostController) {
                             WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
                         )
                     )
-                    .height(64.dp)
-                ,
-                tonalElevation = 0.dp
+                    .height(64.dp),
+                tonalElevation = 0.dp,
+                containerColor = Red900
             ) {
                 items.forEachIndexed { index, screen ->
                     NavigationBarItem(
@@ -104,19 +109,21 @@ fun MainActivityScreen(navController: NavHostController) {
                                 modifier = Modifier.padding(0.dp)
                             )
                         },
-                        label = { 
+                        label = {
                             Text(
                                 text = screen.label,
-                                fontSize = 13.sp,
+                                fontSize = 14.sp,
                                 modifier = Modifier.padding(0.dp)
-                            ) 
+                            )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
-                            selectedIconColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                            selectedTextColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                            indicatorColor = Red800,
+                            selectedIconColor = Beige500,
+                            selectedTextColor = Beige500,
+                            unselectedIconColor = Beige600,
+                            unselectedTextColor = Beige600
                         ),
-                        alwaysShowLabel = false,
+                        alwaysShowLabel = true,
                         selected = selectedItem == index,
                         onClick = {
                             if (selectedItem == index) return@NavigationBarItem
@@ -133,7 +140,11 @@ fun MainActivityScreen(navController: NavHostController) {
             }
         }
     ) { contentPadding ->
-        Box(modifier = Modifier.padding(contentPadding)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = contentPadding.calculateBottomPadding())
+        ) {
             NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
                 lateinit var bofNavController: NavHostController
                 val bofScreenState = BofScreenState()
@@ -167,7 +178,15 @@ class MainActivity : AppCompatActivity() {
             fadeOut.doOnEnd { splashScreenViewProvider.remove() }
             fadeOut.start()
         }
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(
+                scrim = 0x00000000
+            ),
+            navigationBarStyle = SystemBarStyle.dark(
+                scrim = 0x00000000
+            )
+        )
+
         setContent {
             navController = rememberNavController()
             OtogeTrackerTheme {

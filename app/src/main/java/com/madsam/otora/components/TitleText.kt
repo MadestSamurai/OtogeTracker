@@ -12,7 +12,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.ui.theme.Red800
+import com.madsam.otora.ui.theme.Red500
 
 /**
  * 项目名: OtogeTracker
@@ -21,43 +21,6 @@ import com.madsam.otora.ui.theme.Red800
  * 创建时间: 2024/8/1
  * 描述: 标题文字
  */
-
-@Composable
-fun TitleText(
-    textTitle: String,
-    text: String,
-    titleSize: TextUnit,
-    titleTextSize: TextUnit,
-    color: Color,
-    modifier: Modifier
-) {
-    Surface(
-        shape = RoundedCornerShape(
-            topStart = 6.dp,
-            topEnd = 6.dp,
-            bottomStart = 6.dp,
-            bottomEnd = 6.dp
-        ),
-        color = Red800,
-        modifier = modifier
-    ) {
-        Column {
-            Text(
-                text = textTitle,
-                fontSize = titleSize,
-                color = color,
-                modifier = Modifier.padding(start = 14.dp, top = 8.dp, end = 16.dp)
-            )
-            Text(
-                text = text,
-                fontSize = titleTextSize,
-                fontWeight = FontWeight.Bold,
-                color = color,
-                modifier = Modifier.padding(start = 14.dp, end = 16.dp, bottom = 8.dp)
-            )
-        }
-    }
-}
 
 @Composable
 fun TitleText(
@@ -75,7 +38,7 @@ fun TitleText(
             bottomStart = 6.dp,
             bottomEnd = 6.dp
         ),
-        color = Red800,
+        color = Red500,
         modifier = modifier
     ) {
         Column {

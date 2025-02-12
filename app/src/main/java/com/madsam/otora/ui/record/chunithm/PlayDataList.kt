@@ -26,17 +26,17 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.madsam.otora.model.chuni.ui.ChuniPlayDataUI
+import com.madsam.otora.ui.theme.Beige500
 import com.madsam.otora.ui.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.ui.theme.CHUNI_DIFF_BASIC
 import com.madsam.otora.ui.theme.CHUNI_DIFF_EXPERT
 import com.madsam.otora.ui.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.ui.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.ui.theme.CHUNI_DIFF_ULTIMA_2
+import com.madsam.otora.ui.theme.Red500
 import com.madsam.otora.ui.theme.Red700
-import com.madsam.otora.ui.theme.Red800
-import com.madsam.otora.ui.theme.Beige500
 import com.madsam.otora.ui.theme.White1000
-import com.madsam.otora.model.chuni.ui.ChuniPlayDataUI
 import com.madsam.otora.utils.CommonUtils.formatNumberThousand
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -102,7 +102,7 @@ fun PlayDataItem(
             .clip(RoundedCornerShape(5.dp))
             .width(width)
             .height(45.dp)
-            .background(Red800)
+            .background(Red500)
     ) {
         Row {
             Text(

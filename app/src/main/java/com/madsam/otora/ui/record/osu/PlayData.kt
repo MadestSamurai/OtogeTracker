@@ -40,12 +40,11 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.madsam.otora.components.ImageWithText
 import com.madsam.otora.components.TitleText
-import com.madsam.otora.ui.theme.Red500
-import com.madsam.otora.ui.theme.Red700
-import com.madsam.otora.ui.theme.Red800
-import com.madsam.otora.ui.theme.Beige400
 import com.madsam.otora.model.osu.ui.OsuPlayUI
 import com.madsam.otora.ui.icon.Filled
+import com.madsam.otora.ui.theme.Beige400
+import com.madsam.otora.ui.theme.Red500
+import com.madsam.otora.ui.theme.Red700
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -167,13 +166,13 @@ fun PlayData(
                     textTitle = "Play Time",
                     text = buildAnnotatedString {
                         val styles = listOf(
-                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold) to (playTimeStr[0]),
+                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold) to playTimeStr[0],
                             SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${dayHourLabels[0]} ",
-                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold) to (playTimeStr[1]),
+                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold) to playTimeStr[1],
                             SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${dayHourLabels[1]} ",
-                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold) to (playTimeStr[2]),
+                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold) to playTimeStr[2],
                             SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${monthSecondLabels[0]} ",
-                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold) to (playTimeStr[3]),
+                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold) to playTimeStr[3],
                             SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to monthSecondLabels[1]
                         )
                         styles.forEach { (style, text) ->
@@ -295,7 +294,7 @@ fun PlayData(
                 inlineContent = inlineContent,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .background(Red800)
+                    .background(Red500)
                     .clickable {
                         shown = !shown
                     }

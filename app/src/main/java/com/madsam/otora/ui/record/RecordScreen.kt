@@ -2,8 +2,11 @@ package com.madsam.otora.ui.record
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -11,22 +14,27 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -39,20 +47,13 @@ import com.madsam.otora.ui.record.viewmodel.ChuniViewModel
 import com.madsam.otora.ui.record.viewmodel.ChuniViewModelFactory
 import com.madsam.otora.ui.record.viewmodel.OsuViewModel
 import com.madsam.otora.ui.record.viewmodel.OsuViewModelFactory
+import com.madsam.otora.ui.theme.Beige400
+import com.madsam.otora.ui.theme.Beige500
+import com.madsam.otora.ui.theme.Beige600
+import com.madsam.otora.ui.theme.Red500
+import com.madsam.otora.ui.theme.Red800
 import com.madsam.otora.utils.ShareUtil
 import kotlinx.coroutines.launch
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.rememberDrawerState
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.height
-import androidx.compose.ui.text.font.FontWeight
-import com.madsam.otora.ui.theme.Beige300
-import com.madsam.otora.ui.theme.Red700
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,7 +84,9 @@ fun RecordScreen(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet(
-                modifier = Modifier.width(300.dp)
+                modifier = Modifier.width(300.dp),
+                drawerContainerColor = Red500,
+                drawerContentColor = Beige400
             ) {
                 Spacer(modifier = Modifier.height(12.dp))
                 items.forEach { screen ->
@@ -102,97 +105,100 @@ fun RecordScreen(
                             selectedItem = screen
                             scope.launch { drawerState.close() }
                         },
-                        modifier = Modifier.padding(horizontal = 12.dp)
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = Red800,
+                            unselectedContainerColor = Red500,
+                            selectedIconColor = Beige500,
+                            unselectedIconColor = Beige600,
+                            selectedTextColor = Beige500,
+                            unselectedTextColor = Beige600
+                        )
                     )
                 }
             }
         }
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            text = selectedItem.route,
-                            fontWeight = FontWeight.Bold
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch { drawerState.open() }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Menu"
-                            )
-                        }
-                    },
-                    windowInsets = WindowInsets(top = 0.dp),
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = Beige300,
-                        titleContentColor = Red700,
-                        navigationIconContentColor = Red700
+        Column {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = selectedItem.route,
+                        fontWeight = FontWeight.Bold
                     )
-                )
-
-                // Content
-                Box(modifier = Modifier.fillMaxSize()) {
-                    when (selectedItem) {
-                        Screen.Page1 -> OsuUserPage(
-                            showOsuDialog,
-                            osuViewModel,
-                            onDismissDialog = { showOsuDialog = false }
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        scope.launch { drawerState.open() }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Menu"
                         )
-
-                        Screen.Page2 -> MaimaiUserPage(
-                            showMaimaiDialog,
-                            onDismissDialog = { showMaimaiDialog = false }
-                        )
-
-                        Screen.Page3 -> {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                TopRating(
-                                    chuniTopRankUI = chuniViewModel.chuniTopRankUI,
-                                    onBack = { showChunithmTopRating = false }
-                                )
-                                ChunithmUserPage(
-                                    chuniViewModel,
-                                    onNavigateToTopRating = { showChunithmTopRating = true },
-                                    snackbarHostState = snackbarHostState,
-                                    showDialog = showChunithmDialog,
-                                    onDismissDialog = { showChunithmDialog = false }
-                                )
-                            }
-                        }
-
-                        Screen.Page4 -> TestPage4()
                     }
-
-                    // Floating Action Button
-                    FloatingActionButton(
+                },
+                actions = {
+                    // Add action button based on selected item
+                    IconButton(
                         onClick = {
                             when (selectedItem) {
                                 Screen.Page1 -> showOsuDialog = true
                                 Screen.Page2 -> showMaimaiDialog = true
                                 Screen.Page3 -> showChunithmDialog = true
-                                Screen.Page4 -> { /* Action for Page 4 */
-                                }
+                                Screen.Page4 -> { /* Action for Page 4 */ }
                             }
-                        },
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(16.dp)
+                        }
                     ) {
                         Icon(
-                            when (selectedItem) {
+                            imageVector = when (selectedItem) {
                                 Screen.Page1 -> Icons.Default.Add
                                 Screen.Page2 -> Icons.Default.Edit
                                 Screen.Page3 -> Icons.Default.Share
                                 Screen.Page4 -> Icons.Default.Delete
                             },
-                            contentDescription = null
+                            contentDescription = "Action",
+                            tint = Beige400
                         )
                     }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Red500,
+                    titleContentColor = Beige400,
+                    navigationIconContentColor = Beige400
+                )
+            )
+
+            // Content
+            Box(modifier = Modifier.fillMaxSize()) {
+                when (selectedItem) {
+                    Screen.Page1 -> OsuUserPage(
+                        showOsuDialog,
+                        osuViewModel,
+                        onDismissDialog = { showOsuDialog = false }
+                    )
+
+                    Screen.Page2 -> MaimaiUserPage(
+                        showMaimaiDialog,
+                        onDismissDialog = { showMaimaiDialog = false }
+                    )
+
+                    Screen.Page3 -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            TopRating(
+                                chuniTopRankUI = chuniViewModel.chuniTopRankUI,
+                                onBack = { showChunithmTopRating = false }
+                            )
+                            ChunithmUserPage(
+                                chuniViewModel,
+                                onNavigateToTopRating = { showChunithmTopRating = true },
+                                snackbarHostState = snackbarHostState,
+                                showDialog = showChunithmDialog,
+                                onDismissDialog = { showChunithmDialog = false }
+                            )
+                        }
+                    }
+
+                    Screen.Page4 -> TestPage4()
                 }
             }
         }

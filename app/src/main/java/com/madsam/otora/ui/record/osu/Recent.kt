@@ -33,15 +33,15 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.ui.theme.Red700
-import com.madsam.otora.ui.theme.Red800
+import com.madsam.otora.model.osu.ui.OsuRecentUI
+import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.ui.theme.Beige400
 import com.madsam.otora.ui.theme.OSU_ARROW_YELLOW
 import com.madsam.otora.ui.theme.OSU_BRIGHT_YELLOW
 import com.madsam.otora.ui.theme.OSU_HEART_RED
 import com.madsam.otora.ui.theme.OSU_ROTATE_GREEN
-import com.madsam.otora.model.osu.ui.OsuRecentUI
-import com.madsam.otora.ui.icon.Filled
+import com.madsam.otora.ui.theme.Red500
+import com.madsam.otora.ui.theme.Red700
 import com.madsam.otora.utils.CommonUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -178,7 +178,7 @@ fun Recent(
                         modifier = Modifier
                             .padding(vertical = 4.dp)
                             .clip(RoundedCornerShape(6.dp))
-                            .background(Red800)
+                            .background(Red500)
                             .padding(2.dp)
                     ) {
                         val textWidth = cardWidthDp - 8.dp

@@ -2,27 +2,27 @@ package com.madsam.otora.ui.bof
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -50,7 +50,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.madsam.otora.activity.BofScreenState
 import com.madsam.otora.components.CustomTabRow
-import com.madsam.otora.ui.theme.Purple700
 import com.madsam.otora.service.request.BofDataRequestService
 import com.madsam.otora.ui.bof.component.DateTimeRangePicker
 import com.madsam.otora.ui.bof.sub.BofAvgScreen
@@ -60,6 +59,8 @@ import com.madsam.otora.ui.bof.sub.BofMedianScreen
 import com.madsam.otora.ui.bof.sub.BofTeamScreen
 import com.madsam.otora.ui.bof.sub.BofTotalScreen
 import com.madsam.otora.ui.icon.Filled
+import com.madsam.otora.ui.theme.Beige400
+import com.madsam.otora.ui.theme.Red500
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -73,6 +74,7 @@ import java.time.LocalDate
  * 描述: BOF数据展示界面
  */
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BofScreen(
     snackbarHostState: SnackbarHostState,
@@ -206,115 +208,105 @@ fun BofScreen(
                 .fillMaxSize()
                 .background(Color.Black)
         ) {
-            Row(
-                Modifier
-                    .background(Purple700)
-                    .fillMaxWidth()
-            ) {
-                val focusManager = LocalFocusManager.current
-                val keyboardController = LocalSoftwareKeyboardController.current
-                TextField(
-                    value = searchText.value,
-                    onValueChange = {
-                        searchText.value = it
-                        when (selectedTabIndex) {
-                            0 -> vm.findItemIndex(it, vm.totalData.value, selectedTabIndex)
-                            1 -> vm.findItemIndex(it, vm.avgData.value, selectedTabIndex)
-                            2 -> vm.findItemIndex(it, vm.medianData.value, selectedTabIndex)
-                            3 -> vm.findItemIndex(it, vm.diffData.value, selectedTabIndex)
-                            4 -> vm.findTeamItemIndex(it, vm.teamData.value)
-                        }
-                    },
-                    textStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Normal),
-                    placeholder = { Text("Search", color = Color.White, fontSize = 16.sp) },
-                    leadingIcon = {
-                        Icon(
-                            painter = rememberVectorPainter(image = Filled.Magnify),
-                            contentDescription = "Search Icon",
-                            modifier = Modifier.size(16.dp)
+            TopAppBar(
+                title = {
+                    val focusManager = LocalFocusManager.current
+                    val keyboardController = LocalSoftwareKeyboardController.current
+                    TextField(
+                        value = searchText.value,
+                        onValueChange = {
+                            searchText.value = it
+                            when (selectedTabIndex) {
+                                0 -> vm.findItemIndex(it, vm.totalData.value, selectedTabIndex)
+                                1 -> vm.findItemIndex(it, vm.avgData.value, selectedTabIndex)
+                                2 -> vm.findItemIndex(it, vm.medianData.value, selectedTabIndex)
+                                3 -> vm.findItemIndex(it, vm.diffData.value, selectedTabIndex)
+                                4 -> vm.findTeamItemIndex(it, vm.teamData.value)
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Normal),
+                        placeholder = { Text("Search", color = Beige400, fontSize = 16.sp) },
+                        leadingIcon = {
+                            Icon(
+                                painter = rememberVectorPainter(image = Filled.Magnify),
+                                contentDescription = "Search Icon",
+                                tint = Beige400,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                focusManager.clearFocus()
+                                keyboardController?.hide()
+                            }
+                        ),
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = Beige400,
+                            unfocusedTextColor = Beige400,
+                            disabledTextColor = Beige400,
+                            errorTextColor = Beige400,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            errorIndicatorColor = Color.Transparent,
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            errorContainerColor = Color.Transparent,
+                            focusedPlaceholderColor = Beige400,
+                            unfocusedPlaceholderColor = Beige400,
+                            disabledPlaceholderColor = Beige400,
+                            errorPlaceholderColor = Beige400,
+                            focusedLeadingIconColor = Beige400,
+                            unfocusedLeadingIconColor = Beige400,
+                            disabledLeadingIconColor = Beige400,
+                            errorLeadingIconColor = Beige400,
+                            cursorColor = Beige400,
                         )
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            focusManager.clearFocus()
-                            keyboardController?.hide()
+                    )
+                },
+                actions = {
+                    if (searchText.value.isNotEmpty()) {
+                        IconButton(onClick = { vm.scrollToPrevious(selectedTabIndex) }) {
+                            Icon(
+                                painter = rememberVectorPainter(image = Filled.ChevronUp),
+                                contentDescription = "Previous",
+                                tint = Beige400
+                            )
                         }
-                    ),
-                    colors = TextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        disabledTextColor = Color.White,
-                        errorTextColor = Color.White,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        disabledIndicatorColor = Color.Transparent,
-                        errorIndicatorColor = Color.Transparent,
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        errorContainerColor = Color.Transparent,
-                        focusedPlaceholderColor = Color.White,
-                        unfocusedPlaceholderColor = Color.White,
-                        disabledPlaceholderColor = Color.White,
-                        errorPlaceholderColor = Color.White,
-                        focusedLeadingIconColor = Color.White,
-                        unfocusedLeadingIconColor = Color.White,
-                        disabledLeadingIconColor = Color.White,
-                        errorLeadingIconColor = Color.White,
-                        cursorColor = Color.White,
-                    )
+                        IconButton(onClick = { vm.scrollToNext(selectedTabIndex) }) {
+                            Icon(
+                                painter = rememberVectorPainter(image = Filled.ChevronDown),
+                                contentDescription = "Next",
+                                tint = Beige400
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = { selectTime() }) {
+                            Icon(
+                                painter = rememberVectorPainter(image = Filled.Calendar),
+                                contentDescription = "Date&Time",
+                                tint = Beige400
+                            )
+                        }
+                        IconButton(onClick = { refreshData() }) {
+                            Icon(
+                                painter = rememberVectorPainter(image = Filled.ArrowRotate),
+                                contentDescription = "Refresh",
+                                tint = Beige400
+                            )
+                        }
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Red500,
+                    titleContentColor = Beige400,
+                    actionIconContentColor = Beige400
                 )
-                Spacer(modifier = Modifier.weight(1f))
-                if (searchText.value.isNotEmpty()) {
-                    Icon(
-                        painter = rememberVectorPainter(image = Filled.ChevronUp),
-                        contentDescription = "Previous",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .width(16.dp)
-                            .height(25.dp)
-                            .clickable(onClick = { vm.scrollToPrevious(selectedTabIndex) })
-                            .align(Alignment.CenterVertically)
-                    )
-                    Icon(
-                        painter = rememberVectorPainter(image = Filled.ChevronDown),
-                        contentDescription = "Next",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .width(16.dp)
-                            .height(25.dp)
-                            .clickable(onClick = { vm.scrollToNext(selectedTabIndex) })
-                            .align(Alignment.CenterVertically)
-                    )
-                } else {
-                    Icon(
-                        painter = rememberVectorPainter(image = Filled.Calendar),
-                        contentDescription = "Date&Time",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .width(16.dp)
-                            .height(25.dp)
-                            .clickable(onClick = { selectTime() })
-                            .align(Alignment.CenterVertically)
-                    )
-                    Icon(
-                        painter = rememberVectorPainter(image = Filled.ArrowRotate),
-                        contentDescription = "Refresh",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .padding(start = 8.dp, end = 20.dp)
-                            .width(18.dp)
-                            .height(25.dp)
-                            .clickable(onClick = { refreshData() })
-                            .align(Alignment.CenterVertically)
-                    )
-                }
-            }
+            )
             NavHost(
                 navController = navController,
                 startDestination = "${mainTabTitles[selectedTabIndex]}/${subTabTitles.getOrNull(selectedSubTabIndex) ?: ""}",

@@ -11,20 +11,20 @@ import androidx.compose.ui.graphics.Color
  * 描述: 颜色常量类
  */
 
-val Purple700 = Color(0xFF3700B3)
 val PurpleTheme = Color(0xFF674FA3)
 val Black333 = Color(0xFF333333)
 val White1000: Color = Color(0xFFFFFFFF)
 val White800: Color = Color(0xFFE0E0E0)
 val BlackAlpha80: Color = Color(0xAA000000)
 val BlackAlpha50: Color = Color(0x7F000000)
-val Beige300: Color = Color(0xFF4A9CAF)
-val Red500: Color = Color(0xFF371722)
-val Red700: Color = Color(0xFF1A4650)
-val Red800: Color = Color(0xFF250A0A)
-val Red900: Color = Color(0xFF160808)
-val Beige400: Color = Color(0xFFDDC7B7)
-val Beige500: Color = Color(0xFFBBAB9B)
+val Beige300: Color = Color(0xFF211a1a)
+val Red500: Color = Color(0xFF362929)
+val Red700: Color = Color(0xFF2f2525)
+val Red800: Color = Color(0xFF573c3c)
+val Red900: Color = Color(0xFF332727)
+val Beige400: Color = Color(0xFFd7c2c1)
+val Beige500: Color = Color(0xFFEFCCCB)
+val Beige600: Color = Color(0xFFd7c2c1)
 
 val OSU_BRIGHT_RED: Color = Color(0xFFDE4C9B)
 val OSU_DARK_RED: Color = Color(0xFF73184D)

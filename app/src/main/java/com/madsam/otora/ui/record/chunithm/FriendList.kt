@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
+import com.madsam.otora.model.chuni.ui.ChuniFriendUI
+import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.ui.theme.Beige400
 import com.madsam.otora.ui.theme.Beige500
 import com.madsam.otora.ui.theme.GradientBrush.GoldGradientBg
@@ -47,9 +49,6 @@ import com.madsam.otora.ui.theme.OSU_LEVEL_PLATINUM_1
 import com.madsam.otora.ui.theme.RANKING_BLUE
 import com.madsam.otora.ui.theme.Red500
 import com.madsam.otora.ui.theme.Red700
-import com.madsam.otora.ui.theme.Red800
-import com.madsam.otora.model.chuni.ui.ChuniFriendUI
-import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils.getRatingBrush
 import com.madsam.otora.utils.ndp
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -99,7 +98,7 @@ fun FriendCard(
                         "silver" -> RANKING_BLUE
                         "gold" -> OSU_LEVEL_GOLD_1
                         "platina" -> OSU_LEVEL_PLATINUM_1
-                        else -> Red800
+                        else -> Red500
                     }
                 )
         ) {

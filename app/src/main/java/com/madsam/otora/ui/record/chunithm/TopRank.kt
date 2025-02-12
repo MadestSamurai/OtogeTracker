@@ -20,11 +20,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.components.RoundedBarChart
-import com.madsam.otora.ui.theme.BlackAlpha50
-import com.madsam.otora.ui.theme.Red700
-import com.madsam.otora.ui.theme.Red800
-import com.madsam.otora.ui.theme.White1000
 import com.madsam.otora.model.chuni.ui.ChuniTopRankUI
+import com.madsam.otora.ui.theme.BlackAlpha50
+import com.madsam.otora.ui.theme.Red500
+import com.madsam.otora.ui.theme.Red700
+import com.madsam.otora.ui.theme.White1000
 import com.madsam.otora.utils.CommonUtils.getRatingBrush
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -47,12 +47,13 @@ fun TopRank(
         Box(
             modifier = Modifier
                 .width(cardWidthDp * 0.73f)
+                .padding(start = 4.dp)
                 .clip(RoundedCornerShape(6.dp))
-                .background(Red800)
+                .background(Red500)
         ) {
             Column(
                 modifier = Modifier
-                    .padding(start = 12.dp)
+                    .padding(start = 6.dp, top = 6.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .background(BlackAlpha50)
                     .padding(horizontal = 4.dp, vertical = 2.dp)
@@ -86,12 +87,13 @@ fun TopRank(
         Box(
             modifier = Modifier
                 .width(cardWidthDp * 0.27f)
+                .padding(horizontal = 4.dp)
                 .clip(RoundedCornerShape(6.dp))
-                .background(Red800)
+                .background(Red500)
         ) {
             Column(
                 modifier = Modifier
-                    .padding(start = 12.dp)
+                    .padding(start = 6.dp, top = 6.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .background(BlackAlpha50)
                     .padding(horizontal = 4.dp, vertical = 2.dp)
