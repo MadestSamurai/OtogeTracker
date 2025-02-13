@@ -60,6 +60,8 @@ import com.madsam.otora.ui.bof.sub.BofTeamScreen
 import com.madsam.otora.ui.bof.sub.BofTotalScreen
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.ui.theme.Beige400
+import com.madsam.otora.ui.theme.Beige500
+import com.madsam.otora.ui.theme.Beige600
 import com.madsam.otora.ui.theme.Red500
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -89,6 +91,7 @@ fun BofScreen(
 
     val vm: BofViewModel = viewModel(factory = BofViewModelFactory(bofScreenState))
 
+    var isTabRowVisible by remember { mutableStateOf(true) }
     val selectedTabIndex = bofScreenState.selectedTab.asStateFlow().collectAsState().value
     val selectedSubTabIndex = bofScreenState.selectedSubTab.asStateFlow().collectAsState().value
     val searchText = remember { mutableStateOf("") }
@@ -114,7 +117,6 @@ fun BofScreen(
     val scrollListComment = vm.scrollToIndexListComment.asStateFlow().collectAsState().value
 
     var showDateTimeRangePicker by remember { mutableStateOf(false) }
-    var isTabRowVisible by remember { mutableStateOf(true) }
 
     val scrollThreshold = 50f
 
@@ -195,8 +197,8 @@ fun BofScreen(
 
     val tabTitles = mapOf(
         "Entry" to listOf("Total", "Avg", "Median", "Diff"),
-        "Team" to listOf("Total"),
-        "Comment" to listOf("Total")
+        "Team" to listOf(" "),
+        "Comment" to listOf(" ")
     )
 
     val mainTabTitles = tabTitles.keys.toList()
@@ -309,7 +311,9 @@ fun BofScreen(
             )
             NavHost(
                 navController = navController,
-                startDestination = "${mainTabTitles[selectedTabIndex]}/${subTabTitles.getOrNull(selectedSubTabIndex) ?: ""}",
+                startDestination = "${mainTabTitles[selectedTabIndex]}/${
+                    subTabTitles.getOrNull(selectedSubTabIndex) ?: ""
+                }",
                 modifier = Modifier.weight(1f)
             ) {
                 tabTitles.forEach { (mainTab, subTabs) ->
@@ -317,16 +321,57 @@ fun BofScreen(
                         composable("$mainTab/$subTab") {
                             when (mainTab) {
                                 "Entry" -> when (subTab) {
-                                    "Total" -> BofTotalScreen(vm, snackbarHostState, listStateTotal, scrollThreshold, bofScreenState) { isTabRowVisible = it }
-                                    "Avg" -> BofAvgScreen(vm, snackbarHostState, listStateAvg, scrollThreshold, bofScreenState) { isTabRowVisible = it }
-                                    "Median" -> BofMedianScreen(vm, snackbarHostState, listStateMedian, scrollThreshold, bofScreenState) { isTabRowVisible = it }
-                                    "Diff" -> BofDiffScreen(vm, snackbarHostState, listStateDiff, scrollThreshold, bofScreenState) { isTabRowVisible = it }
+                                    "Total" -> BofTotalScreen(
+                                        vm,
+                                        snackbarHostState,
+                                        listStateTotal,
+                                        scrollThreshold,
+                                        bofScreenState
+                                    ) { isTabRowVisible = it }
+
+                                    "Avg" -> BofAvgScreen(
+                                        vm,
+                                        snackbarHostState,
+                                        listStateAvg,
+                                        scrollThreshold,
+                                        bofScreenState
+                                    ) { isTabRowVisible = it }
+
+                                    "Median" -> BofMedianScreen(
+                                        vm,
+                                        snackbarHostState,
+                                        listStateMedian,
+                                        scrollThreshold,
+                                        bofScreenState
+                                    ) { isTabRowVisible = it }
+
+                                    "Diff" -> BofDiffScreen(
+                                        vm,
+                                        snackbarHostState,
+                                        listStateDiff,
+                                        scrollThreshold,
+                                        bofScreenState
+                                    ) { isTabRowVisible = it }
                                 }
+
                                 "Team" -> when (subTab) {
-                                    "Total" -> BofTeamScreen(vm, snackbarHostState, listStateTeam, scrollThreshold, bofScreenState) { isTabRowVisible = it }
+                                    " " -> BofTeamScreen(
+                                        vm,
+                                        snackbarHostState,
+                                        listStateTeam,
+                                        scrollThreshold,
+                                        bofScreenState
+                                    ) { isTabRowVisible = it }
                                 }
+
                                 "Comment" -> when (subTab) {
-                                    "Total" -> BofCommentScreen(vm, snackbarHostState, listStateComment, scrollThreshold, bofScreenState) { isTabRowVisible = it }
+                                    " " -> BofCommentScreen(
+                                        vm,
+                                        snackbarHostState,
+                                        listStateComment,
+                                        scrollThreshold,
+                                        bofScreenState
+                                    ) { isTabRowVisible = it }
                                 }
                             }
                         }
@@ -334,20 +379,18 @@ fun BofScreen(
                 }
             }
         }
-        AnimatedVisibility(
-            visible = isTabRowVisible,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 10.dp)
-                .clip(RoundedCornerShape(20.dp))
+
+        Column(
+            modifier = Modifier.align(Alignment.BottomCenter)
         ) {
-            Column {
+            AnimatedVisibility(
+                visible = isTabRowVisible && subTabTitles.size > 1,
+                modifier = Modifier.clip(RoundedCornerShape(20.dp))
+            ) {
                 CustomTabRow(
                     selectedTabIndex = selectedSubTabIndex,
-                    modifier = Modifier
-                        .padding(3.dp)
-                        .clip(RoundedCornerShape(50.dp))
-                        .background(Color.White)
+                    modifier = Modifier.padding(3.dp),
+                    containerColor = Red500
                 ) {
                     subTabTitles.forEachIndexed { index, title ->
                         Tab(
@@ -361,19 +404,24 @@ fun BofScreen(
                             text = {
                                 Text(
                                     text = title,
-                                    color = if (selectedSubTabIndex == index) Color.Black else Color.Gray
+                                    color = if (selectedSubTabIndex == index) Beige500 else Beige600
                                 )
                             },
                             modifier = Modifier.height(35.dp)
                         )
                     }
                 }
+            }
+            AnimatedVisibility(
+                visible = isTabRowVisible,
+                modifier = Modifier
+                    .padding(bottom = 5.dp)
+                    .clip(RoundedCornerShape(20.dp))
+            ) {
                 CustomTabRow(
                     selectedTabIndex = selectedTabIndex,
-                    modifier = Modifier
-                        .padding(3.dp)
-                        .clip(RoundedCornerShape(50.dp))
-                        .background(Color.White),
+                    modifier = Modifier.padding(3.dp),
+                    containerColor = Red500
                 ) {
                     mainTabTitles.forEachIndexed { index, title ->
                         Tab(
@@ -381,14 +429,19 @@ fun BofScreen(
                             onClick = {
                                 if (selectedTabIndex != index) {
                                     bofScreenState.selectedTab.update { index }
-                                    bofScreenState.selectedSubTab.update { 0 } // Reset sub-tab index
-                                    navController.navigate("${title}/${subTabTitles.firstOrNull() ?: ""}")
+                                    bofScreenState.selectedSubTab.update { 0 }
+                                    val defaultSubTab = when (title) {
+                                        "Entry" -> "Total"
+                                        "Team", "Comment" -> " "
+                                        else -> ""
+                                    }
+                                    navController.navigate("$title/$defaultSubTab")
                                 }
                             },
                             text = {
                                 Text(
                                     text = title,
-                                    color = if (selectedTabIndex == index) Color.Black else Color.Gray,
+                                    color = if (selectedTabIndex == index) Beige500 else Beige600,
                                 )
                             },
                             modifier = Modifier.height(40.dp)

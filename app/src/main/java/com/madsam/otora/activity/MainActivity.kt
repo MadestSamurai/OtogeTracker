@@ -8,6 +8,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -91,6 +92,7 @@ fun MainActivityScreen(navController: NavHostController) {
         bottomBar = {
             NavigationBar(
                 modifier = Modifier
+                    .background(Red900)
                     .windowInsetsPadding(
                         WindowInsets.navigationBars.only(
                             WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom

@@ -40,4 +40,8 @@ object Filled {
     val Tick = com.madsam.otora.ui.icon.filled.Tick
     val Gift = com.madsam.otora.ui.icon.filled.Gift
     val DoubleDown = com.madsam.otora.ui.icon.filled.DoubleDown
+    val Download = com.madsam.otora.ui.icon.filled.Download
+    val OsuIcon = com.madsam.otora.ui.icon.filled.OsuIcon
+    val MaimaiIcon = com.madsam.otora.ui.icon.filled.MaimaiIcon
+    val ChunithmIcon = com.madsam.otora.ui.icon.filled.ChunithmIcon
 }

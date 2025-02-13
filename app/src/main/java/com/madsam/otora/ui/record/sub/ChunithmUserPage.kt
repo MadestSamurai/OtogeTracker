@@ -1,19 +1,18 @@
 package com.madsam.otora.ui.record.sub
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Button
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.ui.theme.Beige300
 import com.madsam.otora.ui.record.chunithm.AvatarLayout
 import com.madsam.otora.ui.record.chunithm.Card
 import com.madsam.otora.ui.record.chunithm.CookieDialog
@@ -21,6 +20,7 @@ import com.madsam.otora.ui.record.chunithm.FriendList
 import com.madsam.otora.ui.record.chunithm.PlayDataList
 import com.madsam.otora.ui.record.chunithm.TopRank
 import com.madsam.otora.ui.record.viewmodel.ChuniViewModel
+import com.madsam.otora.ui.theme.Red300
 import kotlinx.coroutines.launch
 
 @Composable
@@ -38,28 +38,9 @@ fun ChunithmUserPage(
 
     LazyColumn(
         modifier = Modifier
-            .background(color = Beige300)
+            .background(color = Red300)
             .fillMaxSize()
     ) {
-        item {
-            Row {
-                Button(onClick = { onNavigateToTopRating() }) {
-                    Text("Top Rating")
-                }
-                Button(onClick = {
-                    viewModel.fetchUserData(context)
-                    viewModel.loadData(context)
-                }) {
-                    Text("Update Data")
-                }
-                Button(onClick = {
-                    viewModel.fetchSongData(context)
-                    viewModel.loadData(context)
-                }) {
-                    Text("Update Song Data")
-                }
-            }
-        }
 //        item {
 //            Button(onClick = {
 //                val realmConfig = RealmConfiguration.Builder(
@@ -81,7 +62,13 @@ fun ChunithmUserPage(
             Card(viewModel.chuniCardUI)
         }
         item {
-            TopRank(viewModel.chuniTopRankUI)
+            Box(
+                modifier = Modifier.clickable {
+                    onNavigateToTopRating()
+                }
+            ) {
+                TopRank(viewModel.chuniTopRankUI)
+            }
         }
         item {
             Row {
@@ -105,6 +92,8 @@ fun ChunithmUserPage(
             onResult = { success ->
                 if (success) {
                     scope.launch {
+                        viewModel.fetchUserData(context)
+                        viewModel.loadData(context)
                         snackbarHostState.showSnackbar("Cookies Saved")
                     }
                 }

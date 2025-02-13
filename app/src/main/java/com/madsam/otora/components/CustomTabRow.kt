@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TabPosition
 import androidx.compose.runtime.Composable
@@ -33,8 +32,8 @@ import androidx.compose.ui.util.fastFold
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.util.fastMap
-import com.madsam.otora.ui.theme.tab_background
-import com.madsam.otora.ui.theme.tab_indicator_background
+import com.madsam.otora.ui.theme.Red800
+import com.madsam.otora.ui.theme.Transparent
 
 /**
  * 项目名: OtogeTracker
@@ -50,28 +49,37 @@ private val HorizontalTextPadding = 16.dp
 fun CustomTabRow(
     selectedTabIndex: Int,
     modifier: Modifier = Modifier,
-    containerColor: Color = tab_background,
+    containerColor: Color = Transparent,
     contentColor: Color = Color.Unspecified,
     indicator: @Composable (tabPositions: List<CustomTabPosition>) -> Unit = @Composable { tabPositions ->
-        Box(
-            Modifier
-                .tabIndicatorOffset(tabPositions[selectedTabIndex])
-                .padding(4.dp)
-                .clip(RoundedCornerShape(40.dp))
-                .fillMaxHeight()
-                .background(tab_indicator_background))
+        if (tabPositions.isNotEmpty()) {  // 添加安全检查
+            val safeIndex = selectedTabIndex.coerceIn(0, tabPositions.lastIndex)
+            Box(
+                Modifier
+                    .tabIndicatorOffset(tabPositions[safeIndex])
+                    .padding(4.dp)
+                    .clip(RoundedCornerShape(40.dp))
+                    .fillMaxHeight()
+                    .background(Red800)
+            )
+        }
     },
-    divider: @Composable () -> Unit = @Composable { HorizontalDivider() },
+    divider: @Composable () -> Unit = @Composable { },
     tabs: @Composable (selectedTabIndex: Int) -> Unit
 ) {
     Surface(
         modifier = modifier.selectableGroup(),
         color = containerColor,
-        contentColor = contentColor
+        contentColor = contentColor,
+        tonalElevation = 8.dp,
+        shadowElevation = 8.dp,
+        shape = RoundedCornerShape(50.dp)
     ) {
         SubcomposeLayout(Modifier.fillMaxWidth()) { constraints ->
             val tabRowWidth = constraints.maxWidth
-            val tabMeasurables = subcompose(TabSlots.Tabs) { tabs(selectedTabIndex) }
+            val tabMeasurables = subcompose(TabSlots.Tabs) { 
+                tabs(selectedTabIndex.coerceAtLeast(0))  // 确保传递给 tabs 的索引不为负
+            }
             val tabCount = tabMeasurables.size
             var tabWidth = 0
             if (tabCount > 0) {

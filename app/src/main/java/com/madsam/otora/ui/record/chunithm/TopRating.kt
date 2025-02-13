@@ -43,10 +43,11 @@ import com.madsam.otora.ui.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.ui.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.ui.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.ui.theme.OSU_BRIGHT_YELLOW
-import com.madsam.otora.ui.theme.Beige300
+import com.madsam.otora.ui.theme.Red300
 import com.madsam.otora.ui.theme.Red700
 import com.madsam.otora.model.chuni.ui.ChuniScoreUI
 import com.madsam.otora.model.chuni.ui.ChuniTopRankUI
+import com.madsam.otora.ui.theme.Transparent
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
@@ -67,7 +68,7 @@ fun TopRating(
 
     Column(
         modifier = Modifier
-            .background(Beige300)
+            .background(Red300)
     ) {
         Row(
             modifier = Modifier
@@ -190,7 +191,7 @@ fun ChuniRatingItemCard(
                     )
                     .border(
                         width = if (item.diff == "ultima") 1.dp else 0.dp,
-                        color = if (item.diff == "ultima") CHUNI_DIFF_ULTIMA_2 else Color.Transparent,
+                        color = if (item.diff == "ultima") CHUNI_DIFF_ULTIMA_2 else Transparent,
                         shape = RoundedCornerShape(5.dp)
                     )
                     .padding(4.dp)

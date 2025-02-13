@@ -46,7 +46,7 @@ fun TitleText(
                 text = textTitle,
                 fontSize = titleSize,
                 color = color,
-                modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+                modifier = Modifier.padding(start = 8.dp, top = 8.dp)
             )
             Text(
                 text = text,

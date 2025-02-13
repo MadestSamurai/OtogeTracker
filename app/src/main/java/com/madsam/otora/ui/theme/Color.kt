@@ -17,7 +17,7 @@ val White1000: Color = Color(0xFFFFFFFF)
 val White800: Color = Color(0xFFE0E0E0)
 val BlackAlpha80: Color = Color(0xAA000000)
 val BlackAlpha50: Color = Color(0x7F000000)
-val Beige300: Color = Color(0xFF211a1a)
+val Red300: Color = Color(0xFF211a1a)
 val Red500: Color = Color(0xFF362929)
 val Red700: Color = Color(0xFF2f2525)
 val Red800: Color = Color(0xFF573c3c)
@@ -25,6 +25,7 @@ val Red900: Color = Color(0xFF332727)
 val Beige400: Color = Color(0xFFd7c2c1)
 val Beige500: Color = Color(0xFFEFCCCB)
 val Beige600: Color = Color(0xFFd7c2c1)
+val Transparent: Color = Color(0x00000000)
 
 val OSU_BRIGHT_RED: Color = Color(0xFFDE4C9B)
 val OSU_DARK_RED: Color = Color(0xFF73184D)
@@ -75,9 +76,6 @@ val CHUNI_DIFF_EXPERT: Color = Color(0xFFE35454)
 val CHUNI_DIFF_MASTER: Color = Color(0xFFBF6AFF)
 val CHUNI_DIFF_ULTIMA_1: Color = Color(0xFF202020)
 val CHUNI_DIFF_ULTIMA_2: Color = Color(0xFFFF3A3A)
-
-val tab_indicator_background: Color = Color(0xFFDCDCDC)
-val tab_background: Color = Color(0xFFFAFAFA)
 
 object GradientBrush {
     val WhiteGradientBg: Brush = Brush.verticalGradient(
