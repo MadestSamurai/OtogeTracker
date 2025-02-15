@@ -278,7 +278,7 @@ fun OsuTopRankItemCard(
                 modifier = Modifier
                     .constrainAs(title) {
                         top.linkTo(parent.top)
-                        end.linkTo(parent.end)
+                        start.linkTo(cover.end, 8.dp)
                     }
             ) {
                 Text(
@@ -290,7 +290,7 @@ fun OsuTopRankItemCard(
                     lineHeight = 23.sp,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
-                        .width(itemWidth - 124.dp)
+                        .width(itemWidth - 108.dp)
                         .padding(top = 4.dp)
                         .requiredHeight(23.dp)
                         .clip(RectangleShape)
@@ -303,7 +303,7 @@ fun OsuTopRankItemCard(
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     modifier = Modifier
-                        .width(itemWidth - 124.dp)
+                        .width(itemWidth - 108.dp)
                 )
                 val score = if ("CL" in item.mods) {
                     item.score

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
@@ -30,7 +31,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFold
 import androidx.compose.ui.util.fastForEach
-import androidx.compose.ui.util.fastForEachIndexed
 import androidx.compose.ui.util.fastMap
 import com.madsam.otora.ui.theme.Red800
 import com.madsam.otora.ui.theme.Transparent
@@ -68,56 +68,86 @@ fun CustomTabRow(
     tabs: @Composable (selectedTabIndex: Int) -> Unit
 ) {
     Surface(
-        modifier = modifier.selectableGroup(),
+        modifier = modifier
+            .wrapContentWidth(align = Alignment.CenterHorizontally) // 修改这里
+            .selectableGroup(),
         color = containerColor,
         contentColor = contentColor,
         tonalElevation = 8.dp,
         shadowElevation = 8.dp,
         shape = RoundedCornerShape(50.dp)
     ) {
-        SubcomposeLayout(Modifier.fillMaxWidth()) { constraints ->
+        SubcomposeLayout(
+            modifier = Modifier.wrapContentWidth(align = Alignment.CenterHorizontally) // 修改这里
+            ) { constraints ->
             val tabRowWidth = constraints.maxWidth
-            val tabMeasurables = subcompose(TabSlots.Tabs) { 
+            val tabMeasurables = subcompose(TabSlots.Tabs) {
                 tabs(selectedTabIndex.coerceAtLeast(0))  // 确保传递给 tabs 的索引不为负
             }
             val tabCount = tabMeasurables.size
-            var tabWidth = 0
-            if (tabCount > 0) {
-                tabWidth = (tabRowWidth / tabCount)
-            }
-            val tabRowHeight = tabMeasurables.fastFold(initial = 0) { max, curr ->
-                maxOf(curr.maxIntrinsicHeight(tabWidth), max)
+
+            // 计算每个tab的实际内容宽度
+            val tabContentWidths = tabMeasurables.fastMap { measurable ->
+                measurable.maxIntrinsicWidth(constraints.maxHeight)
             }
 
-            val tabPlaceables = tabMeasurables.fastMap {
-                it.measure(
+            val horizontalPaddingPx = HorizontalTextPadding.toPx()
+            // 添加水平padding
+            val totalContentWidth =
+                tabContentWidths.sum() + (HorizontalTextPadding.toPx() * 2 * tabCount)
+
+            // 计算实际tab宽度（以像素为单位）
+            val tabWidths = if (totalContentWidth <= tabRowWidth) {
+                tabContentWidths.map { contentWidth ->
+                    (contentWidth + horizontalPaddingPx * 2).toInt()
+                }
+            } else {
+                List(tabCount) { (tabRowWidth / tabCount) }
+            }
+
+            val tabRowHeight = tabMeasurables.fastFold(initial = 0) { max, curr ->
+                maxOf(curr.maxIntrinsicHeight(0), max)
+            }
+
+            // 使用新的tabWidths测量tabs
+            val tabPlaceables = tabMeasurables.mapIndexed { index, measurable ->
+                measurable.measure(
                     constraints.copy(
-                        minWidth = tabWidth,
-                        maxWidth = tabWidth,
+                        minWidth = tabWidths[index],
+                        maxWidth = tabWidths[index],
                         minHeight = tabRowHeight,
                         maxHeight = tabRowHeight,
                     )
                 )
             }
 
-            val tabPositions = List(tabCount) { index ->
-                var contentWidth =
-                    minOf(tabMeasurables[index].maxIntrinsicWidth(tabRowHeight), tabWidth).toDp()
-                contentWidth -= HorizontalTextPadding * 2
-                val indicatorWidth = maxOf(contentWidth, 24.dp)
-                CustomTabPosition(tabWidth.toDp() * index, tabWidth.toDp(), indicatorWidth)
+            // 计算每个tab的位置
+            var currentX = 0
+            val tabPositions = tabWidths.map { width ->
+                val position = CustomTabPosition(
+                    left = currentX.toDp(),
+                    width = width.toDp(),
+                    contentWidth = (width - HorizontalTextPadding.toPx() * 2).toDp()
+                )
+                currentX += width
+                position
             }
 
-            layout(tabRowWidth, tabRowHeight) {
+            layout(currentX, tabRowHeight) {
+                // 放置indicator
                 subcompose(TabSlots.Indicator) { indicator(tabPositions) }
                     .fastForEach {
                         it.measure(Constraints.fixed(tabRowWidth, tabRowHeight)).placeRelative(0, 0)
                     }
 
-                tabPlaceables.fastForEachIndexed { index, placeable ->
-                    placeable.placeRelative(index * tabWidth, 0)
+                // 放置tabs
+                var x = 0
+                tabPlaceables.forEachIndexed { index, placeable ->
+                    placeable.placeRelative(x, 0)
+                    x += tabWidths[index]
                 }
 
+                // 放置divider
                 subcompose(TabSlots.Divider, divider).fastForEach {
                     val placeable = it.measure(constraints.copy(minHeight = 0))
                     placeable.placeRelative(0, tabRowHeight - placeable.height)
@@ -133,7 +163,11 @@ private enum class TabSlots {
     Indicator
 }
 
-class CustomTabPosition internal constructor(val left: Dp, val width: Dp, private val contentWidth: Dp) {
+class CustomTabPosition internal constructor(
+    val left: Dp,
+    val width: Dp,
+    private val contentWidth: Dp
+) {
 
     private val right: Dp
         get() = left + width

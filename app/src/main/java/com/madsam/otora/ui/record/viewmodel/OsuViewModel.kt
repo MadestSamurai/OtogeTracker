@@ -57,6 +57,7 @@ class OsuViewModel(
     val levelUI = MutableStateFlow(OsuLevelUI())
     val topRankUI = MutableStateFlow(OsuTopRankUI())
     val socialUI = MutableStateFlow(OsuSocialUI())
+    val recentBrief = MutableStateFlow<List<OsuRecentUI>>(emptyList())
     val recentUI = MutableStateFlow<List<OsuRecentUI>>(emptyList())
     val pinnedUI = MutableStateFlow<List<OsuTopRankUI>>(emptyList())
     val firstUI = MutableStateFlow<List<OsuTopRankUI>>(emptyList())
@@ -126,6 +127,24 @@ class OsuViewModel(
     private fun fetchRecentActivity(osuRecentActivityList: List<OsuRecentActivity>) {
         recentUI.update {
             osuRecentActivityList.map { activity ->
+                OsuRecentUI(
+                    username = activity.user.username,
+                    type = activity.type,
+                    rank = activity.rank.toString(),
+                    scoreRank = activity.scoreRank,
+                    beatmapTitle = activity.beatmap.title,
+                    beatmapSetTitle = activity.beatmapset.title,
+                    createdAt = activity.createdAt,
+                    mode = activity.mode,
+                    achievement = activity.achievement.name,
+                    modeAchievement = activity.achievement.mode,
+                    achievementIcon = activity.achievement.iconUrl,
+                    approval = activity.approval
+                )
+            }
+        }
+        recentBrief.update {
+            osuRecentActivityList.take(3).map { activity ->
                 OsuRecentUI(
                     username = activity.user.username,
                     type = activity.type,
