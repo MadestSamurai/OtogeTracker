@@ -5,7 +5,6 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.util.Log
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
@@ -33,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -42,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -62,15 +61,16 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.activity.BofScreenState
+import com.madsam.otora.fonts.sarasaFont
+import com.madsam.otora.model.bof.ui.BofCommentUI
+import com.madsam.otora.ui.bof.BofViewModel
+import com.madsam.otora.ui.bof.component.ScoreChart
+import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.ui.theme.BG_DARK_GRAY
 import com.madsam.otora.ui.theme.RANKING_BLUE
 import com.madsam.otora.ui.theme.RANKING_GREEN
 import com.madsam.otora.ui.theme.RANKING_RED
 import com.madsam.otora.ui.theme.TEXT_GRAY
-import com.madsam.otora.fonts.sarasaFont
-import com.madsam.otora.model.bof.ui.BofCommentUI
-import com.madsam.otora.ui.bof.BofViewModel
-import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.utils.CommonUtils
 import com.madsam.otora.utils.ImageUtils.saveBitmapToGallery
 import com.madsam.otora.utils.ScreenUtil.isLandscape
@@ -756,46 +756,52 @@ fun BofEntryRowComment(
                 ) {
                     if (entry.index <= 50) {
                         Row {
-                            if (entry.vote != 0) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(voteBarWidth.ndp())
-                                        .height(34.ndp())
-                                ) {
-                                    ScoreChart(
-                                        dataList = entry.voteChartData,
-                                        height = 34.ndp(),
-                                        width = voteBarWidth.ndp(),
-                                        color = RANKING_GREEN
-                                    )
+                            entry.voteChartData.takeIf { entry.vote != 0 }?.let { data ->
+                                key(entry.index) {
+                                    Box(
+                                        modifier = Modifier
+                                            .width(voteBarWidth.ndp())
+                                            .height(34.ndp())
+                                    ) {
+                                        ScoreChart(
+                                            dataList = data,
+                                            height = 34.ndp(),
+                                            width = voteBarWidth.ndp(),
+                                            color = RANKING_GREEN
+                                        )
+                                    }
                                 }
                             }
-                            if (entry.short != 0) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(shortBarWidth.ndp())
-                                        .height(34.ndp())
-                                ) {
-                                    ScoreChart(
-                                        dataList = entry.shortChartData,
-                                        height = 34.ndp(),
-                                        width = shortBarWidth.ndp(),
-                                        color = RANKING_BLUE
-                                    )
+                            entry.shortChartData.takeIf { entry.short != 0 }?.let { data ->
+                                key(entry.index) {
+                                    Box(
+                                        modifier = Modifier
+                                            .width(shortBarWidth.ndp())
+                                            .height(34.ndp())
+                                    ) {
+                                        ScoreChart(
+                                            dataList = data,
+                                            height = 34.ndp(),
+                                            width = shortBarWidth.ndp(),
+                                            color = RANKING_BLUE
+                                        )
+                                    }
                                 }
                             }
-                            if (entry.long != 0) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(longBarWidth.ndp())
-                                        .height(34.ndp())
-                                ) {
-                                    ScoreChart(
-                                        dataList = entry.longChartData,
-                                        height = 34.ndp(),
-                                        width = longBarWidth.ndp(),
-                                        color = RANKING_RED
-                                    )
+                            entry.longChartData.takeIf { entry.long != 0 }?.let { data ->
+                                key(entry.index) {
+                                    Box(
+                                        modifier = Modifier
+                                            .width(longBarWidth.ndp())
+                                            .height(34.ndp())
+                                    ) {
+                                        ScoreChart(
+                                            dataList = data,
+                                            height = 34.ndp(),
+                                            width = longBarWidth.ndp(),
+                                            color = RANKING_RED
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -972,56 +978,6 @@ fun BofEntryRowComment(
                 modifier = Modifier
                     .width(rightPadding)
                     .height(36.ndp())
-            )
-        }
-    }
-}
-
-@Composable
-fun ScoreChart(
-    dataList: List<Int>,
-    height: Dp,
-    width: Dp,
-    color: Color
-) {
-    Canvas(modifier = Modifier.size(width, height)) {
-        val maxDataValue = 1000
-        val stepX = size.width / (dataList.size - 1)
-        val stepY = size.height / maxDataValue
-
-        val path = Path().apply {
-            moveTo(0f, size.height)
-            for (i in dataList.indices) {
-                val x = i * stepX
-                val y = size.height - (dataList[i] * stepY)
-                lineTo(x, y)
-            }
-            lineTo(size.width, size.height)
-            close()
-        }
-
-        val fillColor = color.copy(alpha = 1.0f).copy(
-            red = color.red * 0.5f,
-            green = color.green * 0.5f,
-            blue = color.blue * 0.5f
-        )
-
-        drawPath(
-            path = path,
-            color = fillColor
-        )
-
-        for (i in 0 until dataList.size - 1) {
-            val startX = i * stepX
-            val startY = size.height - (dataList[i] * stepY)
-            val endX = (i + 1) * stepX
-            val endY = size.height - (dataList[i + 1] * stepY)
-
-            drawLine(
-                color = color,
-                start = Offset(startX, startY),
-                end = Offset(endX, endY),
-                strokeWidth = 4f
             )
         }
     }

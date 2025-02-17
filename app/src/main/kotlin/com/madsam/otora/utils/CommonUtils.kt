@@ -138,7 +138,7 @@ object CommonUtils {
             return "$count ${prev.value}${if (count > 1) "s" else ""} ago"
         }
 
-        return if (delta >= 365L * 24 * 60 * 60 * 1000 * 10) {
+        return if (delta >= 365L * 24 * 60 * 60 * 1000 * 20) {
             "too long ago"
         } else {
             val years = delta / (365L * 24 * 60 * 60 * 1000)
