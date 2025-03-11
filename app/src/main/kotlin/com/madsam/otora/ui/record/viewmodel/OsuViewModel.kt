@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.madsam.otora.consts.FlagsAlphabet
 import com.madsam.otora.glance.SmallWidget
+import com.madsam.otora.model.osu.ui.BriefUI
 import com.madsam.otora.model.osu.ui.OsuBadgeUI
 import com.madsam.otora.model.osu.ui.OsuCardUI
 import com.madsam.otora.model.osu.ui.OsuGlanceUI
@@ -52,15 +53,18 @@ class OsuViewModel(
     val cardUI = MutableStateFlow(OsuCardUI())
     val badgeUI = MutableStateFlow<List<OsuBadgeUI>>(emptyList())
     val groupListUI = MutableStateFlow<List<OsuGroup>>(emptyList())
-    val rankGraphUI = MutableStateFlow<List<Int>>(emptyList())
+    val rankGraphUI = MutableStateFlow<IntArray>(intArrayOf())
     val playUI = MutableStateFlow(OsuPlayUI())
     val levelUI = MutableStateFlow(OsuLevelUI())
     val topRankUI = MutableStateFlow(OsuTopRankUI())
     val socialUI = MutableStateFlow(OsuSocialUI())
-    val recentBrief = MutableStateFlow<List<OsuRecentUI>>(emptyList())
+    val recentBrief = MutableStateFlow<BriefUI<OsuRecentUI>>(BriefUI())
     val recentUI = MutableStateFlow<List<OsuRecentUI>>(emptyList())
+    val pinnedBrief = MutableStateFlow<BriefUI<OsuTopRankUI>>(BriefUI())
     val pinnedUI = MutableStateFlow<List<OsuTopRankUI>>(emptyList())
+    val firstBrief = MutableStateFlow<BriefUI<OsuTopRankUI>>(BriefUI())
     val firstUI = MutableStateFlow<List<OsuTopRankUI>>(emptyList())
+    val bestBrief = MutableStateFlow<BriefUI<OsuTopRankUI>>(BriefUI())
     val bestUI = MutableStateFlow<List<OsuTopRankUI>>(emptyList())
 
     private val glanceUI = MutableStateFlow(OsuGlanceUI())
@@ -144,22 +148,25 @@ class OsuViewModel(
             }
         }
         recentBrief.update {
-            osuRecentActivityList.take(3).map { activity ->
-                OsuRecentUI(
-                    username = activity.user.username,
-                    type = activity.type,
-                    rank = activity.rank.toString(),
-                    scoreRank = activity.scoreRank,
-                    beatmapTitle = activity.beatmap.title,
-                    beatmapSetTitle = activity.beatmapset.title,
-                    createdAt = activity.createdAt,
-                    mode = activity.mode,
-                    achievement = activity.achievement.name,
-                    modeAchievement = activity.achievement.mode,
-                    achievementIcon = activity.achievement.iconUrl,
-                    approval = activity.approval
-                )
-            }
+            BriefUI(
+                items = osuRecentActivityList.take(3).map { activity ->
+                    OsuRecentUI(
+                        username = activity.user.username,
+                        type = activity.type,
+                        rank = activity.rank.toString(),
+                        scoreRank = activity.scoreRank,
+                        beatmapTitle = activity.beatmap.title,
+                        beatmapSetTitle = activity.beatmapset.title,
+                        createdAt = activity.createdAt,
+                        mode = activity.mode,
+                        achievement = activity.achievement.name,
+                        modeAchievement = activity.achievement.mode,
+                        achievementIcon = activity.achievement.iconUrl,
+                        approval = activity.approval
+                    )
+                },
+                isComplete = osuRecentActivityList.size <= 3
+            )
         }
     }
 
@@ -172,6 +179,7 @@ class OsuViewModel(
             item.accuracy
         }
         return OsuTopRankUI(
+            scoreId = item.id,
             cover2x = item.beatmapSet.covers.list2x,
             bg2x = item.beatmapSet.covers.card2x,
             beatmapSetTitle = item.beatmapSet.title,
@@ -203,17 +211,35 @@ class OsuViewModel(
         pinnedUI.update {
             osuPinnedMap.map { fetchTopRankItem(it) }
         }
+        pinnedBrief.update {
+            BriefUI(
+                items = osuPinnedMap.take(2).map { fetchTopRankItem(it) },
+                isComplete = osuPinnedMap.size <= 2
+            )
+        }
     }
 
     private fun fetchFirstMap(osuFirstMap: List<OsuTopRankItem>) {
         firstUI.update {
             osuFirstMap.map { fetchTopRankItem(it) }
         }
+        firstBrief.update {
+            BriefUI(
+                items = osuFirstMap.take(2).map { fetchTopRankItem(it) },
+                isComplete = osuFirstMap.size <= 2
+            )
+        }
     }
 
     private fun fetchBestMap(osuBestMap: List<OsuTopRankItem>) {
         bestUI.update {
             osuBestMap.map { fetchTopRankItem(it) }
+        }
+        bestBrief.update {
+            BriefUI(
+                items = osuBestMap.take(2).map { fetchTopRankItem(it) },
+                isComplete = osuBestMap.size <= 2
+            )
         }
     }
 

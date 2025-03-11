@@ -5,19 +5,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,14 +47,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.ui.theme.BlackAlpha50
-import com.madsam.otora.ui.theme.Red700
-import com.madsam.otora.ui.theme.Beige400
-import com.madsam.otora.ui.theme.OSU_BRIGHT_YELLOW
-import com.madsam.otora.ui.theme.OSU_HEART_RED
 import com.madsam.otora.consts.OsuDiffColor
+import com.madsam.otora.model.osu.ui.BriefUI
 import com.madsam.otora.model.osu.ui.OsuTopRankUI
 import com.madsam.otora.ui.icon.Filled
+import com.madsam.otora.ui.theme.Beige400
+import com.madsam.otora.ui.theme.BlackAlpha50
+import com.madsam.otora.ui.theme.OSU_ARROW_YELLOW
+import com.madsam.otora.ui.theme.OSU_BRIGHT_YELLOW
+import com.madsam.otora.ui.theme.OSU_HEART_RED
+import com.madsam.otora.ui.theme.Red700
 import com.madsam.otora.utils.CommonUtils.dateCodeToRecent
 import com.madsam.otora.utils.CommonUtils.formatNumberThousand
 import com.madsam.otora.utils.CommonUtils.truncateToTwoDecimalPlaces
@@ -67,9 +73,12 @@ import java.util.Locale
 
 @Composable
 fun TopRank(
-    pinnedMaps: MutableStateFlow<List<OsuTopRankUI>>,
-    topMaps: MutableStateFlow<List<OsuTopRankUI>>,
-    firstMaps: MutableStateFlow<List<OsuTopRankUI>>
+    pinnedMaps: MutableStateFlow<BriefUI<OsuTopRankUI>>,
+    topMaps: MutableStateFlow<BriefUI<OsuTopRankUI>>,
+    firstMaps: MutableStateFlow<BriefUI<OsuTopRankUI>>,
+    pinnedOnMoreClick: () -> Unit,
+    topOnMoreClick: () -> Unit,
+    firstOnMoreClick: () -> Unit
 ) {
     val pinnedData by pinnedMaps.collectAsState()
     val topData by topMaps.collectAsState()
@@ -87,9 +96,10 @@ fun TopRank(
         Red700
     ) {
         Column(
-            modifier = Modifier.padding(top = 16.dp)
+            modifier = Modifier
+                .padding(start = 16.dp, end = 16.dp, bottom = 10.dp, top = 10.dp)
         ) {
-            if (pinnedData.isEmpty() && topData.isEmpty() && firstData.isEmpty()) {
+            if (pinnedData.items.isEmpty() && topData.items.isEmpty() && firstData.items.isEmpty()) {
                 Text(
                     text = "No play records",
                     color = Beige400,
@@ -99,14 +109,20 @@ fun TopRank(
                 )
                 return@Column
             }
-            if (pinnedData.isNotEmpty()) {
-                OsuTopRankItemContent(pinnedData, "Pinned", cardWidth)
+            if (pinnedData.items.isNotEmpty()) {
+                OsuTopRankItemContent(pinnedData, "Pinned", cardWidth) {
+                    pinnedOnMoreClick()
+                }
             }
-            if (topData.isNotEmpty()) {
-                OsuTopRankItemContent(topData, "Top", cardWidth)
+            if (topData.items.isNotEmpty()) {
+                OsuTopRankItemContent(topData, "Top", cardWidth) {
+                    topOnMoreClick()
+                }
             }
-            if (firstData.isNotEmpty()) {
-                OsuTopRankItemContent(firstData, "First", cardWidth)
+            if (firstData.items.isNotEmpty()) {
+                OsuTopRankItemContent(firstData, "First", cardWidth) {
+                    firstOnMoreClick()
+                }
             }
         }
     }
@@ -114,30 +130,51 @@ fun TopRank(
 
 @Composable
 fun OsuTopRankItemContent(
-    items: List<OsuTopRankUI>,
+    items: BriefUI<OsuTopRankUI>,
     title: String,
-    cardWidth: Dp
+    cardWidth: Dp,
+    onMoreClick: () -> Unit = {}
 ) {
-    Column {
-        Text(
-            text = title,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            color = Beige400,
+    val list = items.items
+    Column(
+        modifier = Modifier
+            .padding(bottom = 8.dp)
+            .clip(RoundedCornerShape(6.dp))
+    ) {
+        Row(
             modifier = Modifier
-                .padding(start = 16.dp, bottom = 16.dp)
-        )
-        LazyColumn(
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .height(200.dp)
+                .fillMaxWidth()
+                .padding(start = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            val itemWidth = cardWidth - 16.dp
-            items.forEach {
-                item {
-                    OsuTopRankItemCard(it, itemWidth)
-                }
+            Text(
+                text = title,
+                fontWeight = FontWeight.Bold,
+                fontSize = 24.sp,
+                color = Beige400,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+            if (items.isComplete) return@Row
+            TextButton(
+                onClick = onMoreClick,
+                contentPadding = PaddingValues(0.dp),
+                modifier = Modifier
+                    .defaultMinSize(1.dp, 1.dp)
+                    .height(24.dp)
+            ) {
+                Text(
+                    text = "More",
+                    color = Beige400,
+                    fontSize = 16.sp
+                )
+            }
+        }
+        val itemWidth = cardWidth - 16.dp
+        list.forEach {
+            OsuTopRankItemCard(it, itemWidth)
+            if (list.indexOf(it) < list.size - 1) {
+                Spacer(modifier = Modifier.height(10.dp))
             }
         }
     }
@@ -149,9 +186,7 @@ fun OsuTopRankItemCard(
     itemWidth: Dp
 ) {
     Surface(
-        Modifier
-            .width(itemWidth)
-            .padding(bottom = 10.dp),
+        Modifier.width(itemWidth),
         RoundedCornerShape(6.dp),
         Transparent
     ) {
@@ -435,6 +470,16 @@ fun OsuTopRankItemCard(
                     .background(BlackAlpha50)
                     .padding(6.dp)
             ) {
+                if (item.status == "qualified" || item.status == "approved") {
+                    Icon(
+                        painter = rememberVectorPainter(image = Filled.Tick),
+                        contentDescription = "Qualified",
+                        tint = OSU_ARROW_YELLOW,
+                        modifier = Modifier
+                            .width(20.dp)
+                            .height(20.dp)
+                    )
+                }
                 if (item.status == "loved") {
                     Icon(
                         painter = rememberVectorPainter(image = Filled.Heart1),

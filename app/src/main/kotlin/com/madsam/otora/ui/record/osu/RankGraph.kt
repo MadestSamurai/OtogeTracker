@@ -73,7 +73,7 @@ import java.text.DecimalFormat
 
 @Composable
 fun RankGraph(
-    osuRankGraphData: MutableStateFlow<List<Int>>,
+    osuRankGraphData: MutableStateFlow<IntArray>,
     osuRankHighestData: MutableStateFlow<OsuTopRankUI>
 ) {
     val configuration = LocalConfiguration.current

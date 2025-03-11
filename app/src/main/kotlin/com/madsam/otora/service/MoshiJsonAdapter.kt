@@ -182,7 +182,7 @@ class SafeRankHistoryAdapter {
     private val moshi: Moshi = Moshi.Builder()
         .add(SafeStringAdapter())
         .add(SafeIntAdapter())
-        .add(SafeIntListAdapter())
+        .add(SafeIntArrayAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()
     private val rankHistoryAdapter: JsonAdapter<OsuUserExtend.RankHistory> = moshi.adapter(OsuUserExtend.RankHistory::class.java)
@@ -219,13 +219,13 @@ class SafeStringListAdapter {
     }
 }
 
-class SafeIntListAdapter {
+class SafeIntArrayAdapter {
     @FromJson
     @Suppress("unused")
-    fun fromJson(reader: JsonReader): List<Int> {
+    fun fromJson(reader: JsonReader): IntArray {
         return if (reader.peek() == JsonReader.Token.NULL) {
-            reader.nextNull<List<Int>>()
-            emptyList()
+            reader.nextNull<IntArray>()
+            intArrayOf()
         } else {
             val list = mutableListOf<Int>()
             reader.beginArray()
@@ -233,7 +233,7 @@ class SafeIntListAdapter {
                 list.add(reader.nextInt())
             }
             reader.endArray()
-            list
+            return list.toIntArray()
         }
     }
 }

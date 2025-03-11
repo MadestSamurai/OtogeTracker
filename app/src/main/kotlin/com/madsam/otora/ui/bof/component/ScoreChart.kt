@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.Dp
 
 @Composable
 fun ScoreChart(
-    dataList: List<Int>,
+    dataList: IntArray,
     height: Dp,
     width: Dp,
     color: Color
@@ -47,7 +47,7 @@ fun ScoreChart(
 }
 
 private fun createScoreChartBitmap(
-    dataList: List<Int>,
+    dataList: IntArray,
     height: Dp,
     width: Dp,
     density: Float,
@@ -55,21 +55,19 @@ private fun createScoreChartBitmap(
 ): ImageBitmap {
     val widthPx = (width.value * density).toInt().coerceAtLeast(1)
     val heightPx = (height.value * density).toInt().coerceAtLeast(1)
-    val padding = heightPx * 0.1f  // 添加10%的上下边距
+    val padding = heightPx * 0.1f
 
     return ImageBitmap(widthPx, heightPx).apply {
         val canvas = Canvas(this)
         val path = Path()
         val maxDataValue = 1000f
         val stepX = widthPx.toFloat() / (dataList.size - 1).coerceAtLeast(1)
-        // 调整stepY以适应新的可用高度
         val stepY = (heightPx - padding * 2) / maxDataValue
 
         // Create fill path
         path.moveTo(0f, heightPx.toFloat())
         for (i in dataList.indices) {
             val x = i * stepX
-            // 添加padding到y坐标计算中
             val y = heightPx - padding - (dataList[i] * stepY)
             path.lineTo(x, y)
         }
@@ -95,7 +93,6 @@ private fun createScoreChartBitmap(
             this.strokeWidth = 2f * density
         }
 
-        // 在绘制线条时也要考虑padding
         for (i in 0 until dataList.size - 1) {
             val startX = i * stepX
             val startY = heightPx - padding - (dataList[i] * stepY)

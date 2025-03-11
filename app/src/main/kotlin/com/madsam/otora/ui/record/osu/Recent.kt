@@ -4,8 +4,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,6 +40,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.madsam.otora.model.osu.ui.BriefUI
 import com.madsam.otora.model.osu.ui.OsuRecentUI
 import com.madsam.otora.ui.icon.Filled
 import com.madsam.otora.ui.theme.Beige400
@@ -58,11 +63,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun Recent(
-    recentActivityList: MutableStateFlow<List<OsuRecentUI>>,
+    recentActivityList: MutableStateFlow<BriefUI<OsuRecentUI>>,
     onMoreClick: () -> Unit
 ) {
     val activities by recentActivityList.collectAsState()
-    if (activities.isEmpty()) return
+    if (activities.items.isEmpty()) {
+        return
+    }
+
+    val recentList = activities.items
+    val isComplete = activities.isComplete
+
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     val cardWidthDp = screenWidthDp - 24.dp
@@ -74,11 +85,14 @@ fun Recent(
         RoundedCornerShape(20.dp),
         Red700
     ) {
-        Column {
+        Column(
+            modifier = Modifier
+                .padding(start = 16.dp, end = 16.dp, bottom = 10.dp, top = 10.dp)
+        ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, top = 8.dp),
+                    .padding(start = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -86,9 +100,17 @@ fun Recent(
                     text = "Recent",
                     fontWeight = FontWeight.Bold,
                     fontSize = 24.sp,
-                    color = Beige400
+                    color = Beige400,
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
-                TextButton(onClick = onMoreClick) {
+                if (isComplete) return@Row
+                TextButton(
+                    onClick = onMoreClick,
+                    contentPadding = PaddingValues(0.dp),
+                    modifier = Modifier
+                        .defaultMinSize(1.dp, 1.dp)
+                        .height(24.dp)
+                ) {
                     Text(
                         text = "More",
                         color = Beige400,
@@ -96,12 +118,10 @@ fun Recent(
                     )
                 }
             }
-            Column(
-                modifier = Modifier
-                    .padding(start = 16.dp, end = 16.dp, bottom = 10.dp)
-            ) {
-                activities.forEach { activity ->
-                    OsuRecentItem(activity, cardWidthDp)
+            recentList.forEach {
+                OsuRecentItem(it, cardWidthDp)
+                if (recentList.indexOf(it) < recentList.size - 1) {
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
         }
@@ -203,7 +223,6 @@ fun OsuRecentItem(
         }
     Column(
         modifier = Modifier
-            .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(6.dp))
             .background(Red500)
             .padding(2.dp)
@@ -321,8 +340,8 @@ fun OsuRecentItem(
                             painter = rememberVectorPainter(image = Filled.Tick),
                             contentDescription = "Osu Mode",
                             tint = when (activity.approval) {
-                                "qualified" -> OSU_HEART_RED
-                                "approved" -> OSU_HEART_RED
+                                "qualified" -> OSU_ARROW_YELLOW
+                                "approved" -> OSU_ROTATE_GREEN
                                 "loved" -> OSU_HEART_RED
                                 else -> Color.White
                             },

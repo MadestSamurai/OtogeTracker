@@ -110,6 +110,6 @@ data class OsuUserExtend(
 
         data class RankHistory(
                 var mode: String = "",
-                var data: List<Int> = emptyList()
+                var data: IntArray = intArrayOf()
         )
 }

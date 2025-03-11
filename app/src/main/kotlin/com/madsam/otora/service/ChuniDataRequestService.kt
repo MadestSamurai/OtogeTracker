@@ -85,7 +85,7 @@ class ChuniDataRequestService(private val context: Context) {
         .add(SafeDoubleAdapter())
         .add(SafeBooleanAdapter())
         .add(SafeStringListAdapter())
-        .add(SafeIntListAdapter())
+        .add(SafeIntArrayAdapter())
         .add(IntPairAdapter())
         .addLast(KotlinJsonAdapterFactory())
         .build()

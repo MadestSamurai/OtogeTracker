@@ -2,10 +2,13 @@ package com.madsam.otora.ui.record.sub
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -51,11 +54,13 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.madsam.otora.components.CustomTabRow
 import com.madsam.otora.model.osu.ui.OsuRecentUI
 import com.madsam.otora.model.osu.ui.OsuTopRankUI
 import com.madsam.otora.ui.record.OsuScreenState
+import com.madsam.otora.ui.record.osu.TopRank
 import com.madsam.otora.ui.record.osu.BadgeList
 import com.madsam.otora.ui.record.osu.Card
 import com.madsam.otora.ui.record.osu.Level
@@ -65,11 +70,11 @@ import com.madsam.otora.ui.record.osu.PlayData
 import com.madsam.otora.ui.record.osu.RankGraph
 import com.madsam.otora.ui.record.osu.Recent
 import com.madsam.otora.ui.record.osu.SocialCard
-import com.madsam.otora.ui.record.osu.TopRank
 import com.madsam.otora.ui.record.viewmodel.OsuViewModel
 import com.madsam.otora.ui.theme.Beige400
 import com.madsam.otora.ui.theme.Beige500
 import com.madsam.otora.ui.theme.Beige600
+import com.madsam.otora.ui.theme.BlackAlpha80
 import com.madsam.otora.ui.theme.Red300
 import com.madsam.otora.ui.theme.Red500
 import com.madsam.otora.ui.theme.Red700
@@ -92,22 +97,13 @@ fun OsuUserPage(
         viewModel = viewModel
     )
     val selectedTabIndex by osuScreenState.selectedTab.collectAsState()
-    val selectedSubTabIndex by osuScreenState.selectedSubTab.collectAsState()
     val scrollThreshold = 50f
 
     var isTabRowVisible by remember { mutableStateOf(true) }
-    val tabTitles = mapOf(
-        "Home" to listOf(""),
-        "TopRank" to listOf("Pinned", "Top", "First"),
-        "Comment" to listOf("")
-    )
+    val tabTitles = listOf("Home", "Comment")
 
-    val mainTabTitles = tabTitles.keys.toList()
-    val subTabTitles = tabTitles[mainTabTitles[selectedTabIndex]] ?: emptyList()
+    val pagerState = rememberPagerState { tabTitles.size }
 
-    val pagerState = rememberPagerState { mainTabTitles.size }
-
-    // 处理滑动导致的页面切换
     LaunchedEffect(pagerState.currentPage) {
         if (selectedTabIndex != pagerState.currentPage) {
             osuScreenState.selectedTab.update { pagerState.currentPage }
@@ -118,7 +114,6 @@ fun OsuUserPage(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize(),
-            // 添加页面切换回调
             pageSpacing = 0.dp,
         ) { page ->
             when (page) {
@@ -127,13 +122,7 @@ fun OsuUserPage(
                     scrollThreshold = scrollThreshold,
                 ) { isTabRowVisible = it }
 
-                1 -> TopRankPage(
-                    viewModel = viewModel,
-                    scrollThreshold = scrollThreshold,
-                    osuScreenState = osuScreenState
-                ) { isTabRowVisible = it }
-
-                2 -> CommentPage()
+                1 -> CommentPage()
             }
         }
 
@@ -142,39 +131,6 @@ fun OsuUserPage(
                 .align(Alignment.BottomCenter)
         ) {
             val scope = rememberCoroutineScope()
-            // 子标签栏
-            AnimatedVisibility(
-                visible = isTabRowVisible && subTabTitles.size > 1,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .align(Alignment.CenterHorizontally)
-            ) {
-                CustomTabRow(
-                    selectedTabIndex = selectedSubTabIndex,
-                    modifier = Modifier
-                        .padding(3.dp),
-                    containerColor = Red500
-                ) {
-                    subTabTitles.forEachIndexed { index, title ->
-                        Tab(
-                            selected = selectedSubTabIndex == index,
-                            onClick = {
-                                if (selectedSubTabIndex != index) {
-                                    osuScreenState.selectedSubTab.update { index }
-                                }
-                            },
-                            text = {
-                                Text(
-                                    text = title,
-                                    color = if (selectedSubTabIndex == index) Beige500 else Beige600
-                                )
-                            },
-                            modifier = Modifier.height(35.dp)
-                        )
-                    }
-                }
-            }
-            // 主标签栏
             AnimatedVisibility(
                 visible = isTabRowVisible,
                 modifier = Modifier
@@ -187,17 +143,12 @@ fun OsuUserPage(
                     modifier = Modifier.padding(3.dp),
                     containerColor = Red500
                 ) {
-                    mainTabTitles.forEachIndexed { index, title ->
+                    tabTitles.forEachIndexed { index, title ->
                         Tab(
                             selected = selectedTabIndex == index,
                             onClick = {
                                 if (selectedTabIndex != index) {
                                     osuScreenState.selectedTab.update { index }
-                                    // 只有在有子标签时才重置子标签索引
-                                    val subTabs = tabTitles[mainTabTitles[index]] ?: emptyList()
-                                    if (subTabs.isNotEmpty()) {
-                                        osuScreenState.selectedSubTab.update { 0 }
-                                    }
                                     scope.launch {
                                         pagerState.animateScrollToPage(index)
                                     }
@@ -230,6 +181,7 @@ private fun MainPage(
     val rightPadding by viewModel.rightPadding.collectAsState()
 
     var showFullRecentDialog by remember { mutableStateOf(false) }
+    var showTopRankDialog by remember { mutableStateOf("") }
 
     LaunchedEffect(configuration) {
         viewModel.updatePadding(view)
@@ -266,20 +218,48 @@ private fun MainPage(
         item(key = "play_data") { PlayData(viewModel.playUI) }
         item(key = "social") { SocialCard(viewModel.socialUI) }
         item(key = "recent") {
-            Recent(
-                recentActivityList = viewModel.recentBrief,
-                onMoreClick = { showFullRecentDialog = true }
+            Recent(viewModel.recentBrief) { showFullRecentDialog = true }
+        }
+        item(key = "top_rank") {
+            TopRank(
+                viewModel.pinnedBrief,
+                viewModel.bestBrief,
+                viewModel.firstBrief,
+                { showTopRankDialog = "pinned" },
+                { showTopRankDialog = "best" },
+                { showTopRankDialog = "first" }
             )
         }
-        item(key = "top_rank") { TopRank(viewModel.pinnedUI, viewModel.bestUI, viewModel.firstUI) }
     }
 
-    // Add the Recent dialog
     if (showFullRecentDialog) {
         RecentDialog(
             recentActivityList = viewModel.recentUI,
             onDismiss = { showFullRecentDialog = false }
         )
+    }
+    when (showTopRankDialog) {
+        "pinned" -> {
+            TopRankDialog(
+                topRankList = viewModel.pinnedUI,
+                onDismiss = { showTopRankDialog = "" }
+            )
+            println("pinned dialog")
+        }
+
+        "best" -> {
+            TopRankDialog(
+                topRankList = viewModel.bestUI,
+                onDismiss = { showTopRankDialog = "" }
+            )
+        }
+
+        "first" -> {
+            TopRankDialog(
+                topRankList = viewModel.firstUI,
+                onDismiss = { showTopRankDialog = "" }
+            )
+        }
     }
 }
 
@@ -293,127 +273,174 @@ private fun RecentDialog(
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     val cardWidthDp = screenWidthDp - 24.dp
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        modifier = Modifier
-            .fillMaxWidth(0.9f)
-            .fillMaxHeight(0.7f)
-            .padding(horizontal = 8.dp),
-        title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Recent Activities",
-                    fontWeight = FontWeight.Bold,
-                    color = Beige400
-                )
-                IconButton(onClick = onDismiss) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
-                        tint = Beige400
-                    )
-                }
-            }
-        },
-        text = {
-            LazyColumn(
-                modifier = Modifier.clip(RoundedCornerShape(6.dp))
-            ) {
-                items(
-                    count = activities.size,
-                    key = { index -> activities[index].createdAt }
-                ) { index ->
-                    OsuRecentItem(
-                        activities[index],
-                        cardWidthDp
-                    )
-                }
-            }
-        },
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false,
-        ),
-        confirmButton = { }, // 移除底部按钮
-        containerColor = Red700,
-        shape = RoundedCornerShape(16.dp)
+    val scrimColor = BlackAlpha80
+    val properties = DialogProperties(
+        dismissOnClickOutside = true,
+        usePlatformDefaultWidth = false
     )
-}
 
-@Composable
-private fun TopRankPage(
-    viewModel: OsuViewModel,
-    scrollThreshold: Float,
-    osuScreenState: OsuScreenState,
-    setIsTabRowVisible: (Boolean) -> Unit
-) {
-    val selectedSubTabIndex by osuScreenState.selectedSubTab.collectAsState()
-    val configuration = LocalConfiguration.current
-    val view = LocalView.current
-    val leftPadding by viewModel.leftPadding.collectAsState()
-    val rightPadding by viewModel.rightPadding.collectAsState()
-
-    LaunchedEffect(configuration) {
-        viewModel.updatePadding(view)
-    }
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Red300)
-            .padding(
-                start = 12.dp + if (isLandscape(configuration)) leftPadding else 0.dp,
-                end = 12.dp + if (isLandscape(configuration)) rightPadding else 0.dp
-            )
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = properties
     ) {
-        when (selectedSubTabIndex) {
-            0 -> RankListPage(maps = viewModel.pinnedUI, title = "Pinned")
-            1 -> RankListPage(maps = viewModel.bestUI, title = "Top")
-            2 -> RankListPage(maps = viewModel.firstUI, title = "First")
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(scrimColor)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        if (properties.dismissOnClickOutside) {
+                            onDismiss()
+                        }
+                    }
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .fillMaxHeight(0.7f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Red700)
+                    .padding(16.dp)
+            ) {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Recent Activities",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            color = Beige400
+                        )
+                        IconButton(onClick = onDismiss) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close",
+                                tint = Beige400
+                            )
+                        }
+                    }
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                    ) {
+                        items(
+                            count = activities.size,
+                            key = { index -> activities[index].createdAt }
+                        ) { index ->
+                            OsuRecentItem(
+                                activities[index],
+                                cardWidthDp
+                            )
+                            if (index != activities.size - 1) {
+                                Spacer(modifier = Modifier.height(10.dp))
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun RankListPage(
-    maps: MutableStateFlow<List<OsuTopRankUI>>,
-    title: String
+private fun TopRankDialog(
+    topRankList: MutableStateFlow<List<OsuTopRankUI>>,
+    onDismiss: () -> Unit
 ) {
-    val data by maps.collectAsState()
+    val data by topRankList.collectAsState()
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
 
-    Column(
-        modifier = Modifier.padding(top = 16.dp)
-    ) {
-        Text(
-            text = title,
-            fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            color = Beige400,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
+    val scrimColor = BlackAlpha80
+    val properties = DialogProperties(
+        dismissOnClickOutside = true,
+        usePlatformDefaultWidth = false
+    )
 
-        if (data.isEmpty()) {
-            Text(
-                text = "No $title records",
-                color = Beige400,
-                fontSize = 16.sp,
-                modifier = Modifier.padding(16.dp)
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = properties
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(scrimColor)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        if (properties.dismissOnClickOutside) {
+                            onDismiss()
+                        }
+                    }
             )
-        } else {
-            LazyColumn {
-                items(
-                    count = data.size,
-                    key = { index -> data[index].beatmapId }
-                ) { index ->
-                    OsuTopRankItemCard(
-                        item = data[index],
-                        itemWidth = screenWidthDp - 16.dp
-                    )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .fillMaxHeight(0.7f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Red700)
+                    .padding(16.dp)
+            ) {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Top Plays",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp,
+                            color = Beige400
+                        )
+                        IconButton(onClick = onDismiss) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close",
+                                tint = Beige400
+                            )
+                        }
+                    }
+                    if (data.isEmpty()) {
+                        Text(
+                            text = "No records found",
+                            color = Beige400,
+                            fontSize = 16.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.clip(RoundedCornerShape(6.dp))
+                        ) {
+                            items(
+                                count = data.size,
+                                key = { index -> data[index].scoreId }
+                            ) { index ->
+                                OsuTopRankItemCard(
+                                    item = data[index],
+                                    itemWidth = screenWidthDp - 24.dp
+                                )
+                                if (index != data.size - 1) {
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

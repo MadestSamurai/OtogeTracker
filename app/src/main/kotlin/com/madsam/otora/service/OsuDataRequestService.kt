@@ -44,7 +44,7 @@ class OsuDataRequestService {
         .add(SafeDoubleAdapter())
         .add(SafeBooleanAdapter())
         .add(SafeStringListAdapter())
-        .add(SafeIntListAdapter())
+        .add(SafeIntArrayAdapter())
         .add(SafeGroupListAdapter())
         .add(SafeMedalItemListAdapter())
         .add(SafeTournamentBannerAdapter())
