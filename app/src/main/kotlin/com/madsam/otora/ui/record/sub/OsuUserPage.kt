@@ -9,10 +9,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
@@ -60,7 +60,6 @@ import com.madsam.otora.components.CustomTabRow
 import com.madsam.otora.model.osu.ui.OsuRecentUI
 import com.madsam.otora.model.osu.ui.OsuTopRankUI
 import com.madsam.otora.ui.record.OsuScreenState
-import com.madsam.otora.ui.record.osu.TopRank
 import com.madsam.otora.ui.record.osu.BadgeList
 import com.madsam.otora.ui.record.osu.Card
 import com.madsam.otora.ui.record.osu.Level
@@ -70,6 +69,7 @@ import com.madsam.otora.ui.record.osu.PlayData
 import com.madsam.otora.ui.record.osu.RankGraph
 import com.madsam.otora.ui.record.osu.Recent
 import com.madsam.otora.ui.record.osu.SocialCard
+import com.madsam.otora.ui.record.osu.TopRank
 import com.madsam.otora.ui.record.viewmodel.OsuViewModel
 import com.madsam.otora.ui.theme.Beige400
 import com.madsam.otora.ui.theme.Beige500
@@ -91,11 +91,6 @@ fun OsuUserPage(
     osuScreenState: OsuScreenState,
     onDismissDialog: () -> Unit
 ) {
-    OsuSettingsDialog(
-        showDialog = showOsuDialog,
-        onDismiss = onDismissDialog,
-        viewModel = viewModel
-    )
     val selectedTabIndex by osuScreenState.selectedTab.collectAsState()
     val scrollThreshold = 50f
 
@@ -103,6 +98,12 @@ fun OsuUserPage(
     val tabTitles = listOf("Home", "Comment")
 
     val pagerState = rememberPagerState { tabTitles.size }
+
+    OsuSettingsDialog(
+        showDialog = showOsuDialog,
+        onDismiss = onDismissDialog,
+        viewModel = viewModel
+    )
 
     LaunchedEffect(pagerState.currentPage) {
         if (selectedTabIndex != pagerState.currentPage) {
@@ -117,7 +118,7 @@ fun OsuUserPage(
             pageSpacing = 0.dp,
         ) { page ->
             when (page) {
-                0 -> MainPage(
+                0 -> OsuMainPage(
                     viewModel = viewModel,
                     scrollThreshold = scrollThreshold,
                 ) { isTabRowVisible = it }
@@ -170,7 +171,7 @@ fun OsuUserPage(
 }
 
 @Composable
-private fun MainPage(
+private fun OsuMainPage(
     viewModel: OsuViewModel,
     scrollThreshold: Float,
     setIsTabRowVisible: (Boolean) -> Unit
@@ -303,7 +304,7 @@ private fun RecentDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
-                    .fillMaxHeight(0.7f)
+                    .heightIn(min = 100.dp, max = LocalConfiguration.current.screenHeightDp.dp * 0.8f)
                     .clip(RoundedCornerShape(16.dp))
                     .background(Red700)
                     .padding(16.dp)
@@ -391,7 +392,7 @@ private fun TopRankDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
-                    .fillMaxHeight(0.7f)
+                    .heightIn(min = 100.dp, max = LocalConfiguration.current.screenHeightDp.dp * 0.8f)
                     .clip(RoundedCornerShape(16.dp))
                     .background(Red700)
                     .padding(16.dp)

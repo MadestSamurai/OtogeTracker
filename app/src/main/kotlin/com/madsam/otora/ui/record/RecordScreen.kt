@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.fonts.sarasaFont
 import com.madsam.otora.ui.icon.Filled
-import com.madsam.otora.ui.record.chunithm.TopRating
 import com.madsam.otora.ui.record.sub.ChunithmUserPage
 import com.madsam.otora.ui.record.sub.MaimaiUserPage
 import com.madsam.otora.ui.record.sub.OsuUserPage
@@ -56,7 +55,6 @@ import com.madsam.otora.ui.theme.Red800
 import com.madsam.otora.utils.ShareUtil
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -203,19 +201,14 @@ fun RecordScreen(
                     )
 
                     Screen.Page3 -> {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            TopRating(
-                                chuniTopRankUI = chuniViewModel.chuniTopRankUI,
-                                onBack = { showChunithmTopRating = false }
-                            )
-                            ChunithmUserPage(
-                                chuniViewModel,
-                                onNavigateToTopRating = { showChunithmTopRating = true },
-                                snackbarHostState = snackbarHostState,
-                                showDialog = showChunithmDialog,
-                                onDismissDialog = { showChunithmDialog = false }
-                            )
-                        }
+                        ChunithmUserPage(
+                            chuniViewModel,
+                            chuniScreenState = ChunithmScreenState(),
+                            onNavigateToTopRating = { showChunithmTopRating = true },
+                            snackbarHostState = snackbarHostState,
+                            showDialog = showChunithmDialog,
+                            onDismissDialog = { showChunithmDialog = false }
+                        )
                     }
                     Screen.Page4 -> TestPage4()
                 }
@@ -243,9 +236,8 @@ sealed class Screen(val route: String) {
 
 class OsuScreenState {
     var selectedTab = MutableStateFlow(0)
-    var selectedSubTab = MutableStateFlow(0)
-    var selectedCurrentDate = MutableStateFlow(LocalDate.now())
-    var selectedCurrentTime = MutableStateFlow("00:00")
-    var selectedCompareDate = MutableStateFlow(LocalDate.now().minusDays(1))
-    var selectedCompareTime = MutableStateFlow("00:00")
+}
+
+class ChunithmScreenState {
+    var selectedTab = MutableStateFlow(0)
 }
