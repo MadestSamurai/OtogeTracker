@@ -5,15 +5,15 @@ import android.view.View
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.madsam.otora.activity.BofScreenState
-import com.madsam.otora.model.bof.ui.BofCommentUI
-import com.madsam.otora.model.bof.ui.BofEntryUI
-import com.madsam.otora.model.bof.ui.BofTeamUI
-import com.madsam.otora.model.bof.ui.Rankable
-import com.madsam.otora.service.database.BofDatabaseService
-import com.madsam.otora.utils.CommonUtils
-import com.madsam.otora.utils.ScreenUtil.getSafeInsetLeftDp
-import com.madsam.otora.utils.ScreenUtil.getSafeInsetRightDp
+import com.madsam.otora.BofScreenState
+import com.madsam.otora.data.bof.ui.model.BofCommentUI
+import com.madsam.otora.data.bof.ui.model.BofEntryUI
+import com.madsam.otora.data.bof.ui.model.BofTeamUI
+import com.madsam.otora.data.bof.ui.model.Rankable
+import com.madsam.otora.data.bof.local.api.BofLocalService
+import com.madsam.otora.core.utils.CommonUtils
+import com.madsam.otora.core.utils.ScreenUtil.getSafeInsetLeftDp
+import com.madsam.otora.core.utils.ScreenUtil.getSafeInsetRightDp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlin.math.max
@@ -28,10 +28,10 @@ import kotlin.math.max
 
 private const val TAG = "BofViewModel"
 
-class BofViewModel(
+internal class BofViewModel(
     private val bofScreenState: BofScreenState
 ) : ViewModel() {
-    private val bofDatabaseService = BofDatabaseService()
+    private val bofLocalService = BofLocalService()
     val totalData = MutableStateFlow(listOf<BofEntryUI>())
     val avgData = MutableStateFlow(listOf<BofEntryUI>())
     val medianData = MutableStateFlow(listOf<BofEntryUI>())
@@ -221,8 +221,8 @@ class BofViewModel(
 
     suspend fun requestTotalData() {
         val data = fetchData(
-            { bofDatabaseService.getBofttEntryLatest() },
-            { currentTime, compareTime -> bofDatabaseService.getBofttEntryByTime(currentTime, compareTime) }
+            { bofLocalService.getBofttEntryLatest() },
+            { currentTime, compareTime -> bofLocalService.getBofttEntryByTime(currentTime, compareTime) }
         )
 
         if (data.isEmpty()) {
@@ -244,8 +244,8 @@ class BofViewModel(
 
     suspend fun requestAvgData() {
         val data = fetchData(
-            { bofDatabaseService.getBofttEntryLatest() },
-            { time, compareTime -> bofDatabaseService.getBofttEntryByTime(time, compareTime) }
+            { bofLocalService.getBofttEntryLatest() },
+            { time, compareTime -> bofLocalService.getBofttEntryByTime(time, compareTime) }
         )
         calculateThresholds(data)
         if (data.isEmpty()) {
@@ -267,8 +267,8 @@ class BofViewModel(
 
     suspend fun requestMedianData() {
         val data = fetchData(
-            { bofDatabaseService.getBofttEntryLatest() },
-            { time, compareTime -> bofDatabaseService.getBofttEntryByTime(time, compareTime) }
+            { bofLocalService.getBofttEntryLatest() },
+            { time, compareTime -> bofLocalService.getBofttEntryByTime(time, compareTime) }
         )
         calculateThresholds(data)
         if (data.isEmpty()) {
@@ -290,8 +290,8 @@ class BofViewModel(
 
     suspend fun requestDiffData() {
         val data = fetchData(
-            { bofDatabaseService.getBofttEntryLatest() },
-            { time, compareTime -> bofDatabaseService.getBofttEntryByTime(time, compareTime) }
+            { bofLocalService.getBofttEntryLatest() },
+            { time, compareTime -> bofLocalService.getBofttEntryByTime(time, compareTime) }
         )
         data.forEach {
             it.totalDiff = it.total - it.oldTotal
@@ -322,8 +322,8 @@ class BofViewModel(
 
     suspend fun requestTeamData() {
         val data = fetchData(
-            { bofDatabaseService.getBofttTeamLatest() },
-            { currentTime, compareTime -> bofDatabaseService.getBofttTeamByTime(currentTime, compareTime) }
+            { bofLocalService.getBofttTeamLatest() },
+            { currentTime, compareTime -> bofLocalService.getBofttTeamByTime(currentTime, compareTime) }
         )
 
         if (data.isEmpty()) {
@@ -345,8 +345,8 @@ class BofViewModel(
 
     suspend fun requestCommentData() {
         val data = fetchData(
-            { bofDatabaseService.getBofttCommentLatest() },
-            { currentTime, compareTime -> bofDatabaseService.getBofttCommentByTime("2025-01-08") }
+            { bofLocalService.getBofttCommentLatest() },
+            { currentTime, compareTime -> bofLocalService.getBofttCommentByTime("2025-01-08") }
         )
         if (data.isEmpty()) {
             Log.d(TAG, "No comment data available for the selected date and time.")

@@ -48,9 +48,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.madsam.otora.activity.BofScreenState
-import com.madsam.otora.components.CustomTabRow
-import com.madsam.otora.service.request.BofDataRequestService
+import com.madsam.otora.BofScreenState
+import com.madsam.otora.ui.components.CustomTabRow
+import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.ui.bof.component.DateTimeRangePicker
 import com.madsam.otora.ui.bof.sub.BofAvgScreen
 import com.madsam.otora.ui.bof.sub.BofCommentScreen
@@ -58,11 +58,11 @@ import com.madsam.otora.ui.bof.sub.BofDiffScreen
 import com.madsam.otora.ui.bof.sub.BofMedianScreen
 import com.madsam.otora.ui.bof.sub.BofTeamScreen
 import com.madsam.otora.ui.bof.sub.BofTotalScreen
-import com.madsam.otora.ui.icon.Filled
-import com.madsam.otora.ui.theme.Beige400
-import com.madsam.otora.ui.theme.Beige500
-import com.madsam.otora.ui.theme.Beige600
-import com.madsam.otora.ui.theme.Red500
+import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.core.theme.Beige400
+import com.madsam.otora.core.theme.Beige500
+import com.madsam.otora.core.theme.Beige600
+import com.madsam.otora.core.theme.Red500
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -87,7 +87,7 @@ fun BofScreen(
     val coroutineScope = rememberCoroutineScope()
     val dateTime = LocalDate.now()
 
-    val bofDataRequestService = BofDataRequestService(context)
+    val bofRequestService = BofRequestService(context)
 
     val vm: BofViewModel = viewModel(factory = BofViewModelFactory(bofScreenState))
 
@@ -117,7 +117,6 @@ fun BofScreen(
     val scrollListComment = vm.scrollToIndexListComment.asStateFlow().collectAsState().value
 
     var showDateTimeRangePicker by remember { mutableStateOf(false) }
-
     val scrollThreshold = 50f
 
     fun selectTime() {
@@ -132,17 +131,17 @@ fun BofScreen(
     }
 
     fun refreshData() {
-        bofDataRequestService.requestBofttData(dateTime) {
+        bofRequestService.requestBofttData(dateTime) {
             coroutineScope.launch {
                 vm.requestTotalData()
             }
         }
-        bofDataRequestService.requestBofttTeamData(dateTime) {
+        bofRequestService.requestBofttTeamData(dateTime) {
             coroutineScope.launch {
                 vm.requestTotalData()
             }
         }
-        bofDataRequestService.requestBofttCommentData(dateTime) {
+        bofRequestService.requestBofttCommentData(dateTime) {
             coroutineScope.launch {
                 vm.requestTotalData()
             }

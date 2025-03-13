@@ -21,10 +21,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
-import com.madsam.otora.activity.BofScreenState
-import com.madsam.otora.ui.theme.Black333
-import com.madsam.otora.ui.theme.PurpleTheme
-import com.madsam.otora.ui.theme.White1000
+import com.madsam.otora.BofScreenState
+import com.madsam.otora.core.theme.Black333
+import com.madsam.otora.core.theme.PurpleTheme
+import com.madsam.otora.core.theme.White1000
 import com.vsnappy1.datepicker.DatePicker
 import com.vsnappy1.datepicker.data.DefaultDatePickerConfig
 import com.vsnappy1.datepicker.data.model.DatePickerDate

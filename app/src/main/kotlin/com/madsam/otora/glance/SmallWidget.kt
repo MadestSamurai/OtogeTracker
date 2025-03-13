@@ -20,9 +20,9 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.madsam.otora.ui.theme.Red700
-import com.madsam.otora.ui.theme.Beige400
-import com.madsam.otora.utils.ShareUtil
+import com.madsam.otora.core.theme.Red700
+import com.madsam.otora.core.theme.Beige400
+import com.madsam.otora.core.utils.ShareUtil
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 

@@ -59,22 +59,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.activity.BofScreenState
-import com.madsam.otora.ui.theme.BG_DARK_GRAY
-import com.madsam.otora.ui.theme.RANKING_BLUE
-import com.madsam.otora.ui.theme.RANKING_GREEN
-import com.madsam.otora.ui.theme.RANKING_RED
-import com.madsam.otora.ui.theme.RANKING_YELLOW
-import com.madsam.otora.ui.theme.TEXT_GRAY
-import com.madsam.otora.fonts.sarasaFont
-import com.madsam.otora.model.bof.ui.BofTeamUI
+import com.madsam.otora.BofScreenState
+import com.madsam.otora.core.theme.BG_DARK_GRAY
+import com.madsam.otora.core.theme.RANKING_BLUE
+import com.madsam.otora.core.theme.RANKING_GREEN
+import com.madsam.otora.core.theme.RANKING_RED
+import com.madsam.otora.core.theme.RANKING_YELLOW
+import com.madsam.otora.core.theme.TEXT_GRAY
+import com.madsam.otora.core.theme.sarasaFont
+import com.madsam.otora.data.bof.ui.model.BofTeamUI
 import com.madsam.otora.ui.bof.BofViewModel
-import com.madsam.otora.ui.icon.Filled
-import com.madsam.otora.utils.CommonUtils
-import com.madsam.otora.utils.ImageUtils.saveBitmapToGallery
-import com.madsam.otora.utils.ScreenUtil.isLandscape
-import com.madsam.otora.utils.ndp
-import com.madsam.otora.utils.nsp
+import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.core.utils.CommonUtils
+import com.madsam.otora.core.utils.ImageUtils.saveBitmapToGallery
+import com.madsam.otora.core.utils.ScreenUtil.isLandscape
+import com.madsam.otora.core.utils.ndp
+import com.madsam.otora.core.utils.nsp
 import dev.shreyaspatil.capturable.capturable
 import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
@@ -84,16 +84,8 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.max
 
-/**
- * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.ui.bof.sub.BofTeamScreen
- * 创建者: MadSamurai
- * 创建时间: 2024/10/23
- * 描述: BOF团队数据展示界面
- */
-
 @Composable
-fun BofTeamScreen(
+internal fun BofTeamScreen(
     vm: BofViewModel,
     snackbarHostState: SnackbarHostState,
     listState: LazyListState,
@@ -243,7 +235,7 @@ fun BofTeamScreen(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun TeamCapture(
+internal fun TeamCapture(
     showDialog: MutableState<Boolean>,
     context: Context,
     snackbarHostState: SnackbarHostState,
@@ -409,7 +401,7 @@ fun TeamCapture(
 }
 
 @Composable
-fun TeamHeader(
+internal fun TeamHeader(
     configuration: Configuration,
     leftPadding: Dp,
     rightPadding: Dp,
@@ -513,7 +505,7 @@ fun TeamHeader(
 }
 
 @Composable
-fun BofTeamRowTotal(
+internal fun BofTeamRowTotal(
     entry: BofTeamUI,
     index: Int,
     maxTotal: Double,

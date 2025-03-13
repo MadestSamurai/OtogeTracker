@@ -24,7 +24,7 @@
         tools:targetApi="35">
 
         <activity
-            android:name=".activity.MainActivity"
+            android:name=".MainActivity"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:windowSoftInputMode="adjustResize"
             android:exported="true">

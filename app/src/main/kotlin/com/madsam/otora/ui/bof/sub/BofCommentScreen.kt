@@ -60,22 +60,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.activity.BofScreenState
-import com.madsam.otora.fonts.sarasaFont
-import com.madsam.otora.model.bof.ui.BofCommentUI
+import com.madsam.otora.BofScreenState
+import com.madsam.otora.core.theme.sarasaFont
+import com.madsam.otora.data.bof.ui.model.BofCommentUI
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.bof.component.ScoreChart
-import com.madsam.otora.ui.icon.Filled
-import com.madsam.otora.ui.theme.BG_DARK_GRAY
-import com.madsam.otora.ui.theme.RANKING_BLUE
-import com.madsam.otora.ui.theme.RANKING_GREEN
-import com.madsam.otora.ui.theme.RANKING_RED
-import com.madsam.otora.ui.theme.TEXT_GRAY
-import com.madsam.otora.utils.CommonUtils
-import com.madsam.otora.utils.ImageUtils.saveBitmapToGallery
-import com.madsam.otora.utils.ScreenUtil.isLandscape
-import com.madsam.otora.utils.ndp
-import com.madsam.otora.utils.nsp
+import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.core.theme.BG_DARK_GRAY
+import com.madsam.otora.core.theme.RANKING_BLUE
+import com.madsam.otora.core.theme.RANKING_GREEN
+import com.madsam.otora.core.theme.RANKING_RED
+import com.madsam.otora.core.theme.TEXT_GRAY
+import com.madsam.otora.core.utils.CommonUtils
+import com.madsam.otora.core.utils.ImageUtils.saveBitmapToGallery
+import com.madsam.otora.core.utils.ScreenUtil.isLandscape
+import com.madsam.otora.core.utils.ndp
+import com.madsam.otora.core.utils.nsp
 import dev.shreyaspatil.capturable.capturable
 import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
@@ -94,7 +94,7 @@ import kotlin.math.max
  */
 
 @Composable
-fun BofCommentScreen(
+internal fun BofCommentScreen(
     vm: BofViewModel,
     snackbarHostState: SnackbarHostState,
     listState: LazyListState,
@@ -251,7 +251,7 @@ fun BofCommentScreen(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun CommentCapture(
+internal fun CommentCapture(
     showDialog: MutableState<Boolean>,
     context: Context,
     snackbarHostState: SnackbarHostState,
@@ -418,7 +418,7 @@ fun CommentCapture(
 }
 
 @Composable
-fun CommentHeader(
+internal fun CommentHeader(
     configuration: Configuration,
     leftPadding: Dp,
     rightPadding: Dp,
@@ -612,7 +612,7 @@ fun CommentHeader(
 }
 
 @Composable
-fun BofEntryRowComment(
+internal fun BofEntryRowComment(
     entry: BofCommentUI,
     index: Int,
     maxComment: Int,

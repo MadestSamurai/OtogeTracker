@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.Dp
 
 @Composable
 fun ScoreChart(
-    dataList: IntArray,
+    dataList: List<Int>,
     height: Dp,
     width: Dp,
     color: Color
@@ -47,7 +47,7 @@ fun ScoreChart(
 }
 
 private fun createScoreChartBitmap(
-    dataList: IntArray,
+    dataList: List<Int>,
     height: Dp,
     width: Dp,
     density: Float,
