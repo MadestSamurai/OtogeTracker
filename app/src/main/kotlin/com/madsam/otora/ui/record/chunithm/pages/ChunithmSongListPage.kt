@@ -18,7 +18,6 @@ internal fun ChunithmSongListPage(
         viewModel.loadAllSongsData()
     }
     val songList by viewModel.chuniSongs.collectAsState()
-    val listState = rememberLazyListState()
     LazyColumn {
         items(songList.size) { index ->
             Column {
