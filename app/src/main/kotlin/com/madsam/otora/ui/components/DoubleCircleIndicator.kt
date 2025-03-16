@@ -8,14 +8,6 @@ import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW_HALF_TRANS
 import com.patrykandpatrick.vico.core.common.DrawingContext
 import com.patrykandpatrick.vico.core.common.component.Component
 
-/**
- * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.component.TripleCircleIndicator
- * 创建者: MadSamurai
- * 创建时间: 2024/10/17
- * 描述: 三个圆形指示器
- */
-
 class DoubleCircleIndicator(
     outerCircleColor: Color = OSU_BRIGHT_YELLOW_HALF_TRANS,
     innerCircleColor: Color = OSU_BRIGHT_YELLOW

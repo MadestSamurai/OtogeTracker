@@ -51,7 +51,7 @@ import androidx.navigation.compose.composable
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.ui.components.CustomTabRow
 import com.madsam.otora.data.bof.remote.api.BofRequestService
-import com.madsam.otora.ui.bof.component.DateTimeRangePicker
+import com.madsam.otora.ui.bof.components.DateTimeRangePicker
 import com.madsam.otora.ui.bof.sub.BofAvgScreen
 import com.madsam.otora.ui.bof.sub.BofCommentScreen
 import com.madsam.otora.ui.bof.sub.BofDiffScreen
@@ -67,14 +67,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-
-/**
- * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.ui.bof.sub.BofScreen
- * 创建者: MadSamurai
- * 创建时间: 2024/10/19
- * 描述: BOF数据展示界面
- */
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

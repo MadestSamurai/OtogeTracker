@@ -18,9 +18,11 @@ import kotlinx.coroutines.withContext
 import kotlin.collections.filter
 import kotlin.math.abs
 
-private const val TAG = "BofDatabaseService"
-
 internal class BofLocalService {
+    companion object {
+        private const val TAG = "BofLocalService"
+    }
+
     private val realmConfig = RealmConfiguration.Builder(
         schema = setOf(
             BofEntryEntity::class,

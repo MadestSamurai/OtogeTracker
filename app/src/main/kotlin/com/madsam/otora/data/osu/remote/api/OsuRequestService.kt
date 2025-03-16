@@ -3,6 +3,7 @@ package com.madsam.otora.data.osu.remote.api
 import android.util.Log
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.SafeSoupUtil.safeAttr
+import com.madsam.otora.data.OSU_URL
 import com.madsam.otora.data.adapter.SafeBooleanAdapter
 import com.madsam.otora.data.adapter.SafeDoubleAdapter
 import com.madsam.otora.data.adapter.SafeIntAdapter
@@ -41,6 +42,10 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.IOException
 
 class OsuRequestService {
+    companion object {
+        private const val TAG = "DataRequestService"
+    }
+
     /** The reason I am not using CamelCase adapter for moshi:
     * When you annotate a field with @Json(name = ),
     * the camel mapping will be done before the annotation is processed,
@@ -73,9 +78,9 @@ class OsuRequestService {
         .build()
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl("https://osu.ppy.sh/") // OSU Url
-        .addConverterFactory(MoshiConverterFactory.create(moshi)) // Moshi
-        .addCallAdapterFactory(RxJava3CallAdapterFactory.create()) // RxJava
+        .baseUrl(OSU_URL)
+        .addConverterFactory(MoshiConverterFactory.create(moshi))
+        .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
         .build()
     private val api = retrofit.create(OsuAPI::class.java)
     private val serviceScope = CoroutineScope(Dispatchers.IO)
@@ -233,9 +238,5 @@ class OsuRequestService {
                 Log.e(TAG, "IOException occurred in OsuMedalsThread: $e")
             }
         }
-    }
-
-    companion object {
-        private const val TAG = "DataRequestService"
     }
 }

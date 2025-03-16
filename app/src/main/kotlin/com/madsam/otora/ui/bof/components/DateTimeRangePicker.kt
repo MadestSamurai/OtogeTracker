@@ -1,4 +1,4 @@
-package com.madsam.otora.ui.bof.component
+package com.madsam.otora.ui.bof.components
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,14 +36,6 @@ import com.vsnappy1.timepicker.enums.MinuteGap
 import kotlinx.coroutines.flow.update
 import java.time.LocalDate
 import java.util.Locale
-
-/**
- * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.ui.bof.DateTimeRangePicker
- * 创建者: MadSamurai
- * 创建时间: 2025/1/4
- * 描述: 日期时间范围选择器
- */
 
 @Composable
 fun DateTimeRangePicker(

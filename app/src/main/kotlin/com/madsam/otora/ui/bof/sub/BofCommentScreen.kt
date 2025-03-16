@@ -64,7 +64,7 @@ import com.madsam.otora.BofScreenState
 import com.madsam.otora.core.theme.sarasaFont
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
 import com.madsam.otora.ui.bof.BofViewModel
-import com.madsam.otora.ui.bof.component.ScoreChart
+import com.madsam.otora.ui.bof.components.ScoreChart
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.BG_DARK_GRAY
 import com.madsam.otora.core.theme.RANKING_BLUE

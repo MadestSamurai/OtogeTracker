@@ -24,6 +24,7 @@ import com.madsam.otora.core.utils.CalcUtils.calcChuniRank
 import com.madsam.otora.core.utils.CalcUtils.calcChuniRating
 import com.madsam.otora.core.utils.CommonUtils.bigNumberToInt
 import com.madsam.otora.core.utils.JsonUtil
+import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUI
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -31,7 +32,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-internal class ChuniViewModel(
+internal class ChunithmViewModel(
     context: Context
 ) : ViewModel() {
     val chuniCardUI = MutableStateFlow(ChuniCardUI())
@@ -47,6 +48,8 @@ internal class ChuniViewModel(
     val chuniExpertRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
     val chuniMasterRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
     val chuniUltimaRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
+
+    val chuniSongs = MutableStateFlow<List<ChunithmSongUI>>(emptyList())
 
     init {
         loadData(context)
@@ -314,6 +317,14 @@ internal class ChuniViewModel(
             chuniTopRankUI.update { topRank }
         }
     }
+
+    internal fun loadAllSongsData() {
+        val chunithmLocalService = ChunithmLocalService()
+        viewModelScope.launch {
+            val allSongs = chunithmLocalService.getAllSongData()
+            chuniSongs.update { allSongs }
+        }
+    }
 }
 
 class ChuniViewModelFactory(
@@ -321,8 +332,8 @@ class ChuniViewModelFactory(
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ChuniViewModel::class.java)) {
-            return ChuniViewModel(context) as T
+        if (modelClass.isAssignableFrom(ChunithmViewModel::class.java)) {
+            return ChunithmViewModel(context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

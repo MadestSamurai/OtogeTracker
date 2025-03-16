@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun TopRankDialog(
+    title: String,
     topRankList: MutableStateFlow<List<OsuTopRankUiModel>>,
     onDismiss: () -> Unit
 ) {
@@ -91,7 +92,7 @@ internal fun TopRankDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Top Plays",
+                            text = title,
                             fontWeight = FontWeight.Bold,
                             fontSize = 24.sp,
                             color = Beige400

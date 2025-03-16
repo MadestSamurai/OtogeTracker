@@ -18,14 +18,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlin.math.max
 
-/**
- * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.ui.bof.BofViewModel
- * 创建者: MadSamurai
- * 创建时间: 2024/12/15
- * 描述: BOF视图模型
- */
-
 private const val TAG = "BofViewModel"
 
 internal class BofViewModel(

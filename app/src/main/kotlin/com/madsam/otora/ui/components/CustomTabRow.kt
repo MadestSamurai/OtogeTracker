@@ -35,14 +35,6 @@ import androidx.compose.ui.util.fastMap
 import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.Transparent
 
-/**
- * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.ui.components.CustomTabRow
- * 创建者: MadSamurai
- * 创建时间: 2024/12/30
- * 描述: 自定义TabRow
- */
-
 private val HorizontalTextPadding = 16.dp
 
 @Composable
@@ -52,7 +44,7 @@ fun CustomTabRow(
     containerColor: Color = Transparent,
     contentColor: Color = Color.Unspecified,
     indicator: @Composable (tabPositions: List<CustomTabPosition>) -> Unit = @Composable { tabPositions ->
-        if (tabPositions.isNotEmpty()) {  // 添加安全检查
+        if (tabPositions.isNotEmpty()) {
             val safeIndex = selectedTabIndex.coerceIn(0, tabPositions.lastIndex)
             Box(
                 Modifier
@@ -78,7 +70,7 @@ fun CustomTabRow(
         shape = RoundedCornerShape(50.dp)
     ) {
         SubcomposeLayout(
-            modifier = Modifier.wrapContentWidth(align = Alignment.CenterHorizontally) // 修改这里
+            modifier = Modifier.wrapContentWidth(align = Alignment.CenterHorizontally)
             ) { constraints ->
             val tabRowWidth = constraints.maxWidth
             val tabMeasurables = subcompose(TabSlots.Tabs) {

@@ -104,6 +104,7 @@ internal fun Main(
     when (showTopRankDialog) {
         "pinned" -> {
             TopRankDialog(
+                title = "Pinned",
                 topRankList = viewModel.pinnedUI,
                 onDismiss = { showTopRankDialog = "" }
             )
@@ -112,6 +113,7 @@ internal fun Main(
 
         "best" -> {
             TopRankDialog(
+                title = "Best",
                 topRankList = viewModel.bestUI,
                 onDismiss = { showTopRankDialog = "" }
             )
@@ -119,6 +121,7 @@ internal fun Main(
 
         "first" -> {
             TopRankDialog(
+                title = "First",
                 topRankList = viewModel.firstUI,
                 onDismiss = { showTopRankDialog = "" }
             )

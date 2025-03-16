@@ -1,4 +1,4 @@
-package com.madsam.otora.ui.bof.component
+package com.madsam.otora.ui.bof.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
@@ -14,14 +14,6 @@ import androidx.compose.ui.graphics.PaintingStyle
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-
-/**
- * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.ui.bof.component.ScoreChart
- * 创建者: MadSamurai
- * 创建时间: 2025/2/18
- * 描述: 绘制分数图表
- */
 
 @Composable
 fun ScoreChart(

@@ -6,14 +6,19 @@ import com.madsam.otora.data.chunithm.local.model.ChuniSongsEntity
 import com.madsam.otora.data.chunithm.remote.model.ChuniAliasesDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniJpDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniLxnsDTO
+import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUI
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.UpdatePolicy
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-private const val TAG = "ChuniDataRequestService"
+
 internal class ChunithmLocalService {
+    companion object {
+        private const val TAG = "ChunithmLocalService"
+    }
+
     private val realmConfig = RealmConfiguration.Builder(
         schema = setOf(
             ChuniSongsEntity::class,
@@ -243,6 +248,40 @@ internal class ChunithmLocalService {
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get the sheet data: ${e.message}")
                 ChuniSheetsEntity()
+            } finally {
+                realm.close()
+            }
+        }
+    }
+
+    suspend fun getAllSongData(): List<ChunithmSongUI> {
+        return withContext(Dispatchers.IO) {
+            val realm = Realm.open(realmConfig)
+            try {
+                val songs = realm.query(
+                    clazz = ChuniSongsEntity::class
+                ).find()
+                val songData = songs.map {
+                    ChunithmSongUI(
+                        genre = it.genre,
+                        title = it.title,
+                        artist = it.artist,
+                        bpm = it.bpm,
+                        imageName = it.imageName,
+                        version = it.version,
+                        releaseDate = it.releaseDate,
+                        isNew = it.isNew,
+                        isLocked = it.isLocked,
+                        comment = it.comment,
+                        cnId = it.cnId,
+                        map = it.map,
+                        aliases = it.aliases
+                    )
+                }
+                songData
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to get the song data: ${e.message}")
+                emptyList()
             } finally {
                 realm.close()
             }

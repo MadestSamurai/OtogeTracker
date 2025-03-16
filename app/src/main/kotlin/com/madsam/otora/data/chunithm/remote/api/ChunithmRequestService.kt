@@ -36,6 +36,9 @@ import com.madsam.otora.core.utils.SafeSoupUtil.safeFirstText
 import com.madsam.otora.core.utils.SafeSoupUtil.safeSelectFirst
 import com.madsam.otora.core.utils.SafeSoupUtil.safeText
 import com.madsam.otora.core.utils.ShareUtil
+import com.madsam.otora.data.BASE_URL
+import com.madsam.otora.data.CHUNITHM_URL
+import com.madsam.otora.data.LXNS_URL
 import com.madsam.otora.data.adapter.SafeIntListAdapter
 import com.madsam.otora.data.adapter.SafeLongAdapter
 import com.squareup.moshi.Moshi
@@ -55,10 +58,11 @@ import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.jvmErasure
 
-private const val TAG = "ChuniDataRequestService"
-private const val URL = "https://chunithm.wahlap.com/mobile/"
-
 internal class ChunithmRequestService(private val context: Context) {
+    companion object {
+        private const val TAG = "ChunithmRequestService"
+    }
+
     private val serviceScope = CoroutineScope(Dispatchers.IO)
     private val isUserRequestRunning = AtomicBoolean(false)
     private val isSongsRequestRunning = AtomicBoolean(false)
@@ -203,7 +207,7 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private fun requestPlayerData() {
-        val doc = requestDataFromServer("$URL/home/playerData")
+        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData")
 
         val chuniUser = parseChuniUser(doc)
         val emptyCount = chuniUser::class.memberProperties.count {
@@ -232,17 +236,17 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private fun requestRatingBest() {
-        val doc = requestDataFromServer("$URL/home/playerData/ratingDetailBest")
+        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailBest")
         saveDataToLocal(parseRatingData(doc), "chuniRatingBest.json")
     }
 
     private fun requestRatingRecent() {
-        val doc = requestDataFromServer("$URL/home/playerData/ratingDetailRecent")
+        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailRecent")
         saveDataToLocal(parseRatingData(doc), "chuniRatingRecent.json")
     }
 
     private fun requestRatingNext() {
-        val doc = requestDataFromServer("$URL/home/playerData/ratingDetailNext")
+        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailNext")
         saveDataToLocal(parseRatingData(doc), "chuniRatingNext.json")
     }
 
@@ -284,7 +288,7 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private fun requestMapRecord() {
-        val doc = requestDataFromServer("$URL/record")
+        val doc = requestDataFromServer("$CHUNITHM_URL/record")
         saveDataToLocal(parseChuniMaps(doc), "chuniMapRecord.json")
     }
 
@@ -341,7 +345,7 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private fun requestPlayLog() {
-        val doc = requestDataFromServer("$URL/record/playlog")
+        val doc = requestDataFromServer("$CHUNITHM_URL/record/playlog")
         saveDataToLocal(parsePlayLog(doc), "chuniPlayLog.json")
     }
 
@@ -454,7 +458,7 @@ internal class ChunithmRequestService(private val context: Context) {
         val diffArray = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
         for (diff in diffArray) {
             val doc = requestDataFromServer(
-                link = "$URL/record/musicGenre/send$diff",
+                link = "$CHUNITHM_URL/record/musicGenre/send$diff",
                 requestBody = "genre=99&token=${cookie.token}",
                 method = Method.POST
             )
@@ -497,7 +501,7 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private fun requestCollection() {
-        val doc = requestDataFromServer("$URL/collection")
+        val doc = requestDataFromServer("$CHUNITHM_URL/collection")
         saveDataToLocal(parseChuniUserRole(doc), "chuniUserRole.json")
         saveDataToLocal(parseChuniStatue(doc), "chuniStatue.json")
     }
@@ -587,7 +591,7 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private fun requestFriend() {
-        val doc = requestDataFromServer("$URL/friend")
+        val doc = requestDataFromServer("$CHUNITHM_URL/friend")
         saveDataToLocal(parseFriendList(doc), "chuniFriend.json")
     }
 
@@ -615,13 +619,13 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private fun requestLoginBonus() {
-        val doc = requestDataFromServer("$URL/loginBonus")
+        val doc = requestDataFromServer("$CHUNITHM_URL/loginBonus")
         saveDataToLocal(parseLoginBonus(doc), "chuniLoginBonus.json")
     }
 
     private suspend fun requestSongsData() {
         val retrofitZ = Retrofit.Builder()
-            .baseUrl("https://blog.madsam.work/")
+            .baseUrl(BASE_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
             .build()
@@ -648,7 +652,7 @@ internal class ChunithmRequestService(private val context: Context) {
         }
 
         val retrofitL = Retrofit.Builder()
-            .baseUrl("https://maimai.lxns.net/api/v0/")
+            .baseUrl(LXNS_URL)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
             .build()

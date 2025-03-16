@@ -20,13 +20,6 @@ import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.ShareUtil
 import kotlinx.coroutines.launch
 
-/**
- * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.ui.record.chunithm.dialogs.CookieDialog
- * 创建者: MadSamurai
- * 创建时间: 2024/12/12
- * 描述: Cookie对话框
- */
 @Composable
 fun CookieDialog(
     context: Context,

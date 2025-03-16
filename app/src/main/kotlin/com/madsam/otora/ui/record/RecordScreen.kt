@@ -45,7 +45,7 @@ import com.madsam.otora.ui.record.osu.OsuViewModel
 import com.madsam.otora.ui.record.osu.OsuViewModelFactory
 import com.madsam.otora.ui.record.chunithm.ChunithmUserPage
 import com.madsam.otora.ui.record.maimai.MaimaiUserPage
-import com.madsam.otora.ui.record.chunithm.ChuniViewModel
+import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.ChuniViewModelFactory
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
@@ -79,7 +79,7 @@ fun RecordScreen(
             context = context
         )
     )
-    val chuniViewModel: ChuniViewModel = viewModel(factory = ChuniViewModelFactory(context))
+    val chunithmViewModel: ChunithmViewModel = viewModel(factory = ChuniViewModelFactory(context))
     val osuScreenState = OsuScreenState()
 
     ModalNavigationDrawer(
@@ -144,8 +144,8 @@ fun RecordScreen(
                         // Add the first action button for Page3
                         IconButton(
                             onClick = {
-                                chuniViewModel.fetchSongData(context)
-                                chuniViewModel.loadData(context)
+                                chunithmViewModel.fetchSongData(context)
+                                chunithmViewModel.loadData(context)
                             }
                         ) {
                             Icon(
@@ -202,7 +202,7 @@ fun RecordScreen(
 
                     Screen.Page3 -> {
                         ChunithmUserPage(
-                            chuniViewModel,
+                            chunithmViewModel,
                             chuniScreenState = ChunithmScreenState(),
                             onNavigateToTopRating = { showChunithmTopRating = true },
                             snackbarHostState = snackbarHostState,

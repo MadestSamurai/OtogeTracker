@@ -10,6 +10,7 @@ import com.madsam.otora.data.bof.local.model.BofTeamEntity
 import com.madsam.otora.data.bof.local.model.BofTeamPointEntity
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.ShareUtil
+import com.madsam.otora.data.BASE_URL
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.realm.kotlin.Realm
@@ -30,15 +31,20 @@ import java.time.LocalDate
 import java.util.concurrent.Executors
 import kotlin.collections.forEach
 
-private const val TAG = "BofDataRequestService"
+
 
 class BofRequestService(private val context: Context) {
+    companion object {
+        private const val TAG = "BofRequestService"
+
+    }
+
     private val moshi = Moshi.Builder()
         .addLast(KotlinJsonAdapterFactory())
         .build()
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl("http://blog.madsam.work/")
+        .baseUrl(BASE_URL)
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
         .build()
