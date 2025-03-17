@@ -3,7 +3,7 @@ package com.madsam.otora.data.chunithm.ui.model
 import com.madsam.otora.data.chunithm.remote.model.ChuniUserDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniUserExtendDTO
 
-internal data class ChuniCardUI(
+internal data class ChunithmCardUiModel(
     var nameIn: String = "",
     var profileBackground: String = "",
     var reborn: Int = 0,

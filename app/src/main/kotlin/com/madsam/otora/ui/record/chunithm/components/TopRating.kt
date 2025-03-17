@@ -45,17 +45,17 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red700
-import com.madsam.otora.data.chunithm.ui.model.ChuniScoreUI
-import com.madsam.otora.data.chunithm.ui.model.ChuniTopRankUI
+import com.madsam.otora.data.chunithm.ui.model.ChunithmScoreUiModel
+import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.core.theme.Transparent
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun TopRating(
-    chuniTopRankUI: MutableStateFlow<ChuniTopRankUI>,
+    chunithmTopRankUiModel: MutableStateFlow<ChunithmTopRankUiModel>,
     onBack: () -> Unit
 ) {
-    val topRank by chuniTopRankUI.collectAsState()
+    val topRank by chunithmTopRankUiModel.collectAsState()
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
 
@@ -101,7 +101,7 @@ internal fun TopRating(
 
 @Composable
 internal fun ChuniRatingItemCard(
-    item: ChuniScoreUI,
+    item: ChunithmScoreUiModel,
     itemWidth: Dp
 ) {
     val url = "https://dp4p6x0xfi5o9.cloudfront.net/chunithm"

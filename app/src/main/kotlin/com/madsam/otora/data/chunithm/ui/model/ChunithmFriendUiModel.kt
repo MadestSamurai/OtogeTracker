@@ -2,7 +2,7 @@ package com.madsam.otora.data.chunithm.ui.model
 
 import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
 
-internal data class ChuniFriendUI(
+internal data class ChunithmFriendUiModel(
     var friendName: String,
     var profileBackground: String,
     var reborn: Int = 0,

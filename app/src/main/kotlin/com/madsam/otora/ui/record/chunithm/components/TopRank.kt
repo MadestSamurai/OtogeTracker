@@ -20,8 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.ui.components.RoundedBarChart
-import com.madsam.otora.data.chunithm.ui.model.ChuniScoreUI
-import com.madsam.otora.data.chunithm.ui.model.ChuniTopRankUI
+import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.core.theme.BlackAlpha50
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
@@ -32,7 +31,7 @@ import java.util.Locale
 
 @Composable
 internal fun TopRank(
-    topRankUI: MutableStateFlow<ChuniTopRankUI>
+    topRankUI: MutableStateFlow<ChunithmTopRankUiModel>
 ) {
     val topRank by topRankUI.collectAsState()
     val configuration = LocalConfiguration.current

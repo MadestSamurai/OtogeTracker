@@ -41,16 +41,16 @@ import com.madsam.otora.core.theme.GradientBrush.RainbowGradientBg
 import com.madsam.otora.core.theme.GradientBrush.SilverGradientBg
 import com.madsam.otora.core.theme.GradientBrush.WhiteGradientBg
 import com.madsam.otora.core.theme.OSU_LEVEL_GOLD_1
-import com.madsam.otora.data.chunithm.ui.model.ChuniCardUI
+import com.madsam.otora.data.chunithm.ui.model.ChunithmCardUiModel
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.utils.CommonUtils.getRatingBrush
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun Card(
-    chuniCardUI: MutableStateFlow<ChuniCardUI>
+    chunithmCardUiModel: MutableStateFlow<ChunithmCardUiModel>
 ) {
-    val cardData by chuniCardUI.collectAsState()
+    val cardData by chunithmCardUiModel.collectAsState()
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp.toFloat().dp
     Surface(

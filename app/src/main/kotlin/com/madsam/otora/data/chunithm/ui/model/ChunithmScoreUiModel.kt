@@ -1,6 +1,6 @@
 package com.madsam.otora.data.chunithm.ui.model
 
-internal data class ChuniScoreUI(
+internal data class ChunithmScoreUiModel(
     var title: String = "",
     var artist: String = "",
     var noteDesigner: String = "",

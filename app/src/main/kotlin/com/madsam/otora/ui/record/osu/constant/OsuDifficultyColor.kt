@@ -1,6 +1,7 @@
 package com.madsam.otora.ui.record.osu.constant
 
 import android.graphics.Color
+import androidx.core.graphics.toColorInt
 
 internal object OsuDifficultyColor{
     private val domain = listOf(0.1f, 1.25f, 2f, 2.5f, 3.25f, 4.25f, 5f, 6f, 6.75f, 7.75f, 9f)
@@ -30,7 +31,7 @@ internal object OsuDifficultyColor{
         return DiffColor(r, g, b)
     }
     private fun hexToColor(hex: String): DiffColor {
-        val color = Color.parseColor(hex)
+        val color = hex.toColorInt()
         return DiffColor(
             Color.red(color),
             Color.green(color),

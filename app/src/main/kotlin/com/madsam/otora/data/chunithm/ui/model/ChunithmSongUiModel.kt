@@ -1,6 +1,6 @@
 package com.madsam.otora.data.chunithm.ui.model
 
-internal data class ChunithmSongUI (
+internal data class ChunithmSongUiModel (
     var genre: String = "",
     var title: String = "",
     var artist: String = "",

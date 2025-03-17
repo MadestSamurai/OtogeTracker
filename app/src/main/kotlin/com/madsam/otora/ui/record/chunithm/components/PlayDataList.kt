@@ -26,7 +26,7 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.data.chunithm.ui.model.ChuniPlayDataUI
+import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayDataUiModel
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
@@ -43,9 +43,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @Composable
 internal fun PlayDataList(
     width: Dp,
-    chuniPlayDataUI: MutableStateFlow<ChuniPlayDataUI>
+    chunithmPlayDataUiModel: MutableStateFlow<ChunithmPlayDataUiModel>
 ) {
-    val playData by chuniPlayDataUI.collectAsState()
+    val playData by chunithmPlayDataUiModel.collectAsState()
     val diffArray = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
     val typeArray = arrayOf("Total", "SSSp", "SSS", "SSp", "SS", "Sp", "S", "FC", "AJ", "AJC",
         "FChain", "FChainP", "Clear", "Hard", "Abs", "AbsP", "Catas")
@@ -95,7 +95,7 @@ internal fun PlayDataItem(
     width: Dp,
     diff: String,
     type: String,
-    playDataItem: ChuniPlayDataUI.ChuniPlayDataItemUI
+    playDataItem: ChunithmPlayDataUiModel.ChuniPlayDataItemUI
 ) {
     Column(
         modifier = Modifier

@@ -53,7 +53,7 @@ internal fun ChunithmMainPage(
             })
     ) {
         item {
-            Card(viewModel.chuniCardUI)
+            Card(viewModel.chunithmCardUiModel)
         }
         item {
             Box(
@@ -61,16 +61,16 @@ internal fun ChunithmMainPage(
                     onNavigateToTopRating()
                 }
             ) {
-                TopRank(viewModel.chuniTopRankUI)
+                TopRank(viewModel.chunithmTopRankUiModel)
             }
         }
         item {
             Row {
-                AvatarLayout(viewModel.chuniAvatarUI)
+                AvatarLayout(viewModel.chunithmAvatarUiModel)
                 val playDataWidth = screenWidthDp - 224.dp - 24.dp - 12.dp
                 PlayDataList(
                     width = playDataWidth,
-                    chuniPlayDataUI = viewModel.chuniPlayDataUI
+                    chunithmPlayDataUiModel = viewModel.chunithmPlayDataUiModel
                 )
             }
         }

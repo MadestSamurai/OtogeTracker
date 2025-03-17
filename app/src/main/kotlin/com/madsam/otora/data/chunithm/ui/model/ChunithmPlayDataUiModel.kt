@@ -1,6 +1,6 @@
 package com.madsam.otora.data.chunithm.ui.model
 
-internal data class ChuniPlayDataUI(
+internal data class ChunithmPlayDataUiModel(
     var basicPlayData: ChuniPlayDataItemUI = ChuniPlayDataItemUI(),
     var advancedPlayData: ChuniPlayDataItemUI = ChuniPlayDataItemUI(),
     var expertPlayData: ChuniPlayDataItemUI = ChuniPlayDataItemUI(),

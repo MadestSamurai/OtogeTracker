@@ -2,7 +2,7 @@ package com.madsam.otora.data.chunithm.ui.model
 
 import com.madsam.otora.data.chunithm.remote.model.ChuniPenguinDTO
 
-internal data class ChuniAvatarUI(
+internal data class ChunithmAvatarUiModel(
     var back : String = "",
     var footR : String = "",
     var footL : String = "",

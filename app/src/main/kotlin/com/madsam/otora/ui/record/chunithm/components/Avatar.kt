@@ -25,14 +25,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.theme.Red700
-import com.madsam.otora.data.chunithm.ui.model.ChuniAvatarUI
+import com.madsam.otora.data.chunithm.ui.model.ChunithmAvatarUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun AvatarLayout(
-    chuniAvatarUI: MutableStateFlow<ChuniAvatarUI>
+    chunithmAvatarUiModel: MutableStateFlow<ChunithmAvatarUiModel>
 ) {
-    val avatarData by chuniAvatarUI.collectAsState()
+    val avatarData by chunithmAvatarUiModel.collectAsState()
 
     Box(
         contentAlignment = Alignment.Center,

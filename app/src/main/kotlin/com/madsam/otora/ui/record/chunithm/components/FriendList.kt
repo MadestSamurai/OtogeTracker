@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.data.chunithm.ui.model.ChuniFriendUI
+import com.madsam.otora.data.chunithm.ui.model.ChunithmFriendUiModel
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
@@ -55,7 +55,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun FriendList(
-    chuniFriendListUI: MutableStateFlow<List<ChuniFriendUI>>
+    chuniFriendListUI: MutableStateFlow<List<ChunithmFriendUiModel>>
 ) {
     val friendList by chuniFriendListUI.collectAsState()
     val configuration = LocalConfiguration.current
@@ -81,7 +81,7 @@ internal fun FriendList(
 
 @Composable
 internal fun FriendCard(
-    chuniFriend: ChuniFriendUI,
+    chuniFriend: ChunithmFriendUiModel,
     width: Dp
 ) {
     Surface(

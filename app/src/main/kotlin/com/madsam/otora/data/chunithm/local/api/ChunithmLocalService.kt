@@ -6,7 +6,7 @@ import com.madsam.otora.data.chunithm.local.model.ChuniSongsEntity
 import com.madsam.otora.data.chunithm.remote.model.ChuniAliasesDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniJpDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniLxnsDTO
-import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUI
+import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
 import io.realm.kotlin.UpdatePolicy
@@ -254,7 +254,7 @@ internal class ChunithmLocalService {
         }
     }
 
-    suspend fun getAllSongData(): List<ChunithmSongUI> {
+    suspend fun getAllSongData(): List<ChunithmSongUiModel> {
         return withContext(Dispatchers.IO) {
             val realm = Realm.open(realmConfig)
             try {
@@ -262,7 +262,7 @@ internal class ChunithmLocalService {
                     clazz = ChuniSongsEntity::class
                 ).find()
                 val songData = songs.map {
-                    ChunithmSongUI(
+                    ChunithmSongUiModel(
                         genre = it.genre,
                         title = it.title,
                         artist = it.artist,
