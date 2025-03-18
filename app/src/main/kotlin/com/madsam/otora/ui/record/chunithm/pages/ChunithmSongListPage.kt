@@ -37,6 +37,9 @@ internal fun ChunithmSongListPage(
         state = rememberLazyListState()
     ) {
         items(songList.size) { index ->
+            if (songList[index].genre == "WORLD'S END") {
+                return@items
+            }
             ChunithmSongCard(
                 item = songList[index],
                 itemWidth = cardWidthDp

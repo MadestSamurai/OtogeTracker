@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import androidx.core.content.edit
 
 object ShareUtil {
     private var sps: SharedPreferences?=null
@@ -19,9 +20,9 @@ object ShareUtil {
 
     fun putString(key:String,value:String?,context:Context){
         if(!value.isNullOrBlank()){
-            val editor:SharedPreferences.Editor=getSps(context).edit()
-            editor.putString(key,value)
-            editor.apply()
+            getSps(context).edit {
+                putString(key, value)
+            }
         }
     }
 

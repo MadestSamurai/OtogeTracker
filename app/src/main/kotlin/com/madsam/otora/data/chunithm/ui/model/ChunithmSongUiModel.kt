@@ -13,5 +13,6 @@ internal data class ChunithmSongUiModel (
     var comment: String = "",
     var cnId: Int = 0,
     var map: String = "",
-    var aliases: String = ""
+    var aliases: String = "",
+    var sheets: List<ChunithmSheetUiModel> = emptyList()
 )

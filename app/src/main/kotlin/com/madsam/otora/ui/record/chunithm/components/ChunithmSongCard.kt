@@ -162,19 +162,9 @@ internal fun ChunithmSongCard(
                     .background(Red700)
                     .width(itemWidth)
             ) {
-                Text(
-                    text = "Test",
-                    color = Beige400,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    lineHeight = 23.sp,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .width(itemWidth - 88.dp)
-                        .padding(top = 4.dp)
-                        .requiredHeight(23.dp)
-                        .clip(RectangleShape)
+                ChunithmSheetList(
+                    item.sheets,
+                    itemWidth
                 )
             }
         }

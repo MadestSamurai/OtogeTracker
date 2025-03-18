@@ -3,7 +3,6 @@ package com.madsam.otora.ui.record.chunithm.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
@@ -103,7 +102,9 @@ internal fun AvatarLayout(
                 Image(
                     painter = rememberAsyncImagePainter(avatarData.skin),
                     contentDescription = "Avatar Skin",
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .offset(x = 0.dp, y = 26.dp)
+                        .requiredSize(128.dp, 256.dp)
                 )
             }
 
@@ -118,7 +119,7 @@ internal fun AvatarLayout(
                 Image(
                     painter = rememberAsyncImagePainter(avatarData.wear),
                     contentDescription = "Avatar Wear",
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.requiredSize(258.dp, 218.dp)
                 )
             }
 
@@ -133,7 +134,7 @@ internal fun AvatarLayout(
                 Image(
                     painter = rememberAsyncImagePainter(avatarData.face),
                     contentDescription = "Avatar Face",
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.requiredSize(58.dp, 64.dp)
                 )
             }
 
@@ -148,7 +149,7 @@ internal fun AvatarLayout(
                 Image(
                     painter = rememberAsyncImagePainter(avatarData.faceCover),
                     contentDescription = "Avatar Face Cover",
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.requiredSize(116.dp, 104.dp)
                 )
             }
 
@@ -163,7 +164,7 @@ internal fun AvatarLayout(
                 Image(
                     painter = rememberAsyncImagePainter(avatarData.head),
                     contentDescription = "Avatar Head",
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.requiredSize(200.dp, 150.dp)
                 )
             }
 
@@ -178,7 +179,7 @@ internal fun AvatarLayout(
                 Image(
                     painter = rememberAsyncImagePainter(avatarData.handR),
                     contentDescription = "Avatar Right Hand",
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.requiredSize(36.dp, 72.dp)
                 )
             }
 
@@ -193,7 +194,7 @@ internal fun AvatarLayout(
                 Image(
                     painter = rememberAsyncImagePainter(avatarData.handL),
                     contentDescription = "Avatar Left Hand",
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.requiredSize(36.dp, 72.dp)
                 )
             }
 

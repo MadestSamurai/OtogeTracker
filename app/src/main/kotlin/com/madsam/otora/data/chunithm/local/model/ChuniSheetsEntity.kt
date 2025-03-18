@@ -6,6 +6,7 @@ import io.realm.kotlin.types.annotations.PrimaryKey
 internal class ChuniSheetsEntity : RealmObject {
     @PrimaryKey
     var id: String = ""
+    var title: String = ""
     var type: String = ""
     var difficulty: String = ""
     var levelJp: String = ""

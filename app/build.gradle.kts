@@ -54,7 +54,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.splashscreen)
 
-    //Glance
+    // Glance
     implementation(libs.androidx.glance.appwidget)
     // For interop APIs with Material 3
     implementation(libs.androidx.glance.material3)

@@ -6,6 +6,7 @@ import com.madsam.otora.data.chunithm.local.model.ChuniSongsEntity
 import com.madsam.otora.data.chunithm.remote.model.ChuniAliasesDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniJpDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniLxnsDTO
+import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
 import io.realm.kotlin.Realm
 import io.realm.kotlin.RealmConfiguration
@@ -150,6 +151,7 @@ internal class ChunithmLocalService {
                     }
                     val chuniSheetData = ChuniSheetsEntity().apply {
                         id = "${chuniSongZ.songId}_${sheet.difficulty}"
+                        title = chuniSongZ.title
                         type = sheet.type
                         difficulty = sheet.difficulty
                         levelJp = sheet.level
@@ -225,6 +227,7 @@ internal class ChunithmLocalService {
                 ).find().first()
                 val sheetData = ChuniSheetsEntity().apply {
                     id = sheet.id
+                    this.title = sheet.title
                     type = sheet.type
                     difficulty = sheet.difficulty
                     levelJp = sheet.levelJp
@@ -262,6 +265,35 @@ internal class ChunithmLocalService {
                     clazz = ChuniSongsEntity::class
                 ).find()
                 val songData = songs.map {
+                    val sheet = realm.query(
+                        clazz = ChuniSheetsEntity::class,
+                        query = "title == $0",
+                        it.title
+                    ).find()
+                    val sheetData = sheet.map {
+                        ChunithmSheetUiModel(
+                            title = it.title,
+                            type = it.type,
+                            difficulty = it.difficulty,
+                            levelJp = it.levelJp,
+                            levelValueJp = it.levelValueJp,
+                            internalLevelJp = it.internalLevelJp,
+                            internalLevelValueJp = it.internalLevelValueJp,
+                            levelCn = it.levelCn,
+                            levelValueCn = it.levelValueCn,
+                            noteDesigner = it.noteDesigner,
+                            tap = it.tap,
+                            hold = it.hold,
+                            slide = it.slide,
+                            air = it.air,
+                            flick = it.flick,
+                            total = it.total,
+                            jp = it.jp,
+                            intl = it.intl,
+                            cn = it.cn,
+                            isSpecial = it.isSpecial
+                        )
+                    }
                     ChunithmSongUiModel(
                         genre = it.genre,
                         title = it.title,
@@ -275,7 +307,8 @@ internal class ChunithmLocalService {
                         comment = it.comment,
                         cnId = it.cnId,
                         map = it.map,
-                        aliases = it.aliases
+                        aliases = it.aliases,
+                        sheets = sheetData
                     )
                 }
                 songData
