@@ -11,8 +11,8 @@ import com.madsam.otora.data.bof.ui.model.BofCommentUI
 import com.madsam.otora.data.bof.ui.model.BofEntryUI
 import com.madsam.otora.data.bof.ui.model.BofTeamUI
 import com.madsam.otora.core.utils.CommonUtils
-import io.realm.kotlin.Realm
-import io.realm.kotlin.RealmConfiguration
+import io.github.xilinjia.krdb.Realm
+import io.github.xilinjia.krdb.RealmConfiguration
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.collections.filter

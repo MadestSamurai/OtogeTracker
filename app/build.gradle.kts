@@ -1,9 +1,9 @@
 plugins {
-    id("com.android.application")
-    id("androidx.navigation.safeargs")
-    id("org.jetbrains.kotlin.android")
-    alias(libs.plugins.realm.kotlin)
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.navigation.safe.args)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.krdb)
 }
 
 android {
@@ -89,8 +89,8 @@ dependencies {
 
     debugImplementation(libs.androidx.ui.tooling)
 
-    // Realm
-    implementation(libs.realm.library.base)
+    // Realm(krdb fix ver.)
+    implementation(libs.krdb.base)
 
     // Moshi
     implementation(libs.moshi.kotlin)

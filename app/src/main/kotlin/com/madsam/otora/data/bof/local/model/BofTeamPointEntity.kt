@@ -1,7 +1,7 @@
 package com.madsam.otora.data.bof.local.model
 
-import io.realm.kotlin.types.RealmObject
-import io.realm.kotlin.types.annotations.PrimaryKey
+import io.github.xilinjia.krdb.types.RealmObject
+import io.github.xilinjia.krdb.types.annotations.PrimaryKey
 
 internal class BofTeamPointEntity : RealmObject {
     @PrimaryKey
