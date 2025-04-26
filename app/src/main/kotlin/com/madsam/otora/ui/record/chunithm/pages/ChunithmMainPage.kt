@@ -12,7 +12,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
@@ -29,8 +30,9 @@ internal fun ChunithmMainPage(
     setIsTabRowVisible: (Boolean) -> Unit,
     onNavigateToTopRating: () -> Unit,
 ) {
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val screenWidthDp = with(LocalDensity.current) {
+        LocalWindowInfo.current.containerSize.width.toDp()
+    }
 
     LazyColumn(
         modifier = Modifier

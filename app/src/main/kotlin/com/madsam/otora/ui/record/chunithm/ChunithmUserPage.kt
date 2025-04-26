@@ -94,7 +94,9 @@ internal fun ChunithmUserPage(
                 )
 
                 1 -> ChunithmSongListPage(
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    scrollThreshold = scrollThreshold,
+                    setIsTabRowVisible = { isTabRowVisible = it },
                 )
             }
         }
@@ -103,7 +105,6 @@ internal fun ChunithmUserPage(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
         ) {
-            val scope = rememberCoroutineScope()
             AnimatedVisibility(
                 visible = isTabRowVisible,
                 modifier = Modifier
