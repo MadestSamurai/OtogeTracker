@@ -48,7 +48,9 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -82,14 +84,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.max
-
-/**
- * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.ui.bof.sub.BofScreen
- * 创建者: MadSamurai
- * 创建时间: 2024/10/7
- * 描述: BOF数据展示界面
- */
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 
 @Composable
 internal fun BofTotalScreen(
@@ -133,7 +129,10 @@ internal fun BofTotalScreen(
 
     val isCompare = totalData.value.isNotEmpty() && totalData.value[0].oldTotal != 0
 
-    val screenWidthDp = configuration.screenWidthDp.dp
+    val screenWidthDp = with(LocalDensity.current) {
+        LocalWindowInfo.current.containerSize.width.toDp()
+    }
+
     val barWidth = when (screenWidthDp) {
         in 0.dp..445.dp -> 178.0
         in 445.dp..800.dp -> (screenWidthDp.value - 445) * 0.3 + 160
@@ -357,32 +356,27 @@ internal fun TotalCapture(
                             val bitmap = if (totalHeight > maxHeight) {
                                 val scaleFactor = maxHeight.toFloat() / totalHeight
                                 val newWidth = (bitmapList[0].width * scaleFactor).toInt()
-                                Bitmap.createBitmap(newWidth, maxHeight, Bitmap.Config.ARGB_8888)
-                                    .apply {
-                                        val canvas = Canvas(this)
-                                        var currentHeight = 0
-                                        for (hardwareBitmap in bitmapList) {
-                                            val scaledBitmap = Bitmap.createScaledBitmap(
-                                                hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
-                                                newWidth,
-                                                (hardwareBitmap.height * scaleFactor).toInt(),
-                                                true
-                                            )
-                                            canvas.drawBitmap(
-                                                scaledBitmap,
-                                                0f,
-                                                currentHeight.toFloat(),
-                                                null
-                                            )
-                                            currentHeight += scaledBitmap.height
-                                        }
+                                createBitmap(newWidth, maxHeight).apply {
+                                    val canvas = Canvas(this)
+                                    var currentHeight = 0
+                                    for (hardwareBitmap in bitmapList) {
+                                        val scaledBitmap =
+                                            hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                                .scale(
+                                                    newWidth,
+                                                    (hardwareBitmap.height * scaleFactor).toInt()
+                                                )
+                                        canvas.drawBitmap(
+                                            scaledBitmap,
+                                            0f,
+                                            currentHeight.toFloat(),
+                                            null
+                                        )
+                                        currentHeight += scaledBitmap.height
                                     }
+                                }
                             } else {
-                                Bitmap.createBitmap(
-                                    bitmapList[0].width,
-                                    totalHeight,
-                                    Bitmap.Config.ARGB_8888
-                                ).apply {
+                                createBitmap(bitmapList[0].width, totalHeight).apply {
                                     val canvas = Canvas(this)
                                     var currentHeight = 0
                                     for (hardwareBitmap in bitmapList) {

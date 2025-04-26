@@ -15,12 +15,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -35,7 +40,8 @@ import com.madsam.otora.ui.BASE_URL
 @Composable
 internal fun ChunithmSongCard(
     item: ChunithmSongUiModel,
-    itemWidth: Dp
+    itemWidth: Dp,
+    highlightText: String = ""
 ) {
     Surface(
         Modifier.width(itemWidth),
@@ -99,8 +105,10 @@ internal fun ChunithmSongCard(
                             start.linkTo(cover.end, 8.dp)
                         }
                 ) {
-                    Text(
-                        text = item.title,
+                    // 使用高亮文本组件替换原来的Text
+                    HighlightedText(
+                        fullText = item.title,
+                        highlightText = highlightText,
                         color = Beige400,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
@@ -113,8 +121,11 @@ internal fun ChunithmSongCard(
                             .requiredHeight(23.dp)
                             .clip(RectangleShape)
                     )
-                    Text(
-                        text = item.artist,
+
+                    // 艺术家名称也高亮显示
+                    HighlightedText(
+                        fullText = item.artist,
+                        highlightText = highlightText,
                         color = OSU_BRIGHT_YELLOW,
                         fontSize = 14.sp,
                         lineHeight = 20.sp,
@@ -169,4 +180,70 @@ internal fun ChunithmSongCard(
             }
         }
     }
+}
+
+@Composable
+private fun HighlightedText(
+    modifier: Modifier = Modifier,
+    fullText: String,
+    highlightText: String,
+    color: Color,
+    fontSize: TextUnit,
+    fontWeight: FontWeight = FontWeight.Normal,
+    maxLines: Int = Int.MAX_VALUE,
+    lineHeight: TextUnit = TextUnit.Unspecified,
+    overflow: TextOverflow = TextOverflow.Clip
+) {
+    val annotatedString = buildAnnotatedString {
+        if (highlightText.isNotEmpty()) {
+            var startIndex = fullText.indexOf(highlightText, ignoreCase = true)
+            var currentIndex = 0
+
+            if (startIndex < 0) {
+                // 如果没有匹配，直接添加整个文本
+                withStyle(style = SpanStyle(color = color)) {
+                    append(fullText)
+                }
+            } else {
+                // 处理匹配内容
+                while (startIndex >= 0) {
+                    // 添加匹配前的文本
+                    withStyle(style = SpanStyle(color = color)) {
+                        append(fullText.substring(currentIndex, startIndex))
+                    }
+
+                    // 添加高亮文本
+                    withStyle(style = SpanStyle(color = color, background = Color.Red.copy(alpha = 0.7f))) {
+                        append(fullText.substring(startIndex, startIndex + highlightText.length))
+                    }
+
+                    currentIndex = startIndex + highlightText.length
+                    startIndex = fullText.indexOf(
+                        highlightText,
+                        startIndex + highlightText.length,
+                        ignoreCase = true
+                    )
+                }
+
+                // 添加最后剩余的文本
+                withStyle(style = SpanStyle(color = color)) {
+                    append(fullText.substring(currentIndex))
+                }
+            }
+        } else {
+            withStyle(style = SpanStyle(color = color)) {
+                append(fullText)
+            }
+        }
+    }
+
+    Text(
+        text = annotatedString,
+        fontSize = fontSize,
+        fontWeight = fontWeight,
+        maxLines = maxLines,
+        lineHeight = lineHeight,
+        overflow = overflow,
+        modifier = modifier
+    )
 }

@@ -29,6 +29,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -43,13 +44,20 @@ internal class ChunithmViewModel(
 
     val chunithmTopRankUiModel = MutableStateFlow(ChunithmTopRankUiModel())
 
-    val chuniBasicRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
-    val chuniAdvancedRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
-    val chuniExpertRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
-    val chuniMasterRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
-    val chuniUltimaRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
+    private val chuniBasicRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
+    private val chuniAdvancedRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
+    private val chuniExpertRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
+    private val chuniMasterRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
+    private val chuniUltimaRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
 
-    val chuniSongs = MutableStateFlow<List<ChunithmSongUiModel>>(emptyList())
+    private val _chuniSongs = MutableStateFlow<List<ChunithmSongUiModel>>(emptyList())
+    val chuniSongs = _chuniSongs.asStateFlow()
+
+    private val _searchText = MutableStateFlow("")
+    val searchText = _searchText.asStateFlow()
+
+    private val _filteredSongs = MutableStateFlow<List<ChunithmSongUiModel>>(emptyList())
+    val filteredSongs = _filteredSongs.asStateFlow()
 
     init {
         loadData(context)
@@ -322,7 +330,26 @@ internal class ChunithmViewModel(
         val chunithmLocalService = ChunithmLocalService()
         viewModelScope.launch {
             val allSongs = chunithmLocalService.getAllSongData()
-            chuniSongs.update { allSongs }
+            _chuniSongs.update { allSongs }
+            _filteredSongs.value = _chuniSongs.value
+        }
+    }
+
+    fun updateSearchText(text: String) {
+        _searchText.value = text
+        filterSongs()
+    }
+
+    private fun filterSongs() {
+        val query = _searchText.value.trim()
+        if (query.isEmpty()) {
+            _filteredSongs.value = _chuniSongs.value
+            return
+        }
+
+        _filteredSongs.value = _chuniSongs.value.filter { song ->
+            song.title.contains(query, ignoreCase = true) ||
+                    song.artist.contains(query, ignoreCase = true)
         }
     }
 }
