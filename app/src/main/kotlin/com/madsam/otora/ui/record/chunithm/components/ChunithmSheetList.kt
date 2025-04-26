@@ -60,9 +60,9 @@ internal fun ChunithmSheetList(
         for (sheet in stds) {
             Text(
                 text = if (sheet.levelCn.isNotEmpty()) {
-                    "${sheet.levelCn}(CN) ${sheet.levelJp}(JP)"
+                    "${sheet.levelValueCn}(CN) ${sheet.levelValueJp}(JP)"
                 } else {
-                    "${sheet.levelJp}(JP)"
+                    "${sheet.levelValueJp}(JP)"
                 },
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
