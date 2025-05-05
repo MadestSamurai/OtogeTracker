@@ -4,7 +4,9 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -24,12 +26,15 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.BG_DARK_GRAY
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red500
+import com.madsam.otora.core.utils.nsp
 
 @Composable
 internal fun SearchBar(
@@ -57,7 +62,10 @@ internal fun SearchBar(
             )
 
             Box(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .height(32.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
                 if (searchText.isEmpty()) {
@@ -74,23 +82,22 @@ internal fun SearchBar(
                     modifier = Modifier
                         .fillMaxWidth()
                         .focusRequester(focusRequester),
-                    textStyle = androidx.compose.ui.text.TextStyle(
+                    textStyle = TextStyle(
                         color = Color.White
                     ),
                     singleLine = true,
                     cursorBrush = SolidColor(Red500),
                     interactionSource = interactionSource,
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = {
-                        // 可选：在此处理搜索操作
-                    })
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
                 )
             }
 
             if (searchText.isNotEmpty()) {
                 IconButton(
                     onClick = { onSearchTextChanged("") },
-                    modifier = Modifier.padding(start = 4.dp)
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .size(16.dp)
                 ) {
                     Icon(
                         painter = rememberVectorPainter(image = Icons.Default.Close),

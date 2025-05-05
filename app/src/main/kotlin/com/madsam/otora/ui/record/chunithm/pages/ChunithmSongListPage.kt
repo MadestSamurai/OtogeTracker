@@ -1,42 +1,42 @@
 package com.madsam.otora.ui.record.chunithm.pages
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Red300
+import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSongCard
 import com.madsam.otora.ui.record.chunithm.components.SearchBar
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun ChunithmSongListPage(
@@ -56,10 +56,8 @@ internal fun ChunithmSongListPage(
     val songList by viewModel.chuniSongs.collectAsState()
 
     val lazyListState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
 
-    // 当前匹配项索引和匹配项总数
-    var currentMatchIndex by remember { mutableIntStateOf(0) }
+    // 当前匹配项总数
     var totalMatches by remember { mutableIntStateOf(0) }
 
     // 计算匹配项总数
@@ -67,15 +65,16 @@ internal fun ChunithmSongListPage(
         totalMatches = songList.size
     }
 
-    // 当搜索文本改变时，重置索引
-    LaunchedEffect(searchText) {
-        currentMatchIndex = 10  //TODO: 搜索跳转功能还有问题
-    }
+    // 保存选中的 genre
+    val selectedGenres = remember { mutableStateOf(setOf<String>()) }
+    // 保存选中的 version
+    val selectedVersions = remember { mutableStateOf(setOf<String>()) }
 
     val cardWidthDp = screenWidthDp - 24.dp
     Column(
         modifier = Modifier
             .background(Red300)
+            .fillMaxHeight()
     ) {
         // 添加搜索栏和导航控件
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -86,49 +85,76 @@ internal fun ChunithmSongListPage(
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 8.dp)
             )
+        }
 
-            // 只有当有搜索结果时才显示导航按钮
-            if (searchText.isNotEmpty() && totalMatches > 0) {
-                Row(
+        // 添加 genre 过滤栏
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+        ) {
+            val genres = songList.map { it.genre }.distinct()
+            items(genres.size) { index ->
+                val genre = genres[index]
+                val isSelected = selectedGenres.value.contains(genre)
+                Text(
+                    text = genre,
                     modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .padding(end = 60.dp) // 预留删除按钮的空间
-                ) {
-                    // 向上导航按钮
-                    IconButton(
-                        onClick = {
-                            if (totalMatches > 0) {
-                                currentMatchIndex = (currentMatchIndex - 1 + totalMatches) % totalMatches
-                                scope.launch {
-                                    lazyListState.animateScrollToItem(currentMatchIndex)
-                                }
-                            }
-                        }
-                    ) {
-                        Icon(
-                            painter = rememberVectorPainter(image = Filled.ArrowWindUp),
-                            contentDescription = "向上",
-                            tint = Color.White
+                        .padding(horizontal = 8.dp)
+                        .background(
+                            if (isSelected) Red500 else Red300,
+                            RoundedCornerShape(12.dp)
                         )
-                    }
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .clickable {
+                            selectedGenres.value = if (isSelected) {
+                                selectedGenres.value - genre
+                            } else {
+                                selectedGenres.value + genre
+                            }
+                        },
+                    color = Beige500
+                )
+            }
+        }
 
-                    // 向下导航按钮
-                    IconButton(
-                        onClick = {
-                            if (totalMatches > 0) {
-                                currentMatchIndex = (currentMatchIndex + 1) % totalMatches
-                                scope.launch {
-                                    lazyListState.animateScrollToItem(currentMatchIndex)
-                                }
-                            }
-                        }
-                    ) {
-                        Icon(
-                            painter = rememberVectorPainter(image = Filled.ArrowWindDown),
-                            contentDescription = "向下",
-                            tint = Color.White
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp)
+        ) {
+            val versions = songList.map { it.version }.distinct()
+            items(versions.size) { index ->
+                val version = versions[index]
+                val isSelected = selectedVersions.value.contains(version)
+                Text(
+                    text = version,
+                    modifier = Modifier
+                        .padding(horizontal = 8.dp)
+                        .background(
+                            if (isSelected) Red500 else Red300,
+                            RoundedCornerShape(12.dp)
                         )
-                    }
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .clickable {
+                            selectedVersions.value = if (isSelected) {
+                                selectedVersions.value - version
+                            } else {
+                                selectedVersions.value + version
+                            }
+                        },
+                    color = Beige500
+                )
+            }
+        }
+
+        // 筛选后的目标项列表
+        val filteredSongList by remember(searchText, songList, selectedGenres.value, selectedVersions.value) {
+            derivedStateOf {
+                songList.filter { song ->
+                    (searchText.isEmpty() || song.title.contains(searchText, ignoreCase = true)) &&
+                            (selectedGenres.value.isEmpty() || selectedGenres.value.contains(song.genre)) &&
+                            (selectedVersions.value.isEmpty() || selectedVersions.value.contains(song.version))
                 }
             }
         }
@@ -151,18 +177,22 @@ internal fun ChunithmSongListPage(
                         return Offset.Zero
                     }
                 }),
-            state = rememberLazyListState()
+            state = lazyListState
         ) {
-            items(songList.size) { index ->
-                if (songList[index].genre == "WORLD'S END") {
+            val duplicateTitles = filteredSongList
+                .groupBy { it.title }
+                .filter { it.value.size > 1 }
+                .keys
+            items(filteredSongList.size) { index ->
+                if (duplicateTitles.contains(filteredSongList[index].title) && filteredSongList[index].genre == "WORLD'S END") {
                     return@items
                 }
                 ChunithmSongCard(
-                    item = songList[index],
+                    item = filteredSongList[index],
                     itemWidth = cardWidthDp,
                     highlightText = searchText
                 )
-                if (index != songList.size - 1) {
+                if (index != filteredSongList.size - 1) {
                     Spacer(modifier = Modifier.height(10.dp))
                 }
             }

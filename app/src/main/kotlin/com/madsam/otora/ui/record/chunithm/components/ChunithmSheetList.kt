@@ -36,11 +36,12 @@ internal fun ChunithmSheetList(
 ) {
     val stds = sheets.filter { it.type == "std" }
     val wes = sheets.filter { it.type == "we" }
-    val stdRegions = listOf(
+    val stdRegions =
+        if (stds.isNotEmpty()) listOf(
         Triple("CN", stds[0].cn, "cn"),
         Triple("Intl.", stds[0].intl, "intl"),
         Triple("JP", stds[0].jp, "jp")
-    )
+    ) else listOf()
     Column {
         Row {
             stdRegions.forEach { (tag, isActive, _) ->
@@ -60,9 +61,9 @@ internal fun ChunithmSheetList(
         for (sheet in stds) {
             Text(
                 text = if (sheet.levelCn.isNotEmpty()) {
-                    "${sheet.levelValueCn}(CN) ${sheet.levelValueJp}(JP)"
+                    "${sheet.levelValueCn}(CN) ${sheet.internalLevelValueJp}(JP)"
                 } else {
-                    "${sheet.levelValueJp}(JP)"
+                    "${sheet.internalLevelValueJp}(JP)"
                 },
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
