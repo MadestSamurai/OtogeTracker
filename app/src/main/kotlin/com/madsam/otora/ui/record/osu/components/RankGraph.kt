@@ -21,7 +21,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -32,10 +33,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.R
 import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW
 import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW_HALF_TRANS
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.TEXT_GRAY
+import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 import com.madsam.otora.ui.components.DoubleCircleIndicator
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -76,8 +77,9 @@ internal fun RankGraph(
     osuRankGraphData: MutableStateFlow<List<Int>>,
     osuRankHighestData: MutableStateFlow<OsuTopRankUiModel>
 ) {
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val screenWidthDp = with(LocalDensity.current) {
+        LocalWindowInfo.current.containerSize.width.toDp()
+    }
 
     val rankGraphData by osuRankGraphData.collectAsState()
     val highestData by osuRankHighestData.collectAsState()
@@ -149,7 +151,7 @@ internal fun RankGraph(
 
             val indicatorComponent = DoubleCircleIndicator(
                 outerCircleColor = OSU_BRIGHT_YELLOW_HALF_TRANS,
-                innerCircleColor = OSU_BRIGHT_YELLOW
+                innerCircleColor = Yellow1000
             )
 
             CartesianChartHost(
@@ -176,7 +178,7 @@ internal fun RankGraph(
                     rememberLineCartesianLayer(
                         lineProvider = LineCartesianLayer.LineProvider.series(
                             LineCartesianLayer.rememberLine(
-                                fill = LineCartesianLayer.LineFill.single(fill(OSU_BRIGHT_YELLOW)),
+                                fill = LineCartesianLayer.LineFill.single(fill(Yellow1000)),
                                 areaFill = LineCartesianLayer.AreaFill.single(
                                     fill(
                                         ShaderProvider.verticalGradient(
@@ -221,7 +223,7 @@ internal fun RankGraph(
                             textAlignment = Layout.Alignment.ALIGN_CENTER,
                             minWidth = TextComponent.MinWidth.fixed(40.dp),
                             textSize = 13.sp,
-                            color = OSU_BRIGHT_YELLOW
+                            color = Yellow1000
                         ),
                         labelPosition = DefaultCartesianMarker.LabelPosition.Top,
                         guideline = rememberAxisGuidelineComponent(

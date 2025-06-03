@@ -43,7 +43,7 @@ import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.BlackAlpha50
 import com.madsam.otora.core.theme.OSU_ARROW_YELLOW
-import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW
+import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.OSU_HEART_RED
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.utils.CommonUtils.dateCodeToRecent
@@ -205,7 +205,7 @@ internal fun TopRankCard(
                 )
                 Text(
                     text = item.beatmapSubTitle,
-                    color = OSU_BRIGHT_YELLOW,
+                    color = Yellow1000,
                     fontSize = 14.sp,
                     lineHeight = 20.sp,
                     overflow = TextOverflow.Ellipsis,
@@ -386,7 +386,7 @@ internal fun TopRankCard(
                     Text(
                         text = "${truncateToTwoDecimalPlaces(item.weightPP)}pp(" +
                                 "${truncateToTwoDecimalPlaces(item.weight)}%)",
-                        color = OSU_BRIGHT_YELLOW,
+                        color = Yellow1000,
                         fontSize = 10.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Clip,

@@ -9,7 +9,7 @@ import com.madsam.otora.BofScreenState
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
 import com.madsam.otora.data.bof.ui.model.BofEntryUI
 import com.madsam.otora.data.bof.ui.model.BofTeamUI
-import com.madsam.otora.data.bof.ui.model.Rankable
+import com.madsam.otora.data.bof.ui.model.RankTracking
 import com.madsam.otora.data.bof.local.api.BofLocalService
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.ScreenUtil.getSafeInsetLeftDp
@@ -179,7 +179,7 @@ internal class BofViewModel(
         diffSetter: (T, Int) -> Unit,
         filter: (T) -> Boolean,
         reviewCountSelector: (T) -> Int
-    ): List<T> where T : Rankable {
+    ): List<T> where T : RankTracking {
         val sortedDataOld = data.sortedWith(compareByDescending(oldSelector)).filter { filter(it) }
         var currentOldRank = 1
         sortedDataOld.forEachIndexed { index, entry ->
@@ -198,7 +198,7 @@ internal class BofViewModel(
             rankSetter(entry, currentRank)
         }
         sortedData.forEach {
-            diffSetter(it, it.oldIndex - it.index)
+            diffSetter(it, it.previousRank - it.currentRank)
         }
         return sortedData
     }
@@ -225,8 +225,8 @@ internal class BofViewModel(
             data,
             { it.oldTotal },
             { it.total },
-            { entry, rank -> entry.oldIndex = rank },
-            { entry, rank -> entry.index = rank },
+            { entry, rank -> entry.previousRank = rank },
+            { entry, rank -> entry.currentRank = rank },
             { entry, diff -> entry.rankDiff = diff },
             { true },
             { it.impr }
@@ -248,8 +248,8 @@ internal class BofViewModel(
             data,
             { it.oldAvg },
             { it.avg },
-            { entry, rank -> entry.oldIndex = rank },
-            { entry, rank -> entry.index = rank },
+            { entry, rank -> entry.previousRank = rank },
+            { entry, rank -> entry.currentRank = rank },
             { entry, diff -> entry.avgDiff = diff },
             { it.impr >= thresholdImpr.value },
             { it.impr }
@@ -271,8 +271,8 @@ internal class BofViewModel(
             data,
             { it.oldMedian },
             { it.median },
-            { entry, rank -> entry.oldIndex = rank },
-            { entry, rank -> entry.index = rank },
+            { entry, rank -> entry.previousRank = rank },
+            { entry, rank -> entry.currentRank = rank },
             { entry, diff -> entry.medianDiff = diff },
             { it.impr >= thresholdImpr.value },
             { it.impr }
@@ -293,8 +293,8 @@ internal class BofViewModel(
             data,
             { it.totalDiff },
             { it.totalDiff },
-            { entry, rank -> entry.oldIndex = rank },
-            { entry, rank -> entry.index = rank },
+            { entry, rank -> entry.previousRank = rank },
+            { entry, rank -> entry.currentRank = rank },
             { entry, diff -> entry.totalDiff = entry.totalDiff },
             { true },
             { it.imprDiff }
@@ -326,8 +326,8 @@ internal class BofViewModel(
             data,
             { it.oldTotal },
             { it.total },
-            { entry, rank -> entry.oldIndex = rank },
-            { entry, rank -> entry.index = rank },
+            { entry, rank -> entry.previousRank = rank },
+            { entry, rank -> entry.currentRank = rank },
             { entry, diff -> entry.rankDiff = diff },
             { true },
             { it.impr }

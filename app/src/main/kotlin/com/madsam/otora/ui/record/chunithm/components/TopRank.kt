@@ -14,18 +14,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.ui.components.RoundedBarChart
-import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.core.theme.BlackAlpha50
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.utils.CommonUtils.getRatingBrush
+import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
+import com.madsam.otora.ui.components.RoundedBarChart
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Locale
 
@@ -34,8 +35,9 @@ internal fun TopRank(
     topRankUI: MutableStateFlow<ChunithmTopRankUiModel>
 ) {
     val topRank by topRankUI.collectAsState()
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val screenWidthDp = with(LocalDensity.current) {
+        LocalWindowInfo.current.containerSize.width.toDp()
+    }
     val cardWidthDp = screenWidthDp - 24.dp
     Row(
         modifier = Modifier

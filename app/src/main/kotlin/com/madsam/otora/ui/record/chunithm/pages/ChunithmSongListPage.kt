@@ -3,8 +3,10 @@ package com.madsam.otora.ui.record.chunithm.pages
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +17,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -64,42 +69,21 @@ internal fun ChunithmSongListPage(
 
     val lazyListState = rememberLazyListState()
 
-    // 当前匹配项总数
     var totalMatches by remember { mutableIntStateOf(0) }
 
-    // 计算匹配项总数
     LaunchedEffect(songList) {
         totalMatches = songList.size
     }
 
-    // 保存选中的 genre
     val selectedGenres = remember { mutableStateOf(setOf<String>()) }
-
-    // 保存选中的 version
     val selectedVersions = remember { mutableStateOf(setOf<String>()) }
 
-    // 添加协程作用域用于防抖
     val coroutineScope = rememberCoroutineScope()
 
-    // UI显示用的范围状态
-    val internalLevelRange = remember {
-        mutableStateOf(1.0f..15.8f)
-    }
-
-    // 实际筛选用的范围状态
-    val filterInternalLevelRange = remember {
-        mutableStateOf(1.0f..15.8f)
-    }
-
-    // UI显示用的范围状态
-    val cnLevelRange = remember {
-        mutableStateOf(1.0f..15.5f)
-    }
-
-    // 实际筛选用的范围状态
-    val filterCnLevelRange = remember {
-        mutableStateOf(1.0f..15.5f)
-    }
+    val internalLevelRange = remember { mutableStateOf(1.0f..15.7f) }
+    val filterInternalLevelRange = remember { mutableStateOf(1.0f..15.7f) }
+    val cnLevelRange = remember { mutableStateOf(1.0f..15.4f) }
+    val filterCnLevelRange = remember { mutableStateOf(1.0f..15.4f) }
 
     val cardWidthDp = screenWidthDp - 24.dp
     Column(
@@ -107,7 +91,6 @@ internal fun ChunithmSongListPage(
             .background(Red300)
             .fillMaxHeight()
     ) {
-        // 添加搜索栏和导航控件
         Box(modifier = Modifier.fillMaxWidth()) {
             SearchBar(
                 searchText = searchText,
@@ -118,7 +101,6 @@ internal fun ChunithmSongListPage(
             )
         }
 
-        // 添加 genre 过滤栏
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
@@ -149,7 +131,6 @@ internal fun ChunithmSongListPage(
             }
         }
 
-        // 添加 version 过滤栏
         LazyRow(
             modifier = Modifier
                 .fillMaxWidth()
@@ -180,7 +161,7 @@ internal fun ChunithmSongListPage(
             }
         }
 
-        // 添加内部定级范围筛选器
+        // JP Value range filter
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -189,7 +170,7 @@ internal fun ChunithmSongListPage(
                 .padding(8.dp)
         ) {
             Text(
-                text = "内部定级范围: ${internalLevelRange.value.start.toFloat().round(1)} - ${internalLevelRange.value.endInclusive.toFloat().round(1)}",
+                text = "JP Value Filter: ${internalLevelRange.value.start.toFloat().round(1)} - ${internalLevelRange.value.endInclusive.toFloat().round(1)}",
                 color = Beige500,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
@@ -199,11 +180,11 @@ internal fun ChunithmSongListPage(
                 onValueChange = { range ->
                     internalLevelRange.value = range
                     coroutineScope.launch {
-                        delay(300) // 300毫秒防抖
+                        delay(300) // 300ms debounce
                         filterInternalLevelRange.value = range
                     }
                 },
-                valueRange = 1.0f..15.8f,
+                valueRange = 1.0f..15.7f,
                 steps = 0,
                 modifier = Modifier.padding(horizontal = 8.dp)
                     .pointerInput(Unit) {
@@ -214,7 +195,7 @@ internal fun ChunithmSongListPage(
             )
         }
 
-        // 添加国服定级范围筛选器
+        // CN Value range filter
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -222,23 +203,49 @@ internal fun ChunithmSongListPage(
                 .background(Red300.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
                 .padding(8.dp)
         ) {
-            Text(
-                text = "国服定级范围: ${cnLevelRange.value.start.toFloat().round(1)} - ${cnLevelRange.value.endInclusive.toFloat().round(1)}",
-                color = Beige500,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
+            val isCnFilterEnabled = remember { mutableStateOf(true) }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "CN Value Filter: ${cnLevelRange.value.start.toFloat().round(1)} - ${cnLevelRange.value.endInclusive.toFloat().round(1)}",
+                    color = Beige500,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Switch(
+                    checked = isCnFilterEnabled.value,
+                    onCheckedChange = { enabled ->
+                        isCnFilterEnabled.value = enabled
+                        filterCnLevelRange.value = if (enabled) cnLevelRange.value else 0f..100f
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Beige500,
+                        checkedTrackColor = Red500,
+                        uncheckedThumbColor = Red300,
+                        uncheckedTrackColor = Beige500.copy(alpha = 0.5f)
+                    )
+                )
+            }
+
             RangeSlider(
                 value = cnLevelRange.value,
                 onValueChange = { range ->
                     cnLevelRange.value = range
                     coroutineScope.launch {
-                        delay(300) // 300毫秒防抖
-                        filterCnLevelRange.value = range
+                        delay(300) // 300ms debounce
+                        // update filter range only if CN filter is enabled
+                        if (isCnFilterEnabled.value) {
+                            filterCnLevelRange.value = range
+                        }
                     }
                 },
-                valueRange = 1.0f..15.5f,
+                valueRange = 1.0f..15.4f,
                 steps = 0,
+                enabled = isCnFilterEnabled.value,
                 modifier = Modifier.padding(horizontal = 8.dp)
                     .pointerInput(Unit) {
                         detectDragGestures { change, _ ->
@@ -248,21 +255,28 @@ internal fun ChunithmSongListPage(
             )
         }
 
-        // 修改筛选逻辑，使用防抖后的筛选值
         val filteredSongList by remember(searchText, songList, selectedGenres.value, selectedVersions.value,
             filterInternalLevelRange.value, filterCnLevelRange.value) {
             derivedStateOf {
                 songList.filter { song ->
-                    // 基本属性筛选逻辑...
+                    // Basic property filtering logic
                     val basicMatch = (searchText.isEmpty() || song.title.contains(searchText, ignoreCase = true)) &&
                             (selectedGenres.value.isEmpty() || selectedGenres.value.contains(song.genre)) &&
                             (selectedVersions.value.isEmpty() || selectedVersions.value.contains(song.version))
 
                     if (!basicMatch) return@filter false
 
+                    // If filterCnLevelRange is set to a very loose range (0f..100f), it means the CN filter is disabled
+                    val isCnFilterDisabled = filterCnLevelRange.value.start <= 0.1f && filterCnLevelRange.value.endInclusive >= 99f
+
                     song.sheets.any { sheet ->
-                        sheet.internalLevelValueJp in filterInternalLevelRange.value.start.toDouble()..filterInternalLevelRange.value.endInclusive.toDouble() &&
+                        val jpLevelMatch = sheet.internalLevelValueJp in filterInternalLevelRange.value.start.toDouble()..filterInternalLevelRange.value.endInclusive.toDouble()
+
+                        // Match succeeds if either CN filter is disabled, or the sheet's CN value is within the filter range
+                        val cnLevelMatch = isCnFilterDisabled ||
                                 sheet.levelValueCn in filterCnLevelRange.value.start.toDouble()..filterCnLevelRange.value.endInclusive.toDouble()
+
+                        jpLevelMatch && cnLevelMatch
                     }
                 }
             }
@@ -309,7 +323,6 @@ internal fun ChunithmSongListPage(
     }
 }
 
-// 添加用于保留一位小数的扩展函数
 private fun Float.round(decimals: Int): Float {
     var multiplier = 1.0f
     repeat(decimals) { multiplier *= 10 }

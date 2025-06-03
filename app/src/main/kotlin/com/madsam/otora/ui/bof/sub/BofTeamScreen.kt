@@ -50,7 +50,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -83,6 +85,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.max
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 
 @Composable
 internal fun BofTeamScreen(
@@ -127,7 +131,9 @@ internal fun BofTeamScreen(
     val isCompare = teamData.value.isNotEmpty() && oldMax != 0.0
     println(isCompare)
 
-    val screenWidthDp = configuration.screenWidthDp.dp
+    val screenWidthDp = with(LocalDensity.current) {
+        LocalWindowInfo.current.containerSize.width.toDp()
+    }
     val textWidth = when {
         screenWidthDp > 800.dp && isCompare ->
             // Compare: 62, Rank: 36, Impr: 36, Median: 110
@@ -330,17 +336,17 @@ internal fun TeamCapture(
                         val bitmap = if (totalHeight > maxHeight) {
                             val scaleFactor = maxHeight.toFloat() / totalHeight
                             val newWidth = (bitmapList[0].width * scaleFactor).toInt()
-                            Bitmap.createBitmap(newWidth, maxHeight, Bitmap.Config.ARGB_8888)
+                            createBitmap(newWidth, maxHeight)
                                 .apply {
                                     val canvas = Canvas(this)
                                     var currentHeight = 0
                                     for (hardwareBitmap in bitmapList) {
-                                        val scaledBitmap = Bitmap.createScaledBitmap(
-                                            hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
-                                            newWidth,
-                                            (hardwareBitmap.height * scaleFactor).toInt(),
-                                            true
-                                        )
+                                        val scaledBitmap =
+                                            hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                                .scale(
+                                                    newWidth,
+                                                    (hardwareBitmap.height * scaleFactor).toInt()
+                                                )
                                         canvas.drawBitmap(
                                             scaledBitmap,
                                             0f,
@@ -351,11 +357,7 @@ internal fun TeamCapture(
                                     }
                                 }
                         } else {
-                            Bitmap.createBitmap(
-                                bitmapList[0].width,
-                                totalHeight,
-                                Bitmap.Config.ARGB_8888
-                            ).apply {
+                            createBitmap(bitmapList[0].width, totalHeight).apply {
                                 val canvas = Canvas(this)
                                 var currentHeight = 0
                                 for (hardwareBitmap in bitmapList) {
@@ -606,7 +608,7 @@ internal fun BofTeamRowTotal(
                     )
                 }
                 Text(
-                    text = entry.index.toString(),
+                    text = entry.currentRank.toString(),
                     fontFamily = sarasaFont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.nsp(),
@@ -651,7 +653,7 @@ internal fun BofTeamRowTotal(
                 )
             }
             Text(
-                text = entry.index.toString(),
+                text = entry.currentRank.toString(),
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),

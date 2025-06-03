@@ -29,7 +29,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.OSU_ARROW_YELLOW
-import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW
+import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.OSU_HEART_RED
 import com.madsam.otora.core.theme.OSU_ROTATE_GREEN
 import com.madsam.otora.core.theme.Red500
@@ -50,7 +50,7 @@ internal fun RecentItem(
                         append("achieved #${activity.rank} on ")
                     }
                     appendInlineContent("mode", "[${activity.mode}]")
-                    withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
+                    withStyle(style = SpanStyle(color = Yellow1000)) {
                         append(activity.beatmapTitle)
                     }
                 }
@@ -60,7 +60,7 @@ internal fun RecentItem(
                         append("lost first place on ")
                     }
                     appendInlineContent("mode", "[${activity.mode}]")
-                    withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
+                    withStyle(style = SpanStyle(color = Yellow1000)) {
                         append(activity.beatmapTitle)
                     }
                 }
@@ -69,7 +69,7 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = Beige400)) {
                         append("submitted a new beatmap ")
                     }
-                    withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
+                    withStyle(style = SpanStyle(color = Yellow1000)) {
                         append(activity.beatmapSetTitle)
                     }
                 }
@@ -78,7 +78,7 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = Beige400)) {
                         append("updated a beatmap ")
                     }
-                    withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
+                    withStyle(style = SpanStyle(color = Yellow1000)) {
                         append(activity.beatmapSetTitle)
                     }
                 }
@@ -99,13 +99,13 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = Beige400)) {
                         append("revived a beatmap ")
                     }
-                    withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
+                    withStyle(style = SpanStyle(color = Yellow1000)) {
                         append(activity.beatmapSetTitle)
                     }
                 }
 
                 "beatmapsetApprove" -> {
-                    withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
+                    withStyle(style = SpanStyle(color = Yellow1000)) {
                         append(activity.beatmapSetTitle)
                     }
                     withStyle(style = SpanStyle(color = Beige400)) {
@@ -117,7 +117,7 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = Beige400)) {
                         append("achieved ")
                     }
-                    withStyle(style = SpanStyle(color = OSU_BRIGHT_YELLOW)) {
+                    withStyle(style = SpanStyle(color = Yellow1000)) {
                         append(activity.achievement)
                     }
                 }

@@ -74,7 +74,10 @@ internal class ChunithmRequestService(private val context: Context) {
         ShareUtil.getString("chuniPath", context) ?: "",
         ShareUtil.getString("chuniSameSite", context) ?: "",
         ShareUtil.getString("chuniUserId", context) ?: "",
-        ShareUtil.getString("chuniFriendCodeList", context) ?: ""
+        ShareUtil.getString("chuniFriendCodeList", context) ?: "",
+        ShareUtil.getString("chuniGa", context) ?: "",
+        ShareUtil.getString("chuniGaKey", context) ?: "",
+        ShareUtil.getString("chuniGaValue", context) ?: ""
     )
     private val moshi = Moshi.Builder()
         .add(SafeStringAdapter())
@@ -102,6 +105,8 @@ internal class ChunithmRequestService(private val context: Context) {
             header.cookie("Max-Age", cookie.maxAge)
             header.cookie("path", cookie.path)
             header.cookie("SameSite", cookie.sameSite)
+            header.cookie(cookie.gaKey, cookie.gaValue)
+            header.cookie("_ga", cookie.ga)
             header.cookie("userId", cookie.userId)
             header.cookie("friendCodeList", cookie.friendCodeList)
             if (requestBody.isNotEmpty())
@@ -591,7 +596,7 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private fun requestFriend() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/friend")
+        val doc = requestDataFromServer("$CHUNITHM_URL/friend/")
         saveDataToLocal(parseFriendList(doc), "chuniFriend.json")
     }
 
@@ -700,6 +705,8 @@ internal class ChunithmRequestService(private val context: Context) {
                 "_t" -> cookie.token = value
                 "expires" -> cookie.expires = value
                 "userId" -> cookie.userId = value
+                "_ga" -> cookie.ga = value
+                cookie.gaKey -> cookie.gaValue = value
             }
         }
     }
@@ -726,6 +733,7 @@ internal class ChunithmRequestService(private val context: Context) {
                     ShareUtil.putString("chuniToken", cookie.token, context)
                     ShareUtil.putString("chuniExpires", cookie.expires, context)
                     ShareUtil.putString("chuniUserId", cookie.userId, context)
+                    ShareUtil.putString("chuniGa", cookie.ga, context)
                 } finally {
                     isUserRequestRunning.set(false)
                 }

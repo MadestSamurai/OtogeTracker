@@ -653,7 +653,7 @@ internal fun BofEntryRowTotal(
                     )
                 }
                 Text(
-                    text = entry.index.toString(),
+                    text = entry.currentRank.toString(),
                     fontFamily = sarasaFont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
@@ -693,7 +693,7 @@ internal fun BofEntryRowTotal(
                 )
             }
             Text(
-                text = entry.index.toString(),
+                text = entry.currentRank.toString(),
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),

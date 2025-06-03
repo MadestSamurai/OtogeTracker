@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW
+import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Red900
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
@@ -126,7 +126,7 @@ internal fun ChunithmSongCard(
                     HighlightedText(
                         fullText = item.artist,
                         highlightText = highlightText,
-                        color = OSU_BRIGHT_YELLOW,
+                        color = Yellow1000,
                         fontSize = 14.sp,
                         lineHeight = 20.sp,
                         overflow = TextOverflow.Ellipsis,

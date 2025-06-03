@@ -1,8 +1,8 @@
 package com.madsam.otora.data.bof.ui.model
 
 internal data class BofTeamUI(
-    override var oldIndex: Int,
-    override var index: Int,
+    override var previousRank: Int,
+    override var currentRank: Int,
     var team: String = "",
     var total: Double = 0.0,
     var median: String = "",
@@ -32,4 +32,4 @@ internal data class BofTeamUI(
     var oldImpr: Int = 0,
     var rankDiff: Int = 0,
     var time: String = ""
-) : Rankable
+) : RankTracking

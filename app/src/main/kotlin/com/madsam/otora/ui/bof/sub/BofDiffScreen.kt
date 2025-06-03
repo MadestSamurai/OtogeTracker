@@ -48,7 +48,9 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -77,6 +79,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 
 /**
  * 项目名: OtogeTracker
@@ -124,7 +128,9 @@ internal fun BofDiffScreen(
 
     val showDialog = remember { mutableStateOf(false) }
 
-    val screenWidthDp = configuration.screenWidthDp.dp
+    val screenWidthDp = with(LocalDensity.current) {
+        LocalWindowInfo.current.containerSize.width.toDp()
+    }
     val barWidth = when (screenWidthDp) {
         in 0.dp..800.dp -> (screenWidthDp.value * 0.3)
         else -> 240.0
@@ -314,17 +320,17 @@ internal fun DiffCapture(
                             val bitmap = if (totalHeight > maxHeight) {
                                 val scaleFactor = maxHeight.toFloat() / totalHeight
                                 val newWidth = (bitmapList[0].width * scaleFactor).toInt()
-                                Bitmap.createBitmap(newWidth, maxHeight, Bitmap.Config.ARGB_8888)
+                                createBitmap(newWidth, maxHeight)
                                     .apply {
                                         val canvas = Canvas(this)
                                         var currentHeight = 0
                                         for (hardwareBitmap in bitmapList) {
-                                            val scaledBitmap = Bitmap.createScaledBitmap(
-                                                hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
-                                                newWidth,
-                                                (hardwareBitmap.height * scaleFactor).toInt(),
-                                                true
-                                            )
+                                            val scaledBitmap =
+                                                hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                                    .scale(
+                                                        newWidth,
+                                                        (hardwareBitmap.height * scaleFactor).toInt()
+                                                    )
                                             canvas.drawBitmap(
                                                 scaledBitmap,
                                                 0f,
@@ -335,11 +341,7 @@ internal fun DiffCapture(
                                         }
                                     }
                             } else {
-                                Bitmap.createBitmap(
-                                    bitmapList[0].width,
-                                    totalHeight,
-                                    Bitmap.Config.ARGB_8888
-                                ).apply {
+                                createBitmap(bitmapList[0].width, totalHeight).apply {
                                     val canvas = Canvas(this)
                                     var currentHeight = 0
                                     for (hardwareBitmap in bitmapList) {
@@ -540,7 +542,7 @@ internal fun BofEntryRowDiff(
             )
         }
         Text(
-            text = entry.index.toString(),
+            text = entry.currentRank.toString(),
             fontFamily = sarasaFont,
             fontWeight = FontWeight.Bold,
             fontSize = 20.nsp(),

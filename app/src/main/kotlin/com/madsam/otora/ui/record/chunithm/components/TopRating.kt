@@ -27,7 +27,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -42,12 +43,12 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
 import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
-import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW
+import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red700
+import com.madsam.otora.core.theme.Transparent
 import com.madsam.otora.data.chunithm.ui.model.ChunithmScoreUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
-import com.madsam.otora.core.theme.Transparent
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -56,8 +57,9 @@ internal fun TopRating(
     onBack: () -> Unit
 ) {
     val topRank by chunithmTopRankUiModel.collectAsState()
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val screenWidthDp = with(LocalDensity.current) {
+        LocalWindowInfo.current.containerSize.width.toDp()
+    }
 
     Column(
         modifier = Modifier
@@ -219,7 +221,7 @@ internal fun ChuniRatingItemCard(
                 )
                 Text(
                     text = item.score,
-                    color = OSU_BRIGHT_YELLOW,
+                    color = Yellow1000,
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,

@@ -25,12 +25,12 @@ val Red900: Color = Color(0xFF332727)
 val Beige400: Color = Color(0xFFd7c2c1)
 val Beige500: Color = Color(0xFFEFCCCB)
 val Beige600: Color = Color(0xFFd7c2c1)
+val Yellow1000: Color = Color(0xFFFFCC22)
 val Transparent: Color = Color(0x00000000)
 
 val OSU_BRIGHT_RED: Color = Color(0xFFDE4C9B)
 val OSU_DARK_RED: Color = Color(0xFF73184D)
 val OSU_BRIGHT_RED_HALF_TRANS: Color = Color(0x80DE4C9B)
-val OSU_BRIGHT_YELLOW: Color = Color(0xFFFFCC22)
 val OSU_BRIGHT_YELLOW_HALF_TRANS: Color = Color(0x80FFCC22)
 
 val OSU_LEVEL_WHITE_1: Color = Color(0xFFF0F0F0)

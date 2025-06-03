@@ -20,7 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -31,19 +32,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red700
-import com.madsam.otora.core.theme.Beige500
+import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige400
+import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.GradientBrush.GoldGradientBg
 import com.madsam.otora.core.theme.GradientBrush.PlatinumGradientBg
 import com.madsam.otora.core.theme.GradientBrush.RainbowGradientBg
 import com.madsam.otora.core.theme.GradientBrush.SilverGradientBg
 import com.madsam.otora.core.theme.GradientBrush.WhiteGradientBg
 import com.madsam.otora.core.theme.OSU_LEVEL_GOLD_1
-import com.madsam.otora.data.chunithm.ui.model.ChunithmCardUiModel
-import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.core.theme.Red500
+import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.utils.CommonUtils.getRatingBrush
+import com.madsam.otora.data.chunithm.ui.model.ChunithmCardUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -51,8 +52,9 @@ internal fun Card(
     chunithmCardUiModel: MutableStateFlow<ChunithmCardUiModel>
 ) {
     val cardData by chunithmCardUiModel.collectAsState()
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val screenWidthDp = with(LocalDensity.current) {
+        LocalWindowInfo.current.containerSize.width.toDp()
+    }
     Surface(
         shape = RoundedCornerShape(10.dp),
         color = Color.Transparent,

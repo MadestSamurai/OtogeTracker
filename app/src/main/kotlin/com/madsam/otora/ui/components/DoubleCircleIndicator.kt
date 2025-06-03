@@ -3,14 +3,14 @@ package com.madsam.otora.ui.components
 import android.graphics.Paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW
+import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW_HALF_TRANS
 import com.patrykandpatrick.vico.core.common.DrawingContext
 import com.patrykandpatrick.vico.core.common.component.Component
 
 class DoubleCircleIndicator(
     outerCircleColor: Color = OSU_BRIGHT_YELLOW_HALF_TRANS,
-    innerCircleColor: Color = OSU_BRIGHT_YELLOW
+    innerCircleColor: Color = Yellow1000
 ) : Component {
     private val outerCirclePaint = Paint().apply {
         color = outerCircleColor.toArgb()

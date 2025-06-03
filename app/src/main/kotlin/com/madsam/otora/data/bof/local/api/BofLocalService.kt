@@ -80,8 +80,8 @@ internal class BofLocalService {
                         .minByOrNull { abs(it.time - compareTime) }
 
                     BofEntryUI(
-                        oldIndex = 0,
-                        index = 0,
+                        previousRank = 0,
+                        currentRank = 0,
                         team = entry.team,
                         artist = entry.artist,
                         genre = entry.genre,
@@ -152,8 +152,8 @@ internal class BofLocalService {
                         .minByOrNull { abs(it.time - compareTime) }
 
                     BofTeamUI(
-                        oldIndex = 0,
-                        index = 0,
+                        previousRank = 0,
+                        currentRank = 0,
                         team = team.team,
                         title1 = team.title1,
                         title2 = team.title2,

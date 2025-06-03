@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -29,12 +28,10 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.BG_DARK_GRAY
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.utils.nsp
 
 @Composable
 internal fun SearchBar(
@@ -56,7 +53,7 @@ internal fun SearchBar(
         ) {
             Icon(
                 painter = rememberVectorPainter(image = Filled.Magnify),
-                contentDescription = "搜索",
+                contentDescription = "Search",
                 tint = Beige400,
                 modifier = Modifier.padding(start = 4.dp, end = 8.dp)
             )
@@ -70,7 +67,7 @@ internal fun SearchBar(
             ) {
                 if (searchText.isEmpty()) {
                     Text(
-                        text = "搜索歌曲或艺术家...",
+                        text = "Search Songs...",
                         color = Color.Gray,
                         modifier = Modifier.padding(start = 4.dp)
                     )
@@ -101,7 +98,7 @@ internal fun SearchBar(
                 ) {
                     Icon(
                         painter = rememberVectorPainter(image = Icons.Default.Close),
-                        contentDescription = "清除",
+                        contentDescription = "Clear",
                         tint = Beige400
                     )
                 }

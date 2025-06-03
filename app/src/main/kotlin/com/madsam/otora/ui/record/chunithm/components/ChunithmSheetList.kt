@@ -42,6 +42,7 @@ internal fun ChunithmSheetList(
         Triple("Intl.", stds[0].intl, "intl"),
         Triple("JP", stds[0].jp, "jp")
     ) else listOf()
+
     Column {
         Row {
             stdRegions.forEach { (tag, isActive, _) ->

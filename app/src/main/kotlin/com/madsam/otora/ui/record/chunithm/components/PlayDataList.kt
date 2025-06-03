@@ -149,7 +149,7 @@ internal fun PlayDataItem(
                     "Abs" -> "Absolute"
                     "AbsP" -> "Absolute+"
                     "Catas" -> "Catastrophy"
-                    else -> "未知"
+                    else -> "Unknown"
                 },
                 fontSize = 12.sp,
                 color = White1000,

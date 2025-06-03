@@ -107,13 +107,22 @@ fun CookieDialog(
                     }
                     return@Button
                 }
-                ShareUtil.putString("chuniToken", requestCookieMap["_t"] ?: "", context)
+                ShareUtil.putString("chuniToken", responseCookieMap["_t"] ?: "", context)
                 ShareUtil.putString("chuniUserId", requestCookieMap["userId"] ?: "", context)
                 ShareUtil.putString("chuniFriendCodeList", requestCookieMap["friendCodeList"] ?: "", context)
                 ShareUtil.putString("chuniExpires", responseCookieMap["expires"] ?: "", context)
                 ShareUtil.putString("chuniMaxAge", responseCookieMap["Max-Age"] ?: "", context)
                 ShareUtil.putString("chuniPath", responseCookieMap["path"] ?: "", context)
                 ShareUtil.putString("chuniSameSite", responseCookieMap["SameSite"] ?: "", context)
+                ShareUtil.putString("chuniGa", requestCookieMap["_ga"] ?: "", context)
+                val gaCount = requestCookieMap.count { it.key.startsWith("_ga_") }
+                if (gaCount == 1) {
+                    val entry = requestCookieMap.entries.first { it.key.startsWith("_ga_") }
+                    ShareUtil.putString("chuniGaKey", entry.key, context)
+                    ShareUtil.putString("chuniGaValue", entry.value, context)
+                } else {
+                    println("CookieDialog Error: $gaCount found.")
+                }
                 onResult(true)
             }) {
                 Text("Save Cookies")
