@@ -21,7 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
@@ -37,8 +38,9 @@ internal fun BadgeList(
 ) {
     val badgeListData by osuBadgeList.collectAsState()
     val coroutineScope = rememberCoroutineScope()
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val screenWidthDp = with(LocalDensity.current) {
+        LocalWindowInfo.current.containerSize.width.toDp()
+    }
     if (badgeListData.isNotEmpty()) {
         val cardWidthDp = screenWidthDp - 24.dp
         Surface(
