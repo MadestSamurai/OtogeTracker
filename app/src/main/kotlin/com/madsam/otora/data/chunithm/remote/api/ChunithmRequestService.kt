@@ -105,8 +105,10 @@ internal class ChunithmRequestService(private val context: Context) {
             header.cookie("Max-Age", cookie.maxAge)
             header.cookie("path", cookie.path)
             header.cookie("SameSite", cookie.sameSite)
-            header.cookie(cookie.gaKey, cookie.gaValue)
-            header.cookie("_ga", cookie.ga)
+            if(cookie.gaKey.isNotEmpty()) {
+                header.cookie(cookie.gaKey, cookie.gaValue)
+                header.cookie("_ga", cookie.ga)
+            }
             header.cookie("userId", cookie.userId)
             header.cookie("friendCodeList", cookie.friendCodeList)
             if (requestBody.isNotEmpty())

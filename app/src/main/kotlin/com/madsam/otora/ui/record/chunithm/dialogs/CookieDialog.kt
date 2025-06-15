@@ -120,8 +120,6 @@ fun CookieDialog(
                     val entry = requestCookieMap.entries.first { it.key.startsWith("_ga_") }
                     ShareUtil.putString("chuniGaKey", entry.key, context)
                     ShareUtil.putString("chuniGaValue", entry.value, context)
-                } else {
-                    println("CookieDialog Error: $gaCount found.")
                 }
                 onResult(true)
             }) {
