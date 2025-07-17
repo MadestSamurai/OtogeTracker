@@ -1,6 +1,10 @@
 package com.madsam.otora.ui.record.chunithm.pages
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -28,10 +32,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -40,15 +44,24 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
+import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige500
+import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
+import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
+import com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
+import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
+import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
+import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
+import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSongCard
 import com.madsam.otora.ui.record.chunithm.components.SearchBar
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun ChunithmSongListPage(
@@ -77,254 +90,432 @@ internal fun ChunithmSongListPage(
 
     val selectedGenres = remember { mutableStateOf(setOf<String>()) }
     val selectedVersions = remember { mutableStateOf(setOf<String>()) }
+    val selectedDifficulties = remember { mutableStateOf(setOf<String>()) }
 
-    val coroutineScope = rememberCoroutineScope()
+    // 初始化时将所有选项设为选中状态
+    LaunchedEffect(songList) {
+        if (songList.isNotEmpty()) {
+            selectedGenres.value = songList.map { it.genre }.distinct().toSet()
+            selectedVersions.value = songList.map { it.version }.distinct().toSet()
+            selectedDifficulties.value = setOf("basic", "advanced", "expert", "master", "ultima")
+        }
+    }
 
-    val internalLevelRange = remember { mutableStateOf(1.0f..15.7f) }
-    val filterInternalLevelRange = remember { mutableStateOf(1.0f..15.7f) }
-    val cnLevelRange = remember { mutableStateOf(1.0f..15.4f) }
-    val filterCnLevelRange = remember { mutableStateOf(1.0f..15.4f) }
+    // 添加展开/收起筛选的状态
+    val isFilterExpanded = remember { mutableStateOf(false) }
+
+    // 使用整数范围（乘以10），避免浮点数精度问题
+    val internalLevelRange = remember { mutableStateOf(10..157) } // 1.0 to 15.7
+    val filterInternalLevelRange = remember { mutableStateOf(10..157) }
+    val cnLevelRange = remember { mutableStateOf(10..154) } // 1.0 to 15.4
+    val filterCnLevelRange = remember { mutableStateOf(10..154) }
+
+    val filteredSongList by remember(searchText, songList, selectedGenres.value, selectedVersions.value,
+        selectedDifficulties.value, filterInternalLevelRange.value, filterCnLevelRange.value) {
+        derivedStateOf {
+            songList.filter { song ->
+                // 如果任何一个筛选器是空集合（全不选），则不显示任何内容
+                if (selectedGenres.value.isEmpty() || selectedVersions.value.isEmpty() || selectedDifficulties.value.isEmpty()) {
+                    return@filter false
+                }
+
+                // Basic property filtering logic
+                val basicMatch = (searchText.isEmpty() || song.title.contains(searchText, ignoreCase = true)) &&
+                        selectedGenres.value.contains(song.genre) &&
+                        selectedVersions.value.contains(song.version)
+
+                if (!basicMatch) return@filter false
+
+                // If filterCnLevelRange is set to a very loose range (0..1000), it means the CN filter is disabled
+                val isCnFilterDisabled = filterCnLevelRange.value.start <= 1 && filterCnLevelRange.value.endInclusive >= 999
+
+                song.sheets.any { sheet ->
+                    // 将整数范围转换回小数进行比较
+                    val jpLevelMatch = sheet.internalLevelValueJp >= (filterInternalLevelRange.value.start / 10.0) &&
+                                     sheet.internalLevelValueJp <= (filterInternalLevelRange.value.endInclusive / 10.0)
+
+                    // Match succeeds if either CN filter is disabled, or the sheet's CN value is within the filter range
+                    val cnLevelMatch = isCnFilterDisabled ||
+                            (sheet.levelValueCn >= (filterCnLevelRange.value.start / 10.0) &&
+                             sheet.levelValueCn <= (filterCnLevelRange.value.endInclusive / 10.0))
+
+                    // 难度筛选 - 必须包含选中的难度
+                    val difficultyMatch = selectedDifficulties.value.contains(sheet.difficulty)
+
+                    jpLevelMatch && cnLevelMatch && difficultyMatch
+                }
+            }
+        }
+    }
 
     val cardWidthDp = screenWidthDp - 24.dp
-    Column(
+
+    Box(
         modifier = Modifier
             .background(Red300)
             .fillMaxHeight()
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            SearchBar(
-                searchText = searchText,
-                onSearchTextChanged = viewModel::updateSearchText,
+        // 主内容区域 - 搜索栏和歌曲列表
+        Column(
+            modifier = Modifier.fillMaxHeight()
+        ) {
+            // 搜索栏
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    SearchBar(
+                        searchText = searchText,
+                        onSearchTextChanged = viewModel::updateSearchText,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    androidx.compose.material3.IconButton(
+                        onClick = { isFilterExpanded.value = !isFilterExpanded.value },
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        androidx.compose.material3.Icon(
+                            imageVector = if (isFilterExpanded.value)
+                                Filled.ArrowUp
+                            else
+                                Filled.ArrowDown,
+                            contentDescription = if (isFilterExpanded.value) "收起筛选" else "展开筛选",
+                            tint = Beige500
+                        )
+                    }
+                }
+            }
+
+            // 歌曲列表
+            LazyColumn(
+                modifier = Modifier
+                    .padding(horizontal = 12.dp)
+                    .nestedScroll(object : NestedScrollConnection {
+                        private var totalScroll = 0f
+
+                        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                            totalScroll += available.y
+                            if (totalScroll < -scrollThreshold) {
+                                setIsTabRowVisible(false)
+                                totalScroll = 0f
+                            } else if (totalScroll > scrollThreshold) {
+                                setIsTabRowVisible(true)
+                                totalScroll = 0f
+                            }
+                            return Offset.Zero
+                        }
+                    }),
+                state = lazyListState
+            ) {
+                val duplicateTitles = filteredSongList
+                    .groupBy { it.title }
+                    .filter { it.value.size > 1 }
+                    .keys
+                items(filteredSongList.size) { index ->
+                    if (duplicateTitles.contains(filteredSongList[index].title) && filteredSongList[index].genre == "WORLD'S END") {
+                        return@items
+                    }
+                    ChunithmSongCard(
+                        item = filteredSongList[index],
+                        itemWidth = cardWidthDp,
+                        highlightText = searchText
+                    )
+                    if (index != filteredSongList.size - 1) {
+                        Spacer(modifier = Modifier.height(10.dp))
+                    }
+                }
+            }
+        }
+
+        // 浮动筛选栏
+        AnimatedVisibility(
+            visible = isFilterExpanded.value,
+            enter = expandVertically(),
+            exit = shrinkVertically(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 64.dp) // 调整为更精确的搜索栏高度
+                .zIndex(1f) // 确保浮在上层
+        ) {
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
-            )
-        }
-
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-        ) {
-            val genres = songList.map { it.genre }.distinct()
-            items(genres.size) { index ->
-                val genre = genres[index]
-                val isSelected = selectedGenres.value.contains(genre)
-                Text(
-                    text = genre,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .background(
-                            if (isSelected) Red500 else Red300,
-                            RoundedCornerShape(12.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                        .clickable {
-                            selectedGenres.value = if (isSelected) {
-                                selectedGenres.value - genre
-                            } else {
-                                selectedGenres.value + genre
-                            }
-                        },
-                    color = Beige500
-                )
-            }
-        }
-
-        LazyRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-        ) {
-            val versions = songList.map { it.version }.distinct()
-            items(versions.size) { index ->
-                val version = versions[index]
-                val isSelected = selectedVersions.value.contains(version)
-                Text(
-                    text = version,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .background(
-                            if (isSelected) Red500 else Red300,
-                            RoundedCornerShape(12.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                        .clickable {
-                            selectedVersions.value = if (isSelected) {
-                                selectedVersions.value - version
-                            } else {
-                                selectedVersions.value + version
-                            }
-                        },
-                    color = Beige500
-                )
-            }
-        }
-
-        // JP Value range filter
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 4.dp)
-                .background(Red300.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                .padding(8.dp)
-        ) {
-            Text(
-                text = "JP Value Filter: ${internalLevelRange.value.start.toFloat().round(1)} - ${internalLevelRange.value.endInclusive.toFloat().round(1)}",
-                color = Beige500,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
-            RangeSlider(
-                value = internalLevelRange.value,
-                onValueChange = { range ->
-                    internalLevelRange.value = range
-                    coroutineScope.launch {
-                        delay(300) // 300ms debounce
-                        filterInternalLevelRange.value = range
-                    }
-                },
-                valueRange = 1.0f..15.7f,
-                steps = 0,
-                modifier = Modifier.padding(horizontal = 8.dp)
-                    .pointerInput(Unit) {
-                        detectDragGestures { change, _ ->
-                            change.consume()
-                        }
-                    },
-            )
-        }
-
-        // CN Value range filter
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 4.dp)
-                .background(Red300.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                .padding(8.dp)
-        ) {
-            val isCnFilterEnabled = remember { mutableStateOf(true) }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .background(Red300) // 背景色，确保不透明
             ) {
-                Text(
-                    text = "CN Value Filter: ${cnLevelRange.value.start.toFloat().round(1)} - ${cnLevelRange.value.endInclusive.toFloat().round(1)}",
-                    color = Beige500,
-                    modifier = Modifier.weight(1f)
-                )
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    val genres = songList.map { it.genre }.distinct()
+                    items(genres.size) { index ->
+                        val genre = genres[index]
+                        val isSelected = selectedGenres.value.contains(genre)
+                        Box(
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .height(32.dp)
+                                .background(
+                                    if (isSelected) Red500 else Red300,
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .clickable {
+                                    selectedGenres.value = if (isSelected) {
+                                        selectedGenres.value - genre
+                                    } else {
+                                        selectedGenres.value + genre
+                                    }
+                                }
+                                .padding(horizontal = 12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = genre,
+                                color = Beige500,
+                                fontSize = 13.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
 
-                Switch(
-                    checked = isCnFilterEnabled.value,
-                    onCheckedChange = { enabled ->
-                        isCnFilterEnabled.value = enabled
-                        filterCnLevelRange.value = if (enabled) cnLevelRange.value else 0f..100f
-                    },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Beige500,
-                        checkedTrackColor = Red500,
-                        uncheckedThumbColor = Red300,
-                        uncheckedTrackColor = Beige500.copy(alpha = 0.5f)
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    val versions = songList.map { it.version }.distinct()
+                    items(versions.size) { index ->
+                        val version = versions[index]
+                        val isSelected = selectedVersions.value.contains(version)
+                        Box(
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .height(32.dp)
+                                .background(
+                                    if (isSelected) Red500 else Red300,
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .clickable {
+                                    selectedVersions.value = if (isSelected) {
+                                        selectedVersions.value - version
+                                    } else {
+                                        selectedVersions.value + version
+                                    }
+                                }
+                                .padding(horizontal = 12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = version,
+                                color = Beige500,
+                                fontSize = 13.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
+
+                // 难度筛选按钮
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val difficulties = listOf("basic", "advanced", "expert", "master", "ultima")
+                    val difficultyLabels = listOf("BASIC", "ADVANCED", "EXPERT", "MASTER", "ULTIMA")
+                    val difficultyColors = listOf(
+                        CHUNI_DIFF_BASIC,
+                        CHUNI_DIFF_ADVANCED,
+                        CHUNI_DIFF_EXPERT,
+                        CHUNI_DIFF_MASTER,
+                        CHUNI_DIFF_ULTIMA_1
                     )
-                )
-            }
 
-            RangeSlider(
-                value = cnLevelRange.value,
-                onValueChange = { range ->
-                    cnLevelRange.value = range
-                    coroutineScope.launch {
-                        delay(300) // 300ms debounce
-                        // update filter range only if CN filter is enabled
-                        if (isCnFilterEnabled.value) {
-                            filterCnLevelRange.value = range
+                    difficulties.forEachIndexed { index, difficulty ->
+                        val isSelected = selectedDifficulties.value.contains(difficulty)
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(24.dp)
+                                .background(
+                                    if (isSelected) difficultyColors[index] else Red300,
+                                    RoundedCornerShape(6.dp)
+                                )
+                                .run {
+                                    if (difficulty == "ultima" && isSelected) {
+                                        border(
+                                            width = 1.dp,
+                                            color = CHUNI_DIFF_ULTIMA_2,
+                                            shape = RoundedCornerShape(6.dp)
+                                        )
+                                    } else this
+                                }
+                                .clickable {
+                                    selectedDifficulties.value = if (isSelected) {
+                                        selectedDifficulties.value - difficulty
+                                    } else {
+                                        selectedDifficulties.value + difficulty
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = difficultyLabels[index],
+                                color = if (isSelected) White1000 else Beige500,
+                                fontSize = 12.sp,
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                letterSpacing = if (difficulty == "advanced") (-0.5).sp else 0.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Visible
+                            )
                         }
-                    }
-                },
-                valueRange = 1.0f..15.4f,
-                steps = 0,
-                enabled = isCnFilterEnabled.value,
-                modifier = Modifier.padding(horizontal = 8.dp)
-                    .pointerInput(Unit) {
-                        detectDragGestures { change, _ ->
-                            change.consume()
-                        }
-                    },
-            )
-        }
-
-        val filteredSongList by remember(searchText, songList, selectedGenres.value, selectedVersions.value,
-            filterInternalLevelRange.value, filterCnLevelRange.value) {
-            derivedStateOf {
-                songList.filter { song ->
-                    // Basic property filtering logic
-                    val basicMatch = (searchText.isEmpty() || song.title.contains(searchText, ignoreCase = true)) &&
-                            (selectedGenres.value.isEmpty() || selectedGenres.value.contains(song.genre)) &&
-                            (selectedVersions.value.isEmpty() || selectedVersions.value.contains(song.version))
-
-                    if (!basicMatch) return@filter false
-
-                    // If filterCnLevelRange is set to a very loose range (0f..100f), it means the CN filter is disabled
-                    val isCnFilterDisabled = filterCnLevelRange.value.start <= 0.1f && filterCnLevelRange.value.endInclusive >= 99f
-
-                    song.sheets.any { sheet ->
-                        val jpLevelMatch = sheet.internalLevelValueJp in filterInternalLevelRange.value.start.toDouble()..filterInternalLevelRange.value.endInclusive.toDouble()
-
-                        // Match succeeds if either CN filter is disabled, or the sheet's CN value is within the filter range
-                        val cnLevelMatch = isCnFilterDisabled ||
-                                sheet.levelValueCn in filterCnLevelRange.value.start.toDouble()..filterCnLevelRange.value.endInclusive.toDouble()
-
-                        jpLevelMatch && cnLevelMatch
                     }
                 }
-            }
-        }
 
-        LazyColumn(
-            modifier = Modifier
-                .padding(horizontal = 12.dp)
-                .nestedScroll(object : NestedScrollConnection {
-                    private var totalScroll = 0f
+                // JP Value range filter
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp)
+                        .background(Red300.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                        .padding(8.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "JP Value Filter: ${(internalLevelRange.value.start / 10.0).round(1)} - ${(internalLevelRange.value.endInclusive / 10.0).round(1)}",
+                            color = Beige500,
+                            modifier = Modifier.weight(1f)
+                        )
 
-                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-                        totalScroll += available.y
-                        if (totalScroll < -scrollThreshold) {
-                            setIsTabRowVisible(false)
-                            totalScroll = 0f
-                        } else if (totalScroll > scrollThreshold) {
-                            setIsTabRowVisible(true)
-                            totalScroll = 0f
+                        // 不可见的占位符，保持与CN Filter行高一致
+                        Box(modifier = Modifier.padding(start = 8.dp)) {
+                            Switch(
+                                checked = false,
+                                onCheckedChange = { },
+                                modifier = Modifier.alpha(0f), // 完全透明
+                                enabled = false
+                            )
                         }
-                        return Offset.Zero
                     }
-                }),
-            state = lazyListState
-        ) {
-            val duplicateTitles = filteredSongList
-                .groupBy { it.title }
-                .filter { it.value.size > 1 }
-                .keys
-            items(filteredSongList.size) { index ->
-                if (duplicateTitles.contains(filteredSongList[index].title) && filteredSongList[index].genre == "WORLD'S END") {
-                    return@items
+                    RangeSlider(
+                        value = internalLevelRange.value.start.toFloat()..internalLevelRange.value.endInclusive.toFloat(),
+                        onValueChange = { range ->
+                            // 使用 kotlin.math.round 确保精确的整数转换
+                            val startInt = kotlin.math.round(range.start).toInt()
+                            val endInt = kotlin.math.round(range.endInclusive).toInt()
+                            val intRange = startInt..endInt
+                            internalLevelRange.value = intRange
+                            filterInternalLevelRange.value = intRange // 立即更新筛选范围
+                        },
+                        valueRange = 10f..157f,
+                        steps = 147, // 157 - 10 = 147 steps
+                        colors = androidx.compose.material3.SliderDefaults.colors(
+                            thumbColor = Beige500,
+                            activeTrackColor = Red500,
+                            inactiveTrackColor = Red300,
+                            activeTickColor = androidx.compose.ui.graphics.Color.Transparent,
+                            inactiveTickColor = androidx.compose.ui.graphics.Color.Transparent
+                        ),
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                            .pointerInput(Unit) {
+                                detectDragGestures { change, _ ->
+                                    change.consume()
+                                }
+                            },
+                    )
                 }
-                ChunithmSongCard(
-                    item = filteredSongList[index],
-                    itemWidth = cardWidthDp,
-                    highlightText = searchText
-                )
-                if (index != filteredSongList.size - 1) {
-                    Spacer(modifier = Modifier.height(10.dp))
+
+                // CN Value range filter
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp)
+                        .background(Red300.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                        .padding(8.dp)
+                ) {
+                    val isCnFilterEnabled = remember { mutableStateOf(true) }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "CN Value Filter: ${(cnLevelRange.value.start / 10.0).round(1)} - ${(cnLevelRange.value.endInclusive / 10.0).round(1)}",
+                            color = Beige500,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        Switch(
+                            checked = isCnFilterEnabled.value,
+                            onCheckedChange = { enabled ->
+                                isCnFilterEnabled.value = enabled
+                                filterCnLevelRange.value = if (enabled) cnLevelRange.value else 0..1000
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Beige500,
+                                checkedTrackColor = Red500,
+                                uncheckedThumbColor = Red300,
+                                uncheckedTrackColor = Beige500.copy(alpha = 0.5f)
+                            )
+                        )
+                    }
+
+                    RangeSlider(
+                        value = cnLevelRange.value.start.toFloat()..cnLevelRange.value.endInclusive.toFloat(),
+                        onValueChange = { range ->
+                            // 使用 kotlin.math.round 确保精确的整数转换
+                            val startInt = kotlin.math.round(range.start).toInt()
+                            val endInt = kotlin.math.round(range.endInclusive).toInt()
+                            val intRange = startInt..endInt
+                            cnLevelRange.value = intRange
+                            // 立即更新筛选范围（如果CN filter启用）
+                            if (isCnFilterEnabled.value) {
+                                filterCnLevelRange.value = intRange
+                            }
+                        },
+                        valueRange = 10f..154f,
+                        steps = 144, // 154 - 10 = 144 steps
+                        enabled = isCnFilterEnabled.value,
+                        colors = androidx.compose.material3.SliderDefaults.colors(
+                            thumbColor = Beige500,
+                            activeTrackColor = Red500,
+                            inactiveTrackColor = Red300,
+                            disabledThumbColor = Red300,
+                            disabledActiveTrackColor = Red300.copy(alpha = 0.5f),
+                            disabledInactiveTrackColor = Red300.copy(alpha = 0.3f),
+                            activeTickColor = androidx.compose.ui.graphics.Color.Transparent,
+                            inactiveTickColor = androidx.compose.ui.graphics.Color.Transparent,
+                            disabledActiveTickColor = androidx.compose.ui.graphics.Color.Transparent,
+                            disabledInactiveTickColor = androidx.compose.ui.graphics.Color.Transparent
+                        ),
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                            .pointerInput(Unit) {
+                                detectDragGestures { change, _ ->
+                                    change.consume()
+                                }
+                            },
+                    )
                 }
             }
         }
     }
 }
 
-private fun Float.round(decimals: Int): Float {
-    var multiplier = 1.0f
+private fun Double.round(decimals: Int): Double {
+    var multiplier = 1.0
     repeat(decimals) { multiplier *= 10 }
     return kotlin.math.round(this * multiplier) / multiplier
 }
