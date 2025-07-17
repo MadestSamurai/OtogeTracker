@@ -59,6 +59,9 @@ internal class ChunithmViewModel(
     private val _filteredSongs = MutableStateFlow<List<ChunithmSongUiModel>>(emptyList())
     val filteredSongs = _filteredSongs.asStateFlow()
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing = _isRefreshing.asStateFlow()
+
     init {
         loadData(context)
     }
@@ -80,6 +83,28 @@ internal class ChunithmViewModel(
         val chunithmRequestService = ChunithmRequestService(context)
         chunithmRequestService.getUserData()
         loadCardFromLocal(context)
+    }
+
+    fun refreshData(context: Context) {
+        viewModelScope.launch {
+            _isRefreshing.value = true
+            try {
+                // 添加一个小延迟确保UI更新
+                kotlinx.coroutines.delay(100)
+                
+                // 重新加载本地数据
+                loadData(context)
+                loadAllSongsData()
+                
+                // 添加一个最小延迟确保用户能看到刷新动画
+                kotlinx.coroutines.delay(500)
+            } catch (e: Exception) {
+                // 处理错误，可以添加错误状态
+                e.printStackTrace()
+            } finally {
+                _isRefreshing.value = false
+            }
+        }
     }
 
     private fun loadCardFromLocal(context: Context) {
