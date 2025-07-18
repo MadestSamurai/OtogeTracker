@@ -212,6 +212,7 @@ internal fun ChunithmUserPage(
     if (showTopRankDialog) {
         TopRankDialog(
             chunithmTopRankUiModel = viewModel.chunithmTopRankUiModel,
+            snackbarHostState = snackbarHostState,
             onDismiss = { showTopRankDialog = false }
         )
     }
