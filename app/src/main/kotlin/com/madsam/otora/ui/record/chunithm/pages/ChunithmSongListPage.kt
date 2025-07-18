@@ -93,6 +93,15 @@ internal fun ChunithmSongListPage(
 
     val lazyListState = rememberLazyListState()
 
+    // 监听回到顶部事件
+    val scrollToTopEvent by viewModel.scrollSongListToTopEvent.collectAsState()
+    LaunchedEffect(scrollToTopEvent) {
+        if (scrollToTopEvent) {
+            lazyListState.animateScrollToItem(0)
+            viewModel.resetScrollToTopEvent() // 重置事件状态
+        }
+    }
+
     var totalMatches by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(songList) {

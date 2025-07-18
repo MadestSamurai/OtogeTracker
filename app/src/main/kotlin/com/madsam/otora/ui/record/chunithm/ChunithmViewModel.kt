@@ -61,6 +61,10 @@ internal class ChunithmViewModel(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing = _isRefreshing.asStateFlow()
 
+    // 滚动到顶部事件
+    private val _scrollSongListToTopEvent = MutableStateFlow(false)
+    val scrollSongListToTopEvent = _scrollSongListToTopEvent.asStateFlow()
+
     init {
         loadData(context)
     }
@@ -387,6 +391,14 @@ internal class ChunithmViewModel(
             song.title.contains(query, ignoreCase = true) ||
                     song.artist.contains(query, ignoreCase = true)
         }
+    }
+
+    fun scrollSongListToTop() {
+        _scrollSongListToTopEvent.value = true
+    }
+
+    fun resetScrollToTopEvent() {
+        _scrollSongListToTopEvent.value = false
     }
 }
 
