@@ -43,6 +43,7 @@ import com.madsam.otora.core.theme.Transparent
 import com.madsam.otora.ui.components.CustomTabRow
 import com.madsam.otora.ui.record.ChunithmScreenState
 import com.madsam.otora.ui.record.chunithm.dialogs.CookieDialog
+import com.madsam.otora.ui.record.chunithm.dialogs.TopRankDialog
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmMainPage
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmSongListPage
 import kotlinx.coroutines.flow.update
@@ -52,7 +53,6 @@ import kotlinx.coroutines.launch
 internal fun ChunithmUserPage(
     viewModel: ChunithmViewModel,
     chuniScreenState: ChunithmScreenState,
-    onNavigateToTopRating: () -> Unit,
     snackbarHostState: SnackbarHostState,
     showDialog: Boolean,
     onDismissDialog: () -> Unit
@@ -61,6 +61,7 @@ internal fun ChunithmUserPage(
     val scrollThreshold = 50f
 
     var isTabRowVisible by remember { mutableStateOf(true) }
+    var showTopRankDialog by remember { mutableStateOf(false) }
     val tabTitles = listOf("Home", "Song List")
 
     val pagerState = rememberPagerState { tabTitles.size }
@@ -102,7 +103,7 @@ internal fun ChunithmUserPage(
                     viewModel = viewModel,
                     scrollThreshold = scrollThreshold,
                     setIsTabRowVisible = { isTabRowVisible = it },
-                    onNavigateToTopRating = onNavigateToTopRating
+                    onNavigateToTopRating = { showTopRankDialog = true }
                 )
 
                 1 -> ChunithmSongListPage(
@@ -205,5 +206,13 @@ internal fun ChunithmUserPage(
                 }
             }
         }
+    }
+
+    // TopRank Dialog
+    if (showTopRankDialog) {
+        TopRankDialog(
+            chunithmTopRankUiModel = viewModel.chunithmTopRankUiModel,
+            onDismiss = { showTopRankDialog = false }
+        )
     }
 }

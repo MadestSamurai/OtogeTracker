@@ -70,7 +70,6 @@ fun RecordScreen(
     var showOsuDialog by remember { mutableStateOf(false) }
     var showMaimaiDialog by remember { mutableStateOf(false) }
     var showChunithmDialog by remember { mutableStateOf(false) }
-    var showChunithmTopRating by remember { mutableStateOf(false) }
 
     val osuViewModel: OsuViewModel = viewModel(
         factory = OsuViewModelFactory(
@@ -201,7 +200,6 @@ fun RecordScreen(
                         ChunithmUserPage(
                             chunithmViewModel,
                             chuniScreenState = ChunithmScreenState(),
-                            onNavigateToTopRating = { showChunithmTopRating = true },
                             snackbarHostState = snackbarHostState,
                             showDialog = showChunithmDialog,
                             onDismissDialog = { showChunithmDialog = false }

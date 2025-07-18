@@ -12,16 +12,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -35,21 +39,29 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.theme.Beige400
+import com.madsam.otora.core.theme.Beige500
+import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
 import com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
 import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
-import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.Red300
+import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Transparent
+import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.data.chunithm.ui.model.ChunithmScoreUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
+import com.madsam.otora.ui.BASE_URL
+import com.madsam.otora.ui.components.CustomTabRow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import java.util.Locale
 
 @Composable
 internal fun TopRating(
@@ -60,6 +72,10 @@ internal fun TopRating(
     val screenWidthDp = with(LocalDensity.current) {
         LocalWindowInfo.current.containerSize.width.toDp()
     }
+    
+    val tabTitles = listOf("Best 30", "Recent 10", "Suggest")
+    val pagerState = rememberPagerState { tabTitles.size }
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -88,14 +104,55 @@ internal fun TopRating(
             Box(modifier = Modifier.width(48.dp))
         }
 
-        LazyColumn(
-            modifier = Modifier.padding(8.dp)
+        // 标签页
+        CustomTabRow(
+            selectedTabIndex = pagerState.currentPage,
+            containerColor = Red500,
+            modifier = Modifier.padding(horizontal = 8.dp)
         ) {
-            items(topRank.bestList.size) { index ->
-                ChuniRatingItemCard(
-                    item = topRank.bestList[index],
-                    itemWidth = screenWidthDp
+            tabTitles.forEachIndexed { index, title ->
+                Tab(
+                    selected = pagerState.currentPage == index,
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(index)
+                        }
+                    },
+                    text = {
+                        Text(
+                            text = title,
+                            color = if (pagerState.currentPage == index) Beige500 else Beige600,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    modifier = Modifier.height(40.dp)
                 )
+            }
+        }
+
+        // 内容页
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.weight(1f)
+        ) { page ->
+            val currentList = when (page) {
+                0 -> topRank.bestList
+                1 -> topRank.recentList
+                2 -> topRank.suggestList
+                else -> emptyList()
+            }
+            
+            LazyColumn(
+                modifier = Modifier.padding(8.dp)
+            ) {
+                items(currentList.size) { index ->
+                    ChuniRatingItemCard(
+                        item = currentList[index],
+                        itemWidth = screenWidthDp,
+                        rank = index + 1
+                    )
+                }
             }
         }
     }
@@ -104,29 +161,51 @@ internal fun TopRating(
 @Composable
 internal fun ChuniRatingItemCard(
     item: ChunithmScoreUiModel,
-    itemWidth: Dp
+    itemWidth: Dp,
+    rank: Int
 ) {
-    val url = "https://dp4p6x0xfi5o9.cloudfront.net/chunithm"
     Surface(
         Modifier
             .width(itemWidth)
-            .padding(8.dp),
+            .padding(8.dp)
+            .height(100.dp),
         RoundedCornerShape(6.dp),
         Color.Transparent
     ) {
         ConstraintLayout(
             modifier = Modifier
                 .background(Red700)
+                .height(100.dp)
         ) {
             val (
                 cover,
                 background,
                 diff,
-                rank
+                rankText,
+                info
             ) = createRefs()
+            
+            // 排名显示
+            Text(
+                text = "#$rank",
+                color = Beige400,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .constrainAs(rankText) {
+                        top.linkTo(parent.top, 8.dp)
+                        start.linkTo(parent.start, 8.dp)
+                    }
+                    .background(
+                        color = Red500,
+                        shape = RoundedCornerShape(4.dp)
+                    )
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            )
+            
             Image(
                 painter = rememberAsyncImagePainter(
-                    model = "$url/img/cover/${item.jacket}",
+                    model = "$BASE_URL/chuni/img/${item.jacket}",
                     contentScale = ContentScale.Crop
                 ),
                 contentDescription = "Cover",
@@ -156,7 +235,7 @@ internal fun ChuniRatingItemCard(
             ) {
                 Image(
                     painter = rememberAsyncImagePainter(
-                        model = "$url/img/cover/${item.jacket}",
+                        model = "$BASE_URL/chuni/img/${item.jacket}",
                         contentScale = ContentScale.Crop
                     ),
                     contentDescription = "Cover",
@@ -193,11 +272,15 @@ internal fun ChuniRatingItemCard(
             )
             Column(
                 modifier = Modifier
-                    .constrainAs(rank) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        end.linkTo(parent.end)
-                    }
+                    .constrainAs(info) {
+                        top.linkTo(parent.top, 8.dp)
+                        bottom.linkTo(parent.bottom, 8.dp)
+                        start.linkTo(cover.end, 8.dp)
+                        end.linkTo(parent.end, 8.dp)
+                        width = Dimension.fillToConstraints
+                        height = Dimension.fillToConstraints
+                    },
+                verticalArrangement = Arrangement.SpaceEvenly
             ) {
                 Text(
                     text = item.title,
@@ -205,9 +288,7 @@ internal fun ChuniRatingItemCard(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .width(itemWidth - 144.dp)
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = item.artist,
@@ -215,9 +296,7 @@ internal fun ChuniRatingItemCard(
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .width(itemWidth - 144.dp)
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = item.score,
@@ -225,19 +304,15 @@ internal fun ChuniRatingItemCard(
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .width(itemWidth - 144.dp)
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "${item.levelValue} -> ${item.rating}",
+                    text = "${item.levelValue} -> ${String.format(Locale.US, "%.2f", item.rating)}",
                     color = Beige400,
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .width(itemWidth - 144.dp)
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
