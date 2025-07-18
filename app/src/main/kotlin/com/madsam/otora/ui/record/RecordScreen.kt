@@ -141,11 +141,9 @@ fun RecordScreen(
                 },
                 actions = {
                     if (selectedItem == Screen.Page3) {
-                        // Add the first action button for Page3
                         IconButton(
                             onClick = {
                                 chunithmViewModel.fetchSongData(context)
-                                chunithmViewModel.loadData(context)
                             }
                         ) {
                             Icon(
@@ -155,7 +153,6 @@ fun RecordScreen(
                             )
                         }
                     }
-                    // Original action button
                     IconButton(
                         onClick = {
                             when (selectedItem) {

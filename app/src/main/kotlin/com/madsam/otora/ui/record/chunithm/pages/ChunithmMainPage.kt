@@ -23,8 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red900
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.AvatarLayout
 import com.madsam.otora.ui.record.chunithm.components.Card
@@ -50,17 +50,18 @@ internal fun ChunithmMainPage(
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
-        onRefresh = { viewModel.refreshData(context) },
+        onRefresh = { viewModel.refreshUserData(context) },
         modifier = Modifier.fillMaxSize(),
-//        indicator = {
-//            Indicator(
-//                modifier = Modifier.align(Alignment.TopCenter),
-//                isRefreshing = isRefreshing,
-//                containerColor = Red300,
-//                color = Red900,
-//                state = state
-//            )
-//        },
+        state = state,
+        indicator = {
+            Indicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                isRefreshing = isRefreshing,
+                containerColor = Red300,
+                color = Beige500,
+                state = state
+            )
+        },
     ) {
         LazyColumn(
             modifier = Modifier

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -25,6 +26,10 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -41,6 +46,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
@@ -63,12 +69,14 @@ import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSongCard
 import com.madsam.otora.ui.record.chunithm.components.SearchBar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ChunithmSongListPage(
     viewModel: ChunithmViewModel,
     scrollThreshold: Float,
     setIsTabRowVisible: (Boolean) -> Unit,
 ) {
+    val context = LocalContext.current
     val screenWidthDp = with(LocalDensity.current) {
         LocalWindowInfo.current.containerSize.width.toDp()
     }
@@ -76,6 +84,9 @@ internal fun ChunithmSongListPage(
     LaunchedEffect(Unit) {
         viewModel.loadAllSongsData()
     }
+
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+    val state = rememberPullToRefreshState()
 
     val searchText by viewModel.searchText.collectAsState()
     val songList by viewModel.chuniSongs.collectAsState()
@@ -150,10 +161,22 @@ internal fun ChunithmSongListPage(
 
     val cardWidthDp = screenWidthDp - 24.dp
 
-    Box(
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = { viewModel.refreshSongData(context) },
         modifier = Modifier
             .background(Red300)
-            .fillMaxHeight()
+            .fillMaxHeight(),
+        state = state,
+        indicator = {
+            Indicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                isRefreshing = isRefreshing,
+                containerColor = Red300,
+                color = Beige500,
+                state = state
+            )
+        },
     ) {
         // 主内容区域 - 搜索栏和歌曲列表
         Column(
@@ -245,78 +268,138 @@ internal fun ChunithmSongListPage(
                     .fillMaxWidth()
                     .background(Red300) // 背景色，确保不透明
             ) {
-                LazyRow(
+                // Genre 筛选行
+                val genres = songList.map { it.genre }.distinct()
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val genres = songList.map { it.genre }.distinct()
-                    items(genres.size) { index ->
-                        val genre = genres[index]
-                        val isSelected = selectedGenres.value.contains(genre)
-                        Box(
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                                .height(32.dp)
-                                .background(
-                                    if (isSelected) Red500 else Red300,
-                                    RoundedCornerShape(12.dp)
-                                )
-                                .clickable {
-                                    selectedGenres.value = if (isSelected) {
-                                        selectedGenres.value - genre
-                                    } else {
-                                        selectedGenres.value + genre
-                                    }
-                                }
-                                .padding(horizontal = 12.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = genre,
-                                color = Beige500,
-                                fontSize = 13.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                    val allSelected = selectedGenres.value.size == genres.size
+                    val toggleText = if (allSelected) "全不选" else "全选"
+                    Box(
+                        modifier = Modifier
+                            .height(32.dp)
+                            .background(
+                                if (allSelected) Red300 else Red500,
+                                RoundedCornerShape(12.dp)
                             )
+                            .clickable {
+                                selectedGenres.value = if (allSelected) emptySet() else genres.toSet()
+                            }
+                            .padding(horizontal = 18.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = toggleText,
+                            fontSize = 13.sp,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            color = Beige500,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    LazyRow(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        items(genres.size) { index ->
+                            val genre = genres[index]
+                            val isSelected = selectedGenres.value.contains(genre)
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .height(32.dp)
+                                    .background(
+                                        if (isSelected) Red500 else Red300,
+                                        RoundedCornerShape(12.dp)
+                                    )
+                                    .clickable {
+                                        selectedGenres.value = if (isSelected) {
+                                            selectedGenres.value - genre
+                                        } else {
+                                            selectedGenres.value + genre
+                                        }
+                                    }
+                                    .padding(horizontal = 12.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = genre,
+                                    color = Beige500,
+                                    fontSize = 13.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
                 }
 
-                LazyRow(
+                // Version 筛选行
+                val versions = songList.map { it.version }.distinct()
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    val versions = songList.map { it.version }.distinct()
-                    items(versions.size) { index ->
-                        val version = versions[index]
-                        val isSelected = selectedVersions.value.contains(version)
-                        Box(
-                            modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                                .height(32.dp)
-                                .background(
-                                    if (isSelected) Red500 else Red300,
-                                    RoundedCornerShape(12.dp)
-                                )
-                                .clickable {
-                                    selectedVersions.value = if (isSelected) {
-                                        selectedVersions.value - version
-                                    } else {
-                                        selectedVersions.value + version
-                                    }
-                                }
-                                .padding(horizontal = 12.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = version,
-                                color = Beige500,
-                                fontSize = 13.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                    val allSelected = selectedVersions.value.size == versions.size
+                    val toggleText = if (allSelected) "全不选" else "全选"
+                    Box(
+                        modifier = Modifier
+                            .height(32.dp)
+                            .background(
+                                if (allSelected) Red300 else Red500,
+                                RoundedCornerShape(12.dp)
                             )
+                            .clickable {
+                                selectedVersions.value = if (allSelected) emptySet() else versions.toSet()
+                            }
+                            .padding(horizontal = 18.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = toggleText,
+                            fontSize = 13.sp,
+                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            color = Beige500,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    LazyRow(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        items(versions.size) { index ->
+                            val version = versions[index]
+                            val isSelected = selectedVersions.value.contains(version)
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .height(32.dp)
+                                    .background(
+                                        if (isSelected) Red500 else Red300,
+                                        RoundedCornerShape(12.dp)
+                                    )
+                                    .clickable {
+                                        selectedVersions.value = if (isSelected) {
+                                            selectedVersions.value - version
+                                        } else {
+                                            selectedVersions.value + version
+                                        }
+                                    }
+                                    .padding(horizontal = 12.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = version,
+                                    color = Beige500,
+                                    fontSize = 13.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
                 }
@@ -476,7 +559,6 @@ internal fun ChunithmSongListPage(
                     RangeSlider(
                         value = cnLevelRange.value.start.toFloat()..cnLevelRange.value.endInclusive.toFloat(),
                         onValueChange = { range ->
-                            // 使用 kotlin.math.round 确保精确的整数转换
                             val startInt = kotlin.math.round(range.start).toInt()
                             val endInt = kotlin.math.round(range.endInclusive).toInt()
                             val intRange = startInt..endInt
