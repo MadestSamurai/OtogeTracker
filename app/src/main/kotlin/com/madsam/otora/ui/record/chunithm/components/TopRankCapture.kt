@@ -149,7 +149,7 @@ internal fun TopRankCaptureContent(
 ) {
     val topRank by chunithmTopRankUiModel.collectAsState()
     val cardWidth = 180.dp
-    val cardHeight = 120.dp
+    val cardHeight = 80.dp
     
     Column(
         modifier = Modifier
@@ -265,9 +265,7 @@ internal fun CaptureItemCard(
         color = Red700
     ) {
         ConstraintLayout(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(4.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
             val (
                 cover,
@@ -277,26 +275,7 @@ internal fun CaptureItemCard(
                 info
             ) = createRefs()
             
-            // 排名
-            Text(
-                text = "#$rank",
-                fontFamily = sarasaFont,
-                fontWeight = FontWeight.Bold,
-                fontSize = 10.sp,
-                color = Beige400,
-                modifier = Modifier
-                    .constrainAs(rankText) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                    }
-                    .background(
-                        color = Red500,
-                        shape = RoundedCornerShape(4.dp)
-                    )
-                    .padding(horizontal = 4.dp, vertical = 2.dp)
-            )
-            
-            // 背景图片
+            // 背景图片 - 填满整个卡片
             Image(
                 painter = rememberAsyncImagePainter(
                     model = "$BASE_URL/chuni/img/${item.jacket}",
@@ -315,16 +294,15 @@ internal fun CaptureItemCard(
                     .alpha(0.3f)
             )
             
-            // 封面图片
+            // 封面图片 - 靠左上角
             Surface(
                 modifier = Modifier
                     .constrainAs(cover) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                        bottom.linkTo(parent.bottom)
+                        top.linkTo(parent.top, 2.dp)
+                        start.linkTo(parent.start, 2.dp)
                     }
-                    .size(60.dp),
-                shape = RoundedCornerShape(6.dp),
+                    .size(50.dp),
+                shape = RoundedCornerShape(4.dp),
                 color = Color.Transparent
             ) {
                 Image(
@@ -337,17 +315,17 @@ internal fun CaptureItemCard(
                 )
             }
             
-            // 难度标签
+            // 难度标签 - 覆盖在封面左上角内部
             Text(
                 text = item.level,
-                fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
-                fontSize = 10.sp,
+                fontSize = 8.sp,
+                lineHeight = 10.sp,
                 color = Color.White,
                 modifier = Modifier
                     .constrainAs(diff) {
-                        top.linkTo(parent.top, 2.dp)
-                        start.linkTo(cover.start, 2.dp)
+                        top.linkTo(cover.top, 3.dp)
+                        start.linkTo(cover.start, 3.dp)
                     }
                     .background(
                         color = when (item.diff) {
@@ -358,52 +336,70 @@ internal fun CaptureItemCard(
                             "ultima" -> CHUNI_DIFF_ULTIMA_1
                             else -> CHUNI_DIFF_MASTER
                         },
-                        shape = RoundedCornerShape(4.dp)
+                        shape = RoundedCornerShape(2.dp)
                     )
                     .border(
-                        width = if (item.diff == "ultima") 1.dp else 0.dp,
+                        width = if (item.diff == "ultima") 0.5.dp else 0.dp,
                         color = if (item.diff == "ultima") CHUNI_DIFF_ULTIMA_2 else Transparent,
-                        shape = RoundedCornerShape(4.dp)
+                        shape = RoundedCornerShape(2.dp)
                     )
-                    .padding(2.dp)
+                    .padding(horizontal = 2.dp)
             )
             
-            // 信息栏
+            // 排名 - 放在左下角，减少空余
+            Text(
+                text = "#$rank",
+                fontWeight = FontWeight.Bold,
+                fontSize = 8.sp,
+                lineHeight = 10.sp,
+                color = Beige400,
+                modifier = Modifier
+                    .constrainAs(rankText) {
+                        bottom.linkTo(parent.bottom, 2.dp)
+                        start.linkTo(parent.start, 2.dp)
+                    }
+                    .background(
+                        color = Red500,
+                        shape = RoundedCornerShape(2.dp)
+                    )
+                    .padding(horizontal = 2.dp, vertical = 1.dp)
+            )
+            
+            // 信息栏 - 紧凑布局
             Column(
                 modifier = Modifier
                     .constrainAs(info) {
-                        top.linkTo(parent.top, 4.dp)
-                        bottom.linkTo(parent.bottom, 4.dp)
+                        top.linkTo(parent.top, 2.dp)
+                        bottom.linkTo(parent.bottom, 2.dp)
                         start.linkTo(cover.end, 4.dp)
-                        end.linkTo(parent.end, 4.dp)
+                        end.linkTo(parent.end, 2.dp)
                         width = Dimension.fillToConstraints
                         height = Dimension.fillToConstraints
                     },
-                verticalArrangement = Arrangement.SpaceEvenly
             ) {
                 Text(
                     text = item.title,
-                    fontFamily = sarasaFont,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 10.sp,
+                    fontSize = 9.sp,
+                    lineHeight = 10.sp,
                     color = Beige400,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = item.score,
-                    fontFamily = sarasaFont,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 10.sp,
+                    fontSize = 9.sp,
+                    lineHeight = 10.sp,
                     color = Yellow1000,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
                     text = "${item.levelValue} → ${String.format("%.2f", item.rating)}",
-                    fontFamily = sarasaFont,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 9.sp,
+                    fontSize = 8.sp,
+                    lineHeight = 9.sp,
                     color = Beige400,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

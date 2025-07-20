@@ -14,6 +14,6 @@ import com.madsam.otora.R
  */
 
 val sarasaFont = FontFamily(
-    Font(R.font.inziu_iosevka_regular, FontWeight.Normal),
-    Font(R.font.inziu_iosevka_bold, FontWeight.Bold)
+    Font(R.font.sarasa_ui_regular, FontWeight.Normal),
+    Font(R.font.sarasa_ui_bold, FontWeight.Bold)
 )
