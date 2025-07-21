@@ -49,6 +49,7 @@ import com.madsam.otora.core.theme.OSU_LEVEL_PLATINUM_1
 import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
+import com.madsam.otora.core.theme.sarasaFont
 import com.madsam.otora.core.utils.CommonUtils.getRatingBrush
 import com.madsam.otora.core.utils.ndp
 import com.madsam.otora.data.chunithm.ui.model.ChunithmFriendUiModel
@@ -169,7 +170,8 @@ internal fun FriendCard(
                 overflow = TextOverflow.Ellipsis,
                 color = Color.Black,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
             )
 
             if (chuniFriend.reborn > 0) {

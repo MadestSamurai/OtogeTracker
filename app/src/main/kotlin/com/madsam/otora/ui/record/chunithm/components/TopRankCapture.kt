@@ -66,6 +66,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -149,7 +150,7 @@ internal fun TopRankCaptureContent(
 ) {
     val topRank by chunithmTopRankUiModel.collectAsState()
     val cardWidth = 180.dp
-    val cardHeight = 80.dp
+    val cardHeight = 54.dp
     
     Column(
         modifier = Modifier
@@ -173,7 +174,7 @@ internal fun TopRankCaptureContent(
         // Best 30 - 6行，每行5个
         if (topRank.bestList.isNotEmpty()) {
             Text(
-                text = "Best 30 (平均: ${String.format("%.2f", topRank.best30)})",
+                text = "Best 30 (平均: ${String.format(Locale.US, "%.2f", topRank.best30)})",
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
@@ -212,7 +213,7 @@ internal fun TopRankCaptureContent(
         // Recent 10 - 2行，每行5个
         if (topRank.recentList.isNotEmpty()) {
             Text(
-                text = "Recent 10 (平均: ${String.format("%.2f", topRank.recent10)})",
+                text = "Recent 10 (平均: ${String.format(Locale.US, "%.2f", topRank.recent10)})",
                 fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
@@ -261,7 +262,7 @@ internal fun CaptureItemCard(
         modifier = Modifier
             .width(cardWidth)
             .height(cardHeight),
-        shape = RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(6.dp),
         color = Red700
     ) {
         ConstraintLayout(
@@ -317,15 +318,16 @@ internal fun CaptureItemCard(
             
             // 难度标签 - 覆盖在封面左上角内部
             Text(
-                text = item.level,
+                text = String.format(Locale.US, "%.1f", item.levelValue),
+                fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 8.sp,
-                lineHeight = 10.sp,
+                lineHeight = 11.sp,
                 color = Color.White,
                 modifier = Modifier
                     .constrainAs(diff) {
-                        top.linkTo(cover.top, 3.dp)
-                        start.linkTo(cover.start, 3.dp)
+                        top.linkTo(cover.top, 2.dp)
+                        start.linkTo(cover.start, 2.dp)
                     }
                     .background(
                         color = when (item.diff) {
@@ -349,14 +351,15 @@ internal fun CaptureItemCard(
             // 排名 - 放在左下角，减少空余
             Text(
                 text = "#$rank",
+                fontFamily = sarasaFont,
                 fontWeight = FontWeight.Bold,
                 fontSize = 8.sp,
                 lineHeight = 10.sp,
                 color = Beige400,
                 modifier = Modifier
                     .constrainAs(rankText) {
-                        bottom.linkTo(parent.bottom, 2.dp)
-                        start.linkTo(parent.start, 2.dp)
+                        bottom.linkTo(cover.bottom, 2.dp)
+                        start.linkTo(cover.start, 2.dp)
                     }
                     .background(
                         color = Red500,
@@ -379,6 +382,7 @@ internal fun CaptureItemCard(
             ) {
                 Text(
                     text = item.title,
+                    fontFamily = sarasaFont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 9.sp,
                     lineHeight = 10.sp,
@@ -388,6 +392,7 @@ internal fun CaptureItemCard(
                 )
                 Text(
                     text = item.score,
+                    fontFamily = sarasaFont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 9.sp,
                     lineHeight = 10.sp,
@@ -396,7 +401,8 @@ internal fun CaptureItemCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "${item.levelValue} → ${String.format("%.2f", item.rating)}",
+                    text = String.format(Locale.US, "%.2f", item.rating),
+                    fontFamily = sarasaFont,
                     fontWeight = FontWeight.Bold,
                     fontSize = 8.sp,
                     lineHeight = 9.sp,

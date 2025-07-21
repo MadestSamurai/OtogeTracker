@@ -72,7 +72,6 @@ internal fun OsuUserPage(
                     viewModel = viewModel,
                     scrollThreshold = scrollThreshold,
                 ) { isTabRowVisible = it }
-
                 1 -> Comment()
             }
         }

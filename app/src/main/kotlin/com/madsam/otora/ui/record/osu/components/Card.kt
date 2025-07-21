@@ -56,6 +56,7 @@ import com.madsam.otora.data.osu.ui.model.OsuCardUiModel
 import com.madsam.otora.ui.components.GroupListItem
 import com.madsam.otora.ui.components.PopupTip
 import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.core.graphics.toColorInt
 
 @Composable
 internal fun Card(
@@ -223,11 +224,7 @@ internal fun Card(
             if (cardData.isTitle) {
                 Text(
                     text = cardData.title,
-                    color = Color(
-                        android.graphics.Color.parseColor(
-                            cardData.profileColour
-                        )
-                    ),
+                    color = Color(cardData.profileColour.toColorInt()),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
@@ -335,6 +332,7 @@ internal fun Card(
                 color = Beige400,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
+                letterSpacing = (-0.5).sp,
                 modifier = Modifier
                     .constrainAs(rank) {
                         top.linkTo(baseBackground.bottom)
@@ -372,6 +370,7 @@ internal fun Card(
                     color = Beige400,
                     fontSize = 16.sp,
                     lineHeight = 20.sp,
+                    letterSpacing = (-1).sp,
                 )
             }
             // Popups

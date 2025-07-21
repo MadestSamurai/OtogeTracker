@@ -10,13 +10,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -29,7 +32,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -39,7 +44,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.animation.doOnEnd
@@ -48,13 +56,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.madsam.otora.ui.bof.BofScreen
-import com.madsam.otora.ui.record.RecordScreen
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.OtogeTrackerTheme
 import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.Red900
+import com.madsam.otora.ui.bof.BofScreen
+import com.madsam.otora.ui.record.RecordScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDate
 
@@ -66,6 +74,15 @@ fun MainActivityScreen(navController: NavHostController) {
     val unselectedIcons =
         listOf(Icons.Outlined.Home, Icons.Outlined.FavoriteBorder, Icons.Outlined.Star)
     val snackbarHostState = remember { SnackbarHostState() }
+    
+    // 获取屏幕配置信息
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+    val screenWidth = with(density) { windowInfo.containerSize.width.toDp() }
+    val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
+    
+    // 判断是否使用侧边导航栏：屏幕宽度大于高度（横屏）或宽度大于600dp
+    val useNavigationRail = screenWidth > screenHeight || screenWidth > 600.dp
 
     // Observe the NavController's back stack
     LaunchedEffect(navController) {
@@ -79,18 +96,96 @@ fun MainActivityScreen(navController: NavHostController) {
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        bottomBar = {
-            NavigationBar(
+    if (useNavigationRail) {
+        // 使用侧边导航栏布局
+        Row(modifier = Modifier.fillMaxSize()) {
+            NavigationRail(
                 modifier = Modifier
                     .background(Red900)
                     .windowInsetsPadding(
-                        WindowInsets.navigationBars.only(
-                            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom
-                        )
+                        WindowInsets.displayCutout.only(WindowInsetsSides.Start)
+                            .union(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+                    ),
+                containerColor = Red900
+            ) {
+                items.forEachIndexed { index, screen ->
+                    NavigationRailItem(
+                        icon = {
+                            Icon(
+                                if (selectedItem == index) selectedIcons[index] else unselectedIcons[index],
+                                contentDescription = screen.label
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = screen.label,
+                                fontSize = 12.sp
+                            )
+                        },
+                        colors = NavigationRailItemDefaults.colors(
+                            indicatorColor = Red800,
+                            selectedIconColor = Beige500,
+                            selectedTextColor = Beige500,
+                            unselectedIconColor = Beige600,
+                            unselectedTextColor = Beige600
+                        ),
+                        alwaysShowLabel = true,
+                        selected = selectedItem == index,
+                        onClick = {
+                            if (selectedItem == index) return@NavigationRailItem
+                            selectedItem = index
+                            navController.navigate(screen.route) {
+                                popUpTo(navController.graph.startDestinationId) {
+                                    inclusive = false
+                                }
+                                launchSingleTop = true
+                            }
+                        }
                     )
-                    .height(64.dp),
+                }
+            }
+            
+            Box(modifier = Modifier.fillMaxSize()) {
+                NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
+                    lateinit var bofNavController: NavHostController
+                    val bofScreenState = BofScreenState()
+                    composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
+                    composable(Screen.ReportScreen.route) { Screen2() }
+                    composable(Screen.BOFScreen.route) {
+                        bofNavController = rememberNavController()
+                        BofScreen(snackbarHostState, bofNavController, bofScreenState)
+                    }
+                }
+                
+                // SnackbarHost 放在最上层
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+    } else {
+        // 使用底部导航栏布局
+        Box(modifier = Modifier.fillMaxSize()) {
+            // 主内容区域
+            NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
+                lateinit var bofNavController: NavHostController
+                val bofScreenState = BofScreenState()
+                composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
+                composable(Screen.ReportScreen.route) { Screen2() }
+                composable(Screen.BOFScreen.route) {
+                    bofNavController = rememberNavController()
+                    BofScreen(snackbarHostState, bofNavController, bofScreenState)
+                }
+            }
+            
+            // 底部导航栏
+            NavigationBar(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .background(Red900)
+                    .height(64.dp)
+                    .windowInsetsPadding(WindowInsets.navigationBars),
                 tonalElevation = 0.dp,
                 containerColor = Red900
             ) {
@@ -132,23 +227,12 @@ fun MainActivityScreen(navController: NavHostController) {
                     )
                 }
             }
-        }
-    ) { contentPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = contentPadding.calculateBottomPadding())
-        ) {
-            NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
-                lateinit var bofNavController: NavHostController
-                val bofScreenState = BofScreenState()
-                composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
-                composable(Screen.ReportScreen.route) { Screen2() }
-                composable(Screen.BOFScreen.route) {
-                    bofNavController = rememberNavController()
-                    BofScreen(snackbarHostState, bofNavController, bofScreenState)
-                }
-            }
+            
+            // SnackbarHost 放在最上层
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(16.dp)
+            )
         }
     }
 }

@@ -274,7 +274,8 @@ internal fun RankGraph(
                 withStyle(
                     style = SpanStyle(
                         fontWeight = FontWeight.Normal,
-                        fontSize = 14.sp
+                        fontSize = 14.sp,
+                        letterSpacing = (-1).sp,
                     )
                 ) {
                     append(" (${highestData.date.split("T")[0]})")

@@ -40,7 +40,6 @@ internal fun Main(
 ) {
     val configuration = LocalConfiguration.current
     val view = LocalView.current
-    val leftPadding by viewModel.leftPadding.collectAsState()
     val rightPadding by viewModel.rightPadding.collectAsState()
 
     var showFullRecentDialog by remember { mutableStateOf(false) }
@@ -53,7 +52,7 @@ internal fun Main(
         modifier = Modifier
             .background(Red300)
             .padding(
-                start = 12.dp + if (isLandscape(configuration)) leftPadding else 0.dp,
+                start = 12.dp,
                 end = 12.dp + if (isLandscape(configuration)) rightPadding else 0.dp
             )
             .nestedScroll(object : NestedScrollConnection {
