@@ -167,15 +167,20 @@ fun MainActivityScreen(navController: NavHostController) {
     } else {
         // 使用底部导航栏布局
         Box(modifier = Modifier.fillMaxSize()) {
-            // 主内容区域
-            NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
-                lateinit var bofNavController: NavHostController
-                val bofScreenState = BofScreenState()
-                composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
-                composable(Screen.ReportScreen.route) { Screen2() }
-                composable(Screen.BOFScreen.route) {
-                    bofNavController = rememberNavController()
-                    BofScreen(snackbarHostState, bofNavController, bofScreenState)
+            // 主内容区域 - 添加底部 padding 避免被导航栏覆盖
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 64.dp) // 导航栏高度
+            ) {
+                NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
+                    lateinit var bofNavController: NavHostController
+                    val bofScreenState = BofScreenState()
+                    composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
+                    composable(Screen.ReportScreen.route) { Screen2() }
+                    composable(Screen.BOFScreen.route) {
+                        bofNavController = rememberNavController()
+                        BofScreen(snackbarHostState, bofNavController, bofScreenState)
+                    }
                 }
             }
             
