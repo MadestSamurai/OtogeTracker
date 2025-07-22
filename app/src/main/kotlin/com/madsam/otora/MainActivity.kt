@@ -171,6 +171,7 @@ fun MainActivityScreen(navController: NavHostController) {
             Box(modifier = Modifier
                 .fillMaxSize()
                 .padding(bottom = 64.dp) // 导航栏高度
+                .windowInsetsPadding(WindowInsets.navigationBars)
             ) {
                 NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
                     lateinit var bofNavController: NavHostController
@@ -189,8 +190,8 @@ fun MainActivityScreen(navController: NavHostController) {
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .background(Red900)
-                    .height(64.dp)
-                    .windowInsetsPadding(WindowInsets.navigationBars),
+                    .windowInsetsPadding(WindowInsets.navigationBars)
+                    .height(64.dp),
                 tonalElevation = 0.dp,
                 containerColor = Red900
             ) {

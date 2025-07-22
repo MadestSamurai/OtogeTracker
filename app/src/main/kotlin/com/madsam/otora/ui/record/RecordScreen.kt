@@ -103,7 +103,6 @@ fun RecordScreen(
     if (useNavigationRail) {
         // 横屏或宽屏时使用CustomTabRow作为紧凑的子导航
         Column {
-            // TopAppBar with left-aligned CustomTabRow
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -113,7 +112,7 @@ fun RecordScreen(
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // 左侧游戏类型切换tabs
+                // 左侧类型切换tabs
                 CustomTabRow(
                     selectedTabIndex = items.indexOf(selectedItem),
                     containerColor = Red500,
