@@ -1,11 +1,15 @@
 package com.madsam.otora.ui.record.osu.pages
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -15,11 +19,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.utils.ScreenUtil.isLandscape
 import com.madsam.otora.ui.record.osu.OsuViewModel
 import com.madsam.otora.ui.record.osu.components.BadgeList
 import com.madsam.otora.ui.record.osu.components.Card
@@ -38,22 +41,30 @@ internal fun Main(
     scrollThreshold: Float,
     setIsTabRowVisible: (Boolean) -> Unit
 ) {
-    val configuration = LocalConfiguration.current
-    val view = LocalView.current
-    val rightPadding by viewModel.rightPadding.collectAsState()
-
     var showFullRecentDialog by remember { mutableStateOf(false) }
     var showTopRankDialog by remember { mutableStateOf("") }
-
-    LaunchedEffect(configuration) {
-        viewModel.updatePadding(view)
-    }
+    
+    // 使用和 MainActivity 相同的判断标准来确定是否使用 NavigationRail
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
+    val screenWidth = with(density) { windowInfo.containerSize.width.toDp() }
+    val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
+    val useNavigationRail = screenWidth > screenHeight || screenWidth > 600.dp
+    
     LazyColumn(
         modifier = Modifier
             .background(Red300)
-            .padding(
-                start = 12.dp,
-                end = 12.dp + if (isLandscape(configuration)) rightPadding else 0.dp
+            .padding(horizontal = 12.dp)
+            .windowInsetsPadding(
+                WindowInsets.displayCutout.only(
+                    if (useNavigationRail) {
+                        // 使用 NavigationRail 时，左侧已由 Rail 处理，只处理右侧
+                        WindowInsetsSides.End
+                    } else {
+                        // 使用 BottomNavigation 时，底部已由 BottomBar 处理，只处理左侧和右侧
+                        WindowInsetsSides.Start + WindowInsetsSides.End
+                    }
+                )
             )
             .nestedScroll(object : NestedScrollConnection {
                 private var totalScroll = 0f
@@ -90,6 +101,22 @@ internal fun Main(
                 { showTopRankDialog = "pinned" },
                 { showTopRankDialog = "best" },
                 { showTopRankDialog = "first" }
+            )
+        }
+        
+        // 底部安全区域，让用户滑动到底部时有额外的空间
+        item(key = "bottom_spacer") {
+            androidx.compose.foundation.layout.Spacer(
+                modifier = Modifier
+                    .windowInsetsPadding(
+                        if (useNavigationRail) {
+                            // 使用 NavigationRail 时，需处理底部导航栏
+                            WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
+                        } else {
+                            // 不需要额外处理时，返回空 Insets
+                            WindowInsets(0, 0, 0, 0)
+                        }
+                    )
             )
         }
     }

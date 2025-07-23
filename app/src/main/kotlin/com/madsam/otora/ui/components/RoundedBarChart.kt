@@ -23,7 +23,10 @@ fun RoundedBarChart(
     modifier: Modifier = Modifier,
     minValue: Double,
     maxValue: Double,
-    height: Dp
+    height: Dp,
+    barSpacing: Float? = null, // 可选的固定柱间距参数
+    fillWidth: Boolean = false, // 是否充满容器宽度
+    spacingRatio: Float? = null // 新增：柱间距与柱宽的比例，用于保持视觉一致性
 ) {
     val sortedValues = values.sorted()
     // 计算最小值的偏移量（比最小值小5%）
@@ -41,9 +44,39 @@ fun RoundedBarChart(
                 .align(Alignment.TopCenter)
         ) {
             val barCount = sortedValues.size
-            val barWidth = 10f
-            val availableWidth = size.width - (barCount * barWidth)
-            val spacing = availableWidth / (barCount - 1)
+            
+            val (barWidth, spacing) = when {
+                spacingRatio != null && (fillWidth || barSpacing == null) -> {
+                    // 使用比例来计算柱宽和柱间距，充满容器
+                    // 公式：totalWidth = barCount * barWidth + (barCount - 1) * spacing
+                    // 其中：spacing = barWidth * spacingRatio
+                    // 所以：totalWidth = barCount * barWidth + (barCount - 1) * barWidth * spacingRatio
+                    //      totalWidth = barWidth * (barCount + (barCount - 1) * spacingRatio)
+                    val totalWidth = size.width
+                    val calculatedBarWidth = totalWidth / (barCount + (barCount - 1) * spacingRatio)
+                    val calculatedSpacing = calculatedBarWidth * spacingRatio
+                    calculatedBarWidth to calculatedSpacing
+                }
+                fillWidth -> {
+                    // 充满容器宽度时，保持固定柱宽，计算柱间距
+                    val fixedBarWidth = 10f
+                    val availableWidth = size.width - (barCount * fixedBarWidth)
+                    val calculatedSpacing = availableWidth / (barCount - 1)
+                    fixedBarWidth to calculatedSpacing
+                }
+                barSpacing != null -> {
+                    // 使用固定柱间距
+                    10f to barSpacing
+                }
+                else -> {
+                    // 默认自适应逻辑
+                    val fixedBarWidth = 10f
+                    val availableWidth = size.width - (barCount * fixedBarWidth)
+                    val calculatedSpacing = availableWidth / (barCount - 1)
+                    fixedBarWidth to calculatedSpacing
+                }
+            }
+            
             val heightScale = size.height / (maxValue - minValueOffset).toFloat()
 
             sortedValues.forEachIndexed { index, value ->
@@ -72,12 +105,14 @@ fun RoundedBarChart(
                 text = String.format(java.util.Locale.US, "%.2f", minValue),
                 color = Color.White,
                 fontSize = 12.sp,
+                letterSpacing = (-1).sp,
                 modifier = Modifier.align(Alignment.BottomStart)
             )
             Text(
                 text = String.format(java.util.Locale.US, "%.2f", maxValue),
                 color = Color.White,
                 fontSize = 12.sp,
+                letterSpacing = (-1).sp,
                 modifier = Modifier.align(Alignment.BottomEnd)
             )
         }

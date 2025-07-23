@@ -23,7 +23,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -102,10 +101,8 @@ internal fun Card(
                     ),
                 textAlign = TextAlign.Center,
                 color = Color.Black,
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                ),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold
             )
 
             Image(
