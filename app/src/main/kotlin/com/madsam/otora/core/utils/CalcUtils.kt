@@ -3,13 +3,6 @@ package com.madsam.otora.core.utils
 import java.util.Locale
 import kotlin.math.floor
 
-/**
- * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.core.utils.CalcUtils
- * 创建者: MadSamurai
- * 创建时间: 2024/11/16
- * 描述: 计算工具
- */
 object CalcUtils {
     // Chuni Rating
     fun calcChuniRating(score: Int, level: Double): Double {

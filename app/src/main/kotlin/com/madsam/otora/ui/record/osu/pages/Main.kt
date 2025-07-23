@@ -19,10 +19,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.core.theme.Red300
+import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.record.osu.OsuViewModel
 import com.madsam.otora.ui.record.osu.components.BadgeList
 import com.madsam.otora.ui.record.osu.components.Card
@@ -43,13 +42,8 @@ internal fun Main(
 ) {
     var showFullRecentDialog by remember { mutableStateOf(false) }
     var showTopRankDialog by remember { mutableStateOf("") }
-    
-    // 使用和 MainActivity 相同的判断标准来确定是否使用 NavigationRail
-    val density = LocalDensity.current
-    val windowInfo = LocalWindowInfo.current
-    val screenWidth = with(density) { windowInfo.containerSize.width.toDp() }
-    val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
-    val useNavigationRail = screenWidth > screenHeight || screenWidth > 600.dp
+
+    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
     LazyColumn(
         modifier = Modifier
@@ -110,10 +104,8 @@ internal fun Main(
                 modifier = Modifier
                     .windowInsetsPadding(
                         if (useNavigationRail) {
-                            // 使用 NavigationRail 时，需处理底部导航栏
                             WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
                         } else {
-                            // 不需要额外处理时，返回空 Insets
                             WindowInsets(0, 0, 0, 0)
                         }
                     )

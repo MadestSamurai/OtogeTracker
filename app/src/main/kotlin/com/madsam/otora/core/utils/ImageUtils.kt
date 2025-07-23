@@ -6,20 +6,14 @@ import android.graphics.Bitmap
 import android.os.Environment
 import android.provider.MediaStore
 import java.io.OutputStream
+import androidx.core.graphics.scale
 
-/**
- * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.core.utils.ImageUtils
- * 创建者: MadSamurai
- * 创建时间: 2025/1/4
- * 描述: Image工具类
- */
 object ImageUtils {
     private fun resizeBitmapIfNeeded(bitmap: Bitmap, maxHeight: Int): Bitmap {
         return if (bitmap.height > maxHeight) {
             val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
             val newWidth = (maxHeight * aspectRatio).toInt()
-            Bitmap.createScaledBitmap(bitmap, newWidth, maxHeight, true)
+            bitmap.scale(newWidth, maxHeight)
         } else {
             bitmap
         }

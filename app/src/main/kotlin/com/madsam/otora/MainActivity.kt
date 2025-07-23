@@ -46,8 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.animation.doOnEnd
@@ -61,6 +59,7 @@ import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.OtogeTrackerTheme
 import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.Red900
+import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.bof.BofScreen
 import com.madsam.otora.ui.record.RecordScreen
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -74,15 +73,8 @@ fun MainActivityScreen(navController: NavHostController) {
     val unselectedIcons =
         listOf(Icons.Outlined.Home, Icons.Outlined.FavoriteBorder, Icons.Outlined.Star)
     val snackbarHostState = remember { SnackbarHostState() }
-    
-    // 获取屏幕配置信息
-    val windowInfo = LocalWindowInfo.current
-    val density = LocalDensity.current
-    val screenWidth = with(density) { windowInfo.containerSize.width.toDp() }
-    val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
-    
-    // 判断是否使用侧边导航栏：屏幕宽度大于高度（横屏）或宽度大于600dp
-    val useNavigationRail = screenWidth > screenHeight || screenWidth > 600.dp
+
+    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
 
     // Observe the NavController's back stack
     LaunchedEffect(navController) {

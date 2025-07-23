@@ -44,14 +44,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Locale
 import java.util.TimeZone
 
-/**
- * 项目名: OtogeTracker
- * 文件名: Utils
- * 创建者: MadSamurai
- * 创建时间:2023/1/24 18:20
- * 描述: 工具类
- */
-
 object CommonUtils {
     /**
      * 秒转换为日时分秒

@@ -27,12 +27,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
+import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.components.CustomTabRow
 import com.madsam.otora.ui.record.OsuScreenState
 import com.madsam.otora.ui.record.osu.dialogs.SettingsDialog
@@ -56,12 +55,7 @@ internal fun OsuUserPage(
 
     val pagerState = rememberPagerState { tabTitles.size }
 
-    // 使用和 MainActivity 相同的判断标准来确定是否使用 NavigationRail
-    val density = LocalDensity.current
-    val windowInfo = LocalWindowInfo.current
-    val screenWidth = with(density) { windowInfo.containerSize.width.toDp() }
-    val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
-    val useNavigationRail = screenWidth > screenHeight || screenWidth > 600.dp
+    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
 
     SettingsDialog(
         showDialog = showOsuDialog,
