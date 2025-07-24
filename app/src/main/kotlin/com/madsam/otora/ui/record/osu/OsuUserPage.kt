@@ -36,7 +36,7 @@ import com.madsam.otora.ui.components.CustomTabRow
 import com.madsam.otora.ui.record.OsuScreenState
 import com.madsam.otora.ui.record.osu.dialogs.SettingsDialog
 import com.madsam.otora.ui.record.osu.pages.Comment
-import com.madsam.otora.ui.record.osu.pages.Main
+import com.madsam.otora.ui.record.osu.pages.OsuMainPage
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -54,7 +54,6 @@ internal fun OsuUserPage(
     val tabTitles = listOf("Home", "Comment")
 
     val pagerState = rememberPagerState { tabTitles.size }
-
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
 
     SettingsDialog(
@@ -76,7 +75,7 @@ internal fun OsuUserPage(
             pageSpacing = 0.dp,
         ) { page ->
             when (page) {
-                0 -> Main (
+                0 -> OsuMainPage (
                     viewModel = viewModel,
                     scrollThreshold = scrollThreshold,
                 ) { isTabRowVisible = it }

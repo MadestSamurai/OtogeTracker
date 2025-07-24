@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,7 +28,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,9 +48,15 @@ internal fun RecentDialog(
     onDismiss: () -> Unit
 ) {
     val activities by recentActivityList.collectAsState()
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
-    val cardWidthDp = screenWidthDp - 24.dp
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
+    val screenWidthDp = with(density) {
+        windowInfo.containerSize.width.toDp()
+    }
+    val screenHeightDp = with(density) {
+        windowInfo.containerSize.height.toDp()
+    }
+    val cardWidthDp = screenWidthDp * 0.9f - 32.dp
 
     val scrimColor = BlackAlpha80
     val properties = DialogProperties(
@@ -79,10 +87,10 @@ internal fun RecentDialog(
             )
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
+                    .width(screenWidthDp * 0.9f)
                     .heightIn(
                         min = 100.dp,
-                        max = LocalConfiguration.current.screenHeightDp.dp * 0.8f
+                        max = screenHeightDp * 0.8f
                     )
                     .clip(RoundedCornerShape(16.dp))
                     .background(Red700)
@@ -115,7 +123,7 @@ internal fun RecentDialog(
                     ) {
                         items(
                             count = activities.size,
-                            key = { index -> activities[index].createdAt }
+                            key = { index -> index }
                         ) { index ->
                             RecentItem(
                                 activities[index],

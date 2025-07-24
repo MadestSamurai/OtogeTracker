@@ -38,7 +38,7 @@ import com.madsam.otora.ui.record.osu.dialogs.RecentDialog
 import com.madsam.otora.ui.record.osu.dialogs.TopRankDialog
 
 @Composable
-internal fun Main(
+internal fun OsuMainPage(
     viewModel: OsuViewModel,
     scrollThreshold: Float,
     setIsTabRowVisible: (Boolean) -> Unit

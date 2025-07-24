@@ -5,7 +5,6 @@ import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -65,7 +64,7 @@ internal fun FriendList(
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .width(cardWidth)
             .padding(vertical = 12.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(Red700)

@@ -131,9 +131,10 @@ internal fun RecentItem(
         }
     Column(
         modifier = Modifier
+            .width(cardWidthDp)
             .clip(RoundedCornerShape(6.dp))
             .background(Red500)
-            .padding(2.dp)
+            .padding(vertical = 2.dp)
     ) {
         val textWidth = cardWidthDp - 8.dp
         val inlineContent = mapOf(

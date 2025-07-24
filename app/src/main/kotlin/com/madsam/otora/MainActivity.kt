@@ -76,7 +76,6 @@ fun MainActivityScreen(navController: NavHostController) {
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
 
-    // Observe the NavController's back stack
     LaunchedEffect(navController) {
         navController.currentBackStackEntryFlow.collect { backStackEntry ->
             selectedItem = when (backStackEntry.destination.route) {
@@ -89,7 +88,6 @@ fun MainActivityScreen(navController: NavHostController) {
     }
 
     if (useNavigationRail) {
-        // 使用侧边导航栏布局
         Row(modifier = Modifier.fillMaxSize()) {
             NavigationRail(
                 modifier = Modifier
@@ -148,8 +146,7 @@ fun MainActivityScreen(navController: NavHostController) {
                         BofScreen(snackbarHostState, bofNavController, bofScreenState)
                     }
                 }
-                
-                // SnackbarHost 放在最上层
+
                 SnackbarHost(
                     hostState = snackbarHostState,
                     modifier = Modifier.padding(16.dp)
@@ -157,7 +154,6 @@ fun MainActivityScreen(navController: NavHostController) {
             }
         }
     } else {
-        // 使用底部导航栏布局
         Box(modifier = Modifier.fillMaxSize()) {
             // 主内容区域 - 添加底部 padding 避免被导航栏覆盖
             Box(modifier = Modifier
@@ -176,8 +172,7 @@ fun MainActivityScreen(navController: NavHostController) {
                     }
                 }
             }
-            
-            // 底部导航栏
+
             NavigationBar(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -225,8 +220,7 @@ fun MainActivityScreen(navController: NavHostController) {
                     )
                 }
             }
-            
-            // SnackbarHost 放在最上层
+
             SnackbarHost(
                 hostState = snackbarHostState,
                 modifier = Modifier.padding(16.dp)

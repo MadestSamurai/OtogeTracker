@@ -31,12 +31,9 @@ import java.time.LocalDate
 import java.util.concurrent.Executors
 import kotlin.collections.forEach
 
-
-
 class BofRequestService(private val context: Context) {
     companion object {
         private const val TAG = "BofRequestService"
-
     }
 
     private val moshi = Moshi.Builder()
