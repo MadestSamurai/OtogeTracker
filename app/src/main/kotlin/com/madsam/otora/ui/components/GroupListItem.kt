@@ -1,11 +1,13 @@
 package com.madsam.otora.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,27 +21,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
+import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.core.theme.White800
 import com.madsam.otora.data.osu.remote.model.OsuGroupDTO
-import com.madsam.otora.core.icon.Filled
 import kotlinx.coroutines.delay
-
-/**
- * 项目名: OtogeTracker
- * 文件名: GroupListAdapter
- * 创建者: MadSamurai
- * 创建时间:2023/3/23 16:47
- * 描述:
- */
 
 @Composable
 internal fun GroupListItem(
     osuGroupDTO: OsuGroupDTO,
 ) {
     var showPopup by remember { mutableStateOf(false) }
+    val density = LocalDensity.current
+    val iconHeight = with(density) { 18.sp.toDp() }
+    
     Row(
         modifier = Modifier
             .clickable(onClick = {
@@ -50,6 +50,7 @@ internal fun GroupListItem(
                 color = BlackAlpha80,
                 shape = RoundedCornerShape(100.dp)
             )
+            .wrapContentHeight()
             .padding(
                 start = 12.dp,
                 end = if (osuGroupDTO.hasPlaymodes) 6.dp else 12.dp,
@@ -57,22 +58,22 @@ internal fun GroupListItem(
                 bottom = 4.dp
             )
     ) {
-        androidx.compose.animation.AnimatedVisibility(
+        AnimatedVisibility(
             visible = !showPopup,
         ) {
             Text(
                 text = osuGroupDTO.shortName,
                 fontWeight = FontWeight.Bold,
-                color = Color(android.graphics.Color.parseColor(osuGroupDTO.colour.ifEmpty { "#FFFFFF" })),
+                color = Color(osuGroupDTO.colour.ifEmpty { "#FFFFFF" }.toColorInt()),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
         }
-        androidx.compose.animation.AnimatedVisibility(
+        AnimatedVisibility(
             visible = showPopup,
         ) {
             Text(
                 text = osuGroupDTO.name,
-                color = Color(android.graphics.Color.parseColor(osuGroupDTO.colour.ifEmpty { "#FFFFFF" })),
+                color = Color(osuGroupDTO.colour.ifEmpty { "#FFFFFF" }.toColorInt()),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
         }
@@ -89,9 +90,9 @@ internal fun GroupListItem(
                     }
                 ),
                 colorFilter = ColorFilter.tint(White800),
-                contentDescription = "Playmodes",
+                contentDescription = "Play Modes",
                 modifier = Modifier
-                    .height(18.dp)
+                    .height(iconHeight)
                     .padding(start = 8.dp)
                     .align(Alignment.CenterVertically)
             )

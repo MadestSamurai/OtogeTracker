@@ -6,11 +6,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
@@ -39,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.graphics.toColorInt
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
@@ -56,7 +58,6 @@ import com.madsam.otora.data.osu.ui.model.OsuCardUiModel
 import com.madsam.otora.ui.components.GroupListItem
 import com.madsam.otora.ui.components.PopupTip
 import kotlinx.coroutines.flow.MutableStateFlow
-import androidx.core.graphics.toColorInt
 
 @Composable
 internal fun Card(
@@ -137,32 +138,29 @@ internal fun Card(
                     )
                 }
             )
-            Box(
+            
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = cardData.coverUrl,
+                    contentScale = ContentScale.Crop
+                ),
+                contentDescription = "Cover Image",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .width(cardWidthDp)
+                    .height(120.dp)
                     .constrainAs(coverImage) {
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     }
-                    .height(120.dp)
                     .clip(
                         RoundedCornerShape(
                             topStart = 20.dp,
                             topEnd = 20.dp
                         )
                     )
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = cardData.coverUrl,
-                        contentScale = ContentScale.Crop
-                    ),
-                    contentDescription = "Cover Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
+            )
 
             Image(
                 painter = rememberAsyncImagePainter(
@@ -184,7 +182,8 @@ internal fun Card(
                         end.linkTo(coverImage.end)
                     }
             )
-            Box(
+
+            Spacer(
                 modifier = Modifier
                     .constrainAs(baseBackground) {
                         top.linkTo(tournamentBanner.bottom)
@@ -196,7 +195,15 @@ internal fun Card(
                     .clip(RoundedCornerShape(bottomEnd = 15.dp))
                     .background(Red500)
             )
-            Box(
+
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = cardData.avatarUrl,
+                    imageLoader = gifLoader,
+                    contentScale = ContentScale.Crop
+                ),
+                contentDescription = "Avatar Image",
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .constrainAs(avatarImage) {
                         top.linkTo(tournamentBanner.bottom)
@@ -209,18 +216,7 @@ internal fun Card(
                             bottomEnd = 15.dp
                         )
                     )
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = cardData.avatarUrl,
-                        imageLoader = gifLoader,
-                        contentScale = ContentScale.Crop
-                    ),
-                    contentDescription = "Avatar Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
+            )
             if (cardData.isTitle) {
                 Text(
                     text = cardData.title,
@@ -247,7 +243,7 @@ internal fun Card(
                         bottom.linkTo(coverImage.bottom, margin = 8.dp)
                         end.linkTo(coverImage.end, margin = 12.dp)
                     }
-                    .height(30.dp)
+                    .wrapContentHeight()
                     .width(cardWidthDp - 12.dp)
             ) {
                 items(groupListData.size) { index ->
