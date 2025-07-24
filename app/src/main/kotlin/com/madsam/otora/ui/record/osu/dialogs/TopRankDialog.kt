@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,7 +28,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,8 +49,15 @@ internal fun TopRankDialog(
     onDismiss: () -> Unit
 ) {
     val data by topRankList.collectAsState()
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp.toFloat().dp
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
+    val screenWidthDp = with(density) {
+        windowInfo.containerSize.width.toDp()
+    }
+    val screenHeightDp = with(density) {
+        windowInfo.containerSize.height.toDp()
+    }
+    val cardWidthDp = screenWidthDp * 0.9f - 32.dp
 
     val scrimColor = BlackAlpha80
     val properties = DialogProperties(
@@ -79,8 +88,11 @@ internal fun TopRankDialog(
             )
             Box(
                 modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .heightIn(min = 100.dp, max = LocalConfiguration.current.screenHeightDp.dp * 0.8f)
+                    .width(screenWidthDp * 0.9f)
+                    .heightIn(
+                        min = 100.dp,
+                        max = screenHeightDp * 0.8f
+                    )
                     .clip(RoundedCornerShape(16.dp))
                     .background(Red700)
                     .padding(16.dp)
@@ -122,7 +134,7 @@ internal fun TopRankDialog(
                             ) { index ->
                                 TopRankCard(
                                     item = data[index],
-                                    itemWidth = screenWidthDp - 24.dp
+                                    itemWidth = cardWidthDp
                                 )
                                 if (index != data.size - 1) {
                                     Spacer(modifier = Modifier.height(10.dp))
