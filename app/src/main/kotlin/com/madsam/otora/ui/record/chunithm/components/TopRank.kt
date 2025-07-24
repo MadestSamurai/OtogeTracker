@@ -32,11 +32,11 @@ import java.util.Locale
 @Composable
 internal fun TopRank(
     topRankUI: MutableStateFlow<ChunithmTopRankUiModel>,
-    cardWidthDp: Dp = 600.dp
+    cardWidthDp: Dp
 ) {
     val topRank by topRankUI.collectAsState()
     
-    // 复杂计算：动态分配两个图表的宽度
+    // 动态分配两个图表的宽度
     val idealSpacingRatio = 0.8f // 理想的柱间距与柱宽比例
     val barCount30 = 30
     val barCount10 = 10
@@ -57,7 +57,7 @@ internal fun TopRank(
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .padding(start = 12.dp, end = 12.dp, bottom = 12.dp)
+            .padding(bottom = 12.dp)
     ) {
         // Best 30 图表容器
         Box(

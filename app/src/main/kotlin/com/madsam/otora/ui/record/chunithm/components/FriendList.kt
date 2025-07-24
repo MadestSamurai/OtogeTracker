@@ -23,8 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -57,13 +55,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun FriendList(
-    chuniFriendListUI: MutableStateFlow<List<ChunithmFriendUiModel>>
+    chuniFriendListUI: MutableStateFlow<List<ChunithmFriendUiModel>>,
+    cardWidth: Dp
 ) {
     val friendList by chuniFriendListUI.collectAsState()
-    val screenWidthDp = with(LocalDensity.current) {
-        LocalWindowInfo.current.containerSize.width.toDp()
-    }
-    val cardWidth = screenWidthDp - 24.dp
 
     // Only show friends that have scored
     val scoredList = friendList.filter { it.isScored }
@@ -71,7 +66,7 @@ internal fun FriendList(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(12.dp)
+            .padding(vertical = 12.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(Red700)
             .padding(vertical = 4.dp)

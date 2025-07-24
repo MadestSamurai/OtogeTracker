@@ -14,6 +14,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +46,7 @@ import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Transparent
+import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.components.CustomTabRow
 import com.madsam.otora.ui.record.ChunithmScreenState
 import com.madsam.otora.ui.record.chunithm.dialogs.CookieDialog
@@ -67,6 +74,8 @@ internal fun ChunithmUserPage(
     val pagerState = rememberPagerState { tabTitles.size }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
 
     if (showDialog) {
         CookieDialog(
@@ -117,12 +126,32 @@ internal fun ChunithmUserPage(
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
+                .windowInsetsPadding(
+                    if (useNavigationRail) {
+                        // 使用 NavigationRail 时，需处理底部导航栏
+                        WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
+                    } else {
+                        // 不需要额外处理时，返回空 Insets
+                        WindowInsets(0, 0, 0, 0)
+                    }
+                )
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(46.dp) // 40dp tab + 3dp padding + 3dp padding
-                    .padding(start = 12.dp, end = 12.dp, bottom = 5.dp),
+                    .padding(start = 12.dp, end = 12.dp, bottom = 5.dp)
+                    .windowInsetsPadding(
+                        WindowInsets.displayCutout.only(
+                            if (useNavigationRail) {
+                                // 使用 NavigationRail 时，左侧已由 Rail 处理，只处理右侧
+                                WindowInsetsSides.End
+                            } else {
+                                // 使用 BottomNavigation 时，处理左侧和右侧
+                                WindowInsetsSides.Start + WindowInsetsSides.End
+                            }
+                        )
+                    ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(

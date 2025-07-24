@@ -36,7 +36,7 @@ internal fun AvatarLayout(
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .padding(horizontal = 12.dp)
+            .padding(end = 12.dp)
             .clip(RoundedCornerShape(10.dp))
             .scaledLayout(0.8f) // width: 224, height: 264
             .width(280.dp)

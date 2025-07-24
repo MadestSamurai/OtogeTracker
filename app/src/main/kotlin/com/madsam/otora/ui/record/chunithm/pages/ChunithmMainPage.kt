@@ -4,7 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -21,10 +28,12 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Red300
+import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.AvatarLayout
 import com.madsam.otora.ui.record.chunithm.components.Card
@@ -41,8 +50,31 @@ internal fun ChunithmMainPage(
     onNavigateToTopRating: () -> Unit,
 ) {
     val context = LocalContext.current
-    val screenWidthDp = with(LocalDensity.current) {
-        LocalWindowInfo.current.containerSize.width.toDp()
+    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
+    
+    // 计算屏幕宽度和内容宽度
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val windowInfo = LocalWindowInfo.current
+    val screenWidthDp = with(density) {
+        windowInfo.containerSize.width.toDp()
+    }
+    
+    // 计算 Cutout 占用的宽度
+    val cutoutWidthDp = with(density) {
+        val cutoutInsets = WindowInsets.displayCutout
+        // 计算左右两侧的 cutout 总宽度
+        cutoutInsets.getLeft(density, layoutDirection).toDp() +
+        cutoutInsets.getRight(density, layoutDirection).toDp()
+    }
+    
+    // 计算可用内容宽度
+    val contentWidthDp = if (useNavigationRail) {
+        // NavigationRail 宽度 + 水平 padding + cutout 宽度
+        screenWidthDp - 80.dp - 24.dp - cutoutWidthDp
+    } else {
+        // 只减去水平 padding + cutout 宽度
+        screenWidthDp - 24.dp - cutoutWidthDp
     }
 
     val isRefreshing by viewModel.isRefreshing.collectAsState()
@@ -67,6 +99,8 @@ internal fun ChunithmMainPage(
             modifier = Modifier
                 .background(color = Red300)
                 .fillMaxSize()
+                .padding(horizontal = 12.dp)
+                .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
                 .nestedScroll(object : NestedScrollConnection {
                     private var totalScroll = 0f
 
@@ -83,31 +117,66 @@ internal fun ChunithmMainPage(
                     }
                 })
         ) {
-        item {
-            Card(viewModel.chunithmCardUiModel)
-        }
-        item {
-            Box(
-                modifier = Modifier.clickable {
-                    onNavigateToTopRating()
-                }
-            ) {
-                TopRank(viewModel.chunithmTopRankUiModel)
-            }
-        }
-        item {
-            Row {
-                AvatarLayout(viewModel.chunithmAvatarUiModel)
-                val playDataWidth = screenWidthDp - 224.dp - 24.dp - 12.dp
-                PlayDataList(
-                    width = playDataWidth,
-                    chunithmPlayDataUiModel = viewModel.chunithmPlayDataUiModel
+            item {
+                Card(
+                    viewModel.chunithmCardUiModel,
+                    contentWidthDp
                 )
             }
-        }
-        item {
-            FriendList(viewModel.chuniFriendDataUI)
-        }
+            item {
+                Box(
+                    modifier = Modifier.clickable {
+                        onNavigateToTopRating()
+                    }
+                ) {
+                    TopRank(
+                        viewModel.chunithmTopRankUiModel,
+                        contentWidthDp
+                    )
+                }
+            }
+            item {
+                Row(
+                    modifier = Modifier.windowInsetsPadding(
+                        WindowInsets.displayCutout.only(
+                            if (useNavigationRail) {
+                                // 使用 NavigationRail 时，左侧已由 Rail 处理，只处理右侧
+                                WindowInsetsSides.End
+                            } else {
+                                // 使用 BottomNavigation 时，处理左侧和右侧
+                                WindowInsetsSides.Start + WindowInsetsSides.End
+                            }
+                        )
+                    )
+                ) {
+                    AvatarLayout(viewModel.chunithmAvatarUiModel)
+                    val playDataWidth = contentWidthDp - 224.dp
+                    PlayDataList(
+                        width = playDataWidth,
+                        chunithmPlayDataUiModel = viewModel.chunithmPlayDataUiModel
+                    )
+                }
+            }
+            item {
+                FriendList(
+                    viewModel.chuniFriendDataUI,
+                    contentWidthDp
+                )
+            }
+            
+            // 底部安全区域，让用户滑动到底部时有额外的空间
+            item(key = "bottom_spacer") {
+                androidx.compose.foundation.layout.Spacer(
+                    modifier = Modifier
+                        .windowInsetsPadding(
+                            if (useNavigationRail) {
+                                WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
+                            } else {
+                                WindowInsets(0, 0, 0, 0)
+                            }
+                        )
+                )
+            }
         }
     }
 }

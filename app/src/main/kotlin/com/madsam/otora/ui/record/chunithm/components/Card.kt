@@ -20,13 +20,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -48,20 +47,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun Card(
-    chunithmCardUiModel: MutableStateFlow<ChunithmCardUiModel>
+    chunithmCardUiModel: MutableStateFlow<ChunithmCardUiModel>,
+    cardWidthDp: Dp
 ) {
     val cardData by chunithmCardUiModel.collectAsState()
-    val screenWidthDp = with(LocalDensity.current) {
-        LocalWindowInfo.current.containerSize.width.toDp()
-    }
     Surface(
         shape = RoundedCornerShape(10.dp),
         color = Color.Transparent,
         modifier = Modifier
-            .padding(12.dp)
+            .padding(vertical = 12.dp)
             .fillMaxWidth()
     ) {
-        val surfaceWidthDp = screenWidthDp - 24.dp
         ConstraintLayout(
             modifier = Modifier
                 .background(Red700)
@@ -87,7 +83,7 @@ internal fun Card(
                         top.linkTo(parent.top)
                         start.linkTo(parent.start)
                     }
-                    .width(surfaceWidthDp)
+                    .width(cardWidthDp)
                     .padding(5.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .background(
