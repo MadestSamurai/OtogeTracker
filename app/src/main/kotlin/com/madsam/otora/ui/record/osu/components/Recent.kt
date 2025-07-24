@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.Beige400
@@ -33,6 +34,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @Composable
 internal fun Recent(
     recentActivityList: MutableStateFlow<OsuBriefUiModel<OsuRecentUiModel>>,
+    cardWidthDp: Dp,
     onMoreClick: () -> Unit
 ) {
     val activities by recentActivityList.collectAsState()
@@ -46,7 +48,6 @@ internal fun Recent(
     val screenWidthDp = with(LocalDensity.current) {
         LocalWindowInfo.current.containerSize.width.toDp()
     }
-    val cardWidthDp = screenWidthDp - 24.dp
 
     Surface(
         Modifier

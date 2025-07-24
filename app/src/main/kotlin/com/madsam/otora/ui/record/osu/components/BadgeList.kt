@@ -21,8 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
@@ -34,15 +33,12 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun BadgeList(
-    osuBadgeList: MutableStateFlow<List<OsuBadgeUiModel>>
+    osuBadgeList: MutableStateFlow<List<OsuBadgeUiModel>>,
+    cardWidthDp: Dp
 ) {
     val badgeListData by osuBadgeList.collectAsState()
     val coroutineScope = rememberCoroutineScope()
-    val screenWidthDp = with(LocalDensity.current) {
-        LocalWindowInfo.current.containerSize.width.toDp()
-    }
     if (badgeListData.isNotEmpty()) {
-        val cardWidthDp = screenWidthDp - 24.dp
         Surface(
             Modifier
                 .padding(bottom = 12.dp)

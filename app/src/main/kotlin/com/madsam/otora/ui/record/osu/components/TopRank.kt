@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.Beige400
@@ -28,7 +29,8 @@ internal fun TopRank(
     firstMaps: MutableStateFlow<OsuBriefUiModel<OsuTopRankUiModel>>,
     pinnedOnMoreClick: () -> Unit,
     topOnMoreClick: () -> Unit,
-    firstOnMoreClick: () -> Unit
+    firstOnMoreClick: () -> Unit,
+    cardWidthDp: Dp
 ) {
     val pinnedData by pinnedMaps.collectAsState()
     val topData by topMaps.collectAsState()
@@ -37,7 +39,6 @@ internal fun TopRank(
     val screenWidthDp = with(LocalDensity.current) {
         LocalWindowInfo.current.containerSize.width.toDp()
     }
-    val cardWidth = screenWidthDp - 24.dp
 
     Surface(
         Modifier
@@ -61,17 +62,17 @@ internal fun TopRank(
                 return@Column
             }
             if (pinnedData.items.isNotEmpty()) {
-                TopRankList(pinnedData, "Pinned", cardWidth) {
+                TopRankList(pinnedData, "Pinned", cardWidthDp) {
                     pinnedOnMoreClick()
                 }
             }
             if (topData.items.isNotEmpty()) {
-                TopRankList(topData, "Top", cardWidth) {
+                TopRankList(topData, "Top", cardWidthDp) {
                     topOnMoreClick()
                 }
             }
             if (firstData.items.isNotEmpty()) {
-                TopRankList(firstData, "First", cardWidth) {
+                TopRankList(firstData, "First", cardWidthDp) {
                     firstOnMoreClick()
                 }
             }

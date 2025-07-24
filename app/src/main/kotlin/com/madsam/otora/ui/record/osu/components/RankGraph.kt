@@ -21,14 +21,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.R
@@ -75,16 +74,11 @@ import java.text.DecimalFormat
 @Composable
 internal fun RankGraph(
     osuRankGraphData: MutableStateFlow<List<Int>>,
-    osuRankHighestData: MutableStateFlow<OsuTopRankUiModel>
+    osuRankHighestData: MutableStateFlow<OsuTopRankUiModel>,
+    cardWidthDp: Dp
 ) {
-    val screenWidthDp = with(LocalDensity.current) {
-        LocalWindowInfo.current.containerSize.width.toDp()
-    }
-
     val rankGraphData by osuRankGraphData.collectAsState()
     val highestData by osuRankHighestData.collectAsState()
-
-    val cardWidthDp = screenWidthDp - 24.dp
     Column(
         modifier = Modifier
             .padding(bottom = 4.dp)

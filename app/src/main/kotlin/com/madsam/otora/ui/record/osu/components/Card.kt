@@ -30,13 +30,12 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -63,13 +62,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 internal fun Card(
     osuCardData: MutableStateFlow<OsuCardUiModel>,
     osuGroupDTOList: MutableStateFlow<List<OsuGroupDTO>>,
+    cardWidthDp: Dp
 ) {
     val cardData by osuCardData.collectAsState()
     val groupListData = osuGroupDTOList.collectAsState(initial = emptyList()).value
-    val screenWidthDp = with(LocalDensity.current) {
-        LocalWindowInfo.current.containerSize.width.toDp()
-    }
-    val cardWidthDp = screenWidthDp - 24.dp
 
     Column {
         ConstraintLayout(

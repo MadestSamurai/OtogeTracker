@@ -19,6 +19,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.utils.ScreenUtil
@@ -44,6 +47,31 @@ internal fun Main(
     var showTopRankDialog by remember { mutableStateOf("") }
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
+    
+    // 计算屏幕宽度和内容宽度
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val windowInfo = LocalWindowInfo.current
+    val screenWidthDp = with(density) {
+        windowInfo.containerSize.width.toDp()
+    }
+    
+    // 计算 Cutout 占用的宽度
+    val cutoutWidthDp = with(density) {
+        val cutoutInsets = WindowInsets.displayCutout
+        // 计算左右两侧的 cutout 总宽度
+        cutoutInsets.getLeft(density, layoutDirection).toDp() +
+        cutoutInsets.getRight(density, layoutDirection).toDp()
+    }
+    
+    // 计算可用内容宽度
+    val contentWidthDp = if (useNavigationRail) {
+        // NavigationRail 宽度 + 水平 padding + cutout 宽度
+        screenWidthDp - 80.dp - 24.dp - cutoutWidthDp
+    } else {
+        // 只减去水平 padding + cutout 宽度
+        screenWidthDp - 24.dp - cutoutWidthDp
+    }
     
     LazyColumn(
         modifier = Modifier
@@ -76,17 +104,38 @@ internal fun Main(
                 }
             })
     ) {
-        item(key = "card_data") { Card(viewModel.cardUI, viewModel.groupListUI) }
-        item(key = "badge_list") { BadgeList(viewModel.badgeUI) }
+        item(key = "card_data") { Card(
+            viewModel.cardUI,
+            viewModel.groupListUI,
+            contentWidthDp
+        ) }
+        item(key = "badge_list") { BadgeList(
+            viewModel.badgeUI,
+            contentWidthDp
+        ) }
         item(key = "rank_graph") {
-            RankGraph(viewModel.rankGraphUI, viewModel.topRankUI)
-            Level(viewModel.levelUI)
+            RankGraph(
+                viewModel.rankGraphUI,
+                viewModel.topRankUI,
+                contentWidthDp
+            )
+            Level(
+                viewModel.levelUI,
+                contentWidthDp
+            )
         }
-        item(key = "play_data") { PlayData(viewModel.playUI) }
-        item(key = "social") { SocialCard(viewModel.socialUI) }
-        item(key = "recent") {
-            Recent(viewModel.recentBrief) { showFullRecentDialog = true }
-        }
+        item(key = "play_data") { PlayData(
+            viewModel.playUI,
+            contentWidthDp
+        ) }
+        item(key = "social") { SocialCard(
+            viewModel.socialUI,
+            contentWidthDp
+        ) }
+        item(key = "recent") { Recent(
+            viewModel.recentBrief,
+            contentWidthDp
+        ) { showFullRecentDialog = true } }
         item(key = "top_rank") {
             TopRank(
                 viewModel.pinnedBrief,
@@ -94,7 +143,8 @@ internal fun Main(
                 viewModel.firstBrief,
                 { showTopRankDialog = "pinned" },
                 { showTopRankDialog = "best" },
-                { showTopRankDialog = "first" }
+                { showTopRankDialog = "first" },
+                contentWidthDp
             )
         }
         
