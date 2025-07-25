@@ -19,4 +19,26 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep data model classes
 -keep class com.madsam.otora.data.model.web.** { *; }
+
+# Suppress R8 warnings for kotlinx-serialization
+-dontwarn kotlinx.serialization.**
+
+# Keep Moshi JSON adapters
+-keep class com.squareup.moshi.** { *; }
+-keep @com.squareup.moshi.JsonClass class * { *; }
+-keepclassmembers class * {
+    @com.squareup.moshi.Json <fields>;
+}
+
+# Keep Retrofit service interfaces
+-keep interface com.madsam.otora.data.**.api.** { *; }
+
+# Keep data transfer objects (DTOs)
+-keep class com.madsam.otora.data.**.model.** { *; }
+-keep class com.madsam.otora.data.**.remote.model.** { *; }
+
+# Keep entity classes for Realm
+-keep class com.madsam.otora.data.**.local.model.** { *; }

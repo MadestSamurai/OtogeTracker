@@ -1,15 +1,9 @@
 package com.madsam.otora.core.icon.filled
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 val Tick: ImageVector
@@ -45,11 +39,3 @@ val Tick: ImageVector
 
 @Suppress("ObjectPropertyName")
 private var _Tick: ImageVector? = null
-
-@Preview(showBackground = true)
-@Composable
-private fun TickPreview() {
-    Box(modifier = Modifier.padding(12.dp)) {
-        Image(imageVector = Tick, contentDescription = null)
-    }
-}

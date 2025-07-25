@@ -1,17 +1,11 @@
 package com.madsam.otora.core.icon.filled
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.PathData
 import androidx.compose.ui.graphics.vector.group
 import androidx.compose.ui.graphics.vector.path
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 val SwitchArrow: ImageVector
@@ -77,11 +71,3 @@ val SwitchArrow: ImageVector
 
 @Suppress("ObjectPropertyName")
 private var _SwitchArrow: ImageVector? = null
-
-@Preview(showBackground = true)
-@Composable
-private fun SwitchArrow1Preview() {
-    Box(modifier = Modifier.padding(12.dp)) {
-        Image(imageVector = SwitchArrow, contentDescription = null)
-    }
-}
