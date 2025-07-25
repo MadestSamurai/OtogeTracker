@@ -38,6 +38,8 @@ import com.madsam.otora.core.theme.GradientBrush.RainbowGradientBg
 import com.madsam.otora.core.theme.GradientBrush.SilverGradientBg
 import com.madsam.otora.core.theme.GradientBrush.WhiteGradientBg
 import com.madsam.otora.core.theme.OSU_LEVEL_GOLD_1
+import com.madsam.otora.core.theme.OSU_LEVEL_PLATINUM_1
+import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.utils.CommonUtils.getRatingBrush
@@ -59,7 +61,14 @@ internal fun Card(
     ) {
         ConstraintLayout(
             modifier = Modifier
-                .background(Red700)
+                .background(
+                    when (cardData.profileBackground) {
+                        "silver" -> RANKING_BLUE
+                        "gold" -> OSU_LEVEL_GOLD_1
+                        "platina" -> OSU_LEVEL_PLATINUM_1
+                        else -> Red700
+                    }
+                )
         ) {
             val (
                 charaImage,
