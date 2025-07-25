@@ -21,23 +21,21 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -102,12 +100,6 @@ internal fun ChunithmSongListPage(
         }
     }
 
-    var totalMatches by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(songList) {
-        totalMatches = songList.size
-    }
-
     val selectedGenres = remember { mutableStateOf(setOf<String>()) }
     val selectedVersions = remember { mutableStateOf(setOf<String>()) }
     val selectedDifficulties = remember { mutableStateOf(setOf<String>()) }
@@ -123,6 +115,10 @@ internal fun ChunithmSongListPage(
 
     // 添加展开/收起筛选的状态
     val isFilterExpanded = remember { mutableStateOf(false) }
+    
+    // 添加排序相关状态
+    val isSortExpanded = remember { mutableStateOf(false) }
+    val selectedSortOption = remember { mutableStateOf("default") } // 默认按数据库原始顺序
 
     // 使用整数范围（乘以10），避免浮点数精度问题
     val internalLevelRange = remember { mutableStateOf(10..157) } // 1.0 to 15.7
@@ -131,9 +127,9 @@ internal fun ChunithmSongListPage(
     val filterCnLevelRange = remember { mutableStateOf(10..154) }
 
     val filteredSongList by remember(searchText, songList, selectedGenres.value, selectedVersions.value,
-        selectedDifficulties.value, filterInternalLevelRange.value, filterCnLevelRange.value) {
+        selectedDifficulties.value, filterInternalLevelRange.value, filterCnLevelRange.value, selectedSortOption.value) {
         derivedStateOf {
-            songList.filter { song ->
+            val filtered = songList.filter { song ->
                 // 如果任何一个筛选器是空集合（全不选），则不显示任何内容
                 if (selectedGenres.value.isEmpty() || selectedVersions.value.isEmpty() || selectedDifficulties.value.isEmpty()) {
                     return@filter false
@@ -164,6 +160,44 @@ internal fun ChunithmSongListPage(
 
                     jpLevelMatch && cnLevelMatch && difficultyMatch
                 }
+            }
+            
+            // 排序逻辑
+            when (selectedSortOption.value) {
+                "default" -> filtered // 保持数据库原始顺序
+                "title" -> filtered.sortedBy { it.title }
+                "artist" -> filtered.sortedBy { it.artist }
+                "basic_cn" -> filtered.sortedBy { song -> 
+                    song.sheets.find { it.difficulty == "basic" }?.levelValueCn ?: 0.0 
+                }
+                "advanced_cn" -> filtered.sortedBy { song -> 
+                    song.sheets.find { it.difficulty == "advanced" }?.levelValueCn ?: 0.0 
+                }
+                "expert_cn" -> filtered.sortedBy { song -> 
+                    song.sheets.find { it.difficulty == "expert" }?.levelValueCn ?: 0.0 
+                }
+                "master_cn" -> filtered.sortedBy { song -> 
+                    song.sheets.find { it.difficulty == "master" }?.levelValueCn ?: 0.0 
+                }
+                "ultima_cn" -> filtered.sortedBy { song -> 
+                    song.sheets.find { it.difficulty == "ultima" }?.levelValueCn ?: 0.0 
+                }
+                "basic_jp" -> filtered.sortedBy { song -> 
+                    song.sheets.find { it.difficulty == "basic" }?.internalLevelValueJp ?: 0.0 
+                }
+                "advanced_jp" -> filtered.sortedBy { song -> 
+                    song.sheets.find { it.difficulty == "advanced" }?.internalLevelValueJp ?: 0.0 
+                }
+                "expert_jp" -> filtered.sortedBy { song -> 
+                    song.sheets.find { it.difficulty == "expert" }?.internalLevelValueJp ?: 0.0 
+                }
+                "master_jp" -> filtered.sortedBy { song -> 
+                    song.sheets.find { it.difficulty == "master" }?.internalLevelValueJp ?: 0.0 
+                }
+                "ultima_jp" -> filtered.sortedBy { song -> 
+                    song.sheets.find { it.difficulty == "ultima" }?.internalLevelValueJp ?: 0.0 
+                }
+                else -> filtered // 默认情况也保持原始顺序
             }
         }
     }
@@ -215,6 +249,20 @@ internal fun ChunithmSongListPage(
                             else
                                 Filled.ArrowDown,
                             contentDescription = if (isFilterExpanded.value) "收起筛选" else "展开筛选",
+                            tint = Beige500
+                        )
+                    }
+
+                    androidx.compose.material3.IconButton(
+                        onClick = { isSortExpanded.value = !isSortExpanded.value },
+                        modifier = Modifier.padding(start = 4.dp)
+                    ) {
+                        androidx.compose.material3.Icon(
+                            imageVector = if (isSortExpanded.value)
+                                Filled.ArrowUp
+                            else
+                                Filled.ArrowDown,
+                            contentDescription = if (isSortExpanded.value) "收起排序" else "展开排序",
                             tint = Beige500
                         )
                     }
@@ -599,6 +647,173 @@ internal fun ChunithmSongListPage(
                                 }
                             },
                     )
+                }
+            }
+        }
+
+        // 浮动排序栏
+        AnimatedVisibility(
+            visible = isSortExpanded.value,
+            enter = expandVertically(),
+            exit = shrinkVertically(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 64.dp) // 调整为更精确的搜索栏高度
+                .zIndex(2f) // 确保浮在筛选栏上层
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Red300) // 背景色，确保不透明
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = "排序选项",
+                    color = Beige500,
+                    fontSize = 16.sp,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                // 基本排序选项
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val basicSortOptions = listOf(
+                        "default" to "默认顺序",
+                        "title" to "标题",
+                        "artist" to "艺术家"
+                    )
+                    
+                    basicSortOptions.forEach { (value, label) ->
+                        val isSelected = selectedSortOption.value == value
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(32.dp)
+                                .background(
+                                    if (isSelected) Red500 else Red300,
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .clickable {
+                                    selectedSortOption.value = value
+                                    isSortExpanded.value = false
+                                }
+                                .padding(horizontal = 12.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = label,
+                                color = Beige500,
+                                fontSize = 13.sp,
+                                fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // CN Value排序选项
+                Text(
+                    text = "按CN Value排序",
+                    color = Beige500,
+                    fontSize = 14.sp,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    val cnSortOptions = listOf(
+                        "basic_cn" to "BAS",
+                        "advanced_cn" to "ADV", 
+                        "expert_cn" to "EXP",
+                        "master_cn" to "MAS",
+                        "ultima_cn" to "ULT"
+                    )
+                    
+                    cnSortOptions.forEach { (value, label) ->
+                        val isSelected = selectedSortOption.value == value
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(28.dp)
+                                .background(
+                                    if (isSelected) Red500 else Red300,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .clickable {
+                                    selectedSortOption.value = value
+                                    isSortExpanded.value = false
+                                }
+                                .padding(horizontal = 4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = label,
+                                color = Beige500,
+                                fontSize = 11.sp,
+                                fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                // JP Value排序选项
+                Text(
+                    text = "按JP Value排序",
+                    color = Beige500,
+                    fontSize = 14.sp,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    val jpSortOptions = listOf(
+                        "basic_jp" to "BAS",
+                        "advanced_jp" to "ADV",
+                        "expert_jp" to "EXP", 
+                        "master_jp" to "MAS",
+                        "ultima_jp" to "ULT"
+                    )
+                    
+                    jpSortOptions.forEach { (value, label) ->
+                        val isSelected = selectedSortOption.value == value
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(28.dp)
+                                .background(
+                                    if (isSelected) Red500 else Red300,
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .clickable {
+                                    selectedSortOption.value = value
+                                    isSortExpanded.value = false
+                                }
+                                .padding(horizontal = 4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = label,
+                                color = Beige500,
+                                fontSize = 11.sp,
+                                fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
                 }
             }
         }

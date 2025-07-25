@@ -53,14 +53,21 @@ import com.madsam.otora.data.chunithm.ui.model.ChunithmFriendUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-internal fun FriendList(
+internal fun ChunithmFriendList(
     chuniFriendListUI: MutableStateFlow<List<ChunithmFriendUiModel>>,
-    cardWidth: Dp
+    cardWidth: Dp,
+    showOnlyScored: Boolean = false,
+    showPinnedLabel: Boolean = false
 ) {
     val friendList by chuniFriendListUI.collectAsState()
 
-    // Only show friends that have scored
-    val scoredList = friendList.filter { it.isScored }
+    val filteredList = if (showOnlyScored) {
+        friendList.filter { it.isScored }
+    } else {
+        friendList.filter { !it.isScored }
+    }
+
+    if (filteredList.isEmpty()) return
 
     Column(
         modifier = Modifier
@@ -70,7 +77,21 @@ internal fun FriendList(
             .background(Red700)
             .padding(vertical = 4.dp)
     ) {
-        for (chuniFriend in scoredList) {
+        // 置顶标签
+        if (showPinnedLabel) {
+            Text(
+                text = "已登录分数 (置顶)",
+                color = Beige500,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.End
+            )
+        }
+        
+        for (chuniFriend in filteredList) {
             FriendCard(chuniFriend, cardWidth - 12.dp)
         }
     }

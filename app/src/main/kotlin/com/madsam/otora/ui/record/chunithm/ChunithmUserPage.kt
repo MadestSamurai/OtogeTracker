@@ -51,6 +51,7 @@ import com.madsam.otora.ui.components.CustomTabRow
 import com.madsam.otora.ui.record.ChunithmScreenState
 import com.madsam.otora.ui.record.chunithm.dialogs.CookieDialog
 import com.madsam.otora.ui.record.chunithm.dialogs.TopRankDialog
+import com.madsam.otora.ui.record.chunithm.pages.ChunithmFriendsPage
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmMainPage
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmSongListPage
 import kotlinx.coroutines.flow.update
@@ -69,7 +70,7 @@ internal fun ChunithmUserPage(
 
     var isTabRowVisible by remember { mutableStateOf(true) }
     var showTopRankDialog by remember { mutableStateOf(false) }
-    val tabTitles = listOf("Home", "Song List")
+    val tabTitles = listOf("Home", "Song List", "Friends")
 
     val pagerState = rememberPagerState { tabTitles.size }
     val context = LocalContext.current
@@ -116,6 +117,12 @@ internal fun ChunithmUserPage(
                 )
 
                 1 -> ChunithmSongListPage(
+                    viewModel = viewModel,
+                    scrollThreshold = scrollThreshold,
+                    setIsTabRowVisible = { isTabRowVisible = it },
+                )
+
+                2 -> ChunithmFriendsPage(
                     viewModel = viewModel,
                     scrollThreshold = scrollThreshold,
                     setIsTabRowVisible = { isTabRowVisible = it },
@@ -202,17 +209,27 @@ internal fun ChunithmUserPage(
                         .clip(RoundedCornerShape(50))
                         .background(Red500)
                         .clickable {
-                            if (selectedTabIndex == 0) {
-                                // 主页，刷新
-                                scope.launch {
-                                    viewModel.loadData(context)
-                                    snackbarHostState.showSnackbar("已刷新")
+                            when (selectedTabIndex) {
+                                0 -> {
+                                    // 主页，刷新
+                                    scope.launch {
+                                        viewModel.loadData(context)
+                                        snackbarHostState.showSnackbar("已刷新")
+                                    }
                                 }
-                            } else if (selectedTabIndex == 1) {
-                                // 歌曲列表页，回到顶部
-                                scope.launch {
-                                    viewModel.scrollSongListToTop()
-                                    snackbarHostState.showSnackbar("已回到顶部")
+                                1 -> {
+                                    // 歌曲列表页，回到顶部
+                                    scope.launch {
+                                        viewModel.scrollSongListToTop()
+                                        snackbarHostState.showSnackbar("已回到顶部")
+                                    }
+                                }
+                                2 -> {
+                                    // 好友页面，刷新好友数据
+                                    scope.launch {
+                                        viewModel.refreshUserData(context)
+                                        snackbarHostState.showSnackbar("好友数据已刷新")
+                                    }
                                 }
                             }
                         },
@@ -225,9 +242,19 @@ internal fun ChunithmUserPage(
                     ) { tabIndex ->
                         Icon(
                             painter = rememberVectorPainter(
-                                image = if (tabIndex == 0) Filled.ArrowRotate else Filled.ArrowUp
+                                image = when (tabIndex) {
+                                    0 -> Filled.ArrowRotate  // Home: 刷新图标
+                                    1 -> Filled.ArrowUp      // Song List: 向上箭头
+                                    2 -> Filled.ArrowRotate  // Friends: 刷新图标
+                                    else -> Filled.ArrowRotate
+                                }
                             ),
-                            contentDescription = if (tabIndex == 0) "Refresh" else "Scroll to Top",
+                            contentDescription = when (tabIndex) {
+                                0 -> "Refresh"
+                                1 -> "Scroll to Top"
+                                2 -> "Refresh Friends"
+                                else -> "Refresh"
+                            },
                             tint = Beige500,
                             modifier = Modifier.size(16.dp)
                         )

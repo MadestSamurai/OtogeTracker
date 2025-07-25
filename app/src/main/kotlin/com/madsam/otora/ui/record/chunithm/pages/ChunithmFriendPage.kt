@@ -1,9 +1,6 @@
 package com.madsam.otora.ui.record.chunithm.pages
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
@@ -35,22 +32,18 @@ import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
-import com.madsam.otora.ui.record.chunithm.components.AvatarLayout
-import com.madsam.otora.ui.record.chunithm.components.Card
-import com.madsam.otora.ui.record.chunithm.components.PlayDataList
-import com.madsam.otora.ui.record.chunithm.components.TopRank
+import com.madsam.otora.ui.record.chunithm.components.ChunithmFriendList
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ChunithmMainPage(
+internal fun ChunithmFriendsPage(
     viewModel: ChunithmViewModel,
     scrollThreshold: Float,
     setIsTabRowVisible: (Boolean) -> Unit,
-    onNavigateToTopRating: () -> Unit,
 ) {
     val context = LocalContext.current
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
-    
+
     // 计算屏幕宽度和内容宽度
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
@@ -58,15 +51,15 @@ internal fun ChunithmMainPage(
     val screenWidthDp = with(density) {
         windowInfo.containerSize.width.toDp()
     }
-    
+
     // 计算 Cutout 占用的宽度
     val cutoutWidthDp = with(density) {
         val cutoutInsets = WindowInsets.displayCutout
         // 计算左右两侧的 cutout 总宽度
         cutoutInsets.getLeft(density, layoutDirection).toDp() +
-        cutoutInsets.getRight(density, layoutDirection).toDp()
+                cutoutInsets.getRight(density, layoutDirection).toDp()
     }
-    
+
     // 计算可用内容宽度
     val contentWidthDp = if (useNavigationRail) {
         // NavigationRail 宽度 + 水平 padding + cutout 宽度
@@ -116,47 +109,26 @@ internal fun ChunithmMainPage(
                     }
                 })
         ) {
+            // 置顶：已登录分数的好友
             item {
-                Card(
-                    viewModel.chunithmCardUiModel,
-                    contentWidthDp
+                ChunithmFriendList(
+                    chuniFriendListUI = viewModel.chuniFriendDataUI,
+                    cardWidth = contentWidthDp,
+                    showOnlyScored = true,
+                    showPinnedLabel = true
                 )
             }
+
+            // 其他好友
             item {
-                Box(
-                    modifier = Modifier.clickable {
-                        onNavigateToTopRating()
-                    }
-                ) {
-                    TopRank(
-                        viewModel.chunithmTopRankUiModel,
-                        contentWidthDp
-                    )
-                }
+                ChunithmFriendList(
+                    chuniFriendListUI = viewModel.chuniFriendDataUI,
+                    cardWidth = contentWidthDp,
+                    showOnlyScored = false,
+                    showPinnedLabel = false
+                )
             }
-            item {
-                Row(
-                    modifier = Modifier.windowInsetsPadding(
-                        WindowInsets.displayCutout.only(
-                            if (useNavigationRail) {
-                                // 使用 NavigationRail 时，左侧已由 Rail 处理，只处理右侧
-                                WindowInsetsSides.End
-                            } else {
-                                // 使用 BottomNavigation 时，处理左侧和右侧
-                                WindowInsetsSides.Start + WindowInsetsSides.End
-                            }
-                        )
-                    )
-                ) {
-                    AvatarLayout(viewModel.chunithmAvatarUiModel)
-                    val playDataWidth = contentWidthDp - 224.dp
-                    PlayDataList(
-                        width = playDataWidth,
-                        chunithmPlayDataUiModel = viewModel.chunithmPlayDataUiModel
-                    )
-                }
-            }
-            
+
             // 底部安全区域，让用户滑动到底部时有额外的空间
             item(key = "bottom_spacer") {
                 androidx.compose.foundation.layout.Spacer(
