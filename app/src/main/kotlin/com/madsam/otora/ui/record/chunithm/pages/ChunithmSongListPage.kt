@@ -119,6 +119,7 @@ internal fun ChunithmSongListPage(
     // 添加排序相关状态
     val isSortExpanded = remember { mutableStateOf(false) }
     val selectedSortOption = remember { mutableStateOf("default") } // 默认按数据库原始顺序
+    val isAscendingOrder = remember { mutableStateOf(true) } // 默认正序
 
     // 使用整数范围（乘以10），避免浮点数精度问题
     val internalLevelRange = remember { mutableStateOf(10..157) } // 1.0 to 15.7
@@ -127,7 +128,7 @@ internal fun ChunithmSongListPage(
     val filterCnLevelRange = remember { mutableStateOf(10..154) }
 
     val filteredSongList by remember(searchText, songList, selectedGenres.value, selectedVersions.value,
-        selectedDifficulties.value, filterInternalLevelRange.value, filterCnLevelRange.value, selectedSortOption.value) {
+        selectedDifficulties.value, filterInternalLevelRange.value, filterCnLevelRange.value, selectedSortOption.value, isAscendingOrder.value) {
         derivedStateOf {
             val filtered = songList.filter { song ->
                 // 如果任何一个筛选器是空集合（全不选），则不显示任何内容
@@ -163,7 +164,7 @@ internal fun ChunithmSongListPage(
             }
             
             // 排序逻辑
-            when (selectedSortOption.value) {
+            val sorted = when (selectedSortOption.value) {
                 "default" -> filtered // 保持数据库原始顺序
                 "title" -> filtered.sortedBy { it.title }
                 "artist" -> filtered.sortedBy { it.artist }
@@ -198,6 +199,13 @@ internal fun ChunithmSongListPage(
                     song.sheets.find { it.difficulty == "ultima" }?.internalLevelValueJp ?: 0.0 
                 }
                 else -> filtered // 默认情况也保持原始顺序
+            }
+            
+            // 应用正序/倒序
+            if (selectedSortOption.value != "default" && !isAscendingOrder.value) {
+                sorted.reversed()
+            } else {
+                sorted
             }
         }
     }
@@ -674,6 +682,60 @@ internal fun ChunithmSongListPage(
                     fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
+                
+                // 正序/倒序切换按钮
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(28.dp)
+                            .background(
+                                if (isAscendingOrder.value) Red500 else Red300,
+                                RoundedCornerShape(10.dp)
+                            )
+                            .clickable {
+                                isAscendingOrder.value = true
+                            }
+                            .padding(horizontal = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "正序 ↑",
+                            color = Beige500,
+                            fontSize = 12.sp,
+                            fontWeight = if (isAscendingOrder.value) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(28.dp)
+                            .background(
+                                if (!isAscendingOrder.value) Red500 else Red300,
+                                RoundedCornerShape(10.dp)
+                            )
+                            .clickable {
+                                isAscendingOrder.value = false
+                            }
+                            .padding(horizontal = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "倒序 ↓",
+                            color = Beige500,
+                            fontSize = 12.sp,
+                            fontWeight = if (!isAscendingOrder.value) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
                 
                 // 基本排序选项
                 Row(
