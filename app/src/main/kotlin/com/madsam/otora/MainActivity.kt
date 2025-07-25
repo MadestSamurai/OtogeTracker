@@ -73,7 +73,6 @@ fun MainActivityScreen(navController: NavHostController) {
     val unselectedIcons =
         listOf(Icons.Outlined.Home, Icons.Outlined.FavoriteBorder, Icons.Outlined.Star)
     val snackbarHostState = remember { SnackbarHostState() }
-
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
 
     LaunchedEffect(navController) {

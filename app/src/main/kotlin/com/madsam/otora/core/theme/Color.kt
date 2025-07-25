@@ -3,14 +3,6 @@ package com.madsam.otora.core.theme
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-/**
- * 项目名: OtogeTracker
- * 文件名: Colors
- * 创建者: MadSamurai
- * 创建时间:2023/3/9 16:59
- * 描述: 颜色常量类
- */
-
 val PurpleTheme = Color(0xFF674FA3)
 val Black333 = Color(0xFF333333)
 val White1000: Color = Color(0xFFFFFFFF)

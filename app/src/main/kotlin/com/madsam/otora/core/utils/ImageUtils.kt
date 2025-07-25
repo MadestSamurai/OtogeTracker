@@ -9,11 +9,12 @@ import java.io.OutputStream
 import androidx.core.graphics.scale
 
 object ImageUtils {
-    private fun resizeBitmapIfNeeded(bitmap: Bitmap, maxHeight: Int): Bitmap {
-        return if (bitmap.height > maxHeight) {
+    private const val MAX_BITMAP_HEIGHT = 32000
+    private fun resizeBitmapToMaxHeight(bitmap: Bitmap): Bitmap {
+        return if (bitmap.height > MAX_BITMAP_HEIGHT) {
             val aspectRatio = bitmap.width.toFloat() / bitmap.height.toFloat()
-            val newWidth = (maxHeight * aspectRatio).toInt()
-            bitmap.scale(newWidth, maxHeight)
+            val newWidth = (MAX_BITMAP_HEIGHT * aspectRatio).toInt()
+            bitmap.scale(newWidth, MAX_BITMAP_HEIGHT)
         } else {
             bitmap
         }
@@ -27,7 +28,7 @@ object ImageUtils {
             put(MediaStore.Images.Media.DESCRIPTION, description)
             put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
         }
-        val resizedBitmap = resizeBitmapIfNeeded(bitmap, 32000)
+        val resizedBitmap = resizeBitmapToMaxHeight(bitmap)
         val uri = context.contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
         uri?.let {
             val outputStream: OutputStream? = context.contentResolver.openOutputStream(it)
