@@ -3,7 +3,7 @@ package com.madsam.otora.data.osu.remote.model
 import com.squareup.moshi.Json
 
 internal data class OsuRecentActivityDTO(
-    @Json(name = "created_at") val createdAt: String = "",
+    @param:Json(name = "created_at") val createdAt: String = "",
     val id: Long = 0,
     val type: String = "",
     val scoreRank: String = "",

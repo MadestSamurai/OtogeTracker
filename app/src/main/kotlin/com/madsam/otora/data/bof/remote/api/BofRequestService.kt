@@ -70,12 +70,13 @@ class BofRequestService(private val context: Context) {
         val response = try {
             bofCall.execute()
         } catch (e: SocketTimeoutException) {
-            Log.e(TAG, "Exception: ${e.message}")
+            Log.e(TAG, "Socket timeout exception: ${e.message}")
             return
         }
 
         if (!response.isSuccessful) {
-            Log.e(TAG, "Response is not successful")
+            Log.e(TAG, "Response is not successful: code=${response.code()}, message=${response.message()}, url=${response.raw().request.url}")
+
             return
         }
 
@@ -121,7 +122,7 @@ class BofRequestService(private val context: Context) {
             }
             onComplete()
         } catch (e: IOException) {
-            Log.e(TAG, "IOException: ${e.message}")
+            Log.e(TAG, "IOException while saving BOF entry data: ${e.message}", e)
         } finally {
             realm.close()
         }
@@ -131,7 +132,7 @@ class BofRequestService(private val context: Context) {
         val bofTeamCall = api.getBofttTeamData(date)
         val response = bofTeamCall.execute()
         if (!response.isSuccessful) {
-            Log.e(TAG, "Response is not successful")
+            Log.e(TAG, "Response is not successful: code=${response.code()}, message=${response.message()}, url=${response.raw().request.url}")
             return
         }
 
@@ -196,7 +197,7 @@ class BofRequestService(private val context: Context) {
                 }
             }
         } catch (e: IOException) {
-            Log.e(TAG, "IOException: ${e.message}")
+            Log.e(TAG, "IOException while saving BOF team data: ${e.message}", e)
         } finally {
             realm.close()
         }
@@ -206,7 +207,7 @@ class BofRequestService(private val context: Context) {
         val bofCommentCall = api.getBofttComment(date)
         val response = bofCommentCall.execute()
         if (!response.isSuccessful) {
-            Log.e(TAG, "Response is not successful")
+            Log.e(TAG, "Response is not successful: code=${response.code()}, message=${response.message()}, url=${response.raw().request.url}")
             return
         }
 
@@ -267,50 +268,219 @@ class BofRequestService(private val context: Context) {
                 }
             }
         } catch (e: IOException) {
-            Log.e(TAG, "IOException: ${e.message}")
+            Log.e(TAG, "IOException while saving BOF comment data: ${e.message}", e)
         } finally {
             realm.close()
         }
     }
 
+    // 用于跟踪已处理的日期，避免重复存储到 SharedPreferences
+    private val processedDates = mutableSetOf<String>()
+    private val processedTeamDates = mutableSetOf<String>()
+    
+    // 缓存范围数据
+    private var cachedRangeData: List<com.madsam.otora.data.bof.remote.model.BofRangeDTO>? = null
+
+    private fun getBofRangeData(): List<com.madsam.otora.data.bof.remote.model.BofRangeDTO>? {
+        // 如果已有缓存，直接返回
+        cachedRangeData?.let { return it }
+        
+        val rangeCall = api.getBofRangeData()
+        val response = try {
+            rangeCall.execute()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get range data: ${e.message}")
+            return null
+        }
+        
+        if (!response.isSuccessful) {
+            Log.e(TAG, "Range data response is not successful: code=${response.code()}, message=${response.message()}")
+            return null
+        }
+        
+        val rangeData = response.body()
+        if (rangeData == null) {
+            Log.e(TAG, "Range data response body is null")
+            return null
+        }
+        
+        // 缓存数据
+        cachedRangeData = rangeData
+        return rangeData
+    }
+
     fun requestBofttData(dateTime: LocalDate, onComplete: () -> Unit) {
-        val startDate = LocalDate.parse("2024-10-16")
+        serviceScope.launch(dispatcher) {
+            // 获取范围数据
+            val rangeData = getBofRangeData()
+            val ttRange = rangeData?.find { it.name == "tt" }
+            
+            if (ttRange == null) {
+                Log.w(TAG, "No 'tt' range found in range data, using fallback date")
+                // 如果没有获取到范围数据，使用默认值
+                requestBofttDataWithRange(dateTime, LocalDate.parse("2024-10-16"), onComplete)
+                return@launch
+            }
+            
+            val startDate = try {
+                LocalDate.parse(ttRange.start)
+            } catch (_: Exception) {
+                Log.e(TAG, "Failed to parse start date: ${ttRange.start}, using fallback")
+                LocalDate.parse("2024-10-16")
+            }
+            
+            val endDate = try {
+                LocalDate.parse(ttRange.end)
+            } catch (_: Exception) {
+                Log.e(TAG, "Failed to parse end date: ${ttRange.end}, using current date")
+                dateTime
+            }
+            
+            // 使用范围内的结束日期，而不是传入的日期
+            val actualEndDate = if (dateTime.isAfter(endDate)) endDate else dateTime
+            
+            Log.d(TAG, "Using date range: start=${startDate}, end=${actualEndDate}")
+            requestBofttDataWithRange(actualEndDate, startDate, onComplete)
+        }
+    }
+    
+    private fun requestBofttDataWithRange(dateTime: LocalDate, startDate: LocalDate, onComplete: () -> Unit) {
+        val datesToRequest = mutableListOf<String>()
+        
+        // 收集需要请求的日期
         var currentDate = dateTime
         while (currentDate.isAfter(startDate)) {
             val dateToRequest = currentDate.toString()
-            if (!ShareUtil.findStringArray("dates", dateToRequest, context)) {
-                serviceScope.launch(dispatcher) {
-                    semaphore.withPermit {
+            if (!ShareUtil.findStringArray("dates", dateToRequest, context) && 
+                !processedDates.contains(dateToRequest)) {
+                datesToRequest.add(dateToRequest)
+            }
+            currentDate = currentDate.minusDays(1)
+        }
+        
+        if (datesToRequest.isEmpty()) {
+            onComplete()
+            return
+        }
+        
+        // 使用计数器跟踪完成状态
+        var completedCount = 0
+        val totalCount = datesToRequest.size
+        
+        datesToRequest.forEach { dateToRequest ->
+            serviceScope.launch(dispatcher) {
+                semaphore.withPermit {
+                    try {
                         requestBofttEntryData(dateToRequest) {
-                            if (currentDate.isBefore(dateTime)) {
-                                ShareUtil.insertStringArray("dates", dateToRequest, context)
+                            // 标记为已处理，避免重复请求
+                            processedDates.add(dateToRequest)
+                            // 异步存储到 SharedPreferences
+                            ShareUtil.insertStringArray("dates", dateToRequest, context)
+                            
+                            // 检查是否所有请求都完成
+                            synchronized(this@BofRequestService) {
+                                completedCount++
+                                if (completedCount == totalCount) {
+                                    onComplete()
+                                }
                             }
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to request entry data for $dateToRequest: ${e.message}")
+                        // 即使失败也要更新计数器
+                        synchronized(this@BofRequestService) {
+                            completedCount++
+                            if (completedCount == totalCount) {
+                                onComplete()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    
+    fun requestBofttTeamData(dateTime: LocalDate, onComplete: () -> Unit) {
+        serviceScope.launch(dispatcher) {
+            // 获取范围数据
+            val rangeData = getBofRangeData()
+            val ttRange = rangeData?.find { it.name == "tt" }
+            
+            if (ttRange == null) {
+                Log.w(TAG, "No 'tt' range found in range data, using fallback date")
+                // 如果没有获取到范围数据，使用默认值
+                requestBofttTeamDataWithRange(dateTime, LocalDate.parse("2024-10-16"), onComplete)
+                return@launch
+            }
+            
+            val startDate = try {
+                LocalDate.parse(ttRange.start)
+            } catch (_: Exception) {
+                Log.e(TAG, "Failed to parse start date: ${ttRange.start}, using fallback")
+                LocalDate.parse("2024-10-16")
+            }
+            
+            val endDate = try {
+                LocalDate.parse(ttRange.end)
+            } catch (_: Exception) {
+                Log.e(TAG, "Failed to parse end date: ${ttRange.end}, using current date")
+                dateTime
+            }
+            
+            // 使用范围内的结束日期，而不是传入的日期
+            val actualEndDate = if (dateTime.isAfter(endDate)) endDate else dateTime
+            
+            Log.d(TAG, "Using team date range: start=${startDate}, end=${actualEndDate}")
+            requestBofttTeamDataWithRange(actualEndDate, startDate, onComplete)
+        }
+    }
+    
+    private fun requestBofttTeamDataWithRange(dateTime: LocalDate, startDate: LocalDate, onComplete: () -> Unit) {
+        val datesToRequest = mutableListOf<String>()
+        
+        // 收集需要请求的日期
+        var currentDate = dateTime
+        while (currentDate.isAfter(startDate)) {
+            val dateToRequest = currentDate.toString()
+            if (!ShareUtil.findStringArray("datesTeam", dateToRequest, context) && 
+                !processedTeamDates.contains(dateToRequest)) {
+                datesToRequest.add(dateToRequest)
+            }
+            currentDate = currentDate.minusDays(1)
+        }
+        
+        if (datesToRequest.isEmpty()) {
+            onComplete()
+            return
+        }
+        
+        // 使用计数器跟踪完成状态
+        var completedCount = 0
+        val totalCount = datesToRequest.size
+        
+        datesToRequest.forEach { dateToRequest ->
+            serviceScope.launch(dispatcher) {
+                semaphore.withPermit {
+                    try {
+                        requestBofttTeamData(dateToRequest)
+                        // 标记为已处理，避免重复请求
+                        processedTeamDates.add(dateToRequest)
+                        // 异步存储到 SharedPreferences
+                        ShareUtil.insertStringArray("datesTeam", dateToRequest, context)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to request team data for $dateToRequest: ${e.message}")
+                    }
+                    
+                    // 检查是否所有请求都完成
+                    synchronized(this@BofRequestService) {
+                        completedCount++
+                        if (completedCount == totalCount) {
                             onComplete()
                         }
                     }
                 }
             }
-            currentDate = currentDate.minusDays(1)
-        }
-    }
-
-    fun requestBofttTeamData(dateTime: LocalDate, onComplete: () -> Unit) {
-        val startDate = LocalDate.parse("2024-10-16")
-        var currentDate = dateTime
-        while (currentDate.isAfter(startDate)) {
-            val dateToRequest = currentDate.toString()
-            if (!ShareUtil.findStringArray("datesTeam", dateToRequest, context)) {
-                serviceScope.launch(dispatcher) {
-                    semaphore.withPermit {
-                        requestBofttTeamData(dateToRequest)
-                        if (currentDate.isBefore(dateTime)) {
-                            ShareUtil.insertStringArray("datesTeam", dateToRequest, context)
-                        }
-                        onComplete()
-                    }
-                }
-            }
-            currentDate = currentDate.minusDays(1)
         }
     }
 

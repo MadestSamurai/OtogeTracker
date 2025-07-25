@@ -32,10 +32,10 @@ internal data class ChuniLxnsDTO(
         internal data class Difficulty(
             var difficulty: Int = 0,
             var level: String = "",
-            @Json(name = "level_value") var levelValue: Double = 0.0,
-            @Json(name = "note_designer") var noteDesigner: String = "",
+            @param:Json(name = "level_value") var levelValue: Double = 0.0,
+            @param:Json(name = "note_designer") var noteDesigner: String = "",
             var version: Int = 0,
-            @Json(name = "origin_id") var originId: Int = 0,
+            @param:Json(name = "origin_id") var originId: Int = 0,
             var kanji: String = "",
             var star: Int = 0
         )

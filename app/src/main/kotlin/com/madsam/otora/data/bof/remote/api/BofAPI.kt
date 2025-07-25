@@ -2,6 +2,7 @@ package com.madsam.otora.data.bof.remote.api
 
 import com.madsam.otora.data.bof.remote.model.BofCommentDTO
 import com.madsam.otora.data.bof.remote.model.BofEntryDTO
+import com.madsam.otora.data.bof.remote.model.BofRangeDTO
 import com.madsam.otora.data.bof.remote.model.BofTeamDTO
 import retrofit2.Call
 import retrofit2.http.GET
@@ -22,4 +23,7 @@ internal interface BofAPI {
     fun getBofttComment(
         @Path("date") date: String
     ): Call<List<BofCommentDTO>>
+
+    @GET("bof/range.json")
+    fun getBofRangeData(): Call<List<BofRangeDTO>>
 }

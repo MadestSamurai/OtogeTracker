@@ -3,61 +3,61 @@ package com.madsam.otora.data.osu.remote.model
 import com.squareup.moshi.Json
 
 internal data class OsuUserExtendDTO(
-    @Json(name = "avatar_url") var avatarUrl: String = "",
-    @Json(name = "country_code") var countryCode: String = "",
-    @Json(name = "default_group") var defaultGroup: String = "",
-    @Json(name = "is_active") var isActive: Boolean = false,
-    @Json(name = "is_bot") var isBot: Boolean = false,
-    @Json(name = "is_deleted") var isDeleted: Boolean = false,
-    @Json(name = "is_online") var isOnline: Boolean = false,
-    @Json(name = "is_supporter") var isSupporter: Boolean = false,
-    @Json(name = "last_visit") var lastVisit: String = "",
-    @Json(name = "pm_friends_only") var pmFriendsOnly: Boolean = false,
-    @Json(name = "profile_colour") var profileColour: String = "",
+    @param:Json(name = "avatar_url") var avatarUrl: String = "",
+    @param:Json(name = "country_code") var countryCode: String = "",
+    @param:Json(name = "default_group") var defaultGroup: String = "",
+    @param:Json(name = "is_active") var isActive: Boolean = false,
+    @param:Json(name = "is_bot") var isBot: Boolean = false,
+    @param:Json(name = "is_deleted") var isDeleted: Boolean = false,
+    @param:Json(name = "is_online") var isOnline: Boolean = false,
+    @param:Json(name = "is_supporter") var isSupporter: Boolean = false,
+    @param:Json(name = "last_visit") var lastVisit: String = "",
+    @param:Json(name = "pm_friends_only") var pmFriendsOnly: Boolean = false,
+    @param:Json(name = "profile_colour") var profileColour: String = "",
     var username: String = "",
-    @Json(name = "cover_url") var coverUrl: String = "",
+    @param:Json(name = "cover_url") var coverUrl: String = "",
     var discord: String = "",
     var interests: String = "",
-    @Json(name = "join_date") var joinDate: String = "",
+    @param:Json(name = "join_date") var joinDate: String = "",
     var location: String = "",
-    @Json(name = "max_blocks") var maxBlocks: String = "",
-    @Json(name = "max_friends") var maxFriends: String = "",
+    @param:Json(name = "max_blocks") var maxBlocks: String = "",
+    @param:Json(name = "max_friends") var maxFriends: String = "",
     var occupation: String = "",
     var playmode: String = "",
     var playstyle: List<String> = emptyList(),
-    @Json(name = "post_count") var postCount: Int = 0,
-    @Json(name = "profile_order") var profileOrder: List<String> = emptyList(),
+    @param:Json(name = "post_count") var postCount: Int = 0,
+    @param:Json(name = "profile_order") var profileOrder: List<String> = emptyList(),
     var title: String = "",
-    @Json(name = "title_url") var titleUrl: String = "",
+    @param:Json(name = "title_url") var titleUrl: String = "",
     var twitter: String = "",
     var website: String = "",
     var country: Country = Country(),
     var cover: Cover = Cover(),
-    @Json(name = "is_admin") var isAdmin: Boolean = false,
-    @Json(name = "is_bng") var isBng: Boolean = false,
-    @Json(name = "is_full_bn") var isFullBn: Boolean = false,
-    @Json(name = "is_gmt") var isGmt: Boolean = false,
-    @Json(name = "is_limited_bn") var isLimitedBn: Boolean = false,
-    @Json(name = "is_nat") var isNat: Boolean = false,
-    @Json(name = "is_restricted") var isRestricted: Boolean = false,
-    @Json(name = "is_silenced") var isSilenced: Boolean = false,
+    @param:Json(name = "is_admin") var isAdmin: Boolean = false,
+    @param:Json(name = "is_bng") var isBng: Boolean = false,
+    @param:Json(name = "is_full_bn") var isFullBn: Boolean = false,
+    @param:Json(name = "is_gmt") var isGmt: Boolean = false,
+    @param:Json(name = "is_limited_bn") var isLimitedBn: Boolean = false,
+    @param:Json(name = "is_nat") var isNat: Boolean = false,
+    @param:Json(name = "is_restricted") var isRestricted: Boolean = false,
+    @param:Json(name = "is_silenced") var isSilenced: Boolean = false,
     var kudosu: Kudosu = Kudosu(),
-    @Json(name = "account_history") var accountHistory: List<String> = emptyList(),
-    @Json(name = "active_tournament_banner") var activeTournamentBanner: ActiveTournamentBanner = ActiveTournamentBanner(),
-    @Json(name = "active_tournament_banners") var activeTournamentBanners: List<ActiveTournamentBanner> = emptyList(),
+    @param:Json(name = "account_history") var accountHistory: List<String> = emptyList(),
+    @param:Json(name = "active_tournament_banner") var activeTournamentBanner: ActiveTournamentBanner = ActiveTournamentBanner(),
+    @param:Json(name = "active_tournament_banners") var activeTournamentBanners: List<ActiveTournamentBanner> = emptyList(),
     var badges: List<Badge> = emptyList(),
-    @Json(name = "comments_count") var commentsCount: Int = 0,
-    @Json(name = "follower_count") var followerCount: Int = 0,
+    @param:Json(name = "comments_count") var commentsCount: Int = 0,
+    @param:Json(name = "follower_count") var followerCount: Int = 0,
     var groups: List<OsuGroupDTO> = emptyList(),
-    @Json(name = "mapping_follower_count") var mappingFollowerCount: Int = 0,
-    @Json(name = "pending_beatmapset_count") var pendingBeatmapsetCount: Int = 0,
-    @Json(name = "previous_usernames") var previousUsernames: List<String> = emptyList(),
-    @Json(name = "rank_highest") var rankHighest: RankHighest = RankHighest(),
+    @param:Json(name = "mapping_follower_count") var mappingFollowerCount: Int = 0,
+    @param:Json(name = "pending_beatmapset_count") var pendingBeatmapsetCount: Int = 0,
+    @param:Json(name = "previous_usernames") var previousUsernames: List<String> = emptyList(),
+    @param:Json(name = "rank_highest") var rankHighest: RankHighest = RankHighest(),
     var statistics: OsuStatisticsDTO = OsuStatisticsDTO(),
-    @Json(name = "support_level") var supportLevel: Int = 0,
-    @Json(name = "user_achievements") var userAchievements: List<UserAchievement> = emptyList(),
-    @Json(name = "rank_history") var rankHistory: RankHistory = RankHistory(),
-    @Json(name = "unranked_beatmapset_count") var unrankedBeatmapsetCount: Int = 0
+    @param:Json(name = "support_level") var supportLevel: Int = 0,
+    @param:Json(name = "user_achievements") var userAchievements: List<UserAchievement> = emptyList(),
+    @param:Json(name = "rank_history") var rankHistory: RankHistory = RankHistory(),
+    @param:Json(name = "unranked_beatmapset_count") var unrankedBeatmapsetCount: Int = 0
 ) {
     internal data class Country(
         var code: String = "",
@@ -65,7 +65,7 @@ internal data class OsuUserExtendDTO(
     )
 
     internal data class Cover(
-        @Json(name = "custom_url") var customUrl: String = "",
+        @param:Json(name = "custom_url") var customUrl: String = "",
         var url: String = "",
         var id: String = ""
     )
@@ -77,27 +77,27 @@ internal data class OsuUserExtendDTO(
 
     internal data class ActiveTournamentBanner(
         var id: Long = 0,
-        @Json(name = "tournament_id") var tournamentId: Long = 0,
+        @param:Json(name = "tournament_id") var tournamentId: Long = 0,
         var image: String = "",
-        @Json(name = "image@2x") var image2x: String = ""
+        @param:Json(name = "image@2x") var image2x: String = ""
     )
 
     internal data class Badge(
-        @Json(name = "awarded_at") var awardedAt: String = "",
+        @param:Json(name = "awarded_at") var awardedAt: String = "",
         var description: String = "",
-        @Json(name = "image@2x_url") var image2xUrl: String = "",
-        @Json(name = "image_url") var imageUrl: String = "",
+        @param:Json(name = "image@2x_url") var image2xUrl: String = "",
+        @param:Json(name = "image_url") var imageUrl: String = "",
         var url: String = ""
     )
 
     internal data class RankHighest(
         var rank: Int = 0,
-        @Json(name = "updated_at") var updatedAt: String = ""
+        @param:Json(name = "updated_at") var updatedAt: String = ""
     )
 
     internal data class UserAchievement(
-        @Json(name = "achieved_at") var achievedAt: String = "",
-        @Json(name = "achievement_id") var achievementId: String = ""
+        @param:Json(name = "achieved_at") var achievedAt: String = "",
+        @param:Json(name = "achievement_id") var achievementId: String = ""
     )
 
     internal data class RankHistory(
