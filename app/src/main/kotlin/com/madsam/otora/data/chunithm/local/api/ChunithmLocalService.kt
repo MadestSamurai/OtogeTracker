@@ -3,11 +3,15 @@ package com.madsam.otora.data.chunithm.local.api
 import android.util.Log
 import com.madsam.otora.data.chunithm.local.model.ChuniSheetsEntity
 import com.madsam.otora.data.chunithm.local.model.ChuniSongsEntity
+import com.madsam.otora.data.chunithm.local.model.ChuniPlayRecordEntity
+import com.madsam.otora.data.chunithm.local.model.ChuniFullScoreEntity
 import com.madsam.otora.data.chunithm.remote.model.ChuniAliasesDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniJpDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniLxnsDTO
+import com.madsam.otora.data.chunithm.remote.model.ChuniPlayRecordDTO
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
+import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayRecordUiModel
 import io.github.xilinjia.krdb.Realm
 import io.github.xilinjia.krdb.RealmConfiguration
 import io.github.xilinjia.krdb.UpdatePolicy
@@ -24,10 +28,12 @@ internal class ChunithmLocalService {
         schema = setOf(
             ChuniSongsEntity::class,
             ChuniSheetsEntity::class,
+            ChuniPlayRecordEntity::class,
+            ChuniFullScoreEntity::class,
         )
     )
         .name("otoge-tracker-chuni.realm")
-        .schemaVersion(1)
+        .schemaVersion(2)
         .build()
 
     suspend fun saveJPAndLxnsSongsData(
@@ -317,6 +323,279 @@ internal class ChunithmLocalService {
                 emptyList()
             } finally {
                 realm.close()
+            }
+        }
+    }
+
+    suspend fun savePlayRecordData(playRecordDTO: ChuniPlayRecordDTO, difficulty: String) {
+        withContext(Dispatchers.IO) {
+            val realm = Realm.open(realmConfig)
+            try {
+                realm.write {
+                    val currentTime = System.currentTimeMillis().toString()
+                    
+                    // Save play record statistics
+                    val playRecordEntity = ChuniPlayRecordEntity().apply {
+                        id = difficulty
+                        
+                        // Rating statistics
+                        playRecordDTO.rateSSSp.let {
+                            rateSSSp_count = it.first
+                            rateSSSp_total = it.second
+                        }
+                        playRecordDTO.rateSSS.let {
+                            rateSSS_count = it.first
+                            rateSSS_total = it.second
+                        }
+                        playRecordDTO.rateSSp.let {
+                            rateSSp_count = it.first
+                            rateSSp_total = it.second
+                        }
+                        playRecordDTO.rateSS.let {
+                            rateSS_count = it.first
+                            rateSS_total = it.second
+                        }
+                        playRecordDTO.rateSp.let {
+                            rateSp_count = it.first
+                            rateSp_total = it.second
+                        }
+                        playRecordDTO.rateS.let {
+                            rateS_count = it.first
+                            rateS_total = it.second
+                        }
+                        
+                        // Clear statistics
+                        playRecordDTO.rateClear.let {
+                            rateClear_count = it.first
+                            rateClear_total = it.second
+                        }
+                        playRecordDTO.rateFC.let {
+                            rateFC_count = it.first
+                            rateFC_total = it.second
+                        }
+                        playRecordDTO.rateAJ.let {
+                            rateAJ_count = it.first
+                            rateAJ_total = it.second
+                        }
+                        playRecordDTO.rateAJC.let {
+                            rateAJC_count = it.first
+                            rateAJC_total = it.second
+                        }
+                        playRecordDTO.rateFChain.let {
+                            rateFChain_count = it.first
+                            rateFChain_total = it.second
+                        }
+                        playRecordDTO.rateFChainP.let {
+                            rateFChainP_count = it.first
+                            rateFChainP_total = it.second
+                        }
+                        
+                        // Difficulty statistics
+                        playRecordDTO.rateHard.let {
+                            rateHard_count = it.first
+                            rateHard_total = it.second
+                        }
+                        playRecordDTO.rateAbs.let {
+                            rateAbs_count = it.first
+                            rateAbs_total = it.second
+                        }
+                        playRecordDTO.rateAbsP.let {
+                            rateAbsP_count = it.first
+                            rateAbsP_total = it.second
+                        }
+                        playRecordDTO.rateCatas.let {
+                            rateCatas_count = it.first
+                            rateCatas_total = it.second
+                        }
+                        
+                        lastUpdated = currentTime
+                    }
+                    this.copyToRealm(playRecordEntity, UpdatePolicy.ALL)
+                    
+                    // Save genre and score data
+                    playRecordDTO.genreList.forEach { genre ->
+                        genre.fullScoreList.forEach { score ->
+                            val scoreEntity = ChuniFullScoreEntity().apply {
+                                id = "${score.id}_${score.diff}_${difficulty}_${currentTime}"
+                                songId = score.id
+                                title = score.title
+                                diff = score.diff
+                                this.score = score.score
+                                this.genre = score.genre
+                                token = score.token
+                                isClear = score.isClear
+                                isFullCombo = score.isFullCombo
+                                isAllJustice = score.isAllJustice
+                                isAJC = score.isAJC
+                                isFullChain = score.isFullChain
+                                isFullChain2 = score.isFullChain2
+                                rank = score.rank
+                                jacket = score.jacket
+                                date = score.date
+                                trackNumber = score.trackNumber
+                                genreName = genre.name
+                                this.difficulty = difficulty
+                                lastUpdated = currentTime
+                            }
+                            this.copyToRealm(scoreEntity, UpdatePolicy.ALL)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save play record data: ${e.message}")
+            } finally {
+                realm.close()
+            }
+        }
+    }
+
+    suspend fun getPlayRecordData(difficulty: String): ChuniPlayRecordEntity? {
+        return withContext(Dispatchers.IO) {
+            val realm = Realm.open(realmConfig)
+            try {
+                val record = realm.query(
+                    clazz = ChuniPlayRecordEntity::class,
+                    query = "id == $0",
+                    difficulty
+                ).find().firstOrNull()
+                
+                record?.let {
+                    ChuniPlayRecordEntity().apply {
+                        id = it.id
+                        rateSSSp_count = it.rateSSSp_count
+                        rateSSSp_total = it.rateSSSp_total
+                        rateSSS_count = it.rateSSS_count
+                        rateSSS_total = it.rateSSS_total
+                        rateSSp_count = it.rateSSp_count
+                        rateSSp_total = it.rateSSp_total
+                        rateSS_count = it.rateSS_count
+                        rateSS_total = it.rateSS_total
+                        rateSp_count = it.rateSp_count
+                        rateSp_total = it.rateSp_total
+                        rateS_count = it.rateS_count
+                        rateS_total = it.rateS_total
+                        rateClear_count = it.rateClear_count
+                        rateClear_total = it.rateClear_total
+                        rateFC_count = it.rateFC_count
+                        rateFC_total = it.rateFC_total
+                        rateAJ_count = it.rateAJ_count
+                        rateAJ_total = it.rateAJ_total
+                        rateAJC_count = it.rateAJC_count
+                        rateAJC_total = it.rateAJC_total
+                        rateFChain_count = it.rateFChain_count
+                        rateFChain_total = it.rateFChain_total
+                        rateFChainP_count = it.rateFChainP_count
+                        rateFChainP_total = it.rateFChainP_total
+                        rateHard_count = it.rateHard_count
+                        rateHard_total = it.rateHard_total
+                        rateAbs_count = it.rateAbs_count
+                        rateAbs_total = it.rateAbs_total
+                        rateAbsP_count = it.rateAbsP_count
+                        rateAbsP_total = it.rateAbsP_total
+                        rateCatas_count = it.rateCatas_count
+                        rateCatas_total = it.rateCatas_total
+                        lastUpdated = it.lastUpdated
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to get play record data: ${e.message}")
+                null
+            } finally {
+                realm.close()
+            }
+        }
+    }
+
+    suspend fun getFullScoresByDifficulty(difficulty: String): List<ChuniFullScoreEntity> {
+        return withContext(Dispatchers.IO) {
+            val realm = Realm.open(realmConfig)
+            try {
+                val scores = realm.query(
+                    clazz = ChuniFullScoreEntity::class,
+                    query = "difficulty == $0",
+                    difficulty
+                ).find()
+                
+                scores.map { score ->
+                    ChuniFullScoreEntity().apply {
+                        id = score.id
+                        songId = score.songId
+                        title = score.title
+                        diff = score.diff
+                        this.score = score.score
+                        genre = score.genre
+                        token = score.token
+                        isClear = score.isClear
+                        isFullCombo = score.isFullCombo
+                        isAllJustice = score.isAllJustice
+                        isAJC = score.isAJC
+                        isFullChain = score.isFullChain
+                        isFullChain2 = score.isFullChain2
+                        rank = score.rank
+                        jacket = score.jacket
+                        date = score.date
+                        trackNumber = score.trackNumber
+                        genreName = score.genreName
+                        this.difficulty = score.difficulty
+                        lastUpdated = score.lastUpdated
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to get full scores: ${e.message}")
+                emptyList()
+            } finally {
+                realm.close()
+            }
+        }
+    }
+    
+    suspend fun getPlayRecordUiModel(difficulty: String): ChunithmPlayRecordUiModel? {
+        return withContext(Dispatchers.IO) {
+            val playRecord = getPlayRecordData(difficulty)
+            val scores = getFullScoresByDifficulty(difficulty)
+            
+            playRecord?.let { record ->
+                ChunithmPlayRecordUiModel(
+                    difficulty = record.id,
+                    rateSSSp = Pair(record.rateSSSp_count, record.rateSSSp_total),
+                    rateSSS = Pair(record.rateSSS_count, record.rateSSS_total),
+                    rateSSp = Pair(record.rateSSp_count, record.rateSSp_total),
+                    rateSS = Pair(record.rateSS_count, record.rateSS_total),
+                    rateSp = Pair(record.rateSp_count, record.rateSp_total),
+                    rateS = Pair(record.rateS_count, record.rateS_total),
+                    rateClear = Pair(record.rateClear_count, record.rateClear_total),
+                    rateFC = Pair(record.rateFC_count, record.rateFC_total),
+                    rateAJ = Pair(record.rateAJ_count, record.rateAJ_total),
+                    rateAJC = Pair(record.rateAJC_count, record.rateAJC_total),
+                    rateFChain = Pair(record.rateFChain_count, record.rateFChain_total),
+                    rateFChainP = Pair(record.rateFChainP_count, record.rateFChainP_total),
+                    rateHard = Pair(record.rateHard_count, record.rateHard_total),
+                    rateAbs = Pair(record.rateAbs_count, record.rateAbs_total),
+                    rateAbsP = Pair(record.rateAbsP_count, record.rateAbsP_total),
+                    rateCatas = Pair(record.rateCatas_count, record.rateCatas_total),
+                    lastUpdated = record.lastUpdated,
+                    scores = scores.map { score ->
+                        ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel(
+                            songId = score.songId,
+                            title = score.title,
+                            diff = score.diff,
+                            score = score.score,
+                            genre = score.genre,
+                            isClear = score.isClear,
+                            isFullCombo = score.isFullCombo,
+                            isAllJustice = score.isAllJustice,
+                            isAJC = score.isAJC,
+                            isFullChain = score.isFullChain,
+                            isFullChain2 = score.isFullChain2,
+                            rank = score.rank,
+                            jacket = score.jacket,
+                            date = score.date,
+                            trackNumber = score.trackNumber,
+                            genreName = score.genreName,
+                            difficulty = score.difficulty
+                        )
+                    }
+                )
             }
         }
     }

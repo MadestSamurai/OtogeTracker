@@ -461,15 +461,19 @@ internal class ChunithmRequestService(private val context: Context) {
         return chuniPlayRecordDTO
     }
 
-    private fun requestPlayRecord() {
+    private suspend fun requestPlayRecord() {
         val diffArray = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
+        val chunithmLocalService = ChunithmLocalService()
+        
         for (diff in diffArray) {
             val doc = requestDataFromServer(
                 link = "$CHUNITHM_URL/record/musicGenre/send$diff",
                 requestBody = "genre=99&token=${cookie.token}",
                 method = Method.POST
             )
-            saveDataToLocal(parsePlayRecord(doc, diff), "chuniPlayRecord$diff.json")
+            val playRecordData = parsePlayRecord(doc, diff)
+            
+            chunithmLocalService.savePlayRecordData(playRecordData, diff)
         }
     }
 
@@ -717,6 +721,7 @@ internal class ChunithmRequestService(private val context: Context) {
         if (!isUserRequestRunning.getAndSet(true)) {
             serviceScope.launch {
                 try {
+                    // Regular request functions
                     setOf(
                         ::requestPlayerData,
                         ::requestRatingBest,
@@ -724,13 +729,15 @@ internal class ChunithmRequestService(private val context: Context) {
                         ::requestRatingNext,
                         ::requestMapRecord,
                         ::requestPlayLog,
-                        ::requestPlayRecord,
                         ::requestCollection,
                         ::requestFriend,
                         ::requestLoginBonus
                     ).forEach { requestFunc ->
                         requestFunc()
                     }
+                    
+                    // Suspend function that needs to be called separately
+                    requestPlayRecord()
 
                     ShareUtil.putString("chuniToken", cookie.token, context)
                     ShareUtil.putString("chuniExpires", cookie.expires, context)
