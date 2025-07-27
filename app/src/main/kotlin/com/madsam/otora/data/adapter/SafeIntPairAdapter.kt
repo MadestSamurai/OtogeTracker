@@ -7,7 +7,6 @@ import com.squareup.moshi.ToJson
 
 internal class SafeIntPairAdapter {
     @FromJson
-    @Suppress("unused")
     fun fromJson(reader: JsonReader): Pair<Int, Int> {
         var first = 0
         var second = 0
@@ -25,7 +24,6 @@ internal class SafeIntPairAdapter {
     }
 
     @ToJson
-    @Suppress("unused")
     fun toJson(writer: JsonWriter, value: Pair<Int, Int>) {
         writer.beginArray()
         writer.value(value.first)

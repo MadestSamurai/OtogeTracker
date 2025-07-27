@@ -18,7 +18,6 @@ internal class SafeOsuRankHighestAdapter {
     private val rankHighestAdapter: JsonAdapter<OsuUserExtendDTO.RankHighest> = moshi.adapter(OsuUserExtendDTO.RankHighest::class.java)
 
     @FromJson
-    @Suppress("unused")
     fun fromJson(reader: JsonReader): OsuUserExtendDTO.RankHighest {
         return if (reader.peek() == JsonReader.Token.NULL) {
             reader.nextNull<OsuUserExtendDTO.RankHighest>()

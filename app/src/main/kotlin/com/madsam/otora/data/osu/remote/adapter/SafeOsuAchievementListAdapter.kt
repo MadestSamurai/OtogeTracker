@@ -16,7 +16,6 @@ internal class SafeOsuAchievementListAdapter {
     private val userAchievementAdapter: JsonAdapter<OsuUserExtendDTO.UserAchievement> = moshi.adapter(OsuUserExtendDTO.UserAchievement::class.java)
 
     @FromJson
-    @Suppress("unused")
     fun fromJson(reader: JsonReader): List<OsuUserExtendDTO.UserAchievement> {
         return if (reader.peek() == JsonReader.Token.NULL) {
             reader.nextNull<List<OsuUserExtendDTO.UserAchievement>>()

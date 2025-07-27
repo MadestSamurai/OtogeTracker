@@ -5,7 +5,6 @@ import com.squareup.moshi.JsonReader
 
 internal class SafeIntListAdapter {
     @FromJson
-    @Suppress("unused")
     fun fromJson(reader: JsonReader): List<Int> {
         val result = mutableListOf<Int>()
         reader.beginArray()

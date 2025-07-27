@@ -18,7 +18,6 @@ internal class SafeOsuMedalItemListAdapter {
     private val osuMedalItemDTOAdapter: JsonAdapter<OsuMedalItemDTO> = moshi.adapter(OsuMedalItemDTO::class.java)
 
     @FromJson
-    @Suppress("unused")
     fun fromJson(reader: JsonReader): List<OsuMedalItemDTO> {
         return if (reader.peek() == JsonReader.Token.NULL) {
             reader.nextNull<List<OsuMedalItemDTO>>()

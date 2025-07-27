@@ -18,7 +18,6 @@ internal class SafeOsuTournamentBannerListAdapter {
     private val activeTournamentBannerAdapter: JsonAdapter<OsuUserExtendDTO.ActiveTournamentBanner> = moshi.adapter(OsuUserExtendDTO.ActiveTournamentBanner::class.java)
 
     @FromJson
-    @Suppress("unused")
     fun fromJson(reader: JsonReader): List<OsuUserExtendDTO.ActiveTournamentBanner> {
         return if (reader.peek() == JsonReader.Token.NULL) {
             reader.nextNull<List<OsuUserExtendDTO.ActiveTournamentBanner>>()

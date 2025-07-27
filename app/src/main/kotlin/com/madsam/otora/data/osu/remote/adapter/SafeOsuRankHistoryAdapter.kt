@@ -20,7 +20,6 @@ internal class SafeOsuRankHistoryAdapter {
     private val rankHistoryAdapter: JsonAdapter<OsuUserExtendDTO.RankHistory> = moshi.adapter(OsuUserExtendDTO.RankHistory::class.java)
 
     @FromJson
-    @Suppress("unused")
     fun fromJson(reader: JsonReader): OsuUserExtendDTO.RankHistory {
         return if (reader.peek() == JsonReader.Token.NULL) {
             reader.nextNull<OsuUserExtendDTO.RankHistory>()

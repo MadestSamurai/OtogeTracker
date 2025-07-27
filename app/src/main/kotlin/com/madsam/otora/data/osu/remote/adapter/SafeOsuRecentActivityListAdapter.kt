@@ -20,7 +20,6 @@ internal class SafeOsuRecentActivityListAdapter {
     private val recentActivityAdapter: JsonAdapter<OsuRecentActivityDTO> = moshi.adapter(OsuRecentActivityDTO::class.java)
 
     @FromJson
-    @Suppress("unused")
     fun fromJson(reader: JsonReader): List<OsuRecentActivityDTO> {
         return if (reader.peek() == JsonReader.Token.NULL) {
             reader.nextNull<List<OsuRecentActivityDTO>>()

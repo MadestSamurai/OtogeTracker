@@ -340,72 +340,72 @@ internal class ChunithmLocalService {
                         
                         // Rating statistics
                         playRecordDTO.rateSSSp.let {
-                            rateSSSp_count = it.first
-                            rateSSSp_total = it.second
+                            rateSSSpCount = it.first
+                            rateSSSpTotal = it.second
                         }
                         playRecordDTO.rateSSS.let {
-                            rateSSS_count = it.first
-                            rateSSS_total = it.second
+                            rateSSSCount = it.first
+                            rateSSSTotal = it.second
                         }
                         playRecordDTO.rateSSp.let {
-                            rateSSp_count = it.first
-                            rateSSp_total = it.second
+                            rateSSPCount = it.first
+                            rateSSPTotal = it.second
                         }
                         playRecordDTO.rateSS.let {
-                            rateSS_count = it.first
-                            rateSS_total = it.second
+                            rateSSCount = it.first
+                            rateSSTotal = it.second
                         }
                         playRecordDTO.rateSp.let {
-                            rateSp_count = it.first
-                            rateSp_total = it.second
+                            rateSpCount = it.first
+                            rateSpTotal = it.second
                         }
                         playRecordDTO.rateS.let {
-                            rateS_count = it.first
-                            rateS_total = it.second
+                            rateSCount = it.first
+                            rateSTotal = it.second
                         }
                         
                         // Clear statistics
                         playRecordDTO.rateClear.let {
-                            rateClear_count = it.first
-                            rateClear_total = it.second
+                            rateClearCount = it.first
+                            rateClearTotal = it.second
                         }
                         playRecordDTO.rateFC.let {
-                            rateFC_count = it.first
-                            rateFC_total = it.second
+                            rateFCCount = it.first
+                            rateFCTotal = it.second
                         }
                         playRecordDTO.rateAJ.let {
-                            rateAJ_count = it.first
-                            rateAJ_total = it.second
+                            rateAJCount = it.first
+                            rateAJTotal = it.second
                         }
                         playRecordDTO.rateAJC.let {
-                            rateAJC_count = it.first
-                            rateAJC_total = it.second
+                            rateAJCCount = it.first
+                            rateAJCTotal = it.second
                         }
                         playRecordDTO.rateFChain.let {
-                            rateFChain_count = it.first
-                            rateFChain_total = it.second
+                            rateFChainCount = it.first
+                            rateFChainTotal = it.second
                         }
                         playRecordDTO.rateFChainP.let {
-                            rateFChainP_count = it.first
-                            rateFChainP_total = it.second
+                            rateFChainPCount = it.first
+                            rateFChainPTotal = it.second
                         }
                         
                         // Difficulty statistics
                         playRecordDTO.rateHard.let {
-                            rateHard_count = it.first
-                            rateHard_total = it.second
+                            rateHardCount = it.first
+                            rateHardTotal = it.second
                         }
                         playRecordDTO.rateAbs.let {
-                            rateAbs_count = it.first
-                            rateAbs_total = it.second
+                            rateAbsCount = it.first
+                            rateAbsTotal = it.second
                         }
                         playRecordDTO.rateAbsP.let {
-                            rateAbsP_count = it.first
-                            rateAbsP_total = it.second
+                            rateAbsPCount = it.first
+                            rateAbsPTotal = it.second
                         }
                         playRecordDTO.rateCatas.let {
-                            rateCatas_count = it.first
-                            rateCatas_total = it.second
+                            rateCatasCount = it.first
+                            rateCatasTotal = it.second
                         }
                         
                         lastUpdated = currentTime
@@ -463,38 +463,38 @@ internal class ChunithmLocalService {
                 record?.let {
                     ChuniPlayRecordEntity().apply {
                         id = it.id
-                        rateSSSp_count = it.rateSSSp_count
-                        rateSSSp_total = it.rateSSSp_total
-                        rateSSS_count = it.rateSSS_count
-                        rateSSS_total = it.rateSSS_total
-                        rateSSp_count = it.rateSSp_count
-                        rateSSp_total = it.rateSSp_total
-                        rateSS_count = it.rateSS_count
-                        rateSS_total = it.rateSS_total
-                        rateSp_count = it.rateSp_count
-                        rateSp_total = it.rateSp_total
-                        rateS_count = it.rateS_count
-                        rateS_total = it.rateS_total
-                        rateClear_count = it.rateClear_count
-                        rateClear_total = it.rateClear_total
-                        rateFC_count = it.rateFC_count
-                        rateFC_total = it.rateFC_total
-                        rateAJ_count = it.rateAJ_count
-                        rateAJ_total = it.rateAJ_total
-                        rateAJC_count = it.rateAJC_count
-                        rateAJC_total = it.rateAJC_total
-                        rateFChain_count = it.rateFChain_count
-                        rateFChain_total = it.rateFChain_total
-                        rateFChainP_count = it.rateFChainP_count
-                        rateFChainP_total = it.rateFChainP_total
-                        rateHard_count = it.rateHard_count
-                        rateHard_total = it.rateHard_total
-                        rateAbs_count = it.rateAbs_count
-                        rateAbs_total = it.rateAbs_total
-                        rateAbsP_count = it.rateAbsP_count
-                        rateAbsP_total = it.rateAbsP_total
-                        rateCatas_count = it.rateCatas_count
-                        rateCatas_total = it.rateCatas_total
+                        rateSSSpCount = it.rateSSSpCount
+                        rateSSSpTotal = it.rateSSSpTotal
+                        rateSSSCount = it.rateSSSCount
+                        rateSSSTotal = it.rateSSSTotal
+                        rateSSPCount = it.rateSSPCount
+                        rateSSPTotal = it.rateSSPTotal
+                        rateSSCount = it.rateSSCount
+                        rateSSTotal = it.rateSSTotal
+                        rateSpCount = it.rateSpCount
+                        rateSpTotal = it.rateSpTotal
+                        rateSCount = it.rateSCount
+                        rateSTotal = it.rateSTotal
+                        rateClearCount = it.rateClearCount
+                        rateClearTotal = it.rateClearTotal
+                        rateFCCount = it.rateFCCount
+                        rateFCTotal = it.rateFCTotal
+                        rateAJCount = it.rateAJCount
+                        rateAJTotal = it.rateAJTotal
+                        rateAJCCount = it.rateAJCCount
+                        rateAJCTotal = it.rateAJCTotal
+                        rateFChainCount = it.rateFChainCount
+                        rateFChainTotal = it.rateFChainTotal
+                        rateFChainPCount = it.rateFChainPCount
+                        rateFChainPTotal = it.rateFChainPTotal
+                        rateHardCount = it.rateHardCount
+                        rateHardTotal = it.rateHardTotal
+                        rateAbsCount = it.rateAbsCount
+                        rateAbsTotal = it.rateAbsTotal
+                        rateAbsPCount = it.rateAbsPCount
+                        rateAbsPTotal = it.rateAbsPTotal
+                        rateCatasCount = it.rateCatasCount
+                        rateCatasTotal = it.rateCatasTotal
                         lastUpdated = it.lastUpdated
                     }
                 }
@@ -558,22 +558,22 @@ internal class ChunithmLocalService {
             playRecord?.let { record ->
                 ChunithmPlayRecordUiModel(
                     difficulty = record.id,
-                    rateSSSp = Pair(record.rateSSSp_count, record.rateSSSp_total),
-                    rateSSS = Pair(record.rateSSS_count, record.rateSSS_total),
-                    rateSSp = Pair(record.rateSSp_count, record.rateSSp_total),
-                    rateSS = Pair(record.rateSS_count, record.rateSS_total),
-                    rateSp = Pair(record.rateSp_count, record.rateSp_total),
-                    rateS = Pair(record.rateS_count, record.rateS_total),
-                    rateClear = Pair(record.rateClear_count, record.rateClear_total),
-                    rateFC = Pair(record.rateFC_count, record.rateFC_total),
-                    rateAJ = Pair(record.rateAJ_count, record.rateAJ_total),
-                    rateAJC = Pair(record.rateAJC_count, record.rateAJC_total),
-                    rateFChain = Pair(record.rateFChain_count, record.rateFChain_total),
-                    rateFChainP = Pair(record.rateFChainP_count, record.rateFChainP_total),
-                    rateHard = Pair(record.rateHard_count, record.rateHard_total),
-                    rateAbs = Pair(record.rateAbs_count, record.rateAbs_total),
-                    rateAbsP = Pair(record.rateAbsP_count, record.rateAbsP_total),
-                    rateCatas = Pair(record.rateCatas_count, record.rateCatas_total),
+                    rateSSSp = Pair(record.rateSSSpCount, record.rateSSSpTotal),
+                    rateSSS = Pair(record.rateSSSCount, record.rateSSSTotal),
+                    rateSSp = Pair(record.rateSSPCount, record.rateSSPTotal),
+                    rateSS = Pair(record.rateSSCount, record.rateSSTotal),
+                    rateSp = Pair(record.rateSpCount, record.rateSpTotal),
+                    rateS = Pair(record.rateSCount, record.rateSTotal),
+                    rateClear = Pair(record.rateClearCount, record.rateClearTotal),
+                    rateFC = Pair(record.rateFCCount, record.rateFCTotal),
+                    rateAJ = Pair(record.rateAJCount, record.rateAJTotal),
+                    rateAJC = Pair(record.rateAJCCount, record.rateAJCTotal),
+                    rateFChain = Pair(record.rateFChainCount, record.rateFChainTotal),
+                    rateFChainP = Pair(record.rateFChainPCount, record.rateFChainPTotal),
+                    rateHard = Pair(record.rateHardCount, record.rateHardTotal),
+                    rateAbs = Pair(record.rateAbsCount, record.rateAbsTotal),
+                    rateAbsP = Pair(record.rateAbsPCount, record.rateAbsPTotal),
+                    rateCatas = Pair(record.rateCatasCount, record.rateCatasTotal),
                     lastUpdated = record.lastUpdated,
                     scores = scores.map { scoreEntity ->
                         ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel(

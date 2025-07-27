@@ -94,6 +94,8 @@ internal class ChunithmViewModel(
         val chunithmRequestService = ChunithmRequestService(context)
         chunithmRequestService.getUserData()
         loadCardFromLocal(context)
+        // 获取用户数据后重新加载分数缓存
+        preloadAllScores()
     }
 
     fun refreshUserData(context: Context) {
@@ -103,6 +105,8 @@ internal class ChunithmViewModel(
                 // 添加一个小延迟确保UI更新
                 kotlinx.coroutines.delay(50)
                 loadData(context)
+                // 重新加载分数缓存，因为用户数据更新可能包含新的分数记录
+                preloadAllScores()
                 // 添加一个最小延迟确保用户能看到刷新动画
                 kotlinx.coroutines.delay(300)
             } catch (e: Exception) {
@@ -120,6 +124,8 @@ internal class ChunithmViewModel(
                 // 添加一个小延迟确保UI更新
                 kotlinx.coroutines.delay(50)
                 fetchSongData(context)
+                // 重新加载分数缓存
+                preloadAllScores()
                 // 添加一个最小延迟确保用户能看到刷新动画
                 kotlinx.coroutines.delay(300)
             } catch (e: Exception) {

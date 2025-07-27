@@ -8,42 +8,42 @@ internal class ChuniPlayRecordEntity : RealmObject {
     var id: String = "" // difficulty level as primary key
     
     // Rating statistics (count, total)
-    var rateSSSp_count: Int = 0
-    var rateSSSp_total: Int = 0
-    var rateSSS_count: Int = 0
-    var rateSSS_total: Int = 0
-    var rateSSp_count: Int = 0
-    var rateSSp_total: Int = 0
-    var rateSS_count: Int = 0
-    var rateSS_total: Int = 0
-    var rateSp_count: Int = 0
-    var rateSp_total: Int = 0
-    var rateS_count: Int = 0
-    var rateS_total: Int = 0
+    var rateSSSpCount: Int = 0
+    var rateSSSpTotal: Int = 0
+    var rateSSSCount: Int = 0
+    var rateSSSTotal: Int = 0
+    var rateSSPCount: Int = 0
+    var rateSSPTotal: Int = 0
+    var rateSSCount: Int = 0
+    var rateSSTotal: Int = 0
+    var rateSpCount: Int = 0
+    var rateSpTotal: Int = 0
+    var rateSCount: Int = 0
+    var rateSTotal: Int = 0
     
     // Clear statistics (count, total)
-    var rateClear_count: Int = 0
-    var rateClear_total: Int = 0
-    var rateFC_count: Int = 0
-    var rateFC_total: Int = 0
-    var rateAJ_count: Int = 0
-    var rateAJ_total: Int = 0
-    var rateAJC_count: Int = 0
-    var rateAJC_total: Int = 0
-    var rateFChain_count: Int = 0
-    var rateFChain_total: Int = 0
-    var rateFChainP_count: Int = 0
-    var rateFChainP_total: Int = 0
+    var rateClearCount: Int = 0
+    var rateClearTotal: Int = 0
+    var rateFCCount: Int = 0
+    var rateFCTotal: Int = 0
+    var rateAJCount: Int = 0
+    var rateAJTotal: Int = 0
+    var rateAJCCount: Int = 0
+    var rateAJCTotal: Int = 0
+    var rateFChainCount: Int = 0
+    var rateFChainTotal: Int = 0
+    var rateFChainPCount: Int = 0
+    var rateFChainPTotal: Int = 0
     
     // Difficulty statistics (count, total)
-    var rateHard_count: Int = 0
-    var rateHard_total: Int = 0
-    var rateAbs_count: Int = 0
-    var rateAbs_total: Int = 0
-    var rateAbsP_count: Int = 0
-    var rateAbsP_total: Int = 0
-    var rateCatas_count: Int = 0
-    var rateCatas_total: Int = 0
+    var rateHardCount: Int = 0
+    var rateHardTotal: Int = 0
+    var rateAbsCount: Int = 0
+    var rateAbsTotal: Int = 0
+    var rateAbsPCount: Int = 0
+    var rateAbsPTotal: Int = 0
+    var rateCatasCount: Int = 0
+    var rateCatasTotal: Int = 0
     
     var lastUpdated: String = ""
 }

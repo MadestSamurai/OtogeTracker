@@ -20,7 +20,6 @@ internal class SafeOsuVariantListAdapter {
     private val variantAdapter: JsonAdapter<OsuStatisticsDTO.Variant> = moshi.adapter(OsuStatisticsDTO.Variant::class.java)
 
     @FromJson
-    @Suppress("unused")
     fun fromJson(reader: JsonReader): List<OsuStatisticsDTO.Variant> {
         return if (reader.peek() == JsonReader.Token.NULL) {
             reader.nextNull<List<OsuStatisticsDTO.Variant>>()

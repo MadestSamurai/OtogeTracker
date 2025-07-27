@@ -5,7 +5,6 @@ import com.squareup.moshi.JsonReader
 
 internal class SafeStringListAdapter {
     @FromJson
-    @Suppress("unused")
     fun fromJson(reader: JsonReader): List<String> {
         return if (reader.peek() == JsonReader.Token.NULL) {
             reader.nextNull<List<String>>()

@@ -84,6 +84,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.max
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.scale
 
 /**
  * 项目名: OtogeTracker
@@ -346,17 +348,17 @@ internal fun CommentCapture(
                             val bitmap = if (commentHeight > maxHeight) {
                                 val scaleFactor = maxHeight.toFloat() / commentHeight
                                 val newWidth = (bitmapList[0].width * scaleFactor).toInt()
-                                Bitmap.createBitmap(newWidth, maxHeight, Bitmap.Config.ARGB_8888)
+                                createBitmap(newWidth, maxHeight)
                                     .apply {
                                         val canvas = Canvas(this)
                                         var currentHeight = 0
                                         for (hardwareBitmap in bitmapList) {
-                                            val scaledBitmap = Bitmap.createScaledBitmap(
-                                                hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false),
-                                                newWidth,
-                                                (hardwareBitmap.height * scaleFactor).toInt(),
-                                                true
-                                            )
+                                            val scaledBitmap =
+                                                hardwareBitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                                    .scale(
+                                                        newWidth,
+                                                        (hardwareBitmap.height * scaleFactor).toInt()
+                                                    )
                                             canvas.drawBitmap(
                                                 scaledBitmap,
                                                 0f,
@@ -367,11 +369,7 @@ internal fun CommentCapture(
                                         }
                                     }
                             } else {
-                                Bitmap.createBitmap(
-                                    bitmapList[0].width,
-                                    commentHeight,
-                                    Bitmap.Config.ARGB_8888
-                                ).apply {
+                                createBitmap(bitmapList[0].width, commentHeight).apply {
                                     val canvas = Canvas(this)
                                     var currentHeight = 0
                                     for (hardwareBitmap in bitmapList) {

@@ -16,7 +16,6 @@ internal class SafeOsuBadgeListAdapter {
     private val badgeAdapter: JsonAdapter<OsuUserExtendDTO.Badge> = moshi.adapter(OsuUserExtendDTO.Badge::class.java)
 
     @FromJson
-    @Suppress("unused")
     fun fromJson(reader: JsonReader): List<OsuUserExtendDTO.Badge> {
         return if (reader.peek() == JsonReader.Token.NULL) {
             reader.nextNull<List<OsuUserExtendDTO.Badge>>()

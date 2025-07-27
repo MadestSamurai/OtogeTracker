@@ -22,7 +22,6 @@ internal class SafeOsuGroupListAdapter {
     private val osuGroupDTOAdapter: JsonAdapter<OsuGroupDTO> = moshi.adapter(OsuGroupDTO::class.java)
 
     @FromJson
-    @Suppress("unused")
     fun fromJson(reader: JsonReader): List<OsuGroupDTO> {
         return if (reader.peek() == JsonReader.Token.NULL) {
             reader.nextNull<List<OsuGroupDTO>>()

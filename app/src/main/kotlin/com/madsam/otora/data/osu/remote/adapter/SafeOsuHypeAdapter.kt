@@ -18,7 +18,6 @@ internal class SafeOsuHypeAdapter {
     private val hypeAdapter: JsonAdapter<OsuBeatmapSetDTO.Hype> = moshi.adapter(OsuBeatmapSetDTO.Hype::class.java)
 
     @FromJson
-    @Suppress("unused")
     fun fromJson(reader: JsonReader): OsuBeatmapSetDTO.Hype {
         return if (reader.peek() == JsonReader.Token.NULL) {
             reader.nextNull<OsuBeatmapSetDTO.Hype>()

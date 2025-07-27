@@ -79,11 +79,19 @@ internal fun ChunithmSongListPage(
         LocalWindowInfo.current.containerSize.width.toDp()
     }
 
+    // 监听特定状态变化来实时更新数据
+    val isRefreshing by viewModel.isRefreshing.collectAsState()
+    LaunchedEffect(isRefreshing) {
+        // 当刷新状态变化且刷新完成时重新加载数据
+        if (!isRefreshing) {
+            viewModel.loadAllSongsData()
+        }
+    }
+
+    // 初始数据加载
     LaunchedEffect(Unit) {
         viewModel.loadAllSongsData()
     }
-
-    val isRefreshing by viewModel.isRefreshing.collectAsState()
     val state = rememberPullToRefreshState()
 
     val searchText by viewModel.searchText.collectAsState()
@@ -96,7 +104,7 @@ internal fun ChunithmSongListPage(
     LaunchedEffect(scrollToTopEvent) {
         if (scrollToTopEvent) {
             lazyListState.animateScrollToItem(0)
-            viewModel.resetScrollToTopEvent() // 重置事件状态
+            viewModel.resetScrollToTopEvent()
         }
     }
 
@@ -118,7 +126,7 @@ internal fun ChunithmSongListPage(
     
     // 添加排序相关状态
     val isSortExpanded = remember { mutableStateOf(false) }
-    val selectedSortOption = remember { mutableStateOf("default") } // 默认按数据库原始顺序
+    val selectedSortOption = remember { mutableStateOf("default") }
     val isAscendingOrder = remember { mutableStateOf(true) } // 默认正序
 
     // 使用整数范围（乘以10），避免浮点数精度问题

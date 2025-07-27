@@ -16,7 +16,6 @@ internal class SafeOsuExtendCountryAdapter {
     private val countryAdapter: JsonAdapter<OsuUserExtendDTO.Country> = moshi.adapter(OsuUserExtendDTO.Country::class.java)
 
     @FromJson
-    @Suppress("unused")
     fun fromJson(reader: JsonReader): OsuUserExtendDTO.Country {
         return if (reader.peek() == JsonReader.Token.NULL) {
             reader.nextNull<OsuUserExtendDTO.Country>()
