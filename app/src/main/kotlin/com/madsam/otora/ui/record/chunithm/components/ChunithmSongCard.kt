@@ -3,6 +3,7 @@ package com.madsam.otora.ui.record.chunithm.components
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
@@ -44,17 +45,24 @@ internal fun ChunithmSongCard(
     item: ChunithmSongUiModel,
     itemWidth: Dp,
     highlightText: String = "",
-    viewModel: ChunithmViewModel? = null
+    viewModel: ChunithmViewModel? = null,
+    onClick: ((ChunithmSongUiModel) -> Unit)? = null
 ) {
     Surface(
-        Modifier.width(itemWidth),
-        RoundedCornerShape(6.dp),
-        Transparent
+        modifier = Modifier
+            .width(itemWidth)
+            .clickable { 
+                Log.d("ChunithmSongCard", "Card clicked: ${item.title}")
+                onClick?.invoke(item)
+            },
+        shape = RoundedCornerShape(6.dp),
+        color = Transparent
     ) {
         Column {
             ConstraintLayout(
                 modifier = Modifier
                     .background(Red700)
+                    .height(80.dp)
             ) {
                 val (
                     cover,

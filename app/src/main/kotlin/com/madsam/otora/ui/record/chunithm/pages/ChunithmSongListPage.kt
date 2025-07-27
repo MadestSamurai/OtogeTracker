@@ -21,11 +21,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -47,12 +51,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
@@ -63,6 +69,8 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
+import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
+import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSongCard
 import com.madsam.otora.ui.record.chunithm.components.SearchBar
@@ -128,6 +136,10 @@ internal fun ChunithmSongListPage(
     val isSortExpanded = remember { mutableStateOf(false) }
     val selectedSortOption = remember { mutableStateOf("default") }
     val isAscendingOrder = remember { mutableStateOf(true) } // 默认正序
+
+    // 添加Modal相关状态
+    val showSongDetailModal = remember { mutableStateOf(false) }
+    val selectedSong = remember { mutableStateOf<ChunithmSongUiModel?>(null) }
 
     // 使用整数范围（乘以10），避免浮点数精度问题
     val internalLevelRange = remember { mutableStateOf(10..157) } // 1.0 to 15.7
@@ -318,7 +330,14 @@ internal fun ChunithmSongListPage(
                         item = filteredSongList[index],
                         itemWidth = cardWidthDp,
                         highlightText = searchText,
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        onClick = { song ->
+                            android.util.Log.d("ChunithmSongListPage", "Song clicked: ${song.title}")
+                            selectedSong.value = song
+                            android.util.Log.d("ChunithmSongListPage", "selectedSong set to: ${selectedSong.value?.title}")
+                            showSongDetailModal.value = true
+                            android.util.Log.d("ChunithmSongListPage", "showSongDetailModal set to: ${showSongDetailModal.value}")
+                        }
                     )
                     if (index != filteredSongList.size - 1) {
                         Spacer(modifier = Modifier.height(10.dp))
@@ -368,7 +387,7 @@ internal fun ChunithmSongListPage(
                         Text(
                             text = toggleText,
                             fontSize = 13.sp,
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            fontWeight = FontWeight.Bold,
                             color = Beige500,
                             textAlign = TextAlign.Center
                         )
@@ -436,7 +455,7 @@ internal fun ChunithmSongListPage(
                         Text(
                             text = toggleText,
                             fontSize = 13.sp,
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                            fontWeight = FontWeight.Bold,
                             color = Beige500,
                             textAlign = TextAlign.Center
                         )
@@ -527,7 +546,7 @@ internal fun ChunithmSongListPage(
                                 text = difficultyLabels[index],
                                 color = if (isSelected) White1000 else Beige500,
                                 fontSize = 12.sp,
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Center,
                                 letterSpacing = if (difficulty == "advanced") (-0.5).sp else 0.sp,
                                 maxLines = 1,
@@ -688,7 +707,7 @@ internal fun ChunithmSongListPage(
                     text = "排序选项",
                     color = Beige500,
                     fontSize = 16.sp,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 
@@ -717,7 +736,7 @@ internal fun ChunithmSongListPage(
                             text = "正序 ↑",
                             color = Beige500,
                             fontSize = 12.sp,
-                            fontWeight = if (isAscendingOrder.value) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
+                            fontWeight = if (isAscendingOrder.value) FontWeight.Bold else FontWeight.Normal,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -740,7 +759,7 @@ internal fun ChunithmSongListPage(
                             text = "倒序 ↓",
                             color = Beige500,
                             fontSize = 12.sp,
-                            fontWeight = if (!isAscendingOrder.value) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
+                            fontWeight = if (!isAscendingOrder.value) FontWeight.Bold else FontWeight.Normal,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -778,7 +797,7 @@ internal fun ChunithmSongListPage(
                                 text = label,
                                 color = Beige500,
                                 fontSize = 13.sp,
-                                fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -792,7 +811,7 @@ internal fun ChunithmSongListPage(
                     text = "按CN Value排序",
                     color = Beige500,
                     fontSize = 14.sp,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 
@@ -829,7 +848,7 @@ internal fun ChunithmSongListPage(
                                 text = label,
                                 color = Beige500,
                                 fontSize = 11.sp,
-                                fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -843,7 +862,7 @@ internal fun ChunithmSongListPage(
                     text = "按JP Value排序",
                     color = Beige500,
                     fontSize = 14.sp,
-                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                    fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 
@@ -880,7 +899,7 @@ internal fun ChunithmSongListPage(
                                 text = label,
                                 color = Beige500,
                                 fontSize = 11.sp,
-                                fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else androidx.compose.ui.text.font.FontWeight.Normal,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -889,10 +908,167 @@ internal fun ChunithmSongListPage(
             }
         }
     }
+
+    // 曲目详细信息Modal
+    android.util.Log.d("ChunithmSongListPage", "Modal check - showSongDetailModal: ${showSongDetailModal.value}, selectedSong: ${selectedSong.value?.title}")
+    if (showSongDetailModal.value && selectedSong.value != null) {
+        android.util.Log.d("ChunithmSongListPage", "Showing modal for: ${selectedSong.value!!.title}")
+        SongDetailModal(
+            song = selectedSong.value!!,
+            onDismiss = { 
+                android.util.Log.d("ChunithmSongListPage", "Modal dismissed")
+                showSongDetailModal.value = false
+                selectedSong.value = null
+            }
+        )
+    }
 }
 
 private fun Double.round(decimals: Int): Double {
     var multiplier = 1.0
     repeat(decimals) { multiplier *= 10 }
     return kotlin.math.round(this * multiplier) / multiplier
+}
+
+@Composable
+private fun SongDetailModal(
+    song: ChunithmSongUiModel,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "曲目详情",
+                color = Beige400,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                android.util.Log.d("ChunithmSongListPage", "Building modal content for: ${song.title}")
+                
+                SongInfoSection(
+                    title = "基本信息",
+                    content = {
+                        InfoRow("曲目名称", song.title)
+                        InfoRow("艺术家", song.artist)
+                        InfoRow("版本", song.version)
+                        InfoRow("类型", song.genre)
+                    }
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                if (song.sheets.isNotEmpty()) {
+                    SongInfoSection(
+                        title = "难度信息",
+                        content = {
+                            song.sheets.forEach { sheet ->
+                                SongSheetItem(sheet = sheet)
+                            }
+                        }
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onDismiss,
+                colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                    contentColor = Beige400
+                )
+            ) {
+                Text("关闭")
+            }
+        },
+        containerColor = Red500,
+        titleContentColor = Beige400,
+        textContentColor = Beige400
+    )
+}
+
+@Composable
+private fun SongInfoSection(
+    title: String,
+    content: @Composable () -> Unit
+) {
+    Column {
+        Text(
+            text = title,
+            color = Beige400,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        content()
+    }
+}
+
+@Composable
+private fun InfoRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = "$label:",
+            color = Beige400,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.weight(0.3f)
+        )
+        Text(
+            text = value,
+            color = White1000,
+            fontSize = 14.sp,
+            modifier = Modifier.weight(0.7f)
+        )
+    }
+}
+
+@Composable
+private fun SongSheetItem(sheet: ChunithmSheetUiModel) {
+    val difficultyColor = when (sheet.difficulty) {
+        "basic" -> CHUNI_DIFF_BASIC
+        "advanced" -> CHUNI_DIFF_ADVANCED
+        "expert" -> CHUNI_DIFF_EXPERT
+        "master" -> CHUNI_DIFF_MASTER
+        "ultima" -> CHUNI_DIFF_ULTIMA_1
+        else -> Red300
+    }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = difficultyColor),
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = sheet.difficulty.uppercase(),
+                color = androidx.compose.ui.graphics.Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Lv. ${sheet.levelCn}",
+                color = androidx.compose.ui.graphics.Color.White,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
 }
