@@ -179,32 +179,10 @@ internal fun ChunithmSongCard(
                 val scoresMap = remember { mutableStateOf<Map<String, SheetScoreInfo>>(emptyMap()) }
                 
                 LaunchedEffect(item.title) {
-                    Log.d("ChunithmSongCard", "Loading scores for song: ${item.title}")
-                    
                     if (viewModel != null) {
-                        // Use batch loading from cache instead of individual queries
-                        val songScoresMap = viewModel.getScoresMapForSong(item.title)
-                        val scores = mutableMapOf<String, SheetScoreInfo>()
-                        
-                        item.sheets.forEach { sheet ->
-                            val scoreData = songScoresMap[sheet.difficulty]
-                            Log.d("ChunithmSongCard", "Cache lookup for ${item.title} - ${sheet.difficulty}: $scoreData")
-                            
-                            if (scoreData != null) {
-                                val scoreInfo = SheetScoreInfo(
-                                    score = scoreData.score,
-                                    rank = scoreData.rank,
-                                    clear = if (scoreData.isClear) "CLEAR" else ""
-                                )
-                                scores[sheet.difficulty] = scoreInfo
-                                Log.d("ChunithmSongCard", "Added cached score to map: ${sheet.difficulty} -> $scoreInfo")
-                            } else {
-                                Log.d("ChunithmSongCard", "No cached score found for ${item.title} - ${sheet.difficulty}")
-                            }
-                        }
-                        
-                        scoresMap.value = scores
-                        Log.d("ChunithmSongCard", "Final scoresMap for ${item.title}: $scores")
+                        // Directly get all scores for the song in SheetScoreInfo format
+                        val songScoresMap = viewModel.getSheetScoreInfoMapForSong(item.title)
+                        scoresMap.value = songScoresMap
                     } else {
                         Log.w("ChunithmSongCard", "ViewModel is null, cannot load scores")
                     }
@@ -213,7 +191,6 @@ internal fun ChunithmSongCard(
                 ChunithmSheetList(
                     sheets = item.sheets,
                     lineWidth = itemWidth,
-                    songTitle = item.title,
                     scoresMap = scoresMap.value
                 )
             }

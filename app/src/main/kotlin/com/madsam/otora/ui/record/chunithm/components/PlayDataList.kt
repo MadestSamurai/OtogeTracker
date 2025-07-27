@@ -153,7 +153,8 @@ internal fun PlayDataItem(
                 },
                 fontSize = 12.sp,
                 color = White1000,
-                modifier = Modifier.padding(4.dp)
+                modifier = Modifier.padding(4.dp),
+                maxLines = 1
             )
         }
         Text(

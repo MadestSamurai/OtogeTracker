@@ -27,6 +27,7 @@ import com.madsam.otora.core.utils.CommonUtils.bigNumberToInt
 import com.madsam.otora.core.utils.JsonUtil
 import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayRecordUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
+import com.madsam.otora.ui.record.chunithm.components.SheetScoreInfo
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -152,6 +153,78 @@ internal class ChunithmViewModel(
     }
 
     private fun loadPlayDataFromLocal(context: Context) {
+        viewModelScope.launch {
+            try {
+                Log.d("ChunithmViewModel", "Loading play data from database...")
+                val chunithmLocalService = ChunithmLocalService()
+                
+                val diffArray = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
+                for (diff in diffArray) {
+                    val playRecordUiModel = chunithmLocalService.getPlayRecordUiModel(diff)
+                    
+                    if (playRecordUiModel != null) {
+                        // Calculate total score from all individual scores
+                        var totalScore = 0L
+                        playRecordUiModel.scores.forEach { score ->
+                            totalScore += score.score
+                        }
+                        
+                        val playData = ChunithmPlayDataUiModel.ChuniPlayDataItemUI().apply {
+                            this.scoreTotal = totalScore
+                            this.rateSSSp = playRecordUiModel.rateSSSp
+                            this.rateSSS = playRecordUiModel.rateSSS
+                            this.rateSSp = playRecordUiModel.rateSSp
+                            this.rateSS = playRecordUiModel.rateSS
+                            this.rateSp = playRecordUiModel.rateSp
+                            this.rateS = playRecordUiModel.rateS
+                            this.rateFC = playRecordUiModel.rateFC
+                            this.rateAJ = playRecordUiModel.rateAJ
+                            this.rateAJC = playRecordUiModel.rateAJC
+                            this.rateFChain = playRecordUiModel.rateFChain
+                            this.rateFChainP = playRecordUiModel.rateFChainP
+                            this.rateClear = playRecordUiModel.rateClear
+                            this.rateHard = playRecordUiModel.rateHard
+                            this.rateAbs = playRecordUiModel.rateAbs
+                            this.rateAbsP = playRecordUiModel.rateAbsP
+                            this.rateCatas = playRecordUiModel.rateCatas
+                        }
+                        
+                        when (diff) {
+                            "Basic" -> {
+                                chunithmPlayDataUiModel.update { it.copy(basicPlayData = playData) }
+                            }
+                            "Advanced" -> {
+                                chunithmPlayDataUiModel.update { it.copy(advancedPlayData = playData) }
+                            }
+                            "Expert" -> {
+                                chunithmPlayDataUiModel.update { it.copy(expertPlayData = playData) }
+                            }
+                            "Master" -> {
+                                chunithmPlayDataUiModel.update { it.copy(masterPlayData = playData) }
+                            }
+                            "Ultima" -> {
+                                chunithmPlayDataUiModel.update { it.copy(ultimaPlayData = playData) }
+                            }
+                        }
+                        
+                        Log.d("ChunithmViewModel", "Loaded $diff play data: total score = $totalScore")
+                    } else {
+                        Log.w("ChunithmViewModel", "No play record found for difficulty: $diff")
+                    }
+                }
+                
+                Log.d("ChunithmViewModel", "Play data loading completed from database")
+                
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Failed to load play data from database: ${e.message}", e)
+                // Fallback to JSON loading if database fails
+                loadPlayDataFromJSON(context)
+            }
+        }
+    }
+
+    private fun loadPlayDataFromJSON(context: Context) {
+        Log.d("ChunithmViewModel", "Fallback: Loading play data from JSON...")
         val moshi = Moshi.Builder()
             .add(SafeIntPairAdapter())
             .addLast(KotlinJsonAdapterFactory())
@@ -414,12 +487,6 @@ internal class ChunithmViewModel(
                 Log.d("ChunithmViewModel", "Starting preload of all scores...")
                 val chunithmLocalService = ChunithmLocalService()
                 
-                // Check database status first
-                if (!databaseChecked) {
-                    chunithmLocalService.checkDatabaseStatus()
-                    databaseChecked = true
-                }
-                
                 val allScores = chunithmLocalService.getAllScoresMap()
                 _allScoresCache.value = allScores
                 scoresCacheLoaded = true
@@ -437,6 +504,18 @@ internal class ChunithmViewModel(
 
     fun getScoresMapForSong(title: String): Map<String, ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel> {
         return _allScoresCache.value[title] ?: emptyMap()
+    }
+
+    fun getSheetScoreInfoMapForSong(title: String): Map<String, SheetScoreInfo> {
+        val songScoresMap = _allScoresCache.value[title] ?: return emptyMap()
+        
+        return songScoresMap.mapValues { (_, scoreData) ->
+            SheetScoreInfo(
+                score = scoreData.score,
+                rank = scoreData.rank,
+                clear = if (scoreData.isClear) "CLEAR" else ""
+            )
+        }
     }
 
     suspend fun getLatestScoreForSong(title: String, difficulty: String): ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel? {
@@ -458,19 +537,9 @@ internal class ChunithmViewModel(
         Log.d("ChunithmViewModel", "Cache not loaded, falling back to individual query")
         val chunithmLocalService = ChunithmLocalService()
         
-        // Check database status on first call
-        if (!databaseChecked) {
-            chunithmLocalService.checkDatabaseStatus()
-            databaseChecked = true
-        }
-        
         val result = chunithmLocalService.getLatestScoreForSong(title, difficulty)
         Log.d("ChunithmViewModel", "getLatestScoreForSong result: $result")
         return result
-    }
-
-    companion object {
-        private var databaseChecked = false
     }
 }
 

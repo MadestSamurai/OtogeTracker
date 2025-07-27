@@ -722,8 +722,7 @@ internal class ChunithmLocalService {
                     }
                     scoresMap[scoreEntity.title]!![difficultyString] = scoreUiModel
                 }
-                
-                Log.d(TAG, "Created scores map for ${scoresMap.size} songs")
+
                 scoresMap.mapValues { it.value.toMap() }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get all scores: ${e.message}", e)
@@ -731,37 +730,6 @@ internal class ChunithmLocalService {
             } finally {
                 realm.close()
                 Log.d(TAG, "Realm closed after batch loading")
-            }
-        }
-    }
-
-    suspend fun checkDatabaseStatus() {
-        Log.d(TAG, "=== Database Status Check ===")
-        return withContext(Dispatchers.IO) {
-            val realm = Realm.open(realmConfig)
-            try {
-                val totalScores = realm.query(clazz = ChuniFullScoreEntity::class).find()
-                Log.d(TAG, "Total ChuniFullScoreEntity records: ${totalScores.size}")
-                
-                if (totalScores.isNotEmpty()) {
-                    Log.d(TAG, "Sample records:")
-                    totalScores.take(10).forEach { score ->
-                        Log.d(TAG, "  ID: ${score.id}")
-                        Log.d(TAG, "  Title: '${score.title}'")
-                        Log.d(TAG, "  Diff: '${score.diff}'")
-                        Log.d(TAG, "  Score: ${score.score}")
-                        Log.d(TAG, "  Difficulty: '${score.difficulty}'")
-                        Log.d(TAG, "  ---")
-                    }
-                }
-                
-                val playRecords = realm.query(clazz = ChuniPlayRecordEntity::class).find()
-                Log.d(TAG, "Total ChuniPlayRecordEntity records: ${playRecords.size}")
-                
-            } catch (e: Exception) {
-                Log.e(TAG, "Error checking database status: ${e.message}", e)
-            } finally {
-                realm.close()
             }
         }
     }

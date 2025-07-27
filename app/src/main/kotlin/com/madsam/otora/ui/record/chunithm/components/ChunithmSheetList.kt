@@ -1,6 +1,5 @@
 package com.madsam.otora.ui.record.chunithm.components
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -42,7 +41,6 @@ data class SheetScoreInfo(
 internal fun ChunithmSheetList(
     sheets: List<ChunithmSheetUiModel>,
     lineWidth: Dp,
-    songTitle: String = "",
     scoresMap: Map<String, SheetScoreInfo> = emptyMap()
 ) {
     val stds = sheets.filter { it.type == "std" }
@@ -53,10 +51,6 @@ internal fun ChunithmSheetList(
         Triple("Intl.", stds[0].intl, "intl"),
         Triple("JP", stds[0].jp, "jp")
     ) else listOf()
-
-    // Debug log for scoresMap
-    Log.d("ChunithmSheetList", "Song: $songTitle, ScoresMap: $scoresMap")
-    Log.d("ChunithmSheetList", "Sheets difficulties: ${sheets.map { it.difficulty }}")
 
     Column {
         Row {
