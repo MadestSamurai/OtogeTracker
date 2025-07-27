@@ -5,11 +5,14 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.madsam.otora.core.utils.CalcUtils.calcChuniRank
+import com.madsam.otora.core.utils.CalcUtils.calcChuniRating
+import com.madsam.otora.core.utils.CommonUtils.bigNumberToInt
+import com.madsam.otora.core.utils.JsonUtil
 import com.madsam.otora.data.chunithm.local.api.ChunithmLocalService
+import com.madsam.otora.data.chunithm.remote.api.ChunithmRequestService
 import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniGenreDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniPenguinDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniPlayRecordDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniScoreDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniUserDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniUserExtendDTO
@@ -17,20 +20,15 @@ import com.madsam.otora.data.chunithm.ui.model.ChunithmAvatarUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmCardUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmFriendUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayDataUiModel
-import com.madsam.otora.data.chunithm.ui.model.ChunithmScoreUiModel
-import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
-import com.madsam.otora.data.chunithm.remote.api.ChunithmRequestService
-import com.madsam.otora.data.adapter.SafeIntPairAdapter
-import com.madsam.otora.core.utils.CalcUtils.calcChuniRank
-import com.madsam.otora.core.utils.CalcUtils.calcChuniRating
-import com.madsam.otora.core.utils.CommonUtils.bigNumberToInt
-import com.madsam.otora.core.utils.JsonUtil
 import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayRecordUiModel
+import com.madsam.otora.data.chunithm.ui.model.ChunithmScoreUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
+import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.ui.record.chunithm.components.SheetScoreInfo
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -46,12 +44,6 @@ internal class ChunithmViewModel(
     val chuniFriendDataUI = MutableStateFlow(listOf<ChunithmFriendUiModel>())
 
     val chunithmTopRankUiModel = MutableStateFlow(ChunithmTopRankUiModel())
-
-    private val chuniBasicRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
-    private val chuniAdvancedRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
-    private val chuniExpertRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
-    private val chuniMasterRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
-    private val chuniUltimaRecord = MutableStateFlow(listOf<ChuniGenreDTO>())
 
     private val _chuniSongs = MutableStateFlow<List<ChunithmSongUiModel>>(emptyList())
     val chuniSongs = _chuniSongs.asStateFlow()
@@ -80,7 +72,7 @@ internal class ChunithmViewModel(
     fun loadData(context: Context) {
         loadCardFromLocal(context)
         loadAvatarFromLocal(context)
-        loadPlayDataFromLocal(context)
+        loadPlayDataFromLocal()
         loadFriendDataFromLocal(context)
         loadTopRankDataFromLocal(context)
     }
@@ -103,12 +95,12 @@ internal class ChunithmViewModel(
             _isRefreshing.value = true
             try {
                 // 添加一个小延迟确保UI更新
-                kotlinx.coroutines.delay(50)
+                delay(50)
                 loadData(context)
                 // 重新加载分数缓存，因为用户数据更新可能包含新的分数记录
                 preloadAllScores()
                 // 添加一个最小延迟确保用户能看到刷新动画
-                kotlinx.coroutines.delay(300)
+                delay(300)
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
@@ -122,12 +114,12 @@ internal class ChunithmViewModel(
             _isRefreshing.value = true
             try {
                 // 添加一个小延迟确保UI更新
-                kotlinx.coroutines.delay(50)
+                delay(50)
                 fetchSongData(context)
                 // 重新加载分数缓存
                 preloadAllScores()
                 // 添加一个最小延迟确保用户能看到刷新动画
-                kotlinx.coroutines.delay(300)
+                delay(300)
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
@@ -158,7 +150,7 @@ internal class ChunithmViewModel(
         chunithmAvatarUiModel.update { ChunithmAvatarUiModel(chuniPenguinDTO) }
     }
 
-    private fun loadPlayDataFromLocal(context: Context) {
+    private fun loadPlayDataFromLocal() {
         viewModelScope.launch {
             try {
                 Log.d("ChunithmViewModel", "Loading play data from database...")
@@ -169,11 +161,21 @@ internal class ChunithmViewModel(
                     val playRecordUiModel = chunithmLocalService.getPlayRecordUiModel(diff)
                     
                     if (playRecordUiModel != null) {
-                        // Calculate total score from all individual scores
-                        var totalScore = 0L
+                        // Calculate total score from all individual scores with deduplication
+                        // 使用Map来存储每个歌曲+难度的最高分数
+                        val bestScores = mutableMapOf<String, Long>()
+
                         playRecordUiModel.scores.forEach { score ->
-                            totalScore += score.score
+                            val scoreKey = "${score.title}_${score.difficulty}" // 创建唯一键
+                            val currentBest = bestScores[scoreKey] ?: 0L
+                            // 只保留最高分数
+                            if (score.score > currentBest) {
+                                bestScores[scoreKey] = score.score.toLong()
+                            }
                         }
+                        
+                        // 计算总分（所有最高分的和）
+                        val totalScore: Long = bestScores.values.sum()
                         
                         val playData = ChunithmPlayDataUiModel.ChuniPlayDataItemUI().apply {
                             this.scoreTotal = totalScore
@@ -213,86 +215,12 @@ internal class ChunithmViewModel(
                             }
                         }
                         
-                        Log.d("ChunithmViewModel", "Loaded $diff play data: total score = $totalScore")
                     } else {
                         Log.w("ChunithmViewModel", "No play record found for difficulty: $diff")
                     }
                 }
-                
-                Log.d("ChunithmViewModel", "Play data loading completed from database")
-                
             } catch (e: Exception) {
                 Log.e("ChunithmViewModel", "Failed to load play data from database: ${e.message}", e)
-                // Fallback to JSON loading if database fails
-                loadPlayDataFromJSON(context)
-            }
-        }
-    }
-
-    private fun loadPlayDataFromJSON(context: Context) {
-        Log.d("ChunithmViewModel", "Fallback: Loading play data from JSON...")
-        val moshi = Moshi.Builder()
-            .add(SafeIntPairAdapter())
-            .addLast(KotlinJsonAdapterFactory())
-            .build()
-        val diffArray = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
-        for (diff in diffArray) {
-            val playRecordJsonAdapter = moshi.adapter(ChuniPlayRecordDTO::class.java)
-            val playRecordJson =
-                JsonUtil.readJsonFromFile(context, "chuniPlayRecord$diff.json") ?: continue
-            val playRecord = playRecordJsonAdapter.fromJson(playRecordJson) ?: ChuniPlayRecordDTO()
-            val playDataList = playRecord.genreList
-            var totalScore = 0L
-            for (score in playDataList) {
-                for (fullScore in score.fullScoreList) {
-                    if (fullScore.score.isEmpty()) continue
-                    totalScore += bigNumberToInt(fullScore.score)
-                }
-            }
-            val playData = ChunithmPlayDataUiModel.ChuniPlayDataItemUI().apply {
-                this.scoreTotal = totalScore
-                this.rateSSSp = playRecord.rateSSSp
-                this.rateSSS = playRecord.rateSSS
-                this.rateSSp = playRecord.rateSSp
-                this.rateSS = playRecord.rateSS
-                this.rateSp = playRecord.rateSp
-                this.rateS = playRecord.rateS
-                this.rateFC = playRecord.rateFC
-                this.rateAJ = playRecord.rateAJ
-                this.rateAJC = playRecord.rateAJC
-                this.rateFChain = playRecord.rateFChain
-                this.rateFChainP = playRecord.rateFChainP
-                this.rateClear = playRecord.rateClear
-                this.rateHard = playRecord.rateHard
-                this.rateAbs = playRecord.rateAbs
-                this.rateAbsP = playRecord.rateAbsP
-                this.rateCatas = playRecord.rateCatas
-            }
-            when (diff) {
-                "Basic" -> {
-                    chuniBasicRecord.update { playDataList }
-                    chunithmPlayDataUiModel.update { it.copy(basicPlayData = playData) }
-                }
-
-                "Advanced" -> {
-                    chuniAdvancedRecord.update { playDataList }
-                    chunithmPlayDataUiModel.update { it.copy(advancedPlayData = playData) }
-                }
-
-                "Expert" -> {
-                    chuniExpertRecord.update { playDataList }
-                    chunithmPlayDataUiModel.update { it.copy(expertPlayData = playData) }
-                }
-
-                "Master" -> {
-                    chuniMasterRecord.update { playDataList }
-                    chunithmPlayDataUiModel.update { it.copy(masterPlayData = playData) }
-                }
-
-                "Ultima" -> {
-                    chuniUltimaRecord.update { playDataList }
-                    chunithmPlayDataUiModel.update { it.copy(ultimaPlayData = playData) }
-                }
             }
         }
     }
