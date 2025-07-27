@@ -1,5 +1,6 @@
 package com.madsam.otora.ui.record.chunithm.components
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -11,7 +12,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -36,12 +37,14 @@ import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Red900
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
 import com.madsam.otora.ui.BASE_URL
+import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 
 @Composable
 internal fun ChunithmSongCard(
     item: ChunithmSongUiModel,
     itemWidth: Dp,
-    highlightText: String = ""
+    highlightText: String = "",
+    viewModel: ChunithmViewModel? = null
 ) {
     Surface(
         Modifier.width(itemWidth),
@@ -173,9 +176,45 @@ internal fun ChunithmSongCard(
                     .background(Red700)
                     .width(itemWidth)
             ) {
+                val scoresMap = remember { mutableStateOf<Map<String, SheetScoreInfo>>(emptyMap()) }
+                
+                LaunchedEffect(item.title) {
+                    Log.d("ChunithmSongCard", "Loading scores for song: ${item.title}")
+                    
+                    if (viewModel != null) {
+                        // Use batch loading from cache instead of individual queries
+                        val songScoresMap = viewModel.getScoresMapForSong(item.title)
+                        val scores = mutableMapOf<String, SheetScoreInfo>()
+                        
+                        item.sheets.forEach { sheet ->
+                            val scoreData = songScoresMap[sheet.difficulty]
+                            Log.d("ChunithmSongCard", "Cache lookup for ${item.title} - ${sheet.difficulty}: $scoreData")
+                            
+                            if (scoreData != null) {
+                                val scoreInfo = SheetScoreInfo(
+                                    score = scoreData.score,
+                                    rank = scoreData.rank,
+                                    clear = if (scoreData.isClear) "CLEAR" else ""
+                                )
+                                scores[sheet.difficulty] = scoreInfo
+                                Log.d("ChunithmSongCard", "Added cached score to map: ${sheet.difficulty} -> $scoreInfo")
+                            } else {
+                                Log.d("ChunithmSongCard", "No cached score found for ${item.title} - ${sheet.difficulty}")
+                            }
+                        }
+                        
+                        scoresMap.value = scores
+                        Log.d("ChunithmSongCard", "Final scoresMap for ${item.title}: $scores")
+                    } else {
+                        Log.w("ChunithmSongCard", "ViewModel is null, cannot load scores")
+                    }
+                }
+                
                 ChunithmSheetList(
-                    item.sheets,
-                    itemWidth
+                    sheets = item.sheets,
+                    lineWidth = itemWidth,
+                    songTitle = item.title,
+                    scoresMap = scoresMap.value
                 )
             }
         }

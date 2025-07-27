@@ -1,6 +1,7 @@
 package com.madsam.otora.ui.record.chunithm
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -24,6 +25,7 @@ import com.madsam.otora.core.utils.CalcUtils.calcChuniRank
 import com.madsam.otora.core.utils.CalcUtils.calcChuniRating
 import com.madsam.otora.core.utils.CommonUtils.bigNumberToInt
 import com.madsam.otora.core.utils.JsonUtil
+import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayRecordUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -65,8 +67,13 @@ internal class ChunithmViewModel(
     private val _scrollSongListToTopEvent = MutableStateFlow(false)
     val scrollSongListToTopEvent = _scrollSongListToTopEvent.asStateFlow()
 
+    // 分数缓存 - 预加载机制
+    private val _allScoresCache = MutableStateFlow<Map<String, Map<String, ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel>>>(emptyMap())
+    private var scoresCacheLoaded = false
+
     init {
         loadData(context)
+        preloadAllScores() // 预加载所有分数数据
     }
 
     fun loadData(context: Context) {
@@ -399,6 +406,71 @@ internal class ChunithmViewModel(
 
     fun resetScrollToTopEvent() {
         _scrollSongListToTopEvent.value = false
+    }
+
+    private fun preloadAllScores() {
+        viewModelScope.launch {
+            try {
+                Log.d("ChunithmViewModel", "Starting preload of all scores...")
+                val chunithmLocalService = ChunithmLocalService()
+                
+                // Check database status first
+                if (!databaseChecked) {
+                    chunithmLocalService.checkDatabaseStatus()
+                    databaseChecked = true
+                }
+                
+                val allScores = chunithmLocalService.getAllScoresMap()
+                _allScoresCache.value = allScores
+                scoresCacheLoaded = true
+                Log.d("ChunithmViewModel", "Preloaded scores for ${allScores.size} songs")
+                
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Failed to preload scores: ${e.message}", e)
+            }
+        }
+    }
+
+    fun getScoreFromCache(title: String, difficulty: String): ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel? {
+        return _allScoresCache.value[title]?.get(difficulty)
+    }
+
+    fun getScoresMapForSong(title: String): Map<String, ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel> {
+        return _allScoresCache.value[title] ?: emptyMap()
+    }
+
+    suspend fun getLatestScoreForSong(title: String, difficulty: String): ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel? {
+        Log.d("ChunithmViewModel", "getLatestScoreForSong called: title='$title', difficulty='$difficulty'")
+        
+        // Try to get from cache first
+        if (scoresCacheLoaded) {
+            val cachedScore = getScoreFromCache(title, difficulty)
+            if (cachedScore != null) {
+                Log.d("ChunithmViewModel", "Found score in cache: $cachedScore")
+                return cachedScore
+            } else {
+                Log.d("ChunithmViewModel", "No score found in cache for $title - $difficulty")
+                return null
+            }
+        }
+        
+        // Fallback to individual query if cache not loaded
+        Log.d("ChunithmViewModel", "Cache not loaded, falling back to individual query")
+        val chunithmLocalService = ChunithmLocalService()
+        
+        // Check database status on first call
+        if (!databaseChecked) {
+            chunithmLocalService.checkDatabaseStatus()
+            databaseChecked = true
+        }
+        
+        val result = chunithmLocalService.getLatestScoreForSong(title, difficulty)
+        Log.d("ChunithmViewModel", "getLatestScoreForSong result: $result")
+        return result
+    }
+
+    companion object {
+        private var databaseChecked = false
     }
 }
 

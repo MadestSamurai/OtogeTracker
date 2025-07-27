@@ -10,7 +10,7 @@ internal class ChuniFullScoreEntity : RealmObject {
     var songId: String = ""
     var title: String = ""
     var diff: String = ""
-    var score: String = ""
+    var score: Int = 0
     var genre: String = ""
     var token: String = ""
     

@@ -270,50 +270,50 @@ internal class ChunithmLocalService {
                 val songs = realm.query(
                     clazz = ChuniSongsEntity::class
                 ).find()
-                val songData = songs.map {
+                val songData = songs.map { song ->
                     val sheet = realm.query(
                         clazz = ChuniSheetsEntity::class,
                         query = "title == $0",
-                        it.title
+                        song.title
                     ).find()
-                    val sheetData = sheet.map {
+                    val sheetData = sheet.map { sheetEntity ->
                         ChunithmSheetUiModel(
-                            title = it.title,
-                            type = it.type,
-                            difficulty = it.difficulty,
-                            levelJp = it.levelJp,
-                            levelValueJp = it.levelValueJp,
-                            internalLevelJp = it.internalLevelJp,
-                            internalLevelValueJp = it.internalLevelValueJp,
-                            levelCn = it.levelCn,
-                            levelValueCn = it.levelValueCn,
-                            noteDesigner = it.noteDesigner,
-                            tap = it.tap,
-                            hold = it.hold,
-                            slide = it.slide,
-                            air = it.air,
-                            flick = it.flick,
-                            total = it.total,
-                            jp = it.jp,
-                            intl = it.intl,
-                            cn = it.cn,
-                            isSpecial = it.isSpecial
+                            title = sheetEntity.title,
+                            type = sheetEntity.type,
+                            difficulty = sheetEntity.difficulty,
+                            levelJp = sheetEntity.levelJp,
+                            levelValueJp = sheetEntity.levelValueJp,
+                            internalLevelJp = sheetEntity.internalLevelJp,
+                            internalLevelValueJp = sheetEntity.internalLevelValueJp,
+                            levelCn = sheetEntity.levelCn,
+                            levelValueCn = sheetEntity.levelValueCn,
+                            noteDesigner = sheetEntity.noteDesigner,
+                            tap = sheetEntity.tap,
+                            hold = sheetEntity.hold,
+                            slide = sheetEntity.slide,
+                            air = sheetEntity.air,
+                            flick = sheetEntity.flick,
+                            total = sheetEntity.total,
+                            jp = sheetEntity.jp,
+                            intl = sheetEntity.intl,
+                            cn = sheetEntity.cn,
+                            isSpecial = sheetEntity.isSpecial
                         )
                     }
                     ChunithmSongUiModel(
-                        genre = it.genre,
-                        title = it.title,
-                        artist = it.artist,
-                        bpm = it.bpm,
-                        imageName = it.imageName,
-                        version = it.version,
-                        releaseDate = it.releaseDate,
-                        isNew = it.isNew,
-                        isLocked = it.isLocked,
-                        comment = it.comment,
-                        cnId = it.cnId,
-                        map = it.map,
-                        aliases = it.aliases,
+                        genre = song.genre,
+                        title = song.title,
+                        artist = song.artist,
+                        bpm = song.bpm,
+                        imageName = song.imageName,
+                        version = song.version,
+                        releaseDate = song.releaseDate,
+                        isNew = song.isNew,
+                        isLocked = song.isLocked,
+                        comment = song.comment,
+                        cnId = song.cnId,
+                        map = song.map,
+                        aliases = song.aliases,
                         sheets = sheetData
                     )
                 }
@@ -420,7 +420,8 @@ internal class ChunithmLocalService {
                                 songId = score.id
                                 title = score.title
                                 diff = score.diff
-                                this.score = score.score
+                                // Convert comma-separated string to integer
+                                this.score = score.score.replace(",", "").toIntOrNull() ?: 0
                                 this.genre = score.genre
                                 token = score.token
                                 isClear = score.isClear
@@ -516,28 +517,28 @@ internal class ChunithmLocalService {
                     difficulty
                 ).find()
                 
-                scores.map { score ->
+                scores.map { scoreEntity ->
                     ChuniFullScoreEntity().apply {
-                        id = score.id
-                        songId = score.songId
-                        title = score.title
-                        diff = score.diff
-                        this.score = score.score
-                        genre = score.genre
-                        token = score.token
-                        isClear = score.isClear
-                        isFullCombo = score.isFullCombo
-                        isAllJustice = score.isAllJustice
-                        isAJC = score.isAJC
-                        isFullChain = score.isFullChain
-                        isFullChain2 = score.isFullChain2
-                        rank = score.rank
-                        jacket = score.jacket
-                        date = score.date
-                        trackNumber = score.trackNumber
-                        genreName = score.genreName
-                        this.difficulty = score.difficulty
-                        lastUpdated = score.lastUpdated
+                        id = scoreEntity.id
+                        songId = scoreEntity.songId
+                        title = scoreEntity.title
+                        diff = scoreEntity.diff
+                        this.score = scoreEntity.score
+                        genre = scoreEntity.genre
+                        token = scoreEntity.token
+                        isClear = scoreEntity.isClear
+                        isFullCombo = scoreEntity.isFullCombo
+                        isAllJustice = scoreEntity.isAllJustice
+                        isAJC = scoreEntity.isAJC
+                        isFullChain = scoreEntity.isFullChain
+                        isFullChain2 = scoreEntity.isFullChain2
+                        rank = scoreEntity.rank
+                        jacket = scoreEntity.jacket
+                        date = scoreEntity.date
+                        trackNumber = scoreEntity.trackNumber
+                        genreName = scoreEntity.genreName
+                        this.difficulty = scoreEntity.difficulty
+                        lastUpdated = scoreEntity.lastUpdated
                     }
                 }
             } catch (e: Exception) {
@@ -574,28 +575,193 @@ internal class ChunithmLocalService {
                     rateAbsP = Pair(record.rateAbsP_count, record.rateAbsP_total),
                     rateCatas = Pair(record.rateCatas_count, record.rateCatas_total),
                     lastUpdated = record.lastUpdated,
-                    scores = scores.map { score ->
+                    scores = scores.map { scoreEntity ->
                         ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel(
-                            songId = score.songId,
-                            title = score.title,
-                            diff = score.diff,
-                            score = score.score,
-                            genre = score.genre,
-                            isClear = score.isClear,
-                            isFullCombo = score.isFullCombo,
-                            isAllJustice = score.isAllJustice,
-                            isAJC = score.isAJC,
-                            isFullChain = score.isFullChain,
-                            isFullChain2 = score.isFullChain2,
-                            rank = score.rank,
-                            jacket = score.jacket,
-                            date = score.date,
-                            trackNumber = score.trackNumber,
-                            genreName = score.genreName,
-                            difficulty = score.difficulty
+                            songId = scoreEntity.songId,
+                            title = scoreEntity.title,
+                            diff = scoreEntity.diff,
+                            score = scoreEntity.score,
+                            genre = scoreEntity.genre,
+                            isClear = scoreEntity.isClear,
+                            isFullCombo = scoreEntity.isFullCombo,
+                            isAllJustice = scoreEntity.isAllJustice,
+                            isAJC = scoreEntity.isAJC,
+                            isFullChain = scoreEntity.isFullChain,
+                            isFullChain2 = scoreEntity.isFullChain2,
+                            rank = scoreEntity.rank,
+                            jacket = scoreEntity.jacket,
+                            date = scoreEntity.date,
+                            trackNumber = scoreEntity.trackNumber,
+                            genreName = scoreEntity.genreName,
+                            difficulty = scoreEntity.difficulty
                         )
                     }
                 )
+            }
+        }
+    }
+
+    suspend fun getLatestScoreForSong(title: String, difficulty: String): ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel? {
+        Log.d(TAG, "getLatestScoreForSong called: title='$title', difficulty='$difficulty'")
+        
+        // Map difficulty string to number
+        val difficultyNumber = when (difficulty.lowercase()) {
+            "basic" -> "0"
+            "advanced" -> "1"
+            "expert" -> "2"
+            "master" -> "3"
+            "ultima" -> "4"
+            else -> {
+                Log.w(TAG, "Unknown difficulty: $difficulty, using as-is")
+                difficulty
+            }
+        }
+        Log.d(TAG, "Mapped difficulty '$difficulty' to '$difficultyNumber'")
+        
+        return withContext(Dispatchers.IO) {
+            val realm = Realm.open(realmConfig)
+            try {
+                Log.d(TAG, "Realm opened successfully")
+                val latestScore = realm.query(
+                    clazz = ChuniFullScoreEntity::class,
+                    query = "title == $0 AND diff == $1",
+                    title,
+                    difficultyNumber
+                ).find().firstOrNull()
+
+                Log.d(TAG, "Query executed. Found score: $latestScore")
+                
+                if (latestScore == null) {
+                    Log.d(TAG, "No score found for title='$title', diff='$difficultyNumber'")
+                    // Let's also check what scores exist in the database
+                    val allScores = realm.query(clazz = ChuniFullScoreEntity::class).find()
+                    Log.d(TAG, "Total scores in database: ${allScores.size}")
+                    if (allScores.isNotEmpty()) {
+                        Log.d(TAG, "Sample scores:")
+                        allScores.take(5).forEach { score ->
+                            Log.d(TAG, "  - title='${score.title}', diff='${score.diff}', score=${score.score}")
+                        }
+                    }
+                    return@withContext null
+                }
+
+                val result = ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel(
+                    songId = latestScore.songId,
+                    title = latestScore.title,
+                    diff = latestScore.diff,
+                    score = latestScore.score,
+                    genre = latestScore.genre,
+                    isClear = latestScore.isClear,
+                    isFullCombo = latestScore.isFullCombo,
+                    isAllJustice = latestScore.isAllJustice,
+                    isAJC = latestScore.isAJC,
+                    isFullChain = latestScore.isFullChain,
+                    isFullChain2 = latestScore.isFullChain2,
+                    rank = latestScore.rank,
+                    jacket = latestScore.jacket,
+                    date = latestScore.date,
+                    trackNumber = latestScore.trackNumber,
+                    genreName = latestScore.genreName,
+                    difficulty = latestScore.difficulty
+                )
+                Log.d(TAG, "Created result: $result")
+                result
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to get latest score for song: ${e.message}", e)
+                null
+            } finally {
+                realm.close()
+                Log.d(TAG, "Realm closed")
+            }
+        }
+    }
+
+    suspend fun getAllScoresMap(): Map<String, Map<String, ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel>> {
+        Log.d(TAG, "getAllScoresMap called - batch loading all scores")
+        return withContext(Dispatchers.IO) {
+            val realm = Realm.open(realmConfig)
+            try {
+                val allScores = realm.query(clazz = ChuniFullScoreEntity::class).find()
+                Log.d(TAG, "Loaded ${allScores.size} total scores from database")
+                
+                val scoresMap = mutableMapOf<String, MutableMap<String, ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel>>()
+                
+                allScores.forEach { scoreEntity ->
+                    val scoreUiModel = ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel(
+                        songId = scoreEntity.songId,
+                        title = scoreEntity.title,
+                        diff = scoreEntity.diff,
+                        score = scoreEntity.score,
+                        genre = scoreEntity.genre,
+                        isClear = scoreEntity.isClear,
+                        isFullCombo = scoreEntity.isFullCombo,
+                        isAllJustice = scoreEntity.isAllJustice,
+                        isAJC = scoreEntity.isAJC,
+                        isFullChain = scoreEntity.isFullChain,
+                        isFullChain2 = scoreEntity.isFullChain2,
+                        rank = scoreEntity.rank,
+                        jacket = scoreEntity.jacket,
+                        date = scoreEntity.date,
+                        trackNumber = scoreEntity.trackNumber,
+                        genreName = scoreEntity.genreName,
+                        difficulty = scoreEntity.difficulty
+                    )
+                    
+                    // Convert numeric difficulty back to string for UI
+                    val difficultyString = when (scoreEntity.diff) {
+                        "0" -> "basic"
+                        "1" -> "advanced"
+                        "2" -> "expert"
+                        "3" -> "master"
+                        "4" -> "ultima"
+                        else -> scoreEntity.diff
+                    }
+                    
+                    if (!scoresMap.containsKey(scoreEntity.title)) {
+                        scoresMap[scoreEntity.title] = mutableMapOf()
+                    }
+                    scoresMap[scoreEntity.title]!![difficultyString] = scoreUiModel
+                }
+                
+                Log.d(TAG, "Created scores map for ${scoresMap.size} songs")
+                scoresMap.mapValues { it.value.toMap() }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to get all scores: ${e.message}", e)
+                emptyMap()
+            } finally {
+                realm.close()
+                Log.d(TAG, "Realm closed after batch loading")
+            }
+        }
+    }
+
+    suspend fun checkDatabaseStatus() {
+        Log.d(TAG, "=== Database Status Check ===")
+        return withContext(Dispatchers.IO) {
+            val realm = Realm.open(realmConfig)
+            try {
+                val totalScores = realm.query(clazz = ChuniFullScoreEntity::class).find()
+                Log.d(TAG, "Total ChuniFullScoreEntity records: ${totalScores.size}")
+                
+                if (totalScores.isNotEmpty()) {
+                    Log.d(TAG, "Sample records:")
+                    totalScores.take(10).forEach { score ->
+                        Log.d(TAG, "  ID: ${score.id}")
+                        Log.d(TAG, "  Title: '${score.title}'")
+                        Log.d(TAG, "  Diff: '${score.diff}'")
+                        Log.d(TAG, "  Score: ${score.score}")
+                        Log.d(TAG, "  Difficulty: '${score.difficulty}'")
+                        Log.d(TAG, "  ---")
+                    }
+                }
+                
+                val playRecords = realm.query(clazz = ChuniPlayRecordEntity::class).find()
+                Log.d(TAG, "Total ChuniPlayRecordEntity records: ${playRecords.size}")
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking database status: ${e.message}", e)
+            } finally {
+                realm.close()
             }
         }
     }

@@ -309,7 +309,8 @@ internal fun ChunithmSongListPage(
                     ChunithmSongCard(
                         item = filteredSongList[index],
                         itemWidth = cardWidthDp,
-                        highlightText = searchText
+                        highlightText = searchText,
+                        viewModel = viewModel
                     )
                     if (index != filteredSongList.size - 1) {
                         Spacer(modifier = Modifier.height(10.dp))

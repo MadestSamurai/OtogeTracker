@@ -32,7 +32,7 @@ data class ChunithmPlayRecordUiModel(
         val songId: String = "",
         val title: String = "",
         val diff: String = "",
-        val score: String = "",
+        val score: Int = 0,
         val genre: String = "",
         val isClear: Boolean = false,
         val isFullCombo: Boolean = false,
