@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.BG_DARK_GRAY
@@ -29,18 +28,21 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
+import com.madsam.otora.core.utils.CalcUtils
+import com.madsam.otora.core.utils.CalcUtils.numberToChuniRank
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
 
 data class SheetScoreInfo(
     val score: Int = 0,
-    val rank: String = "",
-    val clear: String = ""
+    val rank: Int = 0,
+    val clear: String = "",
+    val combo: String = "",
+    val chain: String = ""
 )
 
 @Composable
 internal fun ChunithmSheetList(
     sheets: List<ChunithmSheetUiModel>,
-    lineWidth: Dp,
     scoresMap: Map<String, SheetScoreInfo> = emptyMap()
 ) {
     val stds = sheets.filter { it.type == "std" }
@@ -72,7 +74,24 @@ internal fun ChunithmSheetList(
             val scoreInfo = scoresMap[sheet.difficulty] ?: SheetScoreInfo()
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(2.dp)
+                modifier = Modifier
+                    .padding(2.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(
+                        when (sheet.difficulty) {
+                            "basic" -> CHUNI_DIFF_BASIC
+                            "advanced" -> CHUNI_DIFF_ADVANCED
+                            "expert" -> CHUNI_DIFF_EXPERT
+                            "master" -> CHUNI_DIFF_MASTER
+                            "ultima" -> CHUNI_DIFF_ULTIMA_1
+                            else -> CHUNI_DIFF_ULTIMA_1
+                        }
+                    )
+                    .border(
+                        width = if (sheet.difficulty == "ultima") 1.dp else 0.dp,
+                        color = if (sheet.difficulty == "ultima") CHUNI_DIFF_ULTIMA_2 else Color.Transparent,
+                        shape = RoundedCornerShape(3.dp)
+                    )
             ) {
                 Text(
                     text = if (sheet.levelCn.isNotEmpty()) {
@@ -84,26 +103,9 @@ internal fun ChunithmSheetList(
                     fontWeight = FontWeight.Bold,
                     color = White1000,
                     modifier = Modifier
-                        .width(lineWidth * 0.6f)
-                        .clip(RoundedCornerShape(3.dp))
-                        .background(
-                            when (sheet.difficulty) {
-                                "basic" -> CHUNI_DIFF_BASIC
-                                "advanced" -> CHUNI_DIFF_ADVANCED
-                                "expert" -> CHUNI_DIFF_EXPERT
-                                "master" -> CHUNI_DIFF_MASTER
-                                "ultima" -> CHUNI_DIFF_ULTIMA_1
-                                else -> CHUNI_DIFF_ULTIMA_1
-                            }
-                        )
-                        .border(
-                            width = if (sheet.difficulty == "ultima") 1.dp else 0.dp,
-                            color = if (sheet.difficulty == "ultima") CHUNI_DIFF_ULTIMA_2 else Color.Transparent,
-                            shape = RoundedCornerShape(3.dp)
-                        )
                         .padding(vertical = 2.dp, horizontal = 6.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.weight(1f))
                 if (scoreInfo.score > 0) {
                     Text(
                         text = scoreInfo.score.toString(),
@@ -112,23 +114,63 @@ internal fun ChunithmSheetList(
                         color = White1000,
                         modifier = Modifier
                             .clip(RoundedCornerShape(3.dp))
-                            .background(Color.Gray.copy(alpha = 0.8f))
+                            .background(Color.Black.copy(alpha = 0.5f))
                             .padding(vertical = 1.dp, horizontal = 4.dp)
                     )
-                    if (scoreInfo.rank.isNotEmpty()) {
+                    if (scoreInfo.rank >= 0) {
                         Spacer(modifier = Modifier.width(2.dp))
                         Text(
-                            text = scoreInfo.rank,
-                            fontSize = 10.sp,
+                            text = numberToChuniRank(scoreInfo.rank),
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = White1000,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(2.dp))
-                                .background(Color.DarkGray.copy(alpha = 0.8f))
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .padding(vertical = 1.dp, horizontal = 3.dp)
+                        )
+                    }
+                    if (scoreInfo.clear.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = CalcUtils.clearToChuniClear(scoreInfo.clear),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = White1000,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .padding(vertical = 1.dp, horizontal = 3.dp)
+                        )
+                    }
+                    if (scoreInfo.combo.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = CalcUtils.comboToChuniCombo(scoreInfo.combo),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = White1000,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .padding(vertical = 1.dp, horizontal = 3.dp)
+                        )
+                    }
+                    if (scoreInfo.chain.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = CalcUtils.chainToChuniChain(scoreInfo.chain),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = White1000,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(Color.Black.copy(alpha = 0.5f))
                                 .padding(vertical = 1.dp, horizontal = 3.dp)
                         )
                     }
                 }
+                Spacer(modifier = Modifier.width(6.dp))
             }
         }
         for (sheet in wes) {
@@ -163,12 +205,11 @@ internal fun ChunithmSheetList(
                     fontWeight = FontWeight.Bold,
                     color = White1000,
                     modifier = Modifier
-                        .width(lineWidth * 0.6f)
                         .clip(RoundedCornerShape(3.dp))
                         .background(CHUNI_DIFF_ULTIMA_1)
                         .padding(vertical = 2.dp, horizontal = 6.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.weight(1f))
                 if (weScoreInfo.score > 0) {
                     Text(
                         text = weScoreInfo.score.toString(),
@@ -177,23 +218,63 @@ internal fun ChunithmSheetList(
                         color = White1000,
                         modifier = Modifier
                             .clip(RoundedCornerShape(3.dp))
-                            .background(Color.Gray.copy(alpha = 0.8f))
+                            .background(Color.Black.copy(alpha = 0.5f))
                             .padding(vertical = 1.dp, horizontal = 4.dp)
                     )
-                    if (weScoreInfo.rank.isNotEmpty()) {
+                    if (weScoreInfo.rank >= 0) {
                         Spacer(modifier = Modifier.width(2.dp))
                         Text(
-                            text = weScoreInfo.rank,
-                            fontSize = 10.sp,
+                            text = numberToChuniRank(weScoreInfo.rank),
+                            fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
                             color = White1000,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(2.dp))
-                                .background(Color.DarkGray.copy(alpha = 0.8f))
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .padding(vertical = 1.dp, horizontal = 3.dp)
+                        )
+                    }
+                    if (weScoreInfo.clear.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = CalcUtils.clearToChuniClear(weScoreInfo.clear),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = White1000,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .padding(vertical = 1.dp, horizontal = 3.dp)
+                        )
+                    }
+                    if (weScoreInfo.combo.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = CalcUtils.comboToChuniCombo(weScoreInfo.combo),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = White1000,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(Color.Black.copy(alpha = 0.5f))
+                                .padding(vertical = 1.dp, horizontal = 3.dp)
+                        )
+                    }
+                    if (weScoreInfo.chain.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = CalcUtils.chainToChuniChain(weScoreInfo.chain),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = White1000,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(Color.Black.copy(alpha = 0.5f))
                                 .padding(vertical = 1.dp, horizontal = 3.dp)
                         )
                     }
                 }
+                Spacer(modifier = Modifier.width(6.dp))
             }
         }
     }

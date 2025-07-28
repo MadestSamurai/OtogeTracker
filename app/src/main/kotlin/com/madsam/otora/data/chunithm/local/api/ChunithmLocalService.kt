@@ -33,7 +33,7 @@ internal class ChunithmLocalService {
         )
     )
         .name("otoge-tracker-chuni.realm")
-        .schemaVersion(2)
+        .schemaVersion(3)
         .build()
 
     suspend fun saveJPAndLxnsSongsData(
@@ -424,12 +424,9 @@ internal class ChunithmLocalService {
                                 this.score = score.score.replace(",", "").toIntOrNull() ?: 0
                                 this.genre = score.genre
                                 token = score.token
-                                isClear = score.isClear
-                                isFullCombo = score.isFullCombo
-                                isAllJustice = score.isAllJustice
-                                isAJC = score.isAJC
-                                isFullChain = score.isFullChain
-                                isFullChain2 = score.isFullChain2
+                                clear = score.clear
+                                combo = score.combo
+                                chain = score.chain
                                 rank = score.rank
                                 jacket = score.jacket
                                 date = score.date
@@ -526,12 +523,9 @@ internal class ChunithmLocalService {
                         this.score = scoreEntity.score
                         genre = scoreEntity.genre
                         token = scoreEntity.token
-                        isClear = scoreEntity.isClear
-                        isFullCombo = scoreEntity.isFullCombo
-                        isAllJustice = scoreEntity.isAllJustice
-                        isAJC = scoreEntity.isAJC
-                        isFullChain = scoreEntity.isFullChain
-                        isFullChain2 = scoreEntity.isFullChain2
+                        clear = scoreEntity.clear
+                        combo = scoreEntity.combo
+                        chain = scoreEntity.chain
                         rank = scoreEntity.rank
                         jacket = scoreEntity.jacket
                         date = scoreEntity.date
@@ -582,12 +576,9 @@ internal class ChunithmLocalService {
                             diff = scoreEntity.diff,
                             score = scoreEntity.score,
                             genre = scoreEntity.genre,
-                            isClear = scoreEntity.isClear,
-                            isFullCombo = scoreEntity.isFullCombo,
-                            isAllJustice = scoreEntity.isAllJustice,
-                            isAJC = scoreEntity.isAJC,
-                            isFullChain = scoreEntity.isFullChain,
-                            isFullChain2 = scoreEntity.isFullChain2,
+                            clear = scoreEntity.clear,
+                            combo = scoreEntity.combo,
+                            chain = scoreEntity.chain,
                             rank = scoreEntity.rank,
                             jacket = scoreEntity.jacket,
                             date = scoreEntity.date,
@@ -651,12 +642,9 @@ internal class ChunithmLocalService {
                     diff = latestScore.diff,
                     score = latestScore.score,
                     genre = latestScore.genre,
-                    isClear = latestScore.isClear,
-                    isFullCombo = latestScore.isFullCombo,
-                    isAllJustice = latestScore.isAllJustice,
-                    isAJC = latestScore.isAJC,
-                    isFullChain = latestScore.isFullChain,
-                    isFullChain2 = latestScore.isFullChain2,
+                    clear = latestScore.clear,
+                    combo = latestScore.combo,
+                    chain = latestScore.chain,
                     rank = latestScore.rank,
                     jacket = latestScore.jacket,
                     date = latestScore.date,
@@ -693,12 +681,9 @@ internal class ChunithmLocalService {
                         diff = scoreEntity.diff,
                         score = scoreEntity.score,
                         genre = scoreEntity.genre,
-                        isClear = scoreEntity.isClear,
-                        isFullCombo = scoreEntity.isFullCombo,
-                        isAllJustice = scoreEntity.isAllJustice,
-                        isAJC = scoreEntity.isAJC,
-                        isFullChain = scoreEntity.isFullChain,
-                        isFullChain2 = scoreEntity.isFullChain2,
+                        clear = scoreEntity.clear,
+                        combo = scoreEntity.combo,
+                        chain = scoreEntity.chain,
                         rank = scoreEntity.rank,
                         jacket = scoreEntity.jacket,
                         date = scoreEntity.date,

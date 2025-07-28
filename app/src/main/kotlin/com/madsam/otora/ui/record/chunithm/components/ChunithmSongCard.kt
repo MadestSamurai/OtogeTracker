@@ -198,7 +198,6 @@ internal fun ChunithmSongCard(
                 
                 ChunithmSheetList(
                     sheets = item.sheets,
-                    lineWidth = itemWidth,
                     scoresMap = scoresMap.value
                 )
             }

@@ -317,15 +317,36 @@ internal class ChunithmRequestService(private val context: Context) {
                     .split(".").first()
                     .split("_").last()
             }
-            val isClear = clearMarks.contains("icon_playlog_clear")
-            val isFullCombo = clearMarks.contains("icon_playlog_fullcombo")
-            val isAllJustice = clearMarks.contains("icon_playlog_alljustice")
-            val isAJC = clearMarks.contains("icon_playlog_alljustice_critical")
-            val isFullChain = clearMarks.contains("icon_playlog_fullchain")
+            
+            // Clear类型 (clear, hard, absolute, catastrophy等)
+            val clear = when {
+                clearMarks.contains("catastrophy") -> "catastrophy"
+                clearMarks.contains("absolutep") -> "absolutep"
+                clearMarks.contains("absolute") -> "absolute"
+                clearMarks.contains("hard") -> "hard"
+                clearMarks.contains("clear") -> "clear"
+                else -> ""
+            }
+            
+            // Combo类型 (fullcombo, alljustice, ajc等)
+            val combo = when {
+                clearMarks.contains("alljusticecritical") -> "ajc"
+                clearMarks.contains("alljustice") -> "alljustice"
+                clearMarks.contains("fullcombo") -> "fullcombo"
+                else -> ""
+            }
+            
+            // Chain类型 (fullchain, fullchain2等)
+            val chain = when {
+                clearMarks.contains("fullchain2") -> "fullchain2"
+                clearMarks.contains("fullchain") -> "fullchain"
+                else -> ""
+            }
             val rank = marks.select("img[src*='rank']").attr("src")
                 .split("/").last()
                 .split(".").first()
                 .split("_").last()
+            val rankNum = rank.toIntOrNull() ?: -1
             val jacket = log.getElementsByClass("play_jacket_img")
                 .select("img").attr("data-original")
             val date = log.getElementsByClass("play_datalist_date").text()
@@ -336,12 +357,10 @@ internal class ChunithmRequestService(private val context: Context) {
                     title = title,
                     diff = level,
                     score = score,
-                    isClear = isClear,
-                    isFullCombo = isFullCombo,
-                    isAllJustice = isAllJustice,
-                    isAJC = isAJC,
-                    isFullChain = isFullChain,
-                    rank = rank,
+                    clear = clear,
+                    combo = combo,
+                    chain = chain,
+                    rank = rankNum,
                     jacket = jacket,
                     date = date,
                     trackNumber = trackNumber
@@ -392,7 +411,7 @@ internal class ChunithmRequestService(private val context: Context) {
                 imgSrc.contains("fullchain2") ->
                     chuniPlayRecordDTO.rateFChainP = Pair(count, total)    // FChain+
 
-                // 难度统计  
+                // 难度统计
                 imgSrc.contains("hard") ->
                     chuniPlayRecordDTO.rateHard = Pair(count, total)       // Hard
                 imgSrc.contains("absolute") && !imgSrc.contains("absolutep") ->
@@ -427,16 +446,36 @@ internal class ChunithmRequestService(private val context: Context) {
                     it.attr("src")
                         .split("_").last()
                 }
-                val isClear = clearMarks.contains("clear.png")
-                val isFullCombo = clearMarks.contains("fullcombo.png")
-                val isAllJustice = clearMarks.contains("alljustice.png")
-                val isAJC = clearMarks.contains("alljusticecritical.png")
-                val isFullChain = clearMarks.contains("fullchain.png")
-                val isFullChain2 = clearMarks.contains("fullchain2.png")
+                
+                // Clear类型 (clear, hard, absolute, catastrophy等)
+                val clear = when {
+                    clearMarks.contains("catastrophy.png") -> "catastrophy"
+                    clearMarks.contains("absolutep.png") -> "absolutep"
+                    clearMarks.contains("absolute.png") -> "absolute"
+                    clearMarks.contains("hard.png") -> "hard"
+                    clearMarks.contains("clear.png") -> "clear"
+                    else -> ""
+                }
+                
+                // Combo类型 (fullcombo, alljustice, ajc等)
+                val combo = when {
+                    clearMarks.contains("alljusticecritical.png") -> "ajc"
+                    clearMarks.contains("alljustice.png") -> "alljustice"
+                    clearMarks.contains("fullcombo.png") -> "fullcombo"
+                    else -> ""
+                }
+                
+                // Chain类型 (fullchain, fullchain2等)
+                val chain = when {
+                    clearMarks.contains("fullchain2.png") -> "fullchain2"
+                    clearMarks.contains("fullchain.png") -> "fullchain"
+                    else -> ""
+                }
                 val rank = marks.select("img[src*='rank']").attr("src")
                     .split("/").last()
                     .split(".").first()
                     .split("_").last()
+                val rankNum = rank.toIntOrNull() ?: -1
                 chuniScore.add(
                     ChuniFullScoreDTO(
                         id = id,
@@ -445,13 +484,10 @@ internal class ChunithmRequestService(private val context: Context) {
                         score = highScore,
                         genre = genreId,
                         token = token,
-                        isClear = isClear,
-                        isFullCombo = isFullCombo,
-                        isAllJustice = isAllJustice,
-                        isAJC = isAJC,
-                        isFullChain = isFullChain,
-                        isFullChain2 = isFullChain2,
-                        rank = rank,
+                        clear = clear,
+                        combo = combo,
+                        chain = chain,
+                        rank = rankNum,
                     )
                 )
             }

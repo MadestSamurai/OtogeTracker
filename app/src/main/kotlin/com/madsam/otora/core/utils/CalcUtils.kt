@@ -41,4 +41,41 @@ object CalcUtils {
             else -> "???"
         }
     }
+
+    private val RANK_NAMES = arrayOf(
+        "D", "C", "B", "BB", "BBB", "A", "AA", "AAA",
+        "S", "S+", "SS", "SS+", "SSS", "SSS+"
+    )
+
+    fun numberToChuniRank(number: Int): String {
+        return if (number in RANK_NAMES.indices) RANK_NAMES[number] else "?"
+    }
+
+    fun clearToChuniClear(clear: String): String {
+        return when (clear) {
+            "clear" -> "CLEAR"
+            "hard" -> "HARD"
+            "absolute" -> "ABS"
+            "absolutep" -> "ABS+"
+            "catastrophy" -> "CATAS"
+            else -> clear.uppercase()
+        }
+    }
+
+    fun comboToChuniCombo(combo: String): String {
+        return when (combo) {
+            "fullcombo" -> "FC"
+            "alljustice" -> "AJ"
+            "ajc" -> "AJC"
+            else -> combo.uppercase()
+        }
+    }
+
+    fun chainToChuniChain(chain: String): String {
+        return when (chain) {
+            "fullchain" -> "FCHAIN"
+            "fullchain2" -> "FCHAIN+"
+            else -> chain.uppercase()
+        }
+    }
 }

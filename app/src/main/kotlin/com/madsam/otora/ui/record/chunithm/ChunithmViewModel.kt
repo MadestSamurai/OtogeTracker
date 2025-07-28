@@ -447,7 +447,9 @@ internal class ChunithmViewModel(
             SheetScoreInfo(
                 score = scoreData.score,
                 rank = scoreData.rank,
-                clear = if (scoreData.isClear) "CLEAR" else ""
+                clear = scoreData.clear,
+                combo = scoreData.combo,
+                chain = scoreData.chain
             )
         }
     }

@@ -14,15 +14,12 @@ internal class ChuniFullScoreEntity : RealmObject {
     var genre: String = ""
     var token: String = ""
     
-    // Clear status
-    var isClear: Boolean = false
-    var isFullCombo: Boolean = false
-    var isAllJustice: Boolean = false
-    var isAJC: Boolean = false
-    var isFullChain: Boolean = false
-    var isFullChain2: Boolean = false
+    // Clear status - three separate types
+    var clear: String = ""
+    var combo: String = ""
+    var chain: String = ""
     
-    var rank: String = ""
+    var rank: Int = 0 // Rank as an integer (0-13 for D to SSS+)
     var jacket: String = ""
     var date: String = ""
     var trackNumber: String = ""
