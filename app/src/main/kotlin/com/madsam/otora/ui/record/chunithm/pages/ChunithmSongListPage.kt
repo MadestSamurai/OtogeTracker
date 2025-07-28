@@ -3,6 +3,7 @@ package com.madsam.otora.ui.record.chunithm.pages
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -43,11 +44,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -57,6 +60,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
@@ -71,6 +75,7 @@ import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
+import com.madsam.otora.ui.BASE_URL
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSongCard
 import com.madsam.otora.ui.record.chunithm.components.SearchBar
@@ -946,32 +951,61 @@ private fun SongDetailModal(
             )
         },
         text = {
-            Column(
-                modifier = Modifier.fillMaxWidth()
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(500.dp), // 限制高度，避免过高
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                android.util.Log.d("ChunithmSongListPage", "Building modal content for: ${song.title}")
-                
-                SongInfoSection(
-                    title = "基本信息",
-                    content = {
-                        InfoRow("曲目名称", song.title)
-                        InfoRow("艺术家", song.artist)
-                        InfoRow("版本", song.version)
-                        InfoRow("类型", song.genre)
+                item {
+                    android.util.Log.d("ChunithmSongListPage", "Building modal content for: ${song.title}")
+                    
+                    // 封面图片
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Image(
+                            painter = rememberAsyncImagePainter(
+                                model = "$BASE_URL/chuni/img/${song.imageName}",
+                                contentScale = ContentScale.Crop
+                            ),
+                            contentDescription = "封面",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .width(120.dp)
+                                .height(120.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                        )
                     }
-                )
+                }
                 
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                if (song.sheets.isNotEmpty()) {
+                item {
                     SongInfoSection(
-                        title = "难度信息",
+                        title = "基本信息",
                         content = {
-                            song.sheets.forEach { sheet ->
-                                SongSheetItem(sheet = sheet)
+                            InfoRow("曲目名称", song.title)
+                            InfoRow("艺术家", song.artist)
+                            InfoRow("版本", song.version)
+                            InfoRow("类型", song.genre)
+                            if (song.bpm > 0) {
+                                InfoRow("BPM", song.bpm.toString())
                             }
                         }
                     )
+                }
+                
+                if (song.sheets.isNotEmpty()) {
+                    item {
+                        SongInfoSection(
+                            title = "难度信息",
+                            content = {}
+                        )
+                    }
+                    
+                    items(song.sheets.size) { index ->
+                        SongSheetItem(sheet = song.sheets[index])
+                    }
                 }
             }
         },
@@ -987,7 +1021,8 @@ private fun SongDetailModal(
         },
         containerColor = Red500,
         titleContentColor = Beige400,
-        textContentColor = Beige400
+        textContentColor = Beige400,
+        modifier = Modifier.width(400.dp) // 增加Modal宽度
     )
 }
 
@@ -1046,29 +1081,109 @@ private fun SongSheetItem(sheet: ChunithmSheetUiModel) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp),
+            .padding(vertical = 4.dp),
         colors = CardDefaults.cardColors(containerColor = difficultyColor),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            Text(
-                text = sheet.difficulty.uppercase(),
-                color = androidx.compose.ui.graphics.Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Lv. ${sheet.levelCn}",
-                color = androidx.compose.ui.graphics.Color.White,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
-            )
+            // 难度标题行
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = sheet.difficulty.uppercase(),
+                    color = androidx.compose.ui.graphics.Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = "Lv. ${sheet.levelCn}",
+                    color = androidx.compose.ui.graphics.Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // 难度数值信息
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    if (sheet.levelCn.isNotEmpty()) {
+                        Text(
+                            text = "CN: ${sheet.levelCn} (${sheet.levelValueCn})",
+                            color = androidx.compose.ui.graphics.Color.White,
+                            fontSize = 12.sp
+                        )
+                    }
+                    if (sheet.levelJp.isNotEmpty()) {
+                        Text(
+                            text = "JP: ${sheet.levelJp} (${sheet.internalLevelValueJp})",
+                            color = androidx.compose.ui.graphics.Color.White,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+                
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Total: ${sheet.total}",
+                        color = androidx.compose.ui.graphics.Color.White,
+                        fontSize = 12.sp
+                    )
+                    if (sheet.noteDesigner.isNotEmpty()) {
+                        Text(
+                            text = "谱面作者: ${sheet.noteDesigner}",
+                            color = androidx.compose.ui.graphics.Color.White,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            }
+            
+            // 音符统计
+            if (sheet.total > 0) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    NoteTypeItem("TAP", sheet.tap)
+                    NoteTypeItem("HOLD", sheet.hold)
+                    NoteTypeItem("SLIDE", sheet.slide)
+                    NoteTypeItem("AIR", sheet.air)
+                    NoteTypeItem("FLICK", sheet.flick)
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun NoteTypeItem(type: String, count: Int) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = type,
+            color = White1000.copy(alpha = 0.7f),
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = count.toString(),
+            color = White1000,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
