@@ -8,18 +8,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
@@ -56,6 +57,8 @@ import com.madsam.otora.ui.record.chunithm.pages.ChunithmMainPage
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmSongListPage
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 internal fun ChunithmUserPage(
@@ -63,7 +66,8 @@ internal fun ChunithmUserPage(
     chuniScreenState: ChunithmScreenState,
     snackbarHostState: SnackbarHostState,
     showDialog: Boolean,
-    onDismissDialog: () -> Unit
+    onDismissDialog: () -> Unit,
+    navController: NavController
 ) {
     val selectedTabIndex by chuniScreenState.selectedTab.collectAsState()
     val scrollThreshold = 50f
@@ -120,6 +124,11 @@ internal fun ChunithmUserPage(
                     viewModel = viewModel,
                     scrollThreshold = scrollThreshold,
                     setIsTabRowVisible = { isTabRowVisible = it },
+                    onNavigateToSongDetail = { songTitle ->
+                        // 对歌曲标题进行URL编码以处理特殊字符
+                        val encodedTitle = URLEncoder.encode(songTitle, StandardCharsets.UTF_8.toString())
+                        navController.navigate("chunithm_song_detail/$encodedTitle")
+                    }
                 )
 
                 2 -> ChunithmFriendsPage(

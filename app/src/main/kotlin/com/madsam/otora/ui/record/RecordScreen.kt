@@ -49,6 +49,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
@@ -58,8 +59,8 @@ import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.sarasaFont
 import com.madsam.otora.core.utils.ShareUtil
 import com.madsam.otora.ui.components.CustomTabRow
+import com.madsam.otora.ui.navigation.ChunithmNavHost
 import com.madsam.otora.ui.record.chunithm.ChuniViewModelFactory
-import com.madsam.otora.ui.record.chunithm.ChunithmUserPage
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.maimai.MaimaiUserPage
 import com.madsam.otora.ui.record.osu.OsuUserPage
@@ -92,6 +93,7 @@ fun RecordScreen(
     )
     val chunithmViewModel: ChunithmViewModel = viewModel(factory = ChuniViewModelFactory(context))
     val osuScreenState = OsuScreenState()
+    val chunithmNavController = rememberNavController()
     
     // 检测是否为横屏或宽屏
     val windowInfo = LocalWindowInfo.current
@@ -193,8 +195,9 @@ fun RecordScreen(
                     )
 
                     Screen.Page3 -> {
-                        ChunithmUserPage(
-                            chunithmViewModel,
+                        ChunithmNavHost(
+                            navController = chunithmNavController,
+                            viewModel = chunithmViewModel,
                             chuniScreenState = ChunithmScreenState(),
                             snackbarHostState = snackbarHostState,
                             showDialog = showChunithmDialog,
@@ -324,8 +327,9 @@ fun RecordScreen(
                         )
 
                         Screen.Page3 -> {
-                            ChunithmUserPage(
-                                chunithmViewModel,
+                            ChunithmNavHost(
+                                navController = chunithmNavController,
+                                viewModel = chunithmViewModel,
                                 chuniScreenState = ChunithmScreenState(),
                                 snackbarHostState = snackbarHostState,
                                 showDialog = showChunithmDialog,

@@ -3,7 +3,6 @@ package com.madsam.otora.ui.record.chunithm.pages
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,15 +21,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -44,13 +39,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
@@ -60,9 +53,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
@@ -73,9 +64,6 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
-import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
-import com.madsam.otora.ui.BASE_URL
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSongCard
 import com.madsam.otora.ui.record.chunithm.components.SearchBar
@@ -86,6 +74,7 @@ internal fun ChunithmSongListPage(
     viewModel: ChunithmViewModel,
     scrollThreshold: Float,
     setIsTabRowVisible: (Boolean) -> Unit,
+    onNavigateToSongDetail: (String) -> Unit
 ) {
     val context = LocalContext.current
     val screenWidthDp = with(LocalDensity.current) {
@@ -141,10 +130,6 @@ internal fun ChunithmSongListPage(
     val isSortExpanded = remember { mutableStateOf(false) }
     val selectedSortOption = remember { mutableStateOf("default") }
     val isAscendingOrder = remember { mutableStateOf(true) } // 默认正序
-
-    // 添加Modal相关状态
-    val showSongDetailModal = remember { mutableStateOf(false) }
-    val selectedSong = remember { mutableStateOf<ChunithmSongUiModel?>(null) }
 
     // 使用整数范围（乘以10），避免浮点数精度问题
     val internalLevelRange = remember { mutableStateOf(10..157) } // 1.0 to 15.7
@@ -337,11 +322,7 @@ internal fun ChunithmSongListPage(
                         highlightText = searchText,
                         viewModel = viewModel,
                         onClick = { song ->
-                            android.util.Log.d("ChunithmSongListPage", "Song clicked: ${song.title}")
-                            selectedSong.value = song
-                            android.util.Log.d("ChunithmSongListPage", "selectedSong set to: ${selectedSong.value?.title}")
-                            showSongDetailModal.value = true
-                            android.util.Log.d("ChunithmSongListPage", "showSongDetailModal set to: ${showSongDetailModal.value}")
+                            onNavigateToSongDetail(song.title)
                         }
                     )
                     if (index != filteredSongList.size - 1) {
@@ -913,277 +894,10 @@ internal fun ChunithmSongListPage(
             }
         }
     }
-
-    // 曲目详细信息Modal
-    android.util.Log.d("ChunithmSongListPage", "Modal check - showSongDetailModal: ${showSongDetailModal.value}, selectedSong: ${selectedSong.value?.title}")
-    if (showSongDetailModal.value && selectedSong.value != null) {
-        android.util.Log.d("ChunithmSongListPage", "Showing modal for: ${selectedSong.value!!.title}")
-        SongDetailModal(
-            song = selectedSong.value!!,
-            onDismiss = { 
-                android.util.Log.d("ChunithmSongListPage", "Modal dismissed")
-                showSongDetailModal.value = false
-                selectedSong.value = null
-            }
-        )
-    }
 }
 
 private fun Double.round(decimals: Int): Double {
     var multiplier = 1.0
     repeat(decimals) { multiplier *= 10 }
     return kotlin.math.round(this * multiplier) / multiplier
-}
-
-@Composable
-private fun SongDetailModal(
-    song: ChunithmSongUiModel,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = "曲目详情",
-                color = Beige400,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-        },
-        text = {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(500.dp), // 限制高度，避免过高
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                item {
-                    android.util.Log.d("ChunithmSongListPage", "Building modal content for: ${song.title}")
-                    
-                    // 封面图片
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Image(
-                            painter = rememberAsyncImagePainter(
-                                model = "$BASE_URL/chuni/img/${song.imageName}",
-                                contentScale = ContentScale.Crop
-                            ),
-                            contentDescription = "封面",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .width(120.dp)
-                                .height(120.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                        )
-                    }
-                }
-                
-                item {
-                    SongInfoSection(
-                        title = "基本信息",
-                        content = {
-                            InfoRow("曲目名称", song.title)
-                            InfoRow("艺术家", song.artist)
-                            InfoRow("版本", song.version)
-                            InfoRow("类型", song.genre)
-                            if (song.bpm > 0) {
-                                InfoRow("BPM", song.bpm.toString())
-                            }
-                        }
-                    )
-                }
-                
-                if (song.sheets.isNotEmpty()) {
-                    item {
-                        SongInfoSection(
-                            title = "难度信息",
-                            content = {}
-                        )
-                    }
-                    
-                    items(song.sheets.size) { index ->
-                        SongSheetItem(sheet = song.sheets[index])
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = onDismiss,
-                colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
-                    contentColor = Beige400
-                )
-            ) {
-                Text("关闭")
-            }
-        },
-        containerColor = Red500,
-        titleContentColor = Beige400,
-        textContentColor = Beige400,
-        modifier = Modifier.width(400.dp) // 增加Modal宽度
-    )
-}
-
-@Composable
-private fun SongInfoSection(
-    title: String,
-    content: @Composable () -> Unit
-) {
-    Column {
-        Text(
-            text = title,
-            color = Beige400,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        content()
-    }
-}
-
-@Composable
-private fun InfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = "$label:",
-            color = Beige400,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(0.3f)
-        )
-        Text(
-            text = value,
-            color = White1000,
-            fontSize = 14.sp,
-            modifier = Modifier.weight(0.7f)
-        )
-    }
-}
-
-@Composable
-private fun SongSheetItem(sheet: ChunithmSheetUiModel) {
-    val difficultyColor = when (sheet.difficulty) {
-        "basic" -> CHUNI_DIFF_BASIC
-        "advanced" -> CHUNI_DIFF_ADVANCED
-        "expert" -> CHUNI_DIFF_EXPERT
-        "master" -> CHUNI_DIFF_MASTER
-        "ultima" -> CHUNI_DIFF_ULTIMA_1
-        else -> Red300
-    }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = difficultyColor),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            // 难度标题行
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = sheet.difficulty.uppercase(),
-                    color = androidx.compose.ui.graphics.Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Lv. ${sheet.levelCn}",
-                    color = androidx.compose.ui.graphics.Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            // 难度数值信息
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    if (sheet.levelCn.isNotEmpty()) {
-                        Text(
-                            text = "CN: ${sheet.levelCn} (${sheet.levelValueCn})",
-                            color = androidx.compose.ui.graphics.Color.White,
-                            fontSize = 12.sp
-                        )
-                    }
-                    if (sheet.levelJp.isNotEmpty()) {
-                        Text(
-                            text = "JP: ${sheet.levelJp} (${sheet.internalLevelValueJp})",
-                            color = androidx.compose.ui.graphics.Color.White,
-                            fontSize = 12.sp
-                        )
-                    }
-                }
-                
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Total: ${sheet.total}",
-                        color = androidx.compose.ui.graphics.Color.White,
-                        fontSize = 12.sp
-                    )
-                    if (sheet.noteDesigner.isNotEmpty()) {
-                        Text(
-                            text = "谱面作者: ${sheet.noteDesigner}",
-                            color = androidx.compose.ui.graphics.Color.White,
-                            fontSize = 12.sp
-                        )
-                    }
-                }
-            }
-            
-            // 音符统计
-            if (sheet.total > 0) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    NoteTypeItem("TAP", sheet.tap)
-                    NoteTypeItem("HOLD", sheet.hold)
-                    NoteTypeItem("SLIDE", sheet.slide)
-                    NoteTypeItem("AIR", sheet.air)
-                    NoteTypeItem("FLICK", sheet.flick)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun NoteTypeItem(type: String, count: Int) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = type,
-            color = White1000.copy(alpha = 0.7f),
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = count.toString(),
-            color = White1000,
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
 }
