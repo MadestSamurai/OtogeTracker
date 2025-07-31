@@ -33,7 +33,7 @@ internal class ChunithmLocalService {
         )
     )
         .name("otoge-tracker-chuni.realm")
-        .schemaVersion(3)
+        .schemaVersion(5) // Incremented for historical tracking redesign
         .build()
 
     suspend fun saveJPAndLxnsSongsData(
@@ -412,30 +412,61 @@ internal class ChunithmLocalService {
                     }
                     this.copyToRealm(playRecordEntity, UpdatePolicy.ALL)
                     
-                    // Save genre and score data
+                    // Save genre and score data with intelligent historical tracking
                     playRecordDTO.genreList.forEach { genre ->
                         genre.fullScoreList.forEach { score ->
-                            val scoreEntity = ChuniFullScoreEntity().apply {
-                                id = "${score.id}_${score.diff}_${difficulty}_${currentTime}"
-                                songId = score.id
-                                title = score.title
-                                diff = score.diff
-                                // Convert comma-separated string to integer
-                                this.score = score.score.replace(",", "").toIntOrNull() ?: 0
-                                this.genre = score.genre
-                                token = score.token
-                                clear = score.clear
-                                combo = score.combo
-                                chain = score.chain
-                                rank = score.rank
-                                jacket = score.jacket
-                                date = score.date
-                                trackNumber = score.trackNumber
-                                genreName = genre.name
-                                this.difficulty = difficulty
-                                lastUpdated = currentTime
+                            val newScore = score.score.replace(",", "").toIntOrNull() ?: 0
+                            
+                            // Find the current personal best for this song+difficulty
+                            val currentBest = realm.query(
+                                clazz = ChuniFullScoreEntity::class,
+                                query = "songId == $0 AND diff == $1 AND difficulty == $2 AND isPersonalBest == true",
+                                score.id, score.diff, difficulty
+                            ).find().firstOrNull()
+                            
+                            // Determine if we should save this record
+                            val shouldSaveRecord = if (currentBest == null) {
+                                // No previous record - always save
+                                true
+                            } else {
+                                // Save if any of these conditions are met:
+                                newScore > currentBest.score ||  // Better score
+                                currentBest.clear != score.clear ||  // Clear status improved
+                                currentBest.combo != score.combo ||  // Combo status improved
+                                currentBest.chain != score.chain ||  // Chain status improved
+                                currentBest.rank != score.rank  // Rank improved
                             }
-                            this.copyToRealm(scoreEntity, UpdatePolicy.ALL)
+                            
+                            if (shouldSaveRecord) {
+                                // Mark old personal best as no longer current
+                                currentBest?.let { oldBest ->
+                                    oldBest.isPersonalBest = false
+                                }
+                                
+                                // Create new record with timestamp-based ID for uniqueness
+                                val recordId = "${score.id}_${score.diff}_${difficulty}_${currentTime}"
+                                val scoreEntity = ChuniFullScoreEntity().apply {
+                                    id = recordId
+                                    songId = score.id
+                                    title = score.title
+                                    diff = score.diff
+                                    this.score = newScore
+                                    this.genre = score.genre
+                                    token = score.token
+                                    clear = score.clear
+                                    combo = score.combo
+                                    chain = score.chain
+                                    rank = score.rank
+                                    jacket = score.jacket
+                                    date = score.date
+                                    trackNumber = score.trackNumber
+                                    genreName = genre.name
+                                    this.difficulty = difficulty
+                                    recordedAt = currentTime
+                                    isPersonalBest = true  // This is now the current personal best
+                                }
+                                this.copyToRealm(scoreEntity, UpdatePolicy.ALL)
+                            }
                         }
                     }
                 }
@@ -510,7 +541,7 @@ internal class ChunithmLocalService {
             try {
                 val scores = realm.query(
                     clazz = ChuniFullScoreEntity::class,
-                    query = "difficulty == $0",
+                    query = "difficulty == $0 AND isPersonalBest == true",
                     difficulty
                 ).find()
                 
@@ -532,7 +563,8 @@ internal class ChunithmLocalService {
                         trackNumber = scoreEntity.trackNumber
                         genreName = scoreEntity.genreName
                         this.difficulty = scoreEntity.difficulty
-                        lastUpdated = scoreEntity.lastUpdated
+                        recordedAt = scoreEntity.recordedAt
+                        isPersonalBest = scoreEntity.isPersonalBest
                     }
                 }
             } catch (e: Exception) {
@@ -592,6 +624,59 @@ internal class ChunithmLocalService {
         }
     }
 
+    suspend fun getScoreHistoryForSong(title: String, difficulty: String): List<ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel> {
+        Log.d(TAG, "getScoreHistoryForSong called: title='$title', difficulty='$difficulty'")
+        
+        // Map difficulty string to number
+        val difficultyNumber = when (difficulty.lowercase()) {
+            "basic" -> "0"
+            "advanced" -> "1"
+            "expert" -> "2"
+            "master" -> "3"
+            "ultima" -> "4"
+            else -> {
+                Log.w(TAG, "Unknown difficulty: $difficulty, using as-is")
+                difficulty
+            }
+        }
+        
+        return withContext(Dispatchers.IO) {
+            val realm = Realm.open(realmConfig)
+            try {
+                val historyRecords = realm.query(
+                    clazz = ChuniFullScoreEntity::class,
+                    query = "title == $0 AND diff == $1 ORDER BY recordedAt ASC",
+                    title,
+                    difficultyNumber
+                ).find()
+
+                historyRecords.map { scoreEntity ->
+                    ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel(
+                        songId = scoreEntity.songId,
+                        title = scoreEntity.title,
+                        diff = scoreEntity.diff,
+                        score = scoreEntity.score,
+                        genre = scoreEntity.genre,
+                        clear = scoreEntity.clear,
+                        combo = scoreEntity.combo,
+                        chain = scoreEntity.chain,
+                        rank = scoreEntity.rank,
+                        jacket = scoreEntity.jacket,
+                        date = scoreEntity.date,
+                        trackNumber = scoreEntity.trackNumber,
+                        genreName = scoreEntity.genreName,
+                        difficulty = scoreEntity.difficulty
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to get score history: ${e.message}", e)
+                emptyList()
+            } finally {
+                realm.close()
+            }
+        }
+    }
+
     suspend fun getLatestScoreForSong(title: String, difficulty: String): ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel? {
         Log.d(TAG, "getLatestScoreForSong called: title='$title', difficulty='$difficulty'")
         
@@ -615,7 +700,7 @@ internal class ChunithmLocalService {
                 Log.d(TAG, "Realm opened successfully")
                 val latestScore = realm.query(
                     clazz = ChuniFullScoreEntity::class,
-                    query = "title == $0 AND diff == $1",
+                    query = "title == $0 AND diff == $1 AND isPersonalBest == true",
                     title,
                     difficultyNumber
                 ).find().firstOrNull()
@@ -669,8 +754,11 @@ internal class ChunithmLocalService {
         return withContext(Dispatchers.IO) {
             val realm = Realm.open(realmConfig)
             try {
-                val allScores = realm.query(clazz = ChuniFullScoreEntity::class).find()
-                Log.d(TAG, "Loaded ${allScores.size} total scores from database")
+                val allScores = realm.query(
+                    clazz = ChuniFullScoreEntity::class,
+                    query = "isPersonalBest == true"
+                ).find()
+                Log.d(TAG, "Loaded ${allScores.size} personal best scores from database")
                 
                 val scoresMap = mutableMapOf<String, MutableMap<String, ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel>>()
                 

@@ -5,7 +5,7 @@ import io.github.xilinjia.krdb.types.annotations.PrimaryKey
 
 internal class ChuniFullScoreEntity : RealmObject {
     @PrimaryKey
-    var id: String = "" // combination of songId_difficulty_timestamp or unique identifier
+    var id: String = "" // combination of songId_difficulty_timestamp for unique historical records
     
     var songId: String = ""
     var title: String = ""
@@ -28,5 +28,6 @@ internal class ChuniFullScoreEntity : RealmObject {
     var genreName: String = ""
     var difficulty: String = "" // The difficulty level (Basic, Advanced, etc.)
     
-    var lastUpdated: String = ""
+    var recordedAt: String = "" // When this specific record was created (timestamp)
+    var isPersonalBest: Boolean = false // Whether this is the current personal best for this song+difficulty
 }
