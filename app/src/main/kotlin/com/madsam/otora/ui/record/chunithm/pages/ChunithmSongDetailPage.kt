@@ -1,5 +1,6 @@
 package com.madsam.otora.ui.record.chunithm.pages
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,8 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -40,10 +45,12 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
+import com.madsam.otora.core.utils.CalcUtils
+import com.madsam.otora.core.utils.CalcUtils.numberToChuniRank
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
 import com.madsam.otora.ui.BASE_URL
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
-import com.madsam.otora.ui.record.chunithm.components.ChunithmSheetList
+import com.madsam.otora.ui.record.chunithm.components.SheetScoreInfo
 
 @Composable
 internal fun ChunithmSongDetailPage(
@@ -56,6 +63,11 @@ internal fun ChunithmSongDetailPage(
     
     val songList by viewModel.chuniSongs.collectAsState()
     val song = songList.find { it.title == decodedTitle }
+
+    // 拦截系统返回事件
+    BackHandler {
+        onNavigateBack()
+    }
 
     if (song == null) {
         // 如果找不到歌曲，显示错误页面
@@ -77,74 +89,19 @@ internal fun ChunithmSongDetailPage(
         return
     }
 
-    LazyColumn(
+    // 页面容器
+    androidx.compose.foundation.layout.Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Red300)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // 封面和基本信息
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Red500),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        // 封面图片
-                        Image(
-                            painter = rememberAsyncImagePainter(
-                                model = "$BASE_URL/chuni/img/${song.imageName}",
-                                contentScale = ContentScale.Crop
-                            ),
-                            contentDescription = "封面",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .width(100.dp)
-                                .height(100.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                        )
-
-                        Spacer(modifier = Modifier.width(16.dp))
-
-                        // 基本信息
-                        Column(
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                text = song.title,
-                                color = White1000,
-                                fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 2,
-                                overflow = TextOverflow.Ellipsis
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            InfoRow("艺术家", song.artist)
-                            InfoRow("版本", song.version)
-                            InfoRow("类型", song.genre)
-                            if (song.bpm > 0) {
-                                InfoRow("BPM", song.bpm.toString())
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // 难度信息和成绩
-        if (song.sheets.isNotEmpty()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // 封面和基本信息
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -156,28 +113,78 @@ internal fun ChunithmSongDetailPage(
                             .fillMaxWidth()
                             .padding(20.dp)
                     ) {
-                        Text(
-                            text = "难度信息与成绩",
-                            color = Beige400,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(bottom = 16.dp)
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            // 封面图片
+                            Image(
+                                painter = rememberAsyncImagePainter(
+                                    model = "$BASE_URL/chuni/img/${song.imageName}",
+                                    contentScale = ContentScale.Crop
+                                ),
+                                contentDescription = "封面",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .width(100.dp)
+                                    .height(100.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                            )
 
-                        // 使用 ChunithmSheetList 组件
-                        val scoresMap = viewModel.getSheetScoreInfoMapForSong(song.title)
-                        ChunithmSheetList(
-                            sheets = song.sheets,
-                            scoresMap = scoresMap
-                        )
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            // 基本信息
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = song.title,
+                                    color = White1000,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                InfoRow("艺术家", song.artist)
+                                InfoRow("版本", song.version)
+                                InfoRow("类型", song.genre)
+                                if (song.bpm > 0) {
+                                    InfoRow("BPM", song.bpm.toString())
+                                }
+                            }
+                        }
                     }
                 }
             }
-        }
 
-        // 详细难度信息
-        items(song.sheets.size) { index ->
-            SongSheetDetailCard(sheet = song.sheets[index])
+            // 详细难度信息（包含成绩）
+            val scoresMap = viewModel.getSheetScoreInfoMapForSong(song.title)
+            items(song.sheets.size) { index ->
+                SongSheetDetailCard(
+                    sheet = song.sheets[index],
+                    scoreInfo = scoresMap[song.sheets[index].difficulty]
+                )
+            }
+        }
+        
+        // 浮动返回按钮
+        IconButton(
+            onClick = onNavigateBack,
+            modifier = Modifier
+                .padding(16.dp)
+                .background(
+                    Color.Black.copy(alpha = 0.3f),
+                    RoundedCornerShape(50)
+                )
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "返回",
+                tint = Color.White
+            )
         }
     }
 }
@@ -209,7 +216,10 @@ private fun InfoRow(label: String, value: String) {
 }
 
 @Composable
-private fun SongSheetDetailCard(sheet: ChunithmSheetUiModel) {
+private fun SongSheetDetailCard(
+    sheet: ChunithmSheetUiModel,
+    scoreInfo: SheetScoreInfo?
+) {
     val difficultyColor = when (sheet.difficulty) {
         "basic" -> CHUNI_DIFF_BASIC
         "advanced" -> CHUNI_DIFF_ADVANCED
@@ -310,6 +320,81 @@ private fun SongSheetDetailCard(sheet: ChunithmSheetUiModel) {
                             color = Color.White.copy(alpha = 0.8f),
                             fontSize = 14.sp
                         )
+                    }
+                }
+            }
+            
+            // 成绩信息
+            if (scoreInfo != null && scoreInfo.score > 0) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "成绩信息",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "分数: ${scoreInfo.score}",
+                            color = Color.White,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        if (scoreInfo.rank >= 0) {
+                            Text(
+                                text = "评级: ${numberToChuniRank(scoreInfo.rank)}",
+                                color = Color.White.copy(alpha = 0.8f),
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                    
+                    Row {
+                        if (scoreInfo.clear.isNotEmpty()) {
+                            Text(
+                                text = CalcUtils.clearToChuniClear(scoreInfo.clear),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(Color.Black.copy(alpha = 0.5f))
+                                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                            )
+                        }
+                        if (scoreInfo.combo.isNotEmpty()) {
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = CalcUtils.comboToChuniCombo(scoreInfo.combo),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(Color.Black.copy(alpha = 0.5f))
+                                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                            )
+                        }
+                        if (scoreInfo.chain.isNotEmpty()) {
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = CalcUtils.chainToChuniChain(scoreInfo.chain),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(Color.Black.copy(alpha = 0.5f))
+                                    .padding(vertical = 4.dp, horizontal = 8.dp)
+                            )
+                        }
                     }
                 }
             }

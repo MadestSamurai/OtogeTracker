@@ -1,5 +1,11 @@
 package com.madsam.otora.ui.navigation
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.SnackbarHostState
 import androidx.navigation.NavHostController
@@ -73,7 +79,35 @@ internal fun ChunithmNavHost(
                 navArgument("songTitle") { 
                     type = NavType.StringType 
                 }
-            )
+            ),
+            enterTransition = {
+                scaleIn(
+                    initialScale = 0.1f,
+                    animationSpec = tween(
+                        durationMillis = 300,
+                        easing = FastOutSlowInEasing
+                    )
+                ) + fadeIn(
+                    animationSpec = tween(
+                        durationMillis = 300,
+                        easing = FastOutSlowInEasing
+                    )
+                )
+            },
+            exitTransition = {
+                scaleOut(
+                    targetScale = 0.1f,
+                    animationSpec = tween(
+                        durationMillis = 300,
+                        easing = FastOutSlowInEasing
+                    )
+                ) + fadeOut(
+                    animationSpec = tween(
+                        durationMillis = 300,
+                        easing = FastOutSlowInEasing
+                    )
+                )
+            }
         ) { backStackEntry ->
             val songTitle = backStackEntry.arguments?.getString("songTitle") ?: ""
             ChunithmSongDetailPage(
