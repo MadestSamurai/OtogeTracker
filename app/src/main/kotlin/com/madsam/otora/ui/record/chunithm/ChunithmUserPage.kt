@@ -222,6 +222,7 @@ internal fun ChunithmUserPage(
                         CustomScrollableTabRow(
                             selectedTabIndex = selectedTabIndex,
                             containerColor = Red500,
+                            containerWidthDp = contentWidthDp - 48.dp, // 传入实际计算的容器宽度
                             tabs = { selectedIndex ->
                                 tabTitles.forEachIndexed { index, title ->
                                     Tab(
