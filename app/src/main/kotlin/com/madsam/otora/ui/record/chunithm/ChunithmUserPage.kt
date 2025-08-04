@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -40,6 +42,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.madsam.otora.core.icon.Filled
@@ -81,6 +86,31 @@ internal fun ChunithmUserPage(
     val scope = rememberCoroutineScope()
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
+
+    // 计算屏幕宽度和内容宽度（参考 ChunithmMainPage 的实现）
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val windowInfo = LocalWindowInfo.current
+    val screenWidthDp = with(density) {
+        windowInfo.containerSize.width.toDp()
+    }
+    
+    // 计算 Cutout 占用的宽度
+    val cutoutWidthDp = with(density) {
+        val cutoutInsets = WindowInsets.displayCutout
+        // 计算左右两侧的 cutout 总宽度
+        cutoutInsets.getLeft(density, layoutDirection).toDp() +
+        cutoutInsets.getRight(density, layoutDirection).toDp()
+    }
+    
+    // 计算可用内容宽度
+    val contentWidthDp = if (useNavigationRail) {
+        // NavigationRail 宽度 + 水平 padding + cutout 宽度
+        screenWidthDp - 80.dp - 24.dp - cutoutWidthDp
+    } else {
+        // 只减去水平 padding + cutout 宽度
+        screenWidthDp - 24.dp - cutoutWidthDp
+    }
 
     if (showDialog) {
         CookieDialog(
@@ -179,14 +209,14 @@ internal fun ChunithmUserPage(
                 Box(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    // 左侧可滚动TabRow，限定宽度，为右侧按钮预留空间
+                    // 左侧可滚动TabRow，基于计算的内容宽度设置最大宽度
                     androidx.compose.animation.AnimatedVisibility(
                         visible = isTabRowVisible,
                         enter = fadeIn(animationSpec = tween(300)),
                         exit = fadeOut(animationSpec = tween(300)),
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(end = 48.dp) // 为右侧按钮预留40dp + 8dp间隙 = 48dp
+                            .wrapContentWidth() // 只占用实际需要的宽度
+                            .widthIn(max = contentWidthDp - 48.dp) // 基于内容宽度减去按钮宽度和间隙
                             .clip(RoundedCornerShape(20.dp))
                     ) {
                         CustomScrollableTabRow(
@@ -217,7 +247,7 @@ internal fun ChunithmUserPage(
                         )
                     }
 
-                    // 右侧圆形按钮绝对定位在右边
+                    // 右侧圆形按钮，绝对定位在右边
                     Box(
                         modifier = Modifier
                             .size(40.dp)

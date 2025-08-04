@@ -1,17 +1,21 @@
 package com.madsam.otora.data.chunithm.local.api
 
 import android.util.Log
+import com.madsam.otora.data.chunithm.local.model.ChuniFriendEntity
+import com.madsam.otora.data.chunithm.local.model.ChuniFriendScoreEntity
+import com.madsam.otora.data.chunithm.local.model.ChuniFullScoreEntity
+import com.madsam.otora.data.chunithm.local.model.ChuniPlayRecordEntity
 import com.madsam.otora.data.chunithm.local.model.ChuniSheetsEntity
 import com.madsam.otora.data.chunithm.local.model.ChuniSongsEntity
-import com.madsam.otora.data.chunithm.local.model.ChuniPlayRecordEntity
-import com.madsam.otora.data.chunithm.local.model.ChuniFullScoreEntity
 import com.madsam.otora.data.chunithm.remote.model.ChuniAliasesDTO
+import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
+import com.madsam.otora.data.chunithm.remote.model.ChuniFullScoreDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniJpDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniLxnsDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniPlayRecordDTO
+import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayRecordUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
-import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayRecordUiModel
 import io.github.xilinjia.krdb.Realm
 import io.github.xilinjia.krdb.RealmConfiguration
 import io.github.xilinjia.krdb.UpdatePolicy
@@ -30,10 +34,12 @@ internal class ChunithmLocalService {
             ChuniSheetsEntity::class,
             ChuniPlayRecordEntity::class,
             ChuniFullScoreEntity::class,
+            ChuniFriendEntity::class,
+            ChuniFriendScoreEntity::class,
         )
     )
         .name("otoge-tracker-chuni.realm")
-        .schemaVersion(5) // Incremented for historical tracking redesign
+        .schemaVersion(7) // Incremented for friend entity tracking
         .build()
 
     suspend fun saveJPAndLxnsSongsData(
@@ -804,6 +810,253 @@ internal class ChunithmLocalService {
                 realm.close()
                 Log.d(TAG, "Realm closed after batch loading")
             }
+        }
+    }
+
+    /**
+     * 保存友人分数对比数据到数据库
+     */
+    suspend fun saveFriendScoreData(
+        friendScoreList: List<ChuniFullScoreDTO>,
+        friendCode: String,
+        difficulty: String
+    ) = withContext(Dispatchers.IO) {
+        val realm = Realm.open(realmConfig)
+        try {
+            val currentTime = System.currentTimeMillis().toString()
+            
+            realm.write {
+                // 清除该友人该难度的旧数据
+                val oldRecords = this.query(ChuniFriendScoreEntity::class, "friendCode == $0 AND difficulty == $1", friendCode, difficulty).find()
+                oldRecords.forEach { delete(it) }
+                
+                // 保存新数据
+                friendScoreList.forEach { scoreDTO ->
+                    val entity = ChuniFriendScoreEntity().apply {
+                        id = "${friendCode}_${scoreDTO.id}_${scoreDTO.diff}_${scoreDTO.isPersonalRecord}_$currentTime"
+                        this.friendCode = friendCode
+                        songId = scoreDTO.id
+                        title = scoreDTO.title
+                        diff = scoreDTO.diff
+                        score = scoreDTO.score.replace(",", "").toIntOrNull() ?: 0
+                        genre = scoreDTO.genre
+                        token = scoreDTO.token
+                        clear = scoreDTO.clear
+                        combo = scoreDTO.combo
+                        chain = scoreDTO.chain
+                        rank = scoreDTO.rank
+                        isMyScore = scoreDTO.isPersonalRecord
+                        this.difficulty = difficulty
+                        recordedAt = currentTime
+                    }
+                    copyToRealm(entity, UpdatePolicy.ALL)
+                }
+            }
+            Log.d(TAG, "Saved ${friendScoreList.size} friend score records for friend $friendCode, difficulty $difficulty")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save friend score data: ${e.message}", e)
+        } finally {
+            realm.close()
+        }
+    }
+
+    /**
+     * 获取友人分数对比数据
+     */
+    suspend fun getFriendScoreData(friendCode: String, difficulty: String): List<ChuniFriendScoreEntity> = withContext(Dispatchers.IO) {
+        val realm = Realm.open(realmConfig)
+        try {
+            val entities = realm.query(ChuniFriendScoreEntity::class, "friendCode == $0 AND difficulty == $1", friendCode, difficulty).find()
+            entities.map { entity ->
+                ChuniFriendScoreEntity().apply {
+                    id = entity.id
+                    this.friendCode = entity.friendCode
+                    songId = entity.songId
+                    title = entity.title
+                    diff = entity.diff
+                    score = entity.score
+                    genre = entity.genre
+                    token = entity.token
+                    clear = entity.clear
+                    combo = entity.combo
+                    chain = entity.chain
+                    rank = entity.rank
+                    isMyScore = entity.isMyScore
+                    this.difficulty = entity.difficulty
+                    recordedAt = entity.recordedAt
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get friend score data: ${e.message}", e)
+            emptyList()
+        } finally {
+            realm.close()
+        }
+    }
+
+    /**
+     * 获取所有友人的分数对比数据（用于好友页面展示）
+     */
+    suspend fun getAllFriendsScoreData(): Map<String, Map<String, List<ChuniFriendScoreEntity>>> = withContext(Dispatchers.IO) {
+        val realm = Realm.open(realmConfig)
+        try {
+            val entities = realm.query(ChuniFriendScoreEntity::class).find()
+            val result = mutableMapOf<String, MutableMap<String, MutableList<ChuniFriendScoreEntity>>>()
+            
+            entities.forEach { entity ->
+                val friendCode = entity.friendCode
+                val difficulty = entity.difficulty
+                
+                if (!result.containsKey(friendCode)) {
+                    result[friendCode] = mutableMapOf()
+                }
+                if (!result[friendCode]!!.containsKey(difficulty)) {
+                    result[friendCode]!![difficulty] = mutableListOf()
+                }
+                
+                val copy = ChuniFriendScoreEntity().apply {
+                    id = entity.id
+                    this.friendCode = entity.friendCode
+                    songId = entity.songId
+                    title = entity.title
+                    diff = entity.diff
+                    score = entity.score
+                    genre = entity.genre
+                    token = entity.token
+                    clear = entity.clear
+                    combo = entity.combo
+                    chain = entity.chain
+                    rank = entity.rank
+                    isMyScore = entity.isMyScore
+                    this.difficulty = entity.difficulty
+                    recordedAt = entity.recordedAt
+                }
+                result[friendCode]!![difficulty]!!.add(copy)
+            }
+            
+            result.mapValues { it.value.mapValues { diffEntry -> diffEntry.value.toList() }.toMap() }.toMap()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get all friends score data: ${e.message}", e)
+            emptyMap()
+        } finally {
+            realm.close()
+        }
+    }
+
+    /**
+     * 保存友人列表数据到数据库
+     */
+    suspend fun saveFriendListData(friendList: List<ChuniFriendDTO>) {
+        val realm = Realm.open(realmConfig)
+        
+        try {
+            realm.write {
+                val currentTime = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+                    .format(java.util.Date())
+                
+                for (friend in friendList) {
+                    val entity = ChuniFriendEntity().apply {
+                        friendCode = friend.friendCode
+                        friendName = friend.friendName
+                        profileBackground = friend.profileBackground
+                        reborn = friend.reborn
+                        level = friend.level
+                        rating = friend.rating
+                        ratingMax = friend.ratingMax
+                        overpower = friend.overpower
+                        lastPlay = friend.lastPlay
+                        roleImageUrl = friend.roleImageUrl
+                        roleBase = friend.roleBase
+                        honorText = friend.honorText
+                        honorBase = friend.honorBase
+                        isFavorite = friend.isFavorite
+                        isScored = friend.isScored
+                        classEmblemBase = friend.classEmblemBase
+                        classEmblemTop = friend.classEmblemTop
+                        lastUpdated = currentTime
+                    }
+                    copyToRealm(entity, UpdatePolicy.ALL)
+                }
+            }
+            Log.d(TAG, "Successfully saved ${friendList.size} friends to database")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to save friend list data: ${e.message}", e)
+        } finally {
+            realm.close()
+        }
+    }
+
+    /**
+     * 从数据库获取友人列表数据
+     */
+    suspend fun getFriendListData(): List<ChuniFriendDTO> = withContext(Dispatchers.IO) {
+        val realm = Realm.open(realmConfig)
+        
+        try {
+            val entities = realm.query(ChuniFriendEntity::class).find()
+            entities.map { entity ->
+                ChuniFriendDTO(
+                    friendCode = entity.friendCode,
+                    friendName = entity.friendName,
+                    profileBackground = entity.profileBackground,
+                    reborn = entity.reborn,
+                    level = entity.level,
+                    rating = entity.rating,
+                    ratingMax = entity.ratingMax,
+                    overpower = entity.overpower,
+                    lastPlay = entity.lastPlay,
+                    roleImageUrl = entity.roleImageUrl,
+                    roleBase = entity.roleBase,
+                    honorText = entity.honorText,
+                    honorBase = entity.honorBase,
+                    isFavorite = entity.isFavorite,
+                    isScored = entity.isScored,
+                    classEmblemBase = entity.classEmblemBase,
+                    classEmblemTop = entity.classEmblemTop
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get friend list data: ${e.message}", e)
+            emptyList()
+        } finally {
+            realm.close()
+        }
+    }
+
+    /**
+     * 根据友人代码获取特定友人数据
+     */
+    suspend fun getFriendData(friendCode: String): ChuniFriendDTO? = withContext(Dispatchers.IO) {
+        val realm = Realm.open(realmConfig)
+        
+        try {
+            val entity = realm.query(ChuniFriendEntity::class, "friendCode == $0", friendCode).first().find()
+            entity?.let {
+                ChuniFriendDTO(
+                    friendCode = it.friendCode,
+                    friendName = it.friendName,
+                    profileBackground = it.profileBackground,
+                    reborn = it.reborn,
+                    level = it.level,
+                    rating = it.rating,
+                    ratingMax = it.ratingMax,
+                    overpower = it.overpower,
+                    lastPlay = it.lastPlay,
+                    roleImageUrl = it.roleImageUrl,
+                    roleBase = it.roleBase,
+                    honorText = it.honorText,
+                    honorBase = it.honorBase,
+                    isFavorite = it.isFavorite,
+                    isScored = it.isScored,
+                    classEmblemBase = it.classEmblemBase,
+                    classEmblemTop = it.classEmblemTop
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get friend data for $friendCode: ${e.message}", e)
+            null
+        } finally {
+            realm.close()
         }
     }
 }

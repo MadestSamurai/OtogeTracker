@@ -11,7 +11,6 @@ import com.madsam.otora.core.utils.CommonUtils.bigNumberToInt
 import com.madsam.otora.core.utils.JsonUtil
 import com.madsam.otora.data.chunithm.local.api.ChunithmLocalService
 import com.madsam.otora.data.chunithm.remote.api.ChunithmRequestService
-import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniPenguinDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniScoreDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniUserDTO
@@ -73,7 +72,7 @@ internal class ChunithmViewModel(
         loadCardFromLocal(context)
         loadAvatarFromLocal(context)
         loadPlayDataFromLocal()
-        loadFriendDataFromLocal(context)
+        loadFriendDataFromLocal()
         loadTopRankDataFromLocal(context)
     }
 
@@ -225,21 +224,21 @@ internal class ChunithmViewModel(
         }
     }
 
-    private fun loadFriendDataFromLocal(context: Context) {
-        val json = JsonUtil.readJsonFromFile(context, "chuniFriend.json")
-        if (json.isNullOrEmpty()) return
-
-        val type = Types.newParameterizedType(List::class.java, ChuniFriendDTO::class.java)
-
-        val friendList = Moshi.Builder()
-            .addLast(KotlinJsonAdapterFactory())
-            .build()
-            .adapter<List<ChuniFriendDTO>>(type)
-            .fromJson(json)
-            ?.map { ChunithmFriendUiModel(it) }
-            ?: emptyList()
-
-        chuniFriendDataUI.update { friendList }
+    private fun loadFriendDataFromLocal() {
+        viewModelScope.launch {
+            try {
+                Log.d("ChunithmViewModel", "Loading friend data from database...")
+                val chunithmLocalService = ChunithmLocalService()
+                
+                val friendListData = chunithmLocalService.getFriendListData()
+                val friendList = friendListData.map { ChunithmFriendUiModel(it) }
+                
+                chuniFriendDataUI.update { friendList }
+                Log.d("ChunithmViewModel", "Loaded ${friendList.size} friends from database")
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Failed to load friend data from database: ${e.message}", e)
+            }
+        }
     }
 
     private fun loadTopRankDataFromLocal(context: Context) {

@@ -257,7 +257,7 @@ fun CustomScrollableTabRow(
         
         SubcomposeLayout(
             modifier = Modifier
-                .fillMaxWidth()
+                .wrapContentWidth()
                 .horizontalScroll(scrollState)
         ) { constraints ->
             val tabMeasurables = subcompose(TabSlots.Tabs) {
