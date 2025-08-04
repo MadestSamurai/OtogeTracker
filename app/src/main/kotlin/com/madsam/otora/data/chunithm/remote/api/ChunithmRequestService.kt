@@ -802,18 +802,37 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private suspend fun requestFriendScoreList(friendCode: String, difficulty: Int) {
-        val requestBody = "genre=99&friend=$friendCode&radio_diff=$difficulty&token=${cookie.token}"
-        val doc = requestDataFromServer(
-            link = "$CHUNITHM_URL/friend/genreVs/sendBattleStart/",
-            requestBody = requestBody,
-            method = Method.POST
-        )
-        val friendScoreData = parseFriendScoreList(doc)
-        val difficultyNames = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
-        val diffName = difficultyNames.getOrNull(difficulty) ?: "Unknown"
-        
-        val chunithmLocalService = ChunithmLocalService()
-        chunithmLocalService.saveFriendScoreData(friendScoreData, friendCode, diffName)
+        Log.i(TAG, "=== Starting requestFriendScoreList for friend: $friendCode, difficulty: $difficulty ===")
+        try {
+            val requestBody = "genre=99&friend=$friendCode&radio_diff=$difficulty&token=${cookie.token}"
+            Log.i(TAG, "Request body prepared, requesting data from server...")
+            
+            val doc = requestDataFromServer(
+                link = "$CHUNITHM_URL/friend/genreVs/sendBattleStart/",
+                requestBody = requestBody,
+                method = Method.POST
+            )
+            
+            Log.i(TAG, "Document received, processing...")
+            // 输出前1000个字符进行调试
+            val docText = doc.toString()
+            val preview = if (docText.length > 1000) docText.substring(0, 1000) else docText
+            Log.i(TAG, "Document length: ${docText.length}")
+            Log.i(TAG, "Friend score doc preview (first 1000 chars): $preview")
+            
+            val friendScoreData = parseFriendScoreList(doc)
+            Log.i(TAG, "Parsed ${friendScoreData.size} friend score records")
+            
+            val difficultyNames = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
+            val diffName = difficultyNames.getOrNull(difficulty) ?: "Unknown"
+            
+            val chunithmLocalService = ChunithmLocalService()
+            chunithmLocalService.saveFriendScoreData(friendScoreData, friendCode, diffName)
+            Log.i(TAG, "=== requestFriendScoreList completed successfully ===")
+        } catch (e: Exception) {
+            Log.e(TAG, "=== Error in requestFriendScoreList: ${e.message} ===", e)
+            throw e
+        }
     }
 
     private suspend fun requestSongsData() {
@@ -950,13 +969,16 @@ internal class ChunithmRequestService(private val context: Context) {
      * @param difficulty 难度 (0=Basic, 1=Advanced, 2=Expert, 3=Master, 4=Ultima)
      */
     fun getFriendScoreList(friendCode: String, difficulty: Int) {
+        Log.i(TAG, "*** getFriendScoreList called with friendCode: $friendCode, difficulty: $difficulty ***")
         serviceScope.launch {
             try {
+                Log.i(TAG, "Launching coroutine for friend score request...")
                 requestFriendScoreList(friendCode, difficulty)
-                Log.d(TAG, "Friend score list saved to database for friend: $friendCode, difficulty: $difficulty")
+                Log.i(TAG, "Friend score list request completed successfully for friend: $friendCode, difficulty: $difficulty")
             } catch (e: Exception) {
-                Log.e(TAG, "Error requesting friend score list: ${e.message}")
+                Log.e(TAG, "*** Error requesting friend score list: ${e.message} ***", e)
             }
         }
+        Log.i(TAG, "*** getFriendScoreList method execution finished ***")
     }
 }
