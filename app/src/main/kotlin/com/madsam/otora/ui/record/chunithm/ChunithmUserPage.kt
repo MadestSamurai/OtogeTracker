@@ -1,8 +1,9 @@
 package com.madsam.otora.ui.record.chunithm
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,12 +46,12 @@ import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Transparent
 import com.madsam.otora.core.utils.ScreenUtil
-import com.madsam.otora.ui.components.CustomTabRow
+import com.madsam.otora.ui.components.CustomScrollableTabRow
 import com.madsam.otora.ui.record.ChunithmScreenState
 import com.madsam.otora.ui.record.chunithm.dialogs.CookieDialog
 import com.madsam.otora.ui.record.chunithm.dialogs.TopRankDialog
+import com.madsam.otora.ui.record.chunithm.pages.ChunithmCollectionPage
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmFriendsPage
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmMainPage
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmSongListPage
@@ -74,7 +74,7 @@ internal fun ChunithmUserPage(
 
     var isTabRowVisible by remember { mutableStateOf(true) }
     var showTopRankDialog by remember { mutableStateOf(false) }
-    val tabTitles = listOf("Home", "Song List", "Friends")
+    val tabTitles = listOf("Home", "Song List", "Friends", "Collection")
 
     val pagerState = rememberPagerState { tabTitles.size }
     val context = LocalContext.current
@@ -136,6 +136,12 @@ internal fun ChunithmUserPage(
                     scrollThreshold = scrollThreshold,
                     setIsTabRowVisible = { isTabRowVisible = it },
                 )
+
+                3 -> ChunithmCollectionPage(
+                    viewModel = viewModel,
+                    scrollThreshold = scrollThreshold,
+                    setIsTabRowVisible = { isTabRowVisible = it },
+                )
             }
         }
 
@@ -170,103 +176,114 @@ internal fun ChunithmUserPage(
                     ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .background(Transparent)
-                        .weight(1f)
-                        .wrapContentWidth(Alignment.Start),
+                Box(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    AnimatedVisibility(
+                    // 左侧可滚动TabRow，限定宽度，为右侧按钮预留空间
+                    androidx.compose.animation.AnimatedVisibility(
                         visible = isTabRowVisible,
+                        enter = fadeIn(animationSpec = tween(300)),
+                        exit = fadeOut(animationSpec = tween(300)),
                         modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 48.dp) // 为右侧按钮预留40dp + 8dp间隙 = 48dp
                             .clip(RoundedCornerShape(20.dp))
                     ) {
-                        // 左侧TabRow占满剩余空间
-                        CustomTabRow(
+                        CustomScrollableTabRow(
                             selectedTabIndex = selectedTabIndex,
-                            containerColor = Red500
-                        ) {
-                            tabTitles.forEachIndexed { index, title ->
-                                Tab(
-                                    selected = selectedTabIndex == index,
-                                    onClick = {
-                                        if (selectedTabIndex != index) {
-                                            chuniScreenState.selectedTab.update { index }
-                                            scope.launch {
-                                                pagerState.animateScrollToPage(index)
+                            containerColor = Red500,
+                            tabs = { selectedIndex ->
+                                tabTitles.forEachIndexed { index, title ->
+                                    Tab(
+                                        selected = selectedTabIndex == index,
+                                        onClick = {
+                                            if (selectedTabIndex != index) {
+                                                chuniScreenState.selectedTab.update { index }
+                                                scope.launch {
+                                                    pagerState.animateScrollToPage(index)
+                                                }
                                             }
-                                        }
-                                    },
-                                    text = {
-                                        Text(
-                                            text = title,
-                                            color = if (selectedTabIndex == index) Beige500 else Beige600,
-                                        )
-                                    },
-                                    modifier = Modifier.height(40.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // 右侧圆形按钮紧贴右边
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .align(Alignment.CenterVertically)
-                        .clip(RoundedCornerShape(50))
-                        .background(Red500)
-                        .clickable {
-                            when (selectedTabIndex) {
-                                0 -> {
-                                    // 主页，刷新
-                                    scope.launch {
-                                        viewModel.loadData(context)
-                                        snackbarHostState.showSnackbar("已刷新")
-                                    }
-                                }
-                                1 -> {
-                                    // 歌曲列表页，回到顶部
-                                    scope.launch {
-                                        viewModel.scrollSongListToTop()
-                                        snackbarHostState.showSnackbar("已回到顶部")
-                                    }
-                                }
-                                2 -> {
-                                    // 好友页面，刷新好友数据
-                                    scope.launch {
-                                        viewModel.refreshUserData(context)
-                                        snackbarHostState.showSnackbar("好友数据已刷新")
-                                    }
+                                        },
+                                        text = {
+                                            Text(
+                                                text = title,
+                                                color = if (selectedTabIndex == index) Beige500 else Beige600,
+                                            )
+                                        },
+                                        modifier = Modifier.height(40.dp)
+                                    )
                                 }
                             }
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Crossfade(
-                        targetState = selectedTabIndex,
-                        animationSpec = tween(durationMillis = 300),
-                        label = "icon_crossfade"
-                    ) { tabIndex ->
-                        Icon(
-                            painter = rememberVectorPainter(
-                                image = when (tabIndex) {
-                                    0 -> Filled.ArrowRotate  // Home: 刷新图标
-                                    1 -> Filled.ArrowUp      // Song List: 向上箭头
-                                    2 -> Filled.ArrowRotate  // Friends: 刷新图标
-                                    else -> Filled.ArrowRotate
-                                }
-                            ),
-                            contentDescription = when (tabIndex) {
-                                0 -> "Refresh"
-                                1 -> "Scroll to Top"
-                                2 -> "Refresh Friends"
-                                else -> "Refresh"
-                            },
-                            tint = Beige500,
-                            modifier = Modifier.size(16.dp)
                         )
+                    }
+
+                    // 右侧圆形按钮绝对定位在右边
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .align(Alignment.CenterEnd)
+                            .clip(RoundedCornerShape(50))
+                            .background(Red500)
+                            .clickable {
+                                when (selectedTabIndex) {
+                                    0 -> {
+                                        // 主页，刷新
+                                        scope.launch {
+                                            viewModel.loadData(context)
+                                            snackbarHostState.showSnackbar("已刷新")
+                                        }
+                                    }
+                                    1 -> {
+                                        // 歌曲列表页，回到顶部
+                                        scope.launch {
+                                            viewModel.scrollSongListToTop()
+                                            snackbarHostState.showSnackbar("已回到顶部")
+                                        }
+                                    }
+                                    2 -> {
+                                        // 好友页面，刷新好友数据
+                                        scope.launch {
+                                            viewModel.refreshUserData(context)
+                                            snackbarHostState.showSnackbar("好友数据已刷新")
+                                        }
+                                    }
+                                    3 -> {
+                                        // 藏品页面，刷新藏品数据
+                                        scope.launch {
+                                            viewModel.loadData(context)
+                                            snackbarHostState.showSnackbar("藏品数据已刷新")
+                                        }
+                                    }
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Crossfade(
+                            targetState = selectedTabIndex,
+                            animationSpec = tween(durationMillis = 300),
+                            label = "icon_crossfade"
+                        ) { tabIndex ->
+                            Icon(
+                                painter = rememberVectorPainter(
+                                    image = when (tabIndex) {
+                                        0 -> Filled.ArrowRotate  // Home: 刷新图标
+                                        1 -> Filled.ArrowUp      // Song List: 向上箭头
+                                        2 -> Filled.ArrowRotate  // Friends: 刷新图标
+                                        3 -> Filled.ArrowRotate  // Collection: 刷新图标
+                                        else -> Filled.ArrowRotate
+                                    }
+                                ),
+                                contentDescription = when (tabIndex) {
+                                    0 -> "Refresh"
+                                    1 -> "Scroll to Top"
+                                    2 -> "Refresh Friends"
+                                    3 -> "Refresh Collection"
+                                    else -> "Refresh"
+                                },
+                                tint = Beige500,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 }
             }
