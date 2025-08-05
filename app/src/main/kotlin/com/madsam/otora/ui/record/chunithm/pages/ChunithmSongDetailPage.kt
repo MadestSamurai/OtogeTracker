@@ -22,17 +22,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import android.util.Log
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
@@ -165,7 +171,9 @@ internal fun ChunithmSongDetailPage(
             items(song.sheets.size) { index ->
                 SongSheetDetailCard(
                     sheet = song.sheets[index],
-                    scoreInfo = scoresMap[song.sheets[index].difficulty]
+                    scoreInfo = scoresMap[song.sheets[index].difficulty],
+                    songTitle = song.title,
+                    viewModel = viewModel
                 )
             }
         }
@@ -218,7 +226,9 @@ private fun InfoRow(label: String, value: String) {
 @Composable
 private fun SongSheetDetailCard(
     sheet: ChunithmSheetUiModel,
-    scoreInfo: SheetScoreInfo?
+    scoreInfo: SheetScoreInfo?,
+    songTitle: String,
+    viewModel: ChunithmViewModel
 ) {
     val difficultyColor = when (sheet.difficulty) {
         "basic" -> CHUNI_DIFF_BASIC
@@ -420,6 +430,13 @@ private fun SongSheetDetailCard(
                     NoteTypeItem("FLICK", sheet.flick)
                 }
             }
+            
+            // 友人成绩排行
+            FriendScoreRanking(
+                songTitle = songTitle,
+                difficulty = sheet.difficulty,
+                viewModel = viewModel
+            )
         }
     }
 }
@@ -441,5 +458,161 @@ private fun NoteTypeItem(type: String, count: Int) {
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
+    }
+}
+
+@Composable
+private fun FriendScoreRanking(
+    songTitle: String,
+    difficulty: String,
+    viewModel: ChunithmViewModel
+) {
+    var isExpanded by remember { mutableStateOf(false) }
+    var rankingList by remember { mutableStateOf<List<ChunithmViewModel.FriendScoreRankingItem>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    
+    // 加载排行数据
+    LaunchedEffect(songTitle, difficulty) {
+        isLoading = true
+        try {
+            rankingList = viewModel.getFriendScoreRanking(songTitle, difficulty)
+        } catch (e: Exception) {
+            Log.e("FriendScoreRanking", "Failed to load friend score ranking: ${e.message}")
+        } finally {
+            isLoading = false
+        }
+    }
+    
+    if (isLoading || rankingList.isEmpty()) return
+    
+    Spacer(modifier = Modifier.height(16.dp))
+    
+    // 黑色半透明背景卡片
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.3f)),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // 标题和展开按钮
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "友人成绩排行",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                // 展开/收起按钮
+                if (rankingList.size > 1) {
+                    androidx.compose.material3.TextButton(
+                        onClick = { isExpanded = !isExpanded },
+                        colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                            contentColor = Color.White.copy(alpha = 0.8f)
+                        )
+                    ) {
+                        Text(
+                            text = if (isExpanded) "收起" else "展开完整列表",
+                            fontSize = 12.sp
+                        )
+                    }
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            // 显示排行列表
+            val displayList = if (isExpanded) {
+                rankingList
+            } else {
+                // 只显示自己的排名
+                rankingList.filter { it.isMyScore }
+            }
+            
+            for (item in displayList) {
+                FriendScoreRankingItem(item)
+                if (item != displayList.last()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FriendScoreRankingItem(item: ChunithmViewModel.FriendScoreRankingItem) {
+    androidx.compose.foundation.layout.Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .background(
+                if (item.isMyScore) Color.White.copy(alpha = 0.15f)
+                else Color.White.copy(alpha = 0.08f)
+            )
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 排名和用户名
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "#${item.rank}",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.width(32.dp)
+                )
+                Text(
+                    text = item.friendName,
+                    color = if (item.isMyScore) Color.White else Color.White.copy(alpha = 0.8f),
+                    fontSize = 14.sp,
+                    fontWeight = if (item.isMyScore) FontWeight.Bold else FontWeight.Normal,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            
+            // 分数和标记
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = item.score.toString(),
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.width(90.dp), // 增加分数显示宽度
+                    textAlign = TextAlign.End
+                )
+                
+                // Combo标记
+                if (item.combo.isNotEmpty()) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = CalcUtils.comboToChuniCombo(item.combo),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color.Black.copy(alpha = 0.5f))
+                            .padding(vertical = 2.dp, horizontal = 6.dp)
+                    )
+                }
+            }
+        }
     }
 }

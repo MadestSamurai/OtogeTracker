@@ -476,6 +476,72 @@ internal class ChunithmViewModel(
         Log.d("ChunithmViewModel", "getLatestScoreForSong result: $result")
         return result
     }
+
+    /**
+     * 获取歌曲的友人成绩排行数据
+     * @param title 歌曲标题
+     * @param difficulty 难度 (basic, advanced, expert, master, ultima)
+     * @return 包含自己和友人成绩的排行列表，按分数降序排列
+     */
+    suspend fun getFriendScoreRanking(title: String, difficulty: String): List<FriendScoreRankingItem> {
+        val chunithmLocalService = ChunithmLocalService()
+        val friendList = chunithmLocalService.getFriendListData()
+        val myScore = getLatestScoreForSong(title, difficulty)
+        
+        // 将小写难度转换为数据库使用的首字母大写格式
+        val dbDifficulty = difficulty.replaceFirstChar { it.uppercase() }
+        
+        val rankingList = mutableListOf<FriendScoreRankingItem>()
+        
+        // 添加自己的成绩
+        if (myScore != null && myScore.score > 0) {
+            rankingList.add(
+                FriendScoreRankingItem(
+                    friendName = "我",
+                    friendCode = "",
+                    score = myScore.score,
+                    combo = myScore.combo,
+                    isMyScore = true
+                )
+            )
+        }
+        
+        // 添加友人成绩
+        for (friend in friendList.filter { it.isFavorite }) {
+            val friendScores = chunithmLocalService.getFriendScoreData(friend.friendCode, dbDifficulty)
+            val friendScore = friendScores.find { it.title == title }
+            if (friendScore != null && friendScore.score > 0) {
+                rankingList.add(
+                    FriendScoreRankingItem(
+                        friendName = friend.friendName,
+                        friendCode = friend.friendCode,
+                        score = friendScore.score,
+                        combo = friendScore.combo,
+                        isMyScore = false
+                    )
+                )
+            }
+        }
+        
+        // 按分数降序排列并添加排名
+        return rankingList
+            .sortedByDescending { it.score }
+            .mapIndexed { index, item ->
+                item.copy(rank = index + 1)
+            }
+    }
+
+    /**
+     * 友人成绩排行项目数据类
+     */
+    data class FriendScoreRankingItem(
+        val rank: Int = 0,
+        val friendName: String = "",
+        val friendCode: String = "",
+        val score: Int = 0,
+        val combo: String = "",
+        val isMyScore: Boolean = false
+    )
 }
 
 class ChuniViewModelFactory(
