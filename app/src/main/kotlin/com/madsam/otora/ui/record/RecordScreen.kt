@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -35,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -252,20 +254,51 @@ fun RecordScreen(
             Column {
                 CenterAlignedTopAppBar(
                     title = {
+                        // 当选中CHUNITHM页面时，使用ViewModel中的动态标题
+                        val titleText = if (selectedItem == Screen.Page3) {
+                            val pageTitle by chunithmViewModel.pageTitle.collectAsState()
+                            pageTitle
+                        } else {
+                            selectedItem.route
+                        }
                         Text(
-                            text = selectedItem.route,
+                            text = titleText,
                             fontFamily = sarasaFont,
                             fontWeight = FontWeight.Bold,
                         )
                     },
                     navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch { drawerState.open() }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Menu"
-                            )
+                        // 当在CHUNITHM页面且需要显示返回按钮时，显示返回按钮
+                        if (selectedItem == Screen.Page3) {
+                            val showBackButton by chunithmViewModel.showBackButton.collectAsState()
+                            if (showBackButton) {
+                                IconButton(onClick = {
+                                    chunithmViewModel.triggerBack()
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = "返回"
+                                    )
+                                }
+                            } else {
+                                IconButton(onClick = {
+                                    scope.launch { drawerState.open() }
+                                }) {
+                                    Icon(
+                                        imageVector = Icons.Default.Menu,
+                                        contentDescription = "Menu"
+                                    )
+                                }
+                            }
+                        } else {
+                            IconButton(onClick = {
+                                scope.launch { drawerState.open() }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Menu"
+                                )
+                            }
                         }
                     },
                     actions = {

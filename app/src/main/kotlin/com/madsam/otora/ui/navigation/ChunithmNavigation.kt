@@ -110,10 +110,17 @@ internal fun ChunithmNavHost(
             }
         ) { backStackEntry ->
             val songTitle = backStackEntry.arguments?.getString("songTitle") ?: ""
+            
+            // 设置返回回调
+            viewModel.setOnBackCallback {
+                navController.popBackStack()
+            }
+            
             ChunithmSongDetailPage(
                 songTitle = songTitle,
                 viewModel = viewModel,
                 onNavigateBack = {
+                    viewModel.resetPageTitle()
                     navController.popBackStack()
                 }
             )

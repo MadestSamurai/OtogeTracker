@@ -50,6 +50,17 @@ internal class ChunithmViewModel(
     private val _searchText = MutableStateFlow("")
     val searchText = _searchText.asStateFlow()
 
+    // 页面标题状态
+    private val _pageTitle = MutableStateFlow("CHUNITHM")
+    val pageTitle = _pageTitle.asStateFlow()
+
+    // 控制是否显示返回按钮（而不是菜单按钮）
+    private val _showBackButton = MutableStateFlow(false)
+    val showBackButton = _showBackButton.asStateFlow()
+
+    // 返回回调
+    private var onBackCallback: (() -> Unit)? = null
+
     private val _filteredSongs = MutableStateFlow<List<ChunithmSongUiModel>>(emptyList())
 
     private val _isRefreshing = MutableStateFlow(false)
@@ -408,6 +419,25 @@ internal class ChunithmViewModel(
 
     fun scrollSongListToTop() {
         _scrollSongListToTopEvent.value = true
+    }
+
+    fun updatePageTitle(title: String) {
+        _pageTitle.value = title
+        _showBackButton.value = true
+    }
+
+    fun resetPageTitle() {
+        _pageTitle.value = "CHUNITHM"
+        _showBackButton.value = false
+    }
+
+    fun setOnBackCallback(callback: () -> Unit) {
+        onBackCallback = callback
+    }
+
+    fun triggerBack() {
+        resetPageTitle()
+        onBackCallback?.invoke()
     }
 
     fun resetScrollToTopEvent() {

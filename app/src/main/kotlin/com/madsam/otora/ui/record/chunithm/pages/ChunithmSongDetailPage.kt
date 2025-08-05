@@ -20,12 +20,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -78,8 +74,14 @@ internal fun ChunithmSongDetailPage(
     val songList by viewModel.chuniSongs.collectAsState()
     val song = songList.find { it.title == decodedTitle }
 
+    // 更新页面标题
+    LaunchedEffect(decodedTitle) {
+        viewModel.updatePageTitle(decodedTitle)
+    }
+
     // 拦截系统返回事件
     BackHandler {
+        viewModel.resetPageTitle()
         onNavigateBack()
     }
 
@@ -104,17 +106,13 @@ internal fun ChunithmSongDetailPage(
     }
 
     // 页面容器
-    androidx.compose.foundation.layout.Box(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .background(Red300)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
             // 封面和基本信息
             item {
                 Card(
@@ -185,24 +183,6 @@ internal fun ChunithmSongDetailPage(
                 )
             }
         }
-        
-        // 浮动返回按钮
-        IconButton(
-            onClick = onNavigateBack,
-            modifier = Modifier
-                .padding(16.dp)
-                .background(
-                    Color.Black.copy(alpha = 0.3f),
-                    RoundedCornerShape(50)
-                )
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "返回",
-                tint = Color.White
-            )
-        }
-    }
 }
 
 @Composable
