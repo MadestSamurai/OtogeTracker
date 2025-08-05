@@ -45,6 +45,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.util.Log
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TextButton
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
@@ -316,7 +318,7 @@ private fun SongSheetDetailCard(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "内部定数: ${sheet.internalLevelValueJp}",
+                            text = "定数: ${sheet.internalLevelValueJp}",
                             color = Color.White.copy(alpha = 0.8f),
                             fontSize = 14.sp
                         )
@@ -509,11 +511,13 @@ private fun FriendScoreRanking(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(8.dp)
         ) {
             // 标题和展开按钮
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(32.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -521,16 +525,18 @@ private fun FriendScoreRanking(
                     text = "友人成绩排行",
                     color = Color.White,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(start = 6.dp)
                 )
                 
                 // 展开/收起按钮
                 if (rankingList.size > 1) {
-                    androidx.compose.material3.TextButton(
+                    TextButton(
                         onClick = { isExpanded = !isExpanded },
-                        colors = androidx.compose.material3.ButtonDefaults.textButtonColors(
+                        colors = ButtonDefaults.textButtonColors(
                             contentColor = Color.White.copy(alpha = 0.8f)
-                        )
+                        ),
+                        modifier = Modifier.height(32.dp)
                     ) {
                         Text(
                             text = if (isExpanded) "收起" else "展开完整列表",
@@ -629,12 +635,12 @@ private fun FriendScoreRankingItem(item: ChunithmViewModel.FriendScoreRankingIte
     androidx.compose.foundation.layout.Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(6.dp))
             .background(
                 if (item.isMyScore) Color.White.copy(alpha = 0.15f)
                 else Color.White.copy(alpha = 0.08f)
             )
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .padding(horizontal = 6.dp, vertical = 4.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

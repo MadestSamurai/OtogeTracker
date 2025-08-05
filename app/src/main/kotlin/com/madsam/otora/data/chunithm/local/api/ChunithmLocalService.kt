@@ -157,10 +157,37 @@ internal class ChunithmLocalService {
                         }
                         chuniSongL.difficulties.getOrNull(difficultyIndex)?.also {
                             if (sheet.difficulty == "ultima") {
-                                Log.i(TAG, "No Ultima data found of ${chuniSongL.title}")
+                                Log.i(TAG, "Found Ultima data for ${chuniSongL.title}")
                             }
-                        } ?: ChuniLxnsDTO.ChuniSong.Difficulty()
+                        } ?: run {
+                            if (sheet.difficulty == "ultima") {
+                                Log.i(TAG, "No Ultima data found for ${chuniSongL.title}")
+                            }
+                            null
+                        }
                     }
+                    
+                    // 正确判断CN地区的存在性
+                    val cnExists = if (chuniSongL == null) {
+                        false // 如果CN数据本身不存在，则该曲目在CN不存在
+                    } else {
+                        when (sheet.difficulty) {
+                            "basic", "advanced", "expert", "master" -> {
+                                // 基础四难度：只要CN数据存在，这些难度就存在
+                                true
+                            }
+                            "ultima" -> {
+                                // ULTIMA难度：需要检查CN数据中是否真的有ULTIMA难度
+                                chuniSheetL != null
+                            }
+                            "we" -> {
+                                // World's End：需要检查CN数据中是否有对应的WE难度
+                                chuniSheetL != null
+                            }
+                            else -> chuniSheetL != null
+                        }
+                    }
+                    
                     val chuniSheetData = ChuniSheetsEntity().apply {
                         id = "${chuniSongZ.songId}_${sheet.difficulty}"
                         title = chuniSongZ.title
@@ -182,7 +209,7 @@ internal class ChunithmLocalService {
                         total = sheet.noteCounts.total
                         jp = sheet.regions.jp
                         intl = sheet.regions.intl
-                        cn = chuniSheetL != null
+                        cn = cnExists // 使用正确计算的CN存在性
                         isSpecial = sheet.isSpecial
                         version = chuniSheetL?.version ?: -1
                         originId = chuniSheetL?.originId ?: -1
