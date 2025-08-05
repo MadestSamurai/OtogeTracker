@@ -1,6 +1,12 @@
 package com.madsam.otora.ui.record.chunithm.pages
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -489,7 +495,14 @@ private fun FriendScoreRanking(
     
     // 黑色半透明背景卡片
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessMedium
+                )
+            ),
         colors = CardDefaults.cardColors(containerColor = Color.Black.copy(alpha = 0.3f)),
         shape = RoundedCornerShape(12.dp)
     ) {
@@ -529,18 +542,82 @@ private fun FriendScoreRanking(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // 显示排行列表
-            val displayList = if (isExpanded) {
-                rankingList
+            // 用户自己的排名
+            val userRanking = rankingList.find { it.isMyScore }
+            
+            // 分离排名：比用户高的分数和比用户低的分数
+            val higherRankings = if (userRanking != null) {
+                rankingList.filter { !it.isMyScore && it.rank < userRanking.rank }
             } else {
-                // 只显示自己的排名
-                rankingList.filter { it.isMyScore }
+                emptyList()
             }
             
-            for (item in displayList) {
-                FriendScoreRankingItem(item)
-                if (item != displayList.last()) {
-                    Spacer(modifier = Modifier.height(4.dp))
+            val lowerRankings = if (userRanking != null) {
+                rankingList.filter { !it.isMyScore && it.rank > userRanking.rank }
+            } else {
+                rankingList.filter { !it.isMyScore }
+            }
+            
+            // 比用户分数高的排名（上方展开）
+            AnimatedVisibility(
+                visible = isExpanded && higherRankings.isNotEmpty(),
+                enter = expandVertically(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                ),
+                exit = shrinkVertically(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                )
+            ) {
+                Column {
+                    for (item in higherRankings) {
+                        FriendScoreRankingItem(item)
+                        if (item != higherRankings.last()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                        }
+                    }
+                    if (userRanking != null) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+                }
+            }
+            
+            // 用户自己的排名（始终显示在中间）
+            if (userRanking != null) {
+                FriendScoreRankingItem(userRanking)
+            }
+            
+            // 比用户分数低的排名（下方展开）
+            AnimatedVisibility(
+                visible = isExpanded && lowerRankings.isNotEmpty(),
+                enter = expandVertically(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                ),
+                exit = shrinkVertically(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMedium
+                    )
+                )
+            ) {
+                Column {
+                    if (userRanking != null) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                    }
+                    for (item in lowerRankings) {
+                        FriendScoreRankingItem(item)
+                        if (item != lowerRankings.last()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                        }
+                    }
                 }
             }
         }
