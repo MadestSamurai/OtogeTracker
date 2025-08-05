@@ -1,11 +1,14 @@
 package com.madsam.otora.ui.record
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,6 +18,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -36,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +53,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -261,11 +267,7 @@ fun RecordScreen(
                         } else {
                             selectedItem.route
                         }
-                        Text(
-                            text = titleText,
-                            fontFamily = sarasaFont,
-                            fontWeight = FontWeight.Bold,
-                        )
+                        ScrollableTitle(text = titleText)
                     },
                     navigationIcon = {
                         // 当在CHUNITHM页面且需要显示返回按钮时，显示返回按钮
@@ -400,4 +402,102 @@ class OsuScreenState {
 
 class ChunithmScreenState {
     var selectedTab = MutableStateFlow(0)
+}
+
+@Composable
+private fun ScrollableTitle(text: String) {
+    val scrollState = rememberScrollState()
+    var shouldAutoScroll by remember(text) { mutableStateOf(false) }
+    
+    // 检查是否需要滚动，并启动自动滚动效果
+    LaunchedEffect(text, scrollState.maxValue) {
+        shouldAutoScroll = scrollState.maxValue > 0
+        
+        if (shouldAutoScroll) {
+            kotlinx.coroutines.delay(2000) // 等待2秒让用户看到开头
+            
+            while (shouldAutoScroll) {
+                // 滚动到末尾
+                scrollState.animateScrollTo(
+                    scrollState.maxValue,
+                    animationSpec = androidx.compose.animation.core.tween(
+                        durationMillis = (text.length * 80).coerceIn(4000, 8000), // 控制滚动速度
+                        easing = androidx.compose.animation.core.LinearEasing
+                    )
+                )
+                
+                if (!shouldAutoScroll) break
+                kotlinx.coroutines.delay(1500) // 在末尾停留1.5秒
+                
+                // 滚动回开头
+                scrollState.animateScrollTo(
+                    0,
+                    animationSpec = androidx.compose.animation.core.tween(
+                        durationMillis = 1000, // 快速回到开头
+                        easing = androidx.compose.animation.core.FastOutSlowInEasing
+                    )
+                )
+                
+                if (!shouldAutoScroll) break
+                kotlinx.coroutines.delay(2000) // 在开头停留2秒
+            }
+        }
+    }
+
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(scrollState, enabled = false), // 禁用手动滚动
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = text,
+                fontFamily = sarasaFont,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                overflow = TextOverflow.Visible,
+                modifier = Modifier.padding(horizontal = 48.dp)
+            )
+        }
+        
+        // 左侧渐隐遮罩 - 只在滚动时显示
+        if (shouldAutoScroll && scrollState.value > 10) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(48.dp)
+                    .background(
+                        androidx.compose.ui.graphics.Brush.horizontalGradient(
+                            colors = listOf(
+                                Red500, // TopAppBar的背景色
+                                Red500.copy(alpha = 0f)
+                            )
+                        )
+                    )
+                    .align(Alignment.CenterStart)
+            )
+        }
+        
+        // 右侧渐隐遮罩 - 只在滚动时显示
+        if (shouldAutoScroll && scrollState.value < scrollState.maxValue - 10) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(48.dp)
+                    .background(
+                        androidx.compose.ui.graphics.Brush.horizontalGradient(
+                            colors = listOf(
+                                Red500.copy(alpha = 0f),
+                                Red500 // TopAppBar的背景色
+                            )
+                        )
+                    )
+                    .align(Alignment.CenterEnd)
+            )
+        }
+    }
 }
