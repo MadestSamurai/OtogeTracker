@@ -643,6 +643,22 @@ internal class ChunithmRequestService(private val context: Context) {
         
         val chunithmLocalService = ChunithmLocalService()
         chunithmLocalService.saveFriendListData(friendListData)
+        
+        // 为每个友人获取所有难度的成绩数据
+        val favoriteCount = friendListData.count { it.isFavorite && it.friendCode.isNotEmpty() }
+        Log.i(TAG, "Fetching friend scores for $favoriteCount favorite friends")
+        for (friend in friendListData) {
+            if (friend.friendCode.isNotEmpty() && friend.isFavorite) {
+                // 获取所有难度的成绩 (0=Basic, 1=Advanced, 2=Expert, 3=Master, 4=Ultima)
+                for (difficulty in 0..4) {
+                    try {
+                        requestFriendScoreList(friend.friendCode, difficulty)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to fetch scores for ${friend.friendName}: ${e.message}")
+                    }
+                }
+            }
+        }
     }
 
     private fun parseLoginBonus(doc: Document): ChuniLoginBonusDTO {
@@ -676,136 +692,58 @@ internal class ChunithmRequestService(private val context: Context) {
     private fun parseFriendScoreList(doc: Document): List<ChuniFullScoreDTO> {
         val friendScoreList = mutableListOf<ChuniFullScoreDTO>()
         
-        val scoreBlocks = doc.select("div.w388.musiclist_box")
+        // 选择所有歌曲容器
+        val scoreBlocks = doc.select("div.w388.music_box")
         for (block in scoreBlocks) {
-            // 获取歌曲基本信息
-            val title = block.select("div.music_title").text()
-            val id = block.select("input[name=idx]").attr("value")
-            val diff = block.select("input[name=diff]").attr("value")
-            val genre = block.select("input[name=genre]").attr("value")
-            val token = block.select("input[name=token]").attr("value")
+            // 获取歌曲标题
+            val title = block.select("div.block_underline.text_b.text_c div").text()
             
-            // 获取我的分数
-            val myScore = block.select("div.friend_vs_mylist_data div.text_b").text()
-            
-            // 获取友人分数
-            val friendScore = block.select("div.friend_vs_friendlist_data div.text_b").text()
-            
-            // 获取我的标记
-            val myMarks = block.select("div.friend_vs_mylist_data div.play_musicdata_icon")
-                .select("img").joinToString("") {
-                    it.attr("src").split("/").last().split(".").first().split("_").last()
+            // 获取对比结果容器
+            val resultBlock = block.select("div.vs_list_result_block").first()
+            if (resultBlock != null) {
+                val infoBlocks = resultBlock.select("div.vs_list_infoblock")
+                
+                if (infoBlocks.size >= 2) {
+                    // 第一个infoBlock是我的分数（但我们只需要友人分数）
+                    // 第二个infoBlock是友人分数
+                    val friendInfoBlock = infoBlocks[1]
+                    val friendScore = friendInfoBlock.select("div.play_musicdata_highscore").text()
+                    val friendBadgeImages = friendInfoBlock.select("div.vs_list_friendbatch img")
+                    
+                    // 解析友人的标记（只需要combo相关）
+                    val friendMarks = friendBadgeImages.map { img ->
+                        img.attr("src").split("/").last().split(".").first()
+                    }
+                    
+                    // 在友人成绩页面中，只有Combo类型标记是有意义的
+                    val friendCombo = when {
+                        friendMarks.any { it.contains("alljusticecritical") } -> "ajc"
+                        friendMarks.any { it.contains("alljustice") } -> "alljustice"
+                        friendMarks.any { it.contains("fullcombo") } -> "fullcombo"
+                        else -> ""
+                    }
+                    
+                    // 添加友人的分数记录（只有当友人分数不为空且不为0时）
+                    if (friendScore.isNotEmpty() && friendScore != "0") {
+                        friendScoreList.add(
+                            ChuniFullScoreDTO(
+                                title = title,
+                                score = friendScore,
+                                combo = friendCombo, // 只设置有意义的字段
+                                isPersonalRecord = false // 标记为友人记录
+                            )
+                        )
+                    }
                 }
-            
-            // 获取友人标记
-            val friendMarks = block.select("div.friend_vs_friendlist_data div.play_musicdata_icon")
-                .select("img").joinToString("") {
-                    it.attr("src").split("/").last().split(".").first().split("_").last()
-                }
-            
-            // 解析我的Clear类型
-            val myClear = when {
-                myMarks.contains("catastrophy") -> "catastrophy"
-                myMarks.contains("absolutep") -> "absolutep"
-                myMarks.contains("absolute") -> "absolute"
-                myMarks.contains("hard") -> "hard"
-                myMarks.contains("clear") -> "clear"
-                else -> ""
             }
-            
-            // 解析我的Combo类型
-            val myCombo = when {
-                myMarks.contains("alljusticecritical") -> "ajc"
-                myMarks.contains("alljustice") -> "alljustice"
-                myMarks.contains("fullcombo") -> "fullcombo"
-                else -> ""
-            }
-            
-            // 解析我的Chain类型
-            val myChain = when {
-                myMarks.contains("fullchain2") -> "fullchain2"
-                myMarks.contains("fullchain") -> "fullchain"
-                else -> ""
-            }
-            
-            // 解析我的rank
-            val myRank = block.select("div.friend_vs_mylist_data img[src*='rank']")
-                .attr("src").split("/").last().split(".").first().split("_").last()
-            val myRankNum = myRank.toIntOrNull() ?: -1
-            
-            // 解析友人的Clear类型
-            val friendClear = when {
-                friendMarks.contains("catastrophy") -> "catastrophy"
-                friendMarks.contains("absolutep") -> "absolutep"
-                friendMarks.contains("absolute") -> "absolute"
-                friendMarks.contains("hard") -> "hard"
-                friendMarks.contains("clear") -> "clear"
-                else -> ""
-            }
-            
-            // 解析友人的Combo类型
-            val friendCombo = when {
-                friendMarks.contains("alljusticecritical") -> "ajc"
-                friendMarks.contains("alljustice") -> "alljustice"
-                friendMarks.contains("fullcombo") -> "fullcombo"
-                else -> ""
-            }
-            
-            // 解析友人的Chain类型
-            val friendChain = when {
-                friendMarks.contains("fullchain2") -> "fullchain2"
-                friendMarks.contains("fullchain") -> "fullchain"
-                else -> ""
-            }
-            
-            // 解析友人rank
-            val friendRank = block.select("div.friend_vs_friendlist_data img[src*='rank']")
-                .attr("src").split("/").last().split(".").first().split("_").last()
-            val friendRankNum = friendRank.toIntOrNull() ?: -1
-            
-            // 创建我的分数记录
-            friendScoreList.add(
-                ChuniFullScoreDTO(
-                    id = id,
-                    title = title,
-                    diff = diff,
-                    score = myScore,
-                    genre = genre,
-                    token = token,
-                    clear = myClear,
-                    combo = myCombo,
-                    chain = myChain,
-                    rank = myRankNum,
-                    isPersonalRecord = true // 标记为个人记录
-                )
-            )
-            
-            // 创建友人分数记录
-            friendScoreList.add(
-                ChuniFullScoreDTO(
-                    id = id,
-                    title = title,
-                    diff = diff,
-                    score = friendScore,
-                    genre = genre,
-                    token = token,
-                    clear = friendClear,
-                    combo = friendCombo,
-                    chain = friendChain,
-                    rank = friendRankNum,
-                    isPersonalRecord = false // 标记为友人记录
-                )
-            )
         }
         
         return friendScoreList
     }
 
     private suspend fun requestFriendScoreList(friendCode: String, difficulty: Int) {
-        Log.i(TAG, "=== Starting requestFriendScoreList for friend: $friendCode, difficulty: $difficulty ===")
         try {
             val requestBody = "genre=99&friend=$friendCode&radio_diff=$difficulty&token=${cookie.token}"
-            Log.i(TAG, "Request body prepared, requesting data from server...")
             
             val doc = requestDataFromServer(
                 link = "$CHUNITHM_URL/friend/genreVs/sendBattleStart/",
@@ -813,24 +751,15 @@ internal class ChunithmRequestService(private val context: Context) {
                 method = Method.POST
             )
             
-            Log.i(TAG, "Document received, processing...")
-            // 输出前1000个字符进行调试
-            val docText = doc.toString()
-            val preview = if (docText.length > 1000) docText.substring(0, 1000) else docText
-            Log.i(TAG, "Document length: ${docText.length}")
-            Log.i(TAG, "Friend score doc preview (first 1000 chars): $preview")
-            
             val friendScoreData = parseFriendScoreList(doc)
-            Log.i(TAG, "Parsed ${friendScoreData.size} friend score records")
             
             val difficultyNames = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
             val diffName = difficultyNames.getOrNull(difficulty) ?: "Unknown"
             
             val chunithmLocalService = ChunithmLocalService()
             chunithmLocalService.saveFriendScoreData(friendScoreData, friendCode, diffName)
-            Log.i(TAG, "=== requestFriendScoreList completed successfully ===")
         } catch (e: Exception) {
-            Log.e(TAG, "=== Error in requestFriendScoreList: ${e.message} ===", e)
+            Log.e(TAG, "Error fetching friend score: ${e.message}")
             throw e
         }
     }
@@ -961,24 +890,5 @@ internal class ChunithmRequestService(private val context: Context) {
                 }
             }
         }
-    }
-
-    /**
-     * 请求友人分数对比列表
-     * @param friendCode 友人代码
-     * @param difficulty 难度 (0=Basic, 1=Advanced, 2=Expert, 3=Master, 4=Ultima)
-     */
-    fun getFriendScoreList(friendCode: String, difficulty: Int) {
-        Log.i(TAG, "*** getFriendScoreList called with friendCode: $friendCode, difficulty: $difficulty ***")
-        serviceScope.launch {
-            try {
-                Log.i(TAG, "Launching coroutine for friend score request...")
-                requestFriendScoreList(friendCode, difficulty)
-                Log.i(TAG, "Friend score list request completed successfully for friend: $friendCode, difficulty: $difficulty")
-            } catch (e: Exception) {
-                Log.e(TAG, "*** Error requesting friend score list: ${e.message} ***", e)
-            }
-        }
-        Log.i(TAG, "*** getFriendScoreList method execution finished ***")
     }
 }

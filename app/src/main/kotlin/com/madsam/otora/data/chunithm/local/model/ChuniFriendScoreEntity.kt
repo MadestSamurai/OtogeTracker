@@ -5,25 +5,14 @@ import io.github.xilinjia.krdb.types.annotations.PrimaryKey
 
 internal class ChuniFriendScoreEntity : RealmObject {
     @PrimaryKey
-    var id: String = "" // combination of friendCode_songId_difficulty_isMyScore for unique comparison records
+    var id: String = "" // combination of friendCode_title_difficulty for unique comparison records
     
     var friendCode: String = "" // 友人代码
-    var songId: String = ""
-    var title: String = ""
-    var diff: String = ""
-    var score: Int = 0
-    var genre: String = ""
-    var token: String = ""
+    var title: String = "" // 歌曲名称
+    var score: Int = 0 // 友人分数
     
-    // Clear status - three separate types
-    var clear: String = ""
-    var combo: String = ""
-    var chain: String = ""
-    
-    var rank: Int = 0 // Rank as an integer (0-13 for D to SSS+)
-    
-    // 标识这条记录是谁的分数
-    var isMyScore: Boolean = true // true=我的分数, false=友人分数
+    // 友人成绩页面中只有Combo相关标记是有意义的
+    var combo: String = "" // fullcombo, alljustice, ajc等
     
     // 难度名称 (Basic, Advanced, Expert, Master, Ultima)
     var difficulty: String = ""

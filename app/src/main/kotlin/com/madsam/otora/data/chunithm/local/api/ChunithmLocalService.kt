@@ -822,41 +822,69 @@ internal class ChunithmLocalService {
         difficulty: String
     ) = withContext(Dispatchers.IO) {
         val realm = Realm.open(realmConfig)
+        Log.d(TAG, "=== Starting saveFriendScoreData for friend $friendCode, difficulty $difficulty ===")
+        Log.d(TAG, "Input: ${friendScoreList.size} score records to save")
+        
         try {
             val currentTime = System.currentTimeMillis().toString()
             
             realm.write {
-                // 清除该友人该难度的旧数据
-                val oldRecords = this.query(ChuniFriendScoreEntity::class, "friendCode == $0 AND difficulty == $1", friendCode, difficulty).find()
-                oldRecords.forEach { delete(it) }
+                Log.d(TAG, "Entered realm.write block")
                 
-                // 保存新数据
-                friendScoreList.forEach { scoreDTO ->
-                    val entity = ChuniFriendScoreEntity().apply {
-                        id = "${friendCode}_${scoreDTO.id}_${scoreDTO.diff}_${scoreDTO.isPersonalRecord}_$currentTime"
-                        this.friendCode = friendCode
-                        songId = scoreDTO.id
-                        title = scoreDTO.title
-                        diff = scoreDTO.diff
-                        score = scoreDTO.score.replace(",", "").toIntOrNull() ?: 0
-                        genre = scoreDTO.genre
-                        token = scoreDTO.token
-                        clear = scoreDTO.clear
-                        combo = scoreDTO.combo
-                        chain = scoreDTO.chain
-                        rank = scoreDTO.rank
-                        isMyScore = scoreDTO.isPersonalRecord
-                        this.difficulty = difficulty
-                        recordedAt = currentTime
+                // 使用新的主键策略：friendCode_title_difficulty，直接保存/更新，无需删除旧数据
+                var savedCount = 0
+                var updatedCount = 0
+                
+                friendScoreList.forEachIndexed { index, scoreDTO ->
+                    try {
+                        // 使用友人代码+曲名+难度作为唯一主键
+                        val entityId = "${friendCode}_${scoreDTO.title}_${difficulty}"
+                        
+                        // 检查是否已存在记录
+                        val existingEntity = this.query(ChuniFriendScoreEntity::class, "id == $0", entityId).find().firstOrNull()
+                        
+                        val entity = (existingEntity ?: ChuniFriendScoreEntity()).apply {
+                            id = entityId
+                            this.friendCode = friendCode
+                            title = scoreDTO.title
+                            score = scoreDTO.score.replace(",", "").toIntOrNull() ?: 0
+                            // 只保存友人成绩页面中有意义的字段
+                            combo = scoreDTO.combo // 只有combo标记在友人页面是有意义的
+                            this.difficulty = difficulty
+                            recordedAt = currentTime
+                        }
+                        
+                        // 详细日志第一条和最后几条记录
+                        if (index < 3 || index >= friendScoreList.size - 3) {
+                            val action = if (existingEntity != null) "Updating" else "Creating"
+                            Log.d(TAG, "$action record $index: id=$entityId, title=${scoreDTO.title}, score=${scoreDTO.score}")
+                        }
+                        
+                        if (existingEntity != null) {
+                            updatedCount++
+                        } else {
+                            copyToRealm(entity, UpdatePolicy.ALL)
+                            savedCount++
+                        }
+                        
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to save individual record $index (${scoreDTO.title}): ${e.message}", e)
                     }
-                    copyToRealm(entity, UpdatePolicy.ALL)
                 }
+                Log.d(TAG, "Successfully created $savedCount new records and updated $updatedCount existing records out of ${friendScoreList.size} total records")
             }
-            Log.d(TAG, "Saved ${friendScoreList.size} friend score records for friend $friendCode, difficulty $difficulty")
+            
+            // 验证保存结果
+            val verificationRecords = realm.query(ChuniFriendScoreEntity::class, "friendCode == $0 AND difficulty == $1", friendCode, difficulty).find()
+            Log.d(TAG, "Verification: Found ${verificationRecords.size} records in database after save")
+            
+            Log.d(TAG, "=== Successfully completed saveFriendScoreData ===")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to save friend score data: ${e.message}", e)
+            Log.e(TAG, "=== Failed to save friend score data: ${e.message} ===", e)
+            throw e // 重新抛出异常以便上层处理
         } finally {
             realm.close()
+            Log.d(TAG, "Realm connection closed")
         }
     }
 
@@ -871,17 +899,9 @@ internal class ChunithmLocalService {
                 ChuniFriendScoreEntity().apply {
                     id = entity.id
                     this.friendCode = entity.friendCode
-                    songId = entity.songId
                     title = entity.title
-                    diff = entity.diff
                     score = entity.score
-                    genre = entity.genre
-                    token = entity.token
-                    clear = entity.clear
-                    combo = entity.combo
-                    chain = entity.chain
-                    rank = entity.rank
-                    isMyScore = entity.isMyScore
+                    combo = entity.combo // 只保留combo字段
                     this.difficulty = entity.difficulty
                     recordedAt = entity.recordedAt
                 }
@@ -917,17 +937,9 @@ internal class ChunithmLocalService {
                 val copy = ChuniFriendScoreEntity().apply {
                     id = entity.id
                     this.friendCode = entity.friendCode
-                    songId = entity.songId
                     title = entity.title
-                    diff = entity.diff
                     score = entity.score
-                    genre = entity.genre
-                    token = entity.token
-                    clear = entity.clear
-                    combo = entity.combo
-                    chain = entity.chain
-                    rank = entity.rank
-                    isMyScore = entity.isMyScore
+                    combo = entity.combo // 只保留combo字段
                     this.difficulty = entity.difficulty
                     recordedAt = entity.recordedAt
                 }
