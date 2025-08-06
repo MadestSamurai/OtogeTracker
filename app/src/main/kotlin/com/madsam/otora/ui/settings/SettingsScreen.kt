@@ -18,8 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Settings
-import com.madsam.otora.core.icon.Fa
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -27,6 +25,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -36,14 +35,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.core.icon.fa.Cloud
+import com.madsam.otora.core.icon.fa.Cog
+import com.madsam.otora.core.icon.fa.Font
+import com.madsam.otora.core.icon.fa.Language
+import com.madsam.otora.core.icon.fa.Moon
 import com.madsam.otora.core.icon.fa.Palette
 import com.madsam.otora.core.icon.fa.Refresh
+import com.madsam.otora.core.icon.fa.Sun
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
@@ -56,71 +61,78 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     onNavigateBack: () -> Unit
 ) {
-    var selectedCategory by remember { mutableStateOf<SettingsCategory?>(null) }
-    
-    if (selectedCategory != null) {
-        // 显示子页面
-        when (selectedCategory) {
-            SettingsCategory.DataUpdate -> {
-                DataUpdateScreen(
-                    onNavigateBack = { selectedCategory = null }
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Red300)
+    ) {
+        // 顶栏
+        CenterAlignedTopAppBar(
+            title = {
+                Text(
+                    text = "设置",
+                    fontFamily = sarasaFont,
+                    fontWeight = FontWeight.Bold,
+                    color = Beige400
                 )
-            }
-            SettingsCategory.Appearance -> {
-                AppearanceScreen(
-                    onNavigateBack = { selectedCategory = null }
-                )
-            }
-            null -> {
-                // 这个分支永远不会被执行，因为我们已经检查了 selectedCategory != null
-            }
-        }
-    } else {
-        // 显示主设置页面
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .background(Red300)
-        ) {
-            // 顶栏
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "设置",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Bold,
-                        color = Beige400
+            },
+            navigationIcon = {
+                IconButton(onClick = onNavigateBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "返回",
+                        tint = Beige400,
+                        modifier = Modifier.size(24.dp)
                     )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "返回",
-                            tint = Beige400,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Red500,
-                    titleContentColor = Beige400,
-                    navigationIconContentColor = Beige400
-                )
+                }
+            },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = Red500,
+                titleContentColor = Beige400,
+                navigationIconContentColor = Beige400
             )
-            
-            // 设置分类列表
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(SettingsCategory.values()) { category ->
-                    SettingsCategoryCard(
-                        category = category,
-                        onClick = { selectedCategory = category }
+        )
+        
+        // 设置列表
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // 数据更新组
+            item {
+                SettingsGroup(
+                    title = "数据更新",
+                    items = DataUpdateSettings.entries.toTypedArray()
+                ) { setting ->
+                    DataUpdateSettingItem(
+                        setting = setting,
+                        onClick = { /* TODO: 实现数据更新功能 */ }
                     )
+                }
+            }
+            
+            // 外观设置组
+            item {
+                SettingsGroup(
+                    title = "外观设置",
+                    items = AppearanceSettings.entries.toTypedArray()
+                ) { setting ->
+                    when (setting.type) {
+                        SettingType.Toggle -> {
+                            ToggleSettingItem(
+                                setting = setting,
+                                onToggle = { /* TODO: 实现设置保存 */ }
+                            )
+                        }
+                        SettingType.Selection -> {
+                            SelectionSettingItem(
+                                setting = setting,
+                                onClick = { /* TODO: 打开选择对话框 */ }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -128,72 +140,297 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun SettingsCategoryCard(
-    category: SettingsCategory,
-    onClick: () -> Unit
+private fun <T> SettingsGroup(
+    title: String,
+    items: Array<T>,
+    content: @Composable (T) -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = Red500),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
+    Column {
+        // 组标题
+        Text(
+            text = title,
+            color = Beige400,
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Medium,
+            fontFamily = sarasaFont,
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
+        )
+        
+        // 组内容卡片
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = Red500),
+            shape = RoundedCornerShape(12.dp)
         ) {
-            Icon(
-                imageVector = category.icon,
-                contentDescription = null,
-                tint = White1000,
-                modifier = Modifier.size(24.dp)
-            )
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = category.title,
-                    color = White1000,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = sarasaFont
-                )
-                
-                Text(
-                    text = category.description,
-                    color = White1000.copy(alpha = 0.7f),
-                    fontSize = 14.sp,
-                    fontFamily = sarasaFont
-                )
+            Column {
+                items.forEachIndexed { index, item ->
+                    content(item)
+                    // 除了最后一项，都添加分割线
+                    if (index < items.size - 1) {
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(0.5.dp)
+                                .background(White1000.copy(alpha = 0.1f))
+                                .padding(horizontal = 56.dp)
+                        )
+                    }
+                }
             }
-            
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = White1000.copy(alpha = 0.7f),
-                modifier = Modifier.size(20.dp)
-            )
         }
     }
 }
 
-enum class SettingsCategory(
+@Composable
+private fun DataUpdateSettingItem(
+    setting: DataUpdateSettings,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = setting.icon,
+            contentDescription = null,
+            tint = White1000,
+            modifier = Modifier.size(24.dp)
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = setting.title,
+                color = White1000,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = sarasaFont
+            )
+            
+            Text(
+                text = setting.description,
+                color = White1000.copy(alpha = 0.7f),
+                fontSize = 14.sp,
+                fontFamily = sarasaFont
+            )
+            
+            if (setting.lastUpdate.isNotEmpty()) {
+                Text(
+                    text = "上次更新: ${setting.lastUpdate}",
+                    color = White1000.copy(alpha = 0.5f),
+                    fontSize = 12.sp,
+                    fontFamily = sarasaFont
+                )
+            }
+        }
+        
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = White1000.copy(alpha = 0.5f),
+            modifier = Modifier.size(18.dp)
+        )
+    }
+}
+
+@Composable
+private fun ToggleSettingItem(
+    setting: AppearanceSettings,
+    onToggle: (Boolean) -> Unit
+) {
+    var isEnabled by remember { mutableStateOf(setting.defaultValue as? Boolean ?: false) }
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = setting.icon,
+            contentDescription = null,
+            tint = White1000,
+            modifier = Modifier.size(24.dp)
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = setting.title,
+                color = White1000,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = sarasaFont
+            )
+            
+            Text(
+                text = setting.description,
+                color = White1000.copy(alpha = 0.7f),
+                fontSize = 14.sp,
+                fontFamily = sarasaFont
+            )
+        }
+        
+        Switch(
+            checked = isEnabled,
+            onCheckedChange = { newValue ->
+                isEnabled = newValue
+                onToggle(newValue)
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Beige400,
+                checkedTrackColor = Beige400.copy(alpha = 0.5f),
+                uncheckedThumbColor = White1000.copy(alpha = 0.7f),
+                uncheckedTrackColor = White1000.copy(alpha = 0.3f)
+            )
+        )
+    }
+}
+
+@Composable
+private fun SelectionSettingItem(
+    setting: AppearanceSettings,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = setting.icon,
+            contentDescription = null,
+            tint = White1000,
+            modifier = Modifier.size(24.dp)
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = setting.title,
+                color = White1000,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = sarasaFont
+            )
+            
+            Text(
+                text = setting.description,
+                color = White1000.copy(alpha = 0.7f),
+                fontSize = 14.sp,
+                fontFamily = sarasaFont
+            )
+            
+            if (setting.currentValue.isNotEmpty()) {
+                Text(
+                    text = "当前: ${setting.currentValue}",
+                    color = Beige400.copy(alpha = 0.8f),
+                    fontSize = 12.sp,
+                    fontFamily = sarasaFont
+                )
+            }
+        }
+        
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = White1000.copy(alpha = 0.5f),
+            modifier = Modifier.size(18.dp)
+        )
+    }
+}
+
+enum class SettingType {
+    Toggle,
+    Selection
+}
+
+enum class DataUpdateSettings(
     val title: String,
     val description: String,
-    val icon: ImageVector
+    val icon: ImageVector,
+    val lastUpdate: String = ""
 ) {
-    DataUpdate(
-        title = "数据更新",
-        description = "管理各游戏数据和BOF数据的更新",
-        icon = Fa.Refresh
+    Osu(
+        title = "osu!",
+        description = "更新osu!谱面和成绩数据",
+        icon = Filled.OsuIcon,
+        lastUpdate = "2024-08-05 14:30"
     ),
-    Appearance(
-        title = "外观设置",
-        description = "主题、字体和界面显示设置",
-        icon = Fa.Palette
+    Maimai(
+        title = "maimai DX",
+        description = "更新maimai DX歌曲和成绩数据",
+        icon = Filled.MaimaiIcon,
+        lastUpdate = "2024-08-05 12:15"
+    ),
+    Chunithm(
+        title = "CHUNITHM",
+        description = "更新CHUNITHM歌曲和成绩数据",
+        icon = Filled.ChunithmIcon,
+        lastUpdate = "2024-08-05 16:45"
+    ),
+    BOF(
+        title = "BOF数据",
+        description = "更新BOF活动和相关数据",
+        icon = Fa.Cloud,
+        lastUpdate = "2024-08-04 20:00"
+    ),
+    General(
+        title = "通用设置",
+        description = "自动更新频率和网络设置",
+        icon = Fa.Cog
+    )
+}
+
+enum class AppearanceSettings(
+    val title: String,
+    val description: String,
+    val icon: ImageVector,
+    val type: SettingType,
+    val defaultValue: Any? = null,
+    val currentValue: String = ""
+) {
+    DarkMode(
+        title = "深色模式",
+        description = "启用深色主题界面",
+        icon = Fa.Moon,
+        type = SettingType.Toggle,
+        defaultValue = false
+    ),
+    AutoDarkMode(
+        title = "跟随系统",
+        description = "根据系统设置自动切换主题",
+        icon = Fa.Sun,
+        type = SettingType.Toggle,
+        defaultValue = true
+    ),
+    ThemeColor(
+        title = "主题颜色",
+        description = "选择应用的主色调",
+        icon = Fa.Palette,
+        type = SettingType.Selection,
+        currentValue = "红色"
+    ),
+    Language(
+        title = "语言",
+        description = "选择应用显示语言",
+        icon = Fa.Language,
+        type = SettingType.Selection,
+        currentValue = "简体中文"
+    ),
+    FontSize(
+        title = "字体大小",
+        description = "调整界面文字大小",
+        icon = Fa.Font,
+        type = SettingType.Selection,
+        currentValue = "标准"
     )
 }

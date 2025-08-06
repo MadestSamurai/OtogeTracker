@@ -14,14 +14,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import com.madsam.otora.core.icon.Fa
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -90,159 +88,146 @@ fun AppearanceScreen(
         
         // 设置选项列表
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
-            items(AppearanceSetting.values()) { setting ->
+            items(AppearanceSetting.entries.toTypedArray()) { setting ->
                 when (setting.type) {
                     SettingType.Toggle -> {
-                        ToggleSettingCard(
+                        ToggleSettingItem(
                             setting = setting,
                             onToggle = { /* TODO: 实现设置保存 */ }
                         )
                     }
                     SettingType.Selection -> {
-                        SelectionSettingCard(
+                        SelectionSettingItem(
                             setting = setting,
                             onClick = { /* TODO: 打开选择对话框 */ }
                         )
                     }
                 }
+                
+                // 添加分割线，除了最后一项
+                if (setting != AppearanceSetting.entries.last()) {
+                    HorizontalDivider(
+                        color = Beige400.copy(alpha = 0.2f),
+                        thickness = 0.5.dp,
+                        modifier = Modifier.padding(horizontal = 56.dp)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun ToggleSettingCard(
+private fun ToggleSettingItem(
     setting: AppearanceSetting,
     onToggle: (Boolean) -> Unit
 ) {
     var isEnabled by remember { mutableStateOf(setting.defaultValue as? Boolean ?: false) }
     
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Red500),
-        shape = RoundedCornerShape(16.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = setting.icon,
-                contentDescription = null,
-                tint = White1000,
-                modifier = Modifier.size(28.dp)
+        Icon(
+            imageVector = setting.icon,
+            contentDescription = null,
+            tint = Beige400,
+            modifier = Modifier.size(24.dp)
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = setting.title,
+                color = White1000,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = sarasaFont
             )
             
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = setting.title,
-                    color = White1000,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = sarasaFont
-                )
-                
-                Text(
-                    text = setting.description,
-                    color = White1000.copy(alpha = 0.7f),
-                    fontSize = 14.sp,
-                    fontFamily = sarasaFont
-                )
-            }
-            
-            Switch(
-                checked = isEnabled,
-                onCheckedChange = { newValue ->
-                    isEnabled = newValue
-                    onToggle(newValue)
-                },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Beige400,
-                    checkedTrackColor = Beige400.copy(alpha = 0.5f),
-                    uncheckedThumbColor = White1000.copy(alpha = 0.7f),
-                    uncheckedTrackColor = White1000.copy(alpha = 0.3f)
-                )
+            Text(
+                text = setting.description,
+                color = White1000.copy(alpha = 0.6f),
+                fontSize = 14.sp,
+                fontFamily = sarasaFont
             )
         }
+        
+        Switch(
+            checked = isEnabled,
+            onCheckedChange = { newValue ->
+                isEnabled = newValue
+                onToggle(newValue)
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Beige400,
+                checkedTrackColor = Beige400.copy(alpha = 0.5f),
+                uncheckedThumbColor = White1000.copy(alpha = 0.7f),
+                uncheckedTrackColor = White1000.copy(alpha = 0.3f)
+            )
+        )
     }
 }
 
 @Composable
-private fun SelectionSettingCard(
+private fun SelectionSettingItem(
     setting: AppearanceSetting,
     onClick: () -> Unit
 ) {
-    Card(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = Red500),
-        shape = RoundedCornerShape(16.dp)
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = setting.icon,
-                contentDescription = null,
-                tint = White1000,
-                modifier = Modifier.size(28.dp)
+        Icon(
+            imageVector = setting.icon,
+            contentDescription = null,
+            tint = Beige400,
+            modifier = Modifier.size(24.dp)
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = setting.title,
+                color = White1000,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = sarasaFont
             )
             
-            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = setting.description,
+                color = White1000.copy(alpha = 0.6f),
+                fontSize = 14.sp,
+                fontFamily = sarasaFont
+            )
             
-            Column(modifier = Modifier.weight(1f)) {
+            if (setting.currentValue.isNotEmpty()) {
                 Text(
-                    text = setting.title,
-                    color = White1000,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
+                    text = "当前: ${setting.currentValue}",
+                    color = Beige400.copy(alpha = 0.8f),
+                    fontSize = 12.sp,
                     fontFamily = sarasaFont
                 )
-                
-                Text(
-                    text = setting.description,
-                    color = White1000.copy(alpha = 0.7f),
-                    fontSize = 14.sp,
-                    fontFamily = sarasaFont
-                )
-                
-                if (setting.currentValue.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "当前: ${setting.currentValue}",
-                        color = Beige400.copy(alpha = 0.8f),
-                        fontSize = 12.sp,
-                        fontFamily = sarasaFont
-                    )
-                }
             }
-            
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = White1000.copy(alpha = 0.7f),
-                modifier = Modifier.size(20.dp)
-            )
         }
+        
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = White1000.copy(alpha = 0.5f),
+            modifier = Modifier.size(18.dp)
+        )
     }
-}
-
-enum class SettingType {
-    Toggle,
-    Selection
 }
 
 enum class AppearanceSetting(

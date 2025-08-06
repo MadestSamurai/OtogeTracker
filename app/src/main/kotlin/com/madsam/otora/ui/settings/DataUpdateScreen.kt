@@ -14,14 +14,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import com.madsam.otora.core.icon.Fa
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -82,84 +80,84 @@ fun DataUpdateScreen(
         
         // 数据源列表
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
-            items(DataSource.values()) { dataSource ->
-                DataSourceCard(
+            items(DataSource.entries.toTypedArray()) { dataSource ->
+                DataSourceItem(
                     dataSource = dataSource,
                     onClick = {
                         // TODO: 导航到具体的游戏数据更新页面
                     }
                 )
+                
+                // 添加分割线，除了最后一项
+                if (dataSource != DataSource.entries.last()) {
+                    HorizontalDivider(
+                        color = Beige400.copy(alpha = 0.2f),
+                        thickness = 0.5.dp,
+                        modifier = Modifier.padding(horizontal = 56.dp)
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun DataSourceCard(
+private fun DataSourceItem(
     dataSource: DataSource,
     onClick: () -> Unit
 ) {
-    Card(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
-        colors = CardDefaults.cardColors(containerColor = Red500),
-        shape = RoundedCornerShape(16.dp)
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = dataSource.icon,
-                contentDescription = null,
-                tint = White1000,
-                modifier = Modifier.size(28.dp)
+        Icon(
+            imageVector = dataSource.icon,
+            contentDescription = null,
+            tint = Beige400,
+            modifier = Modifier.size(24.dp)
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = dataSource.title,
+                color = White1000,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = sarasaFont
             )
             
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = dataSource.title,
-                    color = White1000,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = sarasaFont
-                )
-                
+            if (dataSource.description.isNotEmpty()) {
                 Text(
                     text = dataSource.description,
-                    color = White1000.copy(alpha = 0.7f),
+                    color = White1000.copy(alpha = 0.6f),
                     fontSize = 14.sp,
                     fontFamily = sarasaFont
                 )
-                
-                if (dataSource.lastUpdate.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "上次更新: ${dataSource.lastUpdate}",
-                        color = White1000.copy(alpha = 0.5f),
-                        fontSize = 12.sp,
-                        fontFamily = sarasaFont
-                    )
-                }
             }
             
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = null,
-                tint = White1000.copy(alpha = 0.7f),
-                modifier = Modifier.size(20.dp)
-            )
+            if (dataSource.lastUpdate.isNotEmpty()) {
+                Text(
+                    text = "上次更新: ${dataSource.lastUpdate}",
+                    color = White1000.copy(alpha = 0.4f),
+                    fontSize = 12.sp,
+                    fontFamily = sarasaFont
+                )
+            }
         }
+        
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = White1000.copy(alpha = 0.5f),
+            modifier = Modifier.size(18.dp)
+        )
     }
 }
 
