@@ -288,20 +288,6 @@ fun RecordScreen(
                         }
                     },
                     actions = {
-                        if (selectedItem == Screen.Page3) {
-                            IconButton(
-                                onClick = {
-                                    chunithmViewModel.fetchSongData(context)
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Filled.Download,
-                                    contentDescription = "Download Data",
-                                    tint = Beige400,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        }
                         IconButton(
                             onClick = {
                                 val intent = Intent(context, SettingsActivity::class.java)

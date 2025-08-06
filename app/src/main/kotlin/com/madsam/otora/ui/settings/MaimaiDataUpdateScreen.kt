@@ -24,6 +24,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -33,12 +34,15 @@ import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaFont
+import com.madsam.otora.core.utils.UserAgentUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MaimaiDataUpdateScreen(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToUserAgent: (() -> Unit)? = null
 ) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -83,6 +87,53 @@ fun MaimaiDataUpdateScreen(
                 modifier = Modifier.padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                // User-Agent检查提示
+                if (!UserAgentUtils.isUserAgentValid(context)) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Red300),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp)
+                        ) {
+                            Text(
+                                text = "⚠️ User-Agent未设置",
+                                color = White1000,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium,
+                                fontFamily = sarasaFont
+                            )
+                            Text(
+                                text = "建议设置User-Agent以确保maimai DX数据更新正常工作",
+                                color = White1000.copy(alpha = 0.8f),
+                                fontSize = 12.sp,
+                                fontFamily = sarasaFont
+                            )
+                            
+                            if (onNavigateToUserAgent != null) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Button(
+                                    onClick = onNavigateToUserAgent,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Beige400,
+                                        contentColor = Red500
+                                    ),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        "设置User-Agent",
+                                        fontFamily = sarasaFont,
+                                        fontSize = 12.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+                
                 Text(
                     text = "maimai DX 数据更新",
                     color = White1000,

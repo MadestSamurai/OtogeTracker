@@ -60,6 +60,8 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit
 ) {
     var selectedDataUpdateSetting by remember { mutableStateOf<DataUpdateSettings?>(null) }
+    var selectedAppearanceSetting by remember { mutableStateOf<AppearanceSettings?>(null) }
+    var selectedNetworkSetting by remember { mutableStateOf<NetworkSettings?>(null) }
     
     if (selectedDataUpdateSetting != null) {
         // 显示具体游戏的数据更新页面
@@ -71,12 +73,20 @@ fun SettingsScreen(
             }
             DataUpdateSettings.Maimai -> {
                 MaimaiDataUpdateScreen(
-                    onNavigateBack = { selectedDataUpdateSetting = null }
+                    onNavigateBack = { selectedDataUpdateSetting = null },
+                    onNavigateToUserAgent = { 
+                        selectedDataUpdateSetting = null
+                        selectedNetworkSetting = NetworkSettings.UserAgent
+                    }
                 )
             }
             DataUpdateSettings.Chunithm -> {
                 ChunithmDataUpdateScreen(
-                    onNavigateBack = { selectedDataUpdateSetting = null }
+                    onNavigateBack = { selectedDataUpdateSetting = null },
+                    onNavigateToUserAgent = { 
+                        selectedDataUpdateSetting = null
+                        selectedNetworkSetting = NetworkSettings.UserAgent
+                    }
                 )
             }
             DataUpdateSettings.BOF -> {
@@ -91,6 +101,27 @@ fun SettingsScreen(
             }
             else -> {
                 // 不应该到达这里
+            }
+        }
+    } else if (selectedAppearanceSetting != null) {
+        // 显示外观设置页面
+        when (selectedAppearanceSetting) {
+            else -> {
+                // 其他外观设置暂未实现
+                selectedAppearanceSetting = null
+            }
+        }
+    } else if (selectedNetworkSetting != null) {
+        // 显示网络设置页面
+        when (selectedNetworkSetting) {
+            NetworkSettings.UserAgent -> {
+                UserAgentSettingScreen(
+                    onNavigateBack = { selectedNetworkSetting = null }
+                )
+            }
+            else -> {
+                // 其他网络设置暂未实现
+                selectedNetworkSetting = null
             }
         }
     } else {
@@ -163,7 +194,34 @@ fun SettingsScreen(
                             SettingType.Selection -> {
                                 SelectionSettingItem(
                                     setting = setting,
-                                    onClick = { /* TODO: 打开选择对话框 */ }
+                                    onClick = { 
+                                        selectedAppearanceSetting = setting
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                // 网络设置组
+                item {
+                    SettingsGroup(
+                        title = "网络设置",
+                        items = NetworkSettings.entries.toTypedArray()
+                    ) { setting ->
+                        when (setting.type) {
+                            SettingType.Toggle -> {
+                                NetworkToggleSettingItem(
+                                    setting = setting,
+                                    onToggle = { /* TODO: 实现设置保存 */ }
+                                )
+                            }
+                            SettingType.Selection -> {
+                                NetworkSelectionSettingItem(
+                                    setting = setting,
+                                    onClick = { 
+                                        selectedNetworkSetting = setting
+                                    }
                                 )
                             }
                         }
@@ -328,8 +386,119 @@ private fun ToggleSettingItem(
 }
 
 @Composable
+private fun NetworkToggleSettingItem(
+    setting: NetworkSettings,
+    onToggle: (Boolean) -> Unit
+) {
+    var isEnabled by remember { mutableStateOf(setting.defaultValue as? Boolean ?: false) }
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = setting.icon,
+            contentDescription = null,
+            tint = White1000,
+            modifier = Modifier.size(24.dp)
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = setting.title,
+                color = White1000,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = sarasaFont
+            )
+            
+            Text(
+                text = setting.description,
+                color = White1000.copy(alpha = 0.7f),
+                fontSize = 14.sp,
+                fontFamily = sarasaFont
+            )
+        }
+        
+        Switch(
+            checked = isEnabled,
+            onCheckedChange = { newValue ->
+                isEnabled = newValue
+                onToggle(newValue)
+            },
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = Beige400,
+                checkedTrackColor = Beige400.copy(alpha = 0.5f),
+                uncheckedThumbColor = White1000.copy(alpha = 0.7f),
+                uncheckedTrackColor = White1000.copy(alpha = 0.3f)
+            )
+        )
+    }
+}
+
+@Composable
 private fun SelectionSettingItem(
     setting: AppearanceSettings,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = setting.icon,
+            contentDescription = null,
+            tint = White1000,
+            modifier = Modifier.size(24.dp)
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = setting.title,
+                color = White1000,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium,
+                fontFamily = sarasaFont
+            )
+            
+            Text(
+                text = setting.description,
+                color = White1000.copy(alpha = 0.7f),
+                fontSize = 14.sp,
+                fontFamily = sarasaFont
+            )
+            
+            if (setting.currentValue.isNotEmpty()) {
+                Text(
+                    text = "当前: ${setting.currentValue}",
+                    color = Beige400.copy(alpha = 0.8f),
+                    fontSize = 12.sp,
+                    fontFamily = sarasaFont
+                )
+            }
+        }
+        
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = White1000.copy(alpha = 0.5f),
+            modifier = Modifier.size(18.dp)
+        )
+    }
+}
+
+@Composable
+private fun NetworkSelectionSettingItem(
+    setting: NetworkSettings,
     onClick: () -> Unit
 ) {
     Row(
@@ -467,5 +636,22 @@ enum class AppearanceSettings(
         icon = Fa.Font,
         type = SettingType.Selection,
         currentValue = "标准"
+    )
+}
+
+enum class NetworkSettings(
+    val title: String,
+    val description: String,
+    val icon: ImageVector,
+    val type: SettingType,
+    val defaultValue: Any? = null,
+    val currentValue: String = ""
+) {
+    UserAgent(
+        title = "User-Agent",
+        description = "设置用于maimai DX、CHUNITHM等应用更新的浏览器标识",
+        icon = Fa.Cog,
+        type = SettingType.Selection,
+        currentValue = "默认"
     )
 }
