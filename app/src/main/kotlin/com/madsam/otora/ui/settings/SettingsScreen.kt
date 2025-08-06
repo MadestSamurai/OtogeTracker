@@ -59,76 +59,113 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     onNavigateBack: () -> Unit
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Red300)
-    ) {
-        // 顶栏
-        CenterAlignedTopAppBar(
-            title = {
-                Text(
-                    text = "设置",
-                    fontFamily = sarasaFont,
-                    fontWeight = FontWeight.Bold,
-                    color = Beige400
+    var selectedDataUpdateSetting by remember { mutableStateOf<DataUpdateSettings?>(null) }
+    
+    if (selectedDataUpdateSetting != null) {
+        // 显示具体游戏的数据更新页面
+        when (selectedDataUpdateSetting) {
+            DataUpdateSettings.Osu -> {
+                OsuDataUpdateScreen(
+                    onNavigateBack = { selectedDataUpdateSetting = null }
                 )
-            },
-            navigationIcon = {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "返回",
-                        tint = Beige400,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                containerColor = Red500,
-                titleContentColor = Beige400,
-                navigationIconContentColor = Beige400
-            )
-        )
-        
-        // 设置列表
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // 数据更新组
-            item {
-                SettingsGroup(
-                    title = "数据更新",
-                    items = DataUpdateSettings.entries.toTypedArray()
-                ) { setting ->
-                    DataUpdateSettingItem(
-                        setting = setting,
-                        onClick = { /* TODO: 实现数据更新功能 */ }
-                    )
-                }
             }
+            DataUpdateSettings.Maimai -> {
+                MaimaiDataUpdateScreen(
+                    onNavigateBack = { selectedDataUpdateSetting = null }
+                )
+            }
+            DataUpdateSettings.Chunithm -> {
+                ChunithmDataUpdateScreen(
+                    onNavigateBack = { selectedDataUpdateSetting = null }
+                )
+            }
+            DataUpdateSettings.BOF -> {
+                BOFDataUpdateScreen(
+                    onNavigateBack = { selectedDataUpdateSetting = null }
+                )
+            }
+            DataUpdateSettings.General -> {
+                GeneralDataUpdateScreen(
+                    onNavigateBack = { selectedDataUpdateSetting = null }
+                )
+            }
+            else -> {
+                // 不应该到达这里
+            }
+        }
+    } else {
+        // 显示主设置页面
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .background(Red300)
+        ) {
+            // 顶栏
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "设置",
+                        fontFamily = sarasaFont,
+                        fontWeight = FontWeight.Bold,
+                        color = Beige400
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "返回",
+                            tint = Beige400,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Red500,
+                    titleContentColor = Beige400,
+                    navigationIconContentColor = Beige400
+                )
+            )
             
-            // 外观设置组
-            item {
-                SettingsGroup(
-                    title = "外观设置",
-                    items = AppearanceSettings.entries.toTypedArray()
-                ) { setting ->
-                    when (setting.type) {
-                        SettingType.Toggle -> {
-                            ToggleSettingItem(
-                                setting = setting,
-                                onToggle = { /* TODO: 实现设置保存 */ }
-                            )
-                        }
-                        SettingType.Selection -> {
-                            SelectionSettingItem(
-                                setting = setting,
-                                onClick = { /* TODO: 打开选择对话框 */ }
-                            )
+            // 设置列表
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // 数据更新组
+                item {
+                    SettingsGroup(
+                        title = "数据更新",
+                        items = DataUpdateSettings.entries.toTypedArray()
+                    ) { setting ->
+                        DataUpdateSettingItem(
+                            setting = setting,
+                            onClick = { selectedDataUpdateSetting = setting }
+                        )
+                    }
+                }
+                
+                // 外观设置组
+                item {
+                    SettingsGroup(
+                        title = "外观设置",
+                        items = AppearanceSettings.entries.toTypedArray()
+                    ) { setting ->
+                        when (setting.type) {
+                            SettingType.Toggle -> {
+                                ToggleSettingItem(
+                                    setting = setting,
+                                    onToggle = { /* TODO: 实现设置保存 */ }
+                                )
+                            }
+                            SettingType.Selection -> {
+                                SelectionSettingItem(
+                                    setting = setting,
+                                    onClick = { /* TODO: 打开选择对话框 */ }
+                                )
+                            }
                         }
                     }
                 }

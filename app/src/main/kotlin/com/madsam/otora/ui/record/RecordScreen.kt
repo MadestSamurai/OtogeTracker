@@ -1,5 +1,6 @@
 package com.madsam.otora.ui.record
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -55,13 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
-import android.content.Intent
-import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.icon.Fa
+import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.icon.fa.Cog
-import com.madsam.otora.core.icon.fa.Edit
-import com.madsam.otora.core.icon.fa.Plus
-import com.madsam.otora.core.icon.fa.Refresh
 import com.madsam.otora.core.icon.fa.Trash
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
@@ -75,10 +72,10 @@ import com.madsam.otora.ui.navigation.ChunithmNavHost
 import com.madsam.otora.ui.record.chunithm.ChuniViewModelFactory
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.maimai.MaimaiUserPage
-import com.madsam.otora.ui.settings.SettingsActivity
 import com.madsam.otora.ui.record.osu.OsuUserPage
 import com.madsam.otora.ui.record.osu.OsuViewModel
 import com.madsam.otora.ui.record.osu.OsuViewModelFactory
+import com.madsam.otora.ui.settings.SettingsActivity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -155,20 +152,6 @@ fun RecordScreen(
                 
                 // 右侧action按钮
                 Row {
-                    if (selectedItem == Screen.Page3) {
-                        IconButton(
-                            onClick = {
-                                chunithmViewModel.fetchSongData(context)
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Filled.Download,
-                                contentDescription = "Download Data",
-                                tint = Beige400,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
                     IconButton(
                         onClick = {
                             val intent = Intent(context, SettingsActivity::class.java)
