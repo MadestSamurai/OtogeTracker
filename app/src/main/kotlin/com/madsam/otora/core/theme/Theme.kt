@@ -1,5 +1,6 @@
 package com.madsam.otora.core.theme
 
+import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -34,7 +35,7 @@ fun OtogeTrackerTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         DisposableEffect(darkTheme) {
-            val window = (view.context as MainActivity).window
+            val window = (view.context as Activity).window
             WindowCompat.setDecorFitsSystemWindows(window, false)
             
             // Update system bars appearance

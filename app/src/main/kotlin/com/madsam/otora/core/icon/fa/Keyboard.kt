@@ -1,0 +1,150 @@
+package com.madsam.otora.core.icon.fa
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
+import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.ImageVector.Builder
+import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.unit.dp
+import com.madsam.otora.core.icon.Fa
+
+public val Fa.Keyboard: ImageVector
+    get() {
+        if (_keyboard != null) {
+            return _keyboard!!
+        }
+        _keyboard = Builder(name = "Keyboard", defaultWidth = 640.0.dp, defaultHeight = 640.0.dp,
+                viewportWidth = 640.0f, viewportHeight = 640.0f).apply {
+            path(fill = SolidColor(Color(0xFF000000)), stroke = null, strokeLineWidth = 0.0f,
+                    strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
+                    pathFillType = NonZero) {
+                moveTo(96.0f, 128.0f)
+                curveTo(60.7f, 128.0f, 32.0f, 156.7f, 32.0f, 192.0f)
+                lineTo(32.0f, 448.0f)
+                curveTo(32.0f, 483.3f, 60.7f, 512.0f, 96.0f, 512.0f)
+                lineTo(544.0f, 512.0f)
+                curveTo(579.3f, 512.0f, 608.0f, 483.3f, 608.0f, 448.0f)
+                lineTo(608.0f, 192.0f)
+                curveTo(608.0f, 156.7f, 579.3f, 128.0f, 544.0f, 128.0f)
+                lineTo(96.0f, 128.0f)
+                close()
+                moveTo(112.0f, 192.0f)
+                lineTo(144.0f, 192.0f)
+                curveTo(152.8f, 192.0f, 160.0f, 199.2f, 160.0f, 208.0f)
+                lineTo(160.0f, 240.0f)
+                curveTo(160.0f, 248.8f, 152.8f, 256.0f, 144.0f, 256.0f)
+                lineTo(112.0f, 256.0f)
+                curveTo(103.2f, 256.0f, 96.0f, 248.8f, 96.0f, 240.0f)
+                lineTo(96.0f, 208.0f)
+                curveTo(96.0f, 199.2f, 103.2f, 192.0f, 112.0f, 192.0f)
+                close()
+                moveTo(96.0f, 304.0f)
+                curveTo(96.0f, 295.2f, 103.2f, 288.0f, 112.0f, 288.0f)
+                lineTo(144.0f, 288.0f)
+                curveTo(152.8f, 288.0f, 160.0f, 295.2f, 160.0f, 304.0f)
+                lineTo(160.0f, 336.0f)
+                curveTo(160.0f, 344.8f, 152.8f, 352.0f, 144.0f, 352.0f)
+                lineTo(112.0f, 352.0f)
+                curveTo(103.2f, 352.0f, 96.0f, 344.8f, 96.0f, 336.0f)
+                lineTo(96.0f, 304.0f)
+                close()
+                moveTo(208.0f, 192.0f)
+                lineTo(240.0f, 192.0f)
+                curveTo(248.8f, 192.0f, 256.0f, 199.2f, 256.0f, 208.0f)
+                lineTo(256.0f, 240.0f)
+                curveTo(256.0f, 248.8f, 248.8f, 256.0f, 240.0f, 256.0f)
+                lineTo(208.0f, 256.0f)
+                curveTo(199.2f, 256.0f, 192.0f, 248.8f, 192.0f, 240.0f)
+                lineTo(192.0f, 208.0f)
+                curveTo(192.0f, 199.2f, 199.2f, 192.0f, 208.0f, 192.0f)
+                close()
+                moveTo(192.0f, 304.0f)
+                curveTo(192.0f, 295.2f, 199.2f, 288.0f, 208.0f, 288.0f)
+                lineTo(240.0f, 288.0f)
+                curveTo(248.8f, 288.0f, 256.0f, 295.2f, 256.0f, 304.0f)
+                lineTo(256.0f, 336.0f)
+                curveTo(256.0f, 344.8f, 248.8f, 352.0f, 240.0f, 352.0f)
+                lineTo(208.0f, 352.0f)
+                curveTo(199.2f, 352.0f, 192.0f, 344.8f, 192.0f, 336.0f)
+                lineTo(192.0f, 304.0f)
+                close()
+                moveTo(208.0f, 384.0f)
+                lineTo(432.0f, 384.0f)
+                curveTo(440.8f, 384.0f, 448.0f, 391.2f, 448.0f, 400.0f)
+                lineTo(448.0f, 432.0f)
+                curveTo(448.0f, 440.8f, 440.8f, 448.0f, 432.0f, 448.0f)
+                lineTo(208.0f, 448.0f)
+                curveTo(199.2f, 448.0f, 192.0f, 440.8f, 192.0f, 432.0f)
+                lineTo(192.0f, 400.0f)
+                curveTo(192.0f, 391.2f, 199.2f, 384.0f, 208.0f, 384.0f)
+                close()
+                moveTo(288.0f, 208.0f)
+                curveTo(288.0f, 199.2f, 295.2f, 192.0f, 304.0f, 192.0f)
+                lineTo(336.0f, 192.0f)
+                curveTo(344.8f, 192.0f, 352.0f, 199.2f, 352.0f, 208.0f)
+                lineTo(352.0f, 240.0f)
+                curveTo(352.0f, 248.8f, 344.8f, 256.0f, 336.0f, 256.0f)
+                lineTo(304.0f, 256.0f)
+                curveTo(295.2f, 256.0f, 288.0f, 248.8f, 288.0f, 240.0f)
+                lineTo(288.0f, 208.0f)
+                close()
+                moveTo(304.0f, 288.0f)
+                lineTo(336.0f, 288.0f)
+                curveTo(344.8f, 288.0f, 352.0f, 295.2f, 352.0f, 304.0f)
+                lineTo(352.0f, 336.0f)
+                curveTo(352.0f, 344.8f, 344.8f, 352.0f, 336.0f, 352.0f)
+                lineTo(304.0f, 352.0f)
+                curveTo(295.2f, 352.0f, 288.0f, 344.8f, 288.0f, 336.0f)
+                lineTo(288.0f, 304.0f)
+                curveTo(288.0f, 295.2f, 295.2f, 288.0f, 304.0f, 288.0f)
+                close()
+                moveTo(384.0f, 208.0f)
+                curveTo(384.0f, 199.2f, 391.2f, 192.0f, 400.0f, 192.0f)
+                lineTo(432.0f, 192.0f)
+                curveTo(440.8f, 192.0f, 448.0f, 199.2f, 448.0f, 208.0f)
+                lineTo(448.0f, 240.0f)
+                curveTo(448.0f, 248.8f, 440.8f, 256.0f, 432.0f, 256.0f)
+                lineTo(400.0f, 256.0f)
+                curveTo(391.2f, 256.0f, 384.0f, 248.8f, 384.0f, 240.0f)
+                lineTo(384.0f, 208.0f)
+                close()
+                moveTo(400.0f, 288.0f)
+                lineTo(432.0f, 288.0f)
+                curveTo(440.8f, 288.0f, 448.0f, 295.2f, 448.0f, 304.0f)
+                lineTo(448.0f, 336.0f)
+                curveTo(448.0f, 344.8f, 440.8f, 352.0f, 432.0f, 352.0f)
+                lineTo(400.0f, 352.0f)
+                curveTo(391.2f, 352.0f, 384.0f, 344.8f, 384.0f, 336.0f)
+                lineTo(384.0f, 304.0f)
+                curveTo(384.0f, 295.2f, 391.2f, 288.0f, 400.0f, 288.0f)
+                close()
+                moveTo(480.0f, 208.0f)
+                curveTo(480.0f, 199.2f, 487.2f, 192.0f, 496.0f, 192.0f)
+                lineTo(528.0f, 192.0f)
+                curveTo(536.8f, 192.0f, 544.0f, 199.2f, 544.0f, 208.0f)
+                lineTo(544.0f, 240.0f)
+                curveTo(544.0f, 248.8f, 536.8f, 256.0f, 528.0f, 256.0f)
+                lineTo(496.0f, 256.0f)
+                curveTo(487.2f, 256.0f, 480.0f, 248.8f, 480.0f, 240.0f)
+                lineTo(480.0f, 208.0f)
+                close()
+                moveTo(496.0f, 288.0f)
+                lineTo(528.0f, 288.0f)
+                curveTo(536.8f, 288.0f, 544.0f, 295.2f, 544.0f, 304.0f)
+                lineTo(544.0f, 336.0f)
+                curveTo(544.0f, 344.8f, 536.8f, 352.0f, 528.0f, 352.0f)
+                lineTo(496.0f, 352.0f)
+                curveTo(487.2f, 352.0f, 480.0f, 344.8f, 480.0f, 336.0f)
+                lineTo(480.0f, 304.0f)
+                curveTo(480.0f, 295.2f, 487.2f, 288.0f, 496.0f, 288.0f)
+                close()
+            }
+        }
+        .build()
+        return _keyboard!!
+    }
+
+private var _keyboard: ImageVector? = null

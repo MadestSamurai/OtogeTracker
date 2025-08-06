@@ -21,9 +21,6 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerValue
@@ -58,7 +55,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import android.content.Intent
 import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.core.icon.Fa
+import com.madsam.otora.core.icon.fa.Cog
+import com.madsam.otora.core.icon.fa.Edit
+import com.madsam.otora.core.icon.fa.Plus
+import com.madsam.otora.core.icon.fa.Refresh
+import com.madsam.otora.core.icon.fa.Trash
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
@@ -71,6 +75,7 @@ import com.madsam.otora.ui.navigation.ChunithmNavHost
 import com.madsam.otora.ui.record.chunithm.ChuniViewModelFactory
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.maimai.MaimaiUserPage
+import com.madsam.otora.ui.settings.SettingsActivity
 import com.madsam.otora.ui.record.osu.OsuUserPage
 import com.madsam.otora.ui.record.osu.OsuViewModel
 import com.madsam.otora.ui.record.osu.OsuViewModelFactory
@@ -159,29 +164,22 @@ fun RecordScreen(
                             Icon(
                                 imageVector = Filled.Download,
                                 contentDescription = "Download Data",
-                                tint = Beige400
+                                tint = Beige400,
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                     }
                     IconButton(
                         onClick = {
-                            when (selectedItem) {
-                                Screen.Page1 -> showOsuDialog = true
-                                Screen.Page2 -> showMaimaiDialog = true
-                                Screen.Page3 -> showChunithmDialog = true
-                                Screen.Page4 -> { /* Action for Page 4 */ }
-                            }
+                            val intent = Intent(context, SettingsActivity::class.java)
+                            context.startActivity(intent)
                         }
                     ) {
                         Icon(
-                            imageVector = when (selectedItem) {
-                                Screen.Page1 -> Icons.Default.Add
-                                Screen.Page2 -> Icons.Default.Edit
-                                Screen.Page3 -> Filled.ArrowRotate
-                                Screen.Page4 -> Icons.Default.Delete
-                            },
-                            contentDescription = "Action",
-                            tint = Beige400
+                            imageVector = Fa.Cog,
+                            contentDescription = "Settings",
+                            tint = Beige400,
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -231,10 +229,10 @@ fun RecordScreen(
                         NavigationDrawerItem(
                             icon = {
                                 when (screen) {
-                                    Screen.Page1 -> Icon(Filled.OsuIcon, "Osu", Modifier.size(26.dp))
-                                    Screen.Page2 -> Icon(Filled.MaimaiIcon, "Maimai", Modifier.padding(1.dp).size(24.dp))
-                                    Screen.Page3 -> Icon(Filled.ChunithmIcon, "Chunithm", Modifier.padding(1.dp).size(24.dp))
-                                    Screen.Page4 -> Icon(Icons.Default.Delete, null)
+                                    Screen.Page1 -> Icon(Filled.OsuIcon, "Osu", Modifier.size(24.dp))
+                                    Screen.Page2 -> Icon(Filled.MaimaiIcon, "Maimai", Modifier.size(24.dp))
+                                    Screen.Page3 -> Icon(Filled.ChunithmIcon, "Chunithm", Modifier.size(24.dp))
+                                    Screen.Page4 -> Icon(Fa.Trash, null, Modifier.size(24.dp))
                                 }
                             },
                             label = { Text(screen.route) },
@@ -279,7 +277,8 @@ fun RecordScreen(
                                 }) {
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = "返回"
+                                        contentDescription = "返回",
+                                        modifier = Modifier.size(24.dp)
                                     )
                                 }
                             } else {
@@ -288,7 +287,8 @@ fun RecordScreen(
                                 }) {
                                     Icon(
                                         imageVector = Icons.Default.Menu,
-                                        contentDescription = "Menu"
+                                        contentDescription = "Menu",
+                                        modifier = Modifier.size(24.dp)
                                     )
                                 }
                             }
@@ -298,7 +298,8 @@ fun RecordScreen(
                             }) {
                                 Icon(
                                     imageVector = Icons.Default.Menu,
-                                    contentDescription = "Menu"
+                                    contentDescription = "Menu",
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
                         }
@@ -313,29 +314,22 @@ fun RecordScreen(
                                 Icon(
                                     imageVector = Filled.Download,
                                     contentDescription = "Download Data",
-                                    tint = Beige400
+                                    tint = Beige400,
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
                         }
                         IconButton(
                             onClick = {
-                                when (selectedItem) {
-                                    Screen.Page1 -> showOsuDialog = true
-                                    Screen.Page2 -> showMaimaiDialog = true
-                                    Screen.Page3 -> showChunithmDialog = true
-                                    Screen.Page4 -> { /* Action for Page 4 */ }
-                                }
+                                val intent = Intent(context, SettingsActivity::class.java)
+                                context.startActivity(intent)
                             }
                         ) {
                             Icon(
-                                imageVector = when (selectedItem) {
-                                    Screen.Page1 -> Icons.Default.Add
-                                    Screen.Page2 -> Icons.Default.Edit
-                                    Screen.Page3 -> Filled.ArrowRotate
-                                    Screen.Page4 -> Icons.Default.Delete
-                                },
-                                contentDescription = "Action",
-                                tint = Beige400
+                                imageVector = Fa.Cog,
+                                contentDescription = "Settings",
+                                tint = Beige400,
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                     },

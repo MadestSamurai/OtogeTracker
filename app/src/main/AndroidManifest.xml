@@ -35,6 +35,12 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.settings.SettingsActivity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
+
         <receiver android:name=".glance.MyAppWidgetReceiver"
             android:exported="false">
             <intent-filter>

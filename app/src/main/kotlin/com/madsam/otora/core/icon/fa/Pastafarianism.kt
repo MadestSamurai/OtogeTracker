@@ -1,0 +1,152 @@
+package com.madsam.otora.core.icon.fa
+
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeCap.Companion.Butt
+import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.ImageVector.Builder
+import androidx.compose.ui.graphics.vector.path
+import androidx.compose.ui.unit.dp
+import com.madsam.otora.core.icon.Fa
+
+public val Fa.Pastafarianism: ImageVector
+    get() {
+        if (_pastafarianism != null) {
+            return _pastafarianism!!
+        }
+        _pastafarianism = Builder(name = "Pastafarianism", defaultWidth = 640.0.dp, defaultHeight =
+                640.0.dp, viewportWidth = 640.0f, viewportHeight = 640.0f).apply {
+            path(fill = SolidColor(Color(0xFF000000)), stroke = null, strokeLineWidth = 0.0f,
+                    strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
+                    pathFillType = NonZero) {
+                moveTo(208.0f, 128.0f)
+                curveTo(208.0f, 119.2f, 200.8f, 112.0f, 192.0f, 112.0f)
+                curveTo(183.2f, 112.0f, 176.0f, 119.2f, 176.0f, 128.0f)
+                curveTo(176.0f, 136.8f, 183.2f, 144.0f, 192.0f, 144.0f)
+                curveTo(200.8f, 144.0f, 208.0f, 136.8f, 208.0f, 128.0f)
+                close()
+                moveTo(256.0f, 128.0f)
+                curveTo(256.0f, 144.2f, 250.0f, 159.1f, 240.0f, 170.3f)
+                lineTo(255.6f, 201.5f)
+                curveTo(274.3f, 195.5f, 295.5f, 192.0f, 320.0f, 192.0f)
+                curveTo(344.5f, 192.0f, 365.8f, 195.5f, 384.4f, 201.5f)
+                lineTo(400.0f, 170.3f)
+                curveTo(390.0f, 159.0f, 384.0f, 144.2f, 384.0f, 128.0f)
+                curveTo(384.0f, 92.7f, 412.7f, 64.0f, 448.0f, 64.0f)
+                curveTo(483.3f, 64.0f, 512.0f, 92.7f, 512.0f, 128.0f)
+                curveTo(512.0f, 163.3f, 483.3f, 192.0f, 448.0f, 192.0f)
+                curveTo(446.3f, 192.0f, 444.6f, 191.9f, 442.9f, 191.8f)
+                lineTo(427.8f, 222.0f)
+                curveTo(448.9f, 235.6f, 465.5f, 252.2f, 479.2f, 268.4f)
+                curveTo(486.3f, 276.7f, 492.7f, 285.0f, 498.5f, 292.4f)
+                lineTo(499.9f, 294.2f)
+                curveTo(506.2f, 302.3f, 511.5f, 309.0f, 516.6f, 314.6f)
+                curveTo(527.3f, 326.3f, 532.7f, 328.0f, 536.0f, 328.0f)
+                curveTo(538.5f, 328.0f, 540.3f, 327.4f, 543.1f, 324.7f)
+                curveTo(546.8f, 321.2f, 550.2f, 315.9f, 555.6f, 307.3f)
+                lineTo(556.2f, 306.4f)
+                curveTo(560.8f, 299.0f, 567.2f, 288.8f, 575.6f, 280.7f)
+                curveTo(585.3f, 271.4f, 598.5f, 264.0f, 616.0f, 264.0f)
+                curveTo(629.3f, 264.0f, 640.0f, 274.7f, 640.0f, 288.0f)
+                curveTo(640.0f, 301.3f, 629.3f, 312.0f, 616.0f, 312.0f)
+                curveTo(613.5f, 312.0f, 611.7f, 312.6f, 608.9f, 315.3f)
+                curveTo(605.2f, 318.8f, 601.8f, 324.1f, 596.4f, 332.7f)
+                lineTo(595.8f, 333.6f)
+                curveTo(591.2f, 341.0f, 584.8f, 351.2f, 576.4f, 359.3f)
+                curveTo(566.7f, 368.6f, 553.5f, 376.0f, 536.0f, 376.0f)
+                curveTo(517.5f, 376.0f, 503.1f, 367.5f, 491.7f, 357.4f)
+                curveTo(488.6f, 361.4f, 485.1f, 365.7f, 481.2f, 370.1f)
+                curveTo(482.6f, 374.4f, 484.0f, 378.6f, 485.2f, 382.6f)
+                curveTo(486.1f, 385.6f, 487.0f, 388.4f, 487.8f, 391.2f)
+                curveTo(490.8f, 401.0f, 493.3f, 409.4f, 496.4f, 417.1f)
+                curveTo(500.3f, 426.9f, 503.8f, 432.5f, 507.2f, 435.6f)
+                curveTo(509.8f, 438.0f, 513.1f, 439.9f, 520.0f, 439.9f)
+                curveTo(528.7f, 439.9f, 536.9f, 435.7f, 553.7f, 426.7f)
+                curveTo(568.7f, 418.7f, 589.4f, 407.9f, 616.0f, 407.9f)
+                curveTo(629.3f, 407.9f, 640.0f, 418.6f, 640.0f, 431.9f)
+                curveTo(640.0f, 445.2f, 629.3f, 455.9f, 616.0f, 455.9f)
+                curveTo(602.6f, 455.9f, 591.3f, 461.1f, 576.3f, 469.1f)
+                curveTo(575.3f, 469.7f, 574.2f, 470.2f, 573.1f, 470.8f)
+                curveTo(560.0f, 477.9f, 541.5f, 487.9f, 520.0f, 487.9f)
+                curveTo(501.6f, 487.9f, 486.4f, 481.8f, 474.5f, 470.7f)
+                curveTo(463.4f, 460.4f, 456.6f, 447.0f, 451.8f, 434.7f)
+                curveTo(448.2f, 425.7f, 445.1f, 415.6f, 442.3f, 406.2f)
+                curveTo(425.9f, 418.5f, 406.2f, 429.8f, 383.4f, 437.5f)
+                curveTo(387.0f, 448.3f, 391.8f, 461.0f, 397.8f, 473.7f)
+                curveTo(405.3f, 489.6f, 414.0f, 504.1f, 423.6f, 514.2f)
+                curveTo(433.2f, 524.4f, 441.3f, 527.9f, 448.1f, 527.9f)
+                curveTo(461.4f, 527.9f, 472.1f, 538.6f, 472.1f, 551.9f)
+                curveTo(472.1f, 565.2f, 461.4f, 575.9f, 448.1f, 575.9f)
+                curveTo(422.9f, 575.9f, 403.1f, 562.4f, 388.6f, 547.1f)
+                curveTo(374.1f, 531.7f, 362.9f, 512.2f, 354.4f, 494.1f)
+                curveTo(346.4f, 477.1f, 340.3f, 460.3f, 336.1f, 447.2f)
+                curveTo(330.9f, 447.6f, 325.5f, 447.8f, 320.1f, 447.8f)
+                curveTo(314.7f, 447.8f, 309.3f, 447.6f, 304.1f, 447.2f)
+                curveTo(299.9f, 460.2f, 293.8f, 477.1f, 285.8f, 494.1f)
+                curveTo(277.3f, 512.2f, 266.0f, 531.7f, 251.6f, 547.1f)
+                curveTo(237.2f, 562.4f, 217.3f, 575.9f, 192.1f, 575.9f)
+                curveTo(178.8f, 575.9f, 168.1f, 565.2f, 168.1f, 551.9f)
+                curveTo(168.1f, 538.6f, 178.8f, 527.9f, 192.1f, 527.9f)
+                curveTo(198.9f, 527.9f, 207.1f, 524.4f, 216.6f, 514.2f)
+                curveTo(226.1f, 504.1f, 234.9f, 489.6f, 242.4f, 473.7f)
+                curveTo(248.3f, 461.1f, 253.1f, 448.3f, 256.8f, 437.5f)
+                curveTo(234.0f, 429.8f, 214.3f, 418.5f, 197.9f, 406.2f)
+                curveTo(195.0f, 415.6f, 191.9f, 425.7f, 188.4f, 434.7f)
+                curveTo(183.6f, 446.9f, 176.8f, 460.3f, 165.7f, 470.7f)
+                curveTo(153.8f, 481.8f, 138.6f, 487.9f, 120.2f, 487.9f)
+                curveTo(107.1f, 487.9f, 95.7f, 483.8f, 86.4f, 479.0f)
+                curveTo(78.5f, 475.0f, 70.7f, 469.8f, 64.3f, 465.5f)
+                lineTo(64.3f, 465.5f)
+                lineTo(61.9f, 463.9f)
+                curveTo(46.6f, 453.7f, 36.1f, 447.9f, 24.2f, 447.9f)
+                curveTo(10.9f, 447.9f, 0.2f, 437.2f, 0.2f, 423.9f)
+                curveTo(0.2f, 410.6f, 10.9f, 399.9f, 24.2f, 399.9f)
+                curveTo(52.3f, 399.9f, 73.8f, 414.1f, 88.5f, 423.9f)
+                lineTo(90.9f, 425.5f)
+                curveTo(97.8f, 430.1f, 103.0f, 433.6f, 108.1f, 436.2f)
+                curveTo(113.6f, 439.0f, 117.2f, 439.8f, 120.1f, 439.8f)
+                curveTo(126.9f, 439.8f, 130.3f, 437.9f, 132.9f, 435.5f)
+                curveTo(136.3f, 432.3f, 139.9f, 426.7f, 143.7f, 417.0f)
+                curveTo(146.7f, 409.3f, 149.3f, 400.9f, 152.3f, 391.1f)
+                curveTo(153.1f, 388.4f, 154.0f, 385.5f, 154.9f, 382.5f)
+                curveTo(156.1f, 378.5f, 157.5f, 374.3f, 158.9f, 370.0f)
+                curveTo(155.0f, 365.5f, 151.5f, 361.2f, 148.4f, 357.3f)
+                curveTo(137.0f, 367.4f, 122.5f, 375.9f, 104.1f, 375.9f)
+                curveTo(86.6f, 375.9f, 73.4f, 368.5f, 63.7f, 359.2f)
+                curveTo(55.3f, 351.1f, 48.9f, 340.9f, 44.3f, 333.5f)
+                lineTo(43.7f, 332.6f)
+                curveTo(38.3f, 324.0f, 34.9f, 318.7f, 31.2f, 315.2f)
+                curveTo(28.4f, 312.5f, 26.6f, 311.9f, 24.1f, 311.9f)
+                curveTo(10.8f, 311.9f, 0.1f, 301.2f, 0.1f, 287.9f)
+                curveTo(0.1f, 274.6f, 10.8f, 263.9f, 24.1f, 263.9f)
+                curveTo(41.6f, 263.9f, 54.8f, 271.3f, 64.5f, 280.6f)
+                curveTo(72.9f, 288.7f, 79.3f, 298.9f, 83.9f, 306.3f)
+                lineTo(84.5f, 307.2f)
+                curveTo(89.9f, 315.8f, 93.3f, 321.1f, 97.0f, 324.6f)
+                curveTo(99.8f, 327.3f, 101.6f, 327.9f, 104.1f, 327.9f)
+                curveTo(107.4f, 327.9f, 112.8f, 326.2f, 123.5f, 314.5f)
+                curveTo(128.6f, 308.9f, 133.9f, 302.2f, 140.2f, 294.1f)
+                lineTo(141.6f, 292.3f)
+                curveTo(147.4f, 284.9f, 153.8f, 276.6f, 160.9f, 268.3f)
+                curveTo(174.7f, 252.1f, 191.2f, 235.5f, 212.3f, 221.9f)
+                lineTo(197.2f, 191.7f)
+                curveTo(195.5f, 191.8f, 193.8f, 191.9f, 192.1f, 191.9f)
+                curveTo(156.8f, 191.9f, 128.1f, 163.2f, 128.1f, 127.9f)
+                curveTo(128.1f, 92.6f, 156.8f, 63.9f, 192.1f, 63.9f)
+                curveTo(227.4f, 63.9f, 256.1f, 92.6f, 256.1f, 127.9f)
+                close()
+                moveTo(464.0f, 128.0f)
+                curveTo(464.0f, 119.2f, 456.8f, 112.0f, 448.0f, 112.0f)
+                curveTo(439.2f, 112.0f, 432.0f, 119.2f, 432.0f, 128.0f)
+                curveTo(432.0f, 136.8f, 439.2f, 144.0f, 448.0f, 144.0f)
+                curveTo(456.8f, 144.0f, 464.0f, 136.8f, 464.0f, 128.0f)
+                close()
+            }
+        }
+        .build()
+        return _pastafarianism!!
+    }
+
+private var _pastafarianism: ImageVector? = null
