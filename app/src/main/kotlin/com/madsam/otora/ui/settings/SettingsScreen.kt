@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -47,7 +46,6 @@ import com.madsam.otora.core.icon.fa.Font
 import com.madsam.otora.core.icon.fa.Language
 import com.madsam.otora.core.icon.fa.Moon
 import com.madsam.otora.core.icon.fa.Palette
-import com.madsam.otora.core.icon.fa.Refresh
 import com.madsam.otora.core.icon.fa.Sun
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
