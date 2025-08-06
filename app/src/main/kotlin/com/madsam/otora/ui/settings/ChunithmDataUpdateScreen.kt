@@ -55,7 +55,6 @@ fun ChunithmDataUpdateScreen(
     val context = LocalContext.current
     val requestState = remember { mutableStateOf("") }
     val responseState = remember { mutableStateOf("") }
-    val uaState = remember { mutableStateOf("") }
     val requestError = remember { mutableStateOf(false) }
     val responseError = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -281,30 +280,6 @@ fun ChunithmDataUpdateScreen(
                         fontFamily = sarasaFont
                     )
                 }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                // User-Agent (可选)
-                TextField(
-                    value = uaState.value,
-                    onValueChange = { uaState.value = it },
-                    label = { 
-                        Text(
-                            "User-Agent (可选)",
-                            fontFamily = sarasaFont,
-                            color = White1000.copy(alpha = 0.7f)
-                        )
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.colors(
-                        focusedTextColor = White1000,
-                        unfocusedTextColor = White1000,
-                        focusedContainerColor = Red300,
-                        unfocusedContainerColor = Red300,
-                        focusedIndicatorColor = Beige400,
-                        unfocusedIndicatorColor = White1000.copy(alpha = 0.5f)
-                    )
-                )
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 

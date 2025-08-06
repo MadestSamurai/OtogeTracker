@@ -35,6 +35,7 @@ import com.madsam.otora.core.utils.SafeSoupUtil.safeFirst
 import com.madsam.otora.core.utils.SafeSoupUtil.safeFirstText
 import com.madsam.otora.core.utils.SafeSoupUtil.safeSelectFirst
 import com.madsam.otora.core.utils.SafeSoupUtil.safeText
+import com.madsam.otora.core.utils.UserAgentUtils
 import com.madsam.otora.core.utils.ShareUtil
 import com.madsam.otora.data.BASE_URL
 import com.madsam.otora.data.CHUNITHM_URL
@@ -66,7 +67,9 @@ internal class ChunithmRequestService(private val context: Context) {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
     private val isUserRequestRunning = AtomicBoolean(false)
     private val isSongsRequestRunning = AtomicBoolean(false)
-    private val userAgent = ShareUtil.getString("chuniUserAgent", context) ?: ""
+    private val userAgent = UserAgentUtils.getUserAgent(context).ifBlank { 
+        UserAgentUtils.getDefaultUserAgent() 
+    }
     private var cookie = ChuniCookieDTO(
         ShareUtil.getString("chuniToken", context) ?: "",
         ShareUtil.getString("chuniExpires", context) ?: "",
