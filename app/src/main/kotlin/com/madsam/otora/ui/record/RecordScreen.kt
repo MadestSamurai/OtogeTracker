@@ -8,17 +8,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -33,7 +29,6 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
@@ -67,7 +62,6 @@ import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.sarasaFont
 import com.madsam.otora.core.utils.ShareUtil
-import com.madsam.otora.ui.components.CustomTabRow
 import com.madsam.otora.ui.navigation.ChunithmNavHost
 import com.madsam.otora.ui.record.chunithm.ChuniViewModelFactory
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
@@ -111,46 +105,128 @@ fun RecordScreen(
     val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
     val useNavigationRail = screenWidth > screenHeight || screenWidth > 600.dp
 
-    if (useNavigationRail) {
-        // 横屏或宽屏时使用CustomTabRow作为紧凑的子导航
-        Column {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Red500)
-                    .windowInsetsPadding(WindowInsets.statusBars)
-                    .height(64.dp) // TopAppBar的标准高度
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
+    // 宽屏模式下使用更宽的Drawer，竖屏模式使用标准宽度的Drawer
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = true, // 所有模式下都启用手势
+        drawerContent = {
+            ModalDrawerSheet(
+                modifier = Modifier.width(if (useNavigationRail) 280.dp else 300.dp), // 宽屏模式稍窄一点
+                drawerContainerColor = Red500,
+                drawerContentColor = Beige400
             ) {
-                // 左侧类型切换tabs
-                CustomTabRow(
-                    selectedTabIndex = items.indexOf(selectedItem),
-                    containerColor = Red500,
-                    modifier = Modifier.wrapContentWidth()
-                ) {
-                    items.forEachIndexed { index, screen ->
-                        Tab(
-                            selected = selectedItem == screen,
-                            onClick = { selectedItem = screen },
-                            text = {
-                                Text(
-                                    text = screen.route,
-                                    fontFamily = sarasaFont,
-                                    fontSize = 14.sp,
-                                    color = if (selectedItem == screen) Beige500 else Beige600
-                                )
-                            },
-                            modifier = Modifier.height(48.dp)
+                Spacer(modifier = Modifier.height(12.dp))
+                items.forEach { screen ->
+                    NavigationDrawerItem(
+                        icon = {
+                            when (screen) {
+                                Screen.Page1 -> Icon(Filled.OsuIcon, "Osu", Modifier.size(24.dp))
+                                Screen.Page2 -> Icon(Filled.MaimaiIcon, "Maimai", Modifier.size(24.dp))
+                                Screen.Page3 -> Icon(Filled.ChunithmIcon, "Chunithm", Modifier.size(24.dp))
+                                Screen.Page4 -> Icon(Fa.Trash, null, Modifier.size(24.dp))
+                            }
+                        },
+                        label = { Text(screen.route) },
+                        selected = selectedItem == screen,
+                        onClick = {
+                            selectedItem = screen
+                            scope.launch { drawerState.close() }
+                        },
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = Red800,
+                            unselectedContainerColor = Red500,
+                            selectedIconColor = Beige500,
+                            unselectedIconColor = Beige600,
+                            selectedTextColor = Beige500,
+                            unselectedTextColor = Beige600
                         )
-                    }
+                    )
                 }
                 
-                // 右侧占位，将action按钮推到最右边
                 Spacer(modifier = Modifier.weight(1f))
                 
-                // 右侧action按钮
-                Row {
+                // 设置按钮放在底部
+                NavigationDrawerItem(
+                    icon = {
+                        Icon(
+                            imageVector = Fa.Cog,
+                            contentDescription = "Settings",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    },
+                    label = { Text("Settings") },
+                    selected = false,
+                    onClick = {
+                        val intent = Intent(context, SettingsActivity::class.java)
+                        context.startActivity(intent)
+                        scope.launch { drawerState.close() }
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = Red800,
+                        unselectedContainerColor = Red500,
+                        selectedIconColor = Beige500,
+                        unselectedIconColor = Beige600,
+                        selectedTextColor = Beige500,
+                        unselectedTextColor = Beige600
+                    )
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+    ) {
+        Column {
+            CenterAlignedTopAppBar(
+                title = {
+                    // 当选中CHUNITHM页面时，使用ViewModel中的动态标题
+                    val titleText = if (selectedItem == Screen.Page3) {
+                        val pageTitle by chunithmViewModel.pageTitle.collectAsState()
+                        pageTitle
+                    } else {
+                        selectedItem.route
+                    }
+                    ScrollableTitle(text = titleText)
+                },
+                navigationIcon = {
+                    // 当在CHUNITHM页面且需要显示返回按钮时，显示返回按钮
+                    if (selectedItem == Screen.Page3) {
+                        val showBackButton by chunithmViewModel.showBackButton.collectAsState()
+                        if (showBackButton) {
+                            IconButton(onClick = {
+                                chunithmViewModel.triggerBack()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "返回",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        } else {
+                            IconButton(onClick = {
+                                scope.launch { drawerState.open() }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Menu",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        IconButton(onClick = {
+                            scope.launch { drawerState.open() }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menu",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                },
+                actions = {
                     IconButton(
                         onClick = {
                             val intent = Intent(context, SettingsActivity::class.java)
@@ -164,8 +240,13 @@ fun RecordScreen(
                             modifier = Modifier.size(24.dp)
                         )
                     }
-                }
-            }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Red500,
+                    titleContentColor = Beige400,
+                    navigationIconContentColor = Beige400
+                )
+            )
 
             // Content
             Box(modifier = Modifier.fillMaxSize()) {
@@ -191,146 +272,6 @@ fun RecordScreen(
                         )
                     }
                     Screen.Page4 -> TestPage4()
-                }
-            }
-        }
-    } else {
-        // 竖屏时使用原有的ModalNavigationDrawer
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-                ModalDrawerSheet(
-                    modifier = Modifier.width(300.dp),
-                    drawerContainerColor = Red500,
-                    drawerContentColor = Beige400
-                ) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    items.forEach { screen ->
-                        NavigationDrawerItem(
-                            icon = {
-                                when (screen) {
-                                    Screen.Page1 -> Icon(Filled.OsuIcon, "Osu", Modifier.size(24.dp))
-                                    Screen.Page2 -> Icon(Filled.MaimaiIcon, "Maimai", Modifier.size(24.dp))
-                                    Screen.Page3 -> Icon(Filled.ChunithmIcon, "Chunithm", Modifier.size(24.dp))
-                                    Screen.Page4 -> Icon(Fa.Trash, null, Modifier.size(24.dp))
-                                }
-                            },
-                            label = { Text(screen.route) },
-                            selected = selectedItem == screen,
-                            onClick = {
-                                selectedItem = screen
-                                scope.launch { drawerState.close() }
-                            },
-                            modifier = Modifier.padding(horizontal = 12.dp),
-                            colors = NavigationDrawerItemDefaults.colors(
-                                selectedContainerColor = Red800,
-                                unselectedContainerColor = Red500,
-                                selectedIconColor = Beige500,
-                                unselectedIconColor = Beige600,
-                                selectedTextColor = Beige500,
-                                unselectedTextColor = Beige600
-                            )
-                        )
-                    }
-                }
-            }
-        ) {
-            Column {
-                CenterAlignedTopAppBar(
-                    title = {
-                        // 当选中CHUNITHM页面时，使用ViewModel中的动态标题
-                        val titleText = if (selectedItem == Screen.Page3) {
-                            val pageTitle by chunithmViewModel.pageTitle.collectAsState()
-                            pageTitle
-                        } else {
-                            selectedItem.route
-                        }
-                        ScrollableTitle(text = titleText)
-                    },
-                    navigationIcon = {
-                        // 当在CHUNITHM页面且需要显示返回按钮时，显示返回按钮
-                        if (selectedItem == Screen.Page3) {
-                            val showBackButton by chunithmViewModel.showBackButton.collectAsState()
-                            if (showBackButton) {
-                                IconButton(onClick = {
-                                    chunithmViewModel.triggerBack()
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = "返回",
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                            } else {
-                                IconButton(onClick = {
-                                    scope.launch { drawerState.open() }
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Menu,
-                                        contentDescription = "Menu",
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                            }
-                        } else {
-                            IconButton(onClick = {
-                                scope.launch { drawerState.open() }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Menu,
-                                    contentDescription = "Menu",
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = {
-                                val intent = Intent(context, SettingsActivity::class.java)
-                                context.startActivity(intent)
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Fa.Cog,
-                                contentDescription = "Settings",
-                                tint = Beige400,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    },
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                        containerColor = Red500,
-                        titleContentColor = Beige400,
-                        navigationIconContentColor = Beige400
-                    )
-                )
-
-                // Content
-                Box(modifier = Modifier.fillMaxSize()) {
-                    when (selectedItem) {
-                        Screen.Page1 -> OsuUserPage(
-                            showOsuDialog,
-                            osuViewModel,
-                            osuScreenState,
-                            onDismissDialog = { showOsuDialog = false }
-                        )
-
-                        Screen.Page2 -> MaimaiUserPage(
-                            showMaimaiDialog,
-                            onDismissDialog = { showMaimaiDialog = false }
-                        )
-
-                        Screen.Page3 -> {
-                            ChunithmNavHost(
-                                navController = chunithmNavController,
-                                viewModel = chunithmViewModel,
-                                chuniScreenState = ChunithmScreenState(),
-                                snackbarHostState = snackbarHostState
-                            )
-                        }
-                        Screen.Page4 -> TestPage4()
-                    }
                 }
             }
         }

@@ -10,7 +10,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
@@ -87,9 +86,31 @@ fun MainActivityScreen(navController: NavHostController) {
     }
 
     if (useNavigationRail) {
-        Row(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            // 主内容区域 - 添加左边距避免被NavigationRail遮挡，并考虑WindowInsets
+            Box(modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 80.dp) // NavigationRail的宽度
+                .windowInsetsPadding(
+                    WindowInsets.displayCutout.only(WindowInsetsSides.Start)
+                )
+            ) {
+                NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
+                    lateinit var bofNavController: NavHostController
+                    val bofScreenState = BofScreenState()
+                    composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
+                    composable(Screen.ReportScreen.route) { Screen2() }
+                    composable(Screen.BOFScreen.route) {
+                        bofNavController = rememberNavController()
+                        BofScreen(snackbarHostState, bofNavController, bofScreenState)
+                    }
+                }
+            }
+
+            // NavigationRail 覆盖在最上层
             NavigationRail(
                 modifier = Modifier
+                    .align(Alignment.CenterStart)
                     .background(Red900)
                     .windowInsetsPadding(
                         WindowInsets.displayCutout.only(WindowInsetsSides.Start)
@@ -133,24 +154,11 @@ fun MainActivityScreen(navController: NavHostController) {
                     )
                 }
             }
-            
-            Box(modifier = Modifier.fillMaxSize()) {
-                NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
-                    lateinit var bofNavController: NavHostController
-                    val bofScreenState = BofScreenState()
-                    composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
-                    composable(Screen.ReportScreen.route) { Screen2() }
-                    composable(Screen.BOFScreen.route) {
-                        bofNavController = rememberNavController()
-                        BofScreen(snackbarHostState, bofNavController, bofScreenState)
-                    }
-                }
 
-                SnackbarHost(
-                    hostState = snackbarHostState,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(16.dp)
+            )
         }
     } else {
         Box(modifier = Modifier.fillMaxSize()) {
