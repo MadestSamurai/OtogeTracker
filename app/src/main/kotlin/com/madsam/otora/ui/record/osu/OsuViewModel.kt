@@ -33,11 +33,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-internal class OsuViewModel(
-    userId: String,
-    mode: String,
-    context: Context
-) : ViewModel() {
+internal class OsuViewModel() : ViewModel() {
     val cardUI = MutableStateFlow(OsuCardUiModel())
     val badgeUI = MutableStateFlow<List<OsuBadgeUiModel>>(emptyList())
     val groupListUI = MutableStateFlow<List<OsuGroupDTO>>(emptyList())
@@ -57,14 +53,12 @@ internal class OsuViewModel(
 
     private val glanceUI = MutableStateFlow(OsuGlanceUiModel())
 
-    init {
-        loadData(userId, mode, context)
-    }
-
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
-    fun loadData(userId: String, mode: String, context: Context) {
+    fun loadData(context: Context) {
         val osuRequestService = OsuRequestService()
+        val userId = ShareUtil.getString("userId", context) ?: "2"
+        val mode = ShareUtil.getString("mode", context) ?: "osu"
         osuRequestService.getOsuMedals(
             { osuInfoDTO: OsuInfoDTO -> fetchMedals(osuInfoDTO, context) }, userId, mode
         )
@@ -336,15 +330,11 @@ internal class OsuViewModel(
     }
 }
 
-class OsuViewModelFactory(
-    private val userId: String,
-    private val mode: String,
-    private val context: Context
-) : ViewModelProvider.Factory {
+class OsuViewModelFactory() : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(OsuViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return OsuViewModel(userId, mode, context) as T
+            return OsuViewModel() as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

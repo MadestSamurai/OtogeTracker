@@ -33,9 +33,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-internal class ChunithmViewModel(
-    context: Context
-) : ViewModel() {
+internal class ChunithmViewModel() : ViewModel() {
     val chunithmCardUiModel = MutableStateFlow(ChunithmCardUiModel())
     val chunithmAvatarUiModel = MutableStateFlow(ChunithmAvatarUiModel())
 
@@ -73,11 +71,6 @@ internal class ChunithmViewModel(
     // 分数缓存 - 预加载机制
     private val _allScoresCache = MutableStateFlow<Map<String, Map<String, ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel>>>(emptyMap())
     private var scoresCacheLoaded = false
-
-    init {
-        loadData(context)
-        preloadAllScores() // 预加载所有分数数据
-    }
 
     fun loadData(context: Context) {
         loadCardFromLocal(context)
@@ -567,12 +560,11 @@ internal class ChunithmViewModel(
 }
 
 class ChuniViewModelFactory(
-    private val context: Context
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ChunithmViewModel::class.java)) {
-            return ChunithmViewModel(context) as T
+            return ChunithmViewModel() as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

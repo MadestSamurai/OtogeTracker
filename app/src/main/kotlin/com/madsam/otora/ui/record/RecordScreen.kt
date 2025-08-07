@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerValue
@@ -34,7 +33,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,7 +59,6 @@ import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.sarasaFont
-import com.madsam.otora.core.utils.ShareUtil
 import com.madsam.otora.ui.navigation.ChunithmNavHost
 import com.madsam.otora.ui.record.chunithm.ChuniViewModelFactory
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
@@ -84,17 +81,9 @@ fun RecordScreen(
     var selectedItem by remember { mutableStateOf(items[0]) }
     val context = LocalContext.current
 
-    var showOsuDialog by remember { mutableStateOf(false) }
     var showMaimaiDialog by remember { mutableStateOf(false) }
 
-    val osuViewModel: OsuViewModel = viewModel(
-        factory = OsuViewModelFactory(
-            userId = ShareUtil.getString("userId", context) ?: "2",
-            mode = ShareUtil.getString("mode", context) ?: "osu",
-            context = context
-        )
-    )
-    val chunithmViewModel: ChunithmViewModel = viewModel(factory = ChuniViewModelFactory(context))
+    // 移除ViewModel创建，让各个页面自己管理
     val osuScreenState = OsuScreenState()
     val chunithmNavController = rememberNavController()
     
@@ -180,50 +169,19 @@ fun RecordScreen(
         Column {
             CenterAlignedTopAppBar(
                 title = {
-                    // 当选中CHUNITHM页面时，使用ViewModel中的动态标题
-                    val titleText = if (selectedItem == Screen.Page3) {
-                        val pageTitle by chunithmViewModel.pageTitle.collectAsState()
-                        pageTitle
-                    } else {
-                        selectedItem.route
-                    }
-                    ScrollableTitle(text = titleText)
+                    // 简化标题逻辑，各页面自行管理
+                    ScrollableTitle(text = selectedItem.route)
                 },
                 navigationIcon = {
-                    // 当在CHUNITHM页面且需要显示返回按钮时，显示返回按钮
-                    if (selectedItem == Screen.Page3) {
-                        val showBackButton by chunithmViewModel.showBackButton.collectAsState()
-                        if (showBackButton) {
-                            IconButton(onClick = {
-                                chunithmViewModel.triggerBack()
-                            }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "返回",
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        } else {
-                            IconButton(onClick = {
-                                scope.launch { drawerState.open() }
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Menu,
-                                    contentDescription = "Menu",
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-                        }
-                    } else {
-                        IconButton(onClick = {
-                            scope.launch { drawerState.open() }
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Menu",
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
+                    // 简化导航图标，统一使用Menu按钮
+                    IconButton(onClick = {
+                        scope.launch { drawerState.open() }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Menu",
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 },
                 actions = {
@@ -251,12 +209,14 @@ fun RecordScreen(
             // Content
             Box(modifier = Modifier.fillMaxSize()) {
                 when (selectedItem) {
-                    Screen.Page1 -> OsuUserPage(
-                        showOsuDialog,
-                        osuViewModel,
-                        osuScreenState,
-                        onDismissDialog = { showOsuDialog = false }
-                    )
+                    Screen.Page1 -> {
+                        val osuViewModel: OsuViewModel = viewModel(factory = OsuViewModelFactory())
+                        OsuUserPage(
+                            osuViewModel, 
+                            osuScreenState,
+                            isPageVisible = selectedItem == Screen.Page1
+                        )
+                    }
 
                     Screen.Page2 -> MaimaiUserPage(
                         showMaimaiDialog,
@@ -264,6 +224,7 @@ fun RecordScreen(
                     )
 
                     Screen.Page3 -> {
+                        val chunithmViewModel: ChunithmViewModel = viewModel(factory = ChuniViewModelFactory())
                         ChunithmNavHost(
                             navController = chunithmNavController,
                             viewModel = chunithmViewModel,

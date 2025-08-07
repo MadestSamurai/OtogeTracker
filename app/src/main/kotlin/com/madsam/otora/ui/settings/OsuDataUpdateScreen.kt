@@ -35,15 +35,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaFont
 import com.madsam.otora.core.utils.ShareUtil
-import com.madsam.otora.ui.record.osu.OsuViewModel
-import com.madsam.otora.ui.record.osu.OsuViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,14 +52,6 @@ fun OsuDataUpdateScreen(
     val modeState = remember { mutableStateOf(ShareUtil.getString("mode", context) ?: "osu") }
     val isClicked = remember { mutableStateOf(false) }
     val items = remember { listOf("mania", "osu", "taiko", "fruits") }
-    
-    val osuViewModel: OsuViewModel = viewModel(
-        factory = OsuViewModelFactory(
-            userId = userState.value.ifEmpty { "2" },
-            mode = modeState.value,
-            context = context
-        )
-    )
 
     Column(
         modifier = Modifier
@@ -201,12 +190,11 @@ fun OsuDataUpdateScreen(
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
-                // 保存并更新按钮
+                // 保存设置按钮
                 Button(
                     onClick = {
                         ShareUtil.putString("userId", userState.value, context)
                         ShareUtil.putString("mode", modeState.value, context)
-                        osuViewModel.loadData(userState.value, modeState.value, context)
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
@@ -215,7 +203,7 @@ fun OsuDataUpdateScreen(
                     )
                 ) {
                     Text(
-                        "保存并更新数据",
+                        "保存设置",
                         fontFamily = sarasaFont,
                         fontWeight = FontWeight.Medium
                     )

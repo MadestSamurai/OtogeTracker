@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,10 +20,15 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.record.osu.OsuViewModel
@@ -41,12 +47,15 @@ import com.madsam.otora.ui.record.osu.dialogs.TopRankDialog
 internal fun OsuMainPage(
     viewModel: OsuViewModel,
     scrollThreshold: Float,
-    setIsTabRowVisible: (Boolean) -> Unit
+    setIsTabRowVisible: (Boolean) -> Unit,
+    isPageVisible: Boolean = true  // 新增参数，表示页面是否可见
 ) {
+    val context = LocalContext.current
     var showFullRecentDialog by remember { mutableStateOf(false) }
     var showTopRankDialog by remember { mutableStateOf("") }
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
+    val lifecycleOwner = LocalLifecycleOwner.current
     
     // 计算屏幕宽度和内容宽度
     val density = LocalDensity.current
@@ -71,6 +80,26 @@ internal fun OsuMainPage(
     } else {
         // 只减去水平 padding + cutout 宽度
         screenWidthDp - 24.dp - cutoutWidthDp
+    }
+
+    // 监听Activity的生命周期，从其他Activity返回时重新加载数据
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && isPageVisible) {
+                viewModel.loadData(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    // 页面首次显示或切换到此页面时加载数据
+    LaunchedEffect(isPageVisible) {
+        if (isPageVisible) {
+            viewModel.loadData(context)
+        }
     }
     
     LazyColumn(

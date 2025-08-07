@@ -34,7 +34,6 @@ import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.components.CustomTabRow
 import com.madsam.otora.ui.record.OsuScreenState
-import com.madsam.otora.ui.record.osu.dialogs.SettingsDialog
 import com.madsam.otora.ui.record.osu.pages.Comment
 import com.madsam.otora.ui.record.osu.pages.OsuMainPage
 import kotlinx.coroutines.flow.update
@@ -42,10 +41,9 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun OsuUserPage(
-    showOsuDialog: Boolean,
     viewModel: OsuViewModel,
     osuScreenState: OsuScreenState,
-    onDismissDialog: () -> Unit
+    isPageVisible: Boolean = true  // 新增参数
 ) {
     val selectedTabIndex by osuScreenState.selectedTab.collectAsState()
     val scrollThreshold = 50f
@@ -55,12 +53,6 @@ internal fun OsuUserPage(
 
     val pagerState = rememberPagerState { tabTitles.size }
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
-
-    SettingsDialog(
-        showDialog = showOsuDialog,
-        onDismiss = onDismissDialog,
-        viewModel = viewModel
-    )
 
     LaunchedEffect(pagerState.currentPage) {
         if (selectedTabIndex != pagerState.currentPage) {
@@ -78,7 +70,9 @@ internal fun OsuUserPage(
                 0 -> OsuMainPage (
                     viewModel = viewModel,
                     scrollThreshold = scrollThreshold,
-                ) { isTabRowVisible = it }
+                    setIsTabRowVisible = { isTabRowVisible = it },
+                    isPageVisible = isPageVisible && selectedTabIndex == 0  // 只有在页面可见且选中第一个tab时才为true
+                )
                 1 -> Comment()
             }
         }
