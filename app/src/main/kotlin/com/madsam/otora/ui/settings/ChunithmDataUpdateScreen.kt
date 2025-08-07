@@ -1,21 +1,26 @@
 package com.madsam.otora.ui.settings
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -43,7 +49,14 @@ import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.ShareUtil
 import com.madsam.otora.core.utils.UserAgentUtils
 import com.madsam.otora.data.chunithm.remote.api.ChunithmRequestService
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+
+enum class UpdateState {
+    IDLE,    // 空闲状态
+    LOADING, // 加载中
+    SUCCESS  // 成功状态
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +70,7 @@ fun ChunithmDataUpdateScreen(
     val responseState = remember { mutableStateOf("") }
     val requestError = remember { mutableStateOf(false) }
     val responseError = remember { mutableStateOf(false) }
+    val updateState = remember { mutableStateOf(UpdateState.IDLE) }
     val scope = rememberCoroutineScope()
 
     Column(
@@ -170,23 +184,89 @@ fun ChunithmDataUpdateScreen(
                 // 更新歌曲数据按钮
                 Button(
                     onClick = {
-                        val chunithmRequestService = ChunithmRequestService(context)
-                        chunithmRequestService.getChuniSongsData()
-                        scope.launch {
-                            snackbarHostState.showSnackbar("开始更新歌曲数据")
+                        if (updateState.value == UpdateState.IDLE) {
+                            updateState.value = UpdateState.LOADING
+                            scope.launch {
+                                snackbarHostState.showSnackbar("开始更新歌曲数据")
+                            }
+                            
+                            val chunithmRequestService = ChunithmRequestService(context)
+                            chunithmRequestService.getChuniSongsData(
+                                onSuccess = {
+                                    updateState.value = UpdateState.SUCCESS
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("歌曲数据更新完成")
+                                    }
+                                    
+                                    // 延时后恢复到空闲状态
+                                    scope.launch {
+                                        delay(1500)
+                                        updateState.value = UpdateState.IDLE
+                                    }
+                                },
+                                onError = { errorMessage ->
+                                    updateState.value = UpdateState.IDLE
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("更新失败: $errorMessage")
+                                    }
+                                }
+                            )
                         }
                     },
+                    enabled = updateState.value == UpdateState.IDLE,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = White1000,
-                        contentColor = Red500
+                        containerColor = when (updateState.value) {
+                            UpdateState.IDLE -> Beige400
+                            UpdateState.LOADING -> Beige400.copy(alpha = 0.8f)
+                            UpdateState.SUCCESS -> Beige400
+                        },
+                        contentColor = Red500,
+                        disabledContainerColor = Beige400.copy(alpha = 0.6f),
+                        disabledContentColor = Red500.copy(alpha = 0.6f)
                     )
                 ) {
-                    Text(
-                        "更新歌曲数据",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        when (updateState.value) {
+                            UpdateState.IDLE -> {
+                                Text(
+                                    "更新歌曲数据",
+                                    fontFamily = sarasaFont,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            UpdateState.LOADING -> {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    color = Red500,
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    "正在更新...",
+                                    fontFamily = sarasaFont,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            UpdateState.SUCCESS -> {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "完成",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = Red500
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    "更新完成",
+                                    fontFamily = sarasaFont,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
                 }
                 
                 Spacer(modifier = Modifier.height(32.dp))

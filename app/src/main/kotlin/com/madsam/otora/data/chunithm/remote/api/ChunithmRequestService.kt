@@ -47,6 +47,7 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jsoup.Connection
 import org.jsoup.Connection.Method
 import org.jsoup.Jsoup
@@ -890,6 +891,37 @@ internal class ChunithmRequestService(private val context: Context) {
                     requestSongsData()
                 } finally {
                     isSongsRequestRunning.set(false)
+                }
+            }
+        }
+    }
+
+    fun getChuniSongsData(
+        onSuccess: (() -> Unit)? = null,
+        onError: ((String) -> Unit)? = null
+    ) {
+        if (!isSongsRequestRunning.getAndSet(true)) {
+            serviceScope.launch {
+                try {
+                    requestSongsData()
+                    // 在主线程上执行成功回调
+                    withContext(Dispatchers.Main) {
+                        onSuccess?.invoke()
+                    }
+                } catch (e: Exception) {
+                    // 在主线程上执行错误回调
+                    withContext(Dispatchers.Main) {
+                        onError?.invoke(e.message ?: "更新失败")
+                    }
+                } finally {
+                    isSongsRequestRunning.set(false)
+                }
+            }
+        } else {
+            // 如果已经在运行中，在主线程上通过错误回调通知
+            serviceScope.launch {
+                withContext(Dispatchers.Main) {
+                    onError?.invoke("歌曲数据更新正在进行中")
                 }
             }
         }

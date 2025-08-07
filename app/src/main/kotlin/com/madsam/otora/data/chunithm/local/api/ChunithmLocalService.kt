@@ -155,11 +155,7 @@ internal class ChunithmLocalService {
                             "we" -> 0
                             else -> 0
                         }
-                        chuniSongL.difficulties.getOrNull(difficultyIndex)?.also {
-                            if (sheet.difficulty == "ultima") {
-                                Log.i(TAG, "Found Ultima data for ${chuniSongL.title}")
-                            }
-                        } ?: run {
+                        chuniSongL.difficulties.getOrNull(difficultyIndex)?: run {
                             if (sheet.difficulty == "ultima") {
                                 Log.i(TAG, "No Ultima data found for ${chuniSongL.title}")
                             }
