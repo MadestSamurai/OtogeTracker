@@ -95,7 +95,7 @@ fun BOFDataUpdateScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Text(
-                    text = "BOF (Be-Music Online Festival) 是音游界的知名活动。\n这里将提供BOF相关的数据更新功能。",
+                    text = "BOF (BMS of Fighters) 是音游界的知名活动。\n这里将提供BOF相关的数据更新功能。",
                     color = White1000.copy(alpha = 0.7f),
                     fontSize = 14.sp,
                     fontFamily = sarasaFont,
