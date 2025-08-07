@@ -40,9 +40,7 @@ object ChunithmRoutes {
  *     startDestination = ChunithmRoutes.CHUNITHM_USER,
  *     viewModel = chunithmViewModel,
  *     chuniScreenState = chuniScreenState,
- *     snackbarHostState = snackbarHostState,
- *     showDialog = showDialog,
- *     onDismissDialog = onDismissDialog
+ *     snackbarHostState = snackbarHostState
  * )
  * ```
  */
@@ -52,9 +50,7 @@ internal fun ChunithmNavHost(
     startDestination: String = ChunithmRoutes.CHUNITHM_USER,
     viewModel: ChunithmViewModel,
     chuniScreenState: ChunithmScreenState,
-    snackbarHostState: SnackbarHostState,
-    showDialog: Boolean,
-    onDismissDialog: () -> Unit
+    snackbarHostState: SnackbarHostState
 ) {
     NavHost(
         navController = navController,
@@ -66,8 +62,6 @@ internal fun ChunithmNavHost(
                 viewModel = viewModel,
                 chuniScreenState = chuniScreenState,
                 snackbarHostState = snackbarHostState,
-                showDialog = showDialog,
-                onDismissDialog = onDismissDialog,
                 navController = navController
             )
         }

@@ -71,6 +71,7 @@ fun ChunithmDataUpdateScreen(
     val requestError = remember { mutableStateOf(false) }
     val responseError = remember { mutableStateOf(false) }
     val updateState = remember { mutableStateOf(UpdateState.IDLE) }
+    val cookieState = remember { mutableStateOf(UpdateState.IDLE) }
     val scope = rememberCoroutineScope()
 
     Column(
@@ -271,9 +272,9 @@ fun ChunithmDataUpdateScreen(
                 
                 Spacer(modifier = Modifier.height(32.dp))
                 
-                // Cookie 配置部分
+                // 个人信息获取部分
                 Text(
-                    text = "Cookie 配置",
+                    text = "个人信息获取",
                     color = White1000,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
@@ -281,7 +282,7 @@ fun ChunithmDataUpdateScreen(
                 )
                 
                 Text(
-                    text = "请输入从CHUNITHM官方网站获取的Cookie信息",
+                    text = "输入从CHUNITHM官方公众号获取的Cookie信息，用于获取和保存您的账号数据",
                     color = White1000.copy(alpha = 0.7f),
                     fontSize = 14.sp,
                     fontFamily = sarasaFont
@@ -366,54 +367,123 @@ fun ChunithmDataUpdateScreen(
                 // 保存Cookies按钮
                 Button(
                     onClick = {
-                        requestError.value = requestState.value.isEmpty()
-                        responseError.value = responseState.value.isEmpty()
-                        if (requestError.value || responseError.value) {
-                            return@Button
-                        }
-                        
-                        val requestCookieMap = CommonUtils.parseCookie(requestState.value)
-                        val responseCookieMap = CommonUtils.parseCookie(responseState.value)
-                        
-                        if (requestCookieMap.isEmpty() || responseCookieMap.isEmpty()) {
-                            scope.launch {
-                                snackbarHostState.showSnackbar("Cookie格式无效")
+                        if (cookieState.value == UpdateState.IDLE) {
+                            requestError.value = requestState.value.isEmpty()
+                            responseError.value = responseState.value.isEmpty()
+                            if (requestError.value || responseError.value) {
+                                return@Button
                             }
-                            return@Button
-                        }
-                        
-                        // 保存Cookie信息
-                        ShareUtil.putString("chuniToken", responseCookieMap["_t"] ?: "", context)
-                        ShareUtil.putString("chuniUserId", requestCookieMap["userId"] ?: "", context)
-                        ShareUtil.putString("chuniFriendCodeList", requestCookieMap["friendCodeList"] ?: "", context)
-                        ShareUtil.putString("chuniExpires", responseCookieMap["expires"] ?: "", context)
-                        ShareUtil.putString("chuniMaxAge", responseCookieMap["Max-Age"] ?: "", context)
-                        ShareUtil.putString("chuniPath", responseCookieMap["path"] ?: "", context)
-                        ShareUtil.putString("chuniSameSite", responseCookieMap["SameSite"] ?: "", context)
-                        ShareUtil.putString("chuniGa", requestCookieMap["_ga"] ?: "", context)
-                        
-                        val gaCount = requestCookieMap.count { it.key.startsWith("_ga_") }
-                        if (gaCount == 1) {
-                            val entry = requestCookieMap.entries.first { it.key.startsWith("_ga_") }
-                            ShareUtil.putString("chuniGaKey", entry.key, context)
-                            ShareUtil.putString("chuniGaValue", entry.value, context)
-                        }
-                        
-                        scope.launch {
-                            snackbarHostState.showSnackbar("Cookie保存成功")
+                            
+                            val requestCookieMap = CommonUtils.parseCookie(requestState.value)
+                            val responseCookieMap = CommonUtils.parseCookie(responseState.value)
+                            
+                            if (requestCookieMap.isEmpty() || responseCookieMap.isEmpty()) {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("Cookie格式无效")
+                                }
+                                return@Button
+                            }
+                            
+                            cookieState.value = UpdateState.LOADING
+                            scope.launch {
+                                snackbarHostState.showSnackbar("开始保存Cookie并获取用户数据")
+                            }
+                            
+                            // 保存Cookie信息
+                            ShareUtil.putString("chuniToken", responseCookieMap["_t"] ?: "", context)
+                            ShareUtil.putString("chuniUserId", requestCookieMap["userId"] ?: "", context)
+                            ShareUtil.putString("chuniFriendCodeList", requestCookieMap["friendCodeList"] ?: "", context)
+                            ShareUtil.putString("chuniExpires", responseCookieMap["expires"] ?: "", context)
+                            ShareUtil.putString("chuniMaxAge", responseCookieMap["Max-Age"] ?: "", context)
+                            ShareUtil.putString("chuniPath", responseCookieMap["path"] ?: "", context)
+                            ShareUtil.putString("chuniSameSite", responseCookieMap["SameSite"] ?: "", context)
+                            ShareUtil.putString("chuniGa", requestCookieMap["_ga"] ?: "", context)
+                            
+                            val gaCount = requestCookieMap.count { it.key.startsWith("_ga_") }
+                            if (gaCount == 1) {
+                                val entry = requestCookieMap.entries.first { it.key.startsWith("_ga_") }
+                                ShareUtil.putString("chuniGaKey", entry.key, context)
+                                ShareUtil.putString("chuniGaValue", entry.value, context)
+                            }
+                            
+                            // 获取用户数据，类似Dialog中的逻辑
+                            val chunithmRequestService = ChunithmRequestService(context)
+                            chunithmRequestService.getUserData(
+                                onSuccess = {
+                                    cookieState.value = UpdateState.SUCCESS
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("用户数据获取成功")
+                                    }
+                                    
+                                    // 延时后恢复到空闲状态
+                                    scope.launch {
+                                        delay(1500)
+                                        cookieState.value = UpdateState.IDLE
+                                    }
+                                },
+                                onError = { errorMessage ->
+                                    cookieState.value = UpdateState.IDLE
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Cookie保存成功，但用户数据获取失败: $errorMessage")
+                                    }
+                                }
+                            )
                         }
                     },
+                    enabled = cookieState.value == UpdateState.IDLE,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Beige400,
-                        contentColor = Red500
+                        containerColor = when (cookieState.value) {
+                            UpdateState.IDLE -> Beige400
+                            UpdateState.LOADING -> Beige400.copy(alpha = 0.8f)
+                            UpdateState.SUCCESS -> Beige400
+                        },
+                        contentColor = Red500,
+                        disabledContainerColor = Beige400.copy(alpha = 0.6f),
+                        disabledContentColor = Red500.copy(alpha = 0.6f)
                     )
                 ) {
-                    Text(
-                        "保存 Cookies",
-                        fontFamily = sarasaFont,
-                        fontWeight = FontWeight.Medium
-                    )
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        when (cookieState.value) {
+                            UpdateState.IDLE -> {
+                                Text(
+                                    "保存并获取用户数据",
+                                    fontFamily = sarasaFont,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            UpdateState.LOADING -> {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    color = Red500,
+                                    strokeWidth = 2.dp
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    "正在获取...",
+                                    fontFamily = sarasaFont,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                            UpdateState.SUCCESS -> {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "完成",
+                                    modifier = Modifier.size(16.dp),
+                                    tint = Red500
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    "获取完成",
+                                    fontFamily = sarasaFont,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

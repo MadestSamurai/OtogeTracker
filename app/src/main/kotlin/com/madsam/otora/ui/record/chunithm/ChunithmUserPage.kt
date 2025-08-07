@@ -54,7 +54,6 @@ import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.components.CustomScrollableTabRow
 import com.madsam.otora.ui.record.ChunithmScreenState
-import com.madsam.otora.ui.record.chunithm.dialogs.CookieDialog
 import com.madsam.otora.ui.record.chunithm.dialogs.TopRankDialog
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmCollectionPage
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmFriendsPage
@@ -70,8 +69,6 @@ internal fun ChunithmUserPage(
     viewModel: ChunithmViewModel,
     chuniScreenState: ChunithmScreenState,
     snackbarHostState: SnackbarHostState,
-    showDialog: Boolean,
-    onDismissDialog: () -> Unit,
     navController: NavController
 ) {
     val selectedTabIndex by chuniScreenState.selectedTab.collectAsState()
@@ -110,24 +107,6 @@ internal fun ChunithmUserPage(
     } else {
         // 只减去水平 padding + cutout 宽度
         screenWidthDp - 24.dp - cutoutWidthDp
-    }
-
-    if (showDialog) {
-        CookieDialog(
-            context = context,
-            snackbarHostState = snackbarHostState,
-            onResult = { success ->
-                if (success) {
-                    scope.launch {
-                        viewModel.fetchUserData(context)
-                        viewModel.loadData(context)
-                        snackbarHostState.showSnackbar("Cookies Saved")
-                    }
-                }
-                onDismissDialog()
-            },
-            onDismiss = onDismissDialog
-        )
     }
 
     LaunchedEffect(pagerState.currentPage) {

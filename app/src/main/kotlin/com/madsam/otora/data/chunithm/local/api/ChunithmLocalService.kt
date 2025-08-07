@@ -845,15 +845,9 @@ internal class ChunithmLocalService {
         difficulty: String
     ) = withContext(Dispatchers.IO) {
         val realm = Realm.open(realmConfig)
-        Log.d(TAG, "=== Starting saveFriendScoreData for friend $friendCode, difficulty $difficulty ===")
-        Log.d(TAG, "Input: ${friendScoreList.size} score records to save")
-        
         try {
             val currentTime = System.currentTimeMillis().toString()
-            
             realm.write {
-                Log.d(TAG, "Entered realm.write block")
-                
                 // 使用新的主键策略：friendCode_title_difficulty，直接保存/更新，无需删除旧数据
                 var savedCount = 0
                 var updatedCount = 0
@@ -862,10 +856,8 @@ internal class ChunithmLocalService {
                     try {
                         // 使用友人代码+曲名+难度作为唯一主键
                         val entityId = "${friendCode}_${scoreDTO.title}_${difficulty}"
-                        
                         // 检查是否已存在记录
                         val existingEntity = this.query(ChuniFriendScoreEntity::class, "id == $0", entityId).find().firstOrNull()
-                        
                         val entity = (existingEntity ?: ChuniFriendScoreEntity()).apply {
                             id = entityId
                             this.friendCode = friendCode
@@ -876,32 +868,17 @@ internal class ChunithmLocalService {
                             this.difficulty = difficulty
                             recordedAt = currentTime
                         }
-                        
-                        // 详细日志第一条和最后几条记录
-                        if (index < 3 || index >= friendScoreList.size - 3) {
-                            val action = if (existingEntity != null) "Updating" else "Creating"
-                            Log.d(TAG, "$action record $index: id=$entityId, title=${scoreDTO.title}, score=${scoreDTO.score}")
-                        }
-                        
                         if (existingEntity != null) {
                             updatedCount++
                         } else {
                             copyToRealm(entity, UpdatePolicy.ALL)
                             savedCount++
                         }
-                        
                     } catch (e: Exception) {
                         Log.e(TAG, "Failed to save individual record $index (${scoreDTO.title}): ${e.message}", e)
                     }
                 }
-                Log.d(TAG, "Successfully created $savedCount new records and updated $updatedCount existing records out of ${friendScoreList.size} total records")
             }
-            
-            // 验证保存结果
-            val verificationRecords = realm.query(ChuniFriendScoreEntity::class, "friendCode == $0 AND difficulty == $1", friendCode, difficulty).find()
-            Log.d(TAG, "Verification: Found ${verificationRecords.size} records in database after save")
-            
-            Log.d(TAG, "=== Successfully completed saveFriendScoreData ===")
         } catch (e: Exception) {
             Log.e(TAG, "=== Failed to save friend score data: ${e.message} ===", e)
             throw e // 重新抛出异常以便上层处理

@@ -92,7 +92,6 @@ fun RecordScreen(
 
     var showOsuDialog by remember { mutableStateOf(false) }
     var showMaimaiDialog by remember { mutableStateOf(false) }
-    var showChunithmDialog by remember { mutableStateOf(false) }
 
     val osuViewModel: OsuViewModel = viewModel(
         factory = OsuViewModelFactory(
@@ -188,9 +187,7 @@ fun RecordScreen(
                             navController = chunithmNavController,
                             viewModel = chunithmViewModel,
                             chuniScreenState = ChunithmScreenState(),
-                            snackbarHostState = snackbarHostState,
-                            showDialog = showChunithmDialog,
-                            onDismissDialog = { showChunithmDialog = false }
+                            snackbarHostState = snackbarHostState
                         )
                     }
                     Screen.Page4 -> TestPage4()
@@ -329,9 +326,7 @@ fun RecordScreen(
                                 navController = chunithmNavController,
                                 viewModel = chunithmViewModel,
                                 chuniScreenState = ChunithmScreenState(),
-                                snackbarHostState = snackbarHostState,
-                                showDialog = showChunithmDialog,
-                                onDismissDialog = { showChunithmDialog = false }
+                                snackbarHostState = snackbarHostState
                             )
                         }
                         Screen.Page4 -> TestPage4()

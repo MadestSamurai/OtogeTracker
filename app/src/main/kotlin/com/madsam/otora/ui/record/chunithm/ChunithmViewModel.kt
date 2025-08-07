@@ -92,14 +92,6 @@ internal class ChunithmViewModel(
         chunithmRequestService.getChuniSongsData()
     }
 
-    fun fetchUserData(context: Context) {
-        val chunithmRequestService = ChunithmRequestService(context)
-        chunithmRequestService.getUserData()
-        loadCardFromLocal(context)
-        // 获取用户数据后重新加载分数缓存
-        preloadAllScores()
-    }
-
     fun refreshUserData(context: Context) {
         viewModelScope.launch {
             _isRefreshing.value = true

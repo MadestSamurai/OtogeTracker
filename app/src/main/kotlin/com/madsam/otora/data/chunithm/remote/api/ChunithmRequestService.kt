@@ -851,7 +851,10 @@ internal class ChunithmRequestService(private val context: Context) {
         }
     }
 
-    fun getUserData() {
+    fun getUserData(
+        onSuccess: (() -> Unit)? = null,
+        onError: ((String) -> Unit)? = null
+    ) {
         if (!isUserRequestRunning.getAndSet(true)) {
             serviceScope.launch {
                 try {
@@ -877,6 +880,14 @@ internal class ChunithmRequestService(private val context: Context) {
                     ShareUtil.putString("chuniExpires", cookie.expires, context)
                     ShareUtil.putString("chuniUserId", cookie.userId, context)
                     ShareUtil.putString("chuniGa", cookie.ga, context)
+                    
+                    withContext(Dispatchers.Main) {
+                        onSuccess?.invoke()
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        onError?.invoke(e.message ?: "未知错误")
+                    }
                 } finally {
                     isUserRequestRunning.set(false)
                 }
