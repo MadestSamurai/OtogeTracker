@@ -43,7 +43,7 @@ fun TitleText(
             Text(
                 text = text,
                 fontSize = titleTextSize,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 color = color,
                 modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
             )

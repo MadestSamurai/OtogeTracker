@@ -58,7 +58,7 @@ import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red800
-import com.madsam.otora.core.theme.sarasaFont
+import com.madsam.otora.core.theme.interTight
 import com.madsam.otora.ui.navigation.ChunithmNavHost
 import com.madsam.otora.ui.record.chunithm.ChuniViewModelFactory
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
@@ -94,10 +94,9 @@ fun RecordScreen(
     val screenHeight = with(density) { windowInfo.containerSize.height.toDp() }
     val useNavigationRail = screenWidth > screenHeight || screenWidth > 600.dp
 
-    // 宽屏模式下使用更宽的Drawer，竖屏模式使用标准宽度的Drawer
     ModalNavigationDrawer(
         drawerState = drawerState,
-        gesturesEnabled = true, // 所有模式下都启用手势
+        gesturesEnabled = true,
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier.width(if (useNavigationRail) 280.dp else 300.dp), // 宽屏模式稍窄一点
@@ -244,7 +243,7 @@ fun TestPage4() {
     Text(
         text = "TestPage4",
         modifier = Modifier.fillMaxSize(),
-        fontFamily = sarasaFont,
+        fontFamily = interTight,
         fontSize = 20.sp
     )
 }
@@ -316,8 +315,8 @@ private fun ScrollableTitle(text: String) {
         ) {
             Text(
                 text = text,
-                fontFamily = sarasaFont,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTight,
+                fontWeight = FontWeight.Black,
                 maxLines = 1,
                 overflow = TextOverflow.Visible,
                 modifier = Modifier.padding(horizontal = 48.dp)

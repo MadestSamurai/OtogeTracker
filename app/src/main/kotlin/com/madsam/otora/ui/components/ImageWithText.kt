@@ -41,7 +41,7 @@ fun ImageWithText(
             text = text,
             color = textColor,
             fontSize = textSize,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
             modifier = textModifier
                 .align(Alignment.CenterHorizontally)
         )

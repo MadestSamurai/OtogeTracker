@@ -66,7 +66,7 @@ import com.madsam.otora.core.theme.RANKING_GREEN
 import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.RANKING_YELLOW
 import com.madsam.otora.core.theme.TEXT_GRAY
-import com.madsam.otora.core.theme.sarasaFont
+import com.madsam.otora.core.theme.interTight
 import com.madsam.otora.data.bof.ui.model.BofEntryUI
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.core.icon.Filled
@@ -440,14 +440,14 @@ internal fun TotalHeader(
         if (totalData.isEmpty() || totalData[0].total == 0) {
             Text(
                 text = selectedTimeStr,
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
             )
         } else {
             Text(
                 text = "Total Score Ranking",
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.nsp(),
                 color = Color.White,
@@ -459,7 +459,7 @@ internal fun TotalHeader(
             )
             Text(
                 text = selectedTimeStr,
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontSize = 12.nsp(),
                 color = Color.White,
                 textAlign = TextAlign.End,
@@ -482,7 +482,7 @@ internal fun TotalHeader(
             }
             Text(
                 text = "Rank",
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
                 color = Color.White,
@@ -500,7 +500,7 @@ internal fun TotalHeader(
             if (!dataSwitch) {
                 Text(
                     text = "Total",
-                    fontFamily = sarasaFont,
+                    fontFamily = interTight,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
                     color = Color.White,
@@ -511,7 +511,7 @@ internal fun TotalHeader(
             if (screenWidthDp > 800.dp || dataSwitch) {
                 Text(
                     text = "Impr",
-                    fontFamily = sarasaFont,
+                    fontFamily = interTight,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
                     color = Color.White,
@@ -522,7 +522,7 @@ internal fun TotalHeader(
                 )
                 Text(
                     text = "Median",
-                    fontFamily = sarasaFont,
+                    fontFamily = interTight,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
                     color = Color.White,
@@ -534,7 +534,7 @@ internal fun TotalHeader(
                 )
                 Text(
                     text = "Avg",
-                    fontFamily = sarasaFont,
+                    fontFamily = interTight,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
                     color = Color.White,
@@ -640,7 +640,7 @@ internal fun BofEntryRowTotal(
                     )
                     Text(
                         text = if (entry.oldTotal == 0) "NEW" else entry.rankDiff.toString(),
-                        fontFamily = sarasaFont,
+                        fontFamily = interTight,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.nsp(),
                         color = if (entry.rankDiff < 0) RANKING_RED
@@ -654,7 +654,7 @@ internal fun BofEntryRowTotal(
                 }
                 Text(
                     text = entry.currentRank.toString(),
-                    fontFamily = sarasaFont,
+                    fontFamily = interTight,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
                     color = Color.White,
@@ -680,7 +680,7 @@ internal fun BofEntryRowTotal(
                 )
                 Text(
                     text = if (entry.oldTotal == 0) "NEW" else entry.rankDiff.toString(),
-                    fontFamily = sarasaFont,
+                    fontFamily = interTight,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.nsp(),
                     color = if (entry.rankDiff < 0) RANKING_RED
@@ -694,7 +694,7 @@ internal fun BofEntryRowTotal(
             }
             Text(
                 text = entry.currentRank.toString(),
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
                 color = Color.White,
@@ -726,7 +726,7 @@ internal fun BofEntryRowTotal(
                 text = annotatedString,
                 fontSize = 15.nsp(),
                 lineHeight = 16.nsp(),
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.End,
                 color = Color.White,
@@ -739,7 +739,7 @@ internal fun BofEntryRowTotal(
                 text = entry.artist,
                 fontSize = 12.nsp(),
                 lineHeight = 13.nsp(),
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 textAlign = TextAlign.End,
                 color = TEXT_GRAY,
                 maxLines = 1,
@@ -776,7 +776,7 @@ internal fun BofEntryRowTotal(
                             color = Color.White,
                             fontSize = if (isCompare) 14.nsp() else 20.nsp(),
                             lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
-                            fontFamily = sarasaFont,
+                            fontFamily = interTight,
                             fontWeight = FontWeight.Bold,
                             overflow = TextOverflow.Visible,
                             maxLines = 1,
@@ -817,7 +817,7 @@ internal fun BofEntryRowTotal(
                                 color = Color.White,
                                 fontSize = 12.nsp(),
                                 lineHeight = 14.nsp(),
-                                fontFamily = sarasaFont,
+                                fontFamily = interTight,
                                 overflow = TextOverflow.Visible,
                                 maxLines = 1,
                                 modifier = Modifier
@@ -832,7 +832,7 @@ internal fun BofEntryRowTotal(
         if (rowWidth > 800.dp || dataSwitch) {
             Text(
                 text = entry.impr.toString(),
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
                 color = Color.White,
@@ -843,7 +843,7 @@ internal fun BofEntryRowTotal(
             )
             Text(
                 text = CommonUtils.truncateToTwoDecimalPlaces(entry.median),
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
                 lineHeight = 36.nsp(),
@@ -858,7 +858,7 @@ internal fun BofEntryRowTotal(
             )
             Text(
                 text = CommonUtils.truncateToTwoDecimalPlaces(entry.avg),
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
                 lineHeight = 36.nsp(),

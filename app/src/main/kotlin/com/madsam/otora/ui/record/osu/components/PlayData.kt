@@ -164,13 +164,13 @@ internal fun PlayData(
                     textTitle = "Play Time",
                     text = buildAnnotatedString {
                         val styles = listOf(
-                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold) to playTimeStr[0],
+                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.SemiBold) to playTimeStr[0],
                             SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${dayHourLabels[0]} ",
-                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold) to playTimeStr[1],
+                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.SemiBold) to playTimeStr[1],
                             SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${dayHourLabels[1]} ",
-                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold) to playTimeStr[2],
+                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.SemiBold) to playTimeStr[2],
                             SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${monthSecondLabels[0]} ",
-                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.Bold) to playTimeStr[3],
+                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.SemiBold) to playTimeStr[3],
                             SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to monthSecondLabels[1]
                         )
                         styles.forEach { (style, text) ->
@@ -193,7 +193,7 @@ internal fun PlayData(
                         withStyle(
                             style = SpanStyle(
                                 fontSize = textSize,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.SemiBold
                             )
                         ) {
                             append(ppSplit[0])
@@ -281,7 +281,7 @@ internal fun PlayData(
                     withStyle(
                         style = SpanStyle(
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.SemiBold
                         )
                     ) {
                         append(if (shown) "Show Less Play Data" else "Show More Play Data")

@@ -61,7 +61,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.BofScreenState
-import com.madsam.otora.core.theme.sarasaFont
+import com.madsam.otora.core.theme.interTight
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.bof.components.ScoreChart
@@ -432,14 +432,14 @@ internal fun CommentHeader(
         if (commentData.isEmpty() || commentData[0].total == 0) {
             Text(
                 text = selectedTimeStr,
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
             )
         } else {
             Text(
                 text = "Comment Score Ranking",
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.nsp(),
                 color = Color.White,
@@ -451,7 +451,7 @@ internal fun CommentHeader(
             )
             Text(
                 text = selectedTimeStr,
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontSize = 12.nsp(),
                 color = Color.White,
                 textAlign = TextAlign.End,
@@ -475,7 +475,7 @@ internal fun CommentHeader(
             }
             Text(
                 text = "Rank",
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
                 color = Color.White,
@@ -486,7 +486,7 @@ internal fun CommentHeader(
             )
             Text(
                 text = "Region",
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
                 color = Color.White,
@@ -508,7 +508,7 @@ internal fun CommentHeader(
                     )
                     Text(
                         text = "Vote",
-                        fontFamily = sarasaFont,
+                        fontFamily = interTight,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.nsp(),
                         color = Color.White,
@@ -525,7 +525,7 @@ internal fun CommentHeader(
                     )
                     Text(
                         text = "Short",
-                        fontFamily = sarasaFont,
+                        fontFamily = interTight,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.nsp(),
                         color = Color.White,
@@ -542,7 +542,7 @@ internal fun CommentHeader(
                     )
                     Text(
                         text = "Long",
-                        fontFamily = sarasaFont,
+                        fontFamily = interTight,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.nsp(),
                         color = Color.White,
@@ -554,7 +554,7 @@ internal fun CommentHeader(
                 }
                 Text(
                     text = "Total",
-                    fontFamily = sarasaFont,
+                    fontFamily = interTight,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
                     color = Color.White,
@@ -567,7 +567,7 @@ internal fun CommentHeader(
             if (screenWidthDp > 800.dp || dataSwitch) {
                 Text(
                     text = "VoteAvg",
-                    fontFamily = sarasaFont,
+                    fontFamily = interTight,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
                     color = Color.White,
@@ -578,7 +578,7 @@ internal fun CommentHeader(
                 )
                 Text(
                     text = "ShortAvg",
-                    fontFamily = sarasaFont,
+                    fontFamily = interTight,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
                     color = Color.White,
@@ -589,7 +589,7 @@ internal fun CommentHeader(
                 )
                 Text(
                     text = "LongAvg",
-                    fontFamily = sarasaFont,
+                    fontFamily = interTight,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
                     color = Color.White,
@@ -675,7 +675,7 @@ internal fun BofEntryRowComment(
         }
         Text(
             text = entry.index.toString(),
-            fontFamily = sarasaFont,
+            fontFamily = interTight,
             fontWeight = FontWeight.Bold,
             fontSize = 20.nsp(),
             color = Color.White,
@@ -706,7 +706,7 @@ internal fun BofEntryRowComment(
                 text = annotatedString,
                 fontSize = if (entry.pattern.isEmpty()) 20.nsp() else 15.nsp(),
                 lineHeight = if (entry.pattern.isEmpty()) 36.nsp() else 16.nsp(),
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.End,
                 color = Color.White,
@@ -722,7 +722,7 @@ internal fun BofEntryRowComment(
                     text = entry.pattern,
                     fontSize = 12.nsp(),
                     lineHeight = 13.nsp(),
-                    fontFamily = sarasaFont,
+                    fontFamily = interTight,
                     textAlign = TextAlign.End,
                     color = TEXT_GRAY,
                     maxLines = 1,
@@ -736,7 +736,7 @@ internal fun BofEntryRowComment(
             color = Color.White,
             fontSize = 20.nsp(),
             lineHeight = 24.nsp(),
-            fontFamily = sarasaFont,
+            fontFamily = interTight,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.End,
             maxLines = 1,
@@ -917,7 +917,7 @@ internal fun BofEntryRowComment(
                 color = Color.White,
                 fontSize = 20.nsp(),
                 lineHeight = 24.nsp(),
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.End,
                 maxLines = 1,
@@ -930,7 +930,7 @@ internal fun BofEntryRowComment(
         if (rowWidth > 800.dp || dataSwitch) {
             Text(
                 text = CommonUtils.truncateToTwoDecimalPlaces(entry.voteAve),
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
                 lineHeight = 36.nsp(),
@@ -944,7 +944,7 @@ internal fun BofEntryRowComment(
             )
             Text(
                 text = CommonUtils.truncateToTwoDecimalPlaces(entry.shortAve),
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
                 lineHeight = 36.nsp(),
@@ -958,7 +958,7 @@ internal fun BofEntryRowComment(
             )
             Text(
                 text = CommonUtils.truncateToTwoDecimalPlaces(entry.longAve),
-                fontFamily = sarasaFont,
+                fontFamily = interTight,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
                 lineHeight = 36.nsp(),
@@ -996,7 +996,7 @@ fun ScoreText(
             blue = color.blue * 2f
         ),
         fontSize = 14.nsp(),
-        fontFamily = sarasaFont,
+        fontFamily = interTight,
         fontWeight = FontWeight.Bold,
         style = TextStyle(
             shadow = Shadow(

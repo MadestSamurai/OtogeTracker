@@ -69,7 +69,7 @@ internal fun Recent(
             ) {
                 Text(
                     text = "Recent",
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     fontSize = 24.sp,
                     color = Beige400,
                     modifier = Modifier.padding(vertical = 8.dp)

@@ -39,7 +39,7 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.sarasaFont
+import com.madsam.otora.core.theme.interTight
 import com.madsam.otora.core.utils.ShareUtil
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,7 +63,7 @@ fun OsuDataUpdateScreen(
             title = {
                 Text(
                     text = "osu! 数据更新",
-                    fontFamily = sarasaFont,
+                    fontFamily = interTight,
                     fontWeight = FontWeight.Bold,
                     color = Beige400
                 )
@@ -101,7 +101,7 @@ fun OsuDataUpdateScreen(
                     color = White1000,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = sarasaFont
+                    fontFamily = interTight
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -113,7 +113,7 @@ fun OsuDataUpdateScreen(
                     label = { 
                         Text(
                             "osu! 用户ID",
-                            fontFamily = sarasaFont,
+                            fontFamily = interTight,
                             color = White1000.copy(alpha = 0.7f)
                         )
                     },
@@ -135,7 +135,7 @@ fun OsuDataUpdateScreen(
                     text = "游戏模式",
                     color = White1000.copy(alpha = 0.7f),
                     fontSize = 14.sp,
-                    fontFamily = sarasaFont
+                    fontFamily = interTight
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -176,7 +176,7 @@ fun OsuDataUpdateScreen(
                                 text = { 
                                     Text(
                                         mode,
-                                        fontFamily = sarasaFont
+                                        fontFamily = interTight
                                     ) 
                                 },
                                 onClick = {
@@ -204,7 +204,7 @@ fun OsuDataUpdateScreen(
                 ) {
                     Text(
                         "保存设置",
-                        fontFamily = sarasaFont,
+                        fontFamily = interTight,
                         fontWeight = FontWeight.Medium
                     )
                 }

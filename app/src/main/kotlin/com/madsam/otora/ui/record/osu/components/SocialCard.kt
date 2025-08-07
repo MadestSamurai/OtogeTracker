@@ -85,7 +85,7 @@ internal fun SocialCard(
                     }
                     withStyle(
                         style = SpanStyle(
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.SemiBold
                         )
                     ) {
                         append(
@@ -112,7 +112,7 @@ internal fun SocialCard(
                     }
                     withStyle(
                         style = SpanStyle(
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.SemiBold
                         )
                     ) {
                         append(
@@ -138,7 +138,7 @@ internal fun SocialCard(
                         }
                         withStyle(
                             style = SpanStyle(
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.SemiBold
                             )
                         ) {
                             append(data.location)
@@ -163,7 +163,7 @@ internal fun SocialCard(
                         }
                         withStyle(
                             style = SpanStyle(
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.SemiBold
                             )
                         ) {
                             append(data.playStyle)
@@ -205,7 +205,7 @@ internal fun SocialCard(
                         )
                         Text(
                             text = "@${data.twitter}",
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.SemiBold,
                             fontSize = 20.sp,
                             color = White1000,
                             modifier = Modifier
@@ -234,7 +234,7 @@ internal fun SocialCard(
                         )
                         Text(
                             text = data.discord,
-                            fontWeight = FontWeight.Bold,
+                            fontWeight = FontWeight.SemiBold,
                             fontSize = 20.sp,
                             color = OSU_DISCORD_TEXT,
                             modifier = Modifier

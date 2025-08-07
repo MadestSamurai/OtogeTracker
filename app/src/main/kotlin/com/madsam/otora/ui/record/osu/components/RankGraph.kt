@@ -96,13 +96,14 @@ internal fun RankGraph(
             text = stringResource(id = R.string.global_ranking),
             color = Beige400,
             fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 10.dp)
         )
 
         Text(
             text = stringResource(id = R.string.recent_90_days),
+            fontWeight = FontWeight.Medium,
             color = Beige400,
             fontSize = 16.sp
         )
@@ -259,7 +260,7 @@ internal fun RankGraph(
                 append("")
                 withStyle(
                     style = SpanStyle(
-                        fontWeight = FontWeight.Bold,
+                        fontWeight = FontWeight.SemiBold,
                         fontSize = 16.sp
                     )
                 ) {
@@ -269,7 +270,6 @@ internal fun RankGraph(
                     style = SpanStyle(
                         fontWeight = FontWeight.Normal,
                         fontSize = 14.sp,
-                        letterSpacing = (-1).sp,
                     )
                 ) {
                     append(" (${highestData.date.split("T")[0]})")

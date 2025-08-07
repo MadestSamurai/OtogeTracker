@@ -73,6 +73,7 @@ internal fun GroupListItem(
         ) {
             Text(
                 text = osuGroupDTO.name,
+                fontWeight = FontWeight.Medium,
                 color = Color(osuGroupDTO.colour.ifEmpty { "#FFFFFF" }.toColorInt()),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )

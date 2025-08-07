@@ -41,7 +41,7 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.sarasaFont
+import com.madsam.otora.core.theme.interTight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,7 +61,7 @@ fun GeneralDataUpdateScreen(
             title = {
                 Text(
                     text = "通用数据设置",
-                    fontFamily = sarasaFont,
+                    fontFamily = interTight,
                     fontWeight = FontWeight.Bold,
                     color = Beige400
                 )
@@ -104,7 +104,7 @@ fun GeneralDataUpdateScreen(
                         color = White1000,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = sarasaFont
+                        fontFamily = interTight
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -129,14 +129,14 @@ fun GeneralDataUpdateScreen(
                                 color = White1000,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium,
-                                fontFamily = sarasaFont
+                                fontFamily = interTight
                             )
                             
                             Text(
                                 text = "定期自动更新游戏数据",
                                 color = White1000.copy(alpha = 0.7f),
                                 fontSize = 14.sp,
-                                fontFamily = sarasaFont
+                                fontFamily = interTight
                             )
                         }
                         
@@ -168,7 +168,7 @@ fun GeneralDataUpdateScreen(
                         color = White1000,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        fontFamily = sarasaFont
+                        fontFamily = interTight
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -193,14 +193,14 @@ fun GeneralDataUpdateScreen(
                                 color = White1000,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium,
-                                fontFamily = sarasaFont
+                                fontFamily = interTight
                             )
                             
                             Text(
                                 text = "节省移动数据流量",
                                 color = White1000.copy(alpha = 0.7f),
                                 fontSize = 14.sp,
-                                fontFamily = sarasaFont
+                                fontFamily = interTight
                             )
                         }
                         

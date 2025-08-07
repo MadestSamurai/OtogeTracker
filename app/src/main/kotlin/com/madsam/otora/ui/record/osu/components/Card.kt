@@ -253,7 +253,7 @@ internal fun Card(
                 text = cardData.username,
                 color = Beige400,
                 fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .constrainAs(nameplateName) {
                         top.linkTo(avatarImage.top, margin = 8.dp)
@@ -324,7 +324,6 @@ internal fun Card(
                 color = Beige400,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = (-0.5).sp,
                 modifier = Modifier
                     .constrainAs(rank) {
                         top.linkTo(baseBackground.bottom)
@@ -361,8 +360,8 @@ internal fun Card(
                     text = cardData.countryRank,
                     color = Beige400,
                     fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
                     lineHeight = 20.sp,
-                    letterSpacing = (-1).sp,
                 )
             }
             // Popups

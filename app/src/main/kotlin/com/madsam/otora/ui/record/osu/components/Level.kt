@@ -111,7 +111,7 @@ internal fun Level(
             text = "${levelData.levelProgress}%",
             color = Beige400,
             fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.SemiBold,
             modifier = if (levelData.levelProgress < 15) {
                 Modifier
                     .constrainAs(levelProgressText) {
