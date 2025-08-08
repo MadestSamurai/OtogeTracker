@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toLowerCase
-import com.madsam.otora.data.chunithm.local.api.ChunithmLocalService
+import com.madsam.otora.data.chunithm.local.objectbox.ChunithmObjectBoxService
 import com.madsam.otora.data.chunithm.remote.model.ChuniAliasesDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniCookieDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
@@ -503,7 +503,7 @@ internal class ChunithmRequestService(private val context: Context) {
 
     private suspend fun requestPlayRecord() {
         val diffArray = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
-        val chunithmLocalService = ChunithmLocalService()
+        val chunithmObjectBoxService = ChunithmObjectBoxService()
         
         for (diff in diffArray) {
             val doc = requestDataFromServer(
@@ -513,7 +513,7 @@ internal class ChunithmRequestService(private val context: Context) {
             )
             val playRecordData = parsePlayRecord(doc, diff)
             
-            chunithmLocalService.savePlayRecordData(playRecordData, diff)
+            chunithmObjectBoxService.savePlayRecordData(playRecordData, diff)
         }
     }
 
@@ -645,8 +645,8 @@ internal class ChunithmRequestService(private val context: Context) {
         val doc = requestDataFromServer("$CHUNITHM_URL/friend/")
         val friendListData = parseFriendList(doc)
         
-        val chunithmLocalService = ChunithmLocalService()
-        chunithmLocalService.saveFriendListData(friendListData)
+        val chunithmObjectBoxService = ChunithmObjectBoxService()
+        chunithmObjectBoxService.saveFriendListData(friendListData)
         
         // 为每个友人获取所有难度的成绩数据
         val favoriteCount = friendListData.count { it.isFavorite && it.friendCode.isNotEmpty() }
@@ -760,8 +760,8 @@ internal class ChunithmRequestService(private val context: Context) {
             val difficultyNames = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
             val diffName = difficultyNames.getOrNull(difficulty) ?: "Unknown"
             
-            val chunithmLocalService = ChunithmLocalService()
-            chunithmLocalService.saveFriendScoreData(friendScoreData, friendCode, diffName)
+            val chunithmObjectBoxService = ChunithmObjectBoxService()
+            chunithmObjectBoxService.saveFriendScoreData(friendScoreData, friendCode, diffName)
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching friend score: ${e.message}")
             throw e
@@ -833,8 +833,8 @@ internal class ChunithmRequestService(private val context: Context) {
             return
         }
 
-        val chunithmLocalService = ChunithmLocalService()
-        chunithmLocalService.saveJPAndLxnsSongsData(chuniJpDTO, chuniLxnsDTO, chuniAliasesDTO)
+        val chunithmObjectBoxService = ChunithmObjectBoxService()
+        chunithmObjectBoxService.saveJPAndLxnsSongsData(chuniJpDTO, chuniLxnsDTO, chuniAliasesDTO)
     }
 
     private fun updateCookie(response: Connection.Response) {

@@ -9,8 +9,9 @@ import com.madsam.otora.core.utils.CalcUtils.calcChuniRank
 import com.madsam.otora.core.utils.CalcUtils.calcChuniRating
 import com.madsam.otora.core.utils.CommonUtils.bigNumberToInt
 import com.madsam.otora.core.utils.JsonUtil
-import com.madsam.otora.data.chunithm.local.api.ChunithmLocalService
+import com.madsam.otora.data.chunithm.local.objectbox.ChunithmObjectBoxService
 import com.madsam.otora.data.chunithm.remote.api.ChunithmRequestService
+import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniPenguinDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniScoreDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniUserDTO
@@ -149,7 +150,7 @@ internal class ChunithmViewModel() : ViewModel() {
         viewModelScope.launch {
             try {
                 Log.d("ChunithmViewModel", "Loading play data from database...")
-                val chunithmLocalService = ChunithmLocalService()
+                val chunithmLocalService = ChunithmObjectBoxService()
                 
                 val diffArray = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
                 for (diff in diffArray) {
@@ -224,10 +225,30 @@ internal class ChunithmViewModel() : ViewModel() {
         viewModelScope.launch {
             try {
                 Log.d("ChunithmViewModel", "Loading friend data from database...")
-                val chunithmLocalService = ChunithmLocalService()
+                val chunithmLocalService = ChunithmObjectBoxService()
                 
                 val friendListData = chunithmLocalService.getFriendListData()
-                val friendList = friendListData.map { ChunithmFriendUiModel(it) }
+                val friendList = friendListData.map { entity ->
+                    ChunithmFriendUiModel(ChuniFriendDTO(
+                        friendCode = entity.friendCode,
+                        friendName = entity.friendName,
+                        profileBackground = entity.profileBackground,
+                        reborn = entity.reborn,
+                        level = entity.level,
+                        rating = entity.rating,
+                        ratingMax = entity.ratingMax,
+                        overpower = entity.overpower,
+                        lastPlay = entity.lastPlay,
+                        roleImageUrl = entity.roleImageUrl,
+                        roleBase = entity.roleBase,
+                        honorText = entity.honorText,
+                        honorBase = entity.honorBase,
+                        isFavorite = entity.isFavorite,
+                        isScored = entity.isScored,
+                        classEmblemBase = entity.classEmblemBase,
+                        classEmblemTop = entity.classEmblemTop
+                    ))
+                }
                 
                 chuniFriendDataUI.update { friendList }
                 Log.d("ChunithmViewModel", "Loaded ${friendList.size} friends from database")
@@ -239,7 +260,7 @@ internal class ChunithmViewModel() : ViewModel() {
 
     private fun loadTopRankDataFromLocal(context: Context) {
         viewModelScope.launch {
-            val chunithmLocalService = ChunithmLocalService()
+            val chunithmLocalService = ChunithmObjectBoxService()
             val topRank = ChunithmTopRankUiModel()
             val moshi = Moshi.Builder()
                 .addLast(KotlinJsonAdapterFactory())
@@ -252,7 +273,7 @@ internal class ChunithmViewModel() : ViewModel() {
                 val bestListData = ratingBestJsonAdapter.fromJson(ratingBestJson) ?: listOf()
                 val bestList = mutableListOf<ChunithmScoreUiModel>()
                 for (best in bestListData) {
-                    val songData = chunithmLocalService.getChuniSongData(best.title)
+                    val songData = chunithmLocalService.getChunithmSongData(best.title)
                     val diff = when (best.diff) {
                         "0" -> "basic"
                         "1" -> "advanced"
@@ -261,7 +282,7 @@ internal class ChunithmViewModel() : ViewModel() {
                         "4" -> "ultima"
                         else -> "master"
                     }
-                    val songSheetData = chunithmLocalService.getChuniSongSheetData(best.title, diff)
+                    val songSheetData = chunithmLocalService.getChunithmSongSheetData(best.title, diff)
                     bestList.add(
                         ChunithmScoreUiModel(
                             title = songData.title,
@@ -294,7 +315,7 @@ internal class ChunithmViewModel() : ViewModel() {
                 val recentListData = ratingRecentJsonAdapter.fromJson(ratingRecentJson) ?: listOf()
                 val recentList = mutableListOf<ChunithmScoreUiModel>()
                 for (recent in recentListData) {
-                    val songData = chunithmLocalService.getChuniSongData(recent.title)
+                    val songData = chunithmLocalService.getChunithmSongData(recent.title)
                     val diff = when (recent.diff) {
                         "0" -> "basic"
                         "1" -> "advanced"
@@ -303,7 +324,7 @@ internal class ChunithmViewModel() : ViewModel() {
                         "4" -> "ultima"
                         else -> "master"
                     }
-                    val songSheetData = chunithmLocalService.getChuniSongSheetData(recent.title, diff)
+                    val songSheetData = chunithmLocalService.getChunithmSongSheetData(recent.title, diff)
                     recentList.add(
                         ChunithmScoreUiModel(
                             title = songData.title,
@@ -336,7 +357,7 @@ internal class ChunithmViewModel() : ViewModel() {
                 val suggestListData = ratingSuggestJsonAdapter.fromJson(ratingSuggestJson) ?: listOf()
                 val suggestList = mutableListOf<ChunithmScoreUiModel>()
                 for (suggest in suggestListData) {
-                    val songData = chunithmLocalService.getChuniSongData(suggest.title)
+                    val songData = chunithmLocalService.getChunithmSongData(suggest.title)
                     val diff = when (suggest.diff) {
                         "0" -> "basic"
                         "1" -> "advanced"
@@ -345,7 +366,7 @@ internal class ChunithmViewModel() : ViewModel() {
                         "4" -> "ultima"
                         else -> "master"
                     }
-                    val songSheetData = chunithmLocalService.getChuniSongSheetData(suggest.title, diff)
+                    val songSheetData = chunithmLocalService.getChunithmSongSheetData(suggest.title, diff)
                     suggestList.add(
                         ChunithmScoreUiModel(
                             title = songData.title,
@@ -376,7 +397,7 @@ internal class ChunithmViewModel() : ViewModel() {
     }
 
     internal fun loadAllSongsData() {
-        val chunithmLocalService = ChunithmLocalService()
+        val chunithmLocalService = ChunithmObjectBoxService()
         viewModelScope.launch {
             val allSongs = chunithmLocalService.getAllSongData()
             _chuniSongs.update { allSongs }
@@ -433,7 +454,7 @@ internal class ChunithmViewModel() : ViewModel() {
         viewModelScope.launch {
             try {
                 Log.d("ChunithmViewModel", "Starting preload of all scores...")
-                val chunithmLocalService = ChunithmLocalService()
+                val chunithmLocalService = ChunithmObjectBoxService()
                 
                 val allScores = chunithmLocalService.getAllScoresMap()
                 _allScoresCache.value = allScores
@@ -485,7 +506,7 @@ internal class ChunithmViewModel() : ViewModel() {
         
         // Fallback to individual query if cache not loaded
         Log.d("ChunithmViewModel", "Cache not loaded, falling back to individual query")
-        val chunithmLocalService = ChunithmLocalService()
+        val chunithmLocalService = ChunithmObjectBoxService()
         
         val result = chunithmLocalService.getLatestScoreForSong(title, difficulty)
         Log.d("ChunithmViewModel", "getLatestScoreForSong result: $result")
@@ -499,7 +520,7 @@ internal class ChunithmViewModel() : ViewModel() {
      * @return 包含自己和友人成绩的排行列表，按分数降序排列
      */
     suspend fun getFriendScoreRanking(title: String, difficulty: String): List<FriendScoreRankingItem> {
-        val chunithmLocalService = ChunithmLocalService()
+        val chunithmLocalService = ChunithmObjectBoxService()
         val friendList = chunithmLocalService.getFriendListData()
         val myScore = getLatestScoreForSong(title, difficulty)
         

@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.navigation.safe.args)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.krdb)
+    alias(libs.plugins.objectbox)
 }
 
 android {
@@ -39,6 +39,23 @@ android {
     kotlin {
         compilerOptions {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+        }
+    }
+}
+
+// 解决 ObjectBox 依赖冲突
+configurations {
+    all {
+        resolutionStrategy {
+            eachDependency {
+                if (requested.group == "io.objectbox" && requested.name == "objectbox-android") {
+                    // 在debug配置中，用objectbox-android-objectbrowser替代objectbox-android
+                    if (name.contains("debug", ignoreCase = true)) {
+                        useTarget("io.objectbox:objectbox-android-objectbrowser:${requested.version}")
+                        because("objectbox-android-objectbrowser包含完整的Android支持+Admin工具")
+                    }
+                }
+            }
         }
     }
 }
@@ -92,8 +109,10 @@ dependencies {
 
     debugImplementation(libs.androidx.ui.tooling)
 
-    // Realm(krdb fix ver.)
-    implementation(libs.krdb.base)
+    // ObjectBox
+    implementation(libs.objectbox.kotlin)
+    implementation(libs.objectbox.android)
+    debugImplementation(libs.objectbox.android.objectbrowser)
 
     // Moshi
     implementation(libs.moshi.kotlin)

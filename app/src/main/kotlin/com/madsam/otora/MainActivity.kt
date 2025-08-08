@@ -59,7 +59,7 @@ import com.madsam.otora.core.theme.OtogeTrackerTheme
 import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.Red900
 import com.madsam.otora.core.utils.ScreenUtil
-import com.madsam.otora.ui.bof.BofScreen
+// import com.madsam.otora.ui.bof.BofScreen  // Temporarily disabled
 import com.madsam.otora.ui.record.RecordScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDate
@@ -67,7 +67,7 @@ import java.time.LocalDate
 @Composable
 fun MainActivityScreen(navController: NavHostController) {
     var selectedItem by remember { mutableIntStateOf(0) }
-    val items = listOf(Screen.RecordScreen, Screen.ReportScreen, Screen.BOFScreen)
+    val items = listOf(Screen.RecordScreen, Screen.ReportScreen) // , Screen.BOFScreen)  // Temporarily disabled BOF
     val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.Favorite, Icons.Filled.Star)
     val unselectedIcons =
         listOf(Icons.Outlined.Home, Icons.Outlined.FavoriteBorder, Icons.Outlined.Star)
@@ -79,7 +79,7 @@ fun MainActivityScreen(navController: NavHostController) {
             selectedItem = when (backStackEntry.destination.route) {
                 Screen.RecordScreen.route -> 0
                 Screen.ReportScreen.route -> 1
-                Screen.BOFScreen.route -> 2
+                // Screen.BOFScreen.route -> 2  // Temporarily disabled
                 else -> 0
             }
         }
@@ -96,14 +96,14 @@ fun MainActivityScreen(navController: NavHostController) {
                 )
             ) {
                 NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
-                    lateinit var bofNavController: NavHostController
-                    val bofScreenState = BofScreenState()
+                    // lateinit var bofNavController: NavHostController  // Temporarily disabled (Rail)
+                    // val bofScreenState = BofScreenState()  // Temporarily disabled (Rail)
                     composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
                     composable(Screen.ReportScreen.route) { Screen2() }
-                    composable(Screen.BOFScreen.route) {
-                        bofNavController = rememberNavController()
-                        BofScreen(snackbarHostState, bofNavController, bofScreenState)
-                    }
+                    // composable(Screen.BOFScreen.route) {  // Temporarily disabled (Rail)
+                    //     bofNavController = rememberNavController()
+                    //     BofScreen(snackbarHostState, bofNavController, bofScreenState)
+                    // }
                 }
             }
 
@@ -169,14 +169,14 @@ fun MainActivityScreen(navController: NavHostController) {
                 .windowInsetsPadding(WindowInsets.navigationBars)
             ) {
                 NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
-                    lateinit var bofNavController: NavHostController
-                    val bofScreenState = BofScreenState()
+                    // lateinit var bofNavController: NavHostController  // Temporarily disabled (Bar)
+                    // val bofScreenState = BofScreenState()  // Temporarily disabled (Bar)
                     composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
                     composable(Screen.ReportScreen.route) { Screen2() }
-                    composable(Screen.BOFScreen.route) {
-                        bofNavController = rememberNavController()
-                        BofScreen(snackbarHostState, bofNavController, bofScreenState)
-                    }
+                    // composable(Screen.BOFScreen.route) {  // Temporarily disabled (Bar)
+                    //     bofNavController = rememberNavController()
+                    //     BofScreen(snackbarHostState, bofNavController, bofScreenState)
+                    // }
                 }
             }
 
