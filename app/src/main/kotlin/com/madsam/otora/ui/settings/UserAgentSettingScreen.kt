@@ -38,7 +38,7 @@ import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightMedium
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.utils.ShareUtil
 import kotlinx.coroutines.launch
@@ -155,7 +155,7 @@ fun UserAgentSettingScreen(
                     text = "常用示例：",
                     color = White1000.copy(alpha = 0.8f),
                     fontSize = 14.sp,
-                    fontFamily = interTightMedium
+                    fontFamily = interTightSemiBold
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -196,7 +196,7 @@ fun UserAgentSettingScreen(
                 ) {
                     Text(
                         "保存设置",
-                        fontFamily = interTightMedium
+                        fontFamily = interTightSemiBold
                     )
                 }
                 
@@ -215,7 +215,7 @@ fun UserAgentSettingScreen(
                 ) {
                     Text(
                         "清空设置",
-                        fontFamily = interTightMedium
+                        fontFamily = interTightSemiBold
                     )
                 }
             }

@@ -7,15 +7,15 @@ import androidx.compose.ui.unit.sp
 val Typography = Typography(
     // Display 系列 - 大标题，使用Medium权重避免过细
     displayLarge = TextStyle(
-        fontFamily = interTightMedium,
+        fontFamily = interTightSemiBold,
         fontSize = 57.sp
     ),
     displayMedium = TextStyle(
-        fontFamily = interTightMedium,
+        fontFamily = interTightSemiBold,
         fontSize = 45.sp
     ),
     displaySmall = TextStyle(
-        fontFamily = interTightMedium,
+        fontFamily = interTightSemiBold,
         fontSize = 36.sp
     ),
     
@@ -63,15 +63,15 @@ val Typography = Typography(
     
     // Label 系列 - 标签使用Medium保持清晰
     labelLarge = TextStyle(
-        fontFamily = interTightMedium,
+        fontFamily = interTightSemiBold,
         fontSize = 14.sp
     ),
     labelMedium = TextStyle(
-        fontFamily = interTightMedium,
+        fontFamily = interTightSemiBold,
         fontSize = 12.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = interTightMedium,
+        fontFamily = interTightSemiBold,
         fontSize = 11.sp
     )
 )

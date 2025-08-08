@@ -52,7 +52,6 @@ import com.madsam.otora.core.theme.OSU_BRIGHT_RED
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightMedium
 import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.data.osu.remote.model.OsuGroupDTO
 import com.madsam.otora.data.osu.ui.model.OsuCardUiModel
@@ -361,7 +360,7 @@ internal fun Card(
                 Text(
                     text = cardData.countryRank,
                     color = Beige400,
-                    fontFamily = interTightMedium,
+                    fontFamily = interTightSemiBold,
                     fontSize = 16.sp,
                     lineHeight = 20.sp,
                 )

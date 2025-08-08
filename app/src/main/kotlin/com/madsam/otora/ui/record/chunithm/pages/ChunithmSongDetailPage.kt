@@ -55,7 +55,7 @@ import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightMedium
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.utils.CalcUtils
 import com.madsam.otora.core.utils.CalcUtils.numberToChuniRank
@@ -199,7 +199,7 @@ private fun InfoRow(label: String, value: String) {
             text = "$label:",
             color = Beige400,
             fontSize = 14.sp,
-            fontFamily = interTightMedium,
+            fontFamily = interTightSemiBold,
             modifier = Modifier.weight(0.4f)
         )
         Text(

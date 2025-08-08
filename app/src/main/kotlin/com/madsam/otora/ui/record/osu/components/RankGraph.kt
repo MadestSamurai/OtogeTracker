@@ -35,9 +35,8 @@ import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW_HALF_TRANS
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.Yellow1000
-import com.madsam.otora.core.theme.interTightMedium
-import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.theme.interTightSemiBold
+import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 import com.madsam.otora.ui.components.DoubleCircleIndicator
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -105,7 +104,7 @@ internal fun RankGraph(
 
         Text(
             text = stringResource(id = R.string.recent_90_days),
-            fontFamily = interTightMedium,
+            fontFamily = interTightSemiBold,
             color = Beige400,
             fontSize = 16.sp
         )

@@ -24,7 +24,7 @@ import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightMedium
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -155,7 +155,7 @@ private fun CollectionCard(
                 text = if (totalCount > 0) "$collectedCount / $totalCount" else "即将推出",
                 color = White1000.copy(alpha = 0.9f),
                 fontSize = 16.sp,
-                fontFamily = interTightMedium,
+                fontFamily = interTightSemiBold,
                 modifier = Modifier.padding(top = 12.dp)
             )
         }

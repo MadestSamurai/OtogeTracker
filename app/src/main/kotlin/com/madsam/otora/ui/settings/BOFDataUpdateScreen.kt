@@ -32,7 +32,7 @@ import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightMedium
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.core.theme.interTightRegular
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,7 +114,7 @@ fun BOFDataUpdateScreen(
                 ) {
                     Text(
                         "更新 BOF 数据",
-                        fontFamily = interTightMedium,
+                        fontFamily = interTightSemiBold,
                     )
                 }
             }

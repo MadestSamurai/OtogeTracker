@@ -39,7 +39,7 @@ import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightMedium
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.utils.ShareUtil
 
@@ -203,7 +203,7 @@ fun OsuDataUpdateScreen(
                 ) {
                     Text(
                         "保存设置",
-                        fontFamily = interTightMedium
+                        fontFamily = interTightSemiBold
                     )
                 }
             }

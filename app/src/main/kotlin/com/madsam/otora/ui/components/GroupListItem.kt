@@ -29,7 +29,7 @@ import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.core.theme.White800
 import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightMedium
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.data.osu.remote.model.OsuGroupDTO
 import kotlinx.coroutines.delay
 
@@ -74,7 +74,7 @@ internal fun GroupListItem(
         ) {
             Text(
                 text = osuGroupDTO.name,
-                fontFamily = interTightMedium,
+                fontFamily = interTightSemiBold,
                 color = Color(osuGroupDTO.colour.ifEmpty { "#FFFFFF" }.toColorInt()),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )

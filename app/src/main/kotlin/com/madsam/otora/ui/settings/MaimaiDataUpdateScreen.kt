@@ -33,7 +33,7 @@ import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightMedium
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.utils.UserAgentUtils
 
@@ -101,7 +101,7 @@ fun MaimaiDataUpdateScreen(
                                 text = "⚠️ User-Agent未设置",
                                 color = White1000,
                                 fontSize = 14.sp,
-                                fontFamily = interTightMedium
+                                fontFamily = interTightSemiBold
                             )
                             Text(
                                 text = "建议设置User-Agent以确保maimai DX数据更新正常工作",
@@ -165,7 +165,7 @@ fun MaimaiDataUpdateScreen(
                 ) {
                     Text(
                         "即将推出",
-                        fontFamily = interTightMedium
+                        fontFamily = interTightSemiBold
                     )
                 }
             }

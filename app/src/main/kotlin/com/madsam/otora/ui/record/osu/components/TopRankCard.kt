@@ -47,6 +47,7 @@ import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.interTightBold
 import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.core.utils.CommonUtils.dateCodeToRecent
 import com.madsam.otora.core.utils.CommonUtils.formatNumberThousand
 import com.madsam.otora.core.utils.CommonUtils.truncateToTwoDecimalPlaces
@@ -194,7 +195,7 @@ internal fun TopRankCard(
                     text = item.beatmapSetTitleUnicode,
                     color = Beige400,
                     fontSize = 16.sp,
-                    fontFamily = interTightBold,
+                    fontFamily = interTightSemiBold,
                     maxLines = 1,
                     lineHeight = 23.sp,
                     overflow = TextOverflow.Ellipsis,

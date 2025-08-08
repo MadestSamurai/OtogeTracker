@@ -51,7 +51,7 @@ import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightMedium
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.core.theme.interTightRegular
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -244,7 +244,7 @@ private fun <T> SettingsGroup(
             text = title,
             color = Beige400,
             fontSize = 14.sp,
-            fontFamily = interTightMedium,
+            fontFamily = interTightSemiBold,
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
         )
         
@@ -299,7 +299,7 @@ private fun DataUpdateSettingItem(
                 text = setting.title,
                 color = White1000,
                 fontSize = 16.sp,
-                fontFamily = interTightMedium
+                fontFamily = interTightSemiBold
             )
             
             Text(
@@ -355,7 +355,7 @@ private fun ToggleSettingItem(
                 text = setting.title,
                 color = White1000,
                 fontSize = 16.sp,
-                fontFamily = interTightMedium
+                fontFamily = interTightSemiBold
             )
             
             Text(
@@ -409,7 +409,7 @@ private fun NetworkToggleSettingItem(
                 text = setting.title,
                 color = White1000,
                 fontSize = 16.sp,
-                fontFamily = interTightMedium
+                fontFamily = interTightSemiBold
             )
             
             Text(
@@ -462,7 +462,7 @@ private fun SelectionSettingItem(
                 text = setting.title,
                 color = White1000,
                 fontSize = 16.sp,
-                fontFamily = interTightMedium
+                fontFamily = interTightSemiBold
             )
             
             Text(
@@ -517,7 +517,7 @@ private fun NetworkSelectionSettingItem(
                 text = setting.title,
                 color = White1000,
                 fontSize = 16.sp,
-                fontFamily = interTightMedium
+                fontFamily = interTightSemiBold
             )
             
             Text(

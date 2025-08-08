@@ -1,98 +1,18 @@
 package com.madsam.otora.core.theme
 
-import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontVariation
 import com.madsam.otora.R
 
-// 英文优先字体族 - Inter Tight -> Source Sans
-@OptIn(ExperimentalTextApi::class)
-val interTightThin = FontFamily(
-    Font(R.font.inter_tight, variationSettings = FontVariation.Settings(
-        FontVariation.weight(100)
-    )),
-    Font(R.font.source_sans, variationSettings = FontVariation.Settings(
-        FontVariation.weight(100)
-    ))
-)
-
-@OptIn(ExperimentalTextApi::class)
-val interTightExtraLight = FontFamily(
-    Font(R.font.inter_tight, variationSettings = FontVariation.Settings(
-        FontVariation.weight(200)
-    )),
-    Font(R.font.source_sans, variationSettings = FontVariation.Settings(
-        FontVariation.weight(200)
-    ))
-)
-
-@OptIn(ExperimentalTextApi::class)
 val interTightLight = FontFamily(
-    Font(R.font.inter_tight, variationSettings = FontVariation.Settings(
-        FontVariation.weight(300)
-    )),
-    Font(R.font.source_sans, variationSettings = FontVariation.Settings(
-        FontVariation.weight(300)
-    ))
+    Font(R.font.sarasa_light)
 )
-
-@OptIn(ExperimentalTextApi::class)
 val interTightRegular = FontFamily(
-    Font(R.font.inter_tight, variationSettings = FontVariation.Settings(
-        FontVariation.weight(400)
-    )),
-    Font(R.font.source_sans, variationSettings = FontVariation.Settings(
-        FontVariation.weight(400)
-    ))
+    Font(R.font.sarasa_regular)
 )
-
-@OptIn(ExperimentalTextApi::class)
-val interTightMedium = FontFamily(
-    Font(R.font.inter_tight, variationSettings = FontVariation.Settings(
-        FontVariation.weight(500)
-    )),
-    Font(R.font.source_sans, variationSettings = FontVariation.Settings(
-        FontVariation.weight(500)
-    ))
-)
-
-@OptIn(ExperimentalTextApi::class)
 val interTightSemiBold = FontFamily(
-    Font(R.font.inter_tight, variationSettings = FontVariation.Settings(
-        FontVariation.weight(600)
-    )),
-    Font(R.font.source_sans, variationSettings = FontVariation.Settings(
-        FontVariation.weight(600)
-    ))
+    Font(R.font.sarasa_semibold)
 )
-
-@OptIn(ExperimentalTextApi::class)
 val interTightBold = FontFamily(
-    Font(R.font.inter_tight, variationSettings = FontVariation.Settings(
-        FontVariation.weight(700)
-    )),
-    Font(R.font.source_sans, variationSettings = FontVariation.Settings(
-        FontVariation.weight(700)
-    ))
-)
-
-@OptIn(ExperimentalTextApi::class)
-val interTightExtraBold = FontFamily(
-    Font(R.font.inter_tight, variationSettings = FontVariation.Settings(
-        FontVariation.weight(800)
-    )),
-    Font(R.font.source_sans, variationSettings = FontVariation.Settings(
-        FontVariation.weight(800)
-    ))
-)
-
-@OptIn(ExperimentalTextApi::class)
-val interTightBlack = FontFamily(
-    Font(R.font.inter_tight, variationSettings = FontVariation.Settings(
-        FontVariation.weight(900)
-    )),
-    Font(R.font.source_sans, variationSettings = FontVariation.Settings(
-        FontVariation.weight(900)
-    ))
+    Font(R.font.sarasa_bold)
 )

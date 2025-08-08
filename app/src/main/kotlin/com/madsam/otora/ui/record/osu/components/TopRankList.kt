@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 
@@ -46,7 +46,7 @@ internal fun TopRankList(
         ) {
             Text(
                 text = title,
-                fontFamily = interTightBold,
+                fontFamily = interTightSemiBold,
                 fontSize = 24.sp,
                 color = Beige400,
                 modifier = Modifier.padding(vertical = 8.dp)
