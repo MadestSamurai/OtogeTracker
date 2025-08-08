@@ -36,8 +36,8 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Red900
-import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
 import com.madsam.otora.ui.BASE_URL
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
@@ -124,7 +124,7 @@ internal fun ChunithmSongCard(
                         highlightText = highlightText,
                         color = Beige400,
                         fontSize = 16.sp,
-                        fontFamily = interTightBold,
+                        fontFamily = sarasaBold,
                         maxLines = 1,
                         lineHeight = 23.sp,
                         overflow = TextOverflow.Ellipsis,
@@ -153,7 +153,7 @@ internal fun ChunithmSongCard(
                             color = Beige400,
                             fontSize = 14.sp,
                             lineHeight = 20.sp,
-                            fontFamily = interTightBold,
+                            fontFamily = sarasaBold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier
@@ -168,7 +168,7 @@ internal fun ChunithmSongCard(
                             color = Beige400,
                             fontSize = 14.sp,
                             lineHeight = 20.sp,
-                            fontFamily = interTightBold,
+                            fontFamily = sarasaBold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier
@@ -214,7 +214,7 @@ private fun HighlightedText(
     highlightText: String,
     color: Color,
     fontSize: TextUnit,
-    fontFamily: FontFamily = interTightRegular,
+    fontFamily: FontFamily = sarasaRegular,
     maxLines: Int = Int.MAX_VALUE,
     lineHeight: TextUnit = TextUnit.Unspecified,
     overflow: TextOverflow = TextOverflow.Clip

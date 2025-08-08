@@ -35,7 +35,7 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.utils.CommonUtils.formatNumberThousand
 import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayDataUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -108,7 +108,7 @@ internal fun PlayDataItem(
             Text(
                 text = diff.toUpperCase(Locale.current),
                 fontSize = 12.sp,
-                fontFamily = interTightBold,
+                fontFamily = sarasaBold,
                 color = White1000,
                 modifier = Modifier
                     .padding(2.dp)

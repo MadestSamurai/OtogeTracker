@@ -51,8 +51,8 @@ import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.core.theme.OSU_BRIGHT_RED
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
-import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightSemiBold
+import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.data.osu.remote.model.OsuGroupDTO
 import com.madsam.otora.data.osu.ui.model.OsuCardUiModel
 import com.madsam.otora.ui.components.GroupListItem
@@ -218,7 +218,7 @@ internal fun Card(
                 Text(
                     text = cardData.title,
                     color = Color(cardData.profileColour.toColorInt()),
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     fontSize = 16.sp,
                     modifier = Modifier
                         .constrainAs(title) {
@@ -253,7 +253,7 @@ internal fun Card(
             Text(
                 text = cardData.username,
                 color = Beige400,
-                fontFamily = interTightSemiBold,
+                fontFamily = sarasaSemiBold,
                 fontSize = 24.sp,
                 modifier = Modifier
                     .constrainAs(nameplateName) {
@@ -323,7 +323,7 @@ internal fun Card(
             Text(
                 text = cardData.rank,
                 color = Beige400,
-                fontFamily = interTightBold,
+                fontFamily = sarasaBold,
                 fontSize = 22.sp,
                 modifier = Modifier
                     .constrainAs(rank) {
@@ -360,7 +360,7 @@ internal fun Card(
                 Text(
                     text = cardData.countryRank,
                     color = Beige400,
-                    fontFamily = interTightSemiBold,
+                    fontFamily = sarasaSemiBold,
                     fontSize = 16.sp,
                     lineHeight = 20.sp,
                 )

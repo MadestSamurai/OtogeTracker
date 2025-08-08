@@ -31,9 +31,9 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightSemiBold
-import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.sarasaRegular
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +50,7 @@ fun BOFDataUpdateScreen(
             title = {
                 Text(
                     text = "BOF 数据更新",
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     color = Beige400
                 )
             },
@@ -87,7 +87,7 @@ fun BOFDataUpdateScreen(
                     text = "BOF 活动数据",
                     color = White1000,
                     fontSize = 18.sp,
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     textAlign = TextAlign.Center
                 )
                 
@@ -97,7 +97,7 @@ fun BOFDataUpdateScreen(
                     text = "BOF (BMS of Fighters) 是音游界的知名活动。\n这里将提供BOF相关的数据更新功能。",
                     color = White1000.copy(alpha = 0.7f),
                     fontSize = 14.sp,
-                    fontFamily = interTightRegular,
+                    fontFamily = sarasaRegular,
                     textAlign = TextAlign.Center
                 )
                 
@@ -114,7 +114,7 @@ fun BOFDataUpdateScreen(
                 ) {
                     Text(
                         "更新 BOF 数据",
-                        fontFamily = interTightSemiBold,
+                        fontFamily = sarasaSemiBold,
                     )
                 }
             }

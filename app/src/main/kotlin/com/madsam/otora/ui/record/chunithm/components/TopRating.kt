@@ -54,7 +54,7 @@ import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Transparent
 import com.madsam.otora.core.theme.Yellow1000
-import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.data.chunithm.ui.model.ChunithmScoreUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.ui.BASE_URL
@@ -99,7 +99,7 @@ internal fun TopRating(
                 text = "Top Rating",
                 color = Beige400,
                 fontSize = 20.sp,
-                fontFamily = interTightBold
+                fontFamily = sarasaBold
             )
             Box(modifier = Modifier.width(48.dp))
         }
@@ -123,7 +123,7 @@ internal fun TopRating(
                             text = title,
                             color = if (pagerState.currentPage == index) Beige500 else Beige600,
                             fontSize = 16.sp,
-                            fontFamily = interTightBold
+                            fontFamily = sarasaBold
                         )
                     },
                     modifier = Modifier.height(40.dp)
@@ -190,7 +190,7 @@ internal fun ChuniRatingItemCard(
                 text = "#$rank",
                 color = Beige400,
                 fontSize = 16.sp,
-                fontFamily = interTightBold,
+                fontFamily = sarasaBold,
                 modifier = Modifier
                     .constrainAs(rankText) {
                         top.linkTo(parent.top, 8.dp)
@@ -245,7 +245,7 @@ internal fun ChuniRatingItemCard(
             Text(
                 text = item.level,
                 fontSize = 14.sp,
-                fontFamily = interTightBold,
+                fontFamily = sarasaBold,
                 color = Color.White,
                 modifier = Modifier
                     .constrainAs(diff) {
@@ -286,7 +286,7 @@ internal fun ChuniRatingItemCard(
                     text = item.title,
                     color = Beige400,
                     fontSize = 16.sp,
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

@@ -41,8 +41,8 @@ import com.madsam.otora.core.theme.OSU_LEVEL_PLATINUM_1
 import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
-import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.utils.CommonUtils.getRatingBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmCardUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -107,7 +107,7 @@ internal fun Card(
                 textAlign = TextAlign.Center,
                 color = Color.Black,
                 fontSize = 16.sp,
-                fontFamily = interTightBold
+                fontFamily = sarasaBold
             )
 
             Image(
@@ -157,7 +157,7 @@ internal fun Card(
                 text = cardData.reborn.toString(),
                 color = Red500,
                 fontSize = 12.sp,
-                fontFamily = interTightBold
+                fontFamily = sarasaBold
             )
 
             Text(
@@ -175,7 +175,7 @@ internal fun Card(
                 text = cardData.level.toString(),
                 color = Beige400,
                 fontSize = 18.sp,
-                fontFamily = interTightBold,
+                fontFamily = sarasaBold,
                 modifier = Modifier
                     .constrainAs(lv) {
                         top.linkTo(rebornBase.top)
@@ -189,7 +189,7 @@ internal fun Card(
                 color = Beige400,
                 fontSize = 18.sp,
                 lineHeight = 22.sp,
-                fontFamily = interTightBold,
+                fontFamily = sarasaBold,
                 modifier = Modifier
                     .constrainAs(username) {
                         top.linkTo(rebornBase.top)
@@ -233,7 +233,7 @@ internal fun Card(
                         style = SpanStyle(
                             color = Beige500,
                             fontSize = 14.sp,
-                            fontFamily = interTightRegular
+                            fontFamily = sarasaRegular
                         )
                     ) {
                         append("RATING ")
@@ -242,7 +242,7 @@ internal fun Card(
                         style = SpanStyle(
                             brush = getRatingBrush(cardData.rating),
                             fontSize = 16.sp,
-                            fontFamily = interTightBold
+                            fontFamily = sarasaBold
                         )
                     ) {
                         append(cardData.rating)
@@ -252,7 +252,7 @@ internal fun Card(
                         style = SpanStyle(
                             color = Beige500,
                             fontSize = 12.sp,
-                            fontFamily = interTightBold
+                            fontFamily = sarasaBold
                         )
                     ) {
                         append(cardData.ratingMax)
@@ -282,7 +282,7 @@ internal fun Card(
                             style = SpanStyle(
                                 color = Beige500,
                                 fontSize = 11.sp,
-                                fontFamily = interTightRegular
+                                fontFamily = sarasaRegular
                             )
                         ) { append("OVERPOWER ") }
                         append(cardData.overpower)
@@ -290,7 +290,7 @@ internal fun Card(
                     color = Beige400,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                 )
                 Text(
                     text = buildAnnotatedString {
@@ -298,7 +298,7 @@ internal fun Card(
                             style = SpanStyle(
                                 color = Beige500,
                                 fontSize = 11.sp,
-                                fontFamily = interTightRegular
+                                fontFamily = sarasaRegular
                             )
                         ) { append("LAST PLAY ") }
                         append(cardData.lastPlay)
@@ -306,7 +306,7 @@ internal fun Card(
                     color = Beige400,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                 )
                 Text(
                     text = buildAnnotatedString {
@@ -314,7 +314,7 @@ internal fun Card(
                             style = SpanStyle(
                                 color = Beige500,
                                 fontSize = 11.sp,
-                                fontFamily = interTightRegular
+                                fontFamily = sarasaRegular
                             )
                         ) { append("PLAY COUNT ") }
                         append(cardData.playCount)
@@ -322,7 +322,7 @@ internal fun Card(
                     color = Beige400,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                 )
                 Text(
                     text = buildAnnotatedString {
@@ -330,7 +330,7 @@ internal fun Card(
                             style = SpanStyle(
                                 color = Beige500,
                                 fontSize = 11.sp,
-                                fontFamily = interTightRegular
+                                fontFamily = sarasaRegular
                             )
                         ) { append("POINTS ") }
                         append("${cardData.point}/${cardData.totalPoint}")
@@ -338,7 +338,7 @@ internal fun Card(
                     color = Beige400,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                 )
             }
         }

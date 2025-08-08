@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.BlackAlpha50
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.utils.CommonUtils.getRatingBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.ui.components.RoundedBarChart
@@ -83,7 +83,7 @@ internal fun TopRank(
                 Text(
                     text = String.format(Locale.US, "%.2f", topRank.best30),
                     fontSize = 14.sp,
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     style = TextStyle(
                         brush = getRatingBrush(topRank.best30.toString())
                     )
@@ -129,7 +129,7 @@ internal fun TopRank(
                 Text(
                     text = String.format(Locale.US, "%.2f", topRank.recent10),
                     fontSize = 14.sp,
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     style = TextStyle(
                         brush = getRatingBrush(topRank.recent10.toString())
                     )

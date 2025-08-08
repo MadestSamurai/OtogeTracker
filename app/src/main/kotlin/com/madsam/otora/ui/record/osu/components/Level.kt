@@ -23,8 +23,8 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.OSU_DARK_RED
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Red900
-import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightSemiBold
+import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.data.osu.ui.model.OsuLevelUiModel
 import com.madsam.otora.ui.components.GradientBorderCircle
@@ -72,7 +72,7 @@ internal fun Level(
                     textAlign = TextAlign.Center,
                     text = levelData.level.toString(),
                     color = Beige400,
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     fontSize = 22.sp,
                 )
             }
@@ -111,7 +111,7 @@ internal fun Level(
             textAlign = TextAlign.Center,
             text = "${levelData.levelProgress}%",
             color = Beige400,
-            fontFamily = interTightSemiBold,
+            fontFamily = sarasaSemiBold,
             fontSize = 14.sp,
             modifier = if (levelData.levelProgress < 15) {
                 Modifier

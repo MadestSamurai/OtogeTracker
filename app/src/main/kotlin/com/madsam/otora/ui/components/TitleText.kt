@@ -12,7 +12,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.interTightSemiBold
+import com.madsam.otora.core.theme.sarasaSemiBold
 
 @Composable
 fun TitleText(
@@ -43,7 +43,7 @@ fun TitleText(
             Text(
                 text = text,
                 fontSize = titleTextSize,
-                fontFamily = interTightSemiBold,
+                fontFamily = sarasaSemiBold,
                 color = color,
                 modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
             )

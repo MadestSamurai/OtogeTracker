@@ -38,9 +38,9 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightSemiBold
-import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.utils.ShareUtil
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,7 +64,7 @@ fun OsuDataUpdateScreen(
             title = {
                 Text(
                     text = "osu! 数据更新",
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     color = Beige400
                 )
             },
@@ -100,7 +100,7 @@ fun OsuDataUpdateScreen(
                     text = "用户设置",
                     color = White1000,
                     fontSize = 18.sp,
-                    fontFamily = interTightBold
+                    fontFamily = sarasaBold
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -112,7 +112,7 @@ fun OsuDataUpdateScreen(
                     label = { 
                         Text(
                             "osu! 用户ID",
-                            fontFamily = interTightRegular,
+                            fontFamily = sarasaRegular,
                             color = White1000.copy(alpha = 0.7f)
                         )
                     },
@@ -134,7 +134,7 @@ fun OsuDataUpdateScreen(
                     text = "游戏模式",
                     color = White1000.copy(alpha = 0.7f),
                     fontSize = 14.sp,
-                    fontFamily = interTightRegular
+                    fontFamily = sarasaRegular
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -175,7 +175,7 @@ fun OsuDataUpdateScreen(
                                 text = { 
                                     Text(
                                         mode,
-                                        fontFamily = interTightRegular
+                                        fontFamily = sarasaRegular
                                     ) 
                                 },
                                 onClick = {
@@ -203,7 +203,7 @@ fun OsuDataUpdateScreen(
                 ) {
                     Text(
                         "保存设置",
-                        fontFamily = interTightSemiBold
+                        fontFamily = sarasaSemiBold
                     )
                 }
             }

@@ -50,9 +50,9 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightSemiBold
-import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.sarasaRegular
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -137,7 +137,7 @@ fun SettingsScreen(
                 title = {
                     Text(
                         text = "设置",
-                        fontFamily = interTightBold,
+                        fontFamily = sarasaBold,
                         color = Beige400
                     )
                 },
@@ -244,7 +244,7 @@ private fun <T> SettingsGroup(
             text = title,
             color = Beige400,
             fontSize = 14.sp,
-            fontFamily = interTightSemiBold,
+            fontFamily = sarasaSemiBold,
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
         )
         
@@ -299,14 +299,14 @@ private fun DataUpdateSettingItem(
                 text = setting.title,
                 color = White1000,
                 fontSize = 16.sp,
-                fontFamily = interTightSemiBold
+                fontFamily = sarasaSemiBold
             )
             
             Text(
                 text = setting.description,
                 color = White1000.copy(alpha = 0.7f),
                 fontSize = 14.sp,
-                fontFamily = interTightRegular
+                fontFamily = sarasaRegular
             )
             
             if (setting.lastUpdate.isNotEmpty()) {
@@ -314,7 +314,7 @@ private fun DataUpdateSettingItem(
                     text = "上次更新: ${setting.lastUpdate}",
                     color = White1000.copy(alpha = 0.5f),
                     fontSize = 12.sp,
-                    fontFamily = interTightRegular
+                    fontFamily = sarasaRegular
                 )
             }
         }
@@ -355,14 +355,14 @@ private fun ToggleSettingItem(
                 text = setting.title,
                 color = White1000,
                 fontSize = 16.sp,
-                fontFamily = interTightSemiBold
+                fontFamily = sarasaSemiBold
             )
             
             Text(
                 text = setting.description,
                 color = White1000.copy(alpha = 0.7f),
                 fontSize = 14.sp,
-                fontFamily = interTightRegular
+                fontFamily = sarasaRegular
             )
         }
         
@@ -409,14 +409,14 @@ private fun NetworkToggleSettingItem(
                 text = setting.title,
                 color = White1000,
                 fontSize = 16.sp,
-                fontFamily = interTightSemiBold
+                fontFamily = sarasaSemiBold
             )
             
             Text(
                 text = setting.description,
                 color = White1000.copy(alpha = 0.7f),
                 fontSize = 14.sp,
-                fontFamily = interTightRegular
+                fontFamily = sarasaRegular
             )
         }
         
@@ -462,14 +462,14 @@ private fun SelectionSettingItem(
                 text = setting.title,
                 color = White1000,
                 fontSize = 16.sp,
-                fontFamily = interTightSemiBold
+                fontFamily = sarasaSemiBold
             )
             
             Text(
                 text = setting.description,
                 color = White1000.copy(alpha = 0.7f),
                 fontSize = 14.sp,
-                fontFamily = interTightRegular
+                fontFamily = sarasaRegular
             )
             
             if (setting.currentValue.isNotEmpty()) {
@@ -477,7 +477,7 @@ private fun SelectionSettingItem(
                     text = "当前: ${setting.currentValue}",
                     color = Beige400.copy(alpha = 0.8f),
                     fontSize = 12.sp,
-                    fontFamily = interTightRegular
+                    fontFamily = sarasaRegular
                 )
             }
         }
@@ -517,14 +517,14 @@ private fun NetworkSelectionSettingItem(
                 text = setting.title,
                 color = White1000,
                 fontSize = 16.sp,
-                fontFamily = interTightSemiBold
+                fontFamily = sarasaSemiBold
             )
             
             Text(
                 text = setting.description,
                 color = White1000.copy(alpha = 0.7f),
                 fontSize = 14.sp,
-                fontFamily = interTightRegular
+                fontFamily = sarasaRegular
             )
             
             if (setting.currentValue.isNotEmpty()) {
@@ -532,7 +532,7 @@ private fun NetworkSelectionSettingItem(
                     text = "当前: ${setting.currentValue}",
                     color = Beige400.copy(alpha = 0.8f),
                     fontSize = 12.sp,
-                    fontFamily = interTightRegular
+                    fontFamily = sarasaRegular
                 )
             }
         }

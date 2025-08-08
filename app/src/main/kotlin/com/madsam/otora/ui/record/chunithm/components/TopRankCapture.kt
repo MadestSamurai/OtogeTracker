@@ -54,7 +54,7 @@ import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Transparent
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.Yellow1000
-import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.utils.ImageUtils.saveBitmapToGallery
 import com.madsam.otora.data.chunithm.ui.model.ChunithmScoreUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
@@ -160,7 +160,7 @@ internal fun TopRankCaptureContent(
         // 标题
         Text(
             text = "Chunithm Top Rating",
-            fontFamily = interTightBold,
+            fontFamily = sarasaBold,
             fontSize = 24.sp,
             color = White1000,
             textAlign = TextAlign.Center,
@@ -173,7 +173,7 @@ internal fun TopRankCaptureContent(
         if (topRank.bestList.isNotEmpty()) {
             Text(
                 text = "Best 30 (平均: ${String.format(Locale.US, "%.2f", topRank.best30)})",
-                fontFamily = interTightBold,
+                fontFamily = sarasaBold,
                 fontSize = 20.sp,
                 color = White1000,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -211,7 +211,7 @@ internal fun TopRankCaptureContent(
         if (topRank.recentList.isNotEmpty()) {
             Text(
                 text = "Recent 10 (平均: ${String.format(Locale.US, "%.2f", topRank.recent10)})",
-                fontFamily = interTightBold,
+                fontFamily = sarasaBold,
                 fontSize = 20.sp,
                 color = White1000,
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
@@ -315,7 +315,7 @@ internal fun CaptureItemCard(
             // 难度标签 - 覆盖在封面左上角内部
             Text(
                 text = String.format(Locale.US, "%.1f", item.levelValue),
-                fontFamily = interTightBold,
+                fontFamily = sarasaBold,
                 fontSize = 8.sp,
                 lineHeight = 11.sp,
                 color = Color.White,
@@ -346,7 +346,7 @@ internal fun CaptureItemCard(
             // 排名 - 放在左下角，减少空余
             Text(
                 text = "#$rank",
-                fontFamily = interTightBold,
+                fontFamily = sarasaBold,
                 fontSize = 8.sp,
                 lineHeight = 10.sp,
                 color = Beige400,
@@ -376,7 +376,7 @@ internal fun CaptureItemCard(
             ) {
                 Text(
                     text = item.title,
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     fontSize = 9.sp,
                     lineHeight = 10.sp,
                     color = Beige400,
@@ -385,7 +385,7 @@ internal fun CaptureItemCard(
                 )
                 Text(
                     text = item.score,
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     fontSize = 9.sp,
                     lineHeight = 10.sp,
                     color = Yellow1000,
@@ -394,7 +394,7 @@ internal fun CaptureItemCard(
                 )
                 Text(
                     text = String.format(Locale.US, "%.2f", item.rating),
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     fontSize = 8.sp,
                     lineHeight = 9.sp,
                     color = Beige400,

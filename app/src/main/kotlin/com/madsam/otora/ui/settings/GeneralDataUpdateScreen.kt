@@ -40,9 +40,9 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightSemiBold
-import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.sarasaRegular
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,7 +62,7 @@ fun GeneralDataUpdateScreen(
             title = {
                 Text(
                     text = "通用数据设置",
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     color = Beige400
                 )
             },
@@ -103,7 +103,7 @@ fun GeneralDataUpdateScreen(
                         text = "自动更新",
                         color = White1000,
                         fontSize = 16.sp,
-                        fontFamily = interTightBold
+                        fontFamily = sarasaBold
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -127,14 +127,14 @@ fun GeneralDataUpdateScreen(
                                 text = "启用自动更新",
                                 color = White1000,
                                 fontSize = 16.sp,
-                                fontFamily = interTightSemiBold
+                                fontFamily = sarasaSemiBold
                             )
                             
                             Text(
                                 text = "定期自动更新游戏数据",
                                 color = White1000.copy(alpha = 0.7f),
                                 fontSize = 14.sp,
-                                fontFamily = interTightRegular
+                                fontFamily = sarasaRegular
                             )
                         }
                         
@@ -165,7 +165,7 @@ fun GeneralDataUpdateScreen(
                         text = "网络设置",
                         color = White1000,
                         fontSize = 16.sp,
-                        fontFamily = interTightBold
+                        fontFamily = sarasaBold
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -189,14 +189,14 @@ fun GeneralDataUpdateScreen(
                                 text = "仅在WiFi下更新",
                                 color = White1000,
                                 fontSize = 16.sp,
-                                fontFamily = interTightSemiBold
+                                fontFamily = sarasaSemiBold
                             )
                             
                             Text(
                                 text = "节省移动数据流量",
                                 color = White1000.copy(alpha = 0.7f),
                                 fontSize = 14.sp,
-                                fontFamily = interTightRegular
+                                fontFamily = sarasaRegular
                             )
                         }
                         

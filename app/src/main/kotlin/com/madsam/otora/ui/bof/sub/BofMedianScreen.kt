@@ -66,7 +66,7 @@ import com.madsam.otora.core.theme.RANKING_GREEN
 import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.RANKING_YELLOW
 import com.madsam.otora.core.theme.TEXT_GRAY
-import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.data.bof.ui.model.BofEntryUI
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.core.icon.Filled
@@ -444,14 +444,14 @@ internal fun MedianHeader(
         if (medianData.isEmpty() || medianData[0].median == 0.0) {
             Text(
                 text = selectedTimeStr,
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
             )
         } else {
             Text(
                 text = "Median Score Ranking",
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.nsp(),
                 color = Color.White,
@@ -463,7 +463,7 @@ internal fun MedianHeader(
             )
             Text(
                 text = "Exclude Impr below $thresholdImpr",
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.nsp(),
                 color = Color.White,
@@ -474,7 +474,7 @@ internal fun MedianHeader(
             )
             Text(
                 text = selectedTimeStr,
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontSize = 12.nsp(),
                 color = Color.White,
                 textAlign = TextAlign.End,
@@ -497,7 +497,7 @@ internal fun MedianHeader(
             }
             Text(
                 text = "Rank",
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
                 color = Color.White,
@@ -514,7 +514,7 @@ internal fun MedianHeader(
             )
             Text(
                 text = "Median",
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
                 color = Color.White,
@@ -523,7 +523,7 @@ internal fun MedianHeader(
             )
             Text(
                 text = "Impr",
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
                 color = Color.White,
@@ -618,7 +618,7 @@ internal fun BofEntryRowMedian(
                     )
                     Text(
                         text = if (entry.oldMedian < thresholdImprOld) "NEW" else entry.medianDiff.toString(),
-                        fontFamily = interTightRegular,
+                        fontFamily = sarasaRegular,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.nsp(),
                         color = if (entry.medianDiff > 0) RANKING_GREEN else if (entry.medianDiff < 0) RANKING_RED else RANKING_YELLOW,
@@ -630,7 +630,7 @@ internal fun BofEntryRowMedian(
                 }
                 Text(
                     text = entry.currentRank.toString(),
-                    fontFamily = interTightRegular,
+                    fontFamily = sarasaRegular,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.nsp(),
                     color = Color.White,
@@ -654,7 +654,7 @@ internal fun BofEntryRowMedian(
                 )
                 Text(
                     text = if (entry.oldMedian < thresholdImprOld) "NEW" else entry.medianDiff.toString(),
-                    fontFamily = interTightRegular,
+                    fontFamily = sarasaRegular,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.nsp(),
                     color = if (entry.medianDiff > 0) RANKING_GREEN else if (entry.medianDiff < 0) RANKING_RED else RANKING_YELLOW,
@@ -666,7 +666,7 @@ internal fun BofEntryRowMedian(
             }
             Text(
                 text = entry.currentRank.toString(),
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
                 color = Color.White,
@@ -698,7 +698,7 @@ internal fun BofEntryRowMedian(
                 text = annotatedString,
                 fontSize = 15.nsp(),
                 lineHeight = 16.nsp(),
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.End,
                 color = Color.White,
@@ -710,7 +710,7 @@ internal fun BofEntryRowMedian(
                 text = entry.artist,
                 fontSize = 12.nsp(),
                 lineHeight = 13.nsp(),
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 textAlign = TextAlign.End,
                 color = TEXT_GRAY,
                 maxLines = 1,
@@ -746,7 +746,7 @@ internal fun BofEntryRowMedian(
                         color = Color.White,
                         fontSize = if (isCompare) 14.nsp() else 20.nsp(),
                         lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
-                        fontFamily = interTightRegular,
+                        fontFamily = sarasaRegular,
                         fontWeight = FontWeight.Bold,
                         overflow = TextOverflow.Visible,
                         maxLines = 1,
@@ -782,7 +782,7 @@ internal fun BofEntryRowMedian(
                             color = Color.White,
                             fontSize = 12.nsp(),
                             lineHeight = 14.nsp(),
-                            fontFamily = interTightRegular,
+                            fontFamily = sarasaRegular,
                             overflow = TextOverflow.Visible,
                             maxLines = 1,
                             modifier = Modifier
@@ -795,7 +795,7 @@ internal fun BofEntryRowMedian(
         }
         Text(
             text = entry.impr.toString(),
-            fontFamily = interTightRegular,
+            fontFamily = sarasaRegular,
             fontWeight = FontWeight.Bold,
             fontSize = 20.nsp(),
             color = Color.White,

@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.unit.TextUnit
-import com.madsam.otora.core.theme.interTightSemiBold
+import com.madsam.otora.core.theme.sarasaSemiBold
 
 @Composable
 fun ImageWithText(
@@ -34,7 +34,7 @@ fun ImageWithText(
             text = text,
             color = textColor,
             fontSize = textSize,
-            fontFamily = interTightSemiBold,
+            fontFamily = sarasaSemiBold,
             modifier = textModifier
                 .align(Alignment.CenterHorizontally)
         )

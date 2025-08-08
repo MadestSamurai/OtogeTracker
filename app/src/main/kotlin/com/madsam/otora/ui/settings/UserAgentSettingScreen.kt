@@ -37,9 +37,9 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightSemiBold
-import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.utils.ShareUtil
 import kotlinx.coroutines.launch
 
@@ -69,7 +69,7 @@ fun UserAgentSettingScreen(
             title = {
                 Text(
                     text = "User-Agent 设置",
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     color = Beige400
                 )
             },
@@ -105,14 +105,14 @@ fun UserAgentSettingScreen(
                     text = "浏览器标识设置",
                     color = White1000,
                     fontSize = 18.sp,
-                    fontFamily = interTightBold
+                    fontFamily = sarasaBold
                 )
                 
                 Text(
                     text = "设置用于maimai DX、CHUNITHM等应用更新时的浏览器User-Agent标识，这有助于某些服务正确识别请求",
                     color = White1000.copy(alpha = 0.7f),
                     fontSize = 14.sp,
-                    fontFamily = interTightRegular
+                    fontFamily = sarasaRegular
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -124,14 +124,14 @@ fun UserAgentSettingScreen(
                     label = { 
                         Text(
                             "User-Agent",
-                            fontFamily = interTightRegular,
+                            fontFamily = sarasaRegular,
                             color = White1000.copy(alpha = 0.7f)
                         )
                     },
                     placeholder = {
                         Text(
                             "例如: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                            fontFamily = interTightRegular,
+                            fontFamily = sarasaRegular,
                             color = White1000.copy(alpha = 0.5f),
                             fontSize = 12.sp
                         )
@@ -155,7 +155,7 @@ fun UserAgentSettingScreen(
                     text = "常用示例：",
                     color = White1000.copy(alpha = 0.8f),
                     fontSize = 14.sp,
-                    fontFamily = interTightSemiBold
+                    fontFamily = sarasaSemiBold
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -164,7 +164,7 @@ fun UserAgentSettingScreen(
                     text = "Chrome (Windows): Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                     color = White1000.copy(alpha = 0.6f),
                     fontSize = 12.sp,
-                    fontFamily = interTightRegular
+                    fontFamily = sarasaRegular
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -173,7 +173,7 @@ fun UserAgentSettingScreen(
                     text = "Safari (macOS): Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
                     color = White1000.copy(alpha = 0.6f),
                     fontSize = 12.sp,
-                    fontFamily = interTightRegular
+                    fontFamily = sarasaRegular
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -196,7 +196,7 @@ fun UserAgentSettingScreen(
                 ) {
                     Text(
                         "保存设置",
-                        fontFamily = interTightSemiBold
+                        fontFamily = sarasaSemiBold
                     )
                 }
                 
@@ -215,7 +215,7 @@ fun UserAgentSettingScreen(
                 ) {
                     Text(
                         "清空设置",
-                        fontFamily = interTightSemiBold
+                        fontFamily = sarasaSemiBold
                     )
                 }
             }

@@ -63,7 +63,7 @@ import com.madsam.otora.BofScreenState
 import com.madsam.otora.core.theme.BG_DARK_GRAY
 import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.TEXT_GRAY
-import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.data.bof.ui.model.BofEntryUI
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.core.icon.Filled
@@ -403,14 +403,14 @@ internal fun DiffHeader(
         if (diffData.isEmpty()) {
             Text(
                 text = selectedTimeStr,
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
             )
         } else {
             Text(
                 text = "Total ${if (isReverse) "Nerf" else "Difference"} Ranking",
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.nsp(),
                 color = Color.White,
@@ -422,7 +422,7 @@ internal fun DiffHeader(
             )
             Text(
                 text = selectedTimeStr,
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontSize = 12.nsp(),
                 color = Color.White,
                 textAlign = TextAlign.End,
@@ -445,7 +445,7 @@ internal fun DiffHeader(
             }
             Text(
                 text = "Rank",
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
                 color = Color.White,
@@ -462,7 +462,7 @@ internal fun DiffHeader(
             )
             Text(
                 text = if (isReverse) "Nerf" else "Diff",
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
                 color = Color.White,
@@ -471,7 +471,7 @@ internal fun DiffHeader(
             )
             Text(
                 text = "Impr${if (isReverse) "Nerf" else "Diff"}",
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
                 color = Color.White,
@@ -543,7 +543,7 @@ internal fun BofEntryRowDiff(
         }
         Text(
             text = entry.currentRank.toString(),
-            fontFamily = interTightRegular,
+            fontFamily = sarasaRegular,
             fontWeight = FontWeight.Bold,
             fontSize = 20.nsp(),
             color = Color.White,
@@ -574,7 +574,7 @@ internal fun BofEntryRowDiff(
                 text = annotatedString,
                 fontSize = 15.nsp(),
                 lineHeight = 16.nsp(),
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.End,
                 color = Color.White,
@@ -586,7 +586,7 @@ internal fun BofEntryRowDiff(
                 text = entry.artist,
                 fontSize = 12.nsp(),
                 lineHeight = 13.nsp(),
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 textAlign = TextAlign.End,
                 color = TEXT_GRAY,
                 maxLines = 1,
@@ -622,7 +622,7 @@ internal fun BofEntryRowDiff(
                         color = Color.White,
                         fontSize = 20.nsp(),
                         lineHeight = 24.nsp(),
-                        fontFamily = interTightRegular,
+                        fontFamily = sarasaRegular,
                         fontWeight = FontWeight.Bold,
                         overflow = TextOverflow.Visible,
                         maxLines = 1,
@@ -635,7 +635,7 @@ internal fun BofEntryRowDiff(
         }
         Text(
             text = entry.imprDiff.toString(),
-            fontFamily = interTightRegular,
+            fontFamily = sarasaRegular,
             fontWeight = FontWeight.Bold,
             fontSize = 20.nsp(),
             color = Color.White,

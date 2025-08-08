@@ -45,9 +45,9 @@ import com.madsam.otora.core.theme.OSU_ARROW_YELLOW
 import com.madsam.otora.core.theme.OSU_HEART_RED
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Yellow1000
-import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightRegular
-import com.madsam.otora.core.theme.interTightSemiBold
+import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.utils.CommonUtils.dateCodeToRecent
 import com.madsam.otora.core.utils.CommonUtils.formatNumberThousand
 import com.madsam.otora.core.utils.CommonUtils.truncateToTwoDecimalPlaces
@@ -168,7 +168,7 @@ internal fun TopRankCard(
                 },
                 inlineContent = inlineContent,
                 fontSize = 14.sp,
-                fontFamily = interTightBold,
+                fontFamily = sarasaBold,
                 color = OsuDifficultyColor.mapValueToTextColor(item.difficultyRating.toFloat()),
                 modifier = Modifier
                     .constrainAs(diff) {
@@ -195,7 +195,7 @@ internal fun TopRankCard(
                     text = item.beatmapSetTitleUnicode,
                     color = Beige400,
                     fontSize = 16.sp,
-                    fontFamily = interTightSemiBold,
+                    fontFamily = sarasaSemiBold,
                     maxLines = 1,
                     lineHeight = 23.sp,
                     overflow = TextOverflow.Ellipsis,
@@ -226,7 +226,7 @@ internal fun TopRankCard(
                             withStyle(
                                 style = SpanStyle(
                                     fontSize = 18.sp,
-                                    fontFamily = interTightBold
+                                    fontFamily = sarasaBold
                                 )
                             ) {
                                 append(item.accuracy)
@@ -236,7 +236,7 @@ internal fun TopRankCard(
                                 withStyle(
                                     style = SpanStyle(
                                         fontSize = 12.sp,
-                                        fontFamily = interTightRegular
+                                        fontFamily = sarasaRegular
                                     )
                                 ) {
                                     append(formatNumberThousand(score))
@@ -247,7 +247,7 @@ internal fun TopRankCard(
                             withStyle(
                                 style = SpanStyle(
                                     fontSize = 18.sp,
-                                    fontFamily = interTightBold
+                                    fontFamily = sarasaBold
                                 )
                             ) {
                                 append(formatNumberThousand(item.score))
@@ -257,7 +257,7 @@ internal fun TopRankCard(
                                 withStyle(
                                     style = SpanStyle(
                                         fontSize = 12.sp,
-                                        fontFamily = interTightRegular
+                                        fontFamily = sarasaRegular
                                     )
                                 ) {
                                     append(item.accuracy)
@@ -370,7 +370,7 @@ internal fun TopRankCard(
                         text = " - ",
                         color = Beige400,
                         fontSize = 16.sp,
-                        fontFamily = interTightBold,
+                        fontFamily = sarasaBold,
                         maxLines = 1,
                         lineHeight = 20.sp
                     )
@@ -380,7 +380,7 @@ internal fun TopRankCard(
                         text = String.format(Locale.US, "%.2fpp", item.pp),
                         color = Beige400,
                         fontSize = 16.sp,
-                        fontFamily = interTightBold,
+                        fontFamily = sarasaBold,
                         maxLines = 1,
                         lineHeight = 20.sp
                     )

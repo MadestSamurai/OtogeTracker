@@ -35,8 +35,8 @@ import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW_HALF_TRANS
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.Yellow1000
-import com.madsam.otora.core.theme.interTightSemiBold
-import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 import com.madsam.otora.ui.components.DoubleCircleIndicator
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -97,14 +97,14 @@ internal fun RankGraph(
             text = stringResource(id = R.string.global_ranking),
             color = Beige400,
             fontSize = 24.sp,
-            fontFamily = interTightSemiBold,
+            fontFamily = sarasaSemiBold,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 10.dp)
         )
 
         Text(
             text = stringResource(id = R.string.recent_90_days),
-            fontFamily = interTightSemiBold,
+            fontFamily = sarasaSemiBold,
             color = Beige400,
             fontSize = 16.sp
         )
@@ -261,7 +261,7 @@ internal fun RankGraph(
                 append("")
                 withStyle(
                     style = SpanStyle(
-                        fontFamily = interTightSemiBold,
+                        fontFamily = sarasaSemiBold,
                         fontSize = 16.sp
                     )
                 ) {
@@ -269,7 +269,7 @@ internal fun RankGraph(
                 }
                 withStyle(
                     style = SpanStyle(
-                        fontFamily = interTightRegular,
+                        fontFamily = sarasaRegular,
                         fontSize = 14.sp,
                     )
                 ) {

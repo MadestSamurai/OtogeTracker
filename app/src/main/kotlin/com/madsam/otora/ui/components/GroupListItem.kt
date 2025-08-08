@@ -28,8 +28,8 @@ import androidx.core.graphics.toColorInt
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.core.theme.White800
-import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightSemiBold
+import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.data.osu.remote.model.OsuGroupDTO
 import kotlinx.coroutines.delay
 
@@ -64,7 +64,7 @@ internal fun GroupListItem(
         ) {
             Text(
                 text = osuGroupDTO.shortName,
-                fontFamily = interTightBold,
+                fontFamily = sarasaBold,
                 color = Color(osuGroupDTO.colour.ifEmpty { "#FFFFFF" }.toColorInt()),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
@@ -74,7 +74,7 @@ internal fun GroupListItem(
         ) {
             Text(
                 text = osuGroupDTO.name,
-                fontFamily = interTightSemiBold,
+                fontFamily = sarasaSemiBold,
                 color = Color(osuGroupDTO.colour.ifEmpty { "#FFFFFF" }.toColorInt()),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )

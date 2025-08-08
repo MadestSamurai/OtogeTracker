@@ -33,8 +33,8 @@ import com.madsam.otora.core.theme.OSU_HEART_RED
 import com.madsam.otora.core.theme.OSU_ROTATE_GREEN
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Yellow1000
-import com.madsam.otora.core.theme.interTightLight
-import com.madsam.otora.core.theme.interTightSemiBold
+import com.madsam.otora.core.theme.sarasaLight
+import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.utils.CommonUtils.dateCodeToRecent
 import com.madsam.otora.data.osu.ui.model.OsuRecentUiModel
 
@@ -52,7 +52,7 @@ internal fun RecentItem(
                         append("achieved #${activity.rank} on ")
                     }
                     appendInlineContent("mode", "[${activity.mode}]")
-                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = interTightSemiBold)) {
+                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = sarasaSemiBold)) {
                         append(activity.beatmapTitle)
                     }
                 }
@@ -62,7 +62,7 @@ internal fun RecentItem(
                         append("lost first place on ")
                     }
                     appendInlineContent("mode", "[${activity.mode}]")
-                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = interTightSemiBold)) {
+                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = sarasaSemiBold)) {
                         append(activity.beatmapTitle)
                     }
                 }
@@ -71,7 +71,7 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = Beige400)) {
                         append("submitted a new beatmap ")
                     }
-                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = interTightSemiBold)) {
+                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = sarasaSemiBold)) {
                         append(activity.beatmapSetTitle)
                     }
                 }
@@ -80,7 +80,7 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = Beige400)) {
                         append("updated a beatmap ")
                     }
-                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = interTightSemiBold)) {
+                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = sarasaSemiBold)) {
                         append(activity.beatmapSetTitle)
                     }
                 }
@@ -101,13 +101,13 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = Beige400)) {
                         append("revived a beatmap ")
                     }
-                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = interTightSemiBold)) {
+                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = sarasaSemiBold)) {
                         append(activity.beatmapSetTitle)
                     }
                 }
 
                 "beatmapsetApprove" -> {
-                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = interTightSemiBold)) {
+                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = sarasaSemiBold)) {
                         append(activity.beatmapSetTitle)
                     }
                     withStyle(style = SpanStyle(color = Beige400)) {
@@ -119,7 +119,7 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = Beige400)) {
                         append("achieved ")
                     }
-                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = interTightSemiBold)) {
+                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = sarasaSemiBold)) {
                         append(activity.achievement)
                     }
                 }
@@ -296,7 +296,7 @@ internal fun RecentItem(
         Text(
             text = dateCodeToRecent(activity.createdAt),
             fontSize = 12.sp,
-            fontFamily = interTightLight,
+            fontFamily = sarasaLight,
             lineHeight = 14.sp,
             color = Color.Gray,
             modifier = Modifier

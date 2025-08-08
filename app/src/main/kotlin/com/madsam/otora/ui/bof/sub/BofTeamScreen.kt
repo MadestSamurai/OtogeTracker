@@ -68,7 +68,7 @@ import com.madsam.otora.core.theme.RANKING_GREEN
 import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.RANKING_YELLOW
 import com.madsam.otora.core.theme.TEXT_GRAY
-import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.data.bof.ui.model.BofTeamUI
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.core.icon.Filled
@@ -417,14 +417,14 @@ internal fun TeamHeader(
         if (teamData.isEmpty() || teamData[0].total == 0.0) {
             Text(
                 text = selectedTimeStr,
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
             )
         } else {
             Text(
                 text = "Total Team Score Ranking",
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.nsp(),
                 color = Color.White,
@@ -436,7 +436,7 @@ internal fun TeamHeader(
             )
             Text(
                 text = selectedTimeStr,
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontSize = 12.nsp(),
                 color = Color.White,
                 textAlign = TextAlign.End,
@@ -460,7 +460,7 @@ internal fun TeamHeader(
             }
             Text(
                 text = "Rank",
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
                 color = Color.White,
@@ -477,7 +477,7 @@ internal fun TeamHeader(
             )
             Text(
                 text = "Impr",
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
                 color = Color.White,
@@ -486,7 +486,7 @@ internal fun TeamHeader(
             )
             Text(
                 text = "Median",
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.nsp(),
                 textAlign = TextAlign.End,
@@ -594,7 +594,7 @@ internal fun BofTeamRowTotal(
                     )
                     Text(
                         text = if (entry.oldTotal == 0.0) "NEW" else entry.rankDiff.toString(),
-                        fontFamily = interTightRegular,
+                        fontFamily = sarasaRegular,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.nsp(),
                         color = if (entry.rankDiff < 0) RANKING_RED
@@ -608,7 +608,7 @@ internal fun BofTeamRowTotal(
                 }
                 Text(
                     text = entry.currentRank.toString(),
-                    fontFamily = interTightRegular,
+                    fontFamily = sarasaRegular,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.nsp(),
                     color = Color.White,
@@ -639,7 +639,7 @@ internal fun BofTeamRowTotal(
                 )
                 Text(
                     text = if (entry.oldTotal == 0.0) "NEW" else entry.rankDiff.toString(),
-                    fontFamily = interTightRegular,
+                    fontFamily = sarasaRegular,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.nsp(),
                     color = if (entry.rankDiff < 0) RANKING_RED
@@ -653,7 +653,7 @@ internal fun BofTeamRowTotal(
             }
             Text(
                 text = entry.currentRank.toString(),
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
                 color = Color.White,
@@ -694,7 +694,7 @@ internal fun BofTeamRowTotal(
                                 color = Color.White,
                                 fontSize = if (isCompare) 14.nsp() else 20.nsp(),
                                 lineHeight = if (isCompare) 18.nsp() else 24.nsp(),
-                                fontFamily = interTightRegular,
+                                fontFamily = sarasaRegular,
                                 fontWeight = FontWeight.Bold,
                                 overflow = TextOverflow.Visible,
                                 maxLines = 1,
@@ -732,7 +732,7 @@ internal fun BofTeamRowTotal(
                                     color = Color.White,
                                     fontSize = 12.nsp(),
                                     lineHeight = 14.nsp(),
-                                    fontFamily = interTightRegular,
+                                    fontFamily = sarasaRegular,
                                     overflow = TextOverflow.Visible,
                                     maxLines = 1,
                                     modifier = Modifier
@@ -746,7 +746,7 @@ internal fun BofTeamRowTotal(
                 if (rowWidth < 800.dp) {
                     Text(
                         text = entry.impr.toString(),
-                        fontFamily = interTightRegular,
+                        fontFamily = sarasaRegular,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.nsp(),
                         lineHeight = 34.nsp(),
@@ -761,7 +761,7 @@ internal fun BofTeamRowTotal(
                 text = annotatedString,
                 fontSize = 16.nsp(),
                 lineHeight = 16.nsp(),
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Start,
                 color = Color.White,
@@ -797,7 +797,7 @@ internal fun BofTeamRowTotal(
                             text = "$title - ${artists[index]}",
                             fontSize = 11.nsp(),
                             lineHeight = 13.nsp(),
-                            fontFamily = interTightRegular,
+                            fontFamily = sarasaRegular,
                             textAlign = TextAlign.Start,
                             color = TEXT_GRAY,
                             maxLines = 1,
@@ -817,7 +817,7 @@ internal fun BofTeamRowTotal(
                             text = totals[index],
                             fontSize = 11.nsp(),
                             lineHeight = 13.nsp(),
-                            fontFamily = interTightRegular,
+                            fontFamily = sarasaRegular,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.End,
                             color = TEXT_GRAY,
@@ -834,7 +834,7 @@ internal fun BofTeamRowTotal(
         if (rowWidth >= 800.dp) {
             Text(
                 text = entry.impr.toString(),
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.nsp(),
                 color = Color.White,
@@ -849,7 +849,7 @@ internal fun BofTeamRowTotal(
         if (medianValue != null) {
             Text(
                 text = CommonUtils.truncateToTwoDecimalPlaces(medianValue),
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.nsp(),
                 lineHeight = 114.nsp(),
@@ -865,7 +865,7 @@ internal fun BofTeamRowTotal(
         } else {
             Text(
                 text = entry.median,
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.nsp(),
                 lineHeight = 114.nsp(),

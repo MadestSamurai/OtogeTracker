@@ -37,7 +37,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.core.theme.Red700
-import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 import com.madsam.otora.ui.record.osu.components.TopRankCard
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -105,7 +105,7 @@ internal fun TopRankDialog(
                     ) {
                         Text(
                             text = title,
-                            fontFamily = interTightBold,
+                            fontFamily = sarasaBold,
                             fontSize = 24.sp,
                             color = Beige400
                         )

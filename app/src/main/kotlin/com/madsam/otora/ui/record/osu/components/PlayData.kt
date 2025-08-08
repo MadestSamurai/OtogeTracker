@@ -41,8 +41,8 @@ import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
-import com.madsam.otora.core.theme.interTightRegular
-import com.madsam.otora.core.theme.interTightSemiBold
+import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.data.osu.ui.model.OsuPlayUiModel
 import com.madsam.otora.ui.components.ImageWithText
@@ -165,14 +165,14 @@ internal fun PlayData(
                     textTitle = "Play Time",
                     text = buildAnnotatedString {
                         val styles = listOf(
-                            SpanStyle(fontSize = textSize, fontFamily = interTightSemiBold) to playTimeStr[0],
-                            SpanStyle(fontSize = 12.sp, fontFamily = interTightRegular) to "${dayHourLabels[0]} ",
-                            SpanStyle(fontSize = textSize, fontFamily = interTightSemiBold) to playTimeStr[1],
-                            SpanStyle(fontSize = 12.sp, fontFamily = interTightRegular) to "${dayHourLabels[1]} ",
-                            SpanStyle(fontSize = 13.sp, fontFamily = interTightSemiBold) to playTimeStr[2],
-                            SpanStyle(fontSize = 12.sp, fontFamily = interTightRegular) to "${monthSecondLabels[0]} ",
-                            SpanStyle(fontSize = 13.sp, fontFamily = interTightSemiBold) to playTimeStr[3],
-                            SpanStyle(fontSize = 12.sp, fontFamily = interTightRegular) to monthSecondLabels[1]
+                            SpanStyle(fontSize = textSize, fontFamily = sarasaSemiBold) to playTimeStr[0],
+                            SpanStyle(fontSize = 12.sp, fontFamily = sarasaRegular) to "${dayHourLabels[0]} ",
+                            SpanStyle(fontSize = textSize, fontFamily = sarasaSemiBold) to playTimeStr[1],
+                            SpanStyle(fontSize = 12.sp, fontFamily = sarasaRegular) to "${dayHourLabels[1]} ",
+                            SpanStyle(fontSize = 13.sp, fontFamily = sarasaSemiBold) to playTimeStr[2],
+                            SpanStyle(fontSize = 12.sp, fontFamily = sarasaRegular) to "${monthSecondLabels[0]} ",
+                            SpanStyle(fontSize = 13.sp, fontFamily = sarasaSemiBold) to playTimeStr[3],
+                            SpanStyle(fontSize = 12.sp, fontFamily = sarasaRegular) to monthSecondLabels[1]
                         )
                         styles.forEach { (style, text) ->
                             withStyle(style = style) {
@@ -194,7 +194,7 @@ internal fun PlayData(
                         withStyle(
                             style = SpanStyle(
                                 fontSize = textSize,
-                                fontFamily = interTightSemiBold
+                                fontFamily = sarasaSemiBold
                             )
                         ) {
                             append(ppSplit[0])
@@ -202,7 +202,7 @@ internal fun PlayData(
                         withStyle(
                             style = SpanStyle(
                                 fontSize = 12.sp,
-                                fontFamily = interTightRegular
+                                fontFamily = sarasaRegular
                             )
                         ) {
                             append(".${ppSplit[1]}")
@@ -282,7 +282,7 @@ internal fun PlayData(
                     withStyle(
                         style = SpanStyle(
                             fontSize = 18.sp,
-                            fontFamily = interTightSemiBold
+                            fontFamily = sarasaSemiBold
                         )
                     ) {
                         append(if (shown) "Show Less Play Data" else "Show More Play Data")

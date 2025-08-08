@@ -4,15 +4,15 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import com.madsam.otora.R
 
-val interTightLight = FontFamily(
+val sarasaLight = FontFamily(
     Font(R.font.sarasa_light)
 )
-val interTightRegular = FontFamily(
+val sarasaRegular = FontFamily(
     Font(R.font.sarasa_regular)
 )
-val interTightSemiBold = FontFamily(
+val sarasaSemiBold = FontFamily(
     Font(R.font.sarasa_semibold)
 )
-val interTightBold = FontFamily(
+val sarasaBold = FontFamily(
     Font(R.font.sarasa_bold)
 )

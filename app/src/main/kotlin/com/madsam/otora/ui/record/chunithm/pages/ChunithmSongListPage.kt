@@ -63,8 +63,8 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.interTightBold
-import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSongCard
 import com.madsam.otora.ui.record.chunithm.components.SearchBar
@@ -374,7 +374,7 @@ internal fun ChunithmSongListPage(
                         Text(
                             text = toggleText,
                             fontSize = 13.sp,
-                            fontFamily = interTightBold,
+                            fontFamily = sarasaBold,
                             color = Beige500,
                             textAlign = TextAlign.Center
                         )
@@ -442,7 +442,7 @@ internal fun ChunithmSongListPage(
                         Text(
                             text = toggleText,
                             fontSize = 13.sp,
-                            fontFamily = interTightBold,
+                            fontFamily = sarasaBold,
                             color = Beige500,
                             textAlign = TextAlign.Center
                         )
@@ -533,7 +533,7 @@ internal fun ChunithmSongListPage(
                                 text = difficultyLabels[index],
                                 color = if (isSelected) White1000 else Beige500,
                                 fontSize = 12.sp,
-                                fontFamily = interTightBold,
+                                fontFamily = sarasaBold,
                                 textAlign = TextAlign.Center,
                                 letterSpacing = if (difficulty == "advanced") (-0.5).sp else 0.sp,
                                 maxLines = 1,
@@ -694,7 +694,7 @@ internal fun ChunithmSongListPage(
                     text = "排序选项",
                     color = Beige500,
                     fontSize = 16.sp,
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 
@@ -723,7 +723,7 @@ internal fun ChunithmSongListPage(
                             text = "正序 ↑",
                             color = Beige500,
                             fontSize = 12.sp,
-                            fontFamily = if (isAscendingOrder.value) interTightBold else interTightRegular,
+                            fontFamily = if (isAscendingOrder.value) sarasaBold else sarasaRegular,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -746,7 +746,7 @@ internal fun ChunithmSongListPage(
                             text = "倒序 ↓",
                             color = Beige500,
                             fontSize = 12.sp,
-                            fontFamily = if (isAscendingOrder.value) interTightBold else interTightRegular,
+                            fontFamily = if (isAscendingOrder.value) sarasaBold else sarasaRegular,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -784,7 +784,7 @@ internal fun ChunithmSongListPage(
                                 text = label,
                                 color = Beige500,
                                 fontSize = 13.sp,
-                                fontFamily = if (isAscendingOrder.value) interTightBold else interTightRegular,
+                                fontFamily = if (isAscendingOrder.value) sarasaBold else sarasaRegular,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -798,7 +798,7 @@ internal fun ChunithmSongListPage(
                     text = "按CN Value排序",
                     color = Beige500,
                     fontSize = 14.sp,
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 
@@ -835,7 +835,7 @@ internal fun ChunithmSongListPage(
                                 text = label,
                                 color = Beige500,
                                 fontSize = 11.sp,
-                                fontFamily = if (isAscendingOrder.value) interTightBold else interTightRegular,
+                                fontFamily = if (isAscendingOrder.value) sarasaBold else sarasaRegular,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -849,7 +849,7 @@ internal fun ChunithmSongListPage(
                     text = "按JP Value排序",
                     color = Beige500,
                     fontSize = 14.sp,
-                    fontFamily = interTightBold,
+                    fontFamily = sarasaBold,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 
@@ -886,7 +886,7 @@ internal fun ChunithmSongListPage(
                                 text = label,
                                 color = Beige500,
                                 fontSize = 11.sp,
-                                fontFamily = if (isAscendingOrder.value) interTightBold else interTightRegular,
+                                fontFamily = if (isAscendingOrder.value) sarasaBold else sarasaRegular,
                                 textAlign = TextAlign.Center
                             )
                         }

@@ -57,7 +57,7 @@ import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red800
-import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.ui.navigation.ChunithmNavHost
 import com.madsam.otora.ui.record.chunithm.ChuniViewModelFactory
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
@@ -242,7 +242,7 @@ fun TestPage4() {
     Text(
         text = "TestPage4",
         modifier = Modifier.fillMaxSize(),
-        fontFamily = interTightBold,
+        fontFamily = sarasaBold,
         fontSize = 20.sp
     )
 }
@@ -314,7 +314,7 @@ private fun ScrollableTitle(text: String) {
         ) {
             Text(
                 text = text,
-                fontFamily = interTightBold,
+                fontFamily = sarasaBold,
                 
                 maxLines = 1,
                 overflow = TextOverflow.Visible,

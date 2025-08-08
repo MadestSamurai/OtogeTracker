@@ -35,8 +35,8 @@ import com.madsam.otora.core.theme.OSU_DISCORD_TEXT
 import com.madsam.otora.core.theme.OSU_X_BG
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.interTightRegular
-import com.madsam.otora.core.theme.interTightSemiBold
+import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.CommonUtils.dateCodeToRecent
 import com.madsam.otora.data.osu.ui.model.OsuSocialUiModel
@@ -80,7 +80,7 @@ internal fun SocialCard(
                     append("Joined ")
                     withStyle(
                         style = SpanStyle(
-                            fontFamily = interTightSemiBold
+                            fontFamily = sarasaSemiBold
                         )
                     ) {
                         append(
@@ -90,7 +90,7 @@ internal fun SocialCard(
                         )
                     }
                 },
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontSize = 16.sp,
                 color = Beige400,
                 modifier = Modifier
@@ -101,7 +101,7 @@ internal fun SocialCard(
                     append("Last seen ")
                     withStyle(
                         style = SpanStyle(
-                            fontFamily = interTightSemiBold
+                            fontFamily = sarasaSemiBold
                         )
                     ) {
                         append(
@@ -109,7 +109,7 @@ internal fun SocialCard(
                         )
                     }
                 },
-                fontFamily = interTightRegular,
+                fontFamily = sarasaRegular,
                 fontSize = 16.sp,
                 color = Beige400,
                 modifier = Modifier
@@ -121,13 +121,13 @@ internal fun SocialCard(
                         append("From ")
                         withStyle(
                             style = SpanStyle(
-                                fontFamily = interTightSemiBold
+                                fontFamily = sarasaSemiBold
                             )
                         ) {
                             append(data.location)
                         }
                     },
-                    fontFamily = interTightRegular,
+                    fontFamily = sarasaRegular,
                     fontSize = 16.sp,
                     color = Beige400,
                     modifier = Modifier
@@ -140,13 +140,13 @@ internal fun SocialCard(
                         append("Plays with ")
                         withStyle(
                             style = SpanStyle(
-                                fontFamily = interTightSemiBold
+                                fontFamily = sarasaSemiBold
                             )
                         ) {
                             append(data.playStyle)
                         }
                     },
-                    fontFamily = interTightRegular,
+                    fontFamily = sarasaRegular,
                     fontSize = 16.sp,
                     color = Beige400,
                     modifier = Modifier
@@ -182,7 +182,7 @@ internal fun SocialCard(
                         )
                         Text(
                             text = "@${data.twitter}",
-                            fontFamily = interTightSemiBold,
+                            fontFamily = sarasaSemiBold,
                             fontSize = 20.sp,
                             color = White1000,
                             modifier = Modifier
@@ -211,7 +211,7 @@ internal fun SocialCard(
                         )
                         Text(
                             text = data.discord,
-                            fontFamily = interTightSemiBold,
+                            fontFamily = sarasaSemiBold,
                             fontSize = 20.sp,
                             color = OSU_DISCORD_TEXT,
                             modifier = Modifier
