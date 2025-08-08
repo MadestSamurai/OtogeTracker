@@ -43,7 +43,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,7 +57,7 @@ import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red800
-import com.madsam.otora.core.theme.interTight
+import com.madsam.otora.core.theme.interTightBlack
 import com.madsam.otora.ui.navigation.ChunithmNavHost
 import com.madsam.otora.ui.record.chunithm.ChuniViewModelFactory
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
@@ -99,7 +98,7 @@ fun RecordScreen(
         gesturesEnabled = true,
         drawerContent = {
             ModalDrawerSheet(
-                modifier = Modifier.width(if (useNavigationRail) 280.dp else 300.dp), // 宽屏模式稍窄一点
+                modifier = Modifier.width(if (useNavigationRail) 280.dp else 300.dp),
                 drawerContainerColor = Red500,
                 drawerContentColor = Beige400
             ) {
@@ -243,7 +242,7 @@ fun TestPage4() {
     Text(
         text = "TestPage4",
         modifier = Modifier.fillMaxSize(),
-        fontFamily = interTight,
+        fontFamily = interTightBlack,
         fontSize = 20.sp
     )
 }
@@ -273,7 +272,7 @@ private fun ScrollableTitle(text: String) {
         shouldAutoScroll = scrollState.maxValue > 0
         
         if (shouldAutoScroll) {
-            kotlinx.coroutines.delay(2000) // 等待2秒让用户看到开头
+            kotlinx.coroutines.delay(2000)
             
             while (shouldAutoScroll) {
                 // 滚动到末尾
@@ -286,7 +285,7 @@ private fun ScrollableTitle(text: String) {
                 )
                 
                 if (!shouldAutoScroll) break
-                kotlinx.coroutines.delay(1500) // 在末尾停留1.5秒
+                kotlinx.coroutines.delay(1500)
                 
                 // 滚动回开头
                 scrollState.animateScrollTo(
@@ -298,7 +297,7 @@ private fun ScrollableTitle(text: String) {
                 )
                 
                 if (!shouldAutoScroll) break
-                kotlinx.coroutines.delay(2000) // 在开头停留2秒
+                kotlinx.coroutines.delay(2000)
             }
         }
     }
@@ -315,8 +314,8 @@ private fun ScrollableTitle(text: String) {
         ) {
             Text(
                 text = text,
-                fontFamily = interTight,
-                fontWeight = FontWeight.Black,
+                fontFamily = interTightBlack,
+                
                 maxLines = 1,
                 overflow = TextOverflow.Visible,
                 modifier = Modifier.padding(horizontal = 48.dp)

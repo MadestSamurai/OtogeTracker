@@ -38,7 +38,7 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.interTight
+import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.utils.ShareUtil
 import kotlinx.coroutines.launch
 
@@ -68,7 +68,7 @@ fun UserAgentSettingScreen(
             title = {
                 Text(
                     text = "User-Agent 设置",
-                    fontFamily = interTight,
+                    fontFamily = interTightRegular,
                     fontWeight = FontWeight.Bold,
                     color = Beige400
                 )
@@ -106,14 +106,14 @@ fun UserAgentSettingScreen(
                     color = White1000,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = interTight
+                    fontFamily = interTightRegular
                 )
                 
                 Text(
                     text = "设置用于maimai DX、CHUNITHM等应用更新时的浏览器User-Agent标识，这有助于某些服务正确识别请求",
                     color = White1000.copy(alpha = 0.7f),
                     fontSize = 14.sp,
-                    fontFamily = interTight
+                    fontFamily = interTightRegular
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -125,14 +125,14 @@ fun UserAgentSettingScreen(
                     label = { 
                         Text(
                             "User-Agent",
-                            fontFamily = interTight,
+                            fontFamily = interTightRegular,
                             color = White1000.copy(alpha = 0.7f)
                         )
                     },
                     placeholder = {
                         Text(
                             "例如: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                            fontFamily = interTight,
+                            fontFamily = interTightRegular,
                             color = White1000.copy(alpha = 0.5f),
                             fontSize = 12.sp
                         )
@@ -157,7 +157,7 @@ fun UserAgentSettingScreen(
                     color = White1000.copy(alpha = 0.8f),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    fontFamily = interTight
+                    fontFamily = interTightRegular
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -166,7 +166,7 @@ fun UserAgentSettingScreen(
                     text = "Chrome (Windows): Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                     color = White1000.copy(alpha = 0.6f),
                     fontSize = 12.sp,
-                    fontFamily = interTight
+                    fontFamily = interTightRegular
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -175,7 +175,7 @@ fun UserAgentSettingScreen(
                     text = "Safari (macOS): Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
                     color = White1000.copy(alpha = 0.6f),
                     fontSize = 12.sp,
-                    fontFamily = interTight
+                    fontFamily = interTightRegular
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -198,7 +198,7 @@ fun UserAgentSettingScreen(
                 ) {
                     Text(
                         "保存设置",
-                        fontFamily = interTight,
+                        fontFamily = interTightRegular,
                         fontWeight = FontWeight.Medium
                     )
                 }
@@ -218,7 +218,7 @@ fun UserAgentSettingScreen(
                 ) {
                     Text(
                         "清空设置",
-                        fontFamily = interTight,
+                        fontFamily = interTightRegular,
                         fontWeight = FontWeight.Medium
                     )
                 }

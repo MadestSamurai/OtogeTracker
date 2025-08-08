@@ -44,7 +44,7 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.interTight
+import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.ShareUtil
 import com.madsam.otora.core.utils.UserAgentUtils
@@ -84,7 +84,7 @@ fun ChunithmDataUpdateScreen(
             title = {
                 Text(
                     text = "CHUNITHM 数据更新",
-                    fontFamily = interTight,
+                    fontFamily = interTightRegular,
                     fontWeight = FontWeight.Bold,
                     color = Beige400
                 )
@@ -132,13 +132,13 @@ fun ChunithmDataUpdateScreen(
                                 color = White1000,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,
-                                fontFamily = interTight
+                                fontFamily = interTightRegular
                             )
                             Text(
                                 text = "建议设置User-Agent以确保CHUNITHM数据更新正常工作",
                                 color = White1000.copy(alpha = 0.8f),
                                 fontSize = 12.sp,
-                                fontFamily = interTight
+                                fontFamily = interTightRegular
                             )
                             
                             if (onNavigateToUserAgent != null) {
@@ -153,7 +153,7 @@ fun ChunithmDataUpdateScreen(
                                 ) {
                                     Text(
                                         "设置User-Agent",
-                                        fontFamily = interTight,
+                                        fontFamily = interTightRegular,
                                         fontSize = 12.sp
                                     )
                                 }
@@ -170,14 +170,14 @@ fun ChunithmDataUpdateScreen(
                     color = White1000,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = interTight
+                    fontFamily = interTightRegular
                 )
                 
                 Text(
                     text = "更新CHUNITHM歌曲数据库",
                     color = White1000.copy(alpha = 0.7f),
                     fontSize = 14.sp,
-                    fontFamily = interTight
+                    fontFamily = interTightRegular
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -235,7 +235,7 @@ fun ChunithmDataUpdateScreen(
                             UpdateState.IDLE -> {
                                 Text(
                                     "更新歌曲数据",
-                                    fontFamily = interTight,
+                                    fontFamily = interTightRegular,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
@@ -248,7 +248,7 @@ fun ChunithmDataUpdateScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     "正在更新...",
-                                    fontFamily = interTight,
+                                    fontFamily = interTightRegular,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
@@ -262,7 +262,7 @@ fun ChunithmDataUpdateScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     "更新完成",
-                                    fontFamily = interTight,
+                                    fontFamily = interTightRegular,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
@@ -278,14 +278,14 @@ fun ChunithmDataUpdateScreen(
                     color = White1000,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = interTight
+                    fontFamily = interTightRegular
                 )
                 
                 Text(
                     text = "输入从CHUNITHM官方公众号获取的Cookie信息，用于获取和保存您的账号数据",
                     color = White1000.copy(alpha = 0.7f),
                     fontSize = 14.sp,
-                    fontFamily = interTight
+                    fontFamily = interTightRegular
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -300,7 +300,7 @@ fun ChunithmDataUpdateScreen(
                     label = { 
                         Text(
                             "Request Cookies",
-                            fontFamily = interTight,
+                            fontFamily = interTightRegular,
                             color = White1000.copy(alpha = 0.7f)
                         )
                     },
@@ -321,7 +321,7 @@ fun ChunithmDataUpdateScreen(
                         "Request Cookies 不能为空",
                         color = MaterialTheme.colorScheme.error,
                         fontSize = 12.sp,
-                        fontFamily = interTight
+                        fontFamily = interTightRegular
                     )
                 }
                 
@@ -337,7 +337,7 @@ fun ChunithmDataUpdateScreen(
                     label = { 
                         Text(
                             "Response Cookies",
-                            fontFamily = interTight,
+                            fontFamily = interTightRegular,
                             color = White1000.copy(alpha = 0.7f)
                         )
                     },
@@ -358,7 +358,7 @@ fun ChunithmDataUpdateScreen(
                         "Response Cookies 不能为空",
                         color = MaterialTheme.colorScheme.error,
                         fontSize = 12.sp,
-                        fontFamily = interTight
+                        fontFamily = interTightRegular
                     )
                 }
                 
@@ -451,7 +451,7 @@ fun ChunithmDataUpdateScreen(
                             UpdateState.IDLE -> {
                                 Text(
                                     "保存并获取用户数据",
-                                    fontFamily = interTight,
+                                    fontFamily = interTightRegular,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
@@ -464,7 +464,7 @@ fun ChunithmDataUpdateScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     "正在获取...",
-                                    fontFamily = interTight,
+                                    fontFamily = interTightRegular,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
@@ -478,7 +478,7 @@ fun ChunithmDataUpdateScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     "获取完成",
-                                    fontFamily = interTight,
+                                    fontFamily = interTightRegular,
                                     fontWeight = FontWeight.Medium
                                 )
                             }

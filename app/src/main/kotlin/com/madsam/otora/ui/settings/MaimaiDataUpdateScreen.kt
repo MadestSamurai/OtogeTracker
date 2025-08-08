@@ -33,7 +33,7 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.interTight
+import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.utils.UserAgentUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +53,7 @@ fun MaimaiDataUpdateScreen(
             title = {
                 Text(
                     text = "maimai DX 数据更新",
-                    fontFamily = interTight,
+                    fontFamily = interTightRegular,
                     fontWeight = FontWeight.Bold,
                     color = Beige400
                 )
@@ -102,13 +102,13 @@ fun MaimaiDataUpdateScreen(
                                 color = White1000,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium,
-                                fontFamily = interTight
+                                fontFamily = interTightRegular
                             )
                             Text(
                                 text = "建议设置User-Agent以确保maimai DX数据更新正常工作",
                                 color = White1000.copy(alpha = 0.8f),
                                 fontSize = 12.sp,
-                                fontFamily = interTight
+                                fontFamily = interTightRegular
                             )
                             
                             if (onNavigateToUserAgent != null) {
@@ -123,7 +123,7 @@ fun MaimaiDataUpdateScreen(
                                 ) {
                                     Text(
                                         "设置User-Agent",
-                                        fontFamily = interTight,
+                                        fontFamily = interTightRegular,
                                         fontSize = 12.sp
                                     )
                                 }
@@ -139,7 +139,7 @@ fun MaimaiDataUpdateScreen(
                     color = White1000,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = interTight,
+                    fontFamily = interTightRegular,
                     textAlign = TextAlign.Center
                 )
                 
@@ -149,7 +149,7 @@ fun MaimaiDataUpdateScreen(
                     text = "maimai DX 的数据更新功能即将推出。\n敬请期待！",
                     color = White1000.copy(alpha = 0.7f),
                     fontSize = 14.sp,
-                    fontFamily = interTight,
+                    fontFamily = interTightRegular,
                     textAlign = TextAlign.Center
                 )
                 
@@ -167,7 +167,7 @@ fun MaimaiDataUpdateScreen(
                 ) {
                     Text(
                         "即将推出",
-                        fontFamily = interTight,
+                        fontFamily = interTightRegular,
                         fontWeight = FontWeight.Medium
                     )
                 }

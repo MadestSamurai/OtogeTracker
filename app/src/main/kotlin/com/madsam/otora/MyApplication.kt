@@ -1,7 +1,7 @@
 package com.madsam.otora
 
 import android.app.Application
-import com.madsam.otora.data.chunithm.local.objectbox.ObjectBoxManager
+import com.madsam.otora.core.database.ObjectBoxManager
 
 class MyApplication : Application() {
     override fun onCreate() {
