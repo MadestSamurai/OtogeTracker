@@ -21,12 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red700
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.data.osu.ui.model.OsuRecentUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,7 +69,7 @@ internal fun Recent(
             ) {
                 Text(
                     text = "Recent",
-                    fontWeight = FontWeight.SemiBold,
+                    fontFamily = interTightSemiBold,
                     fontSize = 24.sp,
                     color = Beige400,
                     modifier = Modifier.padding(vertical = 8.dp)

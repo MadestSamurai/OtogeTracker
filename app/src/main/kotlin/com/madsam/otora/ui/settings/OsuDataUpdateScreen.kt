@@ -32,13 +32,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
+import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.interTightMedium
 import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.utils.ShareUtil
 
@@ -63,8 +64,7 @@ fun OsuDataUpdateScreen(
             title = {
                 Text(
                     text = "osu! 数据更新",
-                    fontFamily = interTightRegular,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                     color = Beige400
                 )
             },
@@ -100,8 +100,7 @@ fun OsuDataUpdateScreen(
                     text = "用户设置",
                     color = White1000,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = interTightRegular
+                    fontFamily = interTightBold
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -204,8 +203,7 @@ fun OsuDataUpdateScreen(
                 ) {
                     Text(
                         "保存设置",
-                        fontFamily = interTightRegular,
-                        fontWeight = FontWeight.Medium
+                        fontFamily = interTightMedium
                     )
                 }
             }

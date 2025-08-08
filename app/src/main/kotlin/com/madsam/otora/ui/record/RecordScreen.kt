@@ -58,6 +58,7 @@ import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.interTightBlack
+import com.madsam.otora.core.theme.interTightExtraBold
 import com.madsam.otora.ui.navigation.ChunithmNavHost
 import com.madsam.otora.ui.record.chunithm.ChuniViewModelFactory
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
@@ -314,7 +315,7 @@ private fun ScrollableTitle(text: String) {
         ) {
             Text(
                 text = text,
-                fontFamily = interTightBlack,
+                fontFamily = interTightExtraBold,
                 
                 maxLines = 1,
                 overflow = TextOverflow.Visible,

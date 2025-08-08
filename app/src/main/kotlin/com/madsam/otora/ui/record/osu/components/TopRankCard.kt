@@ -31,7 +31,6 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -43,9 +42,11 @@ import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.BlackAlpha50
 import com.madsam.otora.core.theme.OSU_ARROW_YELLOW
-import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.OSU_HEART_RED
 import com.madsam.otora.core.theme.Red700
+import com.madsam.otora.core.theme.Yellow1000
+import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.utils.CommonUtils.dateCodeToRecent
 import com.madsam.otora.core.utils.CommonUtils.formatNumberThousand
 import com.madsam.otora.core.utils.CommonUtils.truncateToTwoDecimalPlaces
@@ -166,7 +167,7 @@ internal fun TopRankCard(
                 },
                 inlineContent = inlineContent,
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 color = OsuDifficultyColor.mapValueToTextColor(item.difficultyRating.toFloat()),
                 modifier = Modifier
                     .constrainAs(diff) {
@@ -193,7 +194,7 @@ internal fun TopRankCard(
                     text = item.beatmapSetTitleUnicode,
                     color = Beige400,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                     maxLines = 1,
                     lineHeight = 23.sp,
                     overflow = TextOverflow.Ellipsis,
@@ -224,7 +225,7 @@ internal fun TopRankCard(
                             withStyle(
                                 style = SpanStyle(
                                     fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontFamily = interTightBold
                                 )
                             ) {
                                 append(item.accuracy)
@@ -234,7 +235,7 @@ internal fun TopRankCard(
                                 withStyle(
                                     style = SpanStyle(
                                         fontSize = 12.sp,
-                                        fontWeight = FontWeight.Normal
+                                        fontFamily = interTightRegular
                                     )
                                 ) {
                                     append(formatNumberThousand(score))
@@ -245,7 +246,7 @@ internal fun TopRankCard(
                             withStyle(
                                 style = SpanStyle(
                                     fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold
+                                    fontFamily = interTightBold
                                 )
                             ) {
                                 append(formatNumberThousand(item.score))
@@ -255,7 +256,7 @@ internal fun TopRankCard(
                                 withStyle(
                                     style = SpanStyle(
                                         fontSize = 12.sp,
-                                        fontWeight = FontWeight.Normal
+                                        fontFamily = interTightRegular
                                     )
                                 ) {
                                     append(item.accuracy)
@@ -368,7 +369,7 @@ internal fun TopRankCard(
                         text = " - ",
                         color = Beige400,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontFamily = interTightBold,
                         maxLines = 1,
                         lineHeight = 20.sp
                     )
@@ -378,7 +379,7 @@ internal fun TopRankCard(
                         text = String.format(Locale.US, "%.2fpp", item.pp),
                         color = Beige400,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontFamily = interTightBold,
                         maxLines = 1,
                         lineHeight = 20.sp
                     )

@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -36,6 +36,8 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Red900
+import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
 import com.madsam.otora.ui.BASE_URL
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
@@ -122,7 +124,7 @@ internal fun ChunithmSongCard(
                         highlightText = highlightText,
                         color = Beige400,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontFamily = interTightBold,
                         maxLines = 1,
                         lineHeight = 23.sp,
                         overflow = TextOverflow.Ellipsis,
@@ -151,7 +153,7 @@ internal fun ChunithmSongCard(
                             color = Beige400,
                             fontSize = 14.sp,
                             lineHeight = 20.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontFamily = interTightBold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier
@@ -166,7 +168,7 @@ internal fun ChunithmSongCard(
                             color = Beige400,
                             fontSize = 14.sp,
                             lineHeight = 20.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontFamily = interTightBold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier
@@ -212,7 +214,7 @@ private fun HighlightedText(
     highlightText: String,
     color: Color,
     fontSize: TextUnit,
-    fontWeight: FontWeight = FontWeight.Normal,
+    fontFamily: FontFamily = interTightRegular,
     maxLines: Int = Int.MAX_VALUE,
     lineHeight: TextUnit = TextUnit.Unspecified,
     overflow: TextOverflow = TextOverflow.Clip
@@ -263,7 +265,7 @@ private fun HighlightedText(
     Text(
         text = annotatedString,
         fontSize = fontSize,
-        fontWeight = fontWeight,
+        fontFamily = fontFamily,
         maxLines = maxLines,
         lineHeight = lineHeight,
         overflow = overflow,

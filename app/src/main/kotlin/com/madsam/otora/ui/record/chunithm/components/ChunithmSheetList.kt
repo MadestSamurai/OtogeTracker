@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.BG_DARK_GRAY
@@ -28,6 +27,7 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
+import com.madsam.otora.core.theme.interTightBold
 import com.madsam.otora.core.utils.CalcUtils
 import com.madsam.otora.core.utils.CalcUtils.numberToChuniRank
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
@@ -118,7 +118,7 @@ internal fun ChunithmSheetList(
                         Text(
                             text = tag,
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontFamily = interTightBold,
                             color = if (isActive) Beige500 else Black333,
                             modifier = Modifier
                                 .padding(2.dp)
@@ -135,7 +135,7 @@ internal fun ChunithmSheetList(
                         Text(
                             text = tag,
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontFamily = interTightBold,
                             color = if (isActive) Beige500 else Black333,
                             modifier = Modifier
                                 .padding(2.dp)
@@ -182,7 +182,7 @@ internal fun ChunithmSheetList(
                         Text(
                             text = "${sheet.difficulty} ${sheet.levelJp}",
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
+                            fontFamily = interTightBold,
                             color = White1000,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(3.dp))
@@ -232,7 +232,7 @@ private fun SheetDifficultyRow(
                 "${sheet.internalLevelValueJp}(JP)"
             },
             fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
+            fontFamily = interTightBold,
             color = White1000,
             modifier = Modifier
                 .padding(vertical = 2.dp, horizontal = 6.dp)
@@ -249,7 +249,7 @@ private fun ScoreInfoRow(scoreInfo: SheetScoreInfo) {
         Text(
             text = scoreInfo.score.toString(),
             fontSize = 11.sp,
-            fontWeight = FontWeight.Bold,
+            fontFamily = interTightBold,
             color = White1000,
             modifier = Modifier
                 .clip(RoundedCornerShape(3.dp))
@@ -261,7 +261,7 @@ private fun ScoreInfoRow(scoreInfo: SheetScoreInfo) {
             Text(
                 text = numberToChuniRank(scoreInfo.rank),
                 fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 color = White1000,
                 modifier = Modifier
                     .clip(RoundedCornerShape(2.dp))
@@ -274,7 +274,7 @@ private fun ScoreInfoRow(scoreInfo: SheetScoreInfo) {
             Text(
                 text = CalcUtils.clearToChuniClear(scoreInfo.clear),
                 fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 color = White1000,
                 modifier = Modifier
                     .clip(RoundedCornerShape(2.dp))
@@ -287,7 +287,7 @@ private fun ScoreInfoRow(scoreInfo: SheetScoreInfo) {
             Text(
                 text = CalcUtils.comboToChuniCombo(scoreInfo.combo),
                 fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 color = White1000,
                 modifier = Modifier
                     .clip(RoundedCornerShape(2.dp))
@@ -300,7 +300,7 @@ private fun ScoreInfoRow(scoreInfo: SheetScoreInfo) {
             Text(
                 text = CalcUtils.chainToChuniChain(scoreInfo.chain),
                 fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 color = White1000,
                 modifier = Modifier
                     .clip(RoundedCornerShape(2.dp))

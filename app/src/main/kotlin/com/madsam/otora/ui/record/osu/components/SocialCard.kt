@@ -22,7 +22,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -36,6 +35,8 @@ import com.madsam.otora.core.theme.OSU_DISCORD_TEXT
 import com.madsam.otora.core.theme.OSU_X_BG
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
+import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.CommonUtils.dateCodeToRecent
 import com.madsam.otora.data.osu.ui.model.OsuSocialUiModel
@@ -76,16 +77,10 @@ internal fun SocialCard(
         ) {
             Text(
                 text = buildAnnotatedString {
+                    append("Joined ")
                     withStyle(
                         style = SpanStyle(
-                            fontWeight = FontWeight.Normal
-                        )
-                    ) {
-                        append("Joined ")
-                    }
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.SemiBold
+                            fontFamily = interTightSemiBold
                         )
                     ) {
                         append(
@@ -95,7 +90,7 @@ internal fun SocialCard(
                         )
                     }
                 },
-                fontWeight = FontWeight.Normal,
+                fontFamily = interTightRegular,
                 fontSize = 16.sp,
                 color = Beige400,
                 modifier = Modifier
@@ -103,16 +98,10 @@ internal fun SocialCard(
             )
             Text(
                 text = buildAnnotatedString {
+                    append("Last seen ")
                     withStyle(
                         style = SpanStyle(
-                            fontWeight = FontWeight.Normal
-                        )
-                    ) {
-                        append("Last seen ")
-                    }
-                    withStyle(
-                        style = SpanStyle(
-                            fontWeight = FontWeight.SemiBold
+                            fontFamily = interTightSemiBold
                         )
                     ) {
                         append(
@@ -120,7 +109,7 @@ internal fun SocialCard(
                         )
                     }
                 },
-                fontWeight = FontWeight.Normal,
+                fontFamily = interTightRegular,
                 fontSize = 16.sp,
                 color = Beige400,
                 modifier = Modifier
@@ -129,22 +118,16 @@ internal fun SocialCard(
             if (data.location.isNotEmpty()) {
                 Text(
                     text = buildAnnotatedString {
+                        append("From ")
                         withStyle(
                             style = SpanStyle(
-                                fontWeight = FontWeight.Normal
-                            )
-                        ) {
-                            append("From ")
-                        }
-                        withStyle(
-                            style = SpanStyle(
-                                fontWeight = FontWeight.SemiBold
+                                fontFamily = interTightSemiBold
                             )
                         ) {
                             append(data.location)
                         }
                     },
-                    fontWeight = FontWeight.Normal,
+                    fontFamily = interTightRegular,
                     fontSize = 16.sp,
                     color = Beige400,
                     modifier = Modifier
@@ -154,22 +137,16 @@ internal fun SocialCard(
             if (data.playStyle.isNotEmpty()) {
                 Text(
                     text = buildAnnotatedString {
+                        append("Plays with ")
                         withStyle(
                             style = SpanStyle(
-                                fontWeight = FontWeight.Normal
-                            )
-                        ) {
-                            append("Plays with ")
-                        }
-                        withStyle(
-                            style = SpanStyle(
-                                fontWeight = FontWeight.SemiBold
+                                fontFamily = interTightSemiBold
                             )
                         ) {
                             append(data.playStyle)
                         }
                     },
-                    fontWeight = FontWeight.Normal,
+                    fontFamily = interTightRegular,
                     fontSize = 16.sp,
                     color = Beige400,
                     modifier = Modifier
@@ -205,7 +182,7 @@ internal fun SocialCard(
                         )
                         Text(
                             text = "@${data.twitter}",
-                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = interTightSemiBold,
                             fontSize = 20.sp,
                             color = White1000,
                             modifier = Modifier
@@ -234,7 +211,7 @@ internal fun SocialCard(
                         )
                         Text(
                             text = data.discord,
-                            fontWeight = FontWeight.SemiBold,
+                            fontFamily = interTightSemiBold,
                             fontSize = 20.sp,
                             color = OSU_DISCORD_TEXT,
                             modifier = Modifier

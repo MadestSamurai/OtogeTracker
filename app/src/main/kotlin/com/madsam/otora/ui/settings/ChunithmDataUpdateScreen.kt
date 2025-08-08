@@ -37,13 +37,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
+import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.interTightMedium
 import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.ShareUtil
@@ -84,8 +85,7 @@ fun ChunithmDataUpdateScreen(
             title = {
                 Text(
                     text = "CHUNITHM 数据更新",
-                    fontFamily = interTightRegular,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                     color = Beige400
                 )
             },
@@ -131,8 +131,7 @@ fun ChunithmDataUpdateScreen(
                                 text = "⚠️ User-Agent未设置",
                                 color = White1000,
                                 fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium,
-                                fontFamily = interTightRegular
+                                fontFamily = interTightMedium
                             )
                             Text(
                                 text = "建议设置User-Agent以确保CHUNITHM数据更新正常工作",
@@ -169,8 +168,7 @@ fun ChunithmDataUpdateScreen(
                     text = "歌曲数据更新",
                     color = White1000,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = interTightRegular
+                    fontFamily = interTightBold
                 )
                 
                 Text(
@@ -235,8 +233,7 @@ fun ChunithmDataUpdateScreen(
                             UpdateState.IDLE -> {
                                 Text(
                                     "更新歌曲数据",
-                                    fontFamily = interTightRegular,
-                                    fontWeight = FontWeight.Medium
+                                    fontFamily = interTightMedium
                                 )
                             }
                             UpdateState.LOADING -> {
@@ -248,8 +245,7 @@ fun ChunithmDataUpdateScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     "正在更新...",
-                                    fontFamily = interTightRegular,
-                                    fontWeight = FontWeight.Medium
+                                    fontFamily = interTightMedium
                                 )
                             }
                             UpdateState.SUCCESS -> {
@@ -262,8 +258,7 @@ fun ChunithmDataUpdateScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     "更新完成",
-                                    fontFamily = interTightRegular,
-                                    fontWeight = FontWeight.Medium
+                                    fontFamily = interTightMedium
                                 )
                             }
                         }
@@ -277,8 +272,7 @@ fun ChunithmDataUpdateScreen(
                     text = "个人信息获取",
                     color = White1000,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = interTightRegular
+                    fontFamily = interTightBold
                 )
                 
                 Text(
@@ -451,8 +445,7 @@ fun ChunithmDataUpdateScreen(
                             UpdateState.IDLE -> {
                                 Text(
                                     "保存并获取用户数据",
-                                    fontFamily = interTightRegular,
-                                    fontWeight = FontWeight.Medium
+                                    fontFamily = interTightMedium
                                 )
                             }
                             UpdateState.LOADING -> {
@@ -464,8 +457,7 @@ fun ChunithmDataUpdateScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     "正在获取...",
-                                    fontFamily = interTightRegular,
-                                    fontWeight = FontWeight.Medium
+                                    fontFamily = interTightMedium
                                 )
                             }
                             UpdateState.SUCCESS -> {
@@ -478,8 +470,7 @@ fun ChunithmDataUpdateScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     "获取完成",
-                                    fontFamily = interTightRegular,
-                                    fontWeight = FontWeight.Medium
+                                    fontFamily = interTightMedium
                                 )
                             }
                         }

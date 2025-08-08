@@ -30,7 +30,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -38,6 +37,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.core.theme.Red700
+import com.madsam.otora.core.theme.interTightBold
 import com.madsam.otora.data.osu.ui.model.OsuRecentUiModel
 import com.madsam.otora.ui.record.osu.components.RecentItem
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -104,7 +104,7 @@ internal fun RecentDialog(
                     ) {
                         Text(
                             text = "Recent Activities",
-                            fontWeight = FontWeight.Bold,
+                            fontFamily = interTightBold,
                             fontSize = 24.sp,
                             color = Beige400
                         )

@@ -20,13 +20,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayDataUiModel
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
@@ -37,7 +35,9 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
+import com.madsam.otora.core.theme.interTightBold
 import com.madsam.otora.core.utils.CommonUtils.formatNumberThousand
+import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayDataUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -108,7 +108,7 @@ internal fun PlayDataItem(
             Text(
                 text = diff.toUpperCase(Locale.current),
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 color = White1000,
                 modifier = Modifier
                     .padding(2.dp)

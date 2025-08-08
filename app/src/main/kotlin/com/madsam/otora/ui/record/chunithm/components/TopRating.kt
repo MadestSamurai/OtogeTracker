@@ -33,7 +33,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -55,6 +54,7 @@ import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Transparent
 import com.madsam.otora.core.theme.Yellow1000
+import com.madsam.otora.core.theme.interTightBold
 import com.madsam.otora.data.chunithm.ui.model.ChunithmScoreUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.ui.BASE_URL
@@ -99,7 +99,7 @@ internal fun TopRating(
                 text = "Top Rating",
                 color = Beige400,
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                fontFamily = interTightBold
             )
             Box(modifier = Modifier.width(48.dp))
         }
@@ -123,7 +123,7 @@ internal fun TopRating(
                             text = title,
                             color = if (pagerState.currentPage == index) Beige500 else Beige600,
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                            fontFamily = interTightBold
                         )
                     },
                     modifier = Modifier.height(40.dp)
@@ -190,7 +190,7 @@ internal fun ChuniRatingItemCard(
                 text = "#$rank",
                 color = Beige400,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 modifier = Modifier
                     .constrainAs(rankText) {
                         top.linkTo(parent.top, 8.dp)
@@ -245,7 +245,7 @@ internal fun ChuniRatingItemCard(
             Text(
                 text = item.level,
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 color = Color.White,
                 modifier = Modifier
                     .constrainAs(diff) {
@@ -286,7 +286,7 @@ internal fun ChuniRatingItemCard(
                     text = item.title,
                     color = Beige400,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

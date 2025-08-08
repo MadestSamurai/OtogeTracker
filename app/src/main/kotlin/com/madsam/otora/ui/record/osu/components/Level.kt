@@ -14,7 +14,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -24,6 +23,8 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.OSU_DARK_RED
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Red900
+import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.data.osu.ui.model.OsuLevelUiModel
 import com.madsam.otora.ui.components.GradientBorderCircle
@@ -71,8 +72,8 @@ internal fun Level(
                     textAlign = TextAlign.Center,
                     text = levelData.level.toString(),
                     color = Beige400,
+                    fontFamily = interTightBold,
                     fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
                 )
             }
         }
@@ -110,8 +111,8 @@ internal fun Level(
             textAlign = TextAlign.Center,
             text = "${levelData.levelProgress}%",
             color = Beige400,
+            fontFamily = interTightSemiBold,
             fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
             modifier = if (levelData.levelProgress < 15) {
                 Modifier
                     .constrainAs(levelProgressText) {

@@ -18,12 +18,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
+import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.interTightMedium
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -66,7 +67,7 @@ internal fun ChunithmCollectionPage(
                     text = "藏品收集",
                     color = White1000,
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
@@ -140,7 +141,7 @@ private fun CollectionCard(
                 text = title,
                 color = White1000,
                 fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                fontFamily = interTightBold
             )
             
             Text(
@@ -154,7 +155,7 @@ private fun CollectionCard(
                 text = if (totalCount > 0) "$collectedCount / $totalCount" else "即将推出",
                 color = White1000.copy(alpha = 0.9f),
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
+                fontFamily = interTightMedium,
                 modifier = Modifier.padding(top = 12.dp)
             )
         }

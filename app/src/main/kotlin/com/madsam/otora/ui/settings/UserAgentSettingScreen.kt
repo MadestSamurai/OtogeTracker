@@ -31,13 +31,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
+import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.interTightMedium
 import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.utils.ShareUtil
 import kotlinx.coroutines.launch
@@ -68,8 +69,7 @@ fun UserAgentSettingScreen(
             title = {
                 Text(
                     text = "User-Agent 设置",
-                    fontFamily = interTightRegular,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                     color = Beige400
                 )
             },
@@ -105,8 +105,7 @@ fun UserAgentSettingScreen(
                     text = "浏览器标识设置",
                     color = White1000,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = interTightRegular
+                    fontFamily = interTightBold
                 )
                 
                 Text(
@@ -156,8 +155,7 @@ fun UserAgentSettingScreen(
                     text = "常用示例：",
                     color = White1000.copy(alpha = 0.8f),
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = interTightRegular
+                    fontFamily = interTightMedium
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -198,8 +196,7 @@ fun UserAgentSettingScreen(
                 ) {
                     Text(
                         "保存设置",
-                        fontFamily = interTightRegular,
-                        fontWeight = FontWeight.Medium
+                        fontFamily = interTightMedium
                     )
                 }
                 
@@ -218,8 +215,7 @@ fun UserAgentSettingScreen(
                 ) {
                     Text(
                         "清空设置",
-                        fontFamily = interTightRegular,
-                        fontWeight = FontWeight.Medium
+                        fontFamily = interTightMedium
                     )
                 }
             }

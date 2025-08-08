@@ -31,7 +31,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
@@ -41,6 +40,8 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
+import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.interTightMedium
 import com.madsam.otora.core.theme.interTightRegular
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,8 +62,7 @@ fun GeneralDataUpdateScreen(
             title = {
                 Text(
                     text = "通用数据设置",
-                    fontFamily = interTightRegular,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                     color = Beige400
                 )
             },
@@ -103,8 +103,7 @@ fun GeneralDataUpdateScreen(
                         text = "自动更新",
                         color = White1000,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = interTightRegular
+                        fontFamily = interTightBold
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -128,8 +127,7 @@ fun GeneralDataUpdateScreen(
                                 text = "启用自动更新",
                                 color = White1000,
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                                fontFamily = interTightRegular
+                                fontFamily = interTightMedium
                             )
                             
                             Text(
@@ -167,8 +165,7 @@ fun GeneralDataUpdateScreen(
                         text = "网络设置",
                         color = White1000,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = interTightRegular
+                        fontFamily = interTightBold
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -192,8 +189,7 @@ fun GeneralDataUpdateScreen(
                                 text = "仅在WiFi下更新",
                                 color = White1000,
                                 fontSize = 16.sp,
-                                fontWeight = FontWeight.Medium,
-                                fontFamily = interTightRegular
+                                fontFamily = interTightMedium
                             )
                             
                             Text(

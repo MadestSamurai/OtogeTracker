@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -42,6 +41,8 @@ import com.madsam.otora.core.theme.OSU_LEVEL_PLATINUM_1
 import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
+import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.utils.CommonUtils.getRatingBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmCardUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -106,7 +107,7 @@ internal fun Card(
                 textAlign = TextAlign.Center,
                 color = Color.Black,
                 fontSize = 16.sp,
-                fontWeight = FontWeight.Bold
+                fontFamily = interTightBold
             )
 
             Image(
@@ -156,7 +157,7 @@ internal fun Card(
                 text = cardData.reborn.toString(),
                 color = Red500,
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
+                fontFamily = interTightBold
             )
 
             Text(
@@ -174,7 +175,7 @@ internal fun Card(
                 text = cardData.level.toString(),
                 color = Beige400,
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 modifier = Modifier
                     .constrainAs(lv) {
                         top.linkTo(rebornBase.top)
@@ -188,7 +189,7 @@ internal fun Card(
                 color = Beige400,
                 fontSize = 18.sp,
                 lineHeight = 22.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 modifier = Modifier
                     .constrainAs(username) {
                         top.linkTo(rebornBase.top)
@@ -232,7 +233,7 @@ internal fun Card(
                         style = SpanStyle(
                             color = Beige500,
                             fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal
+                            fontFamily = interTightRegular
                         )
                     ) {
                         append("RATING ")
@@ -241,7 +242,7 @@ internal fun Card(
                         style = SpanStyle(
                             brush = getRatingBrush(cardData.rating),
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                            fontFamily = interTightBold
                         )
                     ) {
                         append(cardData.rating)
@@ -251,7 +252,7 @@ internal fun Card(
                         style = SpanStyle(
                             color = Beige500,
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
+                            fontFamily = interTightBold
                         )
                     ) {
                         append(cardData.ratingMax)
@@ -281,7 +282,7 @@ internal fun Card(
                             style = SpanStyle(
                                 color = Beige500,
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.Normal
+                                fontFamily = interTightRegular
                             )
                         ) { append("OVERPOWER ") }
                         append(cardData.overpower)
@@ -289,7 +290,7 @@ internal fun Card(
                     color = Beige400,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                 )
                 Text(
                     text = buildAnnotatedString {
@@ -297,7 +298,7 @@ internal fun Card(
                             style = SpanStyle(
                                 color = Beige500,
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.Normal
+                                fontFamily = interTightRegular
                             )
                         ) { append("LAST PLAY ") }
                         append(cardData.lastPlay)
@@ -305,7 +306,7 @@ internal fun Card(
                     color = Beige400,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                 )
                 Text(
                     text = buildAnnotatedString {
@@ -313,7 +314,7 @@ internal fun Card(
                             style = SpanStyle(
                                 color = Beige500,
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.Normal
+                                fontFamily = interTightRegular
                             )
                         ) { append("PLAY COUNT ") }
                         append(cardData.playCount)
@@ -321,7 +322,7 @@ internal fun Card(
                     color = Beige400,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                 )
                 Text(
                     text = buildAnnotatedString {
@@ -329,7 +330,7 @@ internal fun Card(
                             style = SpanStyle(
                                 color = Beige500,
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.Normal
+                                fontFamily = interTightRegular
                             )
                         ) { append("POINTS ") }
                         append("${cardData.point}/${cardData.totalPoint}")
@@ -337,7 +338,7 @@ internal fun Card(
                     color = Beige400,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                 )
             }
         }

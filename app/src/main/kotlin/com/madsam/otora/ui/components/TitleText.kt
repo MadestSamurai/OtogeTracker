@@ -9,10 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.core.theme.Red500
+import com.madsam.otora.core.theme.interTightSemiBold
 
 @Composable
 fun TitleText(
@@ -43,7 +43,7 @@ fun TitleText(
             Text(
                 text = text,
                 fontSize = titleTextSize,
-                fontWeight = FontWeight.SemiBold,
+                fontFamily = interTightSemiBold,
                 color = color,
                 modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
             )

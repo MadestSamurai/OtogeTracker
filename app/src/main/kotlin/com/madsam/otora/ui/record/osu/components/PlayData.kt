@@ -31,7 +31,6 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -42,6 +41,8 @@ import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
+import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.data.osu.ui.model.OsuPlayUiModel
 import com.madsam.otora.ui.components.ImageWithText
@@ -164,14 +165,14 @@ internal fun PlayData(
                     textTitle = "Play Time",
                     text = buildAnnotatedString {
                         val styles = listOf(
-                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.SemiBold) to playTimeStr[0],
-                            SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${dayHourLabels[0]} ",
-                            SpanStyle(fontSize = textSize, fontWeight = FontWeight.SemiBold) to playTimeStr[1],
-                            SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${dayHourLabels[1]} ",
-                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.SemiBold) to playTimeStr[2],
-                            SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to "${monthSecondLabels[0]} ",
-                            SpanStyle(fontSize = 13.sp, fontWeight = FontWeight.SemiBold) to playTimeStr[3],
-                            SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal) to monthSecondLabels[1]
+                            SpanStyle(fontSize = textSize, fontFamily = interTightSemiBold) to playTimeStr[0],
+                            SpanStyle(fontSize = 12.sp, fontFamily = interTightRegular) to "${dayHourLabels[0]} ",
+                            SpanStyle(fontSize = textSize, fontFamily = interTightSemiBold) to playTimeStr[1],
+                            SpanStyle(fontSize = 12.sp, fontFamily = interTightRegular) to "${dayHourLabels[1]} ",
+                            SpanStyle(fontSize = 13.sp, fontFamily = interTightSemiBold) to playTimeStr[2],
+                            SpanStyle(fontSize = 12.sp, fontFamily = interTightRegular) to "${monthSecondLabels[0]} ",
+                            SpanStyle(fontSize = 13.sp, fontFamily = interTightSemiBold) to playTimeStr[3],
+                            SpanStyle(fontSize = 12.sp, fontFamily = interTightRegular) to monthSecondLabels[1]
                         )
                         styles.forEach { (style, text) ->
                             withStyle(style = style) {
@@ -193,7 +194,7 @@ internal fun PlayData(
                         withStyle(
                             style = SpanStyle(
                                 fontSize = textSize,
-                                fontWeight = FontWeight.SemiBold
+                                fontFamily = interTightSemiBold
                             )
                         ) {
                             append(ppSplit[0])
@@ -201,7 +202,7 @@ internal fun PlayData(
                         withStyle(
                             style = SpanStyle(
                                 fontSize = 12.sp,
-                                fontWeight = FontWeight.Normal
+                                fontFamily = interTightRegular
                             )
                         ) {
                             append(".${ppSplit[1]}")
@@ -281,7 +282,7 @@ internal fun PlayData(
                     withStyle(
                         style = SpanStyle(
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold
+                            fontFamily = interTightSemiBold
                         )
                     ) {
                         append(if (shown) "Show Less Play Data" else "Show More Play Data")

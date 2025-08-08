@@ -22,13 +22,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.core.theme.White800
+import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.interTightMedium
 import com.madsam.otora.data.osu.remote.model.OsuGroupDTO
 import kotlinx.coroutines.delay
 
@@ -63,7 +64,7 @@ internal fun GroupListItem(
         ) {
             Text(
                 text = osuGroupDTO.shortName,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 color = Color(osuGroupDTO.colour.ifEmpty { "#FFFFFF" }.toColorInt()),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
@@ -73,7 +74,7 @@ internal fun GroupListItem(
         ) {
             Text(
                 text = osuGroupDTO.name,
-                fontWeight = FontWeight.Medium,
+                fontFamily = interTightMedium,
                 color = Color(osuGroupDTO.colour.ifEmpty { "#FFFFFF" }.toColorInt()),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )

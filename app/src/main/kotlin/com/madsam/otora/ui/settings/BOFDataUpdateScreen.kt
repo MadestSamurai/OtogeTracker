@@ -24,7 +24,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +31,8 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
+import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.interTightMedium
 import com.madsam.otora.core.theme.interTightRegular
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,8 +50,7 @@ fun BOFDataUpdateScreen(
             title = {
                 Text(
                     text = "BOF 数据更新",
-                    fontFamily = interTightRegular,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                     color = Beige400
                 )
             },
@@ -87,8 +87,7 @@ fun BOFDataUpdateScreen(
                     text = "BOF 活动数据",
                     color = White1000,
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = interTightRegular,
+                    fontFamily = interTightBold,
                     textAlign = TextAlign.Center
                 )
                 
@@ -115,8 +114,7 @@ fun BOFDataUpdateScreen(
                 ) {
                     Text(
                         "更新 BOF 数据",
-                        fontFamily = interTightRegular,
-                        fontWeight = FontWeight.Medium
+                        fontFamily = interTightMedium,
                     )
                 }
             }

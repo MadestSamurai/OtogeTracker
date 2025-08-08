@@ -12,12 +12,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red700
+import com.madsam.otora.core.theme.interTightBold
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -56,7 +56,7 @@ internal fun TopRank(
                     text = "No play records",
                     color = Beige400,
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                     modifier = Modifier.padding(16.dp)
                 )
                 return@Column

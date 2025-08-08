@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
@@ -46,6 +45,7 @@ import com.madsam.otora.core.theme.OSU_LEVEL_PLATINUM_1
 import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
+import com.madsam.otora.core.theme.interTightBold
 import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.utils.CommonUtils.getRatingBrush
 import com.madsam.otora.core.utils.ndp
@@ -83,7 +83,7 @@ internal fun ChunithmFriendList(
                 text = "已登录分数 (置顶)",
                 color = Beige500,
                 fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 modifier = Modifier
                     .padding(horizontal = 12.dp, vertical = 6.dp)
                     .fillMaxWidth(),
@@ -185,8 +185,7 @@ internal fun FriendCard(
                 overflow = TextOverflow.Ellipsis,
                 color = Color.Black,
                 fontSize = 16.sp,
-                fontFamily = interTightRegular,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
             )
 
             if (chuniFriend.reborn > 0) {
@@ -213,7 +212,7 @@ internal fun FriendCard(
                     text = chuniFriend.reborn.toString(),
                     color = Red500,
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold
+                    fontFamily = interTightBold
                 )
             }
 
@@ -237,7 +236,7 @@ internal fun FriendCard(
                 text = chuniFriend.level.toString(),
                 color = Beige400,
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 modifier = Modifier
                     .constrainAs(lv) {
                         top.linkTo(
@@ -254,7 +253,7 @@ internal fun FriendCard(
                 color = Beige400,
                 fontSize = 18.sp,
                 lineHeight = 22.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 modifier = Modifier
                     .constrainAs(username) {
                         top.linkTo(lv.top)
@@ -298,7 +297,7 @@ internal fun FriendCard(
                         style = SpanStyle(
                             color = Beige500,
                             fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal
+                            fontFamily = interTightRegular
                         )
                     ) {
                         append("RATING ")
@@ -307,7 +306,7 @@ internal fun FriendCard(
                         style = SpanStyle(
                             brush = getRatingBrush(chuniFriend.rating),
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                            fontFamily = interTightBold
                         )
                     ) {
                         append(chuniFriend.rating)
@@ -317,7 +316,7 @@ internal fun FriendCard(
                         style = SpanStyle(
                             color = Beige500,
                             fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
+                            fontFamily = interTightBold
                         )
                     ) {
                         append(chuniFriend.ratingMax)
@@ -339,7 +338,7 @@ internal fun FriendCard(
                         style = SpanStyle(
                             color = Beige500,
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Normal
+                            fontFamily = interTightRegular
                         )
                     ) {
                         append("OVERPOWER ")
@@ -349,7 +348,7 @@ internal fun FriendCard(
                 color = Beige400,
                 fontSize = 12.sp,
                 lineHeight = 14.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 modifier = Modifier
                     .constrainAs(overpower) {
                         top.linkTo(rating.bottom)
@@ -363,7 +362,7 @@ internal fun FriendCard(
                         style = SpanStyle(
                             color = Beige500,
                             fontSize = 11.sp,
-                            fontWeight = FontWeight.Normal
+                            fontFamily = interTightRegular
                         )
                     ) {
                         append("LAST PLAY ")
@@ -373,7 +372,7 @@ internal fun FriendCard(
                 color = Beige400,
                 fontSize = 12.sp,
                 lineHeight = 16.sp,
-                fontWeight = FontWeight.Bold,
+                fontFamily = interTightBold,
                 modifier = Modifier
                     .constrainAs(lastPlay) {
                         top.linkTo(overpower.bottom)

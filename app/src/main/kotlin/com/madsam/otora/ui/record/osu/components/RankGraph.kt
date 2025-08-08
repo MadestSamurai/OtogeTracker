@@ -24,7 +24,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -36,6 +35,9 @@ import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW_HALF_TRANS
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.Yellow1000
+import com.madsam.otora.core.theme.interTightMedium
+import com.madsam.otora.core.theme.interTightRegular
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 import com.madsam.otora.ui.components.DoubleCircleIndicator
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -96,14 +98,14 @@ internal fun RankGraph(
             text = stringResource(id = R.string.global_ranking),
             color = Beige400,
             fontSize = 24.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontFamily = interTightSemiBold,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 10.dp)
         )
 
         Text(
             text = stringResource(id = R.string.recent_90_days),
-            fontWeight = FontWeight.Medium,
+            fontFamily = interTightMedium,
             color = Beige400,
             fontSize = 16.sp
         )
@@ -260,7 +262,7 @@ internal fun RankGraph(
                 append("")
                 withStyle(
                     style = SpanStyle(
-                        fontWeight = FontWeight.SemiBold,
+                        fontFamily = interTightSemiBold,
                         fontSize = 16.sp
                     )
                 ) {
@@ -268,7 +270,7 @@ internal fun RankGraph(
                 }
                 withStyle(
                     style = SpanStyle(
-                        fontWeight = FontWeight.Normal,
+                        fontFamily = interTightRegular,
                         fontSize = 14.sp,
                     )
                 ) {

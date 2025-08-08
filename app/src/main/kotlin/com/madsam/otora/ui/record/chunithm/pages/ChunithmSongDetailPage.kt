@@ -1,5 +1,6 @@
 package com.madsam.otora.ui.record.chunithm.pages
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
@@ -20,9 +21,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -35,14 +38,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import android.util.Log
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.TextButton
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
@@ -55,6 +54,9 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
+import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.interTightMedium
+import com.madsam.otora.core.theme.interTightRegular
 import com.madsam.otora.core.utils.CalcUtils
 import com.madsam.otora.core.utils.CalcUtils.numberToChuniRank
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
@@ -99,7 +101,7 @@ internal fun ChunithmSongDetailPage(
                 text = "歌曲未找到",
                 color = Beige500,
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+                fontFamily = interTightBold
             )
         }
         return
@@ -153,7 +155,7 @@ internal fun ChunithmSongDetailPage(
                                     text = song.title,
                                     color = White1000,
                                     fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = interTightBold,
                                     maxLines = 2,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -197,7 +199,7 @@ private fun InfoRow(label: String, value: String) {
             text = "$label:",
             color = Beige400,
             fontSize = 14.sp,
-            fontWeight = FontWeight.Medium,
+            fontFamily = interTightMedium,
             modifier = Modifier.weight(0.4f)
         )
         Text(
@@ -247,13 +249,13 @@ private fun SongSheetDetailCard(
                     text = sheet.difficulty.uppercase(),
                     color = Color.White,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontFamily = interTightBold
                 )
                 Text(
                     text = "Lv. ${sheet.levelCn}",
                     color = Color.White,
                     fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
+                    fontFamily = interTightBold
                 )
             }
             
@@ -281,7 +283,7 @@ private fun SongSheetDetailCard(
                             text = "CN: ${sheet.levelCn}",
                             color = Color.White,
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                            fontFamily = interTightBold
                         )
                         Text(
                             text = "定数: ${sheet.levelValueCn}",
@@ -295,7 +297,7 @@ private fun SongSheetDetailCard(
                             text = "JP: ${sheet.levelJp}",
                             color = Color.White,
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                            fontFamily = interTightBold
                         )
                         Text(
                             text = "定数: ${sheet.internalLevelValueJp}",
@@ -310,7 +312,7 @@ private fun SongSheetDetailCard(
                         text = "Total: ${sheet.total}",
                         color = Color.White,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
+                        fontFamily = interTightBold
                     )
                     if (sheet.noteDesigner.isNotEmpty()) {
                         Text(
@@ -329,7 +331,7 @@ private fun SongSheetDetailCard(
                     text = "成绩信息",
                     color = Color.White,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 
@@ -343,7 +345,7 @@ private fun SongSheetDetailCard(
                             text = "分数: ${scoreInfo.score}",
                             color = Color.White,
                             fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
+                            fontFamily = interTightBold
                         )
                         if (scoreInfo.rank >= 0) {
                             Text(
@@ -359,7 +361,7 @@ private fun SongSheetDetailCard(
                             Text(
                                 text = CalcUtils.clearToChuniClear(scoreInfo.clear),
                                 fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
+                                fontFamily = interTightBold,
                                 color = Color.White,
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(4.dp))
@@ -372,7 +374,7 @@ private fun SongSheetDetailCard(
                             Text(
                                 text = CalcUtils.comboToChuniCombo(scoreInfo.combo),
                                 fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
+                                fontFamily = interTightBold,
                                 color = Color.White,
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(4.dp))
@@ -385,7 +387,7 @@ private fun SongSheetDetailCard(
                             Text(
                                 text = CalcUtils.chainToChuniChain(scoreInfo.chain),
                                 fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
+                                fontFamily = interTightBold,
                                 color = Color.White,
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(4.dp))
@@ -404,7 +406,7 @@ private fun SongSheetDetailCard(
                     text = "音符统计",
                     color = Color.White,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 Row(
@@ -438,13 +440,13 @@ private fun NoteTypeItem(type: String, count: Int) {
             text = type,
             color = White1000.copy(alpha = 0.7f),
             fontSize = 12.sp,
-            fontWeight = FontWeight.Bold
+            fontFamily = interTightBold
         )
         Text(
             text = count.toString(),
             color = White1000,
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
+            fontFamily = interTightBold
         )
     }
 }
@@ -505,7 +507,7 @@ private fun FriendScoreRanking(
                     text = "友人成绩排行",
                     color = Color.White,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                     modifier = Modifier.padding(start = 6.dp)
                 )
                 
@@ -636,14 +638,14 @@ private fun FriendScoreRankingItem(item: ChunithmViewModel.FriendScoreRankingIte
                     text = "#${item.rank}",
                     color = Color.White,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                     modifier = Modifier.width(32.dp)
                 )
                 Text(
                     text = item.friendName,
                     color = if (item.isMyScore) Color.White else Color.White.copy(alpha = 0.8f),
                     fontSize = 14.sp,
-                    fontWeight = if (item.isMyScore) FontWeight.Bold else FontWeight.Normal,
+                    fontFamily = if (item.isMyScore) interTightBold else interTightRegular,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -656,7 +658,7 @@ private fun FriendScoreRankingItem(item: ChunithmViewModel.FriendScoreRankingIte
                     text = item.score.toString(),
                     color = Color.White,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = interTightBold,
                     modifier = Modifier.width(90.dp), // 增加分数显示宽度
                     textAlign = TextAlign.End
                 )
@@ -667,7 +669,7 @@ private fun FriendScoreRankingItem(item: ChunithmViewModel.FriendScoreRankingIte
                     Text(
                         text = CalcUtils.comboToChuniCombo(item.combo),
                         fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
+                        fontFamily = interTightBold,
                         color = Color.White,
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))

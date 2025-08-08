@@ -34,7 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -52,6 +51,9 @@ import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.core.theme.OSU_BRIGHT_RED
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
+import com.madsam.otora.core.theme.interTightBold
+import com.madsam.otora.core.theme.interTightMedium
+import com.madsam.otora.core.theme.interTightSemiBold
 import com.madsam.otora.data.osu.remote.model.OsuGroupDTO
 import com.madsam.otora.data.osu.ui.model.OsuCardUiModel
 import com.madsam.otora.ui.components.GroupListItem
@@ -217,8 +219,8 @@ internal fun Card(
                 Text(
                     text = cardData.title,
                     color = Color(cardData.profileColour.toColorInt()),
+                    fontFamily = interTightBold,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .constrainAs(title) {
                             top.linkTo(parent.top, margin = 12.dp)
@@ -252,8 +254,8 @@ internal fun Card(
             Text(
                 text = cardData.username,
                 color = Beige400,
+                fontFamily = interTightSemiBold,
                 fontSize = 24.sp,
-                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .constrainAs(nameplateName) {
                         top.linkTo(avatarImage.top, margin = 8.dp)
@@ -322,8 +324,8 @@ internal fun Card(
             Text(
                 text = cardData.rank,
                 color = Beige400,
+                fontFamily = interTightBold,
                 fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .constrainAs(rank) {
                         top.linkTo(baseBackground.bottom)
@@ -359,8 +361,8 @@ internal fun Card(
                 Text(
                     text = cardData.countryRank,
                     color = Beige400,
+                    fontFamily = interTightMedium,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
                     lineHeight = 20.sp,
                 )
             }

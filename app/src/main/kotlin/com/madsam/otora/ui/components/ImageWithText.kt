@@ -8,16 +8,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
+import com.madsam.otora.core.theme.interTightSemiBold
 
-/**
- * 项目名: OtogeTracker
- * 文件名: com.madsam.otora.component.ImageWithText
- * 创建者: MadSamurai
- * 创建时间: 2024/8/3
- * 描述: 图片和文字
- */
 @Composable
 fun ImageWithText(
     painter: Painter,
@@ -41,7 +34,7 @@ fun ImageWithText(
             text = text,
             color = textColor,
             fontSize = textSize,
-            fontWeight = FontWeight.SemiBold,
+            fontFamily = interTightSemiBold,
             modifier = textModifier
                 .align(Alignment.CenterHorizontally)
         )

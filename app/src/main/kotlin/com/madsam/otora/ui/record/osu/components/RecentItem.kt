@@ -21,7 +21,6 @@ import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -34,6 +33,8 @@ import com.madsam.otora.core.theme.OSU_HEART_RED
 import com.madsam.otora.core.theme.OSU_ROTATE_GREEN
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Yellow1000
+import com.madsam.otora.core.theme.interTightLight
+import com.madsam.otora.core.theme.interTightMedium
 import com.madsam.otora.core.utils.CommonUtils.dateCodeToRecent
 import com.madsam.otora.data.osu.ui.model.OsuRecentUiModel
 
@@ -51,7 +52,7 @@ internal fun RecentItem(
                         append("achieved #${activity.rank} on ")
                     }
                     appendInlineContent("mode", "[${activity.mode}]")
-                    withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.Medium)) {
+                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = interTightMedium)) {
                         append(activity.beatmapTitle)
                     }
                 }
@@ -61,7 +62,7 @@ internal fun RecentItem(
                         append("lost first place on ")
                     }
                     appendInlineContent("mode", "[${activity.mode}]")
-                    withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.Medium)) {
+                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = interTightMedium)) {
                         append(activity.beatmapTitle)
                     }
                 }
@@ -70,7 +71,7 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = Beige400)) {
                         append("submitted a new beatmap ")
                     }
-                    withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.Medium)) {
+                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = interTightMedium)) {
                         append(activity.beatmapSetTitle)
                     }
                 }
@@ -79,7 +80,7 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = Beige400)) {
                         append("updated a beatmap ")
                     }
-                    withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.Medium)) {
+                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = interTightMedium)) {
                         append(activity.beatmapSetTitle)
                     }
                 }
@@ -100,13 +101,13 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = Beige400)) {
                         append("revived a beatmap ")
                     }
-                    withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.Medium)) {
+                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = interTightMedium)) {
                         append(activity.beatmapSetTitle)
                     }
                 }
 
                 "beatmapsetApprove" -> {
-                    withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.Medium)) {
+                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = interTightMedium)) {
                         append(activity.beatmapSetTitle)
                     }
                     withStyle(style = SpanStyle(color = Beige400)) {
@@ -118,7 +119,7 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = Beige400)) {
                         append("achieved ")
                     }
-                    withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.Medium)) {
+                    withStyle(style = SpanStyle(color = Yellow1000, fontFamily = interTightMedium)) {
                         append(activity.achievement)
                     }
                 }
@@ -295,7 +296,7 @@ internal fun RecentItem(
         Text(
             text = dateCodeToRecent(activity.createdAt),
             fontSize = 12.sp,
-            fontWeight = FontWeight.Light,
+            fontFamily = interTightLight,
             lineHeight = 14.sp,
             color = Color.Gray,
             modifier = Modifier
