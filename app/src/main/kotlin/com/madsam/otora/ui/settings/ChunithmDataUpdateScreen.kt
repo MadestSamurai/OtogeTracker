@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -74,6 +76,7 @@ fun ChunithmDataUpdateScreen(
     val updateState = remember { mutableStateOf(UpdateState.IDLE) }
     val cookieState = remember { mutableStateOf(UpdateState.IDLE) }
     val scope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
@@ -115,7 +118,9 @@ fun ChunithmDataUpdateScreen(
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(
-                modifier = Modifier.padding(20.dp)
+                modifier = Modifier
+                    .padding(20.dp)
+                    .verticalScroll(scrollState)
             ) {
                 // User-Agent检查提示
                 if (!UserAgentUtils.isUserAgentValid(context)) {
@@ -300,6 +305,8 @@ fun ChunithmDataUpdateScreen(
                     },
                     isError = requestError.value,
                     modifier = Modifier.fillMaxWidth(),
+                    maxLines = 4,
+                    minLines = 1,
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = White1000,
                         unfocusedTextColor = White1000,
@@ -337,6 +344,8 @@ fun ChunithmDataUpdateScreen(
                     },
                     isError = responseError.value,
                     modifier = Modifier.fillMaxWidth(),
+                    maxLines = 4,
+                    minLines = 1,
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = White1000,
                         unfocusedTextColor = White1000,
