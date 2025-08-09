@@ -21,13 +21,11 @@ internal data class ChunithmFullScoreEntity(
     var chain: String = "",
     
     var rank: Int = 0, // Rank as an integer (0-13 for D to SSS+)
-    var jacket: String = "",
     var date: String = "",
     var trackNumber: String = "",
     
     // Genre name for grouping
     var genreName: String = "",
-    @Index var difficulty: String = "", // The difficulty level (Basic, Advanced, etc.)
     
     var recordedAt: String = "", // When this specific record was created (timestamp)
     @Index var isPersonalBest: Boolean = false // Whether this is the current personal best for this song+difficulty
@@ -45,11 +43,9 @@ internal data class ChunithmFullScoreEntity(
         combo = "",
         chain = "",
         rank = 0,
-        jacket = "",
         date = "",
         trackNumber = "",
         genreName = "",
-        difficulty = "",
         recordedAt = "",
         isPersonalBest = false
     )

@@ -82,11 +82,9 @@ internal class ChunithmObjectBoxService {
                         combo = score.combo,
                         chain = score.chain,
                         rank = score.rank,
-                        jacket = score.jacket,
                         date = score.date,
                         trackNumber = score.trackNumber,
-                        genreName = score.genreName,
-                        difficulty = score.difficulty
+                        genreName = score.genreName
                     )
                 }
             } catch (e: Exception) {
@@ -122,27 +120,15 @@ internal class ChunithmObjectBoxService {
                         combo = scoreEntity.combo,
                         chain = scoreEntity.chain,
                         rank = scoreEntity.rank,
-                        jacket = scoreEntity.jacket,
                         date = scoreEntity.date,
                         trackNumber = scoreEntity.trackNumber,
-                        genreName = scoreEntity.genreName,
-                        difficulty = scoreEntity.difficulty
+                        genreName = scoreEntity.genreName
                     )
-                    
-                    // 转换数字难度为字符串
-                    val difficultyString = when (scoreEntity.diff) {
-                        "0" -> "basic"
-                        "1" -> "advanced"
-                        "2" -> "expert"
-                        "3" -> "master"
-                        "4" -> "ultima"
-                        else -> scoreEntity.diff
-                    }
                     
                     if (!scoresMap.containsKey(scoreEntity.title)) {
                         scoresMap[scoreEntity.title] = mutableMapOf()
                     }
-                    scoresMap[scoreEntity.title]!![difficultyString] = scoreUiModel
+                    scoresMap[scoreEntity.title]!![scoreEntity.diff] = scoreUiModel
                 }
                 
                 scoresMap.mapValues { it.value.toMap() }
@@ -189,23 +175,14 @@ internal class ChunithmObjectBoxService {
     /**
      * 获取歌曲的成绩历史
      */
-    suspend fun getScoreHistoryForSong(title: String, difficulty: String): List<ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel> {
-        Log.d(TAG, "getScoreHistoryForSong called: title='$title', difficulty='$difficulty'")
+    suspend fun getScoreHistoryForSong(title: String, diff: String): List<ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel> {
+        Log.d(TAG, "getScoreHistoryForSong called: title='$title', difficulty='$diff'")
         
         return withContext(Dispatchers.IO) {
             try {
-                val difficultyNumber = when (difficulty.lowercase()) {
-                    "basic" -> "0"
-                    "advanced" -> "1"
-                    "expert" -> "2"
-                    "master" -> "3"
-                    "ultima" -> "4"
-                    else -> difficulty
-                }
-                
                 val historyRecords = scoreBox.query(
                     ChunithmFullScoreEntity_.title.equal(title)
-                        .and(ChunithmFullScoreEntity_.diff.equal(difficultyNumber))
+                        .and(ChunithmFullScoreEntity_.diff.equal(diff))
                 ).build().find()
                 
                 historyRecords.map { scoreEntity ->
@@ -219,11 +196,9 @@ internal class ChunithmObjectBoxService {
                         combo = scoreEntity.combo,
                         chain = scoreEntity.chain,
                         rank = scoreEntity.rank,
-                        jacket = scoreEntity.jacket,
                         date = scoreEntity.date,
                         trackNumber = scoreEntity.trackNumber,
-                        genreName = scoreEntity.genreName,
-                        difficulty = scoreEntity.difficulty
+                        genreName = scoreEntity.genreName
                     )
                 }.sortedBy { it.date } // 按日期排序
             } catch (e: Exception) {
@@ -236,7 +211,15 @@ internal class ChunithmObjectBoxService {
     /**
      * 获取游戏记录UI模型
      */
-    suspend fun getPlayRecordUiModel(difficulty: String): ChunithmPlayRecordUiModel? {
+    suspend fun getPlayRecordUiModel(diff: String): ChunithmPlayRecordUiModel? {
+        val difficulty = when(diff) {
+            "0" -> "Basic"
+            "1" -> "Advanced"
+            "2" -> "Expert"
+            "3" -> "Master"
+            "4" -> "Ultima"
+            else -> diff
+        }
         return withContext(Dispatchers.IO) {
             try {
                 val playRecord = playRecordBox.query(
@@ -245,7 +228,7 @@ internal class ChunithmObjectBoxService {
                 
                 playRecord?.let { record ->
                     val scores = scoreBox.query(
-                        ChunithmFullScoreEntity_.difficulty.equal(difficulty)
+                        ChunithmFullScoreEntity_.diff.equal(diff)
                             .and(ChunithmFullScoreEntity_.isPersonalBest.equal(true))
                     ).build().find()
                     
@@ -279,11 +262,9 @@ internal class ChunithmObjectBoxService {
                                 combo = scoreEntity.combo,
                                 chain = scoreEntity.chain,
                                 rank = scoreEntity.rank,
-                                jacket = scoreEntity.jacket,
                                 date = scoreEntity.date,
                                 trackNumber = scoreEntity.trackNumber,
-                                genreName = scoreEntity.genreName,
-                                difficulty = scoreEntity.difficulty
+                                genreName = scoreEntity.genreName
                             )
                         }
                     )
@@ -409,65 +390,18 @@ internal class ChunithmObjectBoxService {
     }
 
     /**
-     * 获取游戏记录数据
-     */
-    suspend fun getPlayRecordData(difficulty: String): ChunithmPlayRecordEntity? {
-        return withContext(Dispatchers.IO) {
-            try {
-                playRecordBox.query(
-                    ChunithmPlayRecordEntity_.difficulty.equal(difficulty)
-                ).build().findFirst()
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to get play record data: ${e.message}", e)
-                null
-            }
-        }
-    }
-
-    /**
      * 获取某个难度的所有成绩
      */
     suspend fun getFullScoresByDifficulty(difficulty: String): List<ChunithmFullScoreEntity> {
         return withContext(Dispatchers.IO) {
             try {
                 scoreBox.query(
-                    ChunithmFullScoreEntity_.difficulty.equal(difficulty)
+                    ChunithmFullScoreEntity_.diff.equal(difficulty)
                         .and(ChunithmFullScoreEntity_.isPersonalBest.equal(true))
                 ).build().find()
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to get full scores by difficulty: ${e.message}", e)
                 emptyList()
-            }
-        }
-    }
-
-    /**
-     * 获取所有友人的分数对比数据（用于好友页面展示）
-     */
-    suspend fun getAllFriendsScoreData(): Map<String, Map<String, List<ChunithmFriendScoreEntity>>> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val entities = friendScoreBox.all
-                val result = mutableMapOf<String, MutableMap<String, MutableList<ChunithmFriendScoreEntity>>>()
-                
-                entities.forEach { entity ->
-                    val friendCode = entity.friendCode
-                    val difficulty = entity.difficulty
-                    
-                    if (!result.containsKey(friendCode)) {
-                        result[friendCode] = mutableMapOf()
-                    }
-                    if (!result[friendCode]!!.containsKey(difficulty)) {
-                        result[friendCode]!![difficulty] = mutableListOf()
-                    }
-                    
-                    result[friendCode]!![difficulty]!!.add(entity)
-                }
-                
-                result.mapValues { it.value.mapValues { diffEntry -> diffEntry.value.toList() }.toMap() }.toMap()
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to get all friends score data: ${e.message}", e)
-                emptyMap()
             }
         }
     }
@@ -604,9 +538,8 @@ internal class ChunithmObjectBoxService {
                         
                         // Find the current personal best for this song+difficulty
                         val currentBest = scoreBox.query(
-                            ChunithmFullScoreEntity_.songId.equal(score.id.toLong())
+                            ChunithmFullScoreEntity_.songId.equal(score.id)
                                 .and(ChunithmFullScoreEntity_.diff.equal(score.diff))
-                                .and(ChunithmFullScoreEntity_.difficulty.equal(diff))
                                 .and(ChunithmFullScoreEntity_.isPersonalBest.equal(true))
                         ).build().findFirst()
                         
@@ -642,11 +575,9 @@ internal class ChunithmObjectBoxService {
                                 combo = score.combo
                                 chain = score.chain
                                 rank = score.rank
-                                jacket = score.jacket
                                 date = score.date
                                 trackNumber = score.trackNumber
                                 genreName = genre.name
-                                difficulty = diff
                                 recordedAt = currentTime
                                 isPersonalBest = true  // This is now the current personal best
                             }
@@ -665,11 +596,7 @@ internal class ChunithmObjectBoxService {
     suspend fun saveFriendListData(friendListData: List<ChuniFriendDTO>) {
         withContext(Dispatchers.IO) {
             try {
-                // Clear existing friend list
                 friendBox.removeAll()
-                
-                val currentTime = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
-                    .format(java.util.Date())
                 
                 for (friendDto in friendListData) {
                     val entity = ChunithmFriendEntity().apply {

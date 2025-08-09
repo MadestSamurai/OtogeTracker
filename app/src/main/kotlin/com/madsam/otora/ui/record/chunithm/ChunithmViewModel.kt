@@ -10,7 +10,6 @@ import com.madsam.otora.core.utils.CalcUtils.calcChuniRating
 import com.madsam.otora.core.utils.CommonUtils.bigNumberToInt
 import com.madsam.otora.core.utils.JsonUtil
 import com.madsam.otora.data.chunithm.local.objectbox.ChunithmObjectBoxService
-import com.madsam.otora.data.chunithm.remote.api.ChunithmRequestService
 import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniPenguinDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniScoreDTO
@@ -30,6 +29,7 @@ import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -71,6 +71,7 @@ internal class ChunithmViewModel() : ViewModel() {
 
     // 分数缓存 - 预加载机制
     private val _allScoresCache = MutableStateFlow<Map<String, Map<String, ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel>>>(emptyMap())
+    val allScoresCache: StateFlow<Map<String, Map<String, ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel>>> = _allScoresCache.asStateFlow()
     private var scoresCacheLoaded = false
 
     fun loadData(context: Context) {
@@ -79,11 +80,7 @@ internal class ChunithmViewModel() : ViewModel() {
         loadPlayDataFromLocal()
         loadFriendDataFromLocal()
         loadTopRankDataFromLocal(context)
-    }
-
-    fun fetchSongData(context: Context) {
-        val chunithmRequestService = ChunithmRequestService(context)
-        chunithmRequestService.getChuniSongsData()
+        preloadAllScores()
     }
 
     fun refreshUserData(context: Context) {
@@ -93,8 +90,6 @@ internal class ChunithmViewModel() : ViewModel() {
                 // 添加一个小延迟确保UI更新
                 delay(50)
                 loadData(context)
-                // 重新加载分数缓存，因为用户数据更新可能包含新的分数记录
-                preloadAllScores()
                 // 添加一个最小延迟确保用户能看到刷新动画
                 delay(300)
             } catch (e: Exception) {
@@ -105,13 +100,12 @@ internal class ChunithmViewModel() : ViewModel() {
         }
     }
 
-    fun refreshSongData(context: Context) {
+    fun refreshSongData() {
         viewModelScope.launch {
             _isRefreshing.value = true
             try {
                 // 添加一个小延迟确保UI更新
                 delay(50)
-                fetchSongData(context)
                 // 重新加载分数缓存
                 preloadAllScores()
                 // 添加一个最小延迟确保用户能看到刷新动画
@@ -151,18 +145,16 @@ internal class ChunithmViewModel() : ViewModel() {
             try {
                 Log.d("ChunithmViewModel", "Loading play data from database...")
                 val chunithmLocalService = ChunithmObjectBoxService()
-                
-                val diffArray = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
-                for (diff in diffArray) {
-                    val playRecordUiModel = chunithmLocalService.getPlayRecordUiModel(diff)
+
+                for (diff in 0..4) {
+                    val playRecordUiModel = chunithmLocalService.getPlayRecordUiModel(diff.toString())
                     
                     if (playRecordUiModel != null) {
-                        // Calculate total score from all individual scores with deduplication
                         // 使用Map来存储每个歌曲+难度的最高分数
                         val bestScores = mutableMapOf<String, Long>()
 
                         playRecordUiModel.scores.forEach { score ->
-                            val scoreKey = "${score.title}_${score.difficulty}" // 创建唯一键
+                            val scoreKey = "${score.title}_${score.diff}" // 创建唯一键
                             val currentBest = bestScores[scoreKey] ?: 0L
                             // 只保留最高分数
                             if (score.score > currentBest) {
@@ -194,19 +186,19 @@ internal class ChunithmViewModel() : ViewModel() {
                         }
                         
                         when (diff) {
-                            "Basic" -> {
+                            0 -> {
                                 chunithmPlayDataUiModel.update { it.copy(basicPlayData = playData) }
                             }
-                            "Advanced" -> {
+                            1 -> {
                                 chunithmPlayDataUiModel.update { it.copy(advancedPlayData = playData) }
                             }
-                            "Expert" -> {
+                            2 -> {
                                 chunithmPlayDataUiModel.update { it.copy(expertPlayData = playData) }
                             }
-                            "Master" -> {
+                            3 -> {
                                 chunithmPlayDataUiModel.update { it.copy(masterPlayData = playData) }
                             }
-                            "Ultima" -> {
+                            4 -> {
                                 chunithmPlayDataUiModel.update { it.copy(ultimaPlayData = playData) }
                             }
                         }
@@ -467,8 +459,8 @@ internal class ChunithmViewModel() : ViewModel() {
         }
     }
 
-    fun getScoreFromCache(title: String, difficulty: String): ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel? {
-        return _allScoresCache.value[title]?.get(difficulty)
+    fun getScoreFromCache(title: String, diff: String): ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel? {
+        return _allScoresCache.value[title]?.get(diff)
     }
 
     fun getScoresMapForSong(title: String): Map<String, ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel> {
@@ -476,9 +468,18 @@ internal class ChunithmViewModel() : ViewModel() {
     }
 
     fun getSheetScoreInfoMapForSong(title: String): Map<String, SheetScoreInfo> {
+        // 确保缓存已加载
+        if (!scoresCacheLoaded) {
+            Log.d("ChunithmViewModel", "Scores cache not loaded yet, returning empty map for $title")
+            return emptyMap()
+        }
+        
         val songScoresMap = _allScoresCache.value[title] ?: return emptyMap()
         
-        return songScoresMap.mapValues { (_, scoreData) ->
+        Log.d("ChunithmViewModel", "Found ${songScoresMap.size} scores for song: $title")
+        
+        return songScoresMap.mapValues { (difficulty, scoreData) ->
+            Log.d("ChunithmViewModel", "Converting score for $title-$difficulty: score=${scoreData.score}")
             SheetScoreInfo(
                 score = scoreData.score,
                 rank = scoreData.rank,
@@ -489,17 +490,15 @@ internal class ChunithmViewModel() : ViewModel() {
         }
     }
 
-    suspend fun getLatestScoreForSong(title: String, difficulty: String): ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel? {
-        Log.d("ChunithmViewModel", "getLatestScoreForSong called: title='$title', difficulty='$difficulty'")
-        
+    suspend fun getLatestScoreForSong(title: String, diff: String): ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel? {
         // Try to get from cache first
         if (scoresCacheLoaded) {
-            val cachedScore = getScoreFromCache(title, difficulty)
+            val cachedScore = getScoreFromCache(title, diff)
             if (cachedScore != null) {
                 Log.d("ChunithmViewModel", "Found score in cache: $cachedScore")
                 return cachedScore
             } else {
-                Log.d("ChunithmViewModel", "No score found in cache for $title - $difficulty")
+                Log.d("ChunithmViewModel", "No score found in cache for $title - $diff")
                 return null
             }
         }
@@ -508,7 +507,7 @@ internal class ChunithmViewModel() : ViewModel() {
         Log.d("ChunithmViewModel", "Cache not loaded, falling back to individual query")
         val chunithmLocalService = ChunithmObjectBoxService()
         
-        val result = chunithmLocalService.getLatestScoreForSong(title, difficulty)
+        val result = chunithmLocalService.getLatestScoreForSong(title, diff)
         Log.d("ChunithmViewModel", "getLatestScoreForSong result: $result")
         return result
     }
@@ -516,16 +515,23 @@ internal class ChunithmViewModel() : ViewModel() {
     /**
      * 获取歌曲的友人成绩排行数据
      * @param title 歌曲标题
-     * @param difficulty 难度 (basic, advanced, expert, master, ultima)
+     * @param diff 难度 (0-4)
      * @return 包含自己和友人成绩的排行列表，按分数降序排列
      */
-    suspend fun getFriendScoreRanking(title: String, difficulty: String): List<FriendScoreRankingItem> {
+    suspend fun getFriendScoreRanking(title: String, diff: String): List<FriendScoreRankingItem> {
         val chunithmLocalService = ChunithmObjectBoxService()
         val friendList = chunithmLocalService.getFriendListData()
-        val myScore = getLatestScoreForSong(title, difficulty)
+        val myScore = getLatestScoreForSong(title, diff)
         
         // 将小写难度转换为数据库使用的首字母大写格式
-        val dbDifficulty = difficulty.replaceFirstChar { it.uppercase() }
+        val difficulty = when (diff) {
+            "0" -> "Basic"
+            "1" -> "Advanced"
+            "2" -> "Expert"
+            "3" -> "Master"
+            "4" -> "Ultima"
+            else -> throw IllegalArgumentException("Invalid difficulty: $diff")
+        }
         
         val rankingList = mutableListOf<FriendScoreRankingItem>()
         
@@ -544,7 +550,7 @@ internal class ChunithmViewModel() : ViewModel() {
         
         // 添加友人成绩
         for (friend in friendList.filter { it.isFavorite }) {
-            val friendScores = chunithmLocalService.getFriendScoreData(friend.friendCode, dbDifficulty)
+            val friendScores = chunithmLocalService.getFriendScoreData(friend.friendCode, difficulty)
             val friendScore = friendScores.find { it.title == title }
             if (friendScore != null && friendScore.score > 0) {
                 rankingList.add(

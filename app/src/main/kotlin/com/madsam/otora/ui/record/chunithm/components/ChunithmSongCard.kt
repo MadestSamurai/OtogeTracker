@@ -13,7 +13,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -33,9 +37,9 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Red900
+import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
@@ -188,11 +192,12 @@ internal fun ChunithmSongCard(
             ) {
                 val scoresMap = remember { mutableStateOf<Map<String, SheetScoreInfo>>(emptyMap()) }
                 
-                LaunchedEffect(item.title) {
+                LaunchedEffect(item.title, viewModel?.allScoresCache?.collectAsState()?.value) {
                     if (viewModel != null) {
-                        // Directly get all scores for the song in SheetScoreInfo format
+                        // Get all scores for the song in SheetScoreInfo format
                         val songScoresMap = viewModel.getSheetScoreInfoMapForSong(item.title)
                         scoresMap.value = songScoresMap
+                        Log.d("ChunithmSongCard", "Loaded ${songScoresMap.size} scores for ${item.title}")
                     } else {
                         Log.w("ChunithmSongCard", "ViewModel is null, cannot load scores")
                     }

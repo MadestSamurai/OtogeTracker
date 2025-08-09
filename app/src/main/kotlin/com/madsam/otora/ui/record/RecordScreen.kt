@@ -33,6 +33,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +51,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.Cog
 import com.madsam.otora.core.icon.fa.Trash
 import com.madsam.otora.core.theme.Beige400
@@ -85,6 +87,18 @@ fun RecordScreen(
     // 移除ViewModel创建，让各个页面自己管理
     val osuScreenState = OsuScreenState()
     val chunithmNavController = rememberNavController()
+    
+    // 创建Chunithm ViewModel在外部，以便观察其状态
+    val chunithmViewModel: ChunithmViewModel = viewModel(factory = ChuniViewModelFactory())
+    val chunithmPageTitle by chunithmViewModel.pageTitle.collectAsState()
+    val chunithmShowBackButton by chunithmViewModel.showBackButton.collectAsState()
+    
+    // 设置Chunithm ViewModel的返回回调
+    LaunchedEffect(chunithmNavController) {
+        chunithmViewModel.setOnBackCallback {
+            chunithmNavController.popBackStack()
+        }
+    }
     
     // 检测是否为横屏或宽屏
     val windowInfo = LocalWindowInfo.current
@@ -167,19 +181,37 @@ fun RecordScreen(
         Column {
             CenterAlignedTopAppBar(
                 title = {
-                    // 简化标题逻辑，各页面自行管理
-                    ScrollableTitle(text = selectedItem.route)
+                    // 根据选中的页面显示不同的标题
+                    val titleText = when (selectedItem) {
+                        Screen.Page3 -> chunithmPageTitle
+                        else -> selectedItem.route
+                    }
+                    ScrollableTitle(text = titleText)
                 },
                 navigationIcon = {
-                    // 简化导航图标，统一使用Menu按钮
-                    IconButton(onClick = {
-                        scope.launch { drawerState.open() }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Menu",
-                            modifier = Modifier.size(24.dp)
-                        )
+                    // 根据页面和状态显示不同的导航图标
+                    if (selectedItem == Screen.Page3 && chunithmShowBackButton) {
+                        // Chunithm页面且需要显示返回按钮时
+                        IconButton(onClick = {
+                            chunithmViewModel.triggerBack()
+                        }) {
+                            Icon(
+                                imageVector = Fa.`Arrow-left`,
+                                contentDescription = "Back",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    } else {
+                        // 其他情况显示菜单按钮
+                        IconButton(onClick = {
+                            scope.launch { drawerState.open() }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menu",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
                 },
                 actions = {
@@ -222,7 +254,6 @@ fun RecordScreen(
                     )
 
                     Screen.Page3 -> {
-                        val chunithmViewModel: ChunithmViewModel = viewModel(factory = ChuniViewModelFactory())
                         ChunithmNavHost(
                             navController = chunithmNavController,
                             viewModel = chunithmViewModel,

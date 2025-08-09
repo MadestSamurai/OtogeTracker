@@ -168,7 +168,15 @@ internal fun ChunithmSheetList(
             
             // 显示该分组的所有谱面
             sortedSheetsInGroup.forEach { sheet ->
-                val scoreInfo = scoresMap[sheet.difficulty] ?: SheetScoreInfo()
+                val diff = when (sheet.difficulty) {
+                    "basic" -> "0"
+                    "advanced" -> "1"
+                    "expert" -> "2"
+                    "master" -> "3"
+                    "ultima" -> "4"
+                    else -> "-1"
+                }
+                val scoreInfo = scoresMap[diff] ?: SheetScoreInfo()
                 
                 if (sheet.type == "std") {
                     // 标准谱面

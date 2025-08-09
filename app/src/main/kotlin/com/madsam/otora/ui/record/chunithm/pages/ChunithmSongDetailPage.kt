@@ -420,11 +420,19 @@ private fun SongSheetDetailCard(
                     NoteTypeItem("FLICK", sheet.flick)
                 }
             }
-            
+
+            val diff = when (sheet.difficulty) {
+                "basic" -> "0"
+                "advanced" -> "1"
+                "expert" -> "2"
+                "master" -> "3"
+                "ultima" -> "4"
+                else -> "-1"
+            }
             // 友人成绩排行
             FriendScoreRanking(
                 songTitle = songTitle,
-                difficulty = sheet.difficulty,
+                diff = diff,
                 viewModel = viewModel
             )
         }
@@ -454,7 +462,7 @@ private fun NoteTypeItem(type: String, count: Int) {
 @Composable
 private fun FriendScoreRanking(
     songTitle: String,
-    difficulty: String,
+    diff: String,
     viewModel: ChunithmViewModel
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -462,10 +470,10 @@ private fun FriendScoreRanking(
     var isLoading by remember { mutableStateOf(true) }
     
     // 加载排行数据
-    LaunchedEffect(songTitle, difficulty) {
+    LaunchedEffect(songTitle, diff) {
         isLoading = true
         try {
-            rankingList = viewModel.getFriendScoreRanking(songTitle, difficulty)
+            rankingList = viewModel.getFriendScoreRanking(songTitle, diff)
         } catch (e: Exception) {
             Log.e("FriendScoreRanking", "Failed to load friend score ranking: ${e.message}")
         } finally {

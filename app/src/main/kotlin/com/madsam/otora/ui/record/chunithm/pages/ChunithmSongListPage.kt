@@ -44,7 +44,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
@@ -77,7 +76,6 @@ internal fun ChunithmSongListPage(
     setIsTabRowVisible: (Boolean) -> Unit,
     onNavigateToSongDetail: (String) -> Unit
 ) {
-    val context = LocalContext.current
     val screenWidthDp = with(LocalDensity.current) {
         LocalWindowInfo.current.containerSize.width.toDp()
     }
@@ -225,7 +223,7 @@ internal fun ChunithmSongListPage(
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
-        onRefresh = { viewModel.refreshSongData(context) },
+        onRefresh = { viewModel.refreshSongData() },
         modifier = Modifier
             .background(Red300)
             .fillMaxHeight(),

@@ -46,6 +46,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jsoup.Connection
@@ -351,8 +352,6 @@ internal class ChunithmRequestService(private val context: Context) {
                 .split(".").first()
                 .split("_").last()
             val rankNum = rank.toIntOrNull() ?: -1
-            val jacket = log.getElementsByClass("play_jacket_img")
-                .select("img").attr("data-original")
             val date = log.getElementsByClass("play_datalist_date").text()
             val trackNumber = log.getElementsByClass("play_track_text").text()
                 .split(" ").last()
@@ -365,7 +364,6 @@ internal class ChunithmRequestService(private val context: Context) {
                     combo = combo,
                     chain = chain,
                     rank = rankNum,
-                    jacket = jacket,
                     date = date,
                     trackNumber = trackNumber
                 )
@@ -641,7 +639,9 @@ internal class ChunithmRequestService(private val context: Context) {
         return friendList
     }
 
-    private suspend fun requestFriend() {
+    private suspend fun requestFriend(
+        onProgress: ((Float, String) -> Unit)? = null
+    ) {
         val doc = requestDataFromServer("$CHUNITHM_URL/friend/")
         val friendListData = parseFriendList(doc)
         
@@ -651,8 +651,24 @@ internal class ChunithmRequestService(private val context: Context) {
         // 为每个友人获取所有难度的成绩数据
         val favoriteCount = friendListData.count { it.isFavorite && it.friendCode.isNotEmpty() }
         Log.i(TAG, "Fetching friend scores for $favoriteCount favorite friends")
+        
+        if (favoriteCount == 0) {
+            return
+        }
+        
+        var processedCount = 0
         for (friend in friendListData) {
             if (friend.friendCode.isNotEmpty() && friend.isFavorite) {
+                processedCount++
+                
+                // 更新好友处理进度
+                withContext(Dispatchers.Main) {
+                    onProgress?.invoke(
+                        processedCount.toFloat() / favoriteCount,
+                        "获取好友数据 (${processedCount}/${favoriteCount})"
+                    )
+                }
+                
                 // 获取所有难度的成绩 (0=Basic, 1=Advanced, 2=Expert, 3=Master, 4=Ultima)
                 for (difficulty in 0..4) {
                     try {
@@ -853,28 +869,59 @@ internal class ChunithmRequestService(private val context: Context) {
 
     fun getUserData(
         onSuccess: (() -> Unit)? = null,
-        onError: ((String) -> Unit)? = null
+        onError: ((String) -> Unit)? = null,
+        onProgress: ((Float, String) -> Unit)? = null
     ) {
         if (!isUserRequestRunning.getAndSet(true)) {
             serviceScope.launch {
                 try {
-                    // Regular request functions
-                    setOf(
-                        ::requestPlayerData,
-                        ::requestRatingBest,
-                        ::requestRatingRecent,
-                        ::requestRatingNext,
-                        ::requestMapRecord,
-                        ::requestPlayLog,
-                        ::requestCollection,
-                        ::requestLoginBonus
-                    ).forEach { requestFunc ->
-                        requestFunc()
+                    // 基础步骤数（不包括好友数据）
+                    val baseSteps = 9
+                    var currentStep = 0
+                    
+                    // Helper function to update progress for base steps
+                    suspend fun updateBaseProgress(message: String) {
+                        currentStep++
+                        val progress = (currentStep.toFloat() / (baseSteps + 1)) * 0.9f // 前90%给基础步骤
+                        withContext(Dispatchers.Main) {
+                            onProgress?.invoke(progress, message)
+                        }
                     }
                     
+                    // Regular request functions with progress updates
+                    updateBaseProgress("获取玩家数据...")
+                    requestPlayerData()
+                    
+                    updateBaseProgress("获取Rating Best...")
+                    requestRatingBest()
+                    
+                    updateBaseProgress("获取Rating Recent...")
+                    requestRatingRecent()
+                    
+                    updateBaseProgress("获取Rating Next...")
+                    requestRatingNext()
+                    
+                    updateBaseProgress("获取地图记录...")
+                    requestMapRecord()
+                    
+                    updateBaseProgress("获取游戏记录...")
+                    requestPlayLog()
+                    
+                    updateBaseProgress("获取收藏数据...")
+                    requestCollection()
+                    
+                    updateBaseProgress("获取登录奖励...")
+                    requestLoginBonus()
+                    
                     // Suspend functions that need to be called separately
+                    updateBaseProgress("处理成绩记录...")
                     requestPlayRecord()
-                    requestFriend()
+                    
+                    // 好友数据处理，占用最后的10%进度
+                    requestFriend { friendProgress, friendMessage ->
+                        val totalProgress = 0.9f + (friendProgress * 0.1f) // 90% + 好友进度的10%
+                        onProgress?.invoke(totalProgress, friendMessage)
+                    }
 
                     ShareUtil.putString("chuniToken", cookie.token, context)
                     ShareUtil.putString("chuniExpires", cookie.expires, context)
@@ -895,28 +942,38 @@ internal class ChunithmRequestService(private val context: Context) {
         }
     }
 
-    fun getChuniSongsData() {
-        if (!isSongsRequestRunning.getAndSet(true)) {
-            serviceScope.launch {
-                try {
-                    requestSongsData()
-                } finally {
-                    isSongsRequestRunning.set(false)
-                }
-            }
-        }
-    }
-
     fun getChuniSongsData(
         onSuccess: (() -> Unit)? = null,
-        onError: ((String) -> Unit)? = null
+        onError: ((String) -> Unit)? = null,
+        onProgress: ((Float, String) -> Unit)? = null
     ) {
         if (!isSongsRequestRunning.getAndSet(true)) {
             serviceScope.launch {
                 try {
+                    withContext(Dispatchers.Main) {
+                        onProgress?.invoke(0.1f, "初始化连接...")
+                    }
+                    delay(200)
+                    
+                    withContext(Dispatchers.Main) {
+                        onProgress?.invoke(0.3f, "连接服务器...")
+                    }
+                    delay(300)
+                    
+                    withContext(Dispatchers.Main) {
+                        onProgress?.invoke(0.6f, "下载歌曲数据...")
+                    }
+                    
                     requestSongsData()
+                    
+                    withContext(Dispatchers.Main) {
+                        onProgress?.invoke(0.9f, "处理数据...")
+                    }
+                    delay(200)
+                    
                     // 在主线程上执行成功回调
                     withContext(Dispatchers.Main) {
+                        onProgress?.invoke(1.0f, "完成")
                         onSuccess?.invoke()
                     }
                 } catch (e: Exception) {

@@ -38,7 +38,6 @@ data class ChunithmPlayRecordUiModel(
         val combo: String = "",
         val chain: String = "",
         val rank: Int = -1,
-        val jacket: String = "",
         val date: String = "",
         val trackNumber: String = "",
         val genreName: String = "",

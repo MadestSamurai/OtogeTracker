@@ -1,5 +1,7 @@
 package com.madsam.otora.ui.settings
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,6 +35,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -46,8 +49,8 @@ import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.ShareUtil
 import com.madsam.otora.core.utils.UserAgentUtils
@@ -61,6 +64,12 @@ enum class UpdateState {
     SUCCESS  // 成功状态
 }
 
+data class ProgressState(
+    val state: UpdateState = UpdateState.IDLE,
+    val progress: Float = 0f,
+    val message: String = ""
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChunithmDataUpdateScreen(
@@ -73,8 +82,8 @@ fun ChunithmDataUpdateScreen(
     val responseState = remember { mutableStateOf("") }
     val requestError = remember { mutableStateOf(false) }
     val responseError = remember { mutableStateOf(false) }
-    val updateState = remember { mutableStateOf(UpdateState.IDLE) }
-    val cookieState = remember { mutableStateOf(UpdateState.IDLE) }
+    val updateState = remember { mutableStateOf(ProgressState()) }
+    val cookieState = remember { mutableStateOf(ProgressState()) }
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
 
@@ -188,16 +197,17 @@ fun ChunithmDataUpdateScreen(
                 // 更新歌曲数据按钮
                 Button(
                     onClick = {
-                        if (updateState.value == UpdateState.IDLE) {
-                            updateState.value = UpdateState.LOADING
+                        if (updateState.value.state == UpdateState.IDLE) {
+                            updateState.value = ProgressState(UpdateState.LOADING, 0.0f, "开始更新...")
                             scope.launch {
                                 snackbarHostState.showSnackbar("开始更新歌曲数据")
                             }
                             
                             val chunithmRequestService = ChunithmRequestService(context)
+                            
                             chunithmRequestService.getChuniSongsData(
                                 onSuccess = {
-                                    updateState.value = UpdateState.SUCCESS
+                                    updateState.value = ProgressState(UpdateState.SUCCESS, 1.0f, "更新完成")
                                     scope.launch {
                                         snackbarHostState.showSnackbar("歌曲数据更新完成")
                                     }
@@ -205,22 +215,25 @@ fun ChunithmDataUpdateScreen(
                                     // 延时后恢复到空闲状态
                                     scope.launch {
                                         delay(1500)
-                                        updateState.value = UpdateState.IDLE
+                                        updateState.value = ProgressState()
                                     }
                                 },
                                 onError = { errorMessage ->
-                                    updateState.value = UpdateState.IDLE
+                                    updateState.value = ProgressState()
                                     scope.launch {
                                         snackbarHostState.showSnackbar("更新失败: $errorMessage")
                                     }
+                                },
+                                onProgress = { progress, message ->
+                                    updateState.value = ProgressState(UpdateState.LOADING, progress, message)
                                 }
                             )
                         }
                     },
-                    enabled = updateState.value == UpdateState.IDLE,
+                    enabled = updateState.value.state == UpdateState.IDLE,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = when (updateState.value) {
+                        containerColor = when (updateState.value.state) {
                             UpdateState.IDLE -> Beige400
                             UpdateState.LOADING -> Beige400.copy(alpha = 0.8f)
                             UpdateState.SUCCESS -> Beige400
@@ -230,11 +243,18 @@ fun ChunithmDataUpdateScreen(
                         disabledContentColor = Red500.copy(alpha = 0.6f)
                     )
                 ) {
+                    // 动画进度值
+                    val animatedProgress by animateFloatAsState(
+                        targetValue = updateState.value.progress,
+                        animationSpec = tween(durationMillis = 300),
+                        label = "updateProgress"
+                    )
+
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        when (updateState.value) {
+                        when (updateState.value.state) {
                             UpdateState.IDLE -> {
                                 Text(
                                     "更新歌曲数据",
@@ -243,14 +263,16 @@ fun ChunithmDataUpdateScreen(
                             }
                             UpdateState.LOADING -> {
                                 CircularProgressIndicator(
+                                    progress = { animatedProgress },
                                     modifier = Modifier.size(16.dp),
                                     color = Red500,
                                     strokeWidth = 2.dp
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    "正在更新...",
-                                    fontFamily = sarasaSemiBold
+                                    updateState.value.message,
+                                    fontFamily = sarasaSemiBold,
+                                    fontSize = 12.sp
                                 )
                             }
                             UpdateState.SUCCESS -> {
@@ -370,7 +392,7 @@ fun ChunithmDataUpdateScreen(
                 // 保存Cookies按钮
                 Button(
                     onClick = {
-                        if (cookieState.value == UpdateState.IDLE) {
+                        if (cookieState.value.state == UpdateState.IDLE) {
                             requestError.value = requestState.value.isEmpty()
                             responseError.value = responseState.value.isEmpty()
                             if (requestError.value || responseError.value) {
@@ -387,7 +409,7 @@ fun ChunithmDataUpdateScreen(
                                 return@Button
                             }
                             
-                            cookieState.value = UpdateState.LOADING
+                            cookieState.value = ProgressState(UpdateState.LOADING, 0.1f, "验证Cookie...")
                             scope.launch {
                                 snackbarHostState.showSnackbar("开始保存Cookie并获取用户数据")
                             }
@@ -411,9 +433,10 @@ fun ChunithmDataUpdateScreen(
                             
                             // 获取用户数据，类似Dialog中的逻辑
                             val chunithmRequestService = ChunithmRequestService(context)
+                            
                             chunithmRequestService.getUserData(
                                 onSuccess = {
-                                    cookieState.value = UpdateState.SUCCESS
+                                    cookieState.value = ProgressState(UpdateState.SUCCESS, 1.0f, "获取完成")
                                     scope.launch {
                                         snackbarHostState.showSnackbar("用户数据获取成功")
                                     }
@@ -421,22 +444,25 @@ fun ChunithmDataUpdateScreen(
                                     // 延时后恢复到空闲状态
                                     scope.launch {
                                         delay(1500)
-                                        cookieState.value = UpdateState.IDLE
+                                        cookieState.value = ProgressState()
                                     }
                                 },
                                 onError = { errorMessage ->
-                                    cookieState.value = UpdateState.IDLE
+                                    cookieState.value = ProgressState()
                                     scope.launch {
                                         snackbarHostState.showSnackbar("Cookie保存成功，但用户数据获取失败: $errorMessage")
                                     }
+                                },
+                                onProgress = { progress, message ->
+                                    cookieState.value = ProgressState(UpdateState.LOADING, progress, message)
                                 }
                             )
                         }
                     },
-                    enabled = cookieState.value == UpdateState.IDLE,
+                    enabled = cookieState.value.state == UpdateState.IDLE,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = when (cookieState.value) {
+                        containerColor = when (cookieState.value.state) {
                             UpdateState.IDLE -> Beige400
                             UpdateState.LOADING -> Beige400.copy(alpha = 0.8f)
                             UpdateState.SUCCESS -> Beige400
@@ -446,11 +472,18 @@ fun ChunithmDataUpdateScreen(
                         disabledContentColor = Red500.copy(alpha = 0.6f)
                     )
                 ) {
+                    // 动画进度值
+                    val animatedCookieProgress by animateFloatAsState(
+                        targetValue = cookieState.value.progress,
+                        animationSpec = tween(durationMillis = 300),
+                        label = "cookieProgress"
+                    )
+                    
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        when (cookieState.value) {
+                        when (cookieState.value.state) {
                             UpdateState.IDLE -> {
                                 Text(
                                     "保存并获取用户数据",
@@ -459,14 +492,16 @@ fun ChunithmDataUpdateScreen(
                             }
                             UpdateState.LOADING -> {
                                 CircularProgressIndicator(
+                                    progress = { animatedCookieProgress },
                                     modifier = Modifier.size(16.dp),
                                     color = Red500,
                                     strokeWidth = 2.dp
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    "正在获取...",
-                                    fontFamily = sarasaSemiBold
+                                    cookieState.value.message,
+                                    fontFamily = sarasaSemiBold,
+                                    fontSize = 12.sp
                                 )
                             }
                             UpdateState.SUCCESS -> {

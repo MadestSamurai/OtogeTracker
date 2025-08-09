@@ -11,7 +11,6 @@ internal data class ChuniFullScoreDTO(
     var combo : String = "",
     var chain : String = "",
     var rank : Int = 0,
-    var jacket : String = "",
     var date : String = "",
     var trackNumber: String = "",
     var isPersonalRecord: Boolean = true // 标记是否为个人记录，true=自己的分数，false=友人分数
