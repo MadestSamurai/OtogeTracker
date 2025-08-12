@@ -14,11 +14,9 @@ import com.madsam.otora.data.chunithm.local.model.ChunithmSheetsEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmSheetsEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmSongsEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmSongsEntity_
-import com.madsam.otora.data.chunithm.remote.model.ChuniAliasesDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniFullScoreDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniJpDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniLxnsDTO
+import com.madsam.otora.data.chunithm.remote.model.ChuniMergedDataDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniPlayRecordDTO
 import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayRecordUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
@@ -230,22 +228,23 @@ internal class ChunithmObjectBoxService {
                     
                     ChunithmPlayRecordUiModel(
                         difficulty = record.id.toString(),
-                        rateSSSp = Pair(record.rateSSSpCount, record.rateSSSpTotal),
-                        rateSSS = Pair(record.rateSSSCount, record.rateSSSTotal),
-                        rateSSp = Pair(record.rateSSPCount, record.rateSSPTotal),
-                        rateSS = Pair(record.rateSSCount, record.rateSSTotal),
-                        rateSp = Pair(record.rateSpCount, record.rateSpTotal),
-                        rateS = Pair(record.rateSCount, record.rateSTotal),
-                        rateClear = Pair(record.rateClearCount, record.rateClearTotal),
-                        rateFC = Pair(record.rateFCCount, record.rateFCTotal),
-                        rateAJ = Pair(record.rateAJCount, record.rateAJTotal),
-                        rateAJC = Pair(record.rateAJCCount, record.rateAJCTotal),
-                        rateFChain = Pair(record.rateFChainCount, record.rateFChainTotal),
-                        rateFChainP = Pair(record.rateFChainPCount, record.rateFChainPTotal),
-                        rateHard = Pair(record.rateHardCount, record.rateHardTotal),
-                        rateAbs = Pair(record.rateAbsCount, record.rateAbsTotal),
-                        rateAbsP = Pair(record.rateAbsPCount, record.rateAbsPTotal),
-                        rateCatas = Pair(record.rateCatasCount, record.rateCatasTotal),
+                        totalSongs = record.rateSSSpTotal, // 使用任意一个Total字段作为总数
+                        rateSSSp = record.rateSSSpCount,
+                        rateSSS = record.rateSSSCount,
+                        rateSSp = record.rateSSPCount,
+                        rateSS = record.rateSSCount,
+                        rateSp = record.rateSpCount,
+                        rateS = record.rateSCount,
+                        rateClear = record.rateClearCount,
+                        rateFC = record.rateFCCount,
+                        rateAJ = record.rateAJCount,
+                        rateAJC = record.rateAJCCount,
+                        rateFChain = record.rateFChainCount,
+                        rateFChainP = record.rateFChainPCount,
+                        rateHard = record.rateHardCount,
+                        rateAbs = record.rateAbsCount,
+                        rateAbsP = record.rateAbsPCount,
+                        rateCatas = record.rateCatasCount,
                         lastUpdated = record.lastUpdated,
                         scores = scores.map { scoreEntity ->
                             ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel(
@@ -454,80 +453,64 @@ internal class ChunithmObjectBoxService {
                     difficulty = diff
                     
                     // Rating statistics
-                    playRecordData.rateSSSp.let {
-                        rateSSSpCount = it.first
-                        rateSSSpTotal = it.second
-                    }
-                    playRecordData.rateSSS.let {
-                        rateSSSCount = it.first
-                        rateSSSTotal = it.second
-                    }
-                    playRecordData.rateSSp.let {
-                        rateSSPCount = it.first
-                        rateSSPTotal = it.second
-                    }
-                    playRecordData.rateSS.let {
-                        rateSSCount = it.first
-                        rateSSTotal = it.second
-                    }
-                    playRecordData.rateSp.let {
-                        rateSpCount = it.first
-                        rateSpTotal = it.second
-                    }
-                    playRecordData.rateS.let {
-                        rateSCount = it.first
-                        rateSTotal = it.second
-                    }
+                    rateSSSpCount = playRecordData.rateSSSp
+                    rateSSSpTotal = playRecordData.totalSongs
+                    
+                    rateSSSCount = playRecordData.rateSSS
+                    rateSSSTotal = playRecordData.totalSongs
+                    
+                    rateSSPCount = playRecordData.rateSSp
+                    rateSSPTotal = playRecordData.totalSongs
+                    
+                    rateSSCount = playRecordData.rateSS
+                    rateSSTotal = playRecordData.totalSongs
+                    
+                    rateSpCount = playRecordData.rateSp
+                    rateSpTotal = playRecordData.totalSongs
+                    
+                    rateSCount = playRecordData.rateS
+                    rateSTotal = playRecordData.totalSongs
                     
                     // Clear statistics
-                    playRecordData.rateClear.let {
-                        rateClearCount = it.first
-                        rateClearTotal = it.second
-                    }
-                    playRecordData.rateFC.let {
-                        rateFCCount = it.first
-                        rateFCTotal = it.second
-                    }
-                    playRecordData.rateAJ.let {
-                        rateAJCount = it.first
-                        rateAJTotal = it.second
-                    }
-                    playRecordData.rateAJC.let {
-                        rateAJCCount = it.first
-                        rateAJCTotal = it.second
-                    }
-                    playRecordData.rateFChain.let {
-                        rateFChainCount = it.first
-                        rateFChainTotal = it.second
-                    }
-                    playRecordData.rateFChainP.let {
-                        rateFChainPCount = it.first
-                        rateFChainPTotal = it.second
-                    }
+                    rateClearCount = playRecordData.rateClear
+                    rateClearTotal = playRecordData.totalSongs
+                    
+                    rateFCCount = playRecordData.rateFC
+                    rateFCTotal = playRecordData.totalSongs
+                    
+                    rateAJCount = playRecordData.rateAJ
+                    rateAJTotal = playRecordData.totalSongs
+                    
+                    rateAJCCount = playRecordData.rateAJC
+                    rateAJCTotal = playRecordData.totalSongs
+                    
+                    rateFChainCount = playRecordData.rateFChain
+                    rateFChainTotal = playRecordData.totalSongs
+                    
+                    rateFChainPCount = playRecordData.rateFChainP
+                    rateFChainPTotal = playRecordData.totalSongs
                     
                     // Difficulty statistics
-                    playRecordData.rateHard.let {
-                        rateHardCount = it.first
-                        rateHardTotal = it.second
-                    }
-                    playRecordData.rateAbs.let {
-                        rateAbsCount = it.first
-                        rateAbsTotal = it.second
-                    }
-                    playRecordData.rateAbsP.let {
-                        rateAbsPCount = it.first
-                        rateAbsPTotal = it.second
-                    }
-                    playRecordData.rateCatas.let {
-                        rateCatasCount = it.first
-                        rateCatasTotal = it.second
-                    }
+                    rateHardCount = playRecordData.rateHard
+                    rateHardTotal = playRecordData.totalSongs
+                    
+                    rateAbsCount = playRecordData.rateAbs
+                    rateAbsTotal = playRecordData.totalSongs
+                    
+                    rateAbsPCount = playRecordData.rateAbsP
+                    rateAbsPTotal = playRecordData.totalSongs
+                    
+                    rateCatasCount = playRecordData.rateCatas
+                    rateCatasTotal = playRecordData.totalSongs
                     
                     lastUpdated = currentTime
                 }
                 playRecordBox.put(playRecordEntity)
                 
                 // Save genre and score data with intelligent historical tracking
+                val updatedOldBests = mutableListOf<ChunithmFullScoreEntity>()
+                val newBestScores = mutableListOf<ChunithmFullScoreEntity>()
+                
                 playRecordData.genreList.forEach { genre ->
                     genre.fullScoreList.forEach { score ->
                         val newScore = score.score.replace(",", "").toIntOrNull() ?: 0
@@ -556,7 +539,7 @@ internal class ChunithmObjectBoxService {
                             // Mark old personal best as no longer current
                             currentBest?.let { oldBest ->
                                 oldBest.isPersonalBest = false
-                                scoreBox.put(oldBest)
+                                updatedOldBests.add(oldBest)
                             }
                             
                             // Create new record with timestamp-based ID for uniqueness
@@ -577,9 +560,19 @@ internal class ChunithmObjectBoxService {
                                 recordedAt = currentTime
                                 isPersonalBest = true  // This is now the current personal best
                             }
-                            scoreBox.put(scoreEntity)
+                            newBestScores.add(scoreEntity)
                         }
                     }
+                }
+                
+                // Batch update all old personal bests (mark as no longer current)
+                if (updatedOldBests.isNotEmpty()) {
+                    scoreBox.put(updatedOldBests)
+                }
+                
+                // Batch save all new personal bests
+                if (newBestScores.isNotEmpty()) {
+                    scoreBox.put(newBestScores)
                 }
                 
                 Log.i(TAG, "Successfully saved play record data for difficulty: $diff")
@@ -594,8 +587,9 @@ internal class ChunithmObjectBoxService {
             try {
                 friendBox.removeAll()
                 
-                for (friendDto in friendListData) {
-                    val entity = ChunithmFriendEntity().apply {
+                // Batch create entities
+                val friendEntities = friendListData.map { friendDto ->
+                    ChunithmFriendEntity().apply {
                         friendCode = friendDto.friendCode
                         friendName = friendDto.friendName
                         profileBackground = friendDto.profileBackground
@@ -614,9 +608,11 @@ internal class ChunithmObjectBoxService {
                         classEmblemBase = friendDto.classEmblemBase
                         classEmblemTop = friendDto.classEmblemTop
                     }
-                    friendBox.put(entity)
                 }
-                Log.d(TAG, "Successfully saved ${friendListData.size} friends to ObjectBox")
+                
+                // Batch save all friends at once
+                friendBox.put(friendEntities)
+                Log.d(TAG, "Successfully batch saved ${friendEntities.size} friends to ObjectBox")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to save friend list data: ${e.message}", e)
             }
@@ -634,11 +630,11 @@ internal class ChunithmObjectBoxService {
                 friendScoreBox.remove(existingScores)
 
                 val currentTime = System.currentTimeMillis().toString()
-                var savedCount = 0
                 
-                for (scoreDto in friendScoreData) {
+                // Batch create entities
+                val friendScoreEntities = friendScoreData.mapNotNull { scoreDto ->
                     try {
-                        val entity = ChunithmFriendScoreEntity().apply {
+                        ChunithmFriendScoreEntity().apply {
                             this.friendCode = friendCode
                             title = scoreDto.title
                             score = scoreDto.score.replace(",", "").toIntOrNull() ?: 0
@@ -647,263 +643,93 @@ internal class ChunithmObjectBoxService {
                             recordedAt = currentTime
                             uniqueKey = "${friendCode}_${scoreDto.title}_${diffName}"
                         }
-                        friendScoreBox.put(entity)
-                        savedCount++
                     } catch (e: Exception) {
-                        Log.e(TAG, "Failed to save individual record (${scoreDto.title}): ${e.message}", e)
+                        Log.e(TAG, "Failed to create entity for (${scoreDto.title}): ${e.message}", e)
+                        null
                     }
                 }
-                Log.i(TAG, "Successfully saved $savedCount friend scores for $friendCode ($diffName)")
+                
+                // Batch save all entities at once
+                friendScoreBox.put(friendScoreEntities)
+                Log.i(TAG, "Successfully batch saved ${friendScoreEntities.size} friend scores for $friendCode ($diffName)")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to save friend score data: ${e.message}", e)
             }
         }
     }
 
-    suspend fun saveJPAndLxnsSongsData(chunithmJpDTO: ChuniJpDTO, chunithmLxnsDTO: ChuniLxnsDTO, chunithmAliasesDTO: ChuniAliasesDTO) {
+    suspend fun saveMergedSongsData(mergedData: ChuniMergedDataDTO) {
         withContext(Dispatchers.IO) {
             try {
-                // Clear existing data
                 songsBox.removeAll()
                 sheetsBox.removeAll()
 
-                // Create lookup maps
-                val aliasesById = chunithmAliasesDTO.aliases.associateBy { it.id }
-                val lxnsByTitle = createLxnsTitleMap(chunithmLxnsDTO.songs, aliasesById)
-                val jpById = chunithmJpDTO.songs.associateBy { it.songId }
+                val songEntities = mutableListOf<ChunithmSongsEntity>()
+                val sheetEntities = mutableListOf<ChunithmSheetsEntity>()
 
-                // Process and save song data
-                processSongData(jpById, lxnsByTitle)
+                mergedData.songs.forEach { mergedSong ->
+                    val songEntity = createSongEntityFromMerged(mergedSong)
+                    songEntities.add(songEntity)
+                    mergedSong.sheets.forEach { mergedSheet ->
+                        val sheetEntity = createSheetEntityFromMerged(mergedSong, mergedSheet)
+                        sheetEntities.add(sheetEntity)
+                    }
+                }
+
+                songsBox.put(songEntities)
+                sheetsBox.put(sheetEntities)
                 
-                Log.i(TAG, "Successfully saved ${chunithmJpDTO.songs.size} JP songs with complete CN integration")
+                Log.i(TAG, "Successfully batch saved ${songEntities.size} songs and ${sheetEntities.size} sheets")
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to save songs data: ${e.message}", e)
+                Log.e(TAG, "Failed to save merged songs data: ${e.message}", e)
             }
         }
     }
 
-    private fun createLxnsTitleMap(
-        lxnsSongs: List<ChuniLxnsDTO.ChuniSong>,
-        aliasesById: Map<Int, ChuniAliasesDTO.ChuniAlias>
-    ): Map<String, ChuniLxnsDTO.ChuniSong> {
-        return lxnsSongs.associateBy { song ->
-            // Add aliases to song
-            val aliases = aliasesById[song.id]?.aliases?.joinToString(",") ?: ""
-            song.aliases = aliases
-
-            // Check if this is a WE song (has difficulty = 5)
-            val isWeSong = song.difficulties.any { it.difficulty == 5 }
-            val title = if (isWeSong) "(WE) ${song.title}" else song.title
-            song.title = title
-
-            title
-        }
-    }
-
-    private fun processSongData(
-        jpSongs: Map<String, ChuniJpDTO.ChuniSong>,
-        lxnsByTitle: Map<String, ChuniLxnsDTO.ChuniSong>
-    ) {
-        // Process JP songs and their corresponding LXNS data
-        jpSongs.values.forEach { jpSong ->
-            // For JP songs with "(2)", "(3)" etc., try to find the base LXNS song
-            val lxnsSong = lxnsByTitle[jpSong.songId] ?: 
-                if (jpSong.songId.contains(" (") && jpSong.songId.contains(")")) {
-                    // Try to find base song without the (2), (3) suffix
-                    val baseSongId = jpSong.songId.substringBeforeLast(" (")
-                    lxnsByTitle[baseSongId]
-                } else null
-            
-            // Save song entity
-            val songEntity = createSongEntity(jpSong, lxnsSong)
-            songsBox.put(songEntity)
-            
-            // Save sheet entities for JP sheets
-            jpSong.sheets.forEach { sheet ->
-                val sheetEntity = createSheetEntity(jpSong, sheet, lxnsSong)
-                sheetsBox.put(sheetEntity)
-            }
-            
-            // Handle additional WE difficulties that exist in LXNS but not in JP
-            lxnsSong?.let { lxns ->
-                // Get all JP WE kanji characters for this song
-                val jpWeKanjis = jpSong.sheets
-                    .filter { it.type == "we" && it.difficulty.startsWith("【") && it.difficulty.endsWith("】") }
-                    .map { it.difficulty.substring(1, it.difficulty.length - 1) }
-                    .toSet()
-                
-                // Find LXNS WE difficulties that don't exist in JP
-                val extraWeDifficulties = lxns.difficulties.filter { it.difficulty == 5 && it.kanji !in jpWeKanjis }
-                
-                extraWeDifficulties.forEach { extraWeDifficulty ->
-                    // Create a virtual JP sheet for the extra WE difficulty
-                    val virtualJpSheet = createVirtualWeSheet(extraWeDifficulty)
-                    val sheetEntity = createSheetEntity(jpSong, virtualJpSheet, lxnsSong)
-                    sheetsBox.put(sheetEntity)
-                }
-            }
-        }
-
-        // Handle standalone LXNS WE songs that don't have corresponding JP songs
-        lxnsByTitle.values.forEach { lxnsSong ->
-            // Check if this LXNS song has WE difficulties and no corresponding JP song
-            val hasWeDifficulties = lxnsSong.difficulties.any { it.difficulty == 5 }
-            val hasCorrespondingJpSong = jpSongs.containsKey(lxnsSong.title)
-            
-            if (hasWeDifficulties && !hasCorrespondingJpSong) {
-                // Create a virtual JP song for this LXNS WE song
-                val virtualJpSong = createVirtualJpSong(lxnsSong)
-                val songEntity = createSongEntity(virtualJpSong, lxnsSong)
-                songsBox.put(songEntity)
-                
-                // Create WE sheets for all WE difficulties
-                lxnsSong.difficulties.filter { it.difficulty == 5 }.forEach { weDifficulty ->
-                    val virtualJpSheet = createVirtualWeSheet(weDifficulty)
-                    val sheetEntity = createSheetEntity(virtualJpSong, virtualJpSheet, lxnsSong)
-                    sheetsBox.put(sheetEntity)
-                }
-            }
-        }
-    }
-
-    private fun createSongEntity(jpSong: ChuniJpDTO.ChuniSong, lxnsSong: ChuniLxnsDTO.ChuniSong?): ChunithmSongsEntity {
+    private fun createSongEntityFromMerged(mergedSong: ChuniMergedDataDTO.ChuniMergedSong): ChunithmSongsEntity {
         return ChunithmSongsEntity().apply {
-            songId = jpSong.songId
-            genre = jpSong.category
-            title = jpSong.title
-            artist = jpSong.artist
-            bpm = jpSong.bpm
-            imageName = jpSong.imageName
-            version = jpSong.version
-            releaseDate = jpSong.releaseDate
-            isNew = jpSong.isNew
-            isLocked = jpSong.isLocked
-            comment = jpSong.comment
-            cnId = lxnsSong?.id ?: -1
-            map = lxnsSong?.map ?: "-"
-            aliases = lxnsSong?.aliases ?: ""
-        }
-    }
-
-    private fun createSheetEntity(
-        jpSong: ChuniJpDTO.ChuniSong, 
-        jpSheet: ChuniJpDTO.ChuniSong.ChuniSongSheet, 
-        lxnsSong: ChuniLxnsDTO.ChuniSong?
-    ): ChunithmSheetsEntity {
-        val lxnsSheet = getLxnsSheet(jpSheet.difficulty, lxnsSong)
-        val cnExists = calculateCnExists(jpSheet.difficulty, lxnsSong, lxnsSheet)
-        
-        return ChunithmSheetsEntity().apply {
-            title = jpSong.title
-            type = jpSheet.type
-            difficulty = jpSheet.difficulty
-            levelJp = jpSheet.level
-            levelValueJp = jpSheet.levelValue
-            internalLevelJp = jpSheet.internalLevel
-            internalLevelValueJp = jpSheet.internalLevelValue
-            levelCn = lxnsSheet?.level ?: ""
-            levelValueCn = lxnsSheet?.levelValue ?: 0.0
-            noteDesigner = lxnsSheet?.noteDesigner ?: jpSheet.noteDesigner
-            tap = jpSheet.noteCounts.tap
-            hold = jpSheet.noteCounts.hold
-            slide = jpSheet.noteCounts.slide
-            air = jpSheet.noteCounts.air
-            flick = jpSheet.noteCounts.flick
-            total = jpSheet.noteCounts.total
-            jp = jpSheet.regions.jp
-            intl = jpSheet.regions.intl
-            cn = cnExists
-            isSpecial = jpSheet.isSpecial
-        }
-    }
-
-    private fun createVirtualJpSong(lxnsSong: ChuniLxnsDTO.ChuniSong): ChuniJpDTO.ChuniSong {
-        return ChuniJpDTO.ChuniSong().apply {
-            songId = lxnsSong.title // Use LXNS title as songId
-            category = "WORLD'S END"
-            title = lxnsSong.title.removePrefix("(WE) ") // Remove WE prefix for title
-            artist = lxnsSong.artist
-            bpm = lxnsSong.bpm.toDouble()
-            imageName = ""
-            version = ""
-            releaseDate = ""
-            isNew = false
-            isLocked = false
+            songId = mergedSong.id.toString()
+            genre = mergedSong.category
+            title = mergedSong.title
+            artist = mergedSong.artist
+            bpm = mergedSong.bpm
+            imageName = mergedSong.imageName
+            version = mergedSong.version
+            releaseDate = mergedSong.releaseDate
+            isNew = mergedSong.isNew
+            isLocked = mergedSong.isLocked
             comment = ""
-            sheets = listOf() // Will be populated separately
+            cnId = mergedSong.id
+            map = "-"
+            aliases = mergedSong.aliases
         }
     }
 
-    private fun createVirtualWeSheet(weDifficulty: ChuniLxnsDTO.ChuniSong.Difficulty): ChuniJpDTO.ChuniSong.ChuniSongSheet {
-        return ChuniJpDTO.ChuniSong.ChuniSongSheet().apply {
-            type = "we"
-            difficulty = "【${weDifficulty.kanji}】"
-            level = "☆".repeat(weDifficulty.star)
-            levelValue = weDifficulty.levelValue
-            internalLevel = ""
-            internalLevelValue = 0.0
-            noteDesigner = weDifficulty.noteDesigner
-            noteCounts = ChuniJpDTO.ChuniSong.ChuniSongSheet.NoteCounts().apply {
-                tap = 0
-                hold = 0
-                slide = 0
-                air = 0
-                flick = 0
-                total = 0
-            }
-            regions = ChuniJpDTO.ChuniSong.ChuniSongSheet.Regions().apply {
-                jp = false
-                intl = false
-            }
-            isSpecial = true
-        }
-    }
-
-    private fun getLxnsSheet(
-        difficulty: String, 
-        lxnsSong: ChuniLxnsDTO.ChuniSong?
-    ): ChuniLxnsDTO.ChuniSong.Difficulty? {
-        if (lxnsSong == null) return null
-        
-        // For WE difficulties, we need to find the difficulty with difficulty=5 and matching kanji
-        if (difficulty.startsWith("【") && difficulty.endsWith("】")) {
-            // Extract the kanji character from JP difficulty (remove 【 and 】)
-            val jpKanji = difficulty.substring(1, difficulty.length - 1)
-            
-            // Find the LXNS difficulty with matching kanji
-            val weDifficulties = lxnsSong.difficulties.filter { it.difficulty == 5 }
-            val matchedDifficulty = weDifficulties.find { it.kanji == jpKanji }
-            
-            return matchedDifficulty
-        }
-        
-        // For regular difficulties, use the index-based approach
-        val difficultyIndex = when (difficulty) {
-            "basic" -> 0
-            "advanced" -> 1
-            "expert" -> 2
-            "master" -> 3
-            "ultima" -> 4
-            else -> 0
-        }
-        
-        return lxnsSong.difficulties.getOrNull(difficultyIndex).also {
-            if (it == null && difficulty == "ultima") {
-                Log.i(TAG, "No Ultima data found for ${lxnsSong.title}")
-            }
-        }
-    }
-
-    private fun calculateCnExists(
-        difficulty: String, 
-        lxnsSong: ChuniLxnsDTO.ChuniSong?, 
-        lxnsSheet: ChuniLxnsDTO.ChuniSong.Difficulty?
-    ): Boolean {
-        return when {
-            lxnsSong == null -> false
-            difficulty in listOf("basic", "advanced", "expert", "master") -> true
-            difficulty in listOf("ultima", "we") -> lxnsSheet != null
-            else -> lxnsSheet != null
+    private fun createSheetEntityFromMerged(
+        mergedSong: ChuniMergedDataDTO.ChuniMergedSong,
+        mergedSheet: ChuniMergedDataDTO.ChuniMergedSong.ChuniMergedSheet
+    ): ChunithmSheetsEntity {
+        return ChunithmSheetsEntity().apply {
+            title = mergedSong.title
+            type = mergedSheet.type
+            difficulty = mergedSheet.difficulty
+            levelJp = mergedSheet.level
+            levelValueJp = mergedSheet.levelValue
+            internalLevelJp = ""
+            internalLevelValueJp = 0.0
+            levelCn = mergedSheet.level
+            levelValueCn = mergedSheet.levelValue
+            noteDesigner = mergedSheet.noteDesigner
+            tap = mergedSheet.noteCounts.tap
+            hold = mergedSheet.noteCounts.hold
+            slide = mergedSheet.noteCounts.slide
+            air = mergedSheet.noteCounts.air
+            flick = mergedSheet.noteCounts.flick
+            total = mergedSheet.noteCounts.total
+            jp = mergedSheet.regions.jp
+            intl = mergedSheet.regions.intl
+            cn = mergedSheet.regions.cn
+            isSpecial = mergedSheet.isSpecial
         }
     }
 }

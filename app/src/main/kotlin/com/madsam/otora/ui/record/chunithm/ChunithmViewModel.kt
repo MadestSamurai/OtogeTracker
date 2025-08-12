@@ -167,6 +167,7 @@ internal class ChunithmViewModel() : ViewModel() {
                         
                         val playData = ChunithmPlayDataUiModel.ChuniPlayDataItemUI().apply {
                             this.scoreTotal = totalScore
+                            this.totalSongs = playRecordUiModel.totalSongs
                             this.rateSSSp = playRecordUiModel.rateSSSp
                             this.rateSSS = playRecordUiModel.rateSSS
                             this.rateSSp = playRecordUiModel.rateSSp

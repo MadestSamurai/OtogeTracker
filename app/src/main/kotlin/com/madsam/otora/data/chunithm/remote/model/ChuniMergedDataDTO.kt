@@ -2,8 +2,8 @@ package com.madsam.otora.data.chunithm.remote.model
 
 import com.squareup.moshi.Json
 
-internal data class ChuniJpDTO(
-    @param:Json(name = "songs") var songs: List<ChuniSong> = listOf(),
+internal data class ChuniMergedDataDTO(
+    @param:Json(name = "songs") var songs: List<ChuniMergedSong> = listOf(),
     @param:Json(name = "categories") var categories: List<Category> = listOf(),
     @param:Json(name = "versions") var versions: List<Version> = listOf(),
     @param:Json(name = "types") var types: List<Type> = listOf(),
@@ -37,8 +37,8 @@ internal data class ChuniJpDTO(
         @param:Json(name = "name") var name: String = ""
     )
 
-    internal data class ChuniSong (
-        @param:Json(name = "songId") var songId: String = "",
+    internal data class ChuniMergedSong(
+        @param:Json(name = "id") var id: Int = 0,
         @param:Json(name = "category") var category: String = "",
         @param:Json(name = "title") var title: String = "",
         @param:Json(name = "artist") var artist: String = "",
@@ -48,20 +48,20 @@ internal data class ChuniJpDTO(
         @param:Json(name = "releaseDate") var releaseDate: String = "",
         @param:Json(name = "isNew") var isNew: Boolean = false,
         @param:Json(name = "isLocked") var isLocked: Boolean = false,
-        @param:Json(name = "comment") var comment: String = "",
-        @param:Json(name = "sheets") var sheets: List<ChuniSongSheet> = listOf()
+        @param:Json(name = "sheets") var sheets: List<ChuniMergedSheet> = listOf(),
+        @param:Json(name = "aliases") var aliases: String = ""
     ) {
-        internal data class ChuniSongSheet(
+        internal data class ChuniMergedSheet(
             @param:Json(name = "type") var type: String = "",
             @param:Json(name = "difficulty") var difficulty: String = "",
             @param:Json(name = "level") var level: String = "",
             @param:Json(name = "levelValue") var levelValue: Double = 0.0,
-            @param:Json(name = "internalLevel") var internalLevel: String = "",
-            @param:Json(name = "internalLevelValue") var internalLevelValue: Double = 0.0,
             @param:Json(name = "noteDesigner") var noteDesigner: String = "",
             @param:Json(name = "noteCounts") var noteCounts: NoteCounts = NoteCounts(),
             @param:Json(name = "regions") var regions: Regions = Regions(),
-            @param:Json(name = "isSpecial") var isSpecial: Boolean = false
+            @param:Json(name = "isSpecial") var isSpecial: Boolean = false,
+            @param:Json(name = "kanji") var kanji: String = "",
+            @param:Json(name = "star") var star: Int = 0
         ) {
             internal data class NoteCounts(
                 @param:Json(name = "tap") var tap: Int = 0,
@@ -74,9 +74,9 @@ internal data class ChuniJpDTO(
 
             internal data class Regions(
                 @param:Json(name = "jp") var jp: Boolean = false,
-                @param:Json(name = "intl") var intl: Boolean = false
+                @param:Json(name = "intl") var intl: Boolean = false,
+                @param:Json(name = "cn") var cn: Boolean = false
             )
         }
     }
 }
-

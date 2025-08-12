@@ -9,21 +9,22 @@ internal data class ChunithmPlayDataUiModel(
 ) {
     internal data class ChuniPlayDataItemUI(
         var scoreTotal: Long = 0,
-        var rateSSSp: Pair<Int, Int> = Pair(0, 0), // SSS+评级数/总曲目数
-        var rateSSS: Pair<Int, Int> = Pair(0, 0),  // SSS评级数/总曲目数
-        var rateSSp: Pair<Int, Int> = Pair(0, 0),  // SS+评级数/总曲目数
-        var rateSS: Pair<Int, Int> = Pair(0, 0),   // SS评级数/总曲目数
-        var rateSp: Pair<Int, Int> = Pair(0, 0),   // S+评级数/总曲目数
-        var rateS: Pair<Int, Int> = Pair(0, 0),    // S评级数/总曲目数
-        var rateFC: Pair<Int, Int> = Pair(0, 0),   // FC数/总曲目数
-        var rateAJ: Pair<Int, Int> = Pair(0, 0),   // AJ数/总曲目数
-        var rateAJC: Pair<Int, Int> = Pair(0, 0),  // AJC数/总曲目数
-        var rateFChain: Pair<Int, Int> = Pair(0, 0), // FChain数/总曲目数
-        var rateFChainP: Pair<Int, Int> = Pair(0, 0), // FChainP数/总曲目数
-        var rateClear: Pair<Int, Int> = Pair(0, 0), // Clear数/总曲目数
-        var rateHard: Pair<Int, Int> = Pair(0, 0), // Hard数/总曲目数
-        var rateAbs: Pair<Int, Int> = Pair(0, 0), // Abs数/总曲目数
-        var rateAbsP: Pair<Int, Int> = Pair(0, 0), // AbsP数/总曲目数
-        var rateCatas: Pair<Int, Int> = Pair(0, 0), // Catas数/总曲目数
+        var totalSongs: Int = 0, // 总曲目数（所有难度共享）
+        var rateSSSp: Int = 0, // SSS+ 达成数量
+        var rateSSS: Int = 0,  // SSS 达成数量
+        var rateSSp: Int = 0,  // SS+ 达成数量
+        var rateSS: Int = 0,   // SS 达成数量
+        var rateSp: Int = 0,   // S+ 达成数量
+        var rateS: Int = 0,    // S 达成数量
+        var rateFC: Int = 0,   // Full Combo 达成数量
+        var rateAJ: Int = 0,   // All Justice 达成数量
+        var rateAJC: Int = 0,  // All Justice Critical 达成数量
+        var rateFChain: Int = 0,  // Full Chain 达成数量
+        var rateFChainP: Int = 0, // Full Chain Platinum 达成数量
+        var rateClear: Int = 0,   // Clear 达成数量
+        var rateHard: Int = 0,    // Hard Clear 达成数量
+        var rateAbs: Int = 0,     // Absolute 达成数量
+        var rateAbsP: Int = 0,    // Absolute+ 达成数量
+        var rateCatas: Int = 0,   // Catastrophe 达成数量
     )
 }

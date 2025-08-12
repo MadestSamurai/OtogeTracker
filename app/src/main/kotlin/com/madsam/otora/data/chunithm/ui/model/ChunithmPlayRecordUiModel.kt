@@ -2,28 +2,29 @@ package com.madsam.otora.data.chunithm.ui.model
 
 data class ChunithmPlayRecordUiModel(
     val difficulty: String = "",
+    val totalSongs: Int = 0, // 总曲目数（所有难度共享）
     
     // Rating statistics
-    val rateSSSp: Pair<Int, Int> = Pair(0, 0),
-    val rateSSS: Pair<Int, Int> = Pair(0, 0),
-    val rateSSp: Pair<Int, Int> = Pair(0, 0),
-    val rateSS: Pair<Int, Int> = Pair(0, 0),
-    val rateSp: Pair<Int, Int> = Pair(0, 0),
-    val rateS: Pair<Int, Int> = Pair(0, 0),
+    val rateSSSp: Int = 0, // SSS+ 达成数量
+    val rateSSS: Int = 0,  // SSS 达成数量
+    val rateSSp: Int = 0,  // SS+ 达成数量
+    val rateSS: Int = 0,   // SS 达成数量
+    val rateSp: Int = 0,   // S+ 达成数量
+    val rateS: Int = 0,    // S 达成数量
     
     // Clear statistics
-    val rateClear: Pair<Int, Int> = Pair(0, 0),
-    val rateFC: Pair<Int, Int> = Pair(0, 0),
-    val rateAJ: Pair<Int, Int> = Pair(0, 0),
-    val rateAJC: Pair<Int, Int> = Pair(0, 0),
-    val rateFChain: Pair<Int, Int> = Pair(0, 0),
-    val rateFChainP: Pair<Int, Int> = Pair(0, 0),
+    val rateClear: Int = 0,   // Clear 达成数量
+    val rateFC: Int = 0,      // Full Combo 达成数量
+    val rateAJ: Int = 0,      // All Justice 达成数量
+    val rateAJC: Int = 0,     // All Justice Critical 达成数量
+    val rateFChain: Int = 0,  // Full Chain 达成数量
+    val rateFChainP: Int = 0, // Full Chain Platinum 达成数量
     
     // Difficulty statistics
-    val rateHard: Pair<Int, Int> = Pair(0, 0),
-    val rateAbs: Pair<Int, Int> = Pair(0, 0),
-    val rateAbsP: Pair<Int, Int> = Pair(0, 0),
-    val rateCatas: Pair<Int, Int> = Pair(0, 0),
+    val rateHard: Int = 0,    // Hard Clear 达成数量
+    val rateAbs: Int = 0,     // Absolute 达成数量
+    val rateAbsP: Int = 0,    // Absolute+ 达成数量
+    val rateCatas: Int = 0,   // Catastrophe 达成数量
     
     val lastUpdated: String = "",
     val scores: List<ChunithmFullScoreUiModel> = emptyList()

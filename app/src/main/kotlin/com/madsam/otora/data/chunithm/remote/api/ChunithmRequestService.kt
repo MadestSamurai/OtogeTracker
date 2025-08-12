@@ -4,15 +4,31 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toLowerCase
+import com.madsam.otora.core.utils.CommonUtils
+import com.madsam.otora.core.utils.JsonUtil
+import com.madsam.otora.core.utils.SafeSoupUtil.safeAttr
+import com.madsam.otora.core.utils.SafeSoupUtil.safeFirst
+import com.madsam.otora.core.utils.SafeSoupUtil.safeFirstText
+import com.madsam.otora.core.utils.SafeSoupUtil.safeSelectFirst
+import com.madsam.otora.core.utils.SafeSoupUtil.safeText
+import com.madsam.otora.core.utils.ShareUtil
+import com.madsam.otora.core.utils.UserAgentUtils
+import com.madsam.otora.data.BASE_URL
+import com.madsam.otora.data.CHUNITHM_URL
+import com.madsam.otora.data.adapter.SafeBooleanAdapter
+import com.madsam.otora.data.adapter.SafeDoubleAdapter
+import com.madsam.otora.data.adapter.SafeIntAdapter
+import com.madsam.otora.data.adapter.SafeIntListAdapter
+import com.madsam.otora.data.adapter.SafeIntPairAdapter
+import com.madsam.otora.data.adapter.SafeLongAdapter
+import com.madsam.otora.data.adapter.SafeStringAdapter
+import com.madsam.otora.data.adapter.SafeStringListAdapter
 import com.madsam.otora.data.chunithm.local.objectbox.ChunithmObjectBoxService
-import com.madsam.otora.data.chunithm.remote.model.ChuniAliasesDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniCookieDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniFullScoreDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniGenreDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniJpDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniLoginBonusDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniLxnsDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniMapDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniMapDTO.ChuniMapArea
 import com.madsam.otora.data.chunithm.remote.model.ChuniPenguinDTO
@@ -22,31 +38,10 @@ import com.madsam.otora.data.chunithm.remote.model.ChuniStatueDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniUserDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniUserExtendDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniUserRoleDTO
-import com.madsam.otora.data.adapter.SafeIntPairAdapter
-import com.madsam.otora.data.adapter.SafeBooleanAdapter
-import com.madsam.otora.data.adapter.SafeDoubleAdapter
-import com.madsam.otora.data.adapter.SafeIntAdapter
-import com.madsam.otora.data.adapter.SafeStringAdapter
-import com.madsam.otora.data.adapter.SafeStringListAdapter
-import com.madsam.otora.core.utils.CommonUtils
-import com.madsam.otora.core.utils.JsonUtil
-import com.madsam.otora.core.utils.SafeSoupUtil.safeAttr
-import com.madsam.otora.core.utils.SafeSoupUtil.safeFirst
-import com.madsam.otora.core.utils.SafeSoupUtil.safeFirstText
-import com.madsam.otora.core.utils.SafeSoupUtil.safeSelectFirst
-import com.madsam.otora.core.utils.SafeSoupUtil.safeText
-import com.madsam.otora.core.utils.UserAgentUtils
-import com.madsam.otora.core.utils.ShareUtil
-import com.madsam.otora.data.BASE_URL
-import com.madsam.otora.data.CHUNITHM_URL
-import com.madsam.otora.data.LXNS_URL
-import com.madsam.otora.data.adapter.SafeIntListAdapter
-import com.madsam.otora.data.adapter.SafeLongAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -380,6 +375,7 @@ internal class ChunithmRequestService(private val context: Context) {
 
     private fun parsePlayRecord(doc: Document, diff: String): ChuniPlayRecordDTO {
         val chuniPlayRecordDTO = ChuniPlayRecordDTO()
+        var totalSongs = 0
 
         doc.select("div.score_list").forEach { scoreList ->
             val imgSrc = scoreList.select("div.score_list_top img").attr("src")
@@ -391,40 +387,48 @@ internal class ChunithmRequestService(private val context: Context) {
             val count = countText.toIntOrNull() ?: 0
             val total = totalText.toIntOrNull() ?: 0
 
+            // 设置总曲目数（使用第一个找到的total值）
+            if (totalSongs == 0 && total > 0) {
+                totalSongs = total
+            }
+
             when {
                 // 评级统计
-                imgSrc.contains("rank_13") -> chuniPlayRecordDTO.rateSSSp = Pair(count, total)  // SSS+
-                imgSrc.contains("rank_12") -> chuniPlayRecordDTO.rateSSS = Pair(count, total)   // SSS
-                imgSrc.contains("rank_11") -> chuniPlayRecordDTO.rateSSp = Pair(count, total)   // SS+
-                imgSrc.contains("rank_10") -> chuniPlayRecordDTO.rateSS = Pair(count, total)    // SS
-                imgSrc.contains("rank_9") -> chuniPlayRecordDTO.rateSp = Pair(count, total)     // S+
-                imgSrc.contains("rank_8") -> chuniPlayRecordDTO.rateS = Pair(count, total)      // S
+                imgSrc.contains("rank_13") -> chuniPlayRecordDTO.rateSSSp = count  // SSS+
+                imgSrc.contains("rank_12") -> chuniPlayRecordDTO.rateSSS = count   // SSS
+                imgSrc.contains("rank_11") -> chuniPlayRecordDTO.rateSSp = count   // SS+
+                imgSrc.contains("rank_10") -> chuniPlayRecordDTO.rateSS = count    // SS
+                imgSrc.contains("rank_9") -> chuniPlayRecordDTO.rateSp = count     // S+
+                imgSrc.contains("rank_8") -> chuniPlayRecordDTO.rateS = count      // S
 
                 // 达成统计
                 imgSrc.contains("clear") && !imgSrc.contains("fullchain") ->
-                    chuniPlayRecordDTO.rateClear = Pair(count, total)      // Clear
+                    chuniPlayRecordDTO.rateClear = count      // Clear
                 imgSrc.contains("fullcombo") ->
-                    chuniPlayRecordDTO.rateFC = Pair(count, total)         // FC
+                    chuniPlayRecordDTO.rateFC = count         // FC
                 imgSrc.contains("alljustice") && !imgSrc.contains("critical") ->
-                    chuniPlayRecordDTO.rateAJ = Pair(count, total)         // AJ
+                    chuniPlayRecordDTO.rateAJ = count         // AJ
                 imgSrc.contains("alljusticecritical") ->
-                    chuniPlayRecordDTO.rateAJC = Pair(count, total)        // AJC
+                    chuniPlayRecordDTO.rateAJC = count        // AJC
                 imgSrc.contains("fullchain") && !imgSrc.contains("fullchain2") ->
-                    chuniPlayRecordDTO.rateFChain = Pair(count, total)     // FChain
+                    chuniPlayRecordDTO.rateFChain = count     // FChain
                 imgSrc.contains("fullchain2") ->
-                    chuniPlayRecordDTO.rateFChainP = Pair(count, total)    // FChain+
+                    chuniPlayRecordDTO.rateFChainP = count    // FChain+
 
                 // 难度统计
                 imgSrc.contains("hard") ->
-                    chuniPlayRecordDTO.rateHard = Pair(count, total)       // Hard
+                    chuniPlayRecordDTO.rateHard = count       // Hard
                 imgSrc.contains("absolute") && !imgSrc.contains("absolutep") ->
-                    chuniPlayRecordDTO.rateAbs = Pair(count, total)        // Abs
+                    chuniPlayRecordDTO.rateAbs = count        // Abs
                 imgSrc.contains("absolutep") ->
-                    chuniPlayRecordDTO.rateAbsP = Pair(count, total)       // Abs+
+                    chuniPlayRecordDTO.rateAbsP = count       // Abs+
                 imgSrc.contains("catastrophy") ->
-                    chuniPlayRecordDTO.rateCatas = Pair(count, total)      // Catastrophy
+                    chuniPlayRecordDTO.rateCatas = count      // Catastrophy
             }
         }
+
+        // 设置总曲目数
+        chuniPlayRecordDTO.totalSongs = totalSongs
 
         val allGenre = doc.getElementsByClass("box05 w400")
         val genreList = mutableListOf<ChuniGenreDTO>()
@@ -787,47 +791,26 @@ internal class ChunithmRequestService(private val context: Context) {
 
     private suspend fun requestSongsData() {
         try {
-            val apiZ = createRetrofitApi(BASE_URL)
-            val apiL = createRetrofitApi(LXNS_URL)
+            val api = Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(MoshiConverterFactory.create(moshi))
+                .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
+                .build()
+                .create(ChunithmAPI::class.java)
             
-            val (chuniJpDTO, chuniLxnsDTO, chuniAliasesDTO) = fetchSongsDataParallel(apiZ, apiL)
+            val mergedData = fetchWithErrorHandling("Merged data") { api.getChunithmMergedData().execute() }
             
-            if (chuniJpDTO.songs.isEmpty() && chuniLxnsDTO.songs.isEmpty() || chuniAliasesDTO.aliases.isEmpty()) {
-                Log.e(TAG, "No songs data found, check the api")
+            if (mergedData?.songs?.isEmpty() != false) {
+                Log.e(TAG, "No merged songs data found, check the api")
                 return
             }
             
             val chunithmObjectBoxService = ChunithmObjectBoxService()
-            chunithmObjectBoxService.saveJPAndLxnsSongsData(chuniJpDTO, chuniLxnsDTO, chuniAliasesDTO)
+            chunithmObjectBoxService.saveMergedSongsData(mergedData)
             
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in requestSongsData: ${e.message}")
         }
-    }
-    
-    private fun createRetrofitApi(baseUrl: String): ChunithmAPI {
-        return Retrofit.Builder()
-            .baseUrl(baseUrl)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
-            .build()
-            .create(ChunithmAPI::class.java)
-    }
-    
-    private suspend fun fetchSongsDataParallel(
-        apiZ: ChunithmAPI, 
-        apiL: ChunithmAPI
-    ): Triple<ChuniJpDTO, ChuniLxnsDTO, ChuniAliasesDTO> = withContext(Dispatchers.IO) {
-        
-        val jpDeferred = async { fetchWithErrorHandling("JP songs") { apiZ.getChunithmSongsJp().execute() } }
-        val lxnsDeferred = async { fetchWithErrorHandling("Lxns songs") { apiL.getChunithmSongsLxns().execute() } }
-        val aliasDeferred = async { fetchWithErrorHandling("Aliases") { apiL.getChunithmAliasList().execute() } }
-        
-        Triple(
-            jpDeferred.await() ?: ChuniJpDTO(),
-            lxnsDeferred.await() ?: ChuniLxnsDTO(), 
-            aliasDeferred.await() ?: ChuniAliasesDTO()
-        )
     }
     
     private inline fun <reified T> fetchWithErrorHandling(
