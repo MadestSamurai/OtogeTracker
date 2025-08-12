@@ -27,10 +27,6 @@ import io.objectbox.Box
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/**
- * ObjectBox版本的Chunithm本地数据服务
- * 与原有的ChunithmLocalService提供相同的接口
- */
 internal class ChunithmObjectBoxService {
     
     companion object {
@@ -642,7 +638,6 @@ internal class ChunithmObjectBoxService {
                 
                 for (scoreDto in friendScoreData) {
                     try {
-                        // 使用友人代码+曲名+难度作为唯一标识
                         val entity = ChunithmFriendScoreEntity().apply {
                             this.friendCode = friendCode
                             title = scoreDto.title
@@ -668,185 +663,164 @@ internal class ChunithmObjectBoxService {
     suspend fun saveJPAndLxnsSongsData(chunithmJpDTO: ChuniJpDTO, chunithmLxnsDTO: ChuniLxnsDTO, chunithmAliasesDTO: ChuniAliasesDTO) {
         withContext(Dispatchers.IO) {
             try {
-                // Clear existing songs and sheets
+                // Clear existing data
                 songsBox.removeAll()
                 sheetsBox.removeAll()
 
-                // 处理 Lxns 和别名数据映射
-                val chunithmSongsLMapI = mutableMapOf<Int, ChuniLxnsDTO.ChuniSong>()
-                for (song in chunithmLxnsDTO.songs) {
-                    val chunithmSong = ChuniLxnsDTO.ChuniSong().apply {
-                        id = song.id
-                        genre = song.genre
-                        title = song.title
-                        artist = song.artist
-                        bpm = song.bpm
-                        map = song.map
-                        version = song.version
-                        difficulties = song.difficulties
-                    }
-                    chunithmSongsLMapI[song.id] = chunithmSong
-                }
-                
-                val chunithmAliasMapI = mutableMapOf<Int, ChuniAliasesDTO.ChuniAlias>()
-                for (alias in chunithmAliasesDTO.aliases) {
-                    val chunithmAliasData = ChuniAliasesDTO.ChuniAlias().apply {
-                        id = alias.id
-                        aliases = alias.aliases
-                    }
-                    chunithmAliasMapI[alias.id] = chunithmAliasData
-                }
-                
-                // 为 Lxns 数据添加别名
-                for (song in chunithmLxnsDTO.songs) {
-                    val chunithmSong = chunithmSongsLMapI[song.id]
-                    val chunithmAliasData = chunithmAliasMapI[song.id]
-                    if (chunithmSong != null && chunithmAliasData != null) {
-                        chunithmSong.aliases = chunithmAliasData.aliases.joinToString(",")
-                    }
-                    song.aliases = chunithmSong?.aliases ?: ""
-                }
+                // Create lookup maps
+                val aliasesById = chunithmAliasesDTO.aliases.associateBy { it.id }
+                val lxnsByTitle = createLxnsTitleMap(chunithmLxnsDTO.songs, aliasesById)
+                val jpById = chunithmJpDTO.songs.associateBy { it.songId }
 
-                // 处理 JP 歌曲映射
-                val chunithmSongsZMap = mutableMapOf<String, ChuniJpDTO.ChuniSong>()
-                for (song in chunithmJpDTO.songs) {
-                    val chunithmSong = ChuniJpDTO.ChuniSong().apply {
-                        songId = song.songId
-                        category = song.category
-                        title = song.title
-                        artist = song.artist
-                        bpm = song.bpm
-                        imageName = song.imageName
-                        version = song.version
-                        releaseDate = song.releaseDate
-                        isNew = song.isNew
-                        isLocked = song.isLocked
-                        comment = song.comment
-                        sheets = song.sheets
-                    }
-                    chunithmSongsZMap[song.songId] = chunithmSong
-                }
-
-                // 处理 Lxns 歌曲按标题映射
-                val chunithmSongsLMapT = mutableMapOf<String, ChuniLxnsDTO.ChuniSong>()
-                for (song in chunithmLxnsDTO.songs) {
-                    if (song.difficulties.size == 1) {
-                        song.title = "(WE) ${song.title}"
-                    }
-                    val chunithmSong = ChuniLxnsDTO.ChuniSong().apply {
-                        id = song.id
-                        genre = song.genre
-                        title = song.title
-                        artist = song.artist
-                        bpm = song.bpm
-                        map = song.map
-                        version = song.version
-                        difficulties = song.difficulties
-                        aliases = song.aliases
-                    }
-                    chunithmSongsLMapT[song.title] = chunithmSong
-                }
-
-                // 保存歌曲数据
-                for (song in chunithmJpDTO.songs) {
-                    val chuniSongZ = chunithmSongsZMap[song.songId]
-                    val chuniSongL = chunithmSongsLMapT[song.songId]
-                    if (chuniSongZ == null) {
-                        Log.e(TAG, "Failed to get the song data from ChuniJp")
-                        continue
-                    }
-
-                    val chuniSongData = ChunithmSongsEntity().apply {
-                        songId = chuniSongZ.songId
-                        genre = chuniSongZ.category
-                        title = chuniSongZ.title
-                        artist = chuniSongZ.artist
-                        bpm = chuniSongZ.bpm
-                        imageName = chuniSongZ.imageName
-                        version = chuniSongZ.version
-                        releaseDate = chuniSongZ.releaseDate
-                        isNew = chuniSongZ.isNew
-                        isLocked = chuniSongZ.isLocked
-                        comment = chuniSongZ.comment
-                        cnId = chuniSongL?.id ?: -1
-                        map = chuniSongL?.map ?: "-"
-                        aliases = chuniSongL?.aliases ?: ""
-                    }
-                    songsBox.put(chuniSongData)
-
-                    // 保存谱面数据
-                    for (sheet in chuniSongZ.sheets) {
-                        val chuniSheetL = if (chuniSongL == null) {
-                            null
-                        } else {
-                            val difficultyIndex = when (sheet.difficulty) {
-                                "basic" -> 0
-                                "advanced" -> 1
-                                "expert" -> 2
-                                "master" -> 3
-                                "ultima" -> 4
-                                "we" -> 0
-                                else -> 0
-                            }
-                            chuniSongL.difficulties.getOrNull(difficultyIndex) ?: run {
-                                if (sheet.difficulty == "ultima") {
-                                    Log.i(TAG, "No Ultima data found for ${chuniSongL.title}")
-                                }
-                                null
-                            }
-                        }
-
-                        // 正确判断CN地区的存在性
-                        val cnExists = if (chuniSongL == null) {
-                            false // 如果CN数据本身不存在，则该曲目在CN不存在
-                        } else {
-                            when (sheet.difficulty) {
-                                "basic", "advanced", "expert", "master" -> {
-                                    // 基础四难度：只要CN数据存在，这些难度就存在
-                                    true
-                                }
-                                "ultima" -> {
-                                    // ULTIMA难度：需要检查CN数据中是否真的有ULTIMA难度
-                                    chuniSheetL != null
-                                }
-                                "we" -> {
-                                    // World's End：需要检查CN数据中是否有对应的WE难度
-                                    chuniSheetL != null
-                                }
-                                else -> chuniSheetL != null
-                            }
-                        }
-
-                        val chuniSheetData = ChunithmSheetsEntity().apply {
-                            title = chuniSongZ.title
-                            type = sheet.type
-                            difficulty = sheet.difficulty
-                            levelJp = sheet.level
-                            levelValueJp = sheet.levelValue
-                            internalLevelJp = sheet.internalLevel
-                            internalLevelValueJp = sheet.internalLevelValue
-                            levelCn = chuniSheetL?.level ?: ""
-                            levelValueCn = chuniSheetL?.levelValue ?: 0.0
-                            noteDesigner = chuniSheetL?.noteDesigner ?: sheet.noteDesigner
-                            tap = sheet.noteCounts.tap
-                            hold = sheet.noteCounts.hold
-                            slide = sheet.noteCounts.slide
-                            air = sheet.noteCounts.air
-                            flick = sheet.noteCounts.flick
-                            total = sheet.noteCounts.total
-                            jp = sheet.regions.jp
-                            intl = sheet.regions.intl
-                            cn = cnExists
-                            isSpecial = sheet.isSpecial
-                        }
-                        sheetsBox.put(chuniSheetData)
-                    }
-                }
+                // Process and save song data
+                processSongData(jpById, lxnsByTitle)
                 
                 Log.i(TAG, "Successfully saved ${chunithmJpDTO.songs.size} JP songs with complete CN integration")
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to save songs data: ${e.message}", e)
             }
+        }
+    }
+
+    private fun createLxnsTitleMap(
+        lxnsSongs: List<ChuniLxnsDTO.ChuniSong>,
+        aliasesById: Map<Int, ChuniAliasesDTO.ChuniAlias>
+    ): Map<String, ChuniLxnsDTO.ChuniSong> {
+        return lxnsSongs.associateBy { song ->
+            // Add aliases to song
+            val aliases = aliasesById[song.id]?.aliases?.joinToString(",") ?: ""
+            song.aliases = aliases
+
+            // Check if this is a WE song (has difficulty = 5)
+            val isWeSong = song.difficulties.any { it.difficulty == 5 }
+            val title = if (isWeSong) "(WE) ${song.title}" else song.title
+            song.title = title
+
+            title
+        }
+    }
+
+    private fun processSongData(
+        jpSongs: Map<String, ChuniJpDTO.ChuniSong>,
+        lxnsByTitle: Map<String, ChuniLxnsDTO.ChuniSong>
+    ) {
+        jpSongs.values.forEach { jpSong ->
+            // For JP songs with "(2)", "(3)" etc., try to find the base LXNS song
+            val lxnsSong = lxnsByTitle[jpSong.songId] ?: 
+                if (jpSong.songId.contains(" (") && jpSong.songId.contains(")")) {
+                    // Try to find base song without the (2), (3) suffix
+                    val baseSongId = jpSong.songId.substringBeforeLast(" (")
+                    lxnsByTitle[baseSongId]
+                } else null
+            
+            // Save song entity
+            val songEntity = createSongEntity(jpSong, lxnsSong)
+            songsBox.put(songEntity)
+            
+            // Save sheet entities
+            jpSong.sheets.forEach { sheet ->
+                val sheetEntity = createSheetEntity(jpSong, sheet, lxnsSong)
+                sheetsBox.put(sheetEntity)
+            }
+        }
+    }
+
+    private fun createSongEntity(jpSong: ChuniJpDTO.ChuniSong, lxnsSong: ChuniLxnsDTO.ChuniSong?): ChunithmSongsEntity {
+        return ChunithmSongsEntity().apply {
+            songId = jpSong.songId
+            genre = jpSong.category
+            title = jpSong.title
+            artist = jpSong.artist
+            bpm = jpSong.bpm
+            imageName = jpSong.imageName
+            version = jpSong.version
+            releaseDate = jpSong.releaseDate
+            isNew = jpSong.isNew
+            isLocked = jpSong.isLocked
+            comment = jpSong.comment
+            cnId = lxnsSong?.id ?: -1
+            map = lxnsSong?.map ?: "-"
+            aliases = lxnsSong?.aliases ?: ""
+        }
+    }
+
+    private fun createSheetEntity(
+        jpSong: ChuniJpDTO.ChuniSong, 
+        jpSheet: ChuniJpDTO.ChuniSong.ChuniSongSheet, 
+        lxnsSong: ChuniLxnsDTO.ChuniSong?
+    ): ChunithmSheetsEntity {
+        val lxnsSheet = getLxnsSheet(jpSheet.difficulty, lxnsSong)
+        val cnExists = calculateCnExists(jpSheet.difficulty, lxnsSong, lxnsSheet)
+        
+        return ChunithmSheetsEntity().apply {
+            title = jpSong.title
+            type = jpSheet.type
+            difficulty = jpSheet.difficulty
+            levelJp = jpSheet.level
+            levelValueJp = jpSheet.levelValue
+            internalLevelJp = jpSheet.internalLevel
+            internalLevelValueJp = jpSheet.internalLevelValue
+            levelCn = lxnsSheet?.level ?: ""
+            levelValueCn = lxnsSheet?.levelValue ?: 0.0
+            noteDesigner = lxnsSheet?.noteDesigner ?: jpSheet.noteDesigner
+            tap = jpSheet.noteCounts.tap
+            hold = jpSheet.noteCounts.hold
+            slide = jpSheet.noteCounts.slide
+            air = jpSheet.noteCounts.air
+            flick = jpSheet.noteCounts.flick
+            total = jpSheet.noteCounts.total
+            jp = jpSheet.regions.jp
+            intl = jpSheet.regions.intl
+            cn = cnExists
+            isSpecial = jpSheet.isSpecial
+        }
+    }
+
+    private fun getLxnsSheet(
+        difficulty: String, 
+        lxnsSong: ChuniLxnsDTO.ChuniSong?
+    ): ChuniLxnsDTO.ChuniSong.Difficulty? {
+        if (lxnsSong == null) return null
+        
+        // For WE difficulties, we need to find the difficulty with difficulty=5 and matching kanji
+        if (difficulty.startsWith("【") && difficulty.endsWith("】")) {
+            // Extract the kanji character from JP difficulty (remove 【 and 】)
+            val jpKanji = difficulty.substring(1, difficulty.length - 1)
+            
+            // Find the LXNS difficulty with matching kanji
+            val weDifficulties = lxnsSong.difficulties.filter { it.difficulty == 5 }
+            val matchedDifficulty = weDifficulties.find { it.kanji == jpKanji }
+            
+            return matchedDifficulty
+        }
+        
+        // For regular difficulties, use the index-based approach
+        val difficultyIndex = when (difficulty) {
+            "basic" -> 0
+            "advanced" -> 1
+            "expert" -> 2
+            "master" -> 3
+            "ultima" -> 4
+            else -> 0
+        }
+        
+        return lxnsSong.difficulties.getOrNull(difficultyIndex).also {
+            if (it == null && difficulty == "ultima") {
+                Log.i(TAG, "No Ultima data found for ${lxnsSong.title}")
+            }
+        }
+    }
+
+    private fun calculateCnExists(
+        difficulty: String, 
+        lxnsSong: ChuniLxnsDTO.ChuniSong?, 
+        lxnsSheet: ChuniLxnsDTO.ChuniSong.Difficulty?
+    ): Boolean {
+        return when {
+            lxnsSong == null -> false
+            difficulty in listOf("basic", "advanced", "expert", "master") -> true
+            difficulty in listOf("ultima", "we") -> lxnsSheet != null
+            else -> lxnsSheet != null
         }
     }
 }

@@ -46,6 +46,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -785,72 +786,69 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private suspend fun requestSongsData() {
-        val retrofitZ = Retrofit.Builder()
-            .baseUrl(BASE_URL)
+        try {
+            val apiZ = createRetrofitApi(BASE_URL)
+            val apiL = createRetrofitApi(LXNS_URL)
+            
+            val (chuniJpDTO, chuniLxnsDTO, chuniAliasesDTO) = fetchSongsDataParallel(apiZ, apiL)
+            
+            if (chuniJpDTO.songs.isEmpty() && chuniLxnsDTO.songs.isEmpty() || chuniAliasesDTO.aliases.isEmpty()) {
+                Log.e(TAG, "No songs data found, check the api")
+                return
+            }
+            
+            val chunithmObjectBoxService = ChunithmObjectBoxService()
+            chunithmObjectBoxService.saveJPAndLxnsSongsData(chuniJpDTO, chuniLxnsDTO, chuniAliasesDTO)
+            
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in requestSongsData: ${e.message}")
+        }
+    }
+    
+    private fun createRetrofitApi(baseUrl: String): ChunithmAPI {
+        return Retrofit.Builder()
+            .baseUrl(baseUrl)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
             .build()
-        val apiZ = retrofitZ.create(ChunithmAPI::class.java)
-        var chuniJpDTO = ChuniJpDTO()
-        try {
-            val chuniSongsCall = apiZ.getChunithmSongsJp()
-            val response = chuniSongsCall.execute()
-            if (!response.isSuccessful) {
-                Log.e(TAG, "Failed to get the songs data")
-                return
+            .create(ChunithmAPI::class.java)
+    }
+    
+    private suspend fun fetchSongsDataParallel(
+        apiZ: ChunithmAPI, 
+        apiL: ChunithmAPI
+    ): Triple<ChuniJpDTO, ChuniLxnsDTO, ChuniAliasesDTO> = withContext(Dispatchers.IO) {
+        
+        val jpDeferred = async { fetchWithErrorHandling("JP songs") { apiZ.getChunithmSongsJp().execute() } }
+        val lxnsDeferred = async { fetchWithErrorHandling("Lxns songs") { apiL.getChunithmSongsLxns().execute() } }
+        val aliasDeferred = async { fetchWithErrorHandling("Aliases") { apiL.getChunithmAliasList().execute() } }
+        
+        Triple(
+            jpDeferred.await() ?: ChuniJpDTO(),
+            lxnsDeferred.await() ?: ChuniLxnsDTO(), 
+            aliasDeferred.await() ?: ChuniAliasesDTO()
+        )
+    }
+    
+    private inline fun <reified T> fetchWithErrorHandling(
+        dataType: String,
+        request: () -> retrofit2.Response<T>
+    ): T? {
+        return try {
+            val response = request()
+            if (response.isSuccessful) {
+                response.body() ?: run {
+                    Log.e(TAG, "Failed to get $dataType: response body is null")
+                    null
+                }
+            } else {
+                Log.e(TAG, "Failed to get $dataType: ${response.code()}")
+                null
             }
-            val chuniData = response.body()
-            if (chuniData == null) {
-                Log.e(TAG, "Failed to get the songs data")
-                return
-            }
-            chuniJpDTO = chuniData
         } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in ChuniData-requestSongsData: ${e.message}")
+            Log.e(TAG, "IOException occurred in $dataType: ${e.message}")
+            null
         }
-        if (chuniJpDTO.songs.isEmpty()) {
-            Log.e(TAG, "No songs data found in ChuniJp")
-        }
-
-        val retrofitL = Retrofit.Builder()
-            .baseUrl(LXNS_URL)
-            .addConverterFactory(MoshiConverterFactory.create(moshi))
-            .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
-            .build()
-        val apiL = retrofitL.create(ChunithmAPI::class.java)
-        var chuniLxnsDTO = ChuniLxnsDTO()
-        var chuniAliasesDTO = ChuniAliasesDTO()
-        try {
-            val chuniSongsCall = apiL.getChunithmSongsLxns()
-            val chuniAliasCall = apiL.getChunithmAliasList()
-            val responseSongs = chuniSongsCall.execute()
-            val responseAlias = chuniAliasCall.execute()
-            if (!responseSongs.isSuccessful || !responseAlias.isSuccessful) {
-                Log.e(TAG, "Failed to get ${responseSongs.code()}, ${responseAlias.code()}")
-                return
-            }
-            val chuniData = responseSongs.body()
-            val chuniAliasData = responseAlias.body()
-            if (chuniData == null || chuniAliasData == null) {
-                Log.e(TAG, "Failed to get the songs data, data is null")
-                return
-            }
-            chuniLxnsDTO = chuniData
-            chuniAliasesDTO = chuniAliasData
-        } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in ChuniData-requestSongsData: ${e.message}")
-        }
-
-        if (chuniLxnsDTO.songs.isEmpty() || chuniAliasesDTO.aliases.isEmpty()) {
-            Log.e(TAG, "No alias data found in Lxns")
-        }
-        if (chuniJpDTO.songs.isEmpty() && chuniLxnsDTO.songs.isEmpty() || chuniAliasesDTO.aliases.isEmpty()) {
-            Log.e(TAG, "No songs data found in both ChuniJp and Lxns, check the api")
-            return
-        }
-
-        val chunithmObjectBoxService = ChunithmObjectBoxService()
-        chunithmObjectBoxService.saveJPAndLxnsSongsData(chuniJpDTO, chuniLxnsDTO, chuniAliasesDTO)
     }
 
     private fun updateCookie(response: Connection.Response) {
@@ -953,31 +951,19 @@ internal class ChunithmRequestService(private val context: Context) {
                     withContext(Dispatchers.Main) {
                         onProgress?.invoke(0.1f, "初始化连接...")
                     }
-                    delay(200)
+                    delay(100)
                     
                     withContext(Dispatchers.Main) {
-                        onProgress?.invoke(0.3f, "连接服务器...")
-                    }
-                    delay(300)
-                    
-                    withContext(Dispatchers.Main) {
-                        onProgress?.invoke(0.6f, "下载歌曲数据...")
+                        onProgress?.invoke(0.5f, "下载歌曲数据...")
                     }
                     
                     requestSongsData()
-                    
-                    withContext(Dispatchers.Main) {
-                        onProgress?.invoke(0.9f, "处理数据...")
-                    }
-                    delay(200)
-                    
-                    // 在主线程上执行成功回调
+
                     withContext(Dispatchers.Main) {
                         onProgress?.invoke(1.0f, "完成")
                         onSuccess?.invoke()
                     }
                 } catch (e: Exception) {
-                    // 在主线程上执行错误回调
                     withContext(Dispatchers.Main) {
                         onError?.invoke(e.message ?: "更新失败")
                     }
@@ -986,7 +972,6 @@ internal class ChunithmRequestService(private val context: Context) {
                 }
             }
         } else {
-            // 如果已经在运行中，在主线程上通过错误回调通知
             serviceScope.launch {
                 withContext(Dispatchers.Main) {
                     onError?.invoke("歌曲数据更新正在进行中")

@@ -8,8 +8,7 @@ import io.objectbox.annotation.Index
 internal data class BofEntryEntity(
     @Id var id: Long = 0,
     
-    @Index var entryId: String = "", // 用于存储原来的 id: "${date}_${entry.no}"
-    var no: Int = 0,
+    @Index var no: Int = 0,
     var team: String = "",
     @Index var date: String = "",
     var artist: String = "",
@@ -20,7 +19,6 @@ internal data class BofEntryEntity(
 ) {
     constructor() : this(
         id = 0,
-        entryId = "",
         no = 0,
         team = "",
         date = "",

@@ -76,7 +76,6 @@ class BofRequestService(private val context: Context) {
             
             bofEntryList.forEach { entry ->
                 val entity = BofEntryEntity(
-                    entryId = "${date}_${entry.no}",
                     no = entry.no,
                     team = entry.team,
                     date = date,
