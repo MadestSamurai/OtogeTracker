@@ -5,10 +5,6 @@ import com.madsam.otora.data.bof.ui.model.BofCommentUI
 import com.madsam.otora.data.bof.ui.model.BofEntryUI
 import com.madsam.otora.data.bof.ui.model.BofTeamUI
 
-/**
- * BOF 数据本地服务 - ObjectBox 版本
- * 替代原来的 Realm 版本
- */
 internal class BofLocalService {
     
     private val bofObjectBoxService = BofObjectBoxService()

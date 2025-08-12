@@ -1,13 +1,6 @@
 package com.madsam.otora.ui.record.chunithm.pages
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,16 +9,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.RangeSlider
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -38,34 +24,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
-import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
-import com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
-import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
-import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
-import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
+import com.madsam.otora.ui.record.chunithm.components.ChunithmFilterComponent
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSongCard
+import com.madsam.otora.ui.record.chunithm.components.ChunithmSortComponent
 import com.madsam.otora.ui.record.chunithm.components.SearchBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -332,571 +304,27 @@ internal fun ChunithmSongListPage(
         }
 
         // 浮动筛选栏
-        AnimatedVisibility(
-            visible = isFilterExpanded.value,
-            enter = expandVertically(),
-            exit = shrinkVertically(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 64.dp) // 调整为更精确的搜索栏高度
-                .zIndex(1f) // 确保浮在上层
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Red300) // 背景色，确保不透明
-            ) {
-                // Genre 筛选行
-                val genres = songList.map { it.genre }.distinct()
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val allSelected = selectedGenres.value.size == genres.size
-                    val toggleText = if (allSelected) "全不选" else "全选"
-                    Box(
-                        modifier = Modifier
-                            .height(32.dp)
-                            .background(
-                                if (allSelected) Red300 else Red500,
-                                RoundedCornerShape(12.dp)
-                            )
-                            .clickable {
-                                selectedGenres.value = if (allSelected) emptySet() else genres.toSet()
-                            }
-                            .padding(horizontal = 18.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = toggleText,
-                            fontSize = 13.sp,
-                            fontFamily = sarasaBold,
-                            color = Beige500,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    LazyRow(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        items(genres.size) { index ->
-                            val genre = genres[index]
-                            val isSelected = selectedGenres.value.contains(genre)
-                            Box(
-                                modifier = Modifier
-                                    .padding(horizontal = 8.dp)
-                                    .height(32.dp)
-                                    .background(
-                                        if (isSelected) Red500 else Red300,
-                                        RoundedCornerShape(12.dp)
-                                    )
-                                    .clickable {
-                                        selectedGenres.value = if (isSelected) {
-                                            selectedGenres.value - genre
-                                        } else {
-                                            selectedGenres.value + genre
-                                        }
-                                    }
-                                    .padding(horizontal = 12.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = genre,
-                                    color = Beige500,
-                                    fontSize = 13.sp,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Version 筛选行
-                val versions = songList.map { it.version }.distinct()
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val allSelected = selectedVersions.value.size == versions.size
-                    val toggleText = if (allSelected) "全不选" else "全选"
-                    Box(
-                        modifier = Modifier
-                            .height(32.dp)
-                            .background(
-                                if (allSelected) Red300 else Red500,
-                                RoundedCornerShape(12.dp)
-                            )
-                            .clickable {
-                                selectedVersions.value = if (allSelected) emptySet() else versions.toSet()
-                            }
-                            .padding(horizontal = 18.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = toggleText,
-                            fontSize = 13.sp,
-                            fontFamily = sarasaBold,
-                            color = Beige500,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    LazyRow(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        items(versions.size) { index ->
-                            val version = versions[index]
-                            val isSelected = selectedVersions.value.contains(version)
-                            Box(
-                                modifier = Modifier
-                                    .padding(horizontal = 8.dp)
-                                    .height(32.dp)
-                                    .background(
-                                        if (isSelected) Red500 else Red300,
-                                        RoundedCornerShape(12.dp)
-                                    )
-                                    .clickable {
-                                        selectedVersions.value = if (isSelected) {
-                                            selectedVersions.value - version
-                                        } else {
-                                            selectedVersions.value + version
-                                        }
-                                    }
-                                    .padding(horizontal = 12.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = version,
-                                    color = Beige500,
-                                    fontSize = 13.sp,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // 难度筛选按钮
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val difficulties = listOf("basic", "advanced", "expert", "master", "ultima")
-                    val difficultyLabels = listOf("BASIC", "ADVANCED", "EXPERT", "MASTER", "ULTIMA")
-                    val difficultyColors = listOf(
-                        CHUNI_DIFF_BASIC,
-                        CHUNI_DIFF_ADVANCED,
-                        CHUNI_DIFF_EXPERT,
-                        CHUNI_DIFF_MASTER,
-                        CHUNI_DIFF_ULTIMA_1
-                    )
-
-                    difficulties.forEachIndexed { index, difficulty ->
-                        val isSelected = selectedDifficulties.value.contains(difficulty)
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(24.dp)
-                                .background(
-                                    if (isSelected) difficultyColors[index] else Red300,
-                                    RoundedCornerShape(6.dp)
-                                )
-                                .run {
-                                    if (difficulty == "ultima" && isSelected) {
-                                        border(
-                                            width = 1.dp,
-                                            color = CHUNI_DIFF_ULTIMA_2,
-                                            shape = RoundedCornerShape(6.dp)
-                                        )
-                                    } else this
-                                }
-                                .clickable {
-                                    selectedDifficulties.value = if (isSelected) {
-                                        selectedDifficulties.value - difficulty
-                                    } else {
-                                        selectedDifficulties.value + difficulty
-                                    }
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = difficultyLabels[index],
-                                color = if (isSelected) White1000 else Beige500,
-                                fontSize = 12.sp,
-                                fontFamily = sarasaBold,
-                                textAlign = TextAlign.Center,
-                                letterSpacing = if (difficulty == "advanced") (-0.5).sp else 0.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Visible
-                            )
-                        }
-                    }
-                }
-
-                // JP Value range filter
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp)
-                        .background(Red300.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                        .padding(8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "JP Value Filter: ${(internalLevelRange.value.start / 10.0).round(1)} - ${(internalLevelRange.value.endInclusive / 10.0).round(1)}",
-                            color = Beige500,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        // 不可见的占位符，保持与CN Filter行高一致
-                        Box(modifier = Modifier.padding(start = 8.dp)) {
-                            Switch(
-                                checked = false,
-                                onCheckedChange = { },
-                                modifier = Modifier.alpha(0f), // 完全透明
-                                enabled = false
-                            )
-                        }
-                    }
-                    RangeSlider(
-                        value = internalLevelRange.value.start.toFloat()..internalLevelRange.value.endInclusive.toFloat(),
-                        onValueChange = { range ->
-                            // 使用 kotlin.math.round 确保精确的整数转换
-                            val startInt = kotlin.math.round(range.start).toInt()
-                            val endInt = kotlin.math.round(range.endInclusive).toInt()
-                            val intRange = startInt..endInt
-                            internalLevelRange.value = intRange
-                            filterInternalLevelRange.value = intRange // 立即更新筛选范围
-                        },
-                        valueRange = 10f..157f,
-                        steps = 147, // 157 - 10 = 147 steps
-                        colors = androidx.compose.material3.SliderDefaults.colors(
-                            thumbColor = Beige500,
-                            activeTrackColor = Red500,
-                            inactiveTrackColor = Red300,
-                            activeTickColor = androidx.compose.ui.graphics.Color.Transparent,
-                            inactiveTickColor = androidx.compose.ui.graphics.Color.Transparent
-                        ),
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                            .pointerInput(Unit) {
-                                detectDragGestures { change, _ ->
-                                    change.consume()
-                                }
-                            },
-                    )
-                }
-
-                // CN Value range filter
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 12.dp)
-                        .background(Red300.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                        .padding(8.dp)
-                ) {
-                    val isCnFilterEnabled = remember { mutableStateOf(true) }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "CN Value Filter: ${(cnLevelRange.value.start / 10.0).round(1)} - ${(cnLevelRange.value.endInclusive / 10.0).round(1)}",
-                            color = Beige500,
-                            modifier = Modifier.weight(1f)
-                        )
-
-                        Switch(
-                            checked = isCnFilterEnabled.value,
-                            onCheckedChange = { enabled ->
-                                isCnFilterEnabled.value = enabled
-                                filterCnLevelRange.value = if (enabled) cnLevelRange.value else 0..1000
-                            },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Beige500,
-                                checkedTrackColor = Red500,
-                                uncheckedThumbColor = Red300,
-                                uncheckedTrackColor = Beige500.copy(alpha = 0.5f)
-                            )
-                        )
-                    }
-
-                    RangeSlider(
-                        value = cnLevelRange.value.start.toFloat()..cnLevelRange.value.endInclusive.toFloat(),
-                        onValueChange = { range ->
-                            val startInt = kotlin.math.round(range.start).toInt()
-                            val endInt = kotlin.math.round(range.endInclusive).toInt()
-                            val intRange = startInt..endInt
-                            cnLevelRange.value = intRange
-                            // 立即更新筛选范围（如果CN filter启用）
-                            if (isCnFilterEnabled.value) {
-                                filterCnLevelRange.value = intRange
-                            }
-                        },
-                        valueRange = 10f..154f,
-                        steps = 144, // 154 - 10 = 144 steps
-                        enabled = isCnFilterEnabled.value,
-                        colors = androidx.compose.material3.SliderDefaults.colors(
-                            thumbColor = Beige500,
-                            activeTrackColor = Red500,
-                            inactiveTrackColor = Red300,
-                            disabledThumbColor = Red300,
-                            disabledActiveTrackColor = Red300.copy(alpha = 0.5f),
-                            disabledInactiveTrackColor = Red300.copy(alpha = 0.3f),
-                            activeTickColor = androidx.compose.ui.graphics.Color.Transparent,
-                            inactiveTickColor = androidx.compose.ui.graphics.Color.Transparent,
-                            disabledActiveTickColor = androidx.compose.ui.graphics.Color.Transparent,
-                            disabledInactiveTickColor = androidx.compose.ui.graphics.Color.Transparent
-                        ),
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                            .pointerInput(Unit) {
-                                detectDragGestures { change, _ ->
-                                    change.consume()
-                                }
-                            },
-                    )
-                }
-            }
-        }
+        ChunithmFilterComponent(
+            isFilterExpanded = isFilterExpanded.value,
+            genres = songList.map { it.genre }.distinct(),
+            versions = songList.map { it.version }.distinct(),
+            selectedGenres = selectedGenres,
+            selectedVersions = selectedVersions,
+            selectedDifficulties = selectedDifficulties,
+            internalLevelRange = internalLevelRange,
+            filterInternalLevelRange = filterInternalLevelRange,
+            cnLevelRange = cnLevelRange,
+            filterCnLevelRange = filterCnLevelRange,
+            modifier = Modifier.padding(top = 64.dp)
+        )
 
         // 浮动排序栏
-        AnimatedVisibility(
-            visible = isSortExpanded.value,
-            enter = expandVertically(),
-            exit = shrinkVertically(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 64.dp) // 调整为更精确的搜索栏高度
-                .zIndex(2f) // 确保浮在筛选栏上层
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Red300) // 背景色，确保不透明
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
-            ) {
-                Text(
-                    text = "排序选项",
-                    color = Beige500,
-                    fontSize = 16.sp,
-                    fontFamily = sarasaBold,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                
-                // 正序/倒序切换按钮
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(28.dp)
-                            .background(
-                                if (isAscendingOrder.value) Red500 else Red300,
-                                RoundedCornerShape(10.dp)
-                            )
-                            .clickable {
-                                isAscendingOrder.value = true
-                            }
-                            .padding(horizontal = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "正序 ↑",
-                            color = Beige500,
-                            fontSize = 12.sp,
-                            fontFamily = if (isAscendingOrder.value) sarasaBold else sarasaRegular,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                    
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(28.dp)
-                            .background(
-                                if (!isAscendingOrder.value) Red500 else Red300,
-                                RoundedCornerShape(10.dp)
-                            )
-                            .clickable {
-                                isAscendingOrder.value = false
-                            }
-                            .padding(horizontal = 8.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "倒序 ↓",
-                            color = Beige500,
-                            fontSize = 12.sp,
-                            fontFamily = if (isAscendingOrder.value) sarasaBold else sarasaRegular,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-                
-                // 基本排序选项
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val basicSortOptions = listOf(
-                        "default" to "默认顺序",
-                        "title" to "标题",
-                        "artist" to "艺术家"
-                    )
-                    
-                    basicSortOptions.forEach { (value, label) ->
-                        val isSelected = selectedSortOption.value == value
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(32.dp)
-                                .background(
-                                    if (isSelected) Red500 else Red300,
-                                    RoundedCornerShape(12.dp)
-                                )
-                                .clickable {
-                                    selectedSortOption.value = value
-                                    isSortExpanded.value = false
-                                }
-                                .padding(horizontal = 12.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = label,
-                                color = Beige500,
-                                fontSize = 13.sp,
-                                fontFamily = if (isAscendingOrder.value) sarasaBold else sarasaRegular,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                // CN Value排序选项
-                Text(
-                    text = "按CN Value排序",
-                    color = Beige500,
-                    fontSize = 14.sp,
-                    fontFamily = sarasaBold,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    val cnSortOptions = listOf(
-                        "basic_cn" to "BAS",
-                        "advanced_cn" to "ADV", 
-                        "expert_cn" to "EXP",
-                        "master_cn" to "MAS",
-                        "ultima_cn" to "ULT"
-                    )
-                    
-                    cnSortOptions.forEach { (value, label) ->
-                        val isSelected = selectedSortOption.value == value
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(28.dp)
-                                .background(
-                                    if (isSelected) Red500 else Red300,
-                                    RoundedCornerShape(8.dp)
-                                )
-                                .clickable {
-                                    selectedSortOption.value = value
-                                    isSortExpanded.value = false
-                                }
-                                .padding(horizontal = 4.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = label,
-                                color = Beige500,
-                                fontSize = 11.sp,
-                                fontFamily = if (isAscendingOrder.value) sarasaBold else sarasaRegular,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                // JP Value排序选项
-                Text(
-                    text = "按JP Value排序",
-                    color = Beige500,
-                    fontSize = 14.sp,
-                    fontFamily = sarasaBold,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    val jpSortOptions = listOf(
-                        "basic_jp" to "BAS",
-                        "advanced_jp" to "ADV",
-                        "expert_jp" to "EXP", 
-                        "master_jp" to "MAS",
-                        "ultima_jp" to "ULT"
-                    )
-                    
-                    jpSortOptions.forEach { (value, label) ->
-                        val isSelected = selectedSortOption.value == value
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(28.dp)
-                                .background(
-                                    if (isSelected) Red500 else Red300,
-                                    RoundedCornerShape(8.dp)
-                                )
-                                .clickable {
-                                    selectedSortOption.value = value
-                                    isSortExpanded.value = false
-                                }
-                                .padding(horizontal = 4.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = label,
-                                color = Beige500,
-                                fontSize = 11.sp,
-                                fontFamily = if (isAscendingOrder.value) sarasaBold else sarasaRegular,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                }
-            }
-        }
+        ChunithmSortComponent(
+            isSortExpanded = isSortExpanded.value,
+            selectedSortOption = selectedSortOption,
+            isAscendingOrder = isAscendingOrder,
+            onSortOptionSelected = { isSortExpanded.value = false },
+            modifier = Modifier.padding(top = 64.dp)
+        )
     }
-}
-
-private fun Double.round(decimals: Int): Double {
-    var multiplier = 1.0
-    repeat(decimals) { multiplier *= 10 }
-    return kotlin.math.round(this * multiplier) / multiplier
 }
