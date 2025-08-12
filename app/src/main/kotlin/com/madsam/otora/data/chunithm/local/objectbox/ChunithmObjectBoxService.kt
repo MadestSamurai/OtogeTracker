@@ -704,6 +704,7 @@ internal class ChunithmObjectBoxService {
         jpSongs: Map<String, ChuniJpDTO.ChuniSong>,
         lxnsByTitle: Map<String, ChuniLxnsDTO.ChuniSong>
     ) {
+        // Process JP songs and their corresponding LXNS data
         jpSongs.values.forEach { jpSong ->
             // For JP songs with "(2)", "(3)" etc., try to find the base LXNS song
             val lxnsSong = lxnsByTitle[jpSong.songId] ?: 
@@ -717,10 +718,50 @@ internal class ChunithmObjectBoxService {
             val songEntity = createSongEntity(jpSong, lxnsSong)
             songsBox.put(songEntity)
             
-            // Save sheet entities
+            // Save sheet entities for JP sheets
             jpSong.sheets.forEach { sheet ->
                 val sheetEntity = createSheetEntity(jpSong, sheet, lxnsSong)
                 sheetsBox.put(sheetEntity)
+            }
+            
+            // Handle additional WE difficulties that exist in LXNS but not in JP
+            lxnsSong?.let { lxns ->
+                // Get all JP WE kanji characters for this song
+                val jpWeKanjis = jpSong.sheets
+                    .filter { it.type == "we" && it.difficulty.startsWith("【") && it.difficulty.endsWith("】") }
+                    .map { it.difficulty.substring(1, it.difficulty.length - 1) }
+                    .toSet()
+                
+                // Find LXNS WE difficulties that don't exist in JP
+                val extraWeDifficulties = lxns.difficulties.filter { it.difficulty == 5 && it.kanji !in jpWeKanjis }
+                
+                extraWeDifficulties.forEach { extraWeDifficulty ->
+                    // Create a virtual JP sheet for the extra WE difficulty
+                    val virtualJpSheet = createVirtualWeSheet(extraWeDifficulty)
+                    val sheetEntity = createSheetEntity(jpSong, virtualJpSheet, lxnsSong)
+                    sheetsBox.put(sheetEntity)
+                }
+            }
+        }
+
+        // Handle standalone LXNS WE songs that don't have corresponding JP songs
+        lxnsByTitle.values.forEach { lxnsSong ->
+            // Check if this LXNS song has WE difficulties and no corresponding JP song
+            val hasWeDifficulties = lxnsSong.difficulties.any { it.difficulty == 5 }
+            val hasCorrespondingJpSong = jpSongs.containsKey(lxnsSong.title)
+            
+            if (hasWeDifficulties && !hasCorrespondingJpSong) {
+                // Create a virtual JP song for this LXNS WE song
+                val virtualJpSong = createVirtualJpSong(lxnsSong)
+                val songEntity = createSongEntity(virtualJpSong, lxnsSong)
+                songsBox.put(songEntity)
+                
+                // Create WE sheets for all WE difficulties
+                lxnsSong.difficulties.filter { it.difficulty == 5 }.forEach { weDifficulty ->
+                    val virtualJpSheet = createVirtualWeSheet(weDifficulty)
+                    val sheetEntity = createSheetEntity(virtualJpSong, virtualJpSheet, lxnsSong)
+                    sheetsBox.put(sheetEntity)
+                }
             }
         }
     }
@@ -773,6 +814,48 @@ internal class ChunithmObjectBoxService {
             intl = jpSheet.regions.intl
             cn = cnExists
             isSpecial = jpSheet.isSpecial
+        }
+    }
+
+    private fun createVirtualJpSong(lxnsSong: ChuniLxnsDTO.ChuniSong): ChuniJpDTO.ChuniSong {
+        return ChuniJpDTO.ChuniSong().apply {
+            songId = lxnsSong.title // Use LXNS title as songId
+            category = "WORLD'S END"
+            title = lxnsSong.title.removePrefix("(WE) ") // Remove WE prefix for title
+            artist = lxnsSong.artist
+            bpm = lxnsSong.bpm.toDouble()
+            imageName = ""
+            version = ""
+            releaseDate = ""
+            isNew = false
+            isLocked = false
+            comment = ""
+            sheets = listOf() // Will be populated separately
+        }
+    }
+
+    private fun createVirtualWeSheet(weDifficulty: ChuniLxnsDTO.ChuniSong.Difficulty): ChuniJpDTO.ChuniSong.ChuniSongSheet {
+        return ChuniJpDTO.ChuniSong.ChuniSongSheet().apply {
+            type = "we"
+            difficulty = "【${weDifficulty.kanji}】"
+            level = "☆".repeat(weDifficulty.star)
+            levelValue = weDifficulty.levelValue
+            internalLevel = ""
+            internalLevelValue = 0.0
+            noteDesigner = weDifficulty.noteDesigner
+            noteCounts = ChuniJpDTO.ChuniSong.ChuniSongSheet.NoteCounts().apply {
+                tap = 0
+                hold = 0
+                slide = 0
+                air = 0
+                flick = 0
+                total = 0
+            }
+            regions = ChuniJpDTO.ChuniSong.ChuniSongSheet.Regions().apply {
+                jp = false
+                intl = false
+            }
+            isSpecial = true
         }
     }
 
