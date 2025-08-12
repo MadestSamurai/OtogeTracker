@@ -353,8 +353,6 @@ internal class ChunithmObjectBoxService {
                         releaseDate = song.releaseDate,
                         isNew = song.isNew,
                         isLocked = song.isLocked,
-                        comment = song.comment,
-                        cnId = song.cnId,
                         map = song.map,
                         aliases = song.aliases,
                         sheets = sheetData
@@ -688,7 +686,6 @@ internal class ChunithmObjectBoxService {
 
     private fun createSongEntityFromMerged(mergedSong: ChuniMergedDataDTO.ChuniMergedSong): ChunithmSongsEntity {
         return ChunithmSongsEntity().apply {
-            songId = mergedSong.id.toString()
             genre = mergedSong.category
             title = mergedSong.title
             artist = mergedSong.artist
@@ -698,8 +695,6 @@ internal class ChunithmObjectBoxService {
             releaseDate = mergedSong.releaseDate
             isNew = mergedSong.isNew
             isLocked = mergedSong.isLocked
-            comment = ""
-            cnId = mergedSong.id
             map = "-"
             aliases = mergedSong.aliases
         }

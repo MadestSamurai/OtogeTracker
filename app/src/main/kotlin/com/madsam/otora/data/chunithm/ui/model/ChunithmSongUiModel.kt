@@ -10,8 +10,6 @@ internal data class ChunithmSongUiModel (
     var releaseDate: String = "",
     var isNew: Boolean = false,
     var isLocked: Boolean = false,
-    var comment: String = "",
-    var cnId: Int = 0,
     var map: String = "",
     var aliases: String = "",
     var sheets: List<ChunithmSheetUiModel> = emptyList()
