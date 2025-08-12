@@ -16,7 +16,7 @@ import com.madsam.otora.data.chunithm.local.model.ChunithmSongsEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmSongsEntity_
 import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniFullScoreDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniMergedDataDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmDataDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniPlayRecordDTO
 import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayRecordUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
@@ -325,8 +325,6 @@ internal class ChunithmObjectBoxService {
                             difficulty = sheetEntity.difficulty,
                             levelJp = sheetEntity.levelJp,
                             levelValueJp = sheetEntity.levelValueJp,
-                            internalLevelJp = sheetEntity.internalLevelJp,
-                            internalLevelValueJp = sheetEntity.internalLevelValueJp,
                             levelCn = sheetEntity.levelCn,
                             levelValueCn = sheetEntity.levelValueCn,
                             noteDesigner = sheetEntity.noteDesigner,
@@ -656,7 +654,7 @@ internal class ChunithmObjectBoxService {
         }
     }
 
-    suspend fun saveMergedSongsData(mergedData: ChuniMergedDataDTO) {
+    suspend fun saveMergedSongsData(mergedData: ChunithmDataDTO) {
         withContext(Dispatchers.IO) {
             try {
                 songsBox.removeAll()
@@ -684,7 +682,7 @@ internal class ChunithmObjectBoxService {
         }
     }
 
-    private fun createSongEntityFromMerged(mergedSong: ChuniMergedDataDTO.ChuniMergedSong): ChunithmSongsEntity {
+    private fun createSongEntityFromMerged(mergedSong: ChunithmDataDTO.ChunithmSong): ChunithmSongsEntity {
         return ChunithmSongsEntity().apply {
             genre = mergedSong.category
             title = mergedSong.title
@@ -695,14 +693,14 @@ internal class ChunithmObjectBoxService {
             releaseDate = mergedSong.releaseDate
             isNew = mergedSong.isNew
             isLocked = mergedSong.isLocked
-            map = "-"
+            map = mergedSong.map
             aliases = mergedSong.aliases
         }
     }
 
     private fun createSheetEntityFromMerged(
-        mergedSong: ChuniMergedDataDTO.ChuniMergedSong,
-        mergedSheet: ChuniMergedDataDTO.ChuniMergedSong.ChuniMergedSheet
+        mergedSong: ChunithmDataDTO.ChunithmSong,
+        mergedSheet: ChunithmDataDTO.ChunithmSong.ChunithmSheet
     ): ChunithmSheetsEntity {
         return ChunithmSheetsEntity().apply {
             title = mergedSong.title
@@ -710,10 +708,8 @@ internal class ChunithmObjectBoxService {
             difficulty = mergedSheet.difficulty
             levelJp = mergedSheet.level
             levelValueJp = mergedSheet.levelValue
-            internalLevelJp = ""
-            internalLevelValueJp = 0.0
-            levelCn = mergedSheet.level
-            levelValueCn = mergedSheet.levelValue
+            levelCn = mergedSheet.levelCn
+            levelValueCn = mergedSheet.levelValueCn
             noteDesigner = mergedSheet.noteDesigner
             tap = mergedSheet.noteCounts.tap
             hold = mergedSheet.noteCounts.hold

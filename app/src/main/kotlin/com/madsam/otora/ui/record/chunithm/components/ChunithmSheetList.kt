@@ -235,9 +235,9 @@ private fun SheetDifficultyRow(
     ) {
         Text(
             text = if (sheet.levelCn.isNotEmpty()) {
-                "${sheet.levelValueCn}(CN) ${sheet.internalLevelValueJp}(JP)"
+                "${sheet.levelValueCn}(CN) ${sheet.levelValueJp}(JP)"
             } else {
-                "${sheet.internalLevelValueJp}(JP)"
+                "${sheet.levelValueJp}(JP)"
             },
             fontSize = 12.sp,
             fontFamily = sarasaBold,

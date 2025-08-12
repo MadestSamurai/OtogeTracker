@@ -157,8 +157,8 @@ internal fun ChunithmSongListPage(
 
                 song.sheets.any { sheet ->
                     // 将整数范围转换回小数进行比较
-                    val jpLevelMatch = sheet.internalLevelValueJp >= (filterInternalLevelRange.value.start / 10.0) &&
-                                     sheet.internalLevelValueJp <= (filterInternalLevelRange.value.endInclusive / 10.0)
+                    val jpLevelMatch = sheet.levelValueJp >= (filterInternalLevelRange.value.start / 10.0) &&
+                                     sheet.levelValueJp <= (filterInternalLevelRange.value.endInclusive / 10.0)
 
                     // Match succeeds if either CN filter is disabled, or the sheet's CN value is within the filter range
                     val cnLevelMatch = isCnFilterDisabled ||
@@ -193,19 +193,19 @@ internal fun ChunithmSongListPage(
                     song.sheets.find { it.difficulty == "ultima" }?.levelValueCn ?: 0.0 
                 }
                 "basic_jp" -> filtered.sortedBy { song -> 
-                    song.sheets.find { it.difficulty == "basic" }?.internalLevelValueJp ?: 0.0 
+                    song.sheets.find { it.difficulty == "basic" }?.levelValueJp ?: 0.0
                 }
                 "advanced_jp" -> filtered.sortedBy { song -> 
-                    song.sheets.find { it.difficulty == "advanced" }?.internalLevelValueJp ?: 0.0 
+                    song.sheets.find { it.difficulty == "advanced" }?.levelValueJp ?: 0.0
                 }
                 "expert_jp" -> filtered.sortedBy { song -> 
-                    song.sheets.find { it.difficulty == "expert" }?.internalLevelValueJp ?: 0.0 
+                    song.sheets.find { it.difficulty == "expert" }?.levelValueJp ?: 0.0
                 }
                 "master_jp" -> filtered.sortedBy { song -> 
-                    song.sheets.find { it.difficulty == "master" }?.internalLevelValueJp ?: 0.0 
+                    song.sheets.find { it.difficulty == "master" }?.levelValueJp ?: 0.0
                 }
                 "ultima_jp" -> filtered.sortedBy { song -> 
-                    song.sheets.find { it.difficulty == "ultima" }?.internalLevelValueJp ?: 0.0 
+                    song.sheets.find { it.difficulty == "ultima" }?.levelValueJp ?: 0.0
                 }
                 else -> filtered // 默认情况也保持原始顺序
             }

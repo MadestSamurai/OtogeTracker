@@ -300,7 +300,7 @@ private fun SongSheetDetailCard(
                             fontFamily = sarasaBold
                         )
                         Text(
-                            text = "定数: ${sheet.internalLevelValueJp}",
+                            text = "定数: ${sheet.levelValueJp}",
                             color = Color.White.copy(alpha = 0.8f),
                             fontSize = 14.sp
                         )
