@@ -84,6 +84,7 @@ internal fun ChunithmSongListPage(
     val selectedGenres = remember { mutableStateOf(setOf<String>()) }
     val selectedVersions = remember { mutableStateOf(setOf<String>()) }
     val selectedDifficulties = remember { mutableStateOf(setOf<String>()) }
+    val includeWE = remember(key1 = "includeWE") { mutableStateOf(true) }
 
     // 初始化时将所有选项设为选中状态
     LaunchedEffect(songList) {
@@ -109,7 +110,7 @@ internal fun ChunithmSongListPage(
     val filterCnLevelRange = remember { mutableStateOf(10..154) }
 
     val filteredSongList by remember(searchText, songList, selectedGenres.value, selectedVersions.value,
-        selectedDifficulties.value, filterInternalLevelRange.value, filterCnLevelRange.value, selectedSortOption.value, isAscendingOrder.value) {
+        selectedDifficulties.value, filterInternalLevelRange.value, filterCnLevelRange.value, includeWE.value, selectedSortOption.value, isAscendingOrder.value) {
         derivedStateOf {
             val filtered = songList.filter { song ->
                 // 如果任何一个筛选器是空集合（全不选），则不显示任何内容
@@ -128,17 +129,33 @@ internal fun ChunithmSongListPage(
                 val isCnFilterDisabled = filterCnLevelRange.value.start <= 1 && filterCnLevelRange.value.endInclusive >= 999
 
                 song.sheets.any { sheet ->
-                    // 将整数范围转换回小数进行比较
-                    val jpLevelMatch = sheet.levelValueJp >= (filterInternalLevelRange.value.start / 10.0) &&
-                                     sheet.levelValueJp <= (filterInternalLevelRange.value.endInclusive / 10.0)
+                    // WE难度特殊处理：如果开启WE开关且这是WE难度（levelValueJp = 0 或 > 100），跳过JP和CN定数范围过滤
+                    val isWEDifficulty = sheet.type == "we"
+                    
+                    val jpLevelMatch = if (includeWE.value && isWEDifficulty) {
+                        true  // WE难度总是匹配JP定数筛选
+                    } else {
+                        // 将整数范围转换回小数进行比较
+                        sheet.levelValueJp >= (filterInternalLevelRange.value.start / 10.0) &&
+                        sheet.levelValueJp <= (filterInternalLevelRange.value.endInclusive / 10.0)
+                    }
 
-                    // Match succeeds if either CN filter is disabled, or the sheet's CN value is within the filter range
-                    val cnLevelMatch = isCnFilterDisabled ||
-                            (sheet.levelValueCn >= (filterCnLevelRange.value.start / 10.0) &&
-                             sheet.levelValueCn <= (filterCnLevelRange.value.endInclusive / 10.0))
+                    // WE难度也跳过CN筛选
+                    val cnLevelMatch = if (includeWE.value && isWEDifficulty) {
+                        true  // WE难度总是匹配CN定数筛选
+                    } else {
+                        // Match succeeds if either CN filter is disabled, or the sheet's CN value is within the filter range
+                        isCnFilterDisabled ||
+                        (sheet.levelValueCn >= (filterCnLevelRange.value.start / 10.0) &&
+                         sheet.levelValueCn <= (filterCnLevelRange.value.endInclusive / 10.0))
+                    }
 
                     // 难度筛选 - 必须包含选中的难度
-                    val difficultyMatch = selectedDifficulties.value.contains(sheet.difficulty)
+                    val difficultyMatch = if (includeWE.value && isWEDifficulty) {
+                        true
+                    } else {
+                        selectedDifficulties.value.contains(sheet.difficulty)
+                    }
 
                     jpLevelMatch && cnLevelMatch && difficultyMatch
                 }
@@ -315,6 +332,7 @@ internal fun ChunithmSongListPage(
             filterInternalLevelRange = filterInternalLevelRange,
             cnLevelRange = cnLevelRange,
             filterCnLevelRange = filterCnLevelRange,
+            includeWE = includeWE,
             modifier = Modifier.padding(top = 64.dp)
         )
 

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
@@ -29,7 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
@@ -50,7 +50,7 @@ import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 
 @Composable
-fun ChunithmFilterComponent(
+internal fun ChunithmFilterComponent(
     isFilterExpanded: Boolean,
     genres: List<String>,
     versions: List<String>,
@@ -61,6 +61,7 @@ fun ChunithmFilterComponent(
     filterInternalLevelRange: MutableState<IntRange>,
     cnLevelRange: MutableState<IntRange>,
     filterCnLevelRange: MutableState<IntRange>,
+    includeWE: MutableState<Boolean>,
     modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
@@ -96,7 +97,8 @@ fun ChunithmFilterComponent(
             // JP Value range filter
             JpValueRangeFilter(
                 internalLevelRange = internalLevelRange,
-                filterInternalLevelRange = filterInternalLevelRange
+                filterInternalLevelRange = filterInternalLevelRange,
+                includeWE = includeWE
             )
 
             // CN Value range filter
@@ -318,7 +320,8 @@ private fun DifficultyFilterRow(
 @Composable
 private fun JpValueRangeFilter(
     internalLevelRange: MutableState<IntRange>,
-    filterInternalLevelRange: MutableState<IntRange>
+    filterInternalLevelRange: MutableState<IntRange>,
+    includeWE: MutableState<Boolean>
 ) {
     Column(
         modifier = Modifier
@@ -338,13 +341,27 @@ private fun JpValueRangeFilter(
                 modifier = Modifier.weight(1f)
             )
 
-            // 不可见的占位符，保持与CN Filter行高一致
-            Box(modifier = Modifier.padding(start = 8.dp)) {
+            // WE难度开关
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(start = 8.dp)
+            ) {
+                Text(
+                    text = "WE",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White,
+                    modifier = Modifier.padding(end = 4.dp)
+                )
                 Switch(
-                    checked = false,
-                    onCheckedChange = { },
-                    modifier = Modifier.alpha(0f), // 完全透明
-                    enabled = false
+                    checked = includeWE.value,
+                    onCheckedChange = { includeWE.value = it },
+                    modifier = Modifier.height(20.dp),
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Beige500,
+                        uncheckedThumbColor = Red500,
+                        checkedTrackColor = Beige500.copy(alpha = 0.3f),
+                        uncheckedTrackColor = Red500.copy(alpha = 0.3f)
+                    )
                 )
             }
         }
