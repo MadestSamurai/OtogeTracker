@@ -3,6 +3,7 @@ package com.madsam.otora.data.bof.remote.api
 import com.madsam.otora.data.bof.remote.model.BofCommentDTO
 import com.madsam.otora.data.bof.remote.model.BofEntryDTO
 import com.madsam.otora.data.bof.remote.model.BofRangeDTO
+import com.madsam.otora.data.bof.remote.model.BofTTWorkData
 import com.madsam.otora.data.bof.remote.model.BofTeamDTO
 import retrofit2.Call
 import retrofit2.http.GET
@@ -26,4 +27,7 @@ internal interface BofAPI {
 
     @GET("bof/range.json")
     fun getBofRangeData(): Call<List<BofRangeDTO>>
+
+    @GET("bof/tt/work.json")
+    fun getBofTTDetailedData(): Call<Map<String, BofTTWorkData>>
 }

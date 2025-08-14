@@ -63,6 +63,7 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
+import com.madsam.otora.ui.bof.sub.BofTTTestScreen
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -187,7 +188,7 @@ fun BofScreen(
     }
 
     val tabTitles = mapOf(
-        "Entry" to listOf("Total", "Avg", "Median", "Diff"),
+        "Entry" to listOf("Total", "Avg", "Median", "Diff", "Test"),
         "Team" to listOf(" "),
         "Comment" to listOf(" ")
     )
@@ -342,6 +343,11 @@ fun BofScreen(
                                         listStateDiff,
                                         scrollThreshold,
                                         bofScreenState
+                                    ) { isTabRowVisible = it }
+
+                                    "Test" -> BofTTTestScreen(
+                                        repository = vm.bofRepository,
+                                        modifier = Modifier.fillMaxSize()
                                     ) { isTabRowVisible = it }
                                 }
 

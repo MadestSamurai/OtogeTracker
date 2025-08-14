@@ -11,6 +11,9 @@ import com.madsam.otora.data.bof.ui.model.BofEntryUI
 import com.madsam.otora.data.bof.ui.model.BofTeamUI
 import com.madsam.otora.data.bof.ui.model.RankTracking
 import com.madsam.otora.data.bof.local.api.BofLocalService
+import com.madsam.otora.data.bof.local.repository.BofRepository
+import com.madsam.otora.data.bof.local.model.BofTTCompactEntity
+import com.madsam.otora.core.database.ObjectBoxManager
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.ScreenUtil.getSafeInsetLeftDp
 import com.madsam.otora.core.utils.ScreenUtil.getSafeInsetRightDp
@@ -24,6 +27,11 @@ internal class BofViewModel(
     private val bofScreenState: BofScreenState
 ) : ViewModel() {
     private val bofLocalService = BofLocalService()
+    
+    // BOFTT Repository for new functionality
+    val bofRepository: BofRepository by lazy {
+        BofRepository(ObjectBoxManager.getBoxStore().boxFor(BofTTCompactEntity::class.java))
+    }
     val totalData = MutableStateFlow(listOf<BofEntryUI>())
     val avgData = MutableStateFlow(listOf<BofEntryUI>())
     val medianData = MutableStateFlow(listOf<BofEntryUI>())
