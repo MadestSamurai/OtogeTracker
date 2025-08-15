@@ -6,11 +6,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -39,16 +40,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.Clock
 import com.madsam.otora.core.theme.BG_DARK_GRAY
-import com.madsam.otora.core.theme.RANKING_BLUE
-import com.madsam.otora.core.theme.RANKING_GREEN
 import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.sarasaRegular
@@ -70,6 +72,12 @@ internal fun BofTTTestScreen(
     var worksCount by remember { mutableStateOf(0L) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    
+    // 屏幕宽度检测和切换状态
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val screenWidthDp = configuration.screenWidthDp
+    val isNarrowScreen = screenWidthDp < 600 // 小于600dp认为是窄屏
+    var showDetailedView by remember { mutableStateOf(!isNarrowScreen) }
     
     // 日期时间状态
     var selectedTimestamp by remember { mutableStateOf(System.currentTimeMillis()) }
@@ -222,6 +230,15 @@ internal fun BofTTTestScreen(
                 }
             }
 
+            if (isNarrowScreen) {
+                OutlinedButton(
+                    onClick = { showDetailedView = !showDetailedView },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(if (showDetailedView) "简化显示" else "详细显示")
+                }
+            }
+
             OutlinedButton(
                 onClick = {
                     repository.clearAll()
@@ -254,6 +271,57 @@ internal fun BofTTTestScreen(
 
         // 排行榜列表
         if (ranking.isNotEmpty()) {
+            // 测量Text组件的精确宽度
+            var impressionWidth by remember { mutableStateOf(50.dp) }
+            var avgScoreWidth by remember { mutableStateOf(60.dp) }
+            var medianScoreWidth by remember { mutableStateOf(60.dp) }
+            
+            val density = LocalDensity.current
+            
+            // 隐藏的测量容器
+            Box(modifier = Modifier
+                .size(0.dp)
+                .requiredHeight(100.dp)
+                .requiredWidth(500.dp)
+            ) {
+                // 测量评价数宽度
+                Text(
+                    text = "000",
+                    fontFamily = sarasaRegular,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    modifier = Modifier.onGloballyPositioned { coordinates ->
+                        impressionWidth = with(density) {
+                            coordinates.size.width.toDp() + 8.dp // 加点padding
+                        }
+                    }
+                )
+                // 测量均分宽度
+                Text(
+                    text = "000.00",
+                    fontFamily = sarasaRegular,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    modifier = Modifier.onGloballyPositioned { coordinates ->
+                        avgScoreWidth = with(density) {
+                            coordinates.size.width.toDp() + 8.dp
+                        }
+                    }
+                )
+                // 测量中位数宽度
+                Text(
+                    text = "000.00",
+                    fontFamily = sarasaRegular,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    modifier = Modifier.onGloballyPositioned { coordinates ->
+                        medianScoreWidth = with(density) {
+                            coordinates.size.width.toDp() + 8.dp
+                        }
+                    }
+                )
+            }
+            
             Column {
                 // 表格标题
                 Text(
@@ -298,22 +366,47 @@ internal fun BofTTTestScreen(
                         modifier = Modifier.width(50.dp)
                     )
                     Text(
-                        text = "作品信息",
-                        fontFamily = sarasaRegular,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        color = Color.White,
-                        modifier = Modifier.weight(1f)
+                        text = "",
+                        modifier = Modifier.weight(0.4f) // 作品信息区域占40%
                     )
                     Text(
-                        text = "分数",
+                        text = "分数条",
                         fontFamily = sarasaRegular,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.width(80.dp)
+                        modifier = Modifier.weight(if (isNarrowScreen && !showDetailedView) 1f else 0.6f) // 窄屏简化模式占更多空间
                     )
+                    if (!isNarrowScreen || showDetailedView) {
+                        Text(
+                            text = "评价数",
+                            fontFamily = sarasaRegular,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.width(impressionWidth)
+                        )
+                        Text(
+                            text = "均分",
+                            fontFamily = sarasaRegular,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.width(avgScoreWidth)
+                        )
+                        Text(
+                            text = "中位值",
+                            fontFamily = sarasaRegular,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.width(medianScoreWidth)
+                        )
+                    }
                 }
 
                 // 数据列表
@@ -325,7 +418,12 @@ internal fun BofTTTestScreen(
                         RankingTableRow(
                             work = work,
                             index = index,
-                            maxScore = ranking.maxOfOrNull { it.score.toDouble() } ?: 1.0
+                            maxScore = ranking.maxOfOrNull { it.score.toDouble() } ?: 1.0,
+                            isNarrowScreen = isNarrowScreen,
+                            showDetailedView = showDetailedView,
+                            impressionWidth = impressionWidth,
+                            avgScoreWidth = avgScoreWidth,
+                            medianScoreWidth = medianScoreWidth
                         )
                     }
                     
@@ -390,49 +488,54 @@ internal fun BofTTTestScreen(
 }
 
 @Composable
-private fun RankingTableRow(work: WorkRanking, index: Int, maxScore: Double) {
+private fun RankingTableRow(
+    work: WorkRanking, 
+    index: Int, 
+    maxScore: Double, 
+    isNarrowScreen: Boolean, 
+    showDetailedView: Boolean,
+    impressionWidth: Dp,
+    avgScoreWidth: Dp,
+    medianScoreWidth: Dp
+) {
     val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
     
     // 计算分数条的宽度比例
     val scoreRatio = if (maxScore > 0) work.score.toDouble() / maxScore else 0.0
     
-    // 根据排名确定颜色
-    val rankColor = when {
-        work.rank == 1 -> RANKING_RED
-        work.rank <= 3 -> RANKING_GREEN
-        work.rank <= 10 -> RANKING_BLUE
-        else -> Color.White
-    }
+    // 根据排名确定颜色 - 排名文字统一使用白色
+    val rankColor = Color.White
+
+    // 直接使用 WorkRanking 的字段
+    val avgScore = work.average
+    val medianScore = work.median
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(backgroundColor)
-            .padding(vertical = 8.dp, horizontal = 4.dp),
+            .height(36.dp)
+            .background(backgroundColor),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 排名列
-        Box(
+        // 排名列（固定宽度）
+        Text(
+            text = work.rank.toString(),
+            fontFamily = sarasaRegular,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+            color = rankColor,
+            textAlign = TextAlign.Center,
             modifier = Modifier
                 .width(50.dp)
-                .height(32.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = work.rank.toString(),
-                fontFamily = sarasaRegular,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = rankColor,
-                textAlign = TextAlign.Center
-            )
-        }
+                .padding(vertical = 4.dp)
+        )
 
-        // 作品信息列
+        // 作品信息列（占60%宽度，右对齐）
         Column(
             modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 8.dp)
+                .weight(0.6f)
+                .padding(horizontal = 8.dp),
+            horizontalAlignment = Alignment.End
         ) {
             Text(
                 text = work.title,
@@ -441,7 +544,9 @@ private fun RankingTableRow(work: WorkRanking, index: Int, maxScore: Double) {
                 fontSize = 14.sp,
                 color = Color.White,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.End,
+                modifier = Modifier.fillMaxWidth()
             )
             Text(
                 text = work.artist,
@@ -449,50 +554,107 @@ private fun RankingTableRow(work: WorkRanking, index: Int, maxScore: Double) {
                 fontSize = 12.sp,
                 color = TEXT_GRAY,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.End,
+                modifier = Modifier.fillMaxWidth()
             )
         }
 
-        // 分数列
-        Column(
-            modifier = Modifier.width(80.dp),
-            horizontalAlignment = Alignment.End
+        // 分数条列（根据屏幕模式调整宽度）
+        Box(
+            modifier = Modifier
+                .weight(if (isNarrowScreen && !showDetailedView) 1f else 0.4f)
+                .padding(horizontal = 4.dp)
+                .height(20.dp)
         ) {
-            // 分数条形图
-            Box(
-                modifier = Modifier
-                    .width(70.dp)
-                    .height(18.dp)
-                    .background(Color.Gray.copy(alpha = 0.3f))
-                    .clip(RoundedCornerShape(4.dp))
-            ) {
-                Box(
+            // 在窄屏简化模式下，根据其他三列的实际测量宽度来调整分数条宽度
+            val adjustedScoreRatio = if (isNarrowScreen && !showDetailedView) {
+                // 使用实际测量的宽度：impressionWidth + avgScoreWidth + medianScoreWidth
+                // 根据这些实际宽度调整分数条的显示比例
+                scoreRatio * 0.85f // 预留一些空间以确保布局稳定
+            } else {
+                scoreRatio
+            }
+
+            Box {
+                Spacer(
                     modifier = Modifier
-                        .fillMaxHeight()
-                        .width((70.dp * scoreRatio.toFloat()).coerceAtLeast(0.dp))
+                        .fillMaxWidth(adjustedScoreRatio.toFloat().coerceAtMost(1f))
+                        .height(20.dp)
                         .background(
-                            color = rankColor,
-                            shape = RoundedCornerShape(4.dp)
+                            color = RANKING_RED,
+                            shape = RoundedCornerShape(
+                                topEnd = 10.dp,
+                                bottomEnd = 10.dp
+                            )
                         )
                 )
                 Text(
                     text = work.score.toString(),
                     fontFamily = sarasaRegular,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 10.sp,
+                    fontSize = 14.sp,
                     color = Color.White,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.Center)
+                    overflow = TextOverflow.Visible,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 4.dp)
                 )
             }
-            
+        }
+
+        // 条件显示详细信息列
+        if (!isNarrowScreen || showDetailedView) {
+            // 评价数列（固定宽度，基于"000"宽度计算）
             Text(
-                text = "ID:${work.workId}",
+                text = if (work.impression > 0) work.impression.toString() else "---",
                 fontFamily = sarasaRegular,
-                fontSize = 10.sp,
-                color = TEXT_GRAY,
-                textAlign = TextAlign.End,
-                modifier = Modifier.padding(top = 2.dp)
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .width(impressionWidth)
+                    .padding(vertical = 4.dp)
+            )
+
+            // 均分列（固定宽度，显示a值）
+            Text(
+                text = if (avgScore > 0) String.format("%.1f", avgScore) else "---",
+                fontFamily = sarasaRegular,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .width(avgScoreWidth)
+                    .background(
+                        if (avgScore > 0) 
+                            Color(red = (avgScore / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
+                        else 
+                            Color.Transparent
+                    )
+                    .padding(vertical = 4.dp)
+            )
+
+            // 中位值列（固定宽度，显示m值）
+            Text(
+                text = if (medianScore > 0) String.format("%.1f", medianScore) else "---",
+                fontFamily = sarasaRegular,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .width(medianScoreWidth)
+                    .background(
+                        if (medianScore > 0) 
+                            Color(red = (medianScore / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
+                        else 
+                            Color.Transparent
+                    )
+                    .padding(vertical = 4.dp)
             )
         }
     }

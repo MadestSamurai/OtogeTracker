@@ -25,7 +25,7 @@ internal data class BofTTCompactEntity(
     @Index var earliestTimestamp: Long = 0,
     @Index var latestTimestamp: Long = 0,
     @Index var latestTotalScore: Int = 0,
-    var latestAverageScore: Double = 0.0,
+    var latestAverage: Double = 0.0,
     var lastUpdated: Long = 0
 ) {
     constructor() : this(
@@ -41,7 +41,7 @@ internal data class BofTTCompactEntity(
         earliestTimestamp = 0,
         latestTimestamp = 0,
         latestTotalScore = 0,
-        latestAverageScore = 0.0,
+        latestAverage = 0.0,
         lastUpdated = 0
     )
 }

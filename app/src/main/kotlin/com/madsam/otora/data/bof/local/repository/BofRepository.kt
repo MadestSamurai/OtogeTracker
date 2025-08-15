@@ -48,7 +48,9 @@ internal class BofRepository(
                     title = getTitleAtTime(entity, timestamp),
                     artist = getArtistAtTime(entity, timestamp),
                     score = scoreSnapshot.totalScore,
-                    scoreDetails = "${scoreSnapshot.currentScore}|${scoreSnapshot.averageScore}"
+                    average = scoreSnapshot.average,
+                    median = scoreSnapshot.median,
+                    impression = scoreSnapshot.impression
                 )
             } else null
         }.sortedByDescending { it.score }
@@ -194,10 +196,10 @@ internal class BofRepository(
                                     day = dayData.d,
                                     hour = hourData.h,
                                     minute = minuteData.n,
-                                    recordIndex = minuteData.v.i,
                                     totalScore = minuteData.v.t,
-                                    currentScore = minuteData.v.m,
-                                    averageScore = minuteData.v.a
+                                    average = minuteData.v.a,
+                                    median = minuteData.v.m,
+                                    impression = minuteData.v.i
                                 )
                             }
                         }
@@ -317,7 +319,7 @@ internal class BofRepository(
         
         val latestScore = findLatestScore(work)
         entity.latestTotalScore = latestScore?.totalScore ?: 0
-        entity.latestAverageScore = latestScore?.averageScore ?: 0.0
+        entity.latestAverage = latestScore?.average ?: 0.0
         
         entity.lastUpdated = System.currentTimeMillis()
         
@@ -380,10 +382,10 @@ internal class BofRepository(
                                     day = dayData.d,
                                     hour = hourData.h,
                                     minute = minuteData.n,
-                                    recordIndex = minuteData.v.i,
                                     totalScore = minuteData.v.t,
-                                    currentScore = minuteData.v.m,
-                                    averageScore = minuteData.v.a
+                                    average = minuteData.v.a,
+                                    median = minuteData.v.m,
+                                    impression = minuteData.v.i
                                 )
                             }
                         }
@@ -406,10 +408,10 @@ internal data class BofTTScoreSnapshot(
     val day: Int,
     val hour: Int,
     val minute: Int,
-    val recordIndex: Int,
     val totalScore: Int,
-    val currentScore: Double,
-    val averageScore: Double
+    val average: Double,
+    val median: Double,
+    val impression: Int
 )
 
 /**
@@ -418,7 +420,9 @@ internal data class BofTTScoreSnapshot(
  * @param title 作品标题（该时间点的标题）
  * @param artist 艺术家（该时间点的艺术家）
  * @param score 总分（用于排序）
- * @param scoreDetails 得分详情，格式："当前分数|平均分数"
+ * @param average 平均分
+ * @param median 中位值
+ * @param impression 评价数
  * @param rank 排名（1开始，按总分降序）
  */
 data class WorkRanking(
@@ -426,7 +430,9 @@ data class WorkRanking(
     val title: String,
     val artist: String,
     val score: Int,
-    val scoreDetails: String,
+    val average: Double,
+    val median: Double,
+    val impression: Int,
     val rank: Int = 0
 )
 
