@@ -58,6 +58,7 @@ import com.madsam.otora.ui.bof.sub.BofDiffScreen
 import com.madsam.otora.ui.bof.sub.BofMedianScreen
 import com.madsam.otora.ui.bof.sub.BofTeamScreen
 import com.madsam.otora.ui.bof.sub.BofTotalScreen
+import com.madsam.otora.ui.bof.sub.BofTotalNewScreen
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
@@ -313,13 +314,11 @@ fun BofScreen(
                         composable("$mainTab/$subTab") {
                             when (mainTab) {
                                 "Entry" -> when (subTab) {
-                                    "Total" -> BofTotalScreen(
-                                        vm,
-                                        snackbarHostState,
-                                        listStateTotal,
-                                        scrollThreshold,
-                                        bofScreenState
-                                    ) { isTabRowVisible = it }
+                                    "Total" -> BofTotalNewScreen(
+                                        vm = vm,
+                                        bofScreenState = bofScreenState,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
 
                                     "Avg" -> BofAvgScreen(
                                         vm,

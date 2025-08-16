@@ -13,12 +13,15 @@ import com.madsam.otora.data.bof.ui.model.RankTracking
 import com.madsam.otora.data.bof.local.api.BofLocalService
 import com.madsam.otora.data.bof.local.repository.BofRepository
 import com.madsam.otora.data.bof.local.model.BofTTCompactEntity
+import com.madsam.otora.data.bof.local.repository.WorkRanking
 import com.madsam.otora.core.database.ObjectBoxManager
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.ScreenUtil.getSafeInsetLeftDp
 import com.madsam.otora.core.utils.ScreenUtil.getSafeInsetRightDp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import kotlin.math.max
 
 private const val TAG = "BofViewModel"
@@ -39,6 +42,11 @@ internal class BofViewModel(
     val isDiffReverse = MutableStateFlow(false)
     val teamData = MutableStateFlow(listOf<BofTeamUI>())
     val commentData = MutableStateFlow(listOf<BofCommentUI>())
+
+    // 新的排名数据流
+    val totalRankingData = MutableStateFlow(listOf<WorkRanking>())
+    val isLoading = MutableStateFlow(false)
+    val errorMessage = MutableStateFlow("")
 
     var thresholdImpr = MutableStateFlow(1)
     var thresholdImprOld = MutableStateFlow(1)
@@ -364,6 +372,37 @@ internal class BofViewModel(
             entry.index = currentRank
         }
         commentData.update { updatedData }
+    }
+
+    // 新的排名数据加载方法
+    fun loadRankingData() {
+        viewModelScope.launch {
+            try {
+                isLoading.update { true }
+                errorMessage.update { "" }
+                
+                // 简化：先使用当前时间戳
+                val timestamp = System.currentTimeMillis()
+                
+                val rankings = bofRepository.getRankingAtTime(timestamp)
+                totalRankingData.update { rankings }
+                
+                if (rankings.isEmpty()) {
+                    errorMessage.update { "该时间点暂无排名数据" }
+                }
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load ranking data", e)
+                errorMessage.update { "加载失败: ${e.message}" }
+                totalRankingData.update { emptyList() }
+            } finally {
+                isLoading.update { false }
+            }
+        }
+    }
+    
+    fun refreshData() {
+        loadRankingData()
     }
 }
 
