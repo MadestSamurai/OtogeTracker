@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,7 +42,7 @@ fun PopupTip(
                     Text(
                         text = text,
                         color = color,
-                        fontSize = 14.sp,
+                        style = MaterialTheme.typography.bodyMedium,
                         lineHeight = 18.sp,
                         modifier = Modifier
                             .background(

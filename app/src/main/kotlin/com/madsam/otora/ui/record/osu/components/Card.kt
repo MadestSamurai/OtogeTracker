@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -51,8 +52,6 @@ import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.core.theme.OSU_BRIGHT_RED
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.data.osu.remote.model.OsuGroupDTO
 import com.madsam.otora.data.osu.ui.model.OsuCardUiModel
 import com.madsam.otora.ui.components.GroupListItem
@@ -218,8 +217,7 @@ internal fun Card(
                 Text(
                     text = cardData.title,
                     color = Color(cardData.profileColour.toColorInt()),
-                    fontFamily = sarasaBold,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier
                         .constrainAs(title) {
                             top.linkTo(parent.top, margin = 12.dp)
@@ -253,8 +251,7 @@ internal fun Card(
             Text(
                 text = cardData.username,
                 color = Beige400,
-                fontFamily = sarasaSemiBold,
-                fontSize = 24.sp,
+                style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .constrainAs(nameplateName) {
                         top.linkTo(avatarImage.top, margin = 8.dp)
@@ -281,7 +278,7 @@ internal fun Card(
                     }
                     .padding(start = 5.dp),
                 color = Beige400,
-                fontSize = 18.sp
+                style = MaterialTheme.typography.bodyLarge
             )
             val supporterShowPopup = remember { MutableTransitionState(false) }
             if (cardData.isSupporter) {
@@ -323,8 +320,7 @@ internal fun Card(
             Text(
                 text = cardData.rank,
                 color = Beige400,
-                fontFamily = sarasaBold,
-                fontSize = 22.sp,
+                style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier
                     .constrainAs(rank) {
                         top.linkTo(baseBackground.bottom)
@@ -354,14 +350,13 @@ internal fun Card(
                     },
                     inlineContent = inlineContent,
                     color = Beige500,
-                    fontSize = 14.sp,
+                    style = MaterialTheme.typography.bodyMedium,
                     lineHeight = 18.sp,
                 )
                 Text(
                     text = cardData.countryRank,
                     color = Beige400,
-                    fontFamily = sarasaSemiBold,
-                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     lineHeight = 20.sp,
                 )
             }
