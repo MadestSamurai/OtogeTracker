@@ -13,9 +13,6 @@ val sarasaFamily = FontFamily(
     Font(R.font.sarasa_bold, FontWeight.Bold)
 )
 
-val sarasaLight = FontFamily(
-    Font(R.font.sarasa_light)
-)
 val sarasaRegular = FontFamily(
     Font(R.font.sarasa_regular)
 )

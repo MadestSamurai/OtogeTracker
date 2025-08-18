@@ -44,7 +44,7 @@ val Typography = Typography(
     titleLarge = TextStyle(
         fontFamily = sarasaFamily,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 24.sp
+        fontSize = 20.sp
     ),
     titleMedium = TextStyle(
         fontFamily = sarasaFamily,

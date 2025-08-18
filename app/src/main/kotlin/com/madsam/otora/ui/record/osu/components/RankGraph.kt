@@ -3,12 +3,13 @@ package com.madsam.otora.ui.record.osu.components
 import android.text.Layout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
@@ -36,7 +36,6 @@ import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.sarasaSemiBold
-import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 import com.madsam.otora.ui.components.DoubleCircleIndicator
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -96,8 +95,7 @@ internal fun RankGraph(
         Text(
             text = stringResource(id = R.string.global_ranking),
             color = Beige400,
-            fontSize = 24.sp,
-            fontFamily = sarasaSemiBold,
+            style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 10.dp)
         )
@@ -106,27 +104,25 @@ internal fun RankGraph(
             text = stringResource(id = R.string.recent_90_days),
             fontFamily = sarasaSemiBold,
             color = Beige400,
-            fontSize = 16.sp
+            style = MaterialTheme.typography.bodyLarge,
         )
 
         if (rankGraphData.isEmpty()) {
-            Box(
+            Text(
+                text = "Loading data...",
+                color = Beige400,
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
                 modifier = Modifier
                     .padding(
                         start = 15.dp,
-                        end = 15.dp
+                        end = 15.dp,
+                        top = 42.dp,
+                        bottom = 42.dp
                     )
-                    .height(100.dp)
-            ) {
-                Text(
-                    text = "Loading data...",
-                    color = Beige400,
-                    fontSize = 16.sp,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
+            )
 
-            Box(
+            Spacer(
                 modifier = Modifier
                     .shimmer()
                     .padding(bottom = 10.dp)
@@ -260,24 +256,17 @@ internal fun RankGraph(
             text = buildAnnotatedString {
                 append("")
                 withStyle(
-                    style = SpanStyle(
-                        fontFamily = sarasaSemiBold,
-                        fontSize = 16.sp
-                    )
+                    style = MaterialTheme.typography.titleMedium.toSpanStyle()
                 ) {
                     append("${stringResource(id = R.string.highest_rank)}: #${highestData.rank}")
                 }
                 withStyle(
-                    style = SpanStyle(
-                        fontFamily = sarasaRegular,
-                        fontSize = 14.sp,
-                    )
+                    style = MaterialTheme.typography.bodyMedium.toSpanStyle()
                 ) {
                     append(" (${highestData.date.split("T")[0]})")
                 }
             },
             color = Beige400,
-            fontSize = 16.sp,
             modifier = Modifier.padding(bottom = 10.dp)
         )
     }

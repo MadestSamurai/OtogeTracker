@@ -1,14 +1,20 @@
 package com.madsam.otora.ui.record.osu.components
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,14 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.OSU_BRIGHT_RED
@@ -35,8 +41,6 @@ import com.madsam.otora.core.theme.OSU_DISCORD_TEXT
 import com.madsam.otora.core.theme.OSU_X_BG
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.CommonUtils.dateCodeToRecent
 import com.madsam.otora.data.osu.ui.model.OsuSocialUiModel
@@ -49,7 +53,7 @@ internal fun SocialCard(
 ) {
     val data by osuSocialCard.collectAsState()
 
-    ConstraintLayout(
+    Column(
         modifier = Modifier
             .width(cardWidthDp)
             .clip(
@@ -61,194 +65,184 @@ internal fun SocialCard(
                 )
             )
             .background(Red700)
+            .padding(vertical = 16.dp)
     ) {
-        val (
-            playInfo,
-            links
-        ) = createRefs()
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth()
-                .constrainAs(playInfo) {
-                    top.linkTo(parent.top)
-                    start.linkTo(parent.start)
-                }
-        ) {
-            Text(
-                text = buildAnnotatedString {
-                    append("Joined ")
-                    withStyle(
-                        style = SpanStyle(
-                            fontFamily = sarasaSemiBold
-                        )
-                    ) {
-                        append(
-                            CommonUtils.dateCodeToYMDHMSU(
-                                data.joinDate
-                            )
-                        )
-                    }
-                },
-                fontFamily = sarasaRegular,
-                fontSize = 16.sp,
-                color = Beige400,
-                modifier = Modifier
-                    .padding(start = 16.dp, top = 16.dp)
+        // User Info Section
+        UserInfoSection(data = data)
+        
+        // Social Links Section  
+        SocialLinksSection(data = data)
+    }
+}
+
+@Composable
+private fun UserInfoSection(data: OsuSocialUiModel) {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .fillMaxWidth()
+    ) {
+        InfoText(
+            prefix = "Joined ",
+            text = CommonUtils.dateCodeToYMDHMSU(data.joinDate)
+        )
+        
+        InfoText(
+            prefix = "Last seen ",
+            text = dateCodeToRecent(data.lastVisit)
+        )
+        
+        if (data.location.isNotEmpty()) {
+            InfoText(
+                prefix = "From ",
+                text = data.location
             )
-            Text(
-                text = buildAnnotatedString {
-                    append("Last seen ")
-                    withStyle(
-                        style = SpanStyle(
-                            fontFamily = sarasaSemiBold
-                        )
-                    ) {
-                        append(
-                            dateCodeToRecent(data.lastVisit)
-                        )
-                    }
-                },
-                fontFamily = sarasaRegular,
-                fontSize = 16.sp,
-                color = Beige400,
-                modifier = Modifier
-                    .padding(start = 16.dp)
+        }
+        
+        if (data.playStyle.isNotEmpty()) {
+            InfoText(
+                prefix = "Plays with ",
+                text = data.playStyle,
+                modifier = Modifier.padding(bottom = 4.dp)
             )
-            if (data.location.isNotEmpty()) {
-                Text(
-                    text = buildAnnotatedString {
-                        append("From ")
-                        withStyle(
-                            style = SpanStyle(
-                                fontFamily = sarasaSemiBold
-                            )
-                        ) {
-                            append(data.location)
-                        }
-                    },
-                    fontFamily = sarasaRegular,
-                    fontSize = 16.sp,
-                    color = Beige400,
-                    modifier = Modifier
-                        .padding(start = 16.dp)
-                )
+        }
+    }
+}
+
+@Composable
+private fun InfoText(
+    prefix: String,
+    text: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = buildAnnotatedString {
+            append(prefix)
+            withStyle(style = MaterialTheme.typography.titleMedium.toSpanStyle()) {
+                append(text)
             }
-            if (data.playStyle.isNotEmpty()) {
-                Text(
-                    text = buildAnnotatedString {
-                        append("Plays with ")
-                        withStyle(
-                            style = SpanStyle(
-                                fontFamily = sarasaSemiBold
-                            )
-                        ) {
-                            append(data.playStyle)
+        },
+        style = MaterialTheme.typography.bodyLarge,
+        color = Beige400,
+        modifier = modifier
+    )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SocialLinksSection(data: OsuSocialUiModel) {
+    val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
+    
+    val socialLinks = buildList {
+        if (data.twitter.isNotEmpty()) {
+            add(
+                SocialLinkData(
+                    icon = Filled.XLogo,
+                    text = "@${data.twitter}",
+                    backgroundColor = OSU_X_BG,
+                    contentColor = White1000,
+                    url = "https://x.com/${data.twitter}"
+                )
+            )
+        }
+        
+        if (data.discord.isNotEmpty()) {
+            add(
+                SocialLinkData(
+                    icon = Filled.Discord,
+                    text = data.discord,
+                    backgroundColor = OSU_DISCORD_BG,
+                    contentColor = OSU_DISCORD_TEXT,
+                    url = null // Discord 用户名通常不能直接跳转
+                )
+            )
+        }
+        
+        if (data.website.isNotEmpty()) {
+            add(
+                SocialLinkData(
+                    icon = Filled.Link,
+                    text = data.website,
+                    backgroundColor = OSU_BRIGHT_RED,
+                    contentColor = Color.White,
+                    url = if (data.website.startsWith("http")) data.website else "https://${data.website}"
+                )
+            )
+        }
+    }
+    
+    if (socialLinks.isNotEmpty()) {
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            socialLinks.forEach { linkData ->
+                SocialLinkChip(
+                    linkData = linkData,
+                    onClick = { url ->
+                        try {
+                            uriHandler.openUri(url)
+                        } catch (_: Exception) {
+                            // 显示错误提示
+                            Toast.makeText(
+                                context,
+                                "无法打开链接: $url",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
-                    },
-                    fontFamily = sarasaRegular,
-                    fontSize = 16.sp,
-                    color = Beige400,
-                    modifier = Modifier
-                        .padding(start = 16.dp, bottom = 4.dp)
+                    }
                 )
             }
         }
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .constrainAs(links) {
-                    top.linkTo(playInfo.bottom)
-                    start.linkTo(parent.start)
+    }
+}
+
+private data class SocialLinkData(
+    val icon: ImageVector,
+    val text: String,
+    val backgroundColor: Color,
+    val contentColor: Color,
+    val url: String? = null
+)
+
+@Composable
+private fun SocialLinkChip(
+    linkData: SocialLinkData,
+    onClick: (String) -> Unit
+) {
+    Surface(
+        color = linkData.backgroundColor,
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .then(
+                if (linkData.url != null) {
+                    Modifier.clickable { onClick(linkData.url) }
+                } else {
+                    Modifier
                 }
-                .padding(bottom = 16.dp)
+            )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
-            if (data.twitter.isNotEmpty()) {
-                Surface(
-                    color = OSU_X_BG,
-                    modifier = Modifier
-                        .padding(top = 12.dp)
-                        .fillMaxWidth()
-                ) {
-                    Row {
-                        Image(
-                            painter = rememberVectorPainter(image = Filled.XLogo),
-                            contentDescription = "Twitter",
-                            colorFilter = ColorFilter.tint(White1000),
-                            modifier = Modifier
-                                .size(50.dp)
-                                .padding(start = 18.dp, top = 12.dp, bottom = 12.dp)
-                                .align(Alignment.CenterVertically)
-                        )
-                        Text(
-                            text = "@${data.twitter}",
-                            fontFamily = sarasaSemiBold,
-                            fontSize = 20.sp,
-                            color = White1000,
-                            modifier = Modifier
-                                .padding(start = 12.dp)
-                                .align(Alignment.CenterVertically)
-                        )
-                    }
-                }
-            }
-            if (data.discord.isNotEmpty()) {
-                Surface(
-                    color = OSU_DISCORD_BG,
-                    modifier = Modifier
-                        .padding(top = 12.dp)
-                        .fillMaxWidth()
-                ) {
-                    Row {
-                        Image(
-                            painter = rememberVectorPainter(image = Filled.Discord),
-                            contentDescription = "Discord",
-                            colorFilter = ColorFilter.tint(OSU_DISCORD_TEXT),
-                            modifier = Modifier
-                                .size(50.dp)
-                                .padding(start = 18.dp, top = 12.dp, bottom = 12.dp)
-                                .align(Alignment.CenterVertically)
-                        )
-                        Text(
-                            text = data.discord,
-                            fontFamily = sarasaSemiBold,
-                            fontSize = 20.sp,
-                            color = OSU_DISCORD_TEXT,
-                            modifier = Modifier
-                                .padding(start = 12.dp)
-                                .align(Alignment.CenterVertically)
-                        )
-                    }
-                }
-            }
-            if (data.website.isNotEmpty()) {
-                Surface(
-                    color = OSU_BRIGHT_RED,
-                    modifier = Modifier
-                        .padding(top = 12.dp)
-                        .fillMaxWidth()
-                ) {
-                    Row {
-                        Image(
-                            painter = rememberVectorPainter(image = Filled.Link),
-                            contentDescription = "Website",
-                            colorFilter = ColorFilter.tint(Color.White),
-                            modifier = Modifier
-                                .size(50.dp)
-                                .padding(start = 18.dp, top = 12.dp, bottom = 12.dp)
-                                .align(Alignment.CenterVertically)
-                        )
-                        Text(
-                            text = data.website,
-                            fontSize = 16.sp,
-                            color = Color.White,
-                            modifier = Modifier
-                                .padding(start = 12.dp)
-                                .align(Alignment.CenterVertically)
-                        )
-                    }
-                }
-            }
+            Image(
+                painter = rememberVectorPainter(image = linkData.icon),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(linkData.contentColor),
+                modifier = Modifier.height(16.dp)
+            )
+            
+            Text(
+                text = linkData.text,
+                style = MaterialTheme.typography.bodyMedium,
+                color = linkData.contentColor,
+                modifier = Modifier.padding(start = 6.dp)
+            )
         }
     }
 }

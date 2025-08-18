@@ -2,13 +2,6 @@ package com.madsam.otora.core.utils
 
 import android.util.Log
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.GradientBrush.BlueGradientBg
 import com.madsam.otora.core.theme.GradientBrush.BronzeGradientBg
 import com.madsam.otora.core.theme.GradientBrush.BronzeGradientText
@@ -306,28 +299,7 @@ object CommonUtils {
      * @param value 字符串
      * @return 处理后的字符串标记文本
      */
-    fun bigNumberTextFormat(value: String, textSize: TextUnit): AnnotatedString {
-        val split = value.split(",")
-        val text = if (split.size > 2) {
-            val splitSize = split.size - 2
-            val firstPart = split.dropLast(splitSize).joinToString(",")
-            buildAnnotatedString {
-                withStyle(style = SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold)) {
-                    append(firstPart)
-                }
-                withStyle(style = SpanStyle(fontSize = 12.sp, fontWeight = FontWeight.Normal)) {
-                    append(",${split.takeLast(splitSize).joinToString(",")}")
-                }
-            }
-        } else {
-            buildAnnotatedString {
-                withStyle(style = SpanStyle(fontSize = textSize, fontWeight = FontWeight.Bold)) {
-                    append(split.joinToString(","))
-                }
-            }
-        }
-        return text
-    }
+
 
     /**
      * Cookie处理为键值对

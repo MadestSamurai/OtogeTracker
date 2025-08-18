@@ -4,10 +4,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -28,9 +28,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
@@ -40,9 +40,6 @@ import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
-import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.theme.sarasaSemiBold
-import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.data.osu.ui.model.OsuPlayUiModel
 import com.madsam.otora.ui.components.ImageWithText
 import com.madsam.otora.ui.components.TitleText
@@ -65,46 +62,33 @@ internal fun PlayData(
             .fillMaxWidth()
     ) {
         // 五个标志图标区域
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(80.dp)
                 .clip(RoundedCornerShape(6.dp))
                 .background(Red500)
+                .padding(top = 16.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                val iconModifier = Modifier
-                    .width(64.dp)
-                    .height(32.dp)
-                
-                val iconTextSize = 16.sp
-                val iconTextModifier = Modifier.padding(top = 4.dp)
+            val imageWithTextData = listOf(
+                Triple(Filled.OsuSsh, "SSH", playData.sshCount.toString()),
+                Triple(Filled.OsuSs, "SS", playData.ssCount.toString()),
+                Triple(Filled.OsuSh, "SH", playData.shCount.toString()),
+                Triple(Filled.OsuS, "S", playData.sCount.toString()),
+                Triple(Filled.OsuA, "A", playData.aCount.toString())
+            )
 
-                val imageWithTextData = listOf(
-                    Triple(Filled.OsuSsh, "SSH", playData.sshCount.toString()),
-                    Triple(Filled.OsuSs, "SS", playData.ssCount.toString()),
-                    Triple(Filled.OsuSh, "SH", playData.shCount.toString()),
-                    Triple(Filled.OsuS, "S", playData.sCount.toString()),
-                    Triple(Filled.OsuA, "A", playData.aCount.toString())
+            imageWithTextData.forEach { (imageRes, contentDescription, text) ->
+                ImageWithText(
+                    painter = rememberVectorPainter(image = imageRes),
+                    contentDescription = contentDescription,
+                    text = text,
+                    textColor = iconTextColor,
+                    modifier = Modifier,
+                    iconModifier = Modifier.width(64.dp).height(32.dp),
+                    textModifier = Modifier.padding(top = 4.dp)
                 )
-
-                imageWithTextData.forEach { (imageRes, contentDescription, text) ->
-                    ImageWithText(
-                        painter = rememberVectorPainter(image = imageRes),
-                        contentDescription = contentDescription,
-                        text = text,
-                        textSize = iconTextSize,
-                        textColor = iconTextColor,
-                        modifier = Modifier,
-                        iconModifier = iconModifier,
-                        textModifier = iconTextModifier
-                    )
-                }
             }
         }
 
@@ -114,9 +98,6 @@ internal fun PlayData(
                 .fillMaxWidth()
                 .padding(top = 10.dp)
         ) {
-            val titleSize = 16.sp
-            val textSize = 20.sp
-
             var shown by remember { mutableStateOf(false) }
             val rowData = listOf(
                 "Ranked Score" to "rankedScore",
@@ -147,23 +128,21 @@ internal fun PlayData(
                     textTitle = "Play Time",
                     text = buildAnnotatedString {
                         val styles = listOf(
-                            SpanStyle(fontSize = textSize, fontFamily = sarasaSemiBold) to playTimeStr[0],
-                            SpanStyle(fontSize = 12.sp, fontFamily = sarasaRegular) to "${dayHourLabels[0]} ",
-                            SpanStyle(fontSize = textSize, fontFamily = sarasaSemiBold) to playTimeStr[1],
-                            SpanStyle(fontSize = 12.sp, fontFamily = sarasaRegular) to "${dayHourLabels[1]} ",
-                            SpanStyle(fontSize = 13.sp, fontFamily = sarasaSemiBold) to playTimeStr[2],
-                            SpanStyle(fontSize = 12.sp, fontFamily = sarasaRegular) to "${monthSecondLabels[0]} ",
-                            SpanStyle(fontSize = 13.sp, fontFamily = sarasaSemiBold) to playTimeStr[3],
-                            SpanStyle(fontSize = 12.sp, fontFamily = sarasaRegular) to monthSecondLabels[1]
+                            MaterialTheme.typography.titleLarge to playTimeStr[0],
+                            MaterialTheme.typography.bodySmall to "${dayHourLabels[0]} ",
+                            MaterialTheme.typography.titleLarge to playTimeStr[1],
+                            MaterialTheme.typography.bodySmall to "${dayHourLabels[1]} ",
+                            MaterialTheme.typography.titleSmall to playTimeStr[2],
+                            MaterialTheme.typography.bodySmall to "${monthSecondLabels[0]} ",
+                            MaterialTheme.typography.titleSmall to playTimeStr[3],
+                            MaterialTheme.typography.bodySmall to monthSecondLabels[1]
                         )
                         styles.forEach { (style, text) ->
-                            withStyle(style = style) {
+                            withStyle(style = style.toSpanStyle()) {
                                 append(text)
                             }
                         }
                     },
-                    titleSize = titleSize,
-                    titleTextSize = textSize,
                     color = iconTextColor,
                     modifier = Modifier
                         .padding(start = 10.dp)
@@ -174,24 +153,16 @@ internal fun PlayData(
                     textTitle = "PP",
                     text = buildAnnotatedString {
                         withStyle(
-                            style = SpanStyle(
-                                fontSize = textSize,
-                                fontFamily = sarasaSemiBold
-                            )
+                            style = MaterialTheme.typography.titleLarge.toSpanStyle()
                         ) {
                             append(ppSplit[0])
                         }
                         withStyle(
-                            style = SpanStyle(
-                                fontSize = 12.sp,
-                                fontFamily = sarasaRegular
-                            )
+                            style = MaterialTheme.typography.bodySmall.toSpanStyle()
                         ) {
                             append(".${ppSplit[1]}")
                         }
                     },
-                    titleSize = titleSize,
-                    titleTextSize = textSize,
                     color = iconTextColor,
                     modifier = Modifier
                         .padding(start = 10.dp)
@@ -208,7 +179,7 @@ internal fun PlayData(
                             .padding(bottom = 8.dp)
                     ) {
                         pair.forEach { (title, key) ->
-                            val text = CommonUtils.bigNumberTextFormat(
+                            val text = bigNumberTextFormat(
                                 when (key) {
                                     "rankedScore" -> playData.rankedScore
                                     "totalScore" -> playData.totalScore
@@ -223,14 +194,11 @@ internal fun PlayData(
                                     "postCount" -> playData.postCount
                                     "commentsCount" -> playData.commentsCount
                                     else -> "0.0"
-                                },
-                                textSize
+                                }
                             )
                             TitleText(
                                 textTitle = title,
                                 text = text,
-                                titleSize = titleSize,
-                                titleTextSize = textSize,
                                 color = iconTextColor,
                                 modifier = Modifier
                                     .padding(start = 10.dp)
@@ -262,15 +230,11 @@ internal fun PlayData(
                 text = buildAnnotatedString {
                     appendInlineContent("icon")
                     withStyle(
-                        style = SpanStyle(
-                            fontSize = 18.sp,
-                            fontFamily = sarasaSemiBold
-                        )
+                        style = MaterialTheme.typography.titleMedium.toSpanStyle()
                     ) {
                         append(if (shown) "Show Less Play Data" else "Show More Play Data")
                     }
                 },
-                fontSize = 18.sp,
                 color = Beige400,
                 inlineContent = inlineContent,
                 textAlign = TextAlign.Center,
@@ -284,4 +248,28 @@ internal fun PlayData(
             )
         }
     }
+}
+
+@Composable
+fun bigNumberTextFormat(value: String): AnnotatedString {
+    val split = value.split(",")
+    val text = if (split.size > 2) {
+        val splitSize = split.size - 2
+        val firstPart = split.dropLast(splitSize).joinToString(",")
+        buildAnnotatedString {
+            withStyle(style = MaterialTheme.typography.titleLarge.toSpanStyle()) {
+                append(firstPart)
+            }
+            withStyle(style = MaterialTheme.typography.bodySmall.toSpanStyle()) {
+                append(",${split.takeLast(splitSize).joinToString(",")}")
+            }
+        }
+    } else {
+        buildAnnotatedString {
+            withStyle(style = MaterialTheme.typography.titleLarge.toSpanStyle()) {
+                append(split.joinToString(","))
+            }
+        }
+    }
+    return text
 }
