@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,7 +38,6 @@ import androidx.compose.ui.window.DialogProperties
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.core.theme.Red700
-import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 import com.madsam.otora.ui.record.osu.components.TopRankCard
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,23 +70,20 @@ internal fun TopRankDialog(
         properties = properties
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(scrimColor)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    if (properties.dismissOnClickOutside) {
+                        onDismiss()
+                    }
+                },
             contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(scrimColor)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {
-                        if (properties.dismissOnClickOutside) {
-                            onDismiss()
-                        }
-                    }
-            )
-            Box(
+            Column(
                 modifier = Modifier
                     .width(screenWidthDp * 0.9f)
                     .heightIn(
@@ -96,49 +93,50 @@ internal fun TopRankDialog(
                     .clip(RoundedCornerShape(16.dp))
                     .background(Red700)
                     .padding(16.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { /* Prevent click propagation */ }
             ) {
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = title,
-                            fontFamily = sarasaBold,
-                            fontSize = 24.sp,
-                            color = Beige400
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = Beige400
+                    )
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = Beige400
                         )
-                        IconButton(onClick = onDismiss) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Close",
-                                tint = Beige400
-                            )
-                        }
                     }
-                    if (data.isEmpty()) {
-                        Text(
-                            text = "No records found",
-                            color = Beige400,
-                            fontSize = 16.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.clip(RoundedCornerShape(6.dp))
-                        ) {
-                            items(
-                                count = data.size,
-                                key = { index -> data[index].scoreId }
-                            ) { index ->
-                                TopRankCard(
-                                    item = data[index],
-                                    itemWidth = cardWidthDp
-                                )
-                                if (index != data.size - 1) {
-                                    Spacer(modifier = Modifier.height(10.dp))
-                                }
+                }
+                if (data.isEmpty()) {
+                    Text(
+                        text = "No records found",
+                        color = Beige400,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.clip(RoundedCornerShape(6.dp))
+                    ) {
+                        items(
+                            count = data.size,
+                            key = { index -> data[index].scoreId }
+                        ) { index ->
+                            TopRankCard(
+                                item = data[index],
+                                itemWidth = cardWidthDp
+                            )
+                            if (index != data.size - 1) {
+                                Spacer(modifier = Modifier.height(10.dp))
                             }
                         }
                     }

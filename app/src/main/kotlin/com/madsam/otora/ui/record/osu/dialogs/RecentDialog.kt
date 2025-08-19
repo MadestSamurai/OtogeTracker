@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,13 +32,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.core.theme.Red700
-import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.data.osu.ui.model.OsuRecentUiModel
 import com.madsam.otora.ui.record.osu.components.RecentItem
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -104,8 +103,7 @@ internal fun RecentDialog(
                 ) {
                     Text(
                         text = "Recent Activities",
-                        fontFamily = sarasaBold,
-                        fontSize = 24.sp,
+                        style = MaterialTheme.typography.headlineSmall,
                         color = Beige400
                     )
                     IconButton(onClick = onDismiss) {

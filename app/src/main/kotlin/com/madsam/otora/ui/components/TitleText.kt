@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.Red500
 
 @Composable
@@ -41,6 +42,7 @@ fun TitleText(
                 text = text,
                 style = MaterialTheme.typography.titleLarge,
                 color = color,
+                letterSpacing = (-0.5).sp,
                 modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
             )
         }
