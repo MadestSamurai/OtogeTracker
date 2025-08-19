@@ -71,7 +71,6 @@ fun RankingTable(
     val isNarrowScreen = screenWidthDp < 600
     
     // 测量各列宽度
-    var scoreWidth by remember { mutableStateOf(60.dp) }
     var extraWidth by remember { mutableStateOf(50.dp) }
     var avgWidth by remember { mutableStateOf(60.dp) }
     var medianWidth by remember { mutableStateOf(60.dp) }
@@ -96,17 +95,6 @@ fun RankingTable(
             .requiredWidth(500.dp)
             .requiredHeight(100.dp)
         ) {
-            // 测量分数宽度
-            Text(
-                text = config.scoreWidthType.measureText,
-                fontFamily = sarasaRegular,
-                fontSize = 14.sp,
-                modifier = Modifier.onGloballyPositioned { coordinates ->
-                    scoreWidth = with(density) {
-                        coordinates.size.width.toDp() + 8.dp
-                    }
-                }
-            )
             // 测量额外列宽度
             if (config.extraColumnName != null) {
                 Text(
@@ -550,29 +538,5 @@ private fun formatScore(score: Number, widthType: ColumnWidthType): String {
                     String.format("%.1f", doubleValue)
                 }
             } else "---"
-    }
-}
-
-// 提供切换按钮的Composable函数
-@Composable
-fun RankingTableToggleButton(
-    isNarrowScreen: Boolean,
-    enableToggle: Boolean,
-    narrowMode: Int,
-    onToggle: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    if (isNarrowScreen && enableToggle) {
-        androidx.compose.material3.OutlinedButton(
-            onClick = { onToggle((narrowMode + 1) % 2) },
-            modifier = modifier
-        ) {
-            Text(
-                when (narrowMode) {
-                    0 -> "查看详细数据"
-                    else -> "查看分数条"
-                }
-            )
-        }
     }
 }

@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -122,15 +123,13 @@ fun BofScreen(
     var showDateTimeRangePicker by remember { mutableStateOf(false) }
     val scrollThreshold = 50f
 
+    // Narrow mode state management
+    val configuration = LocalConfiguration.current
+    val screenWidthDp = configuration.screenWidthDp
+    var narrowMode by remember { mutableIntStateOf(0) }
+
     fun selectTime() {
         showDateTimeRangePicker = true
-    }
-
-    if (showDateTimeRangePicker) {
-        DateTimeRangePicker(
-            bofScreenState = bofScreenState,
-            onDismissRequest = { showDateTimeRangePicker = false }
-        )
     }
 
     fun refreshData() {
@@ -149,6 +148,26 @@ fun BofScreen(
                 vm.requestTotalData()
             }
         }
+    }
+
+    // 初始化时加载今日数据
+    LaunchedEffect(Unit) {
+        vm.loadRankingData()
+        refreshData()
+    }
+
+    if (showDateTimeRangePicker) {
+        DateTimeRangePicker(
+            bofScreenState = bofScreenState,
+            onDismissRequest = { 
+                showDateTimeRangePicker = false
+                // 日期选择后自动刷新数据
+                coroutineScope.launch {
+                    vm.loadRankingData()
+                    refreshData()
+                }
+            }
+        )
     }
 
     LaunchedEffect(
@@ -326,7 +345,7 @@ fun BofScreen(
                                     "Total" -> BofTotalNewScreen(
                                         vm = vm,
                                         bofScreenState = bofScreenState,
-                                        modifier = Modifier.fillMaxSize()
+                                        narrowMode = narrowMode
                                     )
 
                                     "Avg" -> BofAvgScreen(
@@ -431,9 +450,7 @@ fun BofScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // 计算屏幕宽度和内容宽度
-                val configuration = LocalConfiguration.current
-                val screenWidthDp = configuration.screenWidthDp.dp
-                val contentWidthDp = screenWidthDp - 24.dp // 减去水平padding
+                val contentWidthDp = screenWidthDp.dp - 24.dp // 减去水平padding
                 
                 Box(
                     modifier = Modifier.fillMaxWidth()
@@ -491,11 +508,8 @@ fun BofScreen(
                             .clickable {
                                 when (selectedTabIndex) {
                                     0 -> {
-                                        // Entry页面，刷新数据
-                                        coroutineScope.launch {
-                                            refreshData()
-                                            snackbarHostState.showSnackbar("数据已刷新")
-                                        }
+                                        // Entry页面，切换narrow模式
+                                        narrowMode = if (narrowMode == 0) 1 else 0
                                     }
                                     1 -> {
                                         // Team页面，刷新团队数据
@@ -523,14 +537,14 @@ fun BofScreen(
                             Icon(
                                 painter = rememberVectorPainter(
                                     image = when (tabIndex) {
-                                        0 -> Filled.ArrowRotate  // Entry: 刷新图标
+                                        0 -> Filled.SwitchArrow  // Entry: 窄屏切换图标
                                         1 -> Filled.ArrowRotate  // Team: 刷新图标
                                         2 -> Filled.ArrowRotate  // Comment: 刷新图标
                                         else -> Filled.ArrowRotate
                                     }
                                 ),
                                 contentDescription = when (tabIndex) {
-                                    0 -> "Refresh Entry Data"
+                                    0 -> if (narrowMode == 1) "Switch to Wide Mode" else "Switch to Narrow Mode"
                                     1 -> "Refresh Team Data"
                                     2 -> "Refresh Comment Data"
                                     else -> "Refresh"
