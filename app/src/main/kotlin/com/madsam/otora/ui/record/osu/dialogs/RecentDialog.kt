@@ -69,23 +69,20 @@ internal fun RecentDialog(
         properties = properties
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(scrimColor)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    if (properties.dismissOnClickOutside) {
+                        onDismiss()
+                    }
+                },
             contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(scrimColor)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {
-                        if (properties.dismissOnClickOutside) {
-                            onDismiss()
-                        }
-                    }
-            )
-            Box(
+            Column(
                 modifier = Modifier
                     .width(screenWidthDp * 0.9f)
                     .heightIn(
@@ -95,43 +92,45 @@ internal fun RecentDialog(
                     .clip(RoundedCornerShape(16.dp))
                     .background(Red700)
                     .padding(16.dp)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { /* Prevent click propagation */ }
             ) {
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Recent Activities",
-                            fontFamily = sarasaBold,
-                            fontSize = 24.sp,
-                            color = Beige400
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Recent Activities",
+                        fontFamily = sarasaBold,
+                        fontSize = 24.sp,
+                        color = Beige400
+                    )
+                    IconButton(onClick = onDismiss) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            tint = Beige400
                         )
-                        IconButton(onClick = onDismiss) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Close",
-                                tint = Beige400
-                            )
-                        }
                     }
+                }
 
-                    LazyColumn(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                    ) {
-                        items(
-                            count = activities.size,
-                            key = { index -> index }
-                        ) { index ->
-                            RecentItem(
-                                activities[index],
-                                cardWidthDp
-                            )
-                            if (index != activities.size - 1) {
-                                Spacer(modifier = Modifier.height(10.dp))
-                            }
+                LazyColumn(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(6.dp))
+                ) {
+                    items(
+                        count = activities.size,
+                        key = { index -> index }
+                    ) { index ->
+                        RecentItem(
+                            activities[index],
+                            cardWidthDp
+                        )
+                        if (index != activities.size - 1) {
+                            Spacer(modifier = Modifier.height(10.dp))
                         }
                     }
                 }
