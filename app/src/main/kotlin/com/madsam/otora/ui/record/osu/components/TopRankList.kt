@@ -20,7 +20,6 @@ import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -77,8 +76,7 @@ internal fun TopRankList(
         ) {
             Text(
                 text = title,
-                fontFamily = sarasaSemiBold,
-                fontSize = 24.sp,
+                style = MaterialTheme.typography.titleLarge,
                 color = Beige400,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
@@ -93,7 +91,7 @@ internal fun TopRankList(
                 Text(
                     text = "More",
                     color = Beige400,
-                    fontSize = 16.sp
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
         }
@@ -112,105 +110,102 @@ internal fun TopRankCard(
     item: OsuTopRankUiModel,
     itemWidth: Dp
 ) {
-    Surface(
-        modifier = Modifier.width(itemWidth),
-        shape = RoundedCornerShape(6.dp),
-        color = Red500
+    Column(
+        modifier = Modifier
+            .width(itemWidth)
+            .clip(RoundedCornerShape(6.dp))
+            .background(Red500)
     ) {
-        Column {
-            // 主要卡片内容 (100dp高度) - 带背景图
-            Box(
-                modifier = Modifier.height(100.dp)
+        Box(
+            modifier = Modifier.height(100.dp)
+        ) {
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = item.bg2x,
+                    contentScale = ContentScale.Crop
+                ),
+                contentDescription = "Background",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .alpha(0.15f)
+                    .clip(RoundedCornerShape(6.dp))
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                // Background image - 只覆盖前100dp
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = item.bg2x,
-                        contentScale = ContentScale.Crop
-                    ),
-                    contentDescription = "Background",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                        .alpha(0.15f)
-                        .clip(RoundedCornerShape(6.dp))
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Cover image with difficulty overlay
-                    Box {
-                        Image(
-                            painter = rememberAsyncImagePainter(
-                                model = item.cover2x,
-                                contentScale = ContentScale.Crop
-                            ),
-                            contentDescription = "Cover",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .width(100.dp)
-                                .height(100.dp)
-                                .clip(RoundedCornerShape(6.dp))
-                        )
-
-                        // Difficulty badge
-                        DifficultyBadge(
-                            difficultyRating = item.difficultyRating,
-                            modifier = Modifier.align(Alignment.TopStart)
-                        )
-                    }
-
-                    // Content area
-                    Column(
+                // Cover image with difficulty overlay
+                Box {
+                    Image(
+                        painter = rememberAsyncImagePainter(
+                            model = item.cover2x,
+                            contentScale = ContentScale.Crop
+                        ),
+                        contentDescription = "Cover",
+                        contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .weight(1f)
+                            .width(100.dp)
                             .height(100.dp)
-                            .padding(start = 8.dp, end = 4.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                    )
+
+                    // Difficulty badge
+                    DifficultyBadge(
+                        difficultyRating = item.difficultyRating,
+                        modifier = Modifier.align(Alignment.TopStart)
+                    )
+                }
+
+                // Content area
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(100.dp)
+                        .padding(start = 8.dp, end = 4.dp)
+                ) {
+                    // Title and subtitle
+                    TitleSection(
+                        title = item.beatmapSetTitleUnicode,
+                        subtitle = item.beatmapSubTitle,
+                        itemWidth = itemWidth
+                    )
+
+                    // Score section
+                    ScoreSection(
+                        item = item,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    // Mods and date
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.Bottom
                     ) {
-                        // Title and subtitle
-                        TitleSection(
-                            title = item.beatmapSetTitleUnicode,
-                            subtitle = item.beatmapSubTitle,
-                            itemWidth = itemWidth
+                        ModsSection(
+                            mods = item.mods,
+                            modifier = Modifier.weight(1f, fill = false)
                         )
 
-                        // Score section
-                        ScoreSection(
-                            item = item,
-                            modifier = Modifier.padding(top = 4.dp)
+                        Text(
+                            text = dateCodeToRecent(item.date),
+                            fontSize = 10.sp,
+                            color = Color.Gray
                         )
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        // Mods and date
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 4.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.Bottom
-                        ) {
-                            ModsSection(
-                                mods = item.mods,
-                                modifier = Modifier.weight(1f, fill = false)
-                            )
-
-                            Text(
-                                text = dateCodeToRecent(item.date),
-                                fontSize = 10.sp,
-                                color = Color.Gray
-                            )
-                        }
                     }
                 }
             }
+        }
 
-            // PP行在底部 - graveyard状态不显示
-            if (item.status != "graveyard" && item.status != "pending") {
-                PPBottomRow(item = item)
-            }
+        // PP行在底部 - graveyard状态不显示
+        if (item.status != "graveyard" && item.status != "pending") {
+            PPBottomRow(item = item)
         }
     }
 }

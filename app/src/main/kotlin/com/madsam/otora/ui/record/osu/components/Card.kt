@@ -320,7 +320,8 @@ internal fun Card(
             Text(
                 text = cardData.rank,
                 color = Beige400,
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleLarge,
+                letterSpacing = (-0.5).sp,
                 modifier = Modifier
                     .constrainAs(rank) {
                         top.linkTo(baseBackground.bottom)
