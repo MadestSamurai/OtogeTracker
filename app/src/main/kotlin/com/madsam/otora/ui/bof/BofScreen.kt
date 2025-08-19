@@ -1,14 +1,22 @@
 package com.madsam.otora.ui.bof
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -36,6 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -49,22 +58,22 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.madsam.otora.BofScreenState
-import com.madsam.otora.ui.components.CustomTabRow
+import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.core.theme.Beige400
+import com.madsam.otora.core.theme.Beige500
+import com.madsam.otora.core.theme.Beige600
+import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.ui.bof.components.DateTimeRangePicker
 import com.madsam.otora.ui.bof.sub.BofAvgScreen
 import com.madsam.otora.ui.bof.sub.BofCommentScreen
 import com.madsam.otora.ui.bof.sub.BofDiffScreen
 import com.madsam.otora.ui.bof.sub.BofMedianScreen
-import com.madsam.otora.ui.bof.sub.BofTeamScreen
-import com.madsam.otora.ui.bof.sub.BofTotalScreen
-import com.madsam.otora.ui.bof.sub.BofTotalNewScreen
-import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.Beige600
-import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.ui.bof.sub.BofTTTestScreen
+import com.madsam.otora.ui.bof.sub.BofTeamScreen
+import com.madsam.otora.ui.bof.sub.BofTotalNewScreen
+import com.madsam.otora.ui.components.CustomScrollableTabRow
+import com.madsam.otora.ui.components.CustomTabRow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -379,13 +388,17 @@ fun BofScreen(
         Column(
             modifier = Modifier.align(Alignment.BottomCenter)
         ) {
+            // 子Tab栏（如果有多个子Tab）
             AnimatedVisibility(
                 visible = isTabRowVisible && subTabTitles.size > 1,
-                modifier = Modifier.clip(RoundedCornerShape(20.dp))
+                enter = fadeIn(animationSpec = tween(300)),
+                exit = fadeOut(animationSpec = tween(300)),
+                modifier = Modifier
+                    .padding(horizontal = 12.dp, vertical = 3.dp)
+                    .clip(RoundedCornerShape(20.dp))
             ) {
                 CustomTabRow(
                     selectedTabIndex = selectedSubTabIndex,
-                    modifier = Modifier.padding(3.dp),
                     containerColor = Red500
                 ) {
                     subTabTitles.forEachIndexed { index, title ->
@@ -408,40 +421,124 @@ fun BofScreen(
                     }
                 }
             }
-            AnimatedVisibility(
-                visible = isTabRowVisible,
+            
+            // 主Tab栏 - 左侧可滚动TabRow + 右侧圆形按钮
+            Row(
                 modifier = Modifier
-                    .padding(bottom = 5.dp)
-                    .clip(RoundedCornerShape(20.dp))
+                    .fillMaxWidth()
+                    .height(46.dp) // 40dp tab + 3dp padding + 3dp padding
+                    .padding(start = 12.dp, end = 12.dp, bottom = 5.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                CustomTabRow(
-                    selectedTabIndex = selectedTabIndex,
-                    modifier = Modifier.padding(3.dp),
-                    containerColor = Red500
+                // 计算屏幕宽度和内容宽度
+                val configuration = LocalConfiguration.current
+                val screenWidthDp = configuration.screenWidthDp.dp
+                val contentWidthDp = screenWidthDp - 24.dp // 减去水平padding
+                
+                Box(
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    mainTabTitles.forEachIndexed { index, title ->
-                        Tab(
-                            selected = selectedTabIndex == index,
-                            onClick = {
-                                if (selectedTabIndex != index) {
-                                    bofScreenState.selectedTab.update { index }
-                                    bofScreenState.selectedSubTab.update { 0 }
-                                    val defaultSubTab = when (title) {
-                                        "Entry" -> "Total"
-                                        "Team", "Comment" -> " "
-                                        else -> ""
+                    // 左侧可滚动TabRow
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = isTabRowVisible,
+                        enter = fadeIn(animationSpec = tween(300)),
+                        exit = fadeOut(animationSpec = tween(300)),
+                        modifier = Modifier
+                            .wrapContentWidth()
+                            .widthIn(max = contentWidthDp - 48.dp) // 减去按钮宽度和间隙
+                            .clip(RoundedCornerShape(20.dp))
+                    ) {
+                        CustomScrollableTabRow(
+                            selectedTabIndex = selectedTabIndex,
+                            containerColor = Red500,
+                            containerWidthDp = contentWidthDp - 48.dp,
+                            tabs = { selectedIndex ->
+                                mainTabTitles.forEachIndexed { index, title ->
+                                    Tab(
+                                        selected = selectedTabIndex == index,
+                                        onClick = {
+                                            if (selectedTabIndex != index) {
+                                                bofScreenState.selectedTab.update { index }
+                                                bofScreenState.selectedSubTab.update { 0 }
+                                                val defaultSubTab = when (title) {
+                                                    "Entry" -> "Total"
+                                                    "Team", "Comment" -> " "
+                                                    else -> ""
+                                                }
+                                                navController.navigate("$title/$defaultSubTab")
+                                            }
+                                        },
+                                        text = {
+                                            Text(
+                                                text = title,
+                                                color = if (selectedTabIndex == index) Beige500 else Beige600
+                                            )
+                                        },
+                                        modifier = Modifier.height(40.dp)
+                                    )
+                                }
+                            }
+                        )
+                    }
+
+                    // 右侧圆形按钮
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .align(Alignment.CenterEnd)
+                            .clip(RoundedCornerShape(50))
+                            .background(Red500)
+                            .clickable {
+                                when (selectedTabIndex) {
+                                    0 -> {
+                                        // Entry页面，刷新数据
+                                        coroutineScope.launch {
+                                            refreshData()
+                                            snackbarHostState.showSnackbar("数据已刷新")
+                                        }
                                     }
-                                    navController.navigate("$title/$defaultSubTab")
+                                    1 -> {
+                                        // Team页面，刷新团队数据
+                                        coroutineScope.launch {
+                                            refreshData()
+                                            snackbarHostState.showSnackbar("团队数据已刷新")
+                                        }
+                                    }
+                                    2 -> {
+                                        // Comment页面，刷新评论数据
+                                        coroutineScope.launch {
+                                            refreshData()
+                                            snackbarHostState.showSnackbar("评论数据已刷新")
+                                        }
+                                    }
                                 }
                             },
-                            text = {
-                                Text(
-                                    text = title,
-                                    color = if (selectedTabIndex == index) Beige500 else Beige600,
-                                )
-                            },
-                            modifier = Modifier.height(40.dp)
-                        )
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Crossfade(
+                            targetState = selectedTabIndex,
+                            animationSpec = tween(durationMillis = 300),
+                            label = "icon_crossfade"
+                        ) { tabIndex ->
+                            Icon(
+                                painter = rememberVectorPainter(
+                                    image = when (tabIndex) {
+                                        0 -> Filled.ArrowRotate  // Entry: 刷新图标
+                                        1 -> Filled.ArrowRotate  // Team: 刷新图标
+                                        2 -> Filled.ArrowRotate  // Comment: 刷新图标
+                                        else -> Filled.ArrowRotate
+                                    }
+                                ),
+                                contentDescription = when (tabIndex) {
+                                    0 -> "Refresh Entry Data"
+                                    1 -> "Refresh Team Data"
+                                    2 -> "Refresh Comment Data"
+                                    else -> "Refresh"
+                                },
+                                tint = Beige500,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
                     }
                 }
             }

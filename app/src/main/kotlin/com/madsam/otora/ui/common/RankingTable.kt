@@ -23,8 +23,6 @@ import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
-import java.text.SimpleDateFormat
-import java.util.*
 
 // 列宽度类型枚举
 enum class ColumnWidthType(val measureText: String) {
@@ -65,8 +63,7 @@ fun RankingTable(
     items: List<RankingItem>,
     config: RankingTableConfig,
     modifier: Modifier = Modifier,
-    narrowMode: Int = 0,
-    onNarrowModeChange: ((Int) -> Unit)? = null
+    narrowMode: Int = 0
 ) {
     // 屏幕宽度检测
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
@@ -181,7 +178,7 @@ fun RankingTable(
             modifier = Modifier
                 .background(BG_DARK_GRAY)
                 .fillMaxWidth()
-                .padding(vertical = 8.dp, horizontal = 4.dp)
+                .padding(vertical = 8.dp, horizontal = 2.dp)
         ) {
             Text(
                 text = "排名",
@@ -215,7 +212,7 @@ fun RankingTable(
                             fontFamily = sarasaBold,
                             fontSize = 14.sp,
                             color = Color.White,
-                            textAlign = TextAlign.Center,
+                            textAlign = TextAlign.End,
                             modifier = Modifier.width(extraWidth)
                         )
                     }
@@ -225,7 +222,7 @@ fun RankingTable(
                             fontFamily = sarasaBold,
                             fontSize = 14.sp,
                             color = Color.White,
-                            textAlign = TextAlign.Center,
+                            textAlign = TextAlign.End,
                             modifier = Modifier.width(avgWidth)
                         )
                     }
@@ -235,7 +232,7 @@ fun RankingTable(
                             fontFamily = sarasaBold,
                             fontSize = 14.sp,
                             color = Color.White,
-                            textAlign = TextAlign.Center,
+                            textAlign = TextAlign.End,
                             modifier = Modifier.width(medianWidth)
                         )
                     }
@@ -256,7 +253,7 @@ fun RankingTable(
                         fontFamily = sarasaBold,
                         fontSize = 14.sp,
                         color = Color.White,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.End,
                         modifier = Modifier.width(extraWidth)
                     )
                 }
@@ -266,7 +263,7 @@ fun RankingTable(
                         fontFamily = sarasaBold,
                         fontSize = 14.sp,
                         color = Color.White,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.End,
                         modifier = Modifier.width(avgWidth)
                     )
                 }
@@ -276,7 +273,7 @@ fun RankingTable(
                         fontFamily = sarasaBold,
                         fontSize = 14.sp,
                         color = Color.White,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.End,
                         modifier = Modifier.width(medianWidth)
                     )
                 }
@@ -295,7 +292,6 @@ fun RankingTable(
                     config = config,
                     isNarrowScreen = isNarrowScreen,
                     narrowMode = narrowMode,
-                    scoreWidth = scoreWidth,
                     extraWidth = extraWidth,
                     avgWidth = avgWidth,
                     medianWidth = medianWidth,
@@ -323,12 +319,6 @@ fun RankingTable(
             }
         }
     }
-    
-    // 提供切换按钮的接口
-    if (isNarrowScreen && config.enableNarrowToggle) {
-        // 这里可以通过回调函数将切换状态传递给父组件
-        // 或者直接在这里提供切换按钮
-    }
 }
 
 @Composable
@@ -339,7 +329,6 @@ private fun RankingTableRow(
     config: RankingTableConfig,
     isNarrowScreen: Boolean,
     narrowMode: Int,
-    scoreWidth: Dp,
     extraWidth: Dp,
     avgWidth: Dp,
     medianWidth: Dp,
@@ -402,7 +391,7 @@ private fun RankingTableRow(
             Box(
                 modifier = Modifier
                     .width(narrowScoreBarWidth)
-                    .padding(horizontal = 4.dp)
+                    .padding(horizontal = 2.dp)
                     .height(20.dp)
             ) {
                 Box {
@@ -438,7 +427,7 @@ private fun RankingTableRow(
                 Box(
                     modifier = Modifier
                         .weight(0.4f)
-                        .padding(horizontal = 4.dp)
+                        .padding(horizontal = 2.dp)
                         .height(20.dp)
                 ) {
                     Box {
@@ -478,10 +467,10 @@ private fun RankingTableRow(
                         fontFamily = sarasaBold,
                         fontSize = 14.sp,
                         color = Color.White,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.End,
                         modifier = Modifier
                             .width(extraWidth)
-                            .padding(vertical = 4.dp)
+                            .padding(vertical = 4.dp, horizontal = 2.dp)
                     )
                 }
             }
@@ -495,7 +484,7 @@ private fun RankingTableRow(
                         fontFamily = sarasaBold,
                         fontSize = 14.sp,
                         color = Color.White,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.End,
                         modifier = Modifier
                             .width(avgWidth)
                             .background(
@@ -504,7 +493,7 @@ private fun RankingTableRow(
                                 else
                                     Color.Transparent
                             )
-                            .padding(vertical = 4.dp)
+                            .padding(vertical = 4.dp, horizontal = 2.dp)
                     )
                 }
             }
@@ -518,7 +507,7 @@ private fun RankingTableRow(
                         fontFamily = sarasaBold,
                         fontSize = 14.sp,
                         color = Color.White,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.End,
                         modifier = Modifier
                             .width(medianWidth)
                             .background(
@@ -527,7 +516,7 @@ private fun RankingTableRow(
                                 else
                                     Color.Transparent
                             )
-                            .padding(vertical = 4.dp)
+                            .padding(vertical = 4.dp, horizontal = 2.dp)
                     )
                 }
             }

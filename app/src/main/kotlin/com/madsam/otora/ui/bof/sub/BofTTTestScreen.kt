@@ -281,8 +281,7 @@ internal fun BofTTTestScreen(
             RankingTable(
                 items = ranking.toRankingItems(),
                 config = config,
-                narrowMode = narrowMode,
-                onNarrowModeChange = { narrowMode = it }
+                narrowMode = narrowMode
             )
         } else if (!isLoading) {
             Box(

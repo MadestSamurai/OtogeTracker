@@ -1,7 +1,6 @@
 package com.madsam.otora.ui.bof.sub
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,7 +18,6 @@ import com.madsam.otora.ui.bof.components.DateTimeRangePicker
 import com.madsam.otora.ui.common.RankingTable
 import com.madsam.otora.ui.common.RankingTableConfig
 import com.madsam.otora.ui.common.ColumnWidthType
-import com.madsam.otora.ui.bof.sub.toRankingItems
 import kotlinx.coroutines.flow.asStateFlow
 
 @Composable
@@ -116,7 +114,6 @@ internal fun BofTotalNewScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp)
         ) {
             when {
                 isLoading -> {
@@ -181,7 +178,7 @@ internal fun BofTotalNewScreen(
                             maxItems = 500
                         ),
                         narrowMode = narrowMode, // 传入外部控制的状态
-                        onNarrowModeChange = { narrowMode = it }, // 外部按钮和内部逻辑的状态同步
+                        // 外部按钮和内部逻辑的状态同步
                         modifier = Modifier.fillMaxSize()
                     )
                 }
