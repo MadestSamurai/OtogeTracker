@@ -150,9 +150,11 @@ fun BofScreen(
         }
     }
 
-    // 初始化时加载今日数据
+    // 延迟加载数据 - 让页面先显示出来，然后再异步加载数据
     LaunchedEffect(Unit) {
-        vm.loadRankingData()
+        // 延迟一小段时间让页面先渲染出来
+        kotlinx.coroutines.delay(10)
+        vm.loadRankingDataAsync()
     }
 
     if (showDateTimeRangePicker) {
@@ -160,9 +162,9 @@ fun BofScreen(
             bofScreenState = bofScreenState,
             onDismissRequest = { 
                 showDateTimeRangePicker = false
-                // 日期选择后自动刷新数据
+                // 日期选择后异步刷新数据
+                vm.loadRankingDataAsync()
                 coroutineScope.launch {
-                    vm.loadRankingData()
                     refreshData()
                 }
             }

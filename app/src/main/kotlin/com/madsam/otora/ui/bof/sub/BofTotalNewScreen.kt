@@ -28,10 +28,10 @@ internal fun BofTotalNewScreen(
     val isLoading by vm.isLoading.collectAsStateWithLifecycle()
     val errorMessage by vm.errorMessage.collectAsStateWithLifecycle()
     
-    // 监听时间变化，自动刷新数据
+    // 监听时间变化，异步刷新数据
     LaunchedEffect(bofScreenState.selectedCurrentDate.collectAsState().value, 
                    bofScreenState.selectedCurrentTime.collectAsState().value) {
-        vm.loadRankingData()
+        vm.loadRankingDataAsync()
     }
     
     Column(

@@ -374,8 +374,8 @@ internal class BofViewModel(
         commentData.update { updatedData }
     }
 
-    // 新的排名数据加载方法
-    fun loadRankingData() {
+    // 新的排名数据加载方法 - 异步版本
+    fun loadRankingDataAsync() {
         viewModelScope.launch {
             try {
                 isLoading.update { true }
@@ -410,8 +410,13 @@ internal class BofViewModel(
         }
     }
     
+    // 兼容性方法 - 同步调用异步版本
+    fun loadRankingData() {
+        loadRankingDataAsync()
+    }
+    
     fun refreshData() {
-        loadRankingData()
+        loadRankingDataAsync()
     }
     
     // 获取当前选择的时间字符串
