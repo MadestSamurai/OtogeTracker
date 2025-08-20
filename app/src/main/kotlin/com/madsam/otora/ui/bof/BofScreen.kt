@@ -153,7 +153,6 @@ fun BofScreen(
     // 初始化时加载今日数据
     LaunchedEffect(Unit) {
         vm.loadRankingData()
-        refreshData()
     }
 
     if (showDateTimeRangePicker) {

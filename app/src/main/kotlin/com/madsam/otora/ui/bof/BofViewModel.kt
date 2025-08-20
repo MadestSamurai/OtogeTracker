@@ -381,8 +381,17 @@ internal class BofViewModel(
                 isLoading.update { true }
                 errorMessage.update { "" }
                 
-                // 简化：先使用当前时间戳
-                val timestamp = System.currentTimeMillis()
+                // 使用选择的时间戳
+                val timestamp = if (bofScreenState.selectedCurrentTime.value == "-1") {
+                    // 如果没有选择时间，使用当前时间戳
+                    System.currentTimeMillis()
+                } else {
+                    // 使用选择的日期和时间
+                    CommonUtils.ymdToMillis(
+                        bofScreenState.selectedCurrentDate.value.toString(),
+                        CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
+                    )
+                }
                 
                 val rankings = bofRepository.getRankingAtTime(timestamp)
                 totalRankingData.update { rankings }
@@ -403,6 +412,16 @@ internal class BofViewModel(
     
     fun refreshData() {
         loadRankingData()
+    }
+    
+    // 获取当前选择的时间字符串
+    fun getSelectedTimeString(): String {
+        return if (bofScreenState.selectedCurrentTime.value == "-1") {
+            "显示最新数据"
+        } else {
+            val currentTime = CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
+            "数据时间: ${bofScreenState.selectedCurrentDate.value} $currentTime"
+        }
     }
 }
 
