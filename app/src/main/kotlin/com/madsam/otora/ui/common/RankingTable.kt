@@ -449,39 +449,48 @@ private fun RankingTableRow(
             // 额外数据列
             if (config.extraColumnName != null) {
                 val extraValue = item.extraData
-                if (extraValue != null) {
-                    Text(
-                        text = formatScore(extraValue, config.extraWidthType),
-                        fontFamily = sarasaBold,
-                        fontSize = 14.sp,
-                        color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .width(extraWidth)
-                            .padding(vertical = 4.dp, horizontal = 2.dp)
-                    )
-                }
+                Text(
+                    text = if (extraValue != null) {
+                        formatScore(extraValue, config.extraWidthType)
+                    } else {
+                        "---"
+                    },
+                    fontFamily = sarasaBold,
+                    fontSize = 14.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .width(extraWidth)
+                        .padding(vertical = 4.dp, horizontal = 2.dp)
+                )
             }
 
             // 平均分列
             if (config.avgColumnName != null) {
                 val avgValue = item.avgScore
-                if (avgValue != null) {
+                Box(
+                    modifier = Modifier
+                        .width(avgWidth)
+                        .fillMaxHeight()
+                        .background(
+                            if (avgValue != null && avgValue > 0)
+                                Color(red = (avgValue / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
+                            else
+                                Color.Transparent
+                        )
+                        .padding(horizontal = 2.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
                     Text(
-                        text = formatScore(avgValue, config.avgWidthType),
+                        text = if (avgValue != null) {
+                            formatScore(avgValue, config.avgWidthType)
+                        } else {
+                            "---"
+                        },
                         fontFamily = sarasaBold,
                         fontSize = 14.sp,
                         color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .width(avgWidth)
-                            .background(
-                                if (avgValue > 0)
-                                    Color(red = (avgValue / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
-                                else
-                                    Color.Transparent
-                            )
-                            .padding(vertical = 4.dp, horizontal = 2.dp)
+                        textAlign = TextAlign.End
                     )
                 }
             }
@@ -489,22 +498,29 @@ private fun RankingTableRow(
             // 中位数列
             if (config.medianColumnName != null) {
                 val medianValue = item.medianScore
-                if (medianValue != null) {
+                Box(
+                    modifier = Modifier
+                        .width(medianWidth)
+                        .fillMaxHeight()
+                        .background(
+                            if (medianValue != null && medianValue > 0)
+                                Color(red = (medianValue / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
+                            else
+                                Color.Transparent
+                        )
+                        .padding(horizontal = 2.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
                     Text(
-                        text = formatScore(medianValue, config.medianWidthType),
+                        text = if (medianValue != null) {
+                            formatScore(medianValue, config.medianWidthType)
+                        } else {
+                            "---"
+                        },
                         fontFamily = sarasaBold,
                         fontSize = 14.sp,
                         color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .width(medianWidth)
-                            .background(
-                                if (medianValue > 0)
-                                    Color(red = (medianValue / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
-                                else
-                                    Color.Transparent
-                            )
-                            .padding(vertical = 4.dp, horizontal = 2.dp)
+                        textAlign = TextAlign.End
                     )
                 }
             }
