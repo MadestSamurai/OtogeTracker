@@ -79,6 +79,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import android.util.Log
+
+private const val TAG = "BofScreen"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -87,13 +90,17 @@ fun BofScreen(
     navController: NavHostController,
     bofScreenState: BofScreenState
 ) {
+    Log.d(TAG, "BofScreen Compose started")
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val dateTime = LocalDate.now()
 
+    Log.d(TAG, "Creating BofRequestService")
     val bofRequestService = BofRequestService(context)
 
+    Log.d(TAG, "Creating BofViewModel")
     val vm: BofViewModel = viewModel(factory = BofViewModelFactory(bofScreenState))
+    Log.d(TAG, "BofViewModel created")
 
     var isTabRowVisible by remember { mutableStateOf(true) }
     val selectedTabIndex = bofScreenState.selectedTab.asStateFlow().collectAsState().value
@@ -150,11 +157,9 @@ fun BofScreen(
         }
     }
 
-    // 延迟加载数据 - 让页面先显示出来，然后再异步加载数据
+    // 流式JSON解析加载 - 解决JSON解析瓶颈
     LaunchedEffect(Unit) {
-        // 延迟一小段时间让页面先渲染出来
-        kotlinx.coroutines.delay(10)
-        vm.loadRankingDataAsync()
+        vm.loadRankingDataWithStreamedParsing()
     }
 
     if (showDateTimeRangePicker) {
@@ -162,8 +167,8 @@ fun BofScreen(
             bofScreenState = bofScreenState,
             onDismissRequest = { 
                 showDateTimeRangePicker = false
-                // 日期选择后异步刷新数据
-                vm.loadRankingDataAsync()
+                // 日期选择后流式刷新数据（支持对比）
+                vm.loadRankingDataWithStreamedParsing()
                 coroutineScope.launch {
                     refreshData()
                 }
@@ -226,6 +231,7 @@ fun BofScreen(
     val mainTabTitles = tabTitles.keys.toList()
     val subTabTitles = tabTitles[mainTabTitles[selectedTabIndex]] ?: emptyList()
 
+    Log.d(TAG, "Starting UI render")
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier

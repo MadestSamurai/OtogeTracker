@@ -29,10 +29,15 @@ private const val TAG = "BofViewModel"
 internal class BofViewModel(
     private val bofScreenState: BofScreenState
 ) : ViewModel() {
+    init {
+        Log.d(TAG, "BofViewModel init started")
+    }
+    
     private val bofLocalService = BofLocalService()
     
     // BOFTT Repository for new functionality
     val bofRepository: BofRepository by lazy {
+        Log.d(TAG, "BofRepository lazy initialization")
         BofRepository(ObjectBoxManager.getBoxStore().boxFor(BofTTCompactEntity::class.java))
     }
     val totalData = MutableStateFlow(listOf<BofEntryUI>())
@@ -376,8 +381,10 @@ internal class BofViewModel(
 
     // 新的排名数据加载方法 - 异步版本
     fun loadRankingDataAsync() {
+        Log.d(TAG, "loadRankingDataAsync called")
         viewModelScope.launch {
             try {
+                Log.d(TAG, "Starting data loading - setting isLoading to true")
                 isLoading.update { true }
                 errorMessage.update { "" }
                 
@@ -393,19 +400,96 @@ internal class BofViewModel(
                     )
                 }
                 
+                Log.d(TAG, "About to call bofRepository.getRankingAtTime with timestamp: $timestamp")
+                val startTime = System.currentTimeMillis()
                 val rankings = bofRepository.getRankingAtTime(timestamp)
+                val endTime = System.currentTimeMillis()
+                Log.d(TAG, "bofRepository.getRankingAtTime completed in ${endTime - startTime}ms, got ${rankings.size} rankings")
+                
                 totalRankingData.update { rankings }
                 
                 if (rankings.isEmpty()) {
                     errorMessage.update { "该时间点暂无排名数据" }
                 }
                 
+                Log.d(TAG, "Data loading completed successfully")
+                
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load ranking data", e)
                 errorMessage.update { "加载失败: ${e.message}" }
                 totalRankingData.update { emptyList() }
             } finally {
+                Log.d(TAG, "Setting isLoading to false")
                 isLoading.update { false }
+            }
+        }
+    }
+
+    // 流式JSON解析加载 - 支持两时间点对比
+    fun loadRankingDataWithStreamedParsing() {
+        Log.d(TAG, "Starting streamed JSON parsing data loading with comparison")
+        viewModelScope.launch {
+            try {
+                isLoading.update { true }
+                errorMessage.update { "" }
+                
+                // 计算当前时间戳（主排序时间点）
+                val currentTimestamp = if (bofScreenState.selectedCurrentTime.value == "-1") {
+                    System.currentTimeMillis()
+                } else {
+                    CommonUtils.ymdToMillis(
+                        bofScreenState.selectedCurrentDate.value.toString(),
+                        CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
+                    )
+                }
+                
+                // 计算对比时间戳（可选）
+                val compareTimestamp = if (bofScreenState.selectedCompareTime.value == "-1") {
+                    null
+                } else {
+                    CommonUtils.ymdToMillis(
+                        bofScreenState.selectedCompareDate.value.toString(),
+                        CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
+                    )
+                }
+                
+                Log.d(TAG, "Current timestamp: $currentTimestamp, Compare timestamp: $compareTimestamp")
+                
+                var isFirstBatch = true
+                
+                // 使用支持对比的流式处理
+                bofRepository.getRankingAtTimeStreamedWithComparison(
+                    currentTimestamp = currentTimestamp,
+                    compareTimestamp = compareTimestamp,
+                    batchSize = 30
+                ) { currentResults ->
+                    Log.d(TAG, "Streamed update with comparison: ${currentResults.size} rankings available")
+                    totalRankingData.update { currentResults }
+                    
+                    // 第一批数据加载完成后就关闭加载状态
+                    if (isFirstBatch && currentResults.isNotEmpty()) {
+                        Log.d(TAG, "First batch loaded, setting isLoading to false")
+                        isLoading.update { false }
+                        isFirstBatch = false
+                    }
+                }
+                
+                if (totalRankingData.value.isEmpty()) {
+                    errorMessage.update { "该时间点暂无排名数据" }
+                }
+                
+                Log.d(TAG, "Streamed data loading with comparison completed successfully")
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load ranking data with streamed parsing and comparison", e)
+                errorMessage.update { "加载失败: ${e.message}" }
+                totalRankingData.update { emptyList() }
+            } finally {
+                // 确保加载状态最终被设置为false
+                if (isLoading.value) {
+                    Log.d(TAG, "Finally setting isLoading to false")
+                    isLoading.update { false }
+                }
             }
         }
     }
@@ -419,13 +503,26 @@ internal class BofViewModel(
         loadRankingDataAsync()
     }
     
-    // 获取当前选择的时间字符串
+    // 获取当前选择的时间字符串 - 支持对比时间显示
     fun getSelectedTimeString(): String {
-        return if (bofScreenState.selectedCurrentTime.value == "-1") {
-            "显示最新数据"
+        val currentTime = if (bofScreenState.selectedCurrentTime.value == "-1") {
+            "最新数据"
         } else {
-            val currentTime = CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
-            "数据时间: ${bofScreenState.selectedCurrentDate.value} $currentTime"
+            val time = CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
+            "${bofScreenState.selectedCurrentDate.value} $time"
+        }
+        
+        val compareTime = if (bofScreenState.selectedCompareTime.value == "-1") {
+            null
+        } else {
+            val time = CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
+            "${bofScreenState.selectedCompareDate.value} $time"
+        }
+        
+        return if (compareTime != null) {
+            "当前: $currentTime | 对比: $compareTime"
+        } else {
+            "数据时间: $currentTime"
         }
     }
 }
@@ -434,7 +531,9 @@ class BofViewModelFactory(
     private val bofScreenState: BofScreenState
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        Log.d(TAG, "BofViewModelFactory.create called")
         if (modelClass.isAssignableFrom(BofViewModel::class.java)) {
+            Log.d(TAG, "Creating BofViewModel instance")
             @Suppress("UNCHECKED_CAST")
             return BofViewModel(bofScreenState) as T
         }

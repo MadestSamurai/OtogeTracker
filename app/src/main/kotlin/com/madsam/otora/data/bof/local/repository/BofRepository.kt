@@ -1,5 +1,6 @@
 package com.madsam.otora.data.bof.local.repository
 
+import android.util.Log
 import com.madsam.otora.data.bof.local.model.BofTTCompactEntity
 import com.madsam.otora.data.bof.remote.model.*
 import com.squareup.moshi.JsonAdapter
@@ -8,6 +9,8 @@ import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.objectbox.Box
 import java.util.*
+
+private const val TAG = "BofRepository"
 
 /**
  * 统一的BOFTT仓库
@@ -37,10 +40,15 @@ internal class BofRepository(
      * @param timestamp 时间戳（毫秒）
      * @return 按总分降序排列的作品排行榜
      */
-    fun getRankingAtTime(timestamp: Long): List<WorkRanking> {
-        val allWorks = bofTTBox.all
+    fun getRankingAtTime(timestamp: Long, limit: Int? = null): List<WorkRanking> {
+        Log.d(TAG, "getRankingAtTime called with timestamp: $timestamp, limit: $limit")
+        val startTime = System.currentTimeMillis()
         
-        return allWorks.mapNotNull { entity ->
+        Log.d(TAG, "Getting all works from database")
+        val allWorks = bofTTBox.all
+        Log.d(TAG, "Got ${allWorks.size} works from database")
+        
+        val results = allWorks.mapNotNull { entity ->
             val scoreSnapshot = getScoreAtTime(entity, timestamp)
             if (scoreSnapshot != null) {
                 WorkRanking(
@@ -54,7 +62,125 @@ internal class BofRepository(
                 )
             } else null
         }.sortedByDescending { it.score }
+            .let { rankings ->
+                // 应用限制数量
+                if (limit != null) {
+                    rankings.take(limit)
+                } else {
+                    rankings
+                }
+            }
             .mapIndexed { index, work -> work.copy(rank = index + 1) }
+            
+        val endTime = System.currentTimeMillis()
+        Log.d(TAG, "getRankingAtTime completed in ${endTime - startTime}ms, returning ${results.size} results")
+        return results
+    }
+    
+    /**
+     * 流式分段处理 - 边解析边返回结果，避免JSON解析阻塞
+     * 支持两个时间点的对比数据
+     */
+    suspend fun getRankingAtTimeStreamedWithComparison(
+        currentTimestamp: Long,
+        compareTimestamp: Long? = null,
+        batchSize: Int = 20,
+        onBatchReady: suspend (List<WorkRanking>) -> Unit
+    ) {
+        Log.d(TAG, "getRankingAtTimeStreamedWithComparison called with currentTimestamp: $currentTimestamp, compareTimestamp: $compareTimestamp, batchSize: $batchSize")
+        val startTime = System.currentTimeMillis()
+        
+        val allWorks = bofTTBox.all
+        Log.d(TAG, "Starting streamed processing of ${allWorks.size} works with comparison")
+        
+        val allCurrentResults = mutableListOf<WorkRanking>()
+        val compareRankingMap = mutableMapOf<String, WorkRanking>() // workId -> WorkRanking
+        
+        // 如果有对比时间戳，先计算对比时间点的完整排行榜
+        if (compareTimestamp != null) {
+            Log.d(TAG, "Calculating compare ranking for timestamp: $compareTimestamp")
+            val compareStart = System.currentTimeMillis()
+            
+            val compareResults = allWorks.mapNotNull { entity ->
+                val scoreSnapshot = getScoreAtTime(entity, compareTimestamp)
+                if (scoreSnapshot != null) {
+                    WorkRanking(
+                        workId = entity.workId,
+                        title = getTitleAtTime(entity, compareTimestamp),
+                        artist = getArtistAtTime(entity, compareTimestamp),
+                        score = scoreSnapshot.totalScore,
+                        average = scoreSnapshot.average,
+                        median = scoreSnapshot.median,
+                        impression = scoreSnapshot.impression
+                    )
+                } else null
+            }.sortedByDescending { it.score }
+                .mapIndexed { index, work -> work.copy(rank = index + 1) }
+            
+            compareResults.forEach { work ->
+                compareRankingMap[work.workId] = work
+            }
+            
+            val compareEnd = System.currentTimeMillis()
+            Log.d(TAG, "Compare ranking calculated in ${compareEnd - compareStart}ms, got ${compareResults.size} works")
+        }
+        
+        var processedCount = 0
+        
+        // 分批处理当前时间点的数据
+        allWorks.chunked(batchSize).forEach { batch ->
+            val batchStart = System.currentTimeMillis()
+            
+            val batchResults = batch.mapNotNull { entity ->
+                val scoreSnapshot = getScoreAtTime(entity, currentTimestamp)
+                if (scoreSnapshot != null) {
+                    val compareData = compareRankingMap[entity.workId]
+                    WorkRanking(
+                        workId = entity.workId,
+                        title = getTitleAtTime(entity, currentTimestamp),
+                        artist = getArtistAtTime(entity, currentTimestamp),
+                        score = scoreSnapshot.totalScore,
+                        average = scoreSnapshot.average,
+                        median = scoreSnapshot.median,
+                        impression = scoreSnapshot.impression,
+                        // 对比数据
+                        compareScore = compareData?.score,
+                        compareAverage = compareData?.average,
+                        compareMedian = compareData?.median,
+                        compareImpression = compareData?.impression,
+                        compareRank = compareData?.rank
+                    )
+                } else null
+            }
+            
+            allCurrentResults.addAll(batchResults)
+            processedCount += batch.size
+            
+            // 重新排序整体结果并分配排名，同时计算排名变化
+            val currentSorted = allCurrentResults.sortedByDescending { it.score }
+                .mapIndexed { index, work -> 
+                    val rankChange = if (work.compareRank != null) {
+                        work.compareRank - (index + 1) // 对比排名 - 当前排名，正数表示排名上升
+                    } else null
+                    
+                    work.copy(
+                        rank = index + 1,
+                        rankChange = rankChange
+                    )
+                }
+            
+            val batchEnd = System.currentTimeMillis()
+            Log.d(TAG, "Streamed batch ${processedCount}/${allWorks.size} completed in ${batchEnd - batchStart}ms")
+            
+            // 立即回调当前结果，让UI可以逐步显示
+            onBatchReady(currentSorted)
+            
+            // 短暂让出线程，避免阻塞UI
+            kotlinx.coroutines.delay(10)
+        }
+        
+        val endTime = System.currentTimeMillis()
+        Log.d(TAG, "getRankingAtTimeStreamedWithComparison completed in ${endTime - startTime}ms")
     }
     
     /**
@@ -433,8 +559,30 @@ data class WorkRanking(
     val average: Double,
     val median: Double,
     val impression: Int,
-    val rank: Int = 0
-)
+    val rank: Int = 0,
+    // 对比数据 (来自第二个时间点)
+    val compareScore: Int? = null,
+    val compareAverage: Double? = null,
+    val compareMedian: Double? = null,
+    val compareImpression: Int? = null,
+    val compareRank: Int? = null,
+    // 变化量
+    val rankChange: Int? = null // 正数表示排名上升，负数表示排名下降
+) {
+    // 实现 RankingItem 接口的适配器
+    fun toRankingItem(): com.madsam.otora.ui.common.RankingItem = object : com.madsam.otora.ui.common.RankingItem {
+        override val rank: Int = this@WorkRanking.rank
+        override val title: String = this@WorkRanking.title
+        override val artist: String = this@WorkRanking.artist
+        override val score: Number = this@WorkRanking.score
+        override val extraData: Number? = if (this@WorkRanking.impression > 0) this@WorkRanking.impression else null
+        override val avgScore: Double? = if (this@WorkRanking.average > 0) this@WorkRanking.average else null
+        override val medianScore: Double? = if (this@WorkRanking.median > 0) this@WorkRanking.median else null
+        override val rankChange: Int? = this@WorkRanking.rankChange
+        override val compareRank: Int? = this@WorkRanking.compareRank
+        override val compareScore: Number? = this@WorkRanking.compareScore
+    }
+}
 
 /**
  * 带时间戳的元数据

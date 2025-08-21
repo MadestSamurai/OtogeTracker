@@ -279,7 +279,7 @@ internal fun BofTTTestScreen(
             )
             
             RankingTable(
-                items = ranking.toRankingItems(),
+                items = ranking.map { it.toRankingItem() },
                 config = config,
                 narrowMode = narrowMode
             )

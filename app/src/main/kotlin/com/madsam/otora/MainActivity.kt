@@ -288,7 +288,7 @@ class BofScreenState {
     var selectedTab = MutableStateFlow(0)
     var selectedSubTab = MutableStateFlow(0)
     var selectedCurrentDate = MutableStateFlow(LocalDate.now())
-    var selectedCurrentTime = MutableStateFlow("00:00")
+    var selectedCurrentTime = MutableStateFlow("-1")
     var selectedCompareDate = MutableStateFlow(LocalDate.now().minusDays(1))
-    var selectedCompareTime = MutableStateFlow("00:00")
+    var selectedCompareTime = MutableStateFlow("-1")
 }

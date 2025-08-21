@@ -5,6 +5,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +24,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.BG_DARK_GRAY
+import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.sarasaBold
@@ -40,6 +46,10 @@ interface RankingItem {
     val extraData: Number?  // 额外数据列（如评价数）
     val avgScore: Double?   // 平均分（可选，用于背景色）
     val medianScore: Double? // 中位数（可选，用于背景色）
+    // 排名变化支持
+    val rankChange: Int? get() = null  // 排名变化量，正数表示上升，负数表示下降
+    val compareRank: Int? get() = null // 对比时间点的排名
+    val compareScore: Number? get() = null // 对比时间点的分数
 }
 
 // 排行榜表格配置
@@ -85,8 +95,10 @@ fun RankingTable(
         else -> 100.dp
     }
     
-    // 计算最大分数用于分数条比例
-    val maxScore = items.maxOfOrNull { it.score.toDouble() } ?: 1.0
+    // 计算最大分数用于分数条比例 - 考虑当前分数和对比分数
+    val currentMaxScore = items.maxOfOrNull { it.score.toDouble() } ?: 1.0
+    val compareMaxScore = items.mapNotNull { it.compareScore?.toDouble() }.maxOfOrNull { it } ?: 0.0
+    val maxScore = maxOf(currentMaxScore, compareMaxScore)
     
     Column(modifier = modifier) {
         // 隐藏的测量容器
@@ -333,17 +345,74 @@ private fun RankingTableRow(
             .background(backgroundColor),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 排名列
-        Text(
-            text = item.rank.toString(),
-            fontFamily = sarasaBold,
-            fontSize = 16.sp,
-            color = rankColor,
-            textAlign = TextAlign.Center,
+        // 排名列 - 包含排名变化指示器（常显）
+        Column(
             modifier = Modifier
                 .width(50.dp)
-                .padding(vertical = 4.dp)
-        )
+                .padding(vertical = 4.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // 上方：排名变化指示器和变化量
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // 排名变化指示器（常显）
+                val change = item.rankChange
+                when {
+                    change != null && change > 0 -> {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowUp,
+                            contentDescription = "Rank Up",
+                            tint = Color.Green,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = change.toString(),
+                            fontFamily = sarasaRegular,
+                            fontSize = 10.sp,
+                            color = Color.Green
+                        )
+                    }
+                    change != null && change < 0 -> {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Rank Down",
+                            tint = Color.Red,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = (-change).toString(),
+                            fontFamily = sarasaRegular,
+                            fontSize = 10.sp,
+                            color = Color.Red
+                        )
+                    }
+                    change != null && change == 0 -> {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Rank Same",
+                            tint = Color.Gray,
+                            modifier = Modifier.size(12.dp)
+                        )
+                        // 持平时不显示变化量
+                    }
+                    else -> {
+                        // 没有对比数据时显示占位空间
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+                }
+            }
+            
+            // 下方：当前排名
+            Text(
+                text = item.rank.toString(),
+                fontFamily = sarasaBold,
+                fontSize = 16.sp,
+                color = rankColor,
+                textAlign = TextAlign.Center
+            )
+        }
 
         // 作品信息列
         Column(
@@ -375,47 +444,16 @@ private fun RankingTableRow(
         }
 
         if (isNarrowScreen && config.enableNarrowToggle && narrowMode == 0) {
-            // 窄屏模式：只显示分数列
-            Box(
+            // 窄屏模式：只显示分数列 - 包含主分数条和对比分数条
+            Column(
                 modifier = Modifier
                     .width(narrowScoreBarWidth)
                     .padding(horizontal = 2.dp)
-                    .height(20.dp)
             ) {
-                Box {
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
-                            .height(20.dp)
-                            .background(
-                                color = RANKING_RED,
-                                shape = RoundedCornerShape(
-                                    topEnd = 10.dp,
-                                    bottomEnd = 10.dp
-                                )
-                            )
-                    )
-                    Text(
-                        text = formatScore(item.score, config.scoreWidthType),
-                        fontFamily = sarasaBold,
-                        fontSize = 14.sp,
-                        color = Color.White,
-                        overflow = TextOverflow.Visible,
-                        maxLines = 1,
-                        modifier = Modifier
-                            .align(Alignment.CenterEnd)
-                            .padding(end = 4.dp)
-                    )
-                }
-            }
-        } else {
-            // 正常模式或窄屏其他列模式
-            if (!isNarrowScreen || !config.enableNarrowToggle) {
-                // 分数条列（非窄屏模式）
+                // 主分数条
                 Box(
                     modifier = Modifier
-                        .weight(0.4f)
-                        .padding(horizontal = 2.dp)
+                        .fillMaxWidth()
                         .height(20.dp)
                 ) {
                     Box {
@@ -442,6 +480,123 @@ private fun RankingTableRow(
                                 .align(Alignment.CenterEnd)
                                 .padding(end = 4.dp)
                         )
+                    }
+                }
+                
+                // 对比分数条（如果有对比数据）
+                item.compareScore?.let { compareScore ->
+                    val compareRatio = if (maxScore > 0) compareScore.toDouble() / maxScore else 0.0
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(14.dp)
+                            .padding(top = 2.dp)
+                    ) {
+                        Box {
+                            Spacer(
+                                modifier = Modifier
+                                    .fillMaxWidth(compareRatio.toFloat().coerceAtMost(1f))
+                                    .height(14.dp)
+                                    .background(
+                                        color = RANKING_BLUE,
+                                        shape = RoundedCornerShape(
+                                            topEnd = 7.dp,
+                                            bottomEnd = 7.dp
+                                        )
+                                    )
+                            )
+                            Text(
+                                text = formatScore(compareScore, config.scoreWidthType),
+                                fontFamily = sarasaRegular,
+                                fontSize = 11.sp,
+                                color = Color.White.copy(alpha = 0.8f),
+                                overflow = TextOverflow.Visible,
+                                maxLines = 1,
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .padding(end = 2.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            // 正常模式或窄屏其他列模式
+            if (!isNarrowScreen || !config.enableNarrowToggle) {
+                // 分数条列（非窄屏模式） - 包含主分数条和对比分数条
+                Column(
+                    modifier = Modifier
+                        .weight(0.4f)
+                        .padding(horizontal = 2.dp)
+                ) {
+                    // 主分数条
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(20.dp)
+                            .padding(top = 2.dp)
+                    ) {
+                        Box {
+                            Spacer(
+                                modifier = Modifier
+                                    .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
+                                    .height(20.dp)
+                                    .background(
+                                        color = RANKING_RED,
+                                        shape = RoundedCornerShape(
+                                            topEnd = 10.dp,
+                                            bottomEnd = 10.dp
+                                        )
+                                    )
+                            )
+                            Text(
+                                text = formatScore(item.score, config.scoreWidthType),
+                                fontFamily = sarasaBold,
+                                fontSize = 14.sp,
+                                color = Color.White,
+                                overflow = TextOverflow.Visible,
+                                maxLines = 1,
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .padding(end = 4.dp)
+                            )
+                        }
+                    }
+                    
+                    // 对比分数条（如果有对比数据）
+                    item.compareScore?.let { compareScore ->
+                        val compareRatio = if (maxScore > 0) compareScore.toDouble() / maxScore else 0.0
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(14.dp)
+                        ) {
+                            Box {
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth(compareRatio.toFloat().coerceAtMost(1f))
+                                        .height(14.dp)
+                                        .background(
+                                            color = RANKING_BLUE,
+                                            shape = RoundedCornerShape(
+                                                topEnd = 7.dp,
+                                                bottomEnd = 7.dp
+                                            )
+                                        )
+                                )
+                                Text(
+                                    text = formatScore(compareScore, config.scoreWidthType),
+                                    fontFamily = sarasaRegular,
+                                    fontSize = 11.sp,
+                                    color = Color.White.copy(alpha = 0.8f),
+                                    overflow = TextOverflow.Visible,
+                                    maxLines = 1,
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .padding(end = 2.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }

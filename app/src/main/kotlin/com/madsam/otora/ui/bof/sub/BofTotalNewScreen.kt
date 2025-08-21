@@ -28,12 +28,6 @@ internal fun BofTotalNewScreen(
     val isLoading by vm.isLoading.collectAsStateWithLifecycle()
     val errorMessage by vm.errorMessage.collectAsStateWithLifecycle()
     
-    // 监听时间变化，异步刷新数据
-    LaunchedEffect(bofScreenState.selectedCurrentDate.collectAsState().value, 
-                   bofScreenState.selectedCurrentTime.collectAsState().value) {
-        vm.loadRankingDataAsync()
-    }
-    
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -89,7 +83,7 @@ internal fun BofTotalNewScreen(
                 
                 else -> {
                     RankingTable(
-                        items = ranking.toRankingItems(),
+                        items = ranking.map { it.toRankingItem() },
                         config = RankingTableConfig(
                             title = "总分排行榜",
                             subtitle = "BOF 总分排行榜 (${ranking.size} 作品) | ${vm.getSelectedTimeString()}",
