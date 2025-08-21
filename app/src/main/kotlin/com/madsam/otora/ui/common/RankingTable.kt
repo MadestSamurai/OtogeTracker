@@ -455,6 +455,7 @@ private fun RankingTableRow(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(20.dp)
+                        .padding(top = 2.dp)
                 ) {
                     Box {
                         Spacer(
@@ -489,14 +490,13 @@ private fun RankingTableRow(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(14.dp)
-                            .padding(top = 2.dp)
+                            .height(13.dp)
                     ) {
                         Box {
                             Spacer(
                                 modifier = Modifier
                                     .fillMaxWidth(compareRatio.toFloat().coerceAtMost(1f))
-                                    .height(14.dp)
+                                    .height(13.dp)
                                     .background(
                                         color = RANKING_BLUE,
                                         shape = RoundedCornerShape(
@@ -569,13 +569,13 @@ private fun RankingTableRow(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(14.dp)
+                                .height(13.dp)
                         ) {
                             Box {
                                 Spacer(
                                     modifier = Modifier
                                         .fillMaxWidth(compareRatio.toFloat().coerceAtMost(1f))
-                                        .height(14.dp)
+                                        .height(13.dp)
                                         .background(
                                             color = RANKING_BLUE,
                                             shape = RoundedCornerShape(
