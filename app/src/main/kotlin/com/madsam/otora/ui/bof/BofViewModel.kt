@@ -379,52 +379,6 @@ internal class BofViewModel(
         commentData.update { updatedData }
     }
 
-    // 新的排名数据加载方法 - 异步版本
-    fun loadRankingDataAsync() {
-        Log.d(TAG, "loadRankingDataAsync called")
-        viewModelScope.launch {
-            try {
-                Log.d(TAG, "Starting data loading - setting isLoading to true")
-                isLoading.update { true }
-                errorMessage.update { "" }
-                
-                // 使用选择的时间戳
-                val timestamp = if (bofScreenState.selectedCurrentTime.value == "-1") {
-                    // 如果没有选择时间，使用当前时间戳
-                    System.currentTimeMillis()
-                } else {
-                    // 使用选择的日期和时间
-                    CommonUtils.ymdToMillis(
-                        bofScreenState.selectedCurrentDate.value.toString(),
-                        CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
-                    )
-                }
-                
-                Log.d(TAG, "About to call bofRepository.getRankingAtTime with timestamp: $timestamp")
-                val startTime = System.currentTimeMillis()
-                val rankings = bofRepository.getRankingAtTime(timestamp)
-                val endTime = System.currentTimeMillis()
-                Log.d(TAG, "bofRepository.getRankingAtTime completed in ${endTime - startTime}ms, got ${rankings.size} rankings")
-                
-                totalRankingData.update { rankings }
-                
-                if (rankings.isEmpty()) {
-                    errorMessage.update { "该时间点暂无排名数据" }
-                }
-                
-                Log.d(TAG, "Data loading completed successfully")
-                
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to load ranking data", e)
-                errorMessage.update { "加载失败: ${e.message}" }
-                totalRankingData.update { emptyList() }
-            } finally {
-                Log.d(TAG, "Setting isLoading to false")
-                isLoading.update { false }
-            }
-        }
-    }
-
     // 流式JSON解析加载 - 支持两时间点对比
     fun loadRankingDataWithStreamedParsing() {
         Log.d(TAG, "Starting streamed JSON parsing data loading with comparison")
@@ -492,15 +446,6 @@ internal class BofViewModel(
                 }
             }
         }
-    }
-    
-    // 兼容性方法 - 同步调用异步版本
-    fun loadRankingData() {
-        loadRankingDataAsync()
-    }
-    
-    fun refreshData() {
-        loadRankingDataAsync()
     }
     
     // 获取当前选择的时间字符串 - 支持对比时间显示

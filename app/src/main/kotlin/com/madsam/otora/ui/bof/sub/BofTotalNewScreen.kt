@@ -63,7 +63,7 @@ internal fun BofTotalNewScreen(
                             modifier = Modifier.padding(top = 8.dp)
                         )
                         Button(
-                            onClick = { vm.refreshData() },
+                            onClick = { vm.loadRankingDataWithStreamedParsing() },
                             modifier = Modifier.padding(top = 16.dp)
                         ) {
                             Text("重试")

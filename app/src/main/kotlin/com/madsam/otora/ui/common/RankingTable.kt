@@ -448,14 +448,14 @@ private fun RankingTableRow(
             Column(
                 modifier = Modifier
                     .width(narrowScoreBarWidth)
-                    .padding(horizontal = 2.dp)
+                    .padding(top = 1.dp)
             ) {
                 // 主分数条
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(20.dp)
-                        .padding(top = 2.dp)
+                        .padding(horizontal = 2.dp)
                 ) {
                     Box {
                         Spacer(
@@ -491,6 +491,7 @@ private fun RankingTableRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(13.dp)
+                            .padding(horizontal = 2.dp)
                     ) {
                         Box {
                             Spacer(
