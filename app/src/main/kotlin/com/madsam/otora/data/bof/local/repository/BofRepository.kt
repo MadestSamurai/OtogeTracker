@@ -76,7 +76,7 @@ internal class BofRepository(
         Log.d(TAG, "getRankingAtTime completed in ${endTime - startTime}ms, returning ${results.size} results")
         return results
     }
-    
+
     /**
      * 流式分段处理 - 边解析边返回结果，避免JSON解析阻塞
      * 支持两个时间点的对比数据
@@ -581,6 +581,34 @@ data class WorkRanking(
         override val rankChange: Int? = this@WorkRanking.rankChange
         override val compareRank: Int? = this@WorkRanking.compareRank
         override val compareScore: Number? = this@WorkRanking.compareScore
+    }
+    
+    // 专门用于平均分排行的适配器 - 将平均分作为主要分数显示
+    fun toAverageRankingItem(): com.madsam.otora.ui.common.RankingItem = object : com.madsam.otora.ui.common.RankingItem {
+        override val rank: Int = this@WorkRanking.rank
+        override val title: String = this@WorkRanking.title
+        override val artist: String = this@WorkRanking.artist
+        override val score: Number = this@WorkRanking.average // 将平均分作为主要分数
+        override val extraData: Number? = if (this@WorkRanking.impression > 0) this@WorkRanking.impression else null
+        override val avgScore: Double? = null // 不显示额外的平均分列
+        override val medianScore: Double? = null // 不显示中位数列
+        override val rankChange: Int? = this@WorkRanking.rankChange
+        override val compareRank: Int? = this@WorkRanking.compareRank
+        override val compareScore: Number? = this@WorkRanking.compareAverage // 对比平均分
+    }
+    
+    // 专门用于中位数排行的适配器 - 将中位数作为主要分数显示
+    fun toMedianRankingItem(): com.madsam.otora.ui.common.RankingItem = object : com.madsam.otora.ui.common.RankingItem {
+        override val rank: Int = this@WorkRanking.rank
+        override val title: String = this@WorkRanking.title
+        override val artist: String = this@WorkRanking.artist
+        override val score: Number = this@WorkRanking.median // 将中位数作为主要分数
+        override val extraData: Number? = if (this@WorkRanking.impression > 0) this@WorkRanking.impression else null
+        override val avgScore: Double? = null // 不显示额外的平均分列
+        override val medianScore: Double? = null // 不显示额外的中位数列
+        override val rankChange: Int? = this@WorkRanking.rankChange
+        override val compareRank: Int? = this@WorkRanking.compareRank
+        override val compareScore: Number? = this@WorkRanking.compareMedian // 对比中位数
     }
 }
 

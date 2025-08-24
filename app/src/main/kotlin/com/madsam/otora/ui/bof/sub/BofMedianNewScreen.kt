@@ -18,19 +18,28 @@ import com.madsam.otora.ui.common.RankingTableConfig
 import com.madsam.otora.ui.common.ColumnWidthType
 
 @Composable
-internal fun BofTotalNewScreen(
+internal fun BofMedianNewScreen(
     vm: BofViewModel,
     bofScreenState: BofScreenState,
-    narrowMode: Int = 0
+    narrowMode: Int = 0,
+    modifier: Modifier = Modifier
 ) {
     // 收集状态
-    val ranking by vm.totalRankingData.collectAsStateWithLifecycle()
+    val ranking by vm.medianRankingData.collectAsStateWithLifecycle()
     val isLoading by vm.isLoading.collectAsStateWithLifecycle()
     val errorMessage by vm.errorMessage.collectAsStateWithLifecycle()
     
-    // 内容区域 - 直接使用Box而不是Column包装
+    // 使用固定的最低评价数过滤
+    val minImpression = 1
+    
+    // 监听最低评价数变化，更新ViewModel中的过滤条件
+    LaunchedEffect(minImpression) {
+        vm.updateMedianMinImpression(minImpression)
+    }
+    
+    // 内容区域
     Box(
-        modifier = Modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize()
     ) {
         when {
             isLoading -> {
@@ -69,7 +78,7 @@ internal fun BofTotalNewScreen(
             
             ranking.isEmpty() -> {
                 Text(
-                    text = "暂无数据\n请选择时间范围",
+                    text = "暂无数据\n请调整过滤条件或选择其他时间",
                     fontFamily = sarasaRegular,
                     fontSize = 16.sp,
                     textAlign = TextAlign.Center,
@@ -79,22 +88,22 @@ internal fun BofTotalNewScreen(
             
             else -> {
                 RankingTable(
-                    items = ranking.map { it.toRankingItem() },
+                    items = ranking.map { it.toMedianRankingItem() },
                     config = RankingTableConfig(
-                        title = "总分排行榜",
-                        subtitle = "BOF 总分排行榜 (${ranking.size} 作品) | ${vm.getSelectedTimeString()}",
-                        scoreColumnName = "分数条",
+                        title = "中位数排行榜",
+                        subtitle = "BOF 中位数排行榜 (${ranking.size} 作品，评价≥${minImpression}) | ${vm.getSelectedTimeString()}",
+                        scoreColumnName = "中位数",
                         extraColumnName = "评价",
-                        avgColumnName = "均分",
-                        medianColumnName = "中位",
-                        scoreWidthType = ColumnWidthType.THREE_DIGIT_INT,
+                        avgColumnName = null, // 不显示额外的平均分列
+                        medianColumnName = null, // 不显示额外的中位数列
+                        scoreWidthType = ColumnWidthType.ONE_DECIMAL, // 中位数用一位小数
                         extraWidthType = ColumnWidthType.THREE_DIGIT_INT,
                         avgWidthType = ColumnWidthType.TWO_DECIMAL,
                         medianWidthType = ColumnWidthType.ONE_DECIMAL,
-                        enableNarrowToggle = true,
+                        enableNarrowToggle = false,
                         maxItems = 500
                     ),
-                    narrowMode = narrowMode, // 传入外部控制的状态
+                    narrowMode = narrowMode,
                     modifier = Modifier.fillMaxSize()
                 )
             }

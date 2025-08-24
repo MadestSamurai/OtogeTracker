@@ -20,6 +20,7 @@ import com.madsam.otora.core.utils.ScreenUtil.getSafeInsetLeftDp
 import com.madsam.otora.core.utils.ScreenUtil.getSafeInsetRightDp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.combine
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import kotlin.math.max
@@ -29,9 +30,6 @@ private const val TAG = "BofViewModel"
 internal class BofViewModel(
     private val bofScreenState: BofScreenState
 ) : ViewModel() {
-    init {
-        Log.d(TAG, "BofViewModel init started")
-    }
     
     private val bofLocalService = BofLocalService()
     
@@ -50,8 +48,39 @@ internal class BofViewModel(
 
     // 新的排名数据流
     val totalRankingData = MutableStateFlow(listOf<WorkRanking>())
+    val avgRankingData = MutableStateFlow(listOf<WorkRanking>())
+    val medianRankingData = MutableStateFlow(listOf<WorkRanking>())
+    
+    // 平均分排行的过滤参数
+    val avgMinImpression = MutableStateFlow(1)
+    
+    // 中位数排行的过滤参数
+    val medianMinImpression = MutableStateFlow(1)
+    
     val isLoading = MutableStateFlow(false)
     val errorMessage = MutableStateFlow("")
+
+    init {
+        Log.d(TAG, "BofViewModel init started")
+        
+        // 监听总分排行数据和过滤参数变化，自动生成平均分排行数据
+        viewModelScope.launch {
+            combine(totalRankingData, avgMinImpression) { totalData, minImpression ->
+                generateAverageRanking(totalData, minImpression)
+            }.collect { avgData ->
+                avgRankingData.update { avgData }
+            }
+        }
+        
+        // 监听总分排行数据和过滤参数变化，自动生成中位数排行数据
+        viewModelScope.launch {
+            combine(totalRankingData, medianMinImpression) { totalData, minImpression ->
+                generateMedianRanking(totalData, minImpression)
+            }.collect { medianData ->
+                medianRankingData.update { medianData }
+            }
+        }
+    }
 
     var thresholdImpr = MutableStateFlow(1)
     var thresholdImprOld = MutableStateFlow(1)
@@ -469,6 +498,100 @@ internal class BofViewModel(
         } else {
             "数据时间: $currentTime"
         }
+    }
+    
+    // 基于总分排行数据生成平均分排行数据
+    private fun generateAverageRanking(totalData: List<WorkRanking>, minImpression: Int): List<WorkRanking> {
+        // 过滤符合条件的数据
+        val filteredData = totalData.filter { it.impression >= minImpression && it.average > 0 }
+        
+        // 按平均分降序排列
+        val sortedByAverage = filteredData.sortedByDescending { it.average }
+        
+        // 重新分配排名并计算平均分排名变化
+        return sortedByAverage.mapIndexed { index, ranking -> 
+            val newRank = index + 1
+            
+            // 计算平均分排名变化
+            // 需要基于对比数据重新计算平均分排名
+            val compareRankInAverage = if (ranking.compareAverage != null && ranking.compareAverage > 0) {
+                // 在对比数据中找到该作品在平均分排行中的位置
+                val compareFilteredData = totalData.filter { 
+                    it.compareAverage != null && it.compareAverage > 0 &&
+                    (ranking.compareImpression ?: 0) >= minImpression 
+                }
+                val compareSortedByAverage = compareFilteredData.sortedByDescending { it.compareAverage!! }
+                val compareIndex = compareSortedByAverage.indexOfFirst { it.workId == ranking.workId }
+                if (compareIndex >= 0) compareIndex + 1 else null
+            } else {
+                null
+            }
+            
+            // 计算排名变化（正数表示排名提升，负数表示排名下降）
+            val rankChange = if (compareRankInAverage != null) {
+                compareRankInAverage - newRank // 对比排名 - 当前排名
+            } else {
+                null
+            }
+            
+            ranking.copy(
+                rank = newRank,
+                compareRank = compareRankInAverage,
+                rankChange = rankChange
+            )
+        }
+    }
+    
+    // 更新平均分排行的最低评价数过滤条件
+    fun updateAverageMinImpression(minImpression: Int) {
+        avgMinImpression.update { minImpression }
+    }
+    
+    // 基于总分排行数据生成中位数排行数据
+    private fun generateMedianRanking(totalData: List<WorkRanking>, minImpression: Int): List<WorkRanking> {
+        // 过滤符合条件的数据
+        val filteredData = totalData.filter { it.impression >= minImpression && it.median > 0 }
+        
+        // 按中位数降序排列
+        val sortedByMedian = filteredData.sortedByDescending { it.median }
+        
+        // 重新分配排名并计算中位数排名变化
+        return sortedByMedian.mapIndexed { index, ranking -> 
+            val newRank = index + 1
+            
+            // 计算中位数排名变化
+            // 需要基于对比数据重新计算中位数排名
+            val compareRankInMedian = if (ranking.compareMedian != null && ranking.compareMedian > 0) {
+                // 在对比数据中找到该作品在中位数排行中的位置
+                val compareFilteredData = totalData.filter { 
+                    it.compareMedian != null && it.compareMedian > 0 &&
+                    (ranking.compareImpression ?: 0) >= minImpression 
+                }
+                val compareSortedByMedian = compareFilteredData.sortedByDescending { it.compareMedian!! }
+                val compareIndex = compareSortedByMedian.indexOfFirst { it.workId == ranking.workId }
+                if (compareIndex >= 0) compareIndex + 1 else null
+            } else {
+                null
+            }
+            
+            // 计算排名变化（正数表示排名提升，负数表示排名下降）
+            val rankChange = if (compareRankInMedian != null) {
+                compareRankInMedian - newRank // 对比排名 - 当前排名
+            } else {
+                null
+            }
+            
+            ranking.copy(
+                rank = newRank,
+                compareRank = compareRankInMedian,
+                rankChange = rankChange
+            )
+        }
+    }
+    
+    // 更新中位数排行的最低评价数过滤条件
+    fun updateMedianMinImpression(minImpression: Int) {
+        medianMinImpression.update { minImpression }
     }
 }
 

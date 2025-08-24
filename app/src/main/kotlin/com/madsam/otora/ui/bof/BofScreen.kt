@@ -1,5 +1,6 @@
 package com.madsam.otora.ui.bof
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
@@ -66,10 +67,10 @@ import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.ui.bof.components.DateTimeRangePicker
-import com.madsam.otora.ui.bof.sub.BofAvgScreen
+import com.madsam.otora.ui.bof.sub.BofAvgNewScreen
 import com.madsam.otora.ui.bof.sub.BofCommentScreen
 import com.madsam.otora.ui.bof.sub.BofDiffScreen
-import com.madsam.otora.ui.bof.sub.BofMedianScreen
+import com.madsam.otora.ui.bof.sub.BofMedianNewScreen
 import com.madsam.otora.ui.bof.sub.BofTTTestScreen
 import com.madsam.otora.ui.bof.sub.BofTeamScreen
 import com.madsam.otora.ui.bof.sub.BofTotalNewScreen
@@ -79,7 +80,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import android.util.Log
 
 private const val TAG = "BofScreen"
 
@@ -157,7 +157,7 @@ fun BofScreen(
         }
     }
 
-    // 流式JSON解析加载 - 解决JSON解析瓶颈
+    // 流式JSON解析加载
     LaunchedEffect(Unit) {
         vm.loadRankingDataWithStreamedParsing()
     }
@@ -167,11 +167,7 @@ fun BofScreen(
             bofScreenState = bofScreenState,
             onDismissRequest = { 
                 showDateTimeRangePicker = false
-                // 日期选择后流式刷新数据（支持对比）
                 vm.loadRankingDataWithStreamedParsing()
-                coroutineScope.launch {
-                    refreshData()
-                }
             }
         )
     }
@@ -355,21 +351,19 @@ fun BofScreen(
                                         narrowMode = narrowMode
                                     )
 
-                                    "Avg" -> BofAvgScreen(
-                                        vm,
-                                        snackbarHostState,
-                                        listStateAvg,
-                                        scrollThreshold,
-                                        bofScreenState
-                                    ) { isTabRowVisible = it }
+                                    "Avg" -> BofAvgNewScreen(
+                                        vm = vm,
+                                        bofScreenState = bofScreenState,
+                                        narrowMode = narrowMode,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
 
-                                    "Median" -> BofMedianScreen(
-                                        vm,
-                                        snackbarHostState,
-                                        listStateMedian,
-                                        scrollThreshold,
-                                        bofScreenState
-                                    ) { isTabRowVisible = it }
+                                    "Median" -> BofMedianNewScreen(
+                                        vm = vm,
+                                        bofScreenState = bofScreenState,
+                                        narrowMode = narrowMode,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
 
                                     "Diff" -> BofDiffScreen(
                                         vm,
