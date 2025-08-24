@@ -623,13 +623,12 @@ internal class BofViewModel(
             it.median > 0 && 
             it.score > 0 
         }
-        
+
         // 找到最大总分用于标准化
         val maxTotalScore = filteredData.maxOfOrNull { it.score }?.toDouble() ?: 1000.0
-        Log.d(TAG, "Maximum total score for normalization: $maxTotalScore")
         
-        // 计算综合分数并排序
-        val rankedData = filteredData.map { ranking ->
+        // 计算当前时间点的综合分数
+        val currentCompositeData = filteredData.map { ranking ->
             // 标准化总分到0-1000范围
             val normalizedTotalScore = (ranking.score.toDouble() / maxTotalScore) * 1000.0
             
@@ -637,15 +636,64 @@ internal class BofViewModel(
             val compositeScore = normalizedTotalScore * 0.07 + 
                                ranking.median * 0.80 + 
                                ranking.average * 0.13
-            
-            Log.d(TAG, "Work ${ranking.title}: totalScore=${ranking.score}, normalized=$normalizedTotalScore, median=${ranking.median}, avg=${ranking.average}, composite=$compositeScore")
-            
+
             ranking.copy(score = compositeScore.toInt())
         }.sortedByDescending { it.score }
         
-        // 重新分配排名
-        return rankedData.mapIndexed { index, ranking ->
-            ranking.copy(rank = index + 1)
+        // 计算对比时间点的综合分数（如果有对比数据）
+        val compareCompositeMap = mutableMapOf<String, Int>() // workId -> 对比综合分数排名
+        val compareCompositeScoreMap = mutableMapOf<String, Int>() // workId -> 对比综合分数
+        
+        val hasCompareData = filteredData.any { 
+            it.compareScore != null && it.compareAverage != null && it.compareMedian != null 
+        }
+        
+        if (hasCompareData) {
+            // 过滤有完整对比数据的作品
+            val compareFilteredData = filteredData.filter { 
+                it.compareScore != null && it.compareScore > 0 &&
+                it.compareAverage != null && it.compareAverage > 0 &&
+                it.compareMedian != null && it.compareMedian > 0 &&
+                (it.compareImpression ?: 0) >= minImpression
+            }
+            
+            if (compareFilteredData.isNotEmpty()) {
+                // 找到对比时间点的最大总分
+                val maxCompareTotalScore = compareFilteredData.maxOfOrNull { it.compareScore!! }?.toDouble() ?: 1000.0
+                
+                // 计算对比时间点的综合分数并排序
+                val compareCompositeData = compareFilteredData.map { ranking ->
+                    val normalizedCompareTotalScore = (ranking.compareScore!!.toDouble() / maxCompareTotalScore) * 1000.0
+                    val compareCompositeScore = normalizedCompareTotalScore * 0.07 + 
+                                              ranking.compareMedian!! * 0.80 + 
+                                              ranking.compareAverage!! * 0.13
+                    
+                    Triple(ranking.workId, compareCompositeScore.toInt(), ranking)
+                }.sortedByDescending { it.second }
+                
+                // 创建对比排名和分数映射
+                compareCompositeData.forEachIndexed { index, (workId, score, _) ->
+                    compareCompositeMap[workId] = index + 1
+                    compareCompositeScoreMap[workId] = score
+                }
+            }
+        }
+        
+        // 重新分配排名并计算排名变化
+        return currentCompositeData.mapIndexed { index, ranking ->
+            val currentRank = index + 1
+            val compareRank = compareCompositeMap[ranking.workId]
+            val compareCompositeScore = compareCompositeScoreMap[ranking.workId]
+            val rankChange = if (compareRank != null) {
+                compareRank - currentRank // 对比排名 - 当前排名，正数表示排名上升
+            } else null
+            
+            ranking.copy(
+                rank = currentRank,
+                compareRank = compareRank,
+                rankChange = rankChange,
+                compareScore = compareCompositeScore // 将对比综合分数存储在compareScore字段中
+            )
         }
     }
     
@@ -654,58 +702,51 @@ internal class BofViewModel(
         compositeMinImpression.update { minImpression }
     }
     
-    // 加载差值排行数据
-    fun loadDifferenceRankingData() {
-        Log.d(TAG, "Starting difference ranking data loading")
+    // 生成差值排行榜 - 基于总分排行数据直接计算
+    fun generateDifferenceRanking() {
+        Log.d(TAG, "Starting difference ranking generation")
         viewModelScope.launch {
-            try {
-                isLoading.update { true }
-                errorMessage.update { "" }
-                
-                // 计算当前时间戳
-                val currentTimestamp = if (bofScreenState.selectedCurrentTime.value == "-1") {
-                    System.currentTimeMillis()
-                } else {
-                    CommonUtils.ymdToMillis(
-                        bofScreenState.selectedCurrentDate.value.toString(),
-                        CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
-                    )
-                }
-                
-                // 计算对比时间戳
-                val compareTimestamp = if (bofScreenState.selectedCompareTime.value == "-1") {
-                    System.currentTimeMillis() - 86400000L // 默认对比一天前
-                } else {
-                    CommonUtils.ymdToMillis(
-                        bofScreenState.selectedCompareDate.value.toString(),
-                        CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
-                    )
-                }
-                
-                Log.d(TAG, "Current timestamp: $currentTimestamp, Compare timestamp: $compareTimestamp")
-                
-                // 获取差值排行数据
-                val differenceData = bofRepository.getDifferenceRankingBetweenTimes(
-                    currentTimestamp = currentTimestamp,
-                    compareTimestamp = compareTimestamp,
-                    limit = 500
-                )
-                
-                diffRankingData.update { differenceData }
-                
-                if (differenceData.isEmpty()) {
-                    errorMessage.update { "该时间段暂无差值数据" }
-                }
-                
-                Log.d(TAG, "Difference ranking data loading completed successfully, got ${differenceData.size} items")
-                
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to load difference ranking data", e)
-                errorMessage.update { "加载失败: ${e.message}" }
-                diffRankingData.update { emptyList() }
-            } finally {
-                isLoading.update { false }
+            combine(
+                totalRankingData,
+                MutableStateFlow(1) // 暂时固定最低评价数为1，可以后续添加筛选参数
+            ) { totalData: List<WorkRanking>, minImpression: Int ->
+                Log.d(TAG, "Generating difference ranking with ${totalData.size} items")
+                generateDifferenceRankingFromTotal(totalData, minImpression)
+            }.collect { diffData: List<WorkRanking> ->
+                diffRankingData.update { diffData }
             }
+        }
+    }
+    
+    private fun generateDifferenceRankingFromTotal(totalData: List<WorkRanking>, minImpression: Int): List<WorkRanking> {
+        // 过滤有对比数据的作品，并计算分数差值
+        val diffData = totalData.mapNotNull { ranking ->
+            if (ranking.compareScore != null && ranking.compareScore > 0) {
+                val scoreDiff = ranking.score - ranking.compareScore
+                val avgDiff = if (ranking.compareAverage != null) ranking.average - ranking.compareAverage else null
+                val medianDiff = if (ranking.compareMedian != null) ranking.median - ranking.compareMedian else null
+                val impressionDiff = if (ranking.compareImpression != null) ranking.impression - ranking.compareImpression else null
+                
+                // 创建差值排行项，以分数差值作为主要排序依据
+                WorkRanking(
+                    workId = ranking.workId,
+                    title = ranking.title,
+                    artist = ranking.artist,
+                    score = scoreDiff, // 分数差值作为主要分数
+                    average = avgDiff ?: 0.0, // 平均分差值
+                    median = medianDiff ?: 0.0, // 中位数差值
+                    impression = impressionDiff ?: 0, // 评价数差值
+                    rank = 0 // 稍后分配
+                )
+            } else null
+        }.filter { 
+            // 可以根据需要添加更多过滤条件
+            Math.abs(it.score) > 0 // 只显示有变化的作品
+        }.sortedByDescending { it.score } // 按分数差值降序排列（正数表示增长）
+        
+        // 重新分配排名
+        return diffData.mapIndexed { index, ranking ->
+            ranking.copy(rank = index + 1)
         }
     }
 }

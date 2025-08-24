@@ -101,7 +101,8 @@ internal fun BofCompositeNewScreen(
                         extraWidthType = ColumnWidthType.THREE_DIGIT_INT,
                         avgWidthType = ColumnWidthType.ONE_DECIMAL,
                         medianWidthType = ColumnWidthType.ONE_DECIMAL,
-                        allowNegativeScore = false
+                        allowNegativeScore = false,
+                        maxItems = 500
                     )
                 )
             }

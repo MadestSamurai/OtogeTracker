@@ -30,13 +30,8 @@ internal fun BofDiffNewScreen(
     val errorMessage by vm.errorMessage.collectAsStateWithLifecycle()
     
     // 加载数据
-    LaunchedEffect(
-        bofScreenState.selectedCurrentDate.collectAsState().value,
-        bofScreenState.selectedCurrentTime.collectAsState().value,
-        bofScreenState.selectedCompareDate.collectAsState().value,
-        bofScreenState.selectedCompareTime.collectAsState().value
-    ) {
-        vm.loadDifferenceRankingData()
+    LaunchedEffect(Unit) {
+        vm.generateDifferenceRanking()
     }
     
     // 内容区域
@@ -70,7 +65,7 @@ internal fun BofDiffNewScreen(
                         modifier = Modifier.padding(top = 8.dp)
                     )
                     Button(
-                        onClick = { vm.loadDifferenceRankingData() },
+                        onClick = { vm.generateDifferenceRanking() },
                         modifier = Modifier.padding(top = 16.dp)
                     ) {
                         Text("重试")
