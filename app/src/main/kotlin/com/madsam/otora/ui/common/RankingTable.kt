@@ -65,7 +65,8 @@ data class RankingTableConfig(
     val avgWidthType: ColumnWidthType = ColumnWidthType.TWO_DECIMAL,
     val medianWidthType: ColumnWidthType = ColumnWidthType.TWO_DECIMAL,
     val enableNarrowToggle: Boolean = false, // 是否启用窄屏切换
-    val maxItems: Int = 50
+    val maxItems: Int = 50,
+    val allowNegativeScore: Boolean = false // 是否允许显示负数分数
 )
 
 @Composable
@@ -471,7 +472,7 @@ private fun RankingTableRow(
                                 )
                         )
                         Text(
-                            text = formatScore(item.score, config.scoreWidthType),
+                            text = formatScore(item.score, config.scoreWidthType, config.allowNegativeScore),
                             fontFamily = sarasaBold,
                             fontSize = 14.sp,
                             color = Color.White,
@@ -507,7 +508,7 @@ private fun RankingTableRow(
                                     )
                             )
                             Text(
-                                text = formatScore(compareScore, config.scoreWidthType),
+                                text = formatScore(compareScore, config.scoreWidthType, config.allowNegativeScore),
                                 fontFamily = sarasaRegular,
                                 fontSize = 11.sp,
                                 color = Color.White.copy(alpha = 0.8f),
@@ -551,7 +552,7 @@ private fun RankingTableRow(
                                     )
                             )
                             Text(
-                                text = formatScore(item.score, config.scoreWidthType),
+                                text = formatScore(item.score, config.scoreWidthType, config.allowNegativeScore),
                                 fontFamily = sarasaBold,
                                 fontSize = 14.sp,
                                 color = Color.White,
@@ -586,7 +587,7 @@ private fun RankingTableRow(
                                         )
                                 )
                                 Text(
-                                    text = formatScore(compareScore, config.scoreWidthType),
+                                    text = formatScore(compareScore, config.scoreWidthType, config.allowNegativeScore),
                                     fontFamily = sarasaRegular,
                                     fontSize = 11.sp,
                                     color = Color.White.copy(alpha = 0.8f),
@@ -607,7 +608,7 @@ private fun RankingTableRow(
                 val extraValue = item.extraData
                 Text(
                     text = if (extraValue != null) {
-                        formatScore(extraValue, config.extraWidthType)
+                        formatScore(extraValue, config.extraWidthType, config.allowNegativeScore)
                     } else {
                         "---"
                     },
@@ -685,15 +686,19 @@ private fun RankingTableRow(
 }
 
 private fun formatScore(score: Number, widthType: ColumnWidthType): String {
+    return formatScore(score, widthType, allowNegative = false)
+}
+
+private fun formatScore(score: Number, widthType: ColumnWidthType, allowNegative: Boolean): String {
     val doubleValue = score.toDouble()
     return when (widthType) {
         ColumnWidthType.THREE_DIGIT_INT -> 
-            if (doubleValue > 0) {
+            if (doubleValue > 0 || (allowNegative && doubleValue != 0.0)) {
                 // 整数类型，直接显示整数
                 doubleValue.toInt().toString()
             } else "---"
         ColumnWidthType.TWO_DECIMAL -> 
-            if (doubleValue > 0) {
+            if (doubleValue > 0 || (allowNegative && doubleValue != 0.0)) {
                 // 对于整数，显示为一位小数；否则显示两位小数
                 if (doubleValue == doubleValue.toInt().toDouble()) {
                     String.format("%.1f", doubleValue)
@@ -702,7 +707,7 @@ private fun formatScore(score: Number, widthType: ColumnWidthType): String {
                 }
             } else "---"
         ColumnWidthType.ONE_DECIMAL ->
-            if (doubleValue > 0) {
+            if (doubleValue > 0 || (allowNegative && doubleValue != 0.0)) {
                 // 显示一位小数
                 if (doubleValue == 1000.0) {
                     doubleValue.toInt().toString()

@@ -191,6 +191,69 @@ internal class BofRepository(
         val compactEntities = works.map { work -> convertToCompactEntity(work) }
         insertWorks(compactEntities)
     }
+
+    /**
+     * 获取两个时间点的分数差值排行榜
+     * @param currentTimestamp 当前时间戳（毫秒）
+     * @param compareTimestamp 对比时间戳（毫秒）
+     * @param limit 限制返回数量
+     * @return 按分数差值降序排列的作品排行榜
+     */
+    fun getDifferenceRankingBetweenTimes(
+        currentTimestamp: Long, 
+        compareTimestamp: Long, 
+        limit: Int? = null
+    ): List<WorkRanking> {
+        Log.d(TAG, "getDifferenceRankingBetweenTimes called with currentTimestamp: $currentTimestamp, compareTimestamp: $compareTimestamp, limit: $limit")
+        val startTime = System.currentTimeMillis()
+        
+        Log.d(TAG, "Getting all works from database")
+        val allWorks = bofTTBox.all
+        Log.d(TAG, "Got ${allWorks.size} works from database")
+        
+        val results = allWorks.mapNotNull { entity ->
+            val currentSnapshot = getScoreAtTime(entity, currentTimestamp)
+            val compareSnapshot = getScoreAtTime(entity, compareTimestamp)
+            
+            // 只有当两个时间点都有数据时才计算差值
+            if (currentSnapshot != null && compareSnapshot != null) {
+                val scoreDiff = currentSnapshot.totalScore - compareSnapshot.totalScore
+                val impressionDiff = currentSnapshot.impression - compareSnapshot.impression
+                
+                WorkRanking(
+                    workId = entity.workId,
+                    title = getTitleAtTime(entity, currentTimestamp),
+                    artist = getArtistAtTime(entity, currentTimestamp),
+                    score = scoreDiff, // 使用分数差值作为主要排序依据
+                    average = currentSnapshot.average,
+                    median = currentSnapshot.median,
+                    impression = impressionDiff, // 使用评价数差值
+                    // 对比数据
+                    compareScore = compareSnapshot.totalScore,
+                    compareAverage = compareSnapshot.average,
+                    compareMedian = compareSnapshot.median,
+                    compareImpression = compareSnapshot.impression
+                )
+            } else null
+        }.sortedByDescending { it.score } // 按分数差值降序排列
+            .let { rankings ->
+                // 应用限制数量
+                if (limit != null) {
+                    rankings.take(limit)
+                } else {
+                    rankings
+                }
+            }
+            .mapIndexed { index, ranking ->
+                // 差值排行不需要排名变化，因为它本身就是基于差值的新排名
+                ranking.copy(rank = index + 1, rankChange = null, compareRank = null)
+            }
+        
+        val endTime = System.currentTimeMillis()
+        Log.d(TAG, "getDifferenceRankingBetweenTimes completed in ${endTime - startTime}ms, returned ${results.size} results")
+        
+        return results
+    }
     
     /**
      * 批量插入或更新作品数据
@@ -609,6 +672,34 @@ data class WorkRanking(
         override val rankChange: Int? = this@WorkRanking.rankChange
         override val compareRank: Int? = this@WorkRanking.compareRank
         override val compareScore: Number? = this@WorkRanking.compareMedian // 对比中位数
+    }
+    
+    // 专门用于差值排行的适配器 - 将分数差值作为主要分数显示
+    fun toDifferenceRankingItem(): com.madsam.otora.ui.common.RankingItem = object : com.madsam.otora.ui.common.RankingItem {
+        override val rank: Int = this@WorkRanking.rank
+        override val title: String = this@WorkRanking.title
+        override val artist: String = this@WorkRanking.artist
+        override val score: Number = this@WorkRanking.score // 分数差值作为主要分数
+        override val extraData: Number? = if (this@WorkRanking.impression != 0) this@WorkRanking.impression else null // 评价数差值，允许负数
+        override val avgScore: Double? = null // 不显示额外的平均分列
+        override val medianScore: Double? = null // 不显示额外的中位数列
+        override val rankChange: Int? = null // 差值排行不显示排名变化
+        override val compareRank: Int? = null // 不显示对比排名
+        override val compareScore: Number? = null // 不显示对比分数
+    }
+    
+    // 专门用于综合分数排行的适配器 - 将综合分数作为主要分数显示，同时显示原始平均分和中位数
+    fun toCompositeRankingItem(): com.madsam.otora.ui.common.RankingItem = object : com.madsam.otora.ui.common.RankingItem {
+        override val rank: Int = this@WorkRanking.rank
+        override val title: String = this@WorkRanking.title
+        override val artist: String = this@WorkRanking.artist
+        override val score: Number = this@WorkRanking.score // 综合分数作为主要分数
+        override val extraData: Number? = if (this@WorkRanking.impression > 0) this@WorkRanking.impression else null
+        override val avgScore: Double? = if (this@WorkRanking.average > 0) this@WorkRanking.average else null // 显示原始平均分
+        override val medianScore: Double? = if (this@WorkRanking.median > 0) this@WorkRanking.median else null // 显示原始中位数
+        override val rankChange: Int? = this@WorkRanking.rankChange
+        override val compareRank: Int? = this@WorkRanking.compareRank
+        override val compareScore: Number? = this@WorkRanking.compareScore // 对比综合分数
     }
 }
 

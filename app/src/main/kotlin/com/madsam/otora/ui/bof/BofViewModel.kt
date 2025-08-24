@@ -50,12 +50,17 @@ internal class BofViewModel(
     val totalRankingData = MutableStateFlow(listOf<WorkRanking>())
     val avgRankingData = MutableStateFlow(listOf<WorkRanking>())
     val medianRankingData = MutableStateFlow(listOf<WorkRanking>())
+    val diffRankingData = MutableStateFlow(listOf<WorkRanking>())
+    val compositeRankingData = MutableStateFlow(listOf<WorkRanking>())
     
     // 平均分排行的过滤参数
     val avgMinImpression = MutableStateFlow(1)
     
     // 中位数排行的过滤参数
     val medianMinImpression = MutableStateFlow(1)
+    
+    // 综合分数排行的过滤参数
+    val compositeMinImpression = MutableStateFlow(1)
     
     val isLoading = MutableStateFlow(false)
     val errorMessage = MutableStateFlow("")
@@ -592,6 +597,116 @@ internal class BofViewModel(
     // 更新中位数排行的最低评价数过滤条件
     fun updateMedianMinImpression(minImpression: Int) {
         medianMinImpression.update { minImpression }
+    }
+    
+    // 生成综合分数排行榜
+    fun generateCompositeRanking() {
+        Log.d(TAG, "Starting composite ranking generation")
+        viewModelScope.launch {
+            combine(
+                totalRankingData,
+                compositeMinImpression
+            ) { totalData: List<WorkRanking>, minImpression: Int ->
+                Log.d(TAG, "Generating composite ranking with ${totalData.size} items, minImpression: $minImpression")
+                generateCompositeRankingFromTotal(totalData, minImpression)
+            }.collect { compositeData: List<WorkRanking> ->
+                compositeRankingData.update { compositeData }
+            }
+        }
+    }
+    
+    private fun generateCompositeRankingFromTotal(totalData: List<WorkRanking>, minImpression: Int): List<WorkRanking> {
+        // 过滤符合条件的数据
+        val filteredData = totalData.filter { 
+            it.impression >= minImpression && 
+            it.average > 0 && 
+            it.median > 0 && 
+            it.score > 0 
+        }
+        
+        // 找到最大总分用于标准化
+        val maxTotalScore = filteredData.maxOfOrNull { it.score }?.toDouble() ?: 1000.0
+        Log.d(TAG, "Maximum total score for normalization: $maxTotalScore")
+        
+        // 计算综合分数并排序
+        val rankedData = filteredData.map { ranking ->
+            // 标准化总分到0-1000范围
+            val normalizedTotalScore = (ranking.score.toDouble() / maxTotalScore) * 1000.0
+            
+            // 计算综合分数：标准化总分7% + 中位数80% + 平均分13%
+            val compositeScore = normalizedTotalScore * 0.07 + 
+                               ranking.median * 0.80 + 
+                               ranking.average * 0.13
+            
+            Log.d(TAG, "Work ${ranking.title}: totalScore=${ranking.score}, normalized=$normalizedTotalScore, median=${ranking.median}, avg=${ranking.average}, composite=$compositeScore")
+            
+            ranking.copy(score = compositeScore.toInt())
+        }.sortedByDescending { it.score }
+        
+        // 重新分配排名
+        return rankedData.mapIndexed { index, ranking ->
+            ranking.copy(rank = index + 1)
+        }
+    }
+    
+    // 更新综合分数排行的最低评价数过滤条件
+    fun updateCompositeMinImpression(minImpression: Int) {
+        compositeMinImpression.update { minImpression }
+    }
+    
+    // 加载差值排行数据
+    fun loadDifferenceRankingData() {
+        Log.d(TAG, "Starting difference ranking data loading")
+        viewModelScope.launch {
+            try {
+                isLoading.update { true }
+                errorMessage.update { "" }
+                
+                // 计算当前时间戳
+                val currentTimestamp = if (bofScreenState.selectedCurrentTime.value == "-1") {
+                    System.currentTimeMillis()
+                } else {
+                    CommonUtils.ymdToMillis(
+                        bofScreenState.selectedCurrentDate.value.toString(),
+                        CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
+                    )
+                }
+                
+                // 计算对比时间戳
+                val compareTimestamp = if (bofScreenState.selectedCompareTime.value == "-1") {
+                    System.currentTimeMillis() - 86400000L // 默认对比一天前
+                } else {
+                    CommonUtils.ymdToMillis(
+                        bofScreenState.selectedCompareDate.value.toString(),
+                        CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
+                    )
+                }
+                
+                Log.d(TAG, "Current timestamp: $currentTimestamp, Compare timestamp: $compareTimestamp")
+                
+                // 获取差值排行数据
+                val differenceData = bofRepository.getDifferenceRankingBetweenTimes(
+                    currentTimestamp = currentTimestamp,
+                    compareTimestamp = compareTimestamp,
+                    limit = 500
+                )
+                
+                diffRankingData.update { differenceData }
+                
+                if (differenceData.isEmpty()) {
+                    errorMessage.update { "该时间段暂无差值数据" }
+                }
+                
+                Log.d(TAG, "Difference ranking data loading completed successfully, got ${differenceData.size} items")
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load difference ranking data", e)
+                errorMessage.update { "加载失败: ${e.message}" }
+                diffRankingData.update { emptyList() }
+            } finally {
+                isLoading.update { false }
+            }
+        }
     }
 }
 

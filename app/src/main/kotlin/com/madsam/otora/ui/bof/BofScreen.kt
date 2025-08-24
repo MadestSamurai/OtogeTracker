@@ -69,9 +69,9 @@ import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.ui.bof.components.DateTimeRangePicker
 import com.madsam.otora.ui.bof.sub.BofAvgNewScreen
 import com.madsam.otora.ui.bof.sub.BofCommentScreen
-import com.madsam.otora.ui.bof.sub.BofDiffScreen
+import com.madsam.otora.ui.bof.sub.BofCompositeNewScreen
+import com.madsam.otora.ui.bof.sub.BofDiffNewScreen
 import com.madsam.otora.ui.bof.sub.BofMedianNewScreen
-import com.madsam.otora.ui.bof.sub.BofTTTestScreen
 import com.madsam.otora.ui.bof.sub.BofTeamScreen
 import com.madsam.otora.ui.bof.sub.BofTotalNewScreen
 import com.madsam.otora.ui.components.CustomScrollableTabRow
@@ -219,7 +219,7 @@ fun BofScreen(
     }
 
     val tabTitles = mapOf(
-        "Entry" to listOf("Total", "Avg", "Median", "Diff", "Test"),
+        "Entry" to listOf("Total", "Avg", "Median", "Diff", "Composite"),
         "Team" to listOf(" "),
         "Comment" to listOf(" ")
     )
@@ -365,18 +365,19 @@ fun BofScreen(
                                         modifier = Modifier.fillMaxSize()
                                     )
 
-                                    "Diff" -> BofDiffScreen(
-                                        vm,
-                                        snackbarHostState,
-                                        listStateDiff,
-                                        scrollThreshold,
-                                        bofScreenState
-                                    ) { isTabRowVisible = it }
-
-                                    "Test" -> BofTTTestScreen(
-                                        repository = vm.bofRepository,
+                                    "Diff" -> BofDiffNewScreen(
+                                        vm = vm,
+                                        bofScreenState = bofScreenState,
+                                        narrowMode = narrowMode,
                                         modifier = Modifier.fillMaxSize()
-                                    ) { isTabRowVisible = it }
+                                    )
+
+                                    "Composite" -> BofCompositeNewScreen(
+                                        vm = vm,
+                                        bofScreenState = bofScreenState,
+                                        narrowMode = narrowMode,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
                                 }
 
                                 "Team" -> when (subTab) {
