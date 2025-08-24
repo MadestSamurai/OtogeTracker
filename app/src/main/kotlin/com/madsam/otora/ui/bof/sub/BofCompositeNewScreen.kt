@@ -97,10 +97,11 @@ internal fun BofCompositeNewScreen(
                         extraColumnName = "评价",
                         avgColumnName = "平均", // 显示平均分列
                         medianColumnName = "中位数", // 显示中位数列
-                        scoreWidthType = ColumnWidthType.THREE_DIGIT_INT,
-                        extraWidthType = ColumnWidthType.THREE_DIGIT_INT,
-                        avgWidthType = ColumnWidthType.ONE_DECIMAL,
+                        scoreWidthType = ColumnWidthType.TWO_DECIMAL,
+                        extraWidthType = ColumnWidthType.TWO_DECIMAL,
+                        avgWidthType = ColumnWidthType.TWO_DECIMAL,
                         medianWidthType = ColumnWidthType.ONE_DECIMAL,
+                        enableNarrowToggle = true,
                         allowNegativeScore = false,
                         maxItems = 500
                     )

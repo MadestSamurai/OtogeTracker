@@ -637,12 +637,15 @@ internal class BofViewModel(
                                ranking.median * 0.80 + 
                                ranking.average * 0.13
 
-            ranking.copy(score = compositeScore.toInt())
-        }.sortedByDescending { it.score }
+            ranking.copy(
+                score = compositeScore.toInt(), // 保持原有的Int字段用于排序
+                compositeScore = compositeScore // 添加Double字段保留小数
+            )
+        }.sortedByDescending { it.compositeScore ?: it.score.toDouble() }
         
         // 计算对比时间点的综合分数（如果有对比数据）
         val compareCompositeMap = mutableMapOf<String, Int>() // workId -> 对比综合分数排名
-        val compareCompositeScoreMap = mutableMapOf<String, Int>() // workId -> 对比综合分数
+        val compareCompositeScoreMap = mutableMapOf<String, Double>() // workId -> 对比综合分数(Double)
         
         val hasCompareData = filteredData.any { 
             it.compareScore != null && it.compareAverage != null && it.compareMedian != null 
@@ -668,7 +671,7 @@ internal class BofViewModel(
                                               ranking.compareMedian!! * 0.80 + 
                                               ranking.compareAverage!! * 0.13
                     
-                    Triple(ranking.workId, compareCompositeScore.toInt(), ranking)
+                    Triple(ranking.workId, compareCompositeScore, ranking)
                 }.sortedByDescending { it.second }
                 
                 // 创建对比排名和分数映射
@@ -692,7 +695,8 @@ internal class BofViewModel(
                 rank = currentRank,
                 compareRank = compareRank,
                 rankChange = rankChange,
-                compareScore = compareCompositeScore // 将对比综合分数存储在compareScore字段中
+                compareScore = compareCompositeScore?.toInt(), // 保持Int类型用于兼容性
+                compareCompositeScore = compareCompositeScore // 添加Double类型的对比综合分数
             )
         }
     }

@@ -623,12 +623,15 @@ data class WorkRanking(
     val median: Double,
     val impression: Int,
     val rank: Int = 0,
+    // 综合分数 (Double类型保留小数)
+    val compositeScore: Double? = null,
     // 对比数据 (来自第二个时间点)
     val compareScore: Int? = null,
     val compareAverage: Double? = null,
     val compareMedian: Double? = null,
     val compareImpression: Int? = null,
     val compareRank: Int? = null,
+    val compareCompositeScore: Double? = null, // 对比综合分数
     // 变化量
     val rankChange: Int? = null // 正数表示排名上升，负数表示排名下降
 ) {
@@ -693,13 +696,13 @@ data class WorkRanking(
         override val rank: Int = this@WorkRanking.rank
         override val title: String = this@WorkRanking.title
         override val artist: String = this@WorkRanking.artist
-        override val score: Number = this@WorkRanking.score // 综合分数作为主要分数
+        override val score: Number = this@WorkRanking.compositeScore ?: this@WorkRanking.score // 使用Double类型的综合分数，如果没有则回退到Int分数
         override val extraData: Number? = if (this@WorkRanking.impression > 0) this@WorkRanking.impression else null
         override val avgScore: Double? = if (this@WorkRanking.average > 0) this@WorkRanking.average else null // 显示原始平均分
         override val medianScore: Double? = if (this@WorkRanking.median > 0) this@WorkRanking.median else null // 显示原始中位数
         override val rankChange: Int? = this@WorkRanking.rankChange
         override val compareRank: Int? = this@WorkRanking.compareRank
-        override val compareScore: Number? = this@WorkRanking.compareScore // 对比综合分数
+        override val compareScore: Number? = this@WorkRanking.compareCompositeScore ?: this@WorkRanking.compareScore // 使用Double类型的对比综合分数
     }
 }
 
