@@ -138,20 +138,9 @@ fun BofScreen(
     }
 
     fun refreshData() {
-        bofRequestService.requestBofttData(dateTime) {
-            coroutineScope.launch {
-                vm.requestTotalData()
-            }
-        }
         bofRequestService.requestBofttTeamData(dateTime) {
-            coroutineScope.launch {
-                vm.requestTotalData()
-            }
         }
         bofRequestService.requestBofttCommentData(dateTime) {
-            coroutineScope.launch {
-                vm.requestTotalData()
-            }
         }
     }
 
@@ -320,7 +309,9 @@ fun BofScreen(
                                 vm = vm,
                                 bofScreenState = bofScreenState,
                                 narrowMode = narrowMode,
-                                searchText = searchText.value
+                                searchText = searchText.value,
+                                scrollThreshold = scrollThreshold,
+                                setIsTabRowVisible = { isTabRowVisible = it }
                             )
 
                             "Team" -> BofTeamScreen(

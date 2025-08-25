@@ -23,7 +23,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.combine
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import kotlin.math.max
 
 private const val TAG = "BofViewModel"
 
@@ -38,11 +37,6 @@ internal class BofViewModel(
         Log.d(TAG, "BofRepository lazy initialization")
         BofRepository(ObjectBoxManager.getBoxStore().boxFor(BofTTCompactEntity::class.java))
     }
-    val totalData = MutableStateFlow(listOf<BofEntryUI>())
-    val avgData = MutableStateFlow(listOf<BofEntryUI>())
-    val medianData = MutableStateFlow(listOf<BofEntryUI>())
-    val diffData = MutableStateFlow(listOf<BofEntryUI>())
-    val isDiffReverse = MutableStateFlow(false)
     val teamData = MutableStateFlow(listOf<BofTeamUI>())
     val commentData = MutableStateFlow(listOf<BofCommentUI>())
 
@@ -86,9 +80,6 @@ internal class BofViewModel(
             }
         }
     }
-
-    var thresholdImpr = MutableStateFlow(1)
-    var thresholdImprOld = MutableStateFlow(1)
 
     var selectedTimeStr = MutableStateFlow("")
     var selectedTimeStrNoComp = MutableStateFlow("")
@@ -187,7 +178,7 @@ internal class BofViewModel(
     }
 
     fun generateSelectedTimeStr() {
-        if (totalData.value.isEmpty()) {
+        if (totalRankingData.value.isEmpty()) {
             selectedTimeStr.update {
                 "No data available for the selected date and time."
             }
@@ -256,115 +247,6 @@ internal class BofViewModel(
             diffSetter(it, it.previousRank - it.currentRank)
         }
         return sortedData
-    }
-
-    private fun calculateThresholds(data: List<BofEntryUI>) {
-        val sortedDataByOldImpr = data.sortedByDescending { it.oldImpr }
-        thresholdImprOld.update { max(sortedDataByOldImpr.getOrNull(239)?.oldImpr ?: 0, 3) }
-
-        val sortedDataByImpr = data.sortedByDescending { it.impr }
-        thresholdImpr.update { max(sortedDataByImpr.getOrNull(239)?.impr ?: 0, 3) }
-    }
-
-    suspend fun requestTotalData() {
-        val data = fetchData(
-            { bofLocalService.getBofttEntryLatest() },
-            { currentTime, compareTime -> bofLocalService.getBofttEntryByTime(currentTime, compareTime) }
-        )
-
-        if (data.isEmpty()) {
-            Log.d(TAG, "No data available for the selected date and time.")
-            return
-        }
-        val updatedData = updateRanks(
-            data,
-            { it.oldTotal },
-            { it.total },
-            { entry, rank -> entry.previousRank = rank },
-            { entry, rank -> entry.currentRank = rank },
-            { entry, diff -> entry.rankDiff = diff },
-            { true },
-            { it.impr }
-        )
-        totalData.update { updatedData }
-    }
-
-    suspend fun requestAvgData() {
-        val data = fetchData(
-            { bofLocalService.getBofttEntryLatest() },
-            { time, compareTime -> bofLocalService.getBofttEntryByTime(time, compareTime) }
-        )
-        calculateThresholds(data)
-        if (data.isEmpty()) {
-            Log.d(TAG, "No avg data available for the selected date and time.")
-            return
-        }
-        val updatedData = updateRanks(
-            data,
-            { it.oldAvg },
-            { it.avg },
-            { entry, rank -> entry.previousRank = rank },
-            { entry, rank -> entry.currentRank = rank },
-            { entry, diff -> entry.avgDiff = diff },
-            { it.impr >= thresholdImpr.value },
-            { it.impr }
-        )
-        avgData.update { updatedData }
-    }
-
-    suspend fun requestMedianData() {
-        val data = fetchData(
-            { bofLocalService.getBofttEntryLatest() },
-            { time, compareTime -> bofLocalService.getBofttEntryByTime(time, compareTime) }
-        )
-        calculateThresholds(data)
-        if (data.isEmpty()) {
-            Log.d(TAG, "No median data available for the selected date and time.")
-            return
-        }
-        val updatedData = updateRanks(
-            data,
-            { it.oldMedian },
-            { it.median },
-            { entry, rank -> entry.previousRank = rank },
-            { entry, rank -> entry.currentRank = rank },
-            { entry, diff -> entry.medianDiff = diff },
-            { it.impr >= thresholdImpr.value },
-            { it.impr }
-        )
-        medianData.update { updatedData }
-    }
-
-    suspend fun requestDiffData() {
-        val data = fetchData(
-            { bofLocalService.getBofttEntryLatest() },
-            { time, compareTime -> bofLocalService.getBofttEntryByTime(time, compareTime) }
-        )
-        data.forEach {
-            it.totalDiff = it.total - it.oldTotal
-            it.imprDiff = it.impr - it.oldImpr
-        }
-        val updatedData = updateRanks(
-            data,
-            { it.totalDiff },
-            { it.totalDiff },
-            { entry, rank -> entry.previousRank = rank },
-            { entry, rank -> entry.currentRank = rank },
-            { entry, diff -> entry.totalDiff = entry.totalDiff },
-            { true },
-            { it.imprDiff }
-        )
-        val maxTotalDiff = updatedData.maxOfOrNull { it.totalDiff } ?: 0
-        val minTotalDiff = updatedData.minOfOrNull { it.totalDiff } ?: 0
-        if (minTotalDiff < 0 && maxTotalDiff == 0) {
-            val reverseData = updatedData.map {
-                it.totalDiff = -it.totalDiff
-                it.imprDiff = -it.imprDiff
-                it
-            }.sortedByDescending { it.totalDiff }
-            isDiffReverse.update { true }
-            diffData.update { reverseData }
-        } else diffData.update { updatedData }
     }
 
     suspend fun requestTeamData() {
@@ -464,6 +346,11 @@ internal class BofViewModel(
                 
                 if (totalRankingData.value.isEmpty()) {
                     errorMessage.update { "该时间点暂无排名数据" }
+                } else {
+                    // 数据加载完成后，生成其他类型的排行榜
+                    Log.d(TAG, "Generating derived rankings...")
+                    generateCompositeRanking()
+                    generateDifferenceRanking()
                 }
                 
                 Log.d(TAG, "Streamed data loading with comparison completed successfully")
