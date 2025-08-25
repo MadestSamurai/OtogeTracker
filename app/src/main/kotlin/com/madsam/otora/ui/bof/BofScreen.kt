@@ -354,29 +354,25 @@ fun BofScreen(
                                     "Avg" -> BofAvgNewScreen(
                                         vm = vm,
                                         bofScreenState = bofScreenState,
-                                        narrowMode = narrowMode,
-                                        modifier = Modifier.fillMaxSize()
+                                        narrowMode = narrowMode
                                     )
 
                                     "Median" -> BofMedianNewScreen(
                                         vm = vm,
                                         bofScreenState = bofScreenState,
-                                        narrowMode = narrowMode,
-                                        modifier = Modifier.fillMaxSize()
+                                        narrowMode = narrowMode
                                     )
 
                                     "Diff" -> BofDiffNewScreen(
                                         vm = vm,
                                         bofScreenState = bofScreenState,
-                                        narrowMode = narrowMode,
-                                        modifier = Modifier.fillMaxSize()
+                                        narrowMode = narrowMode
                                     )
 
                                     "Composite" -> BofCompositeNewScreen(
                                         vm = vm,
                                         bofScreenState = bofScreenState,
-                                        narrowMode = narrowMode,
-                                        modifier = Modifier.fillMaxSize()
+                                        narrowMode = narrowMode
                                     )
                                 }
 

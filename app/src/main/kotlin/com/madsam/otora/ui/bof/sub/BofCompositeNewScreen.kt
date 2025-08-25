@@ -32,8 +32,7 @@ import com.madsam.otora.ui.common.RankingTableConfig
 internal fun BofCompositeNewScreen(
     vm: BofViewModel,
     bofScreenState: BofScreenState,
-    narrowMode: Int = 0,
-    modifier: Modifier = Modifier
+    narrowMode: Int = 0
 ) {
     // 收集状态
     val ranking by vm.compositeRankingData.collectAsStateWithLifecycle()
@@ -46,7 +45,7 @@ internal fun BofCompositeNewScreen(
         vm.generateCompositeRanking()
     }
     
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
         when {
             isLoading -> {
                 CircularProgressIndicator(
@@ -104,7 +103,8 @@ internal fun BofCompositeNewScreen(
                         enableNarrowToggle = true,
                         allowNegativeScore = false,
                         maxItems = 500
-                    )
+                    ),
+                    narrowMode = narrowMode, // 传入外部控制的状态
                 )
             }
         }

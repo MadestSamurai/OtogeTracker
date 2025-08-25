@@ -21,8 +21,7 @@ import com.madsam.otora.ui.common.ColumnWidthType
 internal fun BofDiffNewScreen(
     vm: BofViewModel,
     bofScreenState: BofScreenState,
-    narrowMode: Int = 0,
-    modifier: Modifier = Modifier
+    narrowMode: Int = 0
 ) {
     // 收集状态
     val ranking by vm.diffRankingData.collectAsStateWithLifecycle()
@@ -36,7 +35,7 @@ internal fun BofDiffNewScreen(
     
     // 内容区域
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         when {
             isLoading -> {
@@ -101,8 +100,7 @@ internal fun BofDiffNewScreen(
                         maxItems = 500,
                         allowNegativeScore = true // 允许显示负数分数差值
                     ),
-                    narrowMode = narrowMode,
-                    modifier = Modifier.fillMaxSize()
+                    narrowMode = narrowMode
                 )
             }
         }

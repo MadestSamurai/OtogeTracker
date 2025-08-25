@@ -73,7 +73,6 @@ data class RankingTableConfig(
 fun RankingTable(
     items: List<RankingItem>,
     config: RankingTableConfig,
-    modifier: Modifier = Modifier,
     narrowMode: Int = 0
 ) {
     // 屏幕宽度检测
@@ -101,7 +100,7 @@ fun RankingTable(
     val compareMaxScore = items.mapNotNull { it.compareScore?.toDouble() }.maxOfOrNull { it } ?: 0.0
     val maxScore = maxOf(currentMaxScore, compareMaxScore)
     
-    Column(modifier = modifier) {
+    Column(modifier = Modifier.fillMaxSize()) {
         // 隐藏的测量容器
         Box(modifier = Modifier
             .size(0.dp)

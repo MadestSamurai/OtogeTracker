@@ -94,8 +94,7 @@ internal fun BofTotalNewScreen(
                         enableNarrowToggle = true,
                         maxItems = 500
                     ),
-                    narrowMode = narrowMode, // 传入外部控制的状态
-                    modifier = Modifier.fillMaxSize()
+                    narrowMode = narrowMode // 传入外部控制的状态
                 )
             }
         }
