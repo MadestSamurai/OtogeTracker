@@ -397,10 +397,7 @@ private fun RankingTableRow(
                         )
                         // 持平时不显示变化量
                     }
-                    else -> {
-                        // 没有对比数据时显示占位空间
-                        Spacer(modifier = Modifier.height(12.dp))
-                    }
+                    else -> {}
                 }
             }
             
