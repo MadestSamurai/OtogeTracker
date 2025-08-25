@@ -67,13 +67,9 @@ import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.ui.bof.components.DateTimeRangePicker
-import com.madsam.otora.ui.bof.sub.BofAvgNewScreen
 import com.madsam.otora.ui.bof.sub.BofCommentScreen
-import com.madsam.otora.ui.bof.sub.BofCompositeNewScreen
-import com.madsam.otora.ui.bof.sub.BofDiffNewScreen
-import com.madsam.otora.ui.bof.sub.BofMedianNewScreen
+import com.madsam.otora.ui.bof.sub.BofEntryPagerScreen
 import com.madsam.otora.ui.bof.sub.BofTeamScreen
-import com.madsam.otora.ui.bof.sub.BofTotalNewScreen
 import com.madsam.otora.ui.components.CustomScrollableTabRow
 import com.madsam.otora.ui.components.CustomTabRow
 import kotlinx.coroutines.flow.asStateFlow
@@ -82,6 +78,20 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 private const val TAG = "BofScreen"
+
+/**
+ * 判断是否应该显示操作按钮
+ * @param selectedTabIndex 当前选中的主Tab索引
+ * @return true表示应该显示按钮
+ */
+private fun shouldShowActionButton(selectedTabIndex: Int): Boolean {
+    return when (selectedTabIndex) {
+        0 -> true  // Entry页面：显示narrow模式切换按钮
+        1 -> true  // Team页面：显示刷新按钮  
+        2 -> true  // Comment页面：显示刷新按钮
+        else -> false
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -107,21 +117,9 @@ fun BofScreen(
     val selectedSubTabIndex = bofScreenState.selectedSubTab.asStateFlow().collectAsState().value
     val searchText = remember { mutableStateOf("") }
 
-    val listStateTotal = rememberLazyListState()
-    val listStateAvg = rememberLazyListState()
-    val listStateMedian = rememberLazyListState()
-    val listStateDiff = rememberLazyListState()
     val listStateTeam = rememberLazyListState()
     val listStateComment = rememberLazyListState()
 
-    val currentIndexTotal = vm.currentIndexTotal.asStateFlow().collectAsState().value
-    val scrollListTotal = vm.scrollToIndexListTotal.asStateFlow().collectAsState().value
-    val currentIndexAvg = vm.currentIndexAvg.asStateFlow().collectAsState().value
-    val scrollListAvg = vm.scrollToIndexListAvg.asStateFlow().collectAsState().value
-    val currentIndexMedian = vm.currentIndexMedian.asStateFlow().collectAsState().value
-    val scrollListMedian = vm.scrollToIndexListMedian.asStateFlow().collectAsState().value
-    val currentIndexDiff = vm.currentIndexDiff.asStateFlow().collectAsState().value
-    val scrollListDiff = vm.scrollToIndexListDiff.asStateFlow().collectAsState().value
     val currentIndexTeam = vm.currentIndexTeam.asStateFlow().collectAsState().value
     val scrollListTeam = vm.scrollToIndexListTeam.asStateFlow().collectAsState().value
     val currentIndexComment = vm.currentIndexComment.asStateFlow().collectAsState().value
@@ -174,54 +172,30 @@ fun BofScreen(
 
     LaunchedEffect(
         selectedTabIndex,
-        currentIndexTotal, scrollListTotal,
-        currentIndexAvg, scrollListAvg,
-        currentIndexMedian, scrollListMedian,
-        currentIndexDiff, scrollListDiff,
-        currentIndexTeam, scrollListTeam
+        currentIndexTeam, scrollListTeam,
+        currentIndexComment, scrollListComment
     ) {
         when (selectedTabIndex) {
-            0 -> {
-                if (currentIndexTotal < scrollListTotal.size)
-                    listStateTotal.scrollToItem(scrollListTotal[currentIndexTotal] + 1)
-                else
-                    listStateTotal.scrollToItem(0)
-            }
-
             1 -> {
-                if (currentIndexAvg < scrollListAvg.size)
-                    listStateAvg.scrollToItem(scrollListAvg[currentIndexAvg] + 1)
-                else
-                    listStateAvg.scrollToItem(0)
-            }
-
-            2 -> {
-                if (currentIndexMedian < scrollListMedian.size)
-                    listStateMedian.scrollToItem(scrollListMedian[currentIndexMedian] + 1)
-                else
-                    listStateMedian.scrollToItem(0)
-            }
-
-            3 -> {
-                if (currentIndexDiff < scrollListDiff.size)
-                    listStateDiff.scrollToItem(scrollListDiff[currentIndexDiff] + 1)
-                else
-                    listStateDiff.scrollToItem(0)
-            }
-
-            4 -> {
                 if (currentIndexTeam < scrollListTeam.size)
                     listStateTeam.scrollToItem(scrollListTeam[currentIndexTeam] + 1)
                 else
                     listStateTeam.scrollToItem(0)
+            }
+
+            2 -> {
+                if (currentIndexComment < scrollListComment.size)
+                    listStateComment.scrollToItem(scrollListComment[currentIndexComment] + 1)
+                else
+                    listStateComment.scrollToItem(0)
             }
         }
     }
 
     val tabTitles = mapOf(
         "Entry" to listOf("Total", "Avg", "Median", "Diff", "Composite"),
-        "Team" to listOf(" "),
-        "Comment" to listOf(" ")
+        "Team" to emptyList<String>(),
+        "Comment" to emptyList<String>()
     )
 
     val mainTabTitles = tabTitles.keys.toList()
@@ -243,11 +217,12 @@ fun BofScreen(
                         onValueChange = {
                             searchText.value = it
                             when (selectedTabIndex) {
-                                0 -> vm.findItemIndex(it, vm.totalData.value, selectedTabIndex)
-                                1 -> vm.findItemIndex(it, vm.avgData.value, selectedTabIndex)
-                                2 -> vm.findItemIndex(it, vm.medianData.value, selectedTabIndex)
-                                3 -> vm.findItemIndex(it, vm.diffData.value, selectedTabIndex)
-                                4 -> vm.findTeamItemIndex(it, vm.teamData.value)
+                                0 -> {
+                                    // Entry页面的搜索由BofEntryPagerScreen处理
+                                }
+                                1 -> vm.findTeamItemIndex(it, vm.teamData.value)
+                                // Comment页面暂时使用相同的搜索逻辑，后续可以添加专门的方法
+                                2 -> {} // 可以后续添加评论搜索
                             }
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -335,67 +310,34 @@ fun BofScreen(
             )
             NavHost(
                 navController = navController,
-                startDestination = "${mainTabTitles[selectedTabIndex]}/${
-                    subTabTitles.getOrNull(selectedSubTabIndex) ?: ""
-                }",
+                startDestination = mainTabTitles[selectedTabIndex],
                 modifier = Modifier.weight(1f)
             ) {
-                tabTitles.forEach { (mainTab, subTabs) ->
-                    subTabs.forEach { subTab ->
-                        composable("$mainTab/$subTab") {
-                            when (mainTab) {
-                                "Entry" -> when (subTab) {
-                                    "Total" -> BofTotalNewScreen(
-                                        vm = vm,
-                                        bofScreenState = bofScreenState,
-                                        narrowMode = narrowMode
-                                    )
+                mainTabTitles.forEach { mainTab ->
+                    composable(mainTab) {
+                        when (mainTab) {
+                            "Entry" -> BofEntryPagerScreen(
+                                vm = vm,
+                                bofScreenState = bofScreenState,
+                                narrowMode = narrowMode,
+                                searchText = searchText.value
+                            )
 
-                                    "Avg" -> BofAvgNewScreen(
-                                        vm = vm,
-                                        bofScreenState = bofScreenState,
-                                        narrowMode = narrowMode
-                                    )
+                            "Team" -> BofTeamScreen(
+                                vm,
+                                snackbarHostState,
+                                listStateTeam,
+                                scrollThreshold,
+                                bofScreenState
+                            ) { isTabRowVisible = it }
 
-                                    "Median" -> BofMedianNewScreen(
-                                        vm = vm,
-                                        bofScreenState = bofScreenState,
-                                        narrowMode = narrowMode
-                                    )
-
-                                    "Diff" -> BofDiffNewScreen(
-                                        vm = vm,
-                                        bofScreenState = bofScreenState,
-                                        narrowMode = narrowMode
-                                    )
-
-                                    "Composite" -> BofCompositeNewScreen(
-                                        vm = vm,
-                                        bofScreenState = bofScreenState,
-                                        narrowMode = narrowMode
-                                    )
-                                }
-
-                                "Team" -> when (subTab) {
-                                    " " -> BofTeamScreen(
-                                        vm,
-                                        snackbarHostState,
-                                        listStateTeam,
-                                        scrollThreshold,
-                                        bofScreenState
-                                    ) { isTabRowVisible = it }
-                                }
-
-                                "Comment" -> when (subTab) {
-                                    " " -> BofCommentScreen(
-                                        vm,
-                                        snackbarHostState,
-                                        listStateComment,
-                                        scrollThreshold,
-                                        bofScreenState
-                                    ) { isTabRowVisible = it }
-                                }
-                            }
+                            "Comment" -> BofCommentScreen(
+                                vm,
+                                snackbarHostState,
+                                listStateComment,
+                                scrollThreshold,
+                                bofScreenState
+                            ) { isTabRowVisible = it }
                         }
                     }
                 }
@@ -424,7 +366,7 @@ fun BofScreen(
                             onClick = {
                                 if (selectedSubTabIndex != index) {
                                     bofScreenState.selectedSubTab.update { index }
-                                    navController.navigate("${mainTabTitles[selectedTabIndex]}/$title")
+                                    // 不需要导航，因为Pager会自动响应状态变化
                                 }
                             },
                             text = {
@@ -475,12 +417,7 @@ fun BofScreen(
                                             if (selectedTabIndex != index) {
                                                 bofScreenState.selectedTab.update { index }
                                                 bofScreenState.selectedSubTab.update { 0 }
-                                                val defaultSubTab = when (title) {
-                                                    "Entry" -> "Total"
-                                                    "Team", "Comment" -> " "
-                                                    else -> ""
-                                                }
-                                                navController.navigate("$title/$defaultSubTab")
+                                                navController.navigate(title)
                                             }
                                         },
                                         text = {
@@ -496,60 +433,62 @@ fun BofScreen(
                         )
                     }
 
-                    // 右侧圆形按钮
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .align(Alignment.CenterEnd)
-                            .clip(RoundedCornerShape(50))
-                            .background(Red500)
-                            .clickable {
-                                when (selectedTabIndex) {
-                                    0 -> {
-                                        // Entry页面，切换narrow模式
-                                        narrowMode = if (narrowMode == 0) 1 else 0
-                                    }
-                                    1 -> {
-                                        // Team页面，刷新团队数据
-                                        coroutineScope.launch {
-                                            refreshData()
-                                            snackbarHostState.showSnackbar("团队数据已刷新")
+                    // 右侧圆形按钮 - 根据页面类型选择性显示
+                    if (shouldShowActionButton(selectedTabIndex)) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .align(Alignment.CenterEnd)
+                                .clip(RoundedCornerShape(50))
+                                .background(Red500)
+                                .clickable {
+                                    when (selectedTabIndex) {
+                                        0 -> {
+                                            // Entry页面，切换narrow模式
+                                            narrowMode = if (narrowMode == 0) 1 else 0
+                                        }
+                                        1 -> {
+                                            // Team页面，刷新团队数据
+                                            coroutineScope.launch {
+                                                refreshData()
+                                                snackbarHostState.showSnackbar("团队数据已刷新")
+                                            }
+                                        }
+                                        2 -> {
+                                            // Comment页面，刷新评论数据
+                                            coroutineScope.launch {
+                                                refreshData()
+                                                snackbarHostState.showSnackbar("评论数据已刷新")
+                                            }
                                         }
                                     }
-                                    2 -> {
-                                        // Comment页面，刷新评论数据
-                                        coroutineScope.launch {
-                                            refreshData()
-                                            snackbarHostState.showSnackbar("评论数据已刷新")
-                                        }
-                                    }
-                                }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Crossfade(
-                            targetState = selectedTabIndex,
-                            animationSpec = tween(durationMillis = 300),
-                            label = "icon_crossfade"
-                        ) { tabIndex ->
-                            Icon(
-                                painter = rememberVectorPainter(
-                                    image = when (tabIndex) {
-                                        0 -> Filled.SwitchArrow  // Entry: 窄屏切换图标
-                                        1 -> Filled.ArrowRotate  // Team: 刷新图标
-                                        2 -> Filled.ArrowRotate  // Comment: 刷新图标
-                                        else -> Filled.ArrowRotate
-                                    }
-                                ),
-                                contentDescription = when (tabIndex) {
-                                    0 -> if (narrowMode == 1) "Switch to Wide Mode" else "Switch to Narrow Mode"
-                                    1 -> "Refresh Team Data"
-                                    2 -> "Refresh Comment Data"
-                                    else -> "Refresh"
                                 },
-                                tint = Beige500,
-                                modifier = Modifier.size(16.dp)
-                            )
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Crossfade(
+                                targetState = selectedTabIndex,
+                                animationSpec = tween(durationMillis = 300),
+                                label = "icon_crossfade"
+                            ) { tabIndex ->
+                                Icon(
+                                    painter = rememberVectorPainter(
+                                        image = when (tabIndex) {
+                                            0 -> Filled.SwitchArrow  // Entry: 窄屏切换图标
+                                            1 -> Filled.ArrowRotate  // Team: 刷新图标
+                                            2 -> Filled.ArrowRotate  // Comment: 刷新图标
+                                            else -> Filled.ArrowRotate
+                                        }
+                                    ),
+                                    contentDescription = when (tabIndex) {
+                                        0 -> if (narrowMode == 1) "Switch to Wide Mode" else "Switch to Narrow Mode"
+                                        1 -> "Refresh Team Data"
+                                        2 -> "Refresh Comment Data"
+                                        else -> "Refresh"
+                                    },
+                                    tint = Beige500,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
                         }
                     }
                 }
