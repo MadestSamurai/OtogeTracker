@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
-import com.madsam.otora.data.bof.ui.model.BofEntryUI
 import com.madsam.otora.data.bof.ui.model.BofTeamUI
 import com.madsam.otora.data.bof.ui.model.RankTracking
 import com.madsam.otora.data.bof.local.api.BofLocalService
@@ -100,30 +99,6 @@ internal class BofViewModel(
     val currentIndexTeam = MutableStateFlow(0)
     val scrollToIndexListComment = MutableStateFlow(listOf<Int>())
     val currentIndexComment = MutableStateFlow(0)
-
-    fun findItemIndex(query: String, originalData: List<BofEntryUI>, pageIndex: Int) {
-        val scrollToIndexList = when (pageIndex) {
-            0 -> scrollToIndexListTotal
-            1 -> scrollToIndexListAvg
-            2 -> scrollToIndexListMedian
-            3 -> scrollToIndexListDiff
-            else -> scrollToIndexListTotal
-        }
-        val currentIndex = when (pageIndex) {
-            0 -> currentIndexTotal
-            1 -> currentIndexAvg
-            2 -> currentIndexMedian
-            3 -> currentIndexDiff
-            else -> currentIndexTotal
-        }
-        currentIndex.update { 0 }
-        scrollToIndexList.update {
-            originalData.mapIndexedNotNull { index, item ->
-                if (item.title.contains(query, ignoreCase = true)) index else null
-            }
-        }
-        highlightedText.update { query }
-    }
 
     fun findTeamItemIndex(query: String, originalData: List<BofTeamUI>) {
         currentIndexTeam.update { 0 }
@@ -602,14 +577,14 @@ internal class BofViewModel(
                 MutableStateFlow(1) // 暂时固定最低评价数为1，可以后续添加筛选参数
             ) { totalData: List<WorkRanking>, minImpression: Int ->
                 Log.d(TAG, "Generating difference ranking with ${totalData.size} items")
-                generateDifferenceRankingFromTotal(totalData, minImpression)
+                generateDifferenceRankingFromTotal(totalData)
             }.collect { diffData: List<WorkRanking> ->
                 diffRankingData.update { diffData }
             }
         }
     }
     
-    private fun generateDifferenceRankingFromTotal(totalData: List<WorkRanking>, minImpression: Int): List<WorkRanking> {
+    private fun generateDifferenceRankingFromTotal(totalData: List<WorkRanking>): List<WorkRanking> {
         // 过滤有对比数据的作品，并计算分数差值
         val diffData = totalData.mapNotNull { ranking ->
             if (ranking.compareScore != null && ranking.compareScore > 0) {

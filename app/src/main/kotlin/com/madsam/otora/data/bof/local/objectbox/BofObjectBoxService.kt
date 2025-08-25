@@ -5,7 +5,6 @@ import com.madsam.otora.core.database.ObjectBoxManager
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.data.bof.local.model.*
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
-import com.madsam.otora.data.bof.ui.model.BofEntryUI
 import com.madsam.otora.data.bof.ui.model.BofTeamUI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -21,82 +20,11 @@ internal class BofObjectBoxService {
     }
     
     private val boxStore by lazy { ObjectBoxManager.getBoxStore() }
-    
-    // 获取各个实体的 Box
-    private val bofEntryBox by lazy { boxStore.boxFor(BofEntryEntity::class.java) }
-    private val bofPointBox by lazy { boxStore.boxFor(BofPointEntity::class.java) }
     private val bofTeamBox by lazy { boxStore.boxFor(BofTeamEntity::class.java) }
     private val bofTeamPointBox by lazy { boxStore.boxFor(BofTeamPointEntity::class.java) }
     private val bofCommentBox by lazy { boxStore.boxFor(BofCommentEntity::class.java) }
     private val bofCommentDetailBox by lazy { boxStore.boxFor(BofCommentDetailEntity::class.java) }
-    
-    /**
-     * 根据时间范围获取 BOF Entry 数据
-     */
-    suspend fun getBofttEntryByTime(currentTime: Long, compareTime: Long): List<BofEntryUI> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val startTime = currentTime - 24 * 60 * 60 * 1000
-                val startTimeCompare = compareTime - 24 * 60 * 60 * 1000
-                
-                // 获取时间范围内的点数据
-                val points = bofPointBox.query(
-                    BofPointEntity_.time.between(startTime, currentTime)
-                ).build().find()
-                
-                val pointsCompare = bofPointBox.query(
-                    BofPointEntity_.time.between(startTimeCompare, compareTime)
-                ).build().find()
 
-                if (points.isEmpty()) {
-                    return@withContext emptyList<BofEntryUI>()
-                }
-
-                val date = CommonUtils.millisToYmd(currentTime).substring(0, 10)
-                val entries = bofEntryBox.query(
-                    BofEntryEntity_.date.equal(date)
-                ).build().find()
-
-                val pointsMap = points.groupBy { it.no }
-                val pointsMapCompare = pointsCompare.groupBy { it.no }
-
-                entries.map { entry ->
-                    val entryPoints = pointsMap[entry.no] ?: emptyList()
-                    val entryPointsCompare = pointsMapCompare[entry.no] ?: emptyList()
-                    val closestPoint = entryPoints
-                        .filter { it.time <= currentTime }
-                        .minByOrNull { abs(it.time - currentTime) }
-                    val closestPointCompare = entryPointsCompare
-                        .filter { it.time <= compareTime }
-                        .minByOrNull { abs(it.time - compareTime) }
-
-                    BofEntryUI(
-                        previousRank = 0,
-                        currentRank = 0,
-                        team = entry.team,
-                        artist = entry.artist,
-                        genre = entry.genre,
-                        title = entry.title,
-                        regist = entry.regist,
-                        update = entry.update,
-                        impr = closestPoint?.impr ?: 0,
-                        total = closestPoint?.total ?: 0,
-                        median = closestPoint?.median ?: 0.0,
-                        avg = closestPoint?.avg ?: 0.0,
-                        oldImpr = closestPointCompare?.impr ?: 0,
-                        oldTotal = closestPointCompare?.total ?: 0,
-                        oldMedian = closestPointCompare?.median ?: 0.0,
-                        oldAvg = closestPointCompare?.avg ?: 0.0,
-                        time = CommonUtils.millisToYmd(currentTime).substring(11, 16)
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching entry by time: ${e.message}")
-                emptyList()
-            }
-        }
-    }
-    
     /**
      * 根据时间范围获取 BOF Team 数据
      */
@@ -230,22 +158,6 @@ internal class BofObjectBoxService {
     }
 
     /**
-     * 获取最新的 Entry 数据
-     */
-    suspend fun getBofttEntryLatest(): List<BofEntryUI> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val currentTime = System.currentTimeMillis()
-                val compareTime = currentTime - 24 * 60 * 60 * 1000
-                getBofttEntryByTime(currentTime, compareTime)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching latest entry: ${e.message}")
-                emptyList()
-            }
-        }
-    }
-
-    /**
      * 获取最新的 Team 数据
      */
     suspend fun getBofttTeamLatest(): List<BofTeamUI> {
@@ -274,35 +186,7 @@ internal class BofObjectBoxService {
             }
         }
     }
-    
-    /**
-     * 保存 BOF Entry 数据
-     */
-    suspend fun saveBofEntryData(entries: List<BofEntryEntity>) {
-        withContext(Dispatchers.IO) {
-            try {
-                bofEntryBox.put(entries)
-                Log.d(TAG, "Saved ${entries.size} BOF entries")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error saving BOF entries: ${e.message}", e)
-            }
-        }
-    }
-    
-    /**
-     * 保存 BOF Point 数据
-     */
-    suspend fun saveBofPointData(points: List<BofPointEntity>) {
-        withContext(Dispatchers.IO) {
-            try {
-                bofPointBox.put(points)
-                Log.d(TAG, "Saved ${points.size} BOF points")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error saving BOF points: ${e.message}", e)
-            }
-        }
-    }
-    
+
     /**
      * 保存 BOF Team 数据
      */
