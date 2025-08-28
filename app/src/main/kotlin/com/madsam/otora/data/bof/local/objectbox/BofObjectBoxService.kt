@@ -297,36 +297,7 @@ internal class BofObjectBoxService {
             }
         }
     }
-    
-    /**
-     * 根据路径获取特定的 BOF Range 数据
-     */
-    suspend fun getBofRangeByPath(path: String): BofRangeDTO? {
-        return withContext(Dispatchers.IO) {
-            try {
-                val entity = bofRangeBox.query(
-                    BofRangeEntity_.path.equal(path)
-                ).build().findFirst()
-                
-                entity?.let {
-                    BofRangeDTO(
-                        path = it.path,
-                        start = it.start,
-                        current = it.current,
-                        short = it.short,
-                        full = it.full,
-                        isStart = it.isStart,
-                        isEnd = it.isEnd,
-                        singleComment = it.singleComment
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching BOF range by path: ${e.message}", e)
-                null
-            }
-        }
-    }
-    
+
     /**
      * 检查 Range 数据是否需要更新（超过1小时）
      */
