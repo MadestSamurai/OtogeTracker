@@ -5,6 +5,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -36,19 +37,27 @@ internal fun BofEntryPagerScreen(
     val selectedSubTabIndex by bofScreenState.selectedSubTab.collectAsStateWithLifecycle()
     
     // 创建Pager状态，页面数量为5（Total, Avg, Median, Diff, Composite）
-    val pagerState = rememberPagerState(pageCount = { 5 })
+    val pagerState = rememberPagerState(
+        pageCount = { 5 },
+        initialPage = selectedSubTabIndex
+    )
     
-    // 同步Pager状态和selectedSubTabIndex
+    // 使用snapshotFlow更安全地处理状态同步
     LaunchedEffect(selectedSubTabIndex) {
-        if (pagerState.currentPage != selectedSubTabIndex) {
+        // 只有当Tab状态与Pager状态不同步时才滚动
+        if (pagerState.currentPage != selectedSubTabIndex && !pagerState.isScrollInProgress) {
             pagerState.animateScrollToPage(selectedSubTabIndex)
         }
     }
     
-    LaunchedEffect(pagerState.currentPage) {
-        if (selectedSubTabIndex != pagerState.currentPage) {
-            bofScreenState.selectedSubTab.update { pagerState.currentPage }
-        }
+    LaunchedEffect(pagerState) {
+        // 使用snapshotFlow监听Pager状态变化，避免在动画过程中频繁更新
+        snapshotFlow { pagerState.currentPage }
+            .collect { currentPage ->
+                if (selectedSubTabIndex != currentPage && !pagerState.isScrollInProgress) {
+                    bofScreenState.selectedSubTab.update { currentPage }
+                }
+            }
     }
     
     HorizontalPager(
