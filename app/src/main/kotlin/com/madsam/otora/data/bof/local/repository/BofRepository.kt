@@ -29,53 +29,6 @@ internal class BofRepository(
         
     private val metadataAdapter: JsonAdapter<List<BofTTMetadataItem>> = 
         moshi.adapter(Types.newParameterizedType(List::class.java, BofTTMetadataItem::class.java))
-    
-    /**
-     * 核心功能：获取指定时间点的四项数据排行榜
-     * 
-     * 返回数据：title、artist、score、scoreDetails
-     * 算法：层次化二分查找，O(log Y × log M × log D × log H × log N)
-     * 智能匹配：自动找到 <= timestamp 的最新记录
-     * 
-     * @param timestamp 时间戳（毫秒）
-     * @return 按总分降序排列的作品排行榜
-     */
-    fun getRankingAtTime(timestamp: Long, limit: Int? = null): List<WorkRanking> {
-        Log.d(TAG, "getRankingAtTime called with timestamp: $timestamp, limit: $limit")
-        val startTime = System.currentTimeMillis()
-        
-        Log.d(TAG, "Getting all works from database")
-        val allWorks = bofTTBox.all
-        Log.d(TAG, "Got ${allWorks.size} works from database")
-        
-        val results = allWorks.mapNotNull { entity ->
-            val scoreSnapshot = getScoreAtTime(entity, timestamp)
-            if (scoreSnapshot != null) {
-                WorkRanking(
-                    workId = entity.workId,
-                    title = getTitleAtTime(entity, timestamp),
-                    artist = getArtistAtTime(entity, timestamp),
-                    score = scoreSnapshot.totalScore,
-                    average = scoreSnapshot.average,
-                    median = scoreSnapshot.median,
-                    impression = scoreSnapshot.impression
-                )
-            } else null
-        }.sortedByDescending { it.score }
-            .let { rankings ->
-                // 应用限制数量
-                if (limit != null) {
-                    rankings.take(limit)
-                } else {
-                    rankings
-                }
-            }
-            .mapIndexed { index, work -> work.copy(rank = index + 1) }
-            
-        val endTime = System.currentTimeMillis()
-        Log.d(TAG, "getRankingAtTime completed in ${endTime - startTime}ms, returning ${results.size} results")
-        return results
-    }
 
     /**
      * 流式分段处理 - 边解析边返回结果，避免JSON解析阻塞

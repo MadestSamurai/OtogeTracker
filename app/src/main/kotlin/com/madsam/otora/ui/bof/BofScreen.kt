@@ -11,20 +11,29 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -32,6 +41,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -65,6 +75,7 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
+import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.ui.bof.components.DateTimeRangePicker
 import com.madsam.otora.ui.bof.sub.BofCommentScreen
@@ -105,6 +116,17 @@ fun BofScreen(
     val coroutineScope = rememberCoroutineScope()
     val dateTime = LocalDate.now()
 
+    // 抽屉状态
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    
+    // BOF页面的导航项
+    val bofItems = listOf(
+        BofNavItem("Entry", "Ranking Entry"),
+        BofNavItem("Team", "Team Data"), 
+        BofNavItem("Comment", "Comments")
+    )
+    var selectedDrawerItem by remember { mutableStateOf(bofItems[0]) }
+
     Log.d(TAG, "Creating BofRequestService")
     val bofRequestService = BofRequestService(context)
 
@@ -116,6 +138,11 @@ fun BofScreen(
     val selectedTabIndex = bofScreenState.selectedTab.asStateFlow().collectAsState().value
     val selectedSubTabIndex = bofScreenState.selectedSubTab.asStateFlow().collectAsState().value
     val searchText = remember { mutableStateOf("") }
+    
+    // 监听Tab状态变化并同步抽屉选中状态
+    LaunchedEffect(selectedTabIndex) {
+        selectedDrawerItem = bofItems[selectedTabIndex]
+    }
 
     val listStateTeam = rememberLazyListState()
     val listStateComment = rememberLazyListState()
@@ -191,6 +218,121 @@ fun BofScreen(
     val subTabTitles = tabTitles[mainTabTitles[selectedTabIndex]] ?: emptyList()
 
     Log.d(TAG, "Starting UI render")
+    
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = true,
+        drawerContent = {
+            ModalDrawerSheet(
+                modifier = Modifier.width(280.dp),
+                drawerContainerColor = Red500,
+                drawerContentColor = Beige400
+            ) {
+                Spacer(modifier = Modifier.height(12.dp))
+                bofItems.forEach { item ->
+                    NavigationDrawerItem(
+                        icon = {
+                            Icon(
+                                painter = rememberVectorPainter(
+                                    image = when (item.route) {
+                                        "Entry" -> Filled.Star
+                                        "Team" -> Filled.ArrowRotate 
+                                        "Comment" -> Filled.Picture
+                                        else -> Filled.Star
+                                    }
+                                ),
+                                contentDescription = item.label,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        },
+                        label = { Text(item.label) },
+                        selected = selectedDrawerItem == item,
+                        onClick = {
+                            selectedDrawerItem = item
+                            // 同步主Tab状态
+                            val tabIndex = when (item.route) {
+                                "Entry" -> 0
+                                "Team" -> 1
+                                "Comment" -> 2
+                                else -> 0
+                            }
+                            bofScreenState.selectedTab.update { tabIndex }
+                            bofScreenState.selectedSubTab.update { 0 }
+                            navController.navigate(item.route)
+                            coroutineScope.launch { drawerState.close() }
+                        },
+                        modifier = Modifier.padding(horizontal = 12.dp),
+                        colors = NavigationDrawerItemDefaults.colors(
+                            selectedContainerColor = Red800,
+                            unselectedContainerColor = Red500,
+                            selectedIconColor = Beige500,
+                            unselectedIconColor = Beige600,
+                            selectedTextColor = Beige500,
+                            unselectedTextColor = Beige600
+                        )
+                    )
+                }
+                
+                Spacer(modifier = Modifier.weight(1f))
+                
+                // 底部功能按钮
+                NavigationDrawerItem(
+                    icon = {
+                        Icon(
+                            painter = rememberVectorPainter(image = Filled.Calendar),
+                            contentDescription = "Date Range",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    },
+                    label = { Text("Date Range") },
+                    selected = false,
+                    onClick = {
+                        showDateTimeRangePicker = true
+                        coroutineScope.launch { drawerState.close() }
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = Red800,
+                        unselectedContainerColor = Red500,
+                        selectedIconColor = Beige500,
+                        unselectedIconColor = Beige600,
+                        selectedTextColor = Beige500,
+                        unselectedTextColor = Beige600
+                    )
+                )
+                
+                NavigationDrawerItem(
+                    icon = {
+                        Icon(
+                            painter = rememberVectorPainter(image = Filled.ArrowRotate),
+                            contentDescription = "Refresh",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    },
+                    label = { Text("Refresh Data") },
+                    selected = false,
+                    onClick = {
+                        refreshData()
+                        coroutineScope.launch { 
+                            drawerState.close()
+                            snackbarHostState.showSnackbar("数据已刷新")
+                        }
+                    },
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                    colors = NavigationDrawerItemDefaults.colors(
+                        selectedContainerColor = Red800,
+                        unselectedContainerColor = Red500,
+                        selectedIconColor = Beige500,
+                        unselectedIconColor = Beige600,
+                        selectedTextColor = Beige500,
+                        unselectedTextColor = Beige600
+                    )
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+        }
+    ) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -257,6 +399,18 @@ fun BofScreen(
                             cursorColor = Beige400,
                         )
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        coroutineScope.launch { drawerState.open() }
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Menu,
+                            contentDescription = "Menu",
+                            tint = Beige400,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 },
                 actions = {
                     if (searchText.value.isNotEmpty()) {
@@ -486,4 +640,11 @@ fun BofScreen(
             }
         }
     }
+    }
 }
+
+// BOF导航项数据类
+data class BofNavItem(
+    val route: String,
+    val label: String
+)

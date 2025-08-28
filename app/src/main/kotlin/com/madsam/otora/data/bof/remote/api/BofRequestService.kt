@@ -10,6 +10,7 @@ import com.madsam.otora.data.bof.local.objectbox.BofObjectBoxService
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.ShareUtil
 import com.madsam.otora.data.BASE_URL
+import com.madsam.otora.data.bof.remote.model.BofRangeDTO
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
@@ -204,9 +205,9 @@ class BofRequestService(private val context: Context) {
     private val processedTeamDates = mutableSetOf<String>()
     
     // 缓存范围数据
-    private var cachedRangeData: List<com.madsam.otora.data.bof.remote.model.BofRangeDTO>? = null
+    private var cachedRangeData: List<BofRangeDTO>? = null
 
-    private fun getBofRangeData(): List<com.madsam.otora.data.bof.remote.model.BofRangeDTO>? {
+    private fun getBofRangeData(): List<BofRangeDTO>? {
         // 如果已有缓存，直接返回
         cachedRangeData?.let { return it }
         
@@ -238,12 +239,19 @@ class BofRequestService(private val context: Context) {
         serviceScope.launch(dispatcher) {
             // 获取范围数据
             val rangeData = getBofRangeData()
-            val ttRange = rangeData?.find { it.name == "tt" }
+            val ttRange = rangeData?.find { it.path == "tt" }
             
             if (ttRange == null) {
                 Log.w(TAG, "No 'tt' range found in range data, using fallback date")
                 // 如果没有获取到范围数据，使用默认值
                 requestBofttTeamDataWithRange(dateTime, LocalDate.parse("2024-10-16"), onComplete)
+                return@launch
+            }
+            
+            // 检查比赛是否已开始
+            if (!ttRange.isStart) {
+                Log.i(TAG, "BOF:TT has not started yet, skipping data request")
+                onComplete()
                 return@launch
             }
             
@@ -255,9 +263,9 @@ class BofRequestService(private val context: Context) {
             }
             
             val endDate = try {
-                LocalDate.parse(ttRange.end)
+                LocalDate.parse(ttRange.current)
             } catch (_: Exception) {
-                Log.e(TAG, "Failed to parse end date: ${ttRange.end}, using current date")
+                Log.e(TAG, "Failed to parse end date: ${ttRange.current}, using current date")
                 dateTime
             }
             
@@ -319,6 +327,24 @@ class BofRequestService(private val context: Context) {
 
     fun requestBofttCommentData(dateTime: LocalDate, onComplete: () -> Unit) {
         serviceScope.launch(dispatcher) {
+            // 获取范围数据并检查比赛状态
+            val rangeData = getBofRangeData()
+            val ttRange = rangeData?.find { it.path == "tt" }
+            
+            if (ttRange == null) {
+                Log.w(TAG, "No 'tt' range found in range data, proceeding with fallback")
+                requestBofttCommentData("2025-01-08") //TODO: 2025-01-08
+                onComplete()
+                return@launch
+            }
+            
+            // 检查比赛是否已开始
+            if (!ttRange.isStart) {
+                Log.i(TAG, "BOF:TT has not started yet, skipping comment data request")
+                onComplete()
+                return@launch
+            }
+            
             requestBofttCommentData("2025-01-08") //TODO: 2025-01-08
             onComplete()
         }
