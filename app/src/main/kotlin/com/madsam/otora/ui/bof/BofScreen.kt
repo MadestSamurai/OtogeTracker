@@ -165,9 +165,9 @@ fun BofScreen(
     }
 
     fun refreshData() {
-        bofRequestService.requestBofttTeamData(dateTime) {
+        bofRequestService.requestBofTeamData(dateTime) {
         }
-        bofRequestService.requestBofttCommentData(dateTime) {
+        bofRequestService.requestBofCommentData(dateTime) {
         }
     }
 

@@ -48,7 +48,7 @@ class BofRequestService(private val context: Context) {
     
     private val bofObjectBoxService = BofObjectBoxService()
 
-    private suspend fun requestBofttTeamData(date: String) {
+    private suspend fun requestBofTeamData(date: String) {
         val bofTeamCall = api.getBofttTeamData(date)
         val response = bofTeamCall.execute()
         if (!response.isSuccessful) {
@@ -127,7 +127,7 @@ class BofRequestService(private val context: Context) {
         }
     }
 
-    private suspend fun requestBofttCommentData(date: String) {
+    private suspend fun requestBofCommentData(date: String) {
         val bofCommentCall = api.getBofttComment(date)
         val response = bofCommentCall.execute()
         if (!response.isSuccessful) {
@@ -235,37 +235,37 @@ class BofRequestService(private val context: Context) {
         return rangeData
     }
 
-    fun requestBofttTeamData(dateTime: LocalDate, onComplete: () -> Unit) {
+    fun requestBofTeamData(dateTime: LocalDate, competitionType: String = "tt", onComplete: () -> Unit) {
         serviceScope.launch(dispatcher) {
             // 获取范围数据
             val rangeData = getBofRangeData()
-            val ttRange = rangeData?.find { it.path == "tt" }
+            val competitionRange = rangeData?.find { it.path == competitionType }
             
-            if (ttRange == null) {
-                Log.w(TAG, "No 'tt' range found in range data, using fallback date")
+            if (competitionRange == null) {
+                Log.w(TAG, "No '$competitionType' range found in range data, using fallback date")
                 // 如果没有获取到范围数据，使用默认值
-                requestBofttTeamDataWithRange(dateTime, LocalDate.parse("2024-10-16"), onComplete)
+                requestBofTeamDataWithRange(dateTime, LocalDate.parse("2024-10-16"), onComplete)
                 return@launch
             }
             
             // 检查比赛是否已开始
-            if (!ttRange.isStart) {
-                Log.i(TAG, "BOF:TT has not started yet, skipping data request")
+            if (!competitionRange.isStart) {
+                Log.i(TAG, "BOF:${competitionType.uppercase()} has not started yet, skipping data request")
                 onComplete()
                 return@launch
             }
             
             val startDate = try {
-                LocalDate.parse(ttRange.start)
+                LocalDate.parse(competitionRange.start)
             } catch (_: Exception) {
-                Log.e(TAG, "Failed to parse start date: ${ttRange.start}, using fallback")
+                Log.e(TAG, "Failed to parse start date: ${competitionRange.start}, using fallback")
                 LocalDate.parse("2024-10-16")
             }
             
             val endDate = try {
-                LocalDate.parse(ttRange.current)
+                LocalDate.parse(competitionRange.current)
             } catch (_: Exception) {
-                Log.e(TAG, "Failed to parse end date: ${ttRange.current}, using current date")
+                Log.e(TAG, "Failed to parse end date: ${competitionRange.current}, using current date")
                 dateTime
             }
             
@@ -273,11 +273,11 @@ class BofRequestService(private val context: Context) {
             val actualEndDate = if (dateTime.isAfter(endDate)) endDate else dateTime
             
             Log.d(TAG, "Using team date range: start=${startDate}, end=${actualEndDate}")
-            requestBofttTeamDataWithRange(actualEndDate, startDate, onComplete)
+            requestBofTeamDataWithRange(actualEndDate, startDate, onComplete)
         }
     }
     
-    private fun requestBofttTeamDataWithRange(dateTime: LocalDate, startDate: LocalDate, onComplete: () -> Unit) {
+    private fun requestBofTeamDataWithRange(dateTime: LocalDate, startDate: LocalDate, onComplete: () -> Unit) {
         val datesToRequest = mutableListOf<String>()
         
         // 收集需要请求的日期
@@ -304,7 +304,7 @@ class BofRequestService(private val context: Context) {
             serviceScope.launch(dispatcher) {
                 semaphore.withPermit {
                     try {
-                        requestBofttTeamData(dateToRequest)
+                        requestBofTeamData(dateToRequest)
                         // 标记为已处理，避免重复请求
                         processedTeamDates.add(dateToRequest)
                         // 异步存储到 SharedPreferences
@@ -325,28 +325,39 @@ class BofRequestService(private val context: Context) {
         }
     }
 
-    fun requestBofttCommentData(dateTime: LocalDate, onComplete: () -> Unit) {
+    fun requestBofCommentData(dateTime: LocalDate, competitionType: String = "tt", onComplete: () -> Unit) {
         serviceScope.launch(dispatcher) {
             // 获取范围数据并检查比赛状态
             val rangeData = getBofRangeData()
-            val ttRange = rangeData?.find { it.path == "tt" }
+            val competitionRange = rangeData?.find { it.path == competitionType }
             
-            if (ttRange == null) {
-                Log.w(TAG, "No 'tt' range found in range data, proceeding with fallback")
-                requestBofttCommentData("2025-01-08") //TODO: 2025-01-08
+            if (competitionRange == null) {
+                Log.w(TAG, "No '$competitionType' range found in range data, proceeding with fallback")
+                requestBofCommentData("2025-01-08") //TODO: 2025-01-08
                 onComplete()
                 return@launch
             }
             
             // 检查比赛是否已开始
-            if (!ttRange.isStart) {
-                Log.i(TAG, "BOF:TT has not started yet, skipping comment data request")
+            if (!competitionRange.isStart) {
+                Log.i(TAG, "BOF:${competitionType.uppercase()} has not started yet, skipping comment data request")
                 onComplete()
                 return@launch
             }
             
-            requestBofttCommentData("2025-01-08") //TODO: 2025-01-08
+            requestBofCommentData("2025-01-08") //TODO: 2025-01-08
             onComplete()
         }
+    }
+    
+    // 向后兼容的便利函数
+    @Deprecated("Use requestBofTeamData with competitionType parameter", ReplaceWith("requestBofTeamData(dateTime, \"tt\", onComplete)"))
+    fun requestBofttTeamData(dateTime: LocalDate, onComplete: () -> Unit) {
+        requestBofTeamData(dateTime, "tt", onComplete)
+    }
+    
+    @Deprecated("Use requestBofCommentData with competitionType parameter", ReplaceWith("requestBofCommentData(dateTime, \"tt\", onComplete)"))
+    fun requestBofttCommentData(dateTime: LocalDate, onComplete: () -> Unit) {
+        requestBofCommentData(dateTime, "tt", onComplete)
     }
 }
