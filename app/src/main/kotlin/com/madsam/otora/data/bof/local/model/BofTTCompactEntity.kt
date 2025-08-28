@@ -3,6 +3,7 @@ package com.madsam.otora.data.bof.local.model
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.annotation.Index
+import io.objectbox.annotation.Unique
 
 /**
  * BOFTT紧凑存储Entity - 层次化数据压缩到单个实体
@@ -10,7 +11,9 @@ import io.objectbox.annotation.Index
 @Entity
 internal data class BofTTCompactEntity(
     @Id var id: Long = 0,
-    @Index var workId: String = "",
+    @Unique @Index var compositeWorkId: String = "", // {path}_{originalWorkId} 格式的复合ID
+    @Index var path: String = "", // 比赛类型路径 (tt, bms等)
+    var originalWorkId: String = "", // 原始workId
     var currentTitle: String = "",
     var currentArtist: String = "",
     var team: String = "",
@@ -30,7 +33,9 @@ internal data class BofTTCompactEntity(
 ) {
     constructor() : this(
         id = 0,
-        workId = "",
+        compositeWorkId = "",
+        path = "",
+        originalWorkId = "",
         currentTitle = "",
         currentArtist = "",
         team = "",
@@ -44,4 +49,13 @@ internal data class BofTTCompactEntity(
         latestAverage = 0.0,
         lastUpdated = 0
     )
+    
+    companion object {
+        /**
+         * 构造复合workId
+         */
+        fun createCompositeWorkId(path: String, originalWorkId: String): String {
+            return "${path}_${originalWorkId}"
+        }
+    }
 }

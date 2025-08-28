@@ -203,35 +203,64 @@ class BofRequestService(private val context: Context) {
     }
 
     private val processedTeamDates = mutableSetOf<String>()
-    
-    // 缓存范围数据
-    private var cachedRangeData: List<BofRangeDTO>? = null
 
-    private fun getBofRangeData(): List<BofRangeDTO>? {
-        // 如果已有缓存，直接返回
-        cachedRangeData?.let { return it }
+    private suspend fun getBofRangeData(): List<BofRangeDTO>? {
+        // 首先检查数据库中是否有数据，以及是否需要更新
+        val shouldUpdate = bofObjectBoxService.shouldUpdateRangeData()
         
+        if (!shouldUpdate) {
+            // 如果不需要更新，直接从数据库获取
+            val cachedData = bofObjectBoxService.getBofRangeData()
+            if (cachedData.isNotEmpty()) {
+                Log.d(TAG, "Using cached range data from database")
+                return cachedData
+            }
+        }
+        
+        // 从网络获取最新数据
         val rangeCall = api.getBofRangeData()
         val response = try {
             rangeCall.execute()
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to get range data: ${e.message}")
-            return null
+            Log.e(TAG, "Failed to get range data from network: ${e.message}")
+            // 网络失败时，尝试返回数据库中的旧数据
+            val cachedData = bofObjectBoxService.getBofRangeData()
+            return if (cachedData.isNotEmpty()) {
+                Log.d(TAG, "Using fallback cached range data from database")
+                cachedData
+            } else {
+                null
+            }
         }
         
         if (!response.isSuccessful) {
             Log.e(TAG, "Range data response is not successful: code=${response.code()}, message=${response.message()}")
-            return null
+            // 网络失败时，尝试返回数据库中的旧数据
+            val cachedData = bofObjectBoxService.getBofRangeData()
+            return if (cachedData.isNotEmpty()) {
+                Log.d(TAG, "Using fallback cached range data from database")
+                cachedData
+            } else {
+                null
+            }
         }
         
         val rangeData = response.body()
         if (rangeData == null) {
             Log.e(TAG, "Range data response body is null")
-            return null
+            // 网络失败时，尝试返回数据库中的旧数据
+            val cachedData = bofObjectBoxService.getBofRangeData()
+            return if (cachedData.isNotEmpty()) {
+                Log.d(TAG, "Using fallback cached range data from database")
+                cachedData
+            } else {
+                null
+            }
         }
         
-        // 缓存数据
-        cachedRangeData = rangeData
+        // 保存到数据库
+        bofObjectBoxService.saveBofRangeData(rangeData)
+        Log.d(TAG, "Saved fresh range data to database")
         return rangeData
     }
 
@@ -359,5 +388,10 @@ class BofRequestService(private val context: Context) {
     @Deprecated("Use requestBofCommentData with competitionType parameter", ReplaceWith("requestBofCommentData(dateTime, \"tt\", onComplete)"))
     fun requestBofttCommentData(dateTime: LocalDate, onComplete: () -> Unit) {
         requestBofCommentData(dateTime, "tt", onComplete)
+    }
+    
+    // 公共方法获取 range 数据
+    suspend fun getBofRangeDataPublic(): List<BofRangeDTO>? {
+        return getBofRangeData()
     }
 }

@@ -77,6 +77,7 @@ import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.data.bof.remote.api.BofRequestService
+import com.madsam.otora.data.bof.remote.model.BofRangeDTO
 import com.madsam.otora.ui.bof.components.DateTimeRangePicker
 import com.madsam.otora.ui.bof.sub.BofCommentScreen
 import com.madsam.otora.ui.bof.sub.BofEntryPagerScreen
@@ -116,17 +117,6 @@ fun BofScreen(
     val coroutineScope = rememberCoroutineScope()
     val dateTime = LocalDate.now()
 
-    // 抽屉状态
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    
-    // BOF页面的导航项
-    val bofItems = listOf(
-        BofNavItem("Entry", "Ranking Entry"),
-        BofNavItem("Team", "Team Data"), 
-        BofNavItem("Comment", "Comments")
-    )
-    var selectedDrawerItem by remember { mutableStateOf(bofItems[0]) }
-
     Log.d(TAG, "Creating BofRequestService")
     val bofRequestService = BofRequestService(context)
 
@@ -134,15 +124,31 @@ fun BofScreen(
     val vm: BofViewModel = viewModel(factory = BofViewModelFactory(bofScreenState))
     Log.d(TAG, "BofViewModel created")
 
+    // 抽屉状态
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    
+    // Range 数据状态
+    var rangeData by remember { mutableStateOf<List<BofRangeDTO>>(emptyList()) }
+    var selectedRange by remember { mutableStateOf<BofRangeDTO?>(null) }
+    
+    // 获取 range 数据
+    LaunchedEffect(Unit) {
+        try {
+            val ranges = bofRequestService.getBofRangeDataPublic()
+            if (ranges != null) {
+                rangeData = ranges
+                // 默认选择第一个可用的 range
+                selectedRange = ranges.firstOrNull { it.isStart }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to load range data: ${e.message}")
+        }
+    }
+
     var isTabRowVisible by remember { mutableStateOf(true) }
     val selectedTabIndex = bofScreenState.selectedTab.asStateFlow().collectAsState().value
     val selectedSubTabIndex = bofScreenState.selectedSubTab.asStateFlow().collectAsState().value
     val searchText = remember { mutableStateOf("") }
-    
-    // 监听Tab状态变化并同步抽屉选中状态
-    LaunchedEffect(selectedTabIndex) {
-        selectedDrawerItem = bofItems[selectedTabIndex]
-    }
 
     val listStateTeam = rememberLazyListState()
     val listStateComment = rememberLazyListState()
@@ -165,9 +171,10 @@ fun BofScreen(
     }
 
     fun refreshData() {
-        bofRequestService.requestBofTeamData(dateTime) {
+        val competitionType = selectedRange?.path ?: "tt"
+        bofRequestService.requestBofTeamData(dateTime, competitionType) {
         }
-        bofRequestService.requestBofCommentData(dateTime) {
+        bofRequestService.requestBofCommentData(dateTime, competitionType) {
         }
     }
 
@@ -229,47 +236,74 @@ fun BofScreen(
                 drawerContentColor = Beige400
             ) {
                 Spacer(modifier = Modifier.height(12.dp))
-                bofItems.forEach { item ->
-                    NavigationDrawerItem(
-                        icon = {
-                            Icon(
-                                painter = rememberVectorPainter(
-                                    image = when (item.route) {
-                                        "Entry" -> Filled.Star
-                                        "Team" -> Filled.ArrowRotate 
-                                        "Comment" -> Filled.Picture
-                                        else -> Filled.Star
+                
+                // 显示 Range 数据列表
+                if (rangeData.isNotEmpty()) {
+                    Text(
+                        text = "BOF Competitions",
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        color = Beige500,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    rangeData.forEach { range ->
+                        NavigationDrawerItem(
+                            label = { 
+                                Column {
+                                    Text(
+                                        text = if (range.full.isNotEmpty()) range.full else range.short,
+                                        color = if (selectedRange?.path == range.path) Beige500 else Beige600,
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    if (range.short.isNotEmpty() && range.full.isNotEmpty()) {
+                                        Text(
+                                            text = range.short,
+                                            color = if (selectedRange?.path == range.path) Beige500.copy(alpha = 0.8f) else Beige600.copy(alpha = 0.8f),
+                                            fontSize = 12.sp
+                                        )
                                     }
-                                ),
-                                contentDescription = item.label,
-                                modifier = Modifier.size(24.dp)
+                                    Text(
+                                        text = "${range.start} - ${range.current}",
+                                        color = if (selectedRange?.path == range.path) Beige500.copy(alpha = 0.7f) else Beige600.copy(alpha = 0.7f),
+                                        fontSize = 11.sp
+                                    )
+                                    if (!range.isStart) {
+                                        Text(
+                                            text = "Not Started",
+                                            color = Red800,
+                                            fontSize = 10.sp
+                                        )
+                                    }
+                                }
+                            },
+                            selected = selectedRange?.path == range.path,
+                            onClick = {
+                                selectedRange = range
+                                // 根据选择的比赛类型刷新数据
+                                refreshData()
+                                coroutineScope.launch { 
+                                    drawerState.close()
+                                    snackbarHostState.showSnackbar("已切换到 ${if (range.full.isNotEmpty()) range.full else range.short}")
+                                }
+                            },
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
+                            colors = NavigationDrawerItemDefaults.colors(
+                                selectedContainerColor = Red800,
+                                unselectedContainerColor = Red500,
+                                selectedIconColor = Beige500,
+                                unselectedIconColor = Beige600,
+                                selectedTextColor = Beige500,
+                                unselectedTextColor = Beige600
                             )
-                        },
-                        label = { Text(item.label) },
-                        selected = selectedDrawerItem == item,
-                        onClick = {
-                            selectedDrawerItem = item
-                            // 同步主Tab状态
-                            val tabIndex = when (item.route) {
-                                "Entry" -> 0
-                                "Team" -> 1
-                                "Comment" -> 2
-                                else -> 0
-                            }
-                            bofScreenState.selectedTab.update { tabIndex }
-                            bofScreenState.selectedSubTab.update { 0 }
-                            navController.navigate(item.route)
-                            coroutineScope.launch { drawerState.close() }
-                        },
-                        modifier = Modifier.padding(horizontal = 12.dp),
-                        colors = NavigationDrawerItemDefaults.colors(
-                            selectedContainerColor = Red800,
-                            unselectedContainerColor = Red500,
-                            selectedIconColor = Beige500,
-                            unselectedIconColor = Beige600,
-                            selectedTextColor = Beige500,
-                            unselectedTextColor = Beige600
                         )
+                    }
+                } else {
+                    Text(
+                        text = "Loading competitions...",
+                        modifier = Modifier.padding(16.dp),
+                        color = Beige600
                     )
                 }
                 
@@ -642,9 +676,3 @@ fun BofScreen(
     }
     }
 }
-
-// BOF导航项数据类
-data class BofNavItem(
-    val route: String,
-    val label: String
-)

@@ -6,6 +6,7 @@ import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.data.bof.local.model.*
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
 import com.madsam.otora.data.bof.ui.model.BofTeamUI
+import com.madsam.otora.data.bof.remote.model.BofRangeDTO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlin.math.abs
@@ -24,6 +25,7 @@ internal class BofObjectBoxService {
     private val bofTeamPointBox by lazy { boxStore.boxFor(BofTeamPointEntity::class.java) }
     private val bofCommentBox by lazy { boxStore.boxFor(BofCommentEntity::class.java) }
     private val bofCommentDetailBox by lazy { boxStore.boxFor(BofCommentDetailEntity::class.java) }
+    private val bofRangeBox by lazy { boxStore.boxFor(BofRangeEntity::class.java) }
 
     /**
      * 根据时间范围获取 BOF Team 数据
@@ -239,6 +241,112 @@ internal class BofObjectBoxService {
                 Log.d(TAG, "Saved ${details.size} BOF comment details")
             } catch (e: Exception) {
                 Log.e(TAG, "Error saving BOF comment details: ${e.message}", e)
+            }
+        }
+    }
+    
+    /**
+     * 保存 BOF Range 数据
+     */
+    suspend fun saveBofRangeData(ranges: List<BofRangeDTO>) {
+        withContext(Dispatchers.IO) {
+            try {
+                val entities = ranges.map { dto ->
+                    BofRangeEntity(
+                        path = dto.path,
+                        start = dto.start,
+                        current = dto.current,
+                        short = dto.short,
+                        full = dto.full,
+                        isStart = dto.isStart,
+                        isEnd = dto.isEnd,
+                        singleComment = dto.singleComment,
+                        lastUpdated = System.currentTimeMillis()
+                    )
+                }
+                bofRangeBox.put(entities)
+                Log.d(TAG, "Saved ${entities.size} BOF ranges")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving BOF ranges: ${e.message}", e)
+            }
+        }
+    }
+    
+    /**
+     * 获取所有 BOF Range 数据
+     */
+    suspend fun getBofRangeData(): List<BofRangeDTO> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val entities = bofRangeBox.all
+                entities.map { entity ->
+                    BofRangeDTO(
+                        path = entity.path,
+                        start = entity.start,
+                        current = entity.current,
+                        short = entity.short,
+                        full = entity.full,
+                        isStart = entity.isStart,
+                        isEnd = entity.isEnd,
+                        singleComment = entity.singleComment
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error fetching BOF ranges: ${e.message}", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 根据路径获取特定的 BOF Range 数据
+     */
+    suspend fun getBofRangeByPath(path: String): BofRangeDTO? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val entity = bofRangeBox.query(
+                    BofRangeEntity_.path.equal(path)
+                ).build().findFirst()
+                
+                entity?.let {
+                    BofRangeDTO(
+                        path = it.path,
+                        start = it.start,
+                        current = it.current,
+                        short = it.short,
+                        full = it.full,
+                        isStart = it.isStart,
+                        isEnd = it.isEnd,
+                        singleComment = it.singleComment
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error fetching BOF range by path: ${e.message}", e)
+                null
+            }
+        }
+    }
+    
+    /**
+     * 检查 Range 数据是否需要更新（超过1小时）
+     */
+    suspend fun shouldUpdateRangeData(): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val latestEntity = bofRangeBox.query()
+                    .orderDesc(BofRangeEntity_.lastUpdated)
+                    .build()
+                    .findFirst()
+                
+                if (latestEntity == null) {
+                    true // 没有数据，需要更新
+                } else {
+                    val oneHourAgo = System.currentTimeMillis() - (60 * 60 * 1000)
+                    latestEntity.lastUpdated < oneHourAgo
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error checking range update requirement: ${e.message}", e)
+                true // 出错时默认需要更新
             }
         }
     }

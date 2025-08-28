@@ -61,7 +61,11 @@ import com.madsam.otora.core.theme.Red900
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.bof.BofScreen
 import com.madsam.otora.ui.record.RecordScreen
+import com.madsam.otora.data.bof.remote.api.BofRequestService
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @Composable
@@ -238,9 +242,14 @@ fun MainActivityScreen(navController: NavHostController) {
 
 class MainActivity : AppCompatActivity() {
     private lateinit var navController: NavHostController
+    private lateinit var bofRequestService: BofRequestService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 初始化BOF请求服务并预加载range数据
+        bofRequestService = BofRequestService(this)
+        preloadBofRangeData()
 
         val splashScreen = installSplashScreen()
         splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
@@ -268,6 +277,19 @@ class MainActivity : AppCompatActivity() {
             navController = rememberNavController()
             OtogeTrackerTheme {
                 MainActivityScreen(navController)
+            }
+        }
+    }
+
+    private fun preloadBofRangeData() {
+        // 在后台线程预加载range数据
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // 触发获取range数据，这会缓存数据供后续使用
+                bofRequestService.getBofRangeDataPublic()
+            } catch (e: Exception) {
+                // 忽略错误，不影响应用启动
+                android.util.Log.w("MainActivity", "Failed to preload BOF range data: ${e.message}")
             }
         }
     }

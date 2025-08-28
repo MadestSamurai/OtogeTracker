@@ -306,6 +306,7 @@ internal class BofViewModel(
                 bofRepository.getRankingAtTimeStreamedWithComparison(
                     currentTimestamp = currentTimestamp,
                     compareTimestamp = compareTimestamp,
+                    path = "tt", // TODO: 从selectedRange获取path
                     batchSize = 30
                 ) { currentResults ->
                     Log.d(TAG, "Streamed update with comparison: ${currentResults.size} rankings available")

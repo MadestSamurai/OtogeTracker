@@ -22,6 +22,8 @@ internal interface BofAPI {
     @GET("bof/range.json")
     fun getBofRangeData(): Call<List<BofRangeDTO>>
 
-    @GET("bof/tt/work.json")
-    fun getBofTTDetailedData(): Call<Map<String, BofTTWorkData>>
+    @GET("bof/{path}/work.json")
+    fun getBofDetailedData(
+        @Path("path") path: String
+    ): Call<Map<String, BofTTWorkData>>
 }

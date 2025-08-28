@@ -2,6 +2,7 @@ package com.madsam.otora.data.bof.local.repository
 
 import android.util.Log
 import com.madsam.otora.data.bof.local.model.BofTTCompactEntity
+import com.madsam.otora.data.bof.local.model.BofTTCompactEntity_
 import com.madsam.otora.data.bof.remote.model.*
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
@@ -37,14 +38,15 @@ internal class BofRepository(
     suspend fun getRankingAtTimeStreamedWithComparison(
         currentTimestamp: Long,
         compareTimestamp: Long? = null,
+        path: String = "tt",
         batchSize: Int = 20,
         onBatchReady: suspend (List<WorkRanking>) -> Unit
     ) {
-        Log.d(TAG, "getRankingAtTimeStreamedWithComparison called with currentTimestamp: $currentTimestamp, compareTimestamp: $compareTimestamp, batchSize: $batchSize")
+        Log.d(TAG, "getRankingAtTimeStreamedWithComparison called with currentTimestamp: $currentTimestamp, compareTimestamp: $compareTimestamp, path: $path, batchSize: $batchSize")
         val startTime = System.currentTimeMillis()
         
-        val allWorks = bofTTBox.all
-        Log.d(TAG, "Starting streamed processing of ${allWorks.size} works with comparison")
+        val allWorks = bofTTBox.query(BofTTCompactEntity_.path.equal(path)).build().find()
+        Log.d(TAG, "Starting streamed processing of ${allWorks.size} works with comparison for path: $path")
         
         val allCurrentResults = mutableListOf<WorkRanking>()
         val compareRankingMap = mutableMapOf<String, WorkRanking>() // workId -> WorkRanking
@@ -58,7 +60,7 @@ internal class BofRepository(
                 val scoreSnapshot = getScoreAtTime(entity, compareTimestamp)
                 if (scoreSnapshot != null) {
                     WorkRanking(
-                        workId = entity.workId,
+                        workId = entity.compositeWorkId,
                         title = getTitleAtTime(entity, compareTimestamp),
                         artist = getArtistAtTime(entity, compareTimestamp),
                         score = scoreSnapshot.totalScore,
@@ -87,9 +89,9 @@ internal class BofRepository(
             val batchResults = batch.mapNotNull { entity ->
                 val scoreSnapshot = getScoreAtTime(entity, currentTimestamp)
                 if (scoreSnapshot != null) {
-                    val compareData = compareRankingMap[entity.workId]
+                    val compareData = compareRankingMap[entity.compositeWorkId]
                     WorkRanking(
-                        workId = entity.workId,
+                        workId = entity.compositeWorkId,
                         title = getTitleAtTime(entity, currentTimestamp),
                         artist = getArtistAtTime(entity, currentTimestamp),
                         score = scoreSnapshot.totalScore,
@@ -139,9 +141,9 @@ internal class BofRepository(
     /**
      * 从API响应保存BOFTT数据
      */
-    fun saveBofTTApiResponse(apiResponse: BofTTApiResponse) {
+    fun saveBofTTApiResponse(apiResponse: BofTTApiResponse, path: String = "tt") {
         val works = apiResponse.getWorksAsList()
-        val compactEntities = works.map { work -> convertToCompactEntity(work) }
+        val compactEntities = works.map { work -> convertToCompactEntity(work, path) }
         insertWorks(compactEntities)
     }
 
@@ -155,13 +157,14 @@ internal class BofRepository(
     fun getDifferenceRankingBetweenTimes(
         currentTimestamp: Long, 
         compareTimestamp: Long, 
+        path: String = "tt",
         limit: Int? = null
     ): List<WorkRanking> {
-        Log.d(TAG, "getDifferenceRankingBetweenTimes called with currentTimestamp: $currentTimestamp, compareTimestamp: $compareTimestamp, limit: $limit")
+        Log.d(TAG, "getDifferenceRankingBetweenTimes called with currentTimestamp: $currentTimestamp, compareTimestamp: $compareTimestamp, path: $path, limit: $limit")
         val startTime = System.currentTimeMillis()
         
-        Log.d(TAG, "Getting all works from database")
-        val allWorks = bofTTBox.all
+        Log.d(TAG, "Getting all works from database for path: $path")
+        val allWorks = bofTTBox.query(BofTTCompactEntity_.path.equal(path)).build().find()
         Log.d(TAG, "Got ${allWorks.size} works from database")
         
         val results = allWorks.mapNotNull { entity ->
@@ -174,7 +177,7 @@ internal class BofRepository(
                 val impressionDiff = currentSnapshot.impression - compareSnapshot.impression
                 
                 WorkRanking(
-                    workId = entity.workId,
+                    workId = entity.compositeWorkId,
                     title = getTitleAtTime(entity, currentTimestamp),
                     artist = getArtistAtTime(entity, currentTimestamp),
                     score = scoreDiff, // 使用分数差值作为主要排序依据
@@ -218,7 +221,7 @@ internal class BofRepository(
     /**
      * 获取所有作品数量
      */
-    fun getWorksCount(): Long = bofTTBox.count()
+    fun getWorksCount(path: String = "tt"): Long = bofTTBox.query(BofTTCompactEntity_.path.equal(path)).build().count()
     
     /**
      * 清空所有数据
@@ -439,10 +442,12 @@ internal class BofRepository(
     /**
      * 将BofTTWork转换为紧凑Entity
      */
-    private fun convertToCompactEntity(work: BofTTWork): BofTTCompactEntity {
+    private fun convertToCompactEntity(work: BofTTWork, path: String = "tt"): BofTTCompactEntity {
         val entity = BofTTCompactEntity()
         
-        entity.workId = work.id
+        entity.path = path
+        entity.originalWorkId = work.id
+        entity.compositeWorkId = BofTTCompactEntity.createCompositeWorkId(path, work.id)
         entity.currentTitle = work.Title?.lastOrNull()?.value ?: ""
         entity.currentArtist = work.Artist?.lastOrNull()?.value ?: ""
         entity.team = work.Team ?: ""

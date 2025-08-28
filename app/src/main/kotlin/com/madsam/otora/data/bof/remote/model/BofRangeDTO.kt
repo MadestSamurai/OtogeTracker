@@ -2,7 +2,7 @@ package com.madsam.otora.data.bof.remote.model
 
 import com.squareup.moshi.Json
 
-internal data class BofRangeDTO(
+data class BofRangeDTO(
     @param:Json(name = "path") var path: String = "",
     @param:Json(name = "start") var start: String = "",
     @param:Json(name = "current") var current: String = "",

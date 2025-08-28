@@ -11,6 +11,7 @@ import com.madsam.otora.data.bof.local.repository.BofRepository
 import com.madsam.otora.data.bof.remote.api.BofAPI
 import com.madsam.otora.data.bof.remote.model.BofTTApiResponse
 import com.madsam.otora.data.bof.remote.model.BofTTWork
+import com.madsam.otora.data.bof.remote.model.BofTTWorkData
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers
@@ -70,7 +71,7 @@ class BOFDataUpdateViewModel : ViewModel() {
 
                 // 调用API
                 val response = withContext(Dispatchers.IO) {
-                    api.getBofTTDetailedData().execute()
+                    api.getBofDetailedData("tt").execute()
                 }
 
                 if (!response.isSuccessful) {
@@ -83,7 +84,7 @@ class BOFDataUpdateViewModel : ViewModel() {
                 }
 
                 // 转换Map格式到BofTTApiResponse
-                val worksAsMap = worksMap.mapValues { (workId, workData) ->
+                val worksAsMap = worksMap.mapValues { (workId: String, workData: BofTTWorkData) ->
                     BofTTWork(
                         id = workId,
                         Score = workData.Score,
@@ -101,8 +102,8 @@ class BOFDataUpdateViewModel : ViewModel() {
                 )
 
                 // 保存数据到Repository
-                bofRepository.saveBofTTApiResponse(bofTTData)
-                val savedCount = bofRepository.getWorksCount()
+                bofRepository.saveBofTTApiResponse(bofTTData, "tt")
+                val savedCount = bofRepository.getWorksCount("tt")
 
                 // 更新状态为完成
                 _uiState.value = _uiState.value.copy(
