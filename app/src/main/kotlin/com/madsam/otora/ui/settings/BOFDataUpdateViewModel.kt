@@ -9,9 +9,8 @@ import com.madsam.otora.data.BASE_URL
 import com.madsam.otora.data.bof.local.model.BofTTCompactEntity
 import com.madsam.otora.data.bof.local.repository.BofRepository
 import com.madsam.otora.data.bof.remote.api.BofAPI
-import com.madsam.otora.data.bof.remote.model.BofTTApiResponse
-import com.madsam.otora.data.bof.remote.model.BofTTWork
-import com.madsam.otora.data.bof.remote.model.BofTTWorkData
+import com.madsam.otora.data.bof.remote.model.BofApiResponse
+import com.madsam.otora.data.bof.remote.model.BofWorkData
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers
@@ -71,7 +70,7 @@ class BOFDataUpdateViewModel : ViewModel() {
 
                 // 调用API
                 val response = withContext(Dispatchers.IO) {
-                    api.getBofDetailedData("tt").execute()
+                    api.getBofWorkData("tt").execute()
                 }
 
                 if (!response.isSuccessful) {
@@ -84,17 +83,10 @@ class BOFDataUpdateViewModel : ViewModel() {
                 }
 
                 // 转换Map格式到BofTTApiResponse
-                val worksAsMap = worksMap.mapValues { (workId: String, workData: BofTTWorkData) ->
-                    BofTTWork(
-                        id = workId,
-                        Score = workData.Score,
-                        Title = workData.Title,
-                        Artist = workData.Artist,
-                        Team = workData.Team,
-                        Genre = workData.Genre
-                    )
+                val worksAsMap = worksMap.mapValues { (workId: String, workData: BofWorkData) ->
+                    workData.copy(id = workId)
                 }
-                val bofTTData = BofTTApiResponse(works = worksAsMap)
+                val bofTTData = BofApiResponse(works = worksAsMap)
 
                 // 更新状态为处理中
                 _uiState.value = _uiState.value.copy(

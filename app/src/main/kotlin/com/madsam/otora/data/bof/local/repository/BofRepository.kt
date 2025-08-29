@@ -25,11 +25,11 @@ internal class BofRepository(
         .addLast(KotlinJsonAdapterFactory())
         .build()
         
-    private val scoreYearsAdapter: JsonAdapter<List<BofTTScoreYear>> = 
-        moshi.adapter(Types.newParameterizedType(List::class.java, BofTTScoreYear::class.java))
+    private val scoreYearsAdapter: JsonAdapter<List<BofScoreYear>> =
+        moshi.adapter(Types.newParameterizedType(List::class.java, BofScoreYear::class.java))
         
-    private val metadataAdapter: JsonAdapter<List<BofTTMetadataItem>> = 
-        moshi.adapter(Types.newParameterizedType(List::class.java, BofTTMetadataItem::class.java))
+    private val metadataAdapter: JsonAdapter<List<BofMetadataItem>> =
+        moshi.adapter(Types.newParameterizedType(List::class.java, BofMetadataItem::class.java))
 
     /**
      * 流式分段处理 - 边解析边返回结果，避免JSON解析阻塞
@@ -141,7 +141,7 @@ internal class BofRepository(
     /**
      * 从API响应保存BOFTT数据
      */
-    fun saveBofTTApiResponse(apiResponse: BofTTApiResponse, path: String = "tt") {
+    fun saveBofTTApiResponse(apiResponse: BofApiResponse, path: String = "tt") {
         val works = apiResponse.getWorksAsList()
         val compactEntities = works.map { work -> convertToCompactEntity(work, path) }
         insertWorks(compactEntities)
@@ -277,7 +277,7 @@ internal class BofRepository(
      * 直接在 Year -> Month -> Day -> Hour -> Minute 结构上查找
      */
     private fun findScoreByHierarchicalSearch(
-        scoreYears: List<BofTTScoreYear>,
+        scoreYears: List<BofScoreYear>,
         targetTimestamp: Long
     ): BofTTScoreSnapshot? {
         
@@ -360,7 +360,7 @@ internal class BofRepository(
      * 层次化查找元数据记录
      */
     private fun findMetadataByHierarchicalSearch(
-        metadataList: List<BofTTMetadataItem>,
+        metadataList: List<BofMetadataItem>,
         targetTimestamp: Long
     ): String? {
         if (metadataList.isEmpty()) return null
@@ -398,7 +398,7 @@ internal class BofRepository(
     /**
      * 分钟级别的二分查找
      */
-    private fun binarySearchMinute(minutes: List<BofTTScoreMinute>, targetMinute: Int): Int {
+    private fun binarySearchMinute(minutes: List<BofScoreMinute>, targetMinute: Int): Int {
         var left = 0
         var right = minutes.size - 1
         var result = -1
@@ -442,7 +442,7 @@ internal class BofRepository(
     /**
      * 将BofTTWork转换为紧凑Entity
      */
-    private fun convertToCompactEntity(work: BofTTWork, path: String = "tt"): BofTTCompactEntity {
+    private fun convertToCompactEntity(work: BofWorkData, path: String = "tt"): BofTTCompactEntity {
         val entity = BofTTCompactEntity()
         
         entity.path = path
@@ -476,7 +476,7 @@ internal class BofRepository(
     /**
      * 计算时间范围
      */
-    private fun calculateTimeRange(work: BofTTWork): Pair<Long, Long> {
+    private fun calculateTimeRange(work: BofWorkData): Pair<Long, Long> {
         var earliest = Long.MAX_VALUE
         var latest = Long.MIN_VALUE
         
@@ -507,7 +507,7 @@ internal class BofRepository(
     /**
      * 查找最新得分
      */
-    private fun findLatestScore(work: BofTTWork): BofTTScoreSnapshot? {
+    private fun findLatestScore(work: BofWorkData): BofTTScoreSnapshot? {
         var latestScore: BofTTScoreSnapshot? = null
         var latestTimestamp = Long.MIN_VALUE
         

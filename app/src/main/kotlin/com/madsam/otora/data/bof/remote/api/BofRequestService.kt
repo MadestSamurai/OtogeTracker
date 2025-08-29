@@ -11,6 +11,7 @@ import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.ShareUtil
 import com.madsam.otora.data.BASE_URL
 import com.madsam.otora.data.bof.remote.model.BofRangeDTO
+import com.madsam.otora.data.bof.remote.model.BofTeamDetailedResponse
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
@@ -393,5 +394,32 @@ class BofRequestService(private val context: Context) {
     // 公共方法获取 range 数据
     suspend fun getBofRangeDataPublic(): List<BofRangeDTO>? {
         return getBofRangeData()
+    }
+    
+    // 获取团队详细数据的方法
+    suspend fun getBofTeamDetailedData(path: String): List<BofTeamDetailedResponse>? {
+        Log.d(TAG, "Fetching team detailed data for path: $path")
+        
+        val teamDetailedCall = api.getBofTeamDetailedData(path)
+        val response = try {
+            teamDetailedCall.execute()
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to get team detailed data from network: ${e.message}")
+            return null
+        }
+        
+        if (!response.isSuccessful) {
+            Log.e(TAG, "Team detailed data response is not successful: code=${response.code()}, message=${response.message()}")
+            return null
+        }
+        
+        val teamDetailedData = response.body()
+        if (teamDetailedData == null) {
+            Log.e(TAG, "Team detailed data response body is null")
+            return null
+        }
+        
+        Log.d(TAG, "Successfully fetched team detailed data for path: $path, data size: ${teamDetailedData.size}")
+        return teamDetailedData
     }
 }
