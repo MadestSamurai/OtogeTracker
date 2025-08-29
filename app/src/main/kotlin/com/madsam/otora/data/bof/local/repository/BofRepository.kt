@@ -14,7 +14,7 @@ import java.util.*
 private const val TAG = "BofRepository"
 
 /**
- * 统一的BOFTT仓库
+ * 统一的BOF仓库
  * 使用层次化二分查找算法，专注于高效查询作品四项数据排行榜
  */
 internal class BofRepository(
@@ -166,37 +166,11 @@ internal class BofRepository(
         return try {
             val objectBoxService = com.madsam.otora.data.bof.local.objectbox.BofObjectBoxService()
             kotlinx.coroutines.runBlocking {
-                objectBoxService.getBofTeamDetailedData(path).size.toLong()
+                objectBoxService.getBofTeamData(path).size.toLong()
             }
         } catch (e: Exception) {
             Log.e(TAG, "Error getting team count for path $path: ${e.message}", e)
             0L
-        }
-    }
-    
-    /**
-     * 获取指定比赛路径的所有团队数据
-     */
-    suspend fun getTeamDataByPath(path: String): List<com.madsam.otora.data.bof.local.model.BofTeamDetailedEntity> {
-        return try {
-            val objectBoxService = com.madsam.otora.data.bof.local.objectbox.BofObjectBoxService()
-            objectBoxService.getBofTeamDetailedData(path)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting team data for path $path: ${e.message}", e)
-            emptyList()
-        }
-    }
-    
-    /**
-     * 获取指定团队的详细数据
-     */
-    suspend fun getTeamDetailedData(path: String, teamName: String): com.madsam.otora.data.bof.local.model.BofTeamDetailedEntity? {
-        return try {
-            val objectBoxService = com.madsam.otora.data.bof.local.objectbox.BofObjectBoxService()
-            objectBoxService.getBofTeamDetailedData(path, teamName)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting team detailed data for $path/$teamName: ${e.message}", e)
-            null
         }
     }
 

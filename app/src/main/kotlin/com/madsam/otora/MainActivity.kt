@@ -249,7 +249,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // 初始化BOF请求服务并预加载range数据
-        bofRequestService = BofRequestService(this)
+        bofRequestService = BofRequestService()
         preloadBofRangeData()
 
         val splashScreen = installSplashScreen()

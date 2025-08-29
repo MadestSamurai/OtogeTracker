@@ -2,14 +2,11 @@ package com.madsam.otora.data.bof.local.objectbox
 
 import android.util.Log
 import com.madsam.otora.core.database.ObjectBoxManager
-import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.data.bof.local.model.*
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
-import com.madsam.otora.data.bof.ui.model.BofTeamUI
 import com.madsam.otora.data.bof.remote.model.BofRangeDTO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlin.math.abs
 
 /**
  * BOF 数据的 ObjectBox 本地存储服务
@@ -22,91 +19,10 @@ internal class BofObjectBoxService {
     
     private val boxStore by lazy { ObjectBoxManager.getBoxStore() }
     private val bofTeamBox by lazy { boxStore.boxFor(BofTeamEntity::class.java) }
-    private val bofTeamPointBox by lazy { boxStore.boxFor(BofTeamPointEntity::class.java) }
-    private val bofTeamDetailedBox by lazy { boxStore.boxFor(BofTeamDetailedEntity::class.java) }
     private val bofCommentBox by lazy { boxStore.boxFor(BofCommentEntity::class.java) }
     private val bofCommentDetailBox by lazy { boxStore.boxFor(BofCommentDetailEntity::class.java) }
     private val bofRangeBox by lazy { boxStore.boxFor(BofRangeEntity::class.java) }
 
-    /**
-     * 根据时间范围获取 BOF Team 数据
-     */
-    suspend fun getBofttTeamByTime(currentTime: Long, compareTime: Long): List<BofTeamUI> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val startTime = currentTime - 24 * 60 * 60 * 1000
-                val startTimeCompare = compareTime - 24 * 60 * 60 * 1000
-
-                val points = bofTeamPointBox.query(
-                    BofTeamPointEntity_.time.between(startTime, currentTime)
-                ).build().find()
-                
-                val pointsCompare = bofTeamPointBox.query(
-                    BofTeamPointEntity_.time.between(startTimeCompare, compareTime)
-                ).build().find()
-
-                if (points.isEmpty()) {
-                    return@withContext emptyList<BofTeamUI>()
-                }
-
-                val date = CommonUtils.millisToYmd(currentTime).substring(0, 10)
-                val teams = bofTeamBox.query(
-                    BofTeamEntity_.date.equal(date)
-                ).build().find()
-
-                val pointsMap = points.groupBy { it.team }
-                val pointsMapCompare = pointsCompare.groupBy { it.team }
-
-                teams.map { team ->
-                    val teamPoints = pointsMap[team.team] ?: emptyList()
-                    val teamPointsCompare = pointsMapCompare[team.team] ?: emptyList()
-                    val closestPoint = teamPoints
-                        .filter { it.time <= currentTime }
-                        .minByOrNull { abs(it.time - currentTime) }
-                    val closestPointCompare = teamPointsCompare
-                        .filter { it.time <= compareTime }
-                        .minByOrNull { abs(it.time - compareTime) }
-
-                    BofTeamUI(
-                        previousRank = 0,
-                        currentRank = 0,
-                        team = team.team,
-                        title1 = team.title1,
-                        title2 = team.title2,
-                        title3 = team.title3,
-                        title4 = team.title4,
-                        artist1 = team.artist1,
-                        artist2 = team.artist2,
-                        artist3 = team.artist3,
-                        artist4 = team.artist4,
-                        fs1 = team.fs1,
-                        fs2 = team.fs2,
-                        fs3 = team.fs3,
-                        fs4 = team.fs4,
-                        impr = closestPoint?.impr ?: 0,
-                        total = closestPoint?.total ?: 0.0,
-                        median = closestPoint?.median ?: "",
-                        total1 = closestPoint?.total1 ?: "",
-                        median1 = closestPoint?.median1 ?: "",
-                        total2 = closestPoint?.total2 ?: "",
-                        median2 = closestPoint?.median2 ?: "",
-                        total3 = closestPoint?.total3 ?: "",
-                        median3 = closestPoint?.median3 ?: "",
-                        total4 = closestPoint?.total4 ?: "",
-                        median4 = closestPoint?.median4 ?: "",
-                        oldImpr = closestPointCompare?.impr ?: 0,
-                        oldTotal = closestPointCompare?.total ?: 0.0,
-                        oldMedian = closestPointCompare?.median ?: "",
-                        time = CommonUtils.millisToYmd(currentTime).substring(11, 16)
-                    )
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching team by time: ${e.message}")
-                emptyList()
-            }
-        }
-    }
-    
     /**
      * 根据日期获取评论数据
      */
@@ -161,22 +77,6 @@ internal class BofObjectBoxService {
     }
 
     /**
-     * 获取最新的 Team 数据
-     */
-    suspend fun getBofttTeamLatest(): List<BofTeamUI> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val currentTime = System.currentTimeMillis()
-                val compareTime = currentTime - 24 * 60 * 60 * 1000
-                getBofttTeamByTime(currentTime, compareTime)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error fetching latest team: ${e.message}")
-                emptyList()
-            }
-        }
-    }
-
-    /**
      * 获取最新的评论数据
      */
     suspend fun getBofttCommentLatest(): List<BofCommentUI> {
@@ -190,34 +90,6 @@ internal class BofObjectBoxService {
         }
     }
 
-    /**
-     * 保存 BOF Team 数据
-     */
-    suspend fun saveBofTeamData(teams: List<BofTeamEntity>) {
-        withContext(Dispatchers.IO) {
-            try {
-                bofTeamBox.put(teams)
-                Log.d(TAG, "Saved ${teams.size} BOF teams")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error saving BOF teams: ${e.message}", e)
-            }
-        }
-    }
-    
-    /**
-     * 保存 BOF Team Point 数据
-     */
-    suspend fun saveBofTeamPointData(points: List<BofTeamPointEntity>) {
-        withContext(Dispatchers.IO) {
-            try {
-                bofTeamPointBox.put(points)
-                Log.d(TAG, "Saved ${points.size} BOF team points")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error saving BOF team points: ${e.message}", e)
-            }
-        }
-    }
-    
     /**
      * 保存 BOF Comment 数据
      */
@@ -343,13 +215,13 @@ internal class BofObjectBoxService {
     /**
      * 保存团队详细数据
      */
-    suspend fun saveBofTeamDetailedData(entities: List<BofTeamDetailedEntity>) {
+    suspend fun saveBofTeamData(entities: List<BofTeamEntity>) {
         withContext(Dispatchers.IO) {
             try {
-                bofTeamDetailedBox.put(entities)
-                Log.d(TAG, "Successfully saved ${entities.size} team detailed entities")
+                bofTeamBox.put(entities)
+                Log.d(TAG, "Successfully saved ${entities.size} team entities")
             } catch (e: Exception) {
-                Log.e(TAG, "Error saving team detailed data: ${e.message}", e)
+                Log.e(TAG, "Error saving team data: ${e.message}", e)
                 throw e
             }
         }
@@ -362,7 +234,7 @@ internal class BofObjectBoxService {
         withContext(Dispatchers.IO) {
             try {
                 val entities = convertTeamResponseToEntities(apiResponse, path)
-                saveBofTeamDetailedData(entities)
+                saveBofTeamData(entities)
                 Log.d(TAG, "Successfully saved team API response for path: $path with ${entities.size} teams")
             } catch (e: Exception) {
                 Log.e(TAG, "Error saving team API response for path $path: ${e.message}", e)
@@ -377,7 +249,7 @@ internal class BofObjectBoxService {
     private fun convertTeamResponseToEntities(
         response: Map<String, com.madsam.otora.data.bof.remote.model.BofTeamResponse>, 
         path: String
-    ): List<BofTeamDetailedEntity> {
+    ): List<BofTeamEntity> {
         val moshi = com.squareup.moshi.Moshi.Builder()
             .addLast(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory())
             .build()
@@ -386,10 +258,10 @@ internal class BofObjectBoxService {
         val teamTimeValueAdapter = moshi.adapter(List::class.java)
         
         return response.map { (teamName, teamData) ->
-            BofTeamDetailedEntity().apply {
+            BofTeamEntity().apply {
                 this.path = path
                 this.teamName = teamName
-                this.compositeTeamId = BofTeamDetailedEntity.createCompositeTeamId(path, teamName)
+                this.compositeTeamId = BofTeamEntity.createCompositeTeamId(path, teamName)
                 
                 // 存储JSON数据
                 this.scoreDataJson = if (teamData.score?.isNotEmpty() == true) scoreAdapter.toJson(teamData.score) else ""
@@ -524,65 +396,30 @@ internal class BofObjectBoxService {
             else -> 0.0
         }
     }
-    
-    /**
-     * 解析时间字符串
-     */
-    private fun parseTimeString(timeString: String): Long {
-        return try {
-            val format = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
-            format.parse(timeString)?.time ?: 0L
-        } catch (e: Exception) {
-            try {
-                // 尝试其他格式
-                val format2 = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault())
-                format2.parse(timeString)?.time ?: 0L
-            } catch (e2: Exception) {
-                0L
-            }
-        }
-    }
-    
+
     /**
      * 根据路径获取团队详细数据
      */
-    suspend fun getBofTeamDetailedData(path: String): List<BofTeamDetailedEntity> {
+    suspend fun getBofTeamData(path: String): List<BofTeamEntity> {
         return withContext(Dispatchers.IO) {
             try {
-                bofTeamDetailedBox.query(
-                    BofTeamDetailedEntity_.path.equal(path)
+                bofTeamBox.query(
+                    BofTeamEntity_.path.equal(path)
                 ).build().find()
             } catch (e: Exception) {
-                Log.e(TAG, "Error getting team detailed data for path $path: ${e.message}", e)
+                Log.e(TAG, "Error getting team data for path $path: ${e.message}", e)
                 emptyList()
             }
         }
     }
-    
-    /**
-     * 根据路径和团队名称获取特定团队详细数据
-     */
-    suspend fun getBofTeamDetailedData(path: String, teamName: String): BofTeamDetailedEntity? {
-        return withContext(Dispatchers.IO) {
-            try {
-                val compositeId = BofTeamDetailedEntity.createCompositeTeamId(path, teamName)
-                bofTeamDetailedBox.query(
-                    BofTeamDetailedEntity_.compositeTeamId.equal(compositeId)
-                ).build().findFirst()
-            } catch (e: Exception) {
-                Log.e(TAG, "Error getting team detailed data for $path/$teamName: ${e.message}", e)
-                null
-            }
-        }
-    }
-    
+
     /**
      * 获取指定路径下所有团队的最新得分排行
      */
     suspend fun getTeamRankingByPath(path: String): List<TeamRankingData> {
         return withContext(Dispatchers.IO) {
             try {
-                val teams = getBofTeamDetailedData(path)
+                val teams = getBofTeamData(path)
                 teams.map { team ->
                     TeamRankingData(
                         teamName = team.teamName,
@@ -596,23 +433,6 @@ internal class BofObjectBoxService {
             } catch (e: Exception) {
                 Log.e(TAG, "Error getting team ranking for path $path: ${e.message}", e)
                 emptyList()
-            }
-        }
-    }
-    
-    /**
-     * 删除指定路径的所有团队数据
-     */
-    suspend fun clearTeamDataByPath(path: String) {
-        withContext(Dispatchers.IO) {
-            try {
-                val teams = bofTeamDetailedBox.query(
-                    BofTeamDetailedEntity_.path.equal(path)
-                ).build().find()
-                bofTeamDetailedBox.remove(teams)
-                Log.d(TAG, "Cleared ${teams.size} team entities for path: $path")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error clearing team data for path $path: ${e.message}", e)
             }
         }
     }

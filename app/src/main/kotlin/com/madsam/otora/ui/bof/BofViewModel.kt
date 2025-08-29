@@ -7,12 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
-import com.madsam.otora.data.bof.ui.model.BofTeamUI
-import com.madsam.otora.data.bof.ui.model.RankTracking
 import com.madsam.otora.data.bof.local.api.BofLocalService
 import com.madsam.otora.data.bof.local.repository.BofRepository
 import com.madsam.otora.data.bof.local.model.BofWorkEntity
-import com.madsam.otora.data.bof.local.model.BofTeamDetailedEntity
 import com.madsam.otora.data.bof.local.repository.WorkRanking
 import com.madsam.otora.core.database.ObjectBoxManager
 import com.madsam.otora.core.utils.CommonUtils
@@ -32,7 +29,7 @@ internal class BofViewModel(
     
     private val bofLocalService = BofLocalService()
     
-    // BOFTT Repository for new functionality
+    // BOF Repository for new functionality
     val bofRepository: BofRepository by lazy {
         Log.d(TAG, "BofRepository lazy initialization")
         val boxStore = ObjectBoxManager.getBoxStore()
@@ -40,13 +37,12 @@ internal class BofViewModel(
             boxStore.boxFor(BofWorkEntity::class.java)
         )
     }
-    val teamData = MutableStateFlow(listOf<BofTeamUI>())
     val commentData = MutableStateFlow(listOf<BofCommentUI>())
 
-    // 团队详细数据状态流
-    val teamDetailedData = MutableStateFlow(listOf<BofTeamDetailedEntity>())
-    val isTeamDetailedLoading = MutableStateFlow(false)
-    val teamDetailedError = MutableStateFlow("")
+    // 新的团队排行数据流
+    val teamRankingData = MutableStateFlow(listOf<TeamRankingItem>())
+    val isTeamRankingLoading = MutableStateFlow(false)
+    val teamRankingError = MutableStateFlow("")
 
     // 新的排名数据流
     val totalRankingData = MutableStateFlow(listOf<WorkRanking>())
@@ -108,16 +104,6 @@ internal class BofViewModel(
     val currentIndexTeam = MutableStateFlow(0)
     val scrollToIndexListComment = MutableStateFlow(listOf<Int>())
     val currentIndexComment = MutableStateFlow(0)
-
-    fun findTeamItemIndex(query: String, originalData: List<BofTeamUI>) {
-        currentIndexTeam.update { 0 }
-        scrollToIndexListTeam.update {
-            originalData.mapIndexedNotNull { index, item ->
-                if (item.team.contains(query, ignoreCase = true)) index else null
-            }
-        }
-        highlightedText.update { query }
-    }
 
     fun scrollToPrevious(pageIndex: Int) {
         val currentIndex = when (pageIndex) {
@@ -198,62 +184,6 @@ internal class BofViewModel(
             )
             fetchByTime(currentTime, compareTime)
         }
-    }
-
-    private fun <T, R : Comparable<R>> updateRanks(
-        data: List<T>,
-        oldSelector: (T) -> R,
-        selector: (T) -> R,
-        oldRankSetter: (T, Int) -> Unit,
-        rankSetter: (T, Int) -> Unit,
-        diffSetter: (T, Int) -> Unit,
-        filter: (T) -> Boolean,
-        reviewCountSelector: (T) -> Int
-    ): List<T> where T : RankTracking {
-        val sortedDataOld = data.sortedWith(compareByDescending(oldSelector)).filter { filter(it) }
-        var currentOldRank = 1
-        sortedDataOld.forEachIndexed { index, entry ->
-            if (index > 0 && oldSelector(sortedDataOld[index - 1]) != oldSelector(entry)) {
-                currentOldRank = index + 1
-            }
-            oldRankSetter(entry, currentOldRank)
-        }
-        val sortedData =
-            sortedDataOld.sortedWith(compareByDescending(selector).thenByDescending(reviewCountSelector))
-        var currentRank = 1
-        sortedData.forEachIndexed { index, entry ->
-            if (index > 0 && selector(sortedData[index - 1]) != selector(entry)) {
-                currentRank = index + 1
-            }
-            rankSetter(entry, currentRank)
-        }
-        sortedData.forEach {
-            diffSetter(it, it.previousRank - it.currentRank)
-        }
-        return sortedData
-    }
-
-    suspend fun requestTeamData() {
-        val data = fetchData(
-            { bofLocalService.getBofttTeamLatest() },
-            { currentTime, compareTime -> bofLocalService.getBofttTeamByTime(currentTime, compareTime) }
-        )
-
-        if (data.isEmpty()) {
-            Log.d(TAG, "No team data available for the selected date and time.")
-            return
-        }
-        val updatedData = updateRanks(
-            data,
-            { it.oldTotal },
-            { it.total },
-            { entry, rank -> entry.previousRank = rank },
-            { entry, rank -> entry.currentRank = rank },
-            { entry, diff -> entry.rankDiff = diff },
-            { true },
-            { it.impr }
-        )
-        teamData.update { updatedData }
     }
 
     suspend fun requestCommentData() {
@@ -625,44 +555,68 @@ internal class BofViewModel(
             ranking.copy(rank = index + 1)
         }
     }
-    
+
     /**
-     * 加载团队详细数据
+     * 加载团队排行数据
      */
-    fun loadTeamDetailedData(path: String) {
+    fun loadTeamRankingData(path: String) {
         viewModelScope.launch {
             try {
-                isTeamDetailedLoading.update { true }
-                teamDetailedError.update { "" }
+                isTeamRankingLoading.update { true }
+                teamRankingError.update { "" }
                 
-                Log.d(TAG, "Loading team detailed data for path: $path")
+                Log.d(TAG, "Loading team ranking data for path: $path")
                 
-                // TODO: Implement when repository methods are ready
-                teamDetailedData.update { emptyList() }
+                val objectBoxService = com.madsam.otora.data.bof.local.objectbox.BofObjectBoxService()
+                val teamRankings = objectBoxService.getTeamRankingByPath(path)
+                val teamDetails = objectBoxService.getBofTeamData(path)
                 
-                Log.d(TAG, "Team detailed data loaded: 0 teams (placeholder)")
+                // 转换为新的TeamRankingItem
+                val teamRankingItems = teamRankings.mapIndexed { index, ranking ->
+                    val detail = teamDetails.find { it.teamName == ranking.teamName }
+                    
+                    TeamRankingItem(
+                        rank = ranking.rank,
+                        teamName = ranking.teamName,
+                        totalScore = ranking.latestTotalScore,
+                        averageScore = ranking.latestAverage,
+                        impressionCount = ranking.latestImpression,
+                        medianScore = 0.0, // TODO: 需要从团队详细数据中解析
+                        lastUpdated = ranking.lastUpdated,
+                        
+                        // 从团队详细数据中获取作品信息
+                        title1 = detail?.currentTitle1 ?: "",
+                        artist1 = detail?.currentArtist1 ?: "",
+                        finalStriker1 = detail?.currentFinalStriker1 ?: "",
+                        title2 = detail?.currentTitle2 ?: "",
+                        artist2 = detail?.currentArtist2 ?: "",
+                        finalStriker2 = detail?.currentFinalStriker2 ?: "",
+                        title3 = detail?.currentTitle3 ?: "",
+                        artist3 = detail?.currentArtist3 ?: "",
+                        finalStriker3 = detail?.currentFinalStriker3 ?: "",
+                        title4 = detail?.currentTitle4 ?: "",
+                        artist4 = detail?.currentArtist4 ?: "",
+                        finalStriker4 = detail?.currentFinalStriker4 ?: "",
+                        
+                        // TODO: 实现对比数据逻辑
+                        compareTotalScore = null,
+                        compareAverageScore = null,
+                        compareImpressionCount = null,
+                        compareMedianScore = null,
+                        compareRank = null,
+                        rankChange = null
+                    )
+                }
+                
+                teamRankingData.update { teamRankingItems }
+                
+                Log.d(TAG, "Team ranking data loaded: ${teamRankingItems.size} teams")
                 
             } catch (e: Exception) {
-                Log.e(TAG, "Error loading team detailed data: ${e.message}", e)
-                teamDetailedError.update { "加载团队详细数据失败: ${e.message}" }
+                Log.e(TAG, "Error loading team ranking data: ${e.message}", e)
+                teamRankingError.update { "加载团队排行数据失败: ${e.message}" }
             } finally {
-                isTeamDetailedLoading.update { false }
-            }
-        }
-    }
-    
-    /**
-     * 获取指定团队的详细数据
-     */
-    fun getTeamDetailedData(path: String, teamName: String, callback: (BofTeamDetailedEntity?) -> Unit) {
-        viewModelScope.launch {
-            try {
-                Log.d(TAG, "Getting team detailed data for path: $path, team: $teamName")
-                // TODO: Implement when repository methods are ready
-                callback(null)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error getting team detailed data: ${e.message}", e)
-                callback(null)
+                isTeamRankingLoading.update { false }
             }
         }
     }
@@ -680,4 +634,47 @@ class BofViewModelFactory(
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
+}
+
+/**
+ * 新的团队排行数据项
+ */
+data class TeamRankingItem(
+    val rank: Int = 0,
+    val teamName: String = "",
+    val totalScore: Double = 0.0,
+    val averageScore: Double = 0.0,
+    val impressionCount: Double = 0.0,
+    val medianScore: Double = 0.0,
+    val lastUpdated: Long = 0,
+    
+    // 团队作品信息
+    val title1: String = "",
+    val artist1: String = "",
+    val finalStriker1: String = "",
+    val title2: String = "",
+    val artist2: String = "",
+    val finalStriker2: String = "",
+    val title3: String = "",
+    val artist3: String = "",
+    val finalStriker3: String = "",
+    val title4: String = "",
+    val artist4: String = "",
+    val finalStriker4: String = "",
+    
+    // 对比数据（如果有）
+    val compareTotalScore: Double? = null,
+    val compareAverageScore: Double? = null,
+    val compareImpressionCount: Double? = null,
+    val compareMedianScore: Double? = null,
+    val compareRank: Int? = null,
+    val rankChange: Int? = null // 正数表示排名上升，负数表示排名下降
+) {
+    /**
+     * 是否为新团队（没有对比数据）
+     */
+    val isNewTeam: Boolean get() = compareTotalScore == null || compareTotalScore == 0.0
+
+    fun getFormattedAverageScore(): String = "%.2f".format(averageScore)
+    fun getFormattedImpressionCount(): String = "%.0f".format(impressionCount)
 }

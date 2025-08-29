@@ -58,7 +58,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
@@ -82,7 +81,7 @@ import com.madsam.otora.data.bof.remote.model.BofRangeDTO
 import com.madsam.otora.ui.bof.components.DateTimeRangePicker
 import com.madsam.otora.ui.bof.sub.BofCommentScreen
 import com.madsam.otora.ui.bof.sub.BofEntryPagerScreen
-import com.madsam.otora.ui.bof.sub.BofTeamScreen
+import com.madsam.otora.ui.bof.sub.BofTeamRankingScreen
 import com.madsam.otora.ui.components.CustomScrollableTabRow
 import com.madsam.otora.ui.components.CustomTabRow
 import kotlinx.coroutines.flow.asStateFlow
@@ -114,12 +113,11 @@ fun BofScreen(
     bofScreenState: BofScreenState
 ) {
     Log.d(TAG, "BofScreen Compose started")
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val dateTime = LocalDate.now()
 
     Log.d(TAG, "Creating BofRequestService")
-    val bofRequestService = BofRequestService(context)
+    val bofRequestService = BofRequestService()
 
     Log.d(TAG, "Creating BofViewModel")
     val vm: BofViewModel = viewModel(factory = BofViewModelFactory(bofScreenState))
@@ -176,8 +174,6 @@ fun BofScreen(
 
     fun refreshData() {
         val competitionType = selectedRange?.path ?: "tt"
-        bofRequestService.requestBofTeamData(dateTime, competitionType) {
-        }
         bofRequestService.requestBofCommentData(dateTime, competitionType) {
         }
     }
@@ -386,7 +382,9 @@ fun BofScreen(
                                         0 -> {
                                             // Entry页面的搜索由BofEntryPagerScreen处理
                                         }
-                                        1 -> vm.findTeamItemIndex(it, vm.teamData.value)
+                                        1 -> {
+                                            // Team页面的搜索逻辑
+                                        }
                                         // Comment页面暂时使用相同的搜索逻辑，后续可以添加专门的方法
                                         2 -> {} // 可以后续添加评论搜索
                                     }
@@ -555,13 +553,10 @@ fun BofScreen(
                                         setIsTabRowVisible = { isTabRowVisible = it }
                                     )
 
-                                    "Team" -> BofTeamScreen(
-                                        vm,
-                                        snackbarHostState,
-                                        listStateTeam,
-                                        scrollThreshold,
-                                        bofScreenState
-                                    ) { isTabRowVisible = it }
+                                    "Team" -> BofTeamRankingScreen(
+                                        bofScreenState = bofScreenState,
+                                        vm = vm
+                                    )
 
                                     "Comment" -> BofCommentScreen(
                                         vm,
