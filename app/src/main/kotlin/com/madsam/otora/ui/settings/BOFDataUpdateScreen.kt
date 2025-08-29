@@ -11,10 +11,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -43,8 +46,8 @@ import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.sarasaSemiBold
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,6 +86,27 @@ fun BOFDataUpdateScreen(
                     )
                 }
             },
+            actions = {
+                IconButton(
+                    onClick = { viewModel.loadAvailableCompetitions() },
+                    enabled = !uiState.isLoadingCompetitions
+                ) {
+                    if (uiState.isLoadingCompetitions) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = Beige400
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "刷新比赛列表",
+                            tint = Beige400,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            },
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = Red500,
                 titleContentColor = Beige400,
@@ -90,44 +114,49 @@ fun BOFDataUpdateScreen(
             )
         )
         
-        // 设置内容
-        Card(
+        LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Red500),
-            shape = RoundedCornerShape(12.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "BOF 活动数据",
-                    color = White1000,
-                    fontSize = 18.sp,
-                    fontFamily = sarasaBold,
-                    textAlign = TextAlign.Center
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(
-                    text = "BOF (BMS of Fighters) 是音游界的知名活动。\n这里将提供BOF TT相关的数据更新功能。",
-                    color = White1000.copy(alpha = 0.7f),
-                    fontSize = 14.sp,
-                    fontFamily = sarasaRegular,
-                    textAlign = TextAlign.Center
-                )
-                
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                // 状态信息显示
-                uiState.message?.let { message ->
+            // 页面说明
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = Red500),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "BOF 活动数据",
+                            color = White1000,
+                            fontSize = 18.sp,
+                            fontFamily = sarasaBold,
+                            textAlign = TextAlign.Center
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Text(
+                            text = "BOF (BMS of Fighters) 是音游界的知名活动。\n根据数据库中的比赛信息显示可更新的数据列表。",
+                            color = White1000.copy(alpha = 0.7f),
+                            fontSize = 14.sp,
+                            fontFamily = sarasaRegular,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+            
+            // 状态信息显示
+            uiState.message?.let { message ->
+                item {
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
                             containerColor = if (uiState.isError) Red300 else RANKING_GREEN.copy(alpha = 0.1f)
                         ),
@@ -157,13 +186,14 @@ fun BOFDataUpdateScreen(
                         }
                     }
                 }
-                
-                // 按钮区域
+            }
+            
+            // 统计按钮
+            item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // 统计信息按钮
                     OutlinedButton(
                         onClick = { 
                             viewModel.clearMessage()
@@ -182,34 +212,196 @@ fun BOFDataUpdateScreen(
                         )
                     }
                     
-                    // 下载更新按钮
-                    Button(
+                    OutlinedButton(
                         onClick = { 
                             viewModel.clearMessage()
-                            viewModel.downloadBofTTData() 
+                            viewModel.loadAvailableCompetitions()
                         },
                         modifier = Modifier.weight(1f),
-                        enabled = !uiState.isLoading,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Beige400,
-                            contentColor = Red500
+                        enabled = !uiState.isLoadingCompetitions,
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = Beige400
                         )
                     ) {
-                        if (uiState.isLoading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(16.dp),
-                                strokeWidth = 2.dp,
-                                color = Red500
-                            )
-                        } else {
+                        Text(
+                            "刷新列表",
+                            fontFamily = sarasaSemiBold,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
+            
+            // 比赛列表
+            if (uiState.availableCompetitions.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "可用比赛 (${uiState.availableCompetitions.size})",
+                        color = Beige400,
+                        fontSize = 16.sp,
+                        fontFamily = sarasaSemiBold,
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    )
+                }
+                
+                items(uiState.availableCompetitions) { competition ->
+                    CompetitionUpdateItem(
+                        competition = competition,
+                        onUpdateClick = { 
+                            viewModel.clearMessage()
+                            viewModel.downloadBofData(competition.path, competition.shortName)
+                        },
+                        isGlobalLoading = uiState.isLoading
+                    )
+                }
+            } else if (!uiState.isLoadingCompetitions) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Red500),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
                             Text(
-                                "更新数据",
+                                text = "暂无可用比赛",
+                                color = White1000.copy(alpha = 0.7f),
+                                fontSize = 16.sp,
                                 fontFamily = sarasaSemiBold,
-                                fontSize = 14.sp
+                                textAlign = TextAlign.Center
+                            )
+                            
+                            Spacer(modifier = Modifier.height(8.dp))
+                            
+                            Text(
+                                text = "请先确保数据库中有 Range 数据，或者刷新比赛列表",
+                                color = White1000.copy(alpha = 0.5f),
+                                fontSize = 14.sp,
+                                fontFamily = sarasaRegular,
+                                textAlign = TextAlign.Center
                             )
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CompetitionUpdateItem(
+    competition: CompetitionUpdateItem,
+    onUpdateClick: () -> Unit,
+    isGlobalLoading: Boolean
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Red500),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // 比赛标题行
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = competition.shortName,
+                            color = White1000,
+                            fontSize = 16.sp,
+                            fontFamily = sarasaBold
+                        )
+                        
+                        if (competition.isStart && !competition.isEnd) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "进行中",
+                                color = RANKING_GREEN,
+                                fontSize = 12.sp,
+                                fontFamily = sarasaSemiBold,
+                                modifier = Modifier
+                                    .background(
+                                        RANKING_GREEN.copy(alpha = 0.2f),
+                                        RoundedCornerShape(4.dp)
+                                    )
+                                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+                    
+                    Text(
+                        text = competition.fullName,
+                        color = White1000.copy(alpha = 0.7f),
+                        fontSize = 14.sp,
+                        fontFamily = sarasaRegular
+                    )
+                }
+                
+                Button(
+                    onClick = onUpdateClick,
+                    enabled = !isGlobalLoading && !competition.isUpdating && competition.isStart,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (competition.isStart) Beige400 else White1000.copy(alpha = 0.3f),
+                        contentColor = if (competition.isStart) Red500 else White1000.copy(alpha = 0.7f),
+                        disabledContainerColor = White1000.copy(alpha = 0.3f),
+                        disabledContentColor = White1000.copy(alpha = 0.5f)
+                    ),
+                    modifier = Modifier.padding(start = 8.dp)
+                ) {
+                    if (competition.isUpdating) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(16.dp),
+                            strokeWidth = 2.dp,
+                            color = if (competition.isStart) Red500 else White1000.copy(alpha = 0.7f)
+                        )
+                    } else {
+                        Text(
+                            if (competition.isStart) "更新" else "未开始",
+                            fontFamily = sarasaSemiBold,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
+            
+            // 数据统计行
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = if (competition.hasData) {
+                        val dataParts = mutableListOf<String>()
+                        if (competition.workCount > 0) dataParts.add("${competition.workCount}作品")
+                        if (competition.teamCount > 0) dataParts.add("${competition.teamCount}团队")
+                        "数据: ${dataParts.joinToString(" | ")}"
+                    } else {
+                        "无数据"
+                    },
+                    color = if (competition.hasData) Beige400 else White1000.copy(alpha = 0.5f),
+                    fontSize = 12.sp,
+                    fontFamily = sarasaRegular
+                )
+                
+                Text(
+                    text = "更新: ${competition.lastUpdated}",
+                    color = White1000.copy(alpha = 0.5f),
+                    fontSize = 12.sp,
+                    fontFamily = sarasaRegular
+                )
             }
         }
     }

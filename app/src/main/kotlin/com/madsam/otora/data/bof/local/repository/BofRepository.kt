@@ -1,8 +1,8 @@
 package com.madsam.otora.data.bof.local.repository
 
 import android.util.Log
-import com.madsam.otora.data.bof.local.model.BofTTCompactEntity
-import com.madsam.otora.data.bof.local.model.BofTTCompactEntity_
+import com.madsam.otora.data.bof.local.model.BofWorkEntity
+import com.madsam.otora.data.bof.local.model.BofWorkEntity_
 import com.madsam.otora.data.bof.remote.model.*
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
@@ -18,7 +18,7 @@ private const val TAG = "BofRepository"
  * 使用层次化二分查找算法，专注于高效查询作品四项数据排行榜
  */
 internal class BofRepository(
-    private val bofTTBox: Box<BofTTCompactEntity>
+    private val bofWorkBox: Box<BofWorkEntity>
 ) {
     
     private val moshi = Moshi.Builder()
@@ -45,7 +45,7 @@ internal class BofRepository(
         Log.d(TAG, "getRankingAtTimeStreamedWithComparison called with currentTimestamp: $currentTimestamp, compareTimestamp: $compareTimestamp, path: $path, batchSize: $batchSize")
         val startTime = System.currentTimeMillis()
         
-        val allWorks = bofTTBox.query(BofTTCompactEntity_.path.equal(path)).build().find()
+        val allWorks = bofWorkBox.query(BofWorkEntity_.path.equal(path)).build().find()
         Log.d(TAG, "Starting streamed processing of ${allWorks.size} works with comparison for path: $path")
         
         val allCurrentResults = mutableListOf<WorkRanking>()
@@ -139,101 +139,71 @@ internal class BofRepository(
     }
     
     /**
-     * 从API响应保存BOFTT数据
+     * 从API响应保存BOF数据
      */
-    fun saveBofTTApiResponse(apiResponse: BofApiResponse, path: String = "tt") {
+    fun saveBofApiResponse(apiResponse: BofWorkResponse, path: String) {
         val works = apiResponse.getWorksAsList()
         val compactEntities = works.map { work -> convertToCompactEntity(work, path) }
         insertWorks(compactEntities)
     }
 
     /**
-     * 获取两个时间点的分数差值排行榜
-     * @param currentTimestamp 当前时间戳（毫秒）
-     * @param compareTimestamp 对比时间戳（毫秒）
-     * @param limit 限制返回数量
-     * @return 按分数差值降序排列的作品排行榜
-     */
-    fun getDifferenceRankingBetweenTimes(
-        currentTimestamp: Long, 
-        compareTimestamp: Long, 
-        path: String = "tt",
-        limit: Int? = null
-    ): List<WorkRanking> {
-        Log.d(TAG, "getDifferenceRankingBetweenTimes called with currentTimestamp: $currentTimestamp, compareTimestamp: $compareTimestamp, path: $path, limit: $limit")
-        val startTime = System.currentTimeMillis()
-        
-        Log.d(TAG, "Getting all works from database for path: $path")
-        val allWorks = bofTTBox.query(BofTTCompactEntity_.path.equal(path)).build().find()
-        Log.d(TAG, "Got ${allWorks.size} works from database")
-        
-        val results = allWorks.mapNotNull { entity ->
-            val currentSnapshot = getScoreAtTime(entity, currentTimestamp)
-            val compareSnapshot = getScoreAtTime(entity, compareTimestamp)
-            
-            // 只有当两个时间点都有数据时才计算差值
-            if (currentSnapshot != null && compareSnapshot != null) {
-                val scoreDiff = currentSnapshot.totalScore - compareSnapshot.totalScore
-                val impressionDiff = currentSnapshot.impression - compareSnapshot.impression
-                
-                WorkRanking(
-                    workId = entity.compositeWorkId,
-                    title = getTitleAtTime(entity, currentTimestamp),
-                    artist = getArtistAtTime(entity, currentTimestamp),
-                    score = scoreDiff, // 使用分数差值作为主要排序依据
-                    average = currentSnapshot.average,
-                    median = currentSnapshot.median,
-                    impression = impressionDiff, // 使用评价数差值
-                    // 对比数据
-                    compareScore = compareSnapshot.totalScore,
-                    compareAverage = compareSnapshot.average,
-                    compareMedian = compareSnapshot.median,
-                    compareImpression = compareSnapshot.impression
-                )
-            } else null
-        }.sortedByDescending { it.score } // 按分数差值降序排列
-            .let { rankings ->
-                // 应用限制数量
-                if (limit != null) {
-                    rankings.take(limit)
-                } else {
-                    rankings
-                }
-            }
-            .mapIndexed { index, ranking ->
-                // 差值排行不需要排名变化，因为它本身就是基于差值的新排名
-                ranking.copy(rank = index + 1, rankChange = null, compareRank = null)
-            }
-        
-        val endTime = System.currentTimeMillis()
-        Log.d(TAG, "getDifferenceRankingBetweenTimes completed in ${endTime - startTime}ms, returned ${results.size} results")
-        
-        return results
-    }
-    
-    /**
      * 批量插入或更新作品数据
      */
-    fun insertWorks(works: List<BofTTCompactEntity>) {
-        bofTTBox.put(works)
+    fun insertWorks(works: List<BofWorkEntity>) {
+        bofWorkBox.put(works)
     }
     
     /**
      * 获取所有作品数量
      */
-    fun getWorksCount(path: String = "tt"): Long = bofTTBox.query(BofTTCompactEntity_.path.equal(path)).build().count()
+    fun getWorksCount(path: String = "tt"): Long = bofWorkBox.query(BofWorkEntity_.path.equal(path)).build().count()
     
     /**
-     * 清空所有数据
+     * 获取团队数据数量
      */
-    fun clearAll() {
-        bofTTBox.removeAll()
+    fun getTeamCount(path: String): Long {
+        return try {
+            val objectBoxService = com.madsam.otora.data.bof.local.objectbox.BofObjectBoxService()
+            kotlinx.coroutines.runBlocking {
+                objectBoxService.getBofTeamDetailedData(path).size.toLong()
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting team count for path $path: ${e.message}", e)
+            0L
+        }
     }
     
     /**
+     * 获取指定比赛路径的所有团队数据
+     */
+    suspend fun getTeamDataByPath(path: String): List<com.madsam.otora.data.bof.local.model.BofTeamDetailedEntity> {
+        return try {
+            val objectBoxService = com.madsam.otora.data.bof.local.objectbox.BofObjectBoxService()
+            objectBoxService.getBofTeamDetailedData(path)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting team data for path $path: ${e.message}", e)
+            emptyList()
+        }
+    }
+    
+    /**
+     * 获取指定团队的详细数据
+     */
+    suspend fun getTeamDetailedData(path: String, teamName: String): com.madsam.otora.data.bof.local.model.BofTeamDetailedEntity? {
+        return try {
+            val objectBoxService = com.madsam.otora.data.bof.local.objectbox.BofObjectBoxService()
+            objectBoxService.getBofTeamDetailedData(path, teamName)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting team detailed data for $path/$teamName: ${e.message}", e)
+            null
+        }
+    }
+
+    /**
      * 层次化查找指定时间点的得分数据
      */
-    private fun getScoreAtTime(entity: BofTTCompactEntity, targetTimestamp: Long): BofTTScoreSnapshot? {
+    private fun getScoreAtTime(entity: BofWorkEntity, targetTimestamp: Long): BofTTScoreSnapshot? {
         if (entity.scoreDataJson.isEmpty()) return null
         
         try {
@@ -247,7 +217,7 @@ internal class BofRepository(
     /**
      * 层次化查找指定时间点的标题
      */
-    private fun getTitleAtTime(entity: BofTTCompactEntity, targetTimestamp: Long): String {
+    private fun getTitleAtTime(entity: BofWorkEntity, targetTimestamp: Long): String {
         if (entity.titleHistoryJson.isEmpty()) return entity.currentTitle
         
         try {
@@ -261,7 +231,7 @@ internal class BofRepository(
     /**
      * 层次化查找指定时间点的艺术家
      */
-    private fun getArtistAtTime(entity: BofTTCompactEntity, targetTimestamp: Long): String {
+    private fun getArtistAtTime(entity: BofWorkEntity, targetTimestamp: Long): String {
         if (entity.artistHistoryJson.isEmpty()) return entity.currentArtist
         
         try {
@@ -294,30 +264,30 @@ internal class BofRepository(
         var bestTimestamp = Long.MIN_VALUE
         
         // 1. 遍历年份（升序）
-        val sortedYears = scoreYears.sortedBy { it.y }
+        val sortedYears = scoreYears.sortedBy { it.year }
         for (yearData in sortedYears) {
-            if (yearData.y > targetYear) break
+            if (yearData.year > targetYear) break
             
             // 2. 遍历月份（升序）
-            val sortedMonths = yearData.c.sortedBy { it.m }
+            val sortedMonths = yearData.months.sortedBy { it.month }
             for (monthData in sortedMonths) {
-                if (yearData.y == targetYear && monthData.m > targetMonth) break
+                if (yearData.year == targetYear && monthData.month > targetMonth) break
                 
                 // 3. 遍历日期（升序）
-                val sortedDays = monthData.c.sortedBy { it.d }
+                val sortedDays = monthData.days.sortedBy { it.day }
                 for (dayData in sortedDays) {
-                    if (yearData.y == targetYear && monthData.m == targetMonth && dayData.d > targetDay) break
+                    if (yearData.year == targetYear && monthData.month == targetMonth && dayData.day > targetDay) break
                     
                     // 4. 遍历小时（升序）
-                    val sortedHours = dayData.c.sortedBy { it.h }
+                    val sortedHours = dayData.hours.sortedBy { it.hour }
                     for (hourData in sortedHours) {
-                        if (yearData.y == targetYear && monthData.m == targetMonth && 
-                            dayData.d == targetDay && hourData.h > targetHour) break
+                        if (yearData.year == targetYear && monthData.month == targetMonth &&
+                            dayData.day == targetDay && hourData.hour > targetHour) break
                         
                         // 5. 遍历分钟（升序，二分查找优化）
-                        val sortedMinutes = hourData.c.sortedBy { it.n }
-                        val validMinutes = if (yearData.y == targetYear && monthData.m == targetMonth && 
-                                            dayData.d == targetDay && hourData.h == targetHour) {
+                        val sortedMinutes = hourData.minutes.sortedBy { it.minute }
+                        val validMinutes = if (yearData.year == targetYear && monthData.month == targetMonth &&
+                                            dayData.day == targetDay && hourData.hour == targetHour) {
                             // 如果是目标时间的精确时分，使用二分查找
                             val minuteIndex = binarySearchMinute(sortedMinutes, targetMinute)
                             if (minuteIndex >= 0) sortedMinutes.subList(0, minuteIndex + 1) else emptyList()
@@ -329,22 +299,22 @@ internal class BofRepository(
                         // 找到这个小时内的最佳匹配
                         for (minuteData in validMinutes) {
                             val currentTimestamp = createTimestamp(
-                                yearData.y, monthData.m, dayData.d, hourData.h, minuteData.n
+                                yearData.year, monthData.month, dayData.day, hourData.hour, minuteData.minute
                             )
                             
                             if (currentTimestamp <= targetTimestamp && currentTimestamp > bestTimestamp) {
                                 bestTimestamp = currentTimestamp
                                 bestMatch = BofTTScoreSnapshot(
                                     timestamp = currentTimestamp,
-                                    year = yearData.y,
-                                    month = monthData.m,
-                                    day = dayData.d,
-                                    hour = hourData.h,
-                                    minute = minuteData.n,
-                                    totalScore = minuteData.v.t,
-                                    average = minuteData.v.a,
-                                    median = minuteData.v.m,
-                                    impression = minuteData.v.i
+                                    year = yearData.year,
+                                    month = monthData.month,
+                                    day = dayData.day,
+                                    hour = hourData.hour,
+                                    minute = minuteData.minute,
+                                    totalScore = minuteData.values.total,
+                                    average = minuteData.values.average,
+                                    median = minuteData.values.median,
+                                    impression = minuteData.values.impression
                                 )
                             }
                         }
@@ -406,7 +376,7 @@ internal class BofRepository(
         while (left <= right) {
             val mid = left + (right - left) / 2
             
-            if (minutes[mid].n <= targetMinute) {
+            if (minutes[mid].minute <= targetMinute) {
                 result = mid
                 left = mid + 1
             } else {
@@ -432,7 +402,7 @@ internal class BofRepository(
      */
     private fun parseTimeString(timeString: String): Long {
         return try {
-            val format = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
+            val format = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
             format.parse(timeString)?.time ?: 0L
         } catch (e: Exception) {
             0L
@@ -442,22 +412,22 @@ internal class BofRepository(
     /**
      * 将BofTTWork转换为紧凑Entity
      */
-    private fun convertToCompactEntity(work: BofWorkData, path: String = "tt"): BofTTCompactEntity {
-        val entity = BofTTCompactEntity()
+    private fun convertToCompactEntity(work: BofWorkData, path: String = "tt"): BofWorkEntity {
+        val entity = BofWorkEntity()
         
         entity.path = path
         entity.originalWorkId = work.id
-        entity.compositeWorkId = BofTTCompactEntity.createCompositeWorkId(path, work.id)
-        entity.currentTitle = work.Title?.lastOrNull()?.value ?: ""
-        entity.currentArtist = work.Artist?.lastOrNull()?.value ?: ""
-        entity.team = work.Team ?: ""
-        entity.genre = work.Genre ?: ""
+        entity.compositeWorkId = BofWorkEntity.createCompositeWorkId(path, work.id)
+        entity.currentTitle = work.title?.lastOrNull()?.value ?: ""
+        entity.currentArtist = work.artist?.lastOrNull()?.value ?: ""
+        entity.team = work.team ?: ""
+        entity.genre = work.genre ?: ""
         
         // 直接存储原始JSON结构
         val scoreAdapter = moshi.adapter(List::class.java)
-        entity.scoreDataJson = if (work.Score != null) scoreAdapter.toJson(work.Score) else ""
-        entity.titleHistoryJson = if (work.Title != null) moshi.adapter(List::class.java).toJson(work.Title) else ""
-        entity.artistHistoryJson = if (work.Artist != null) moshi.adapter(List::class.java).toJson(work.Artist) else ""
+        entity.scoreDataJson = if (work.score != null) scoreAdapter.toJson(work.score) else ""
+        entity.titleHistoryJson = if (work.title != null) moshi.adapter(List::class.java).toJson(work.title) else ""
+        entity.artistHistoryJson = if (work.artist != null) moshi.adapter(List::class.java).toJson(work.artist) else ""
         
         // 计算时间范围和最新得分
         val timeRange = calculateTimeRange(work)
@@ -480,14 +450,14 @@ internal class BofRepository(
         var earliest = Long.MAX_VALUE
         var latest = Long.MIN_VALUE
         
-        work.Score?.forEach { yearData ->
-            yearData.c.forEach { monthData ->
-                monthData.c.forEach { dayData ->
-                    dayData.c.forEach { hourData ->
-                        hourData.c.forEach { minuteData ->
+        work.score?.forEach { yearData ->
+            yearData.months.forEach { monthData ->
+                monthData.days.forEach { dayData ->
+                    dayData.hours.forEach { hourData ->
+                        hourData.minutes.forEach { minuteData ->
                             val timestamp = createTimestamp(
-                                yearData.y, monthData.m, dayData.d,
-                                hourData.h, minuteData.n
+                                yearData.year, monthData.month, dayData.day,
+                                hourData.hour, minuteData.minute
                             )
                             if (timestamp < earliest) earliest = timestamp
                             if (timestamp > latest) latest = timestamp
@@ -511,28 +481,28 @@ internal class BofRepository(
         var latestScore: BofTTScoreSnapshot? = null
         var latestTimestamp = Long.MIN_VALUE
         
-        work.Score?.forEach { yearData ->
-            yearData.c.forEach { monthData ->
-                monthData.c.forEach { dayData ->
-                    dayData.c.forEach { hourData ->
-                        hourData.c.forEach { minuteData ->
+        work.score?.forEach { yearData ->
+            yearData.months.forEach { monthData ->
+                monthData.days.forEach { dayData ->
+                    dayData.hours.forEach { hourData ->
+                        hourData.minutes.forEach { minuteData ->
                             val timestamp = createTimestamp(
-                                yearData.y, monthData.m, dayData.d,
-                                hourData.h, minuteData.n
+                                yearData.year, monthData.month, dayData.day,
+                                hourData.hour, minuteData.minute
                             )
                             if (timestamp > latestTimestamp) {
                                 latestTimestamp = timestamp
                                 latestScore = BofTTScoreSnapshot(
                                     timestamp = timestamp,
-                                    year = yearData.y,
-                                    month = monthData.m,
-                                    day = dayData.d,
-                                    hour = hourData.h,
-                                    minute = minuteData.n,
-                                    totalScore = minuteData.v.t,
-                                    average = minuteData.v.a,
-                                    median = minuteData.v.m,
-                                    impression = minuteData.v.i
+                                    year = yearData.year,
+                                    month = monthData.month,
+                                    day = dayData.day,
+                                    hour = hourData.hour,
+                                    minute = minuteData.minute,
+                                    totalScore = minuteData.values.total,
+                                    average = minuteData.values.average,
+                                    median = minuteData.values.median,
+                                    impression = minuteData.values.impression
                                 )
                             }
                         }

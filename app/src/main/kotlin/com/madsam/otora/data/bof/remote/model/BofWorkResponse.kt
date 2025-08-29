@@ -1,12 +1,13 @@
 package com.madsam.otora.data.bof.remote.model
 
+import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
  * BOF API响应的数据结构
  * 对应work.json的原始数据格式
  */
-internal data class BofApiResponse(
+internal data class BofWorkResponse(
     val works: Map<String, BofWorkData>
 ) {
     // 将Map转换为方便使用的形式
@@ -23,61 +24,61 @@ internal data class BofApiResponse(
 @JsonClass(generateAdapter = true)
 internal data class BofWorkData(
     var id: String = "",
-    val Score: List<BofScoreYear>? = null,
-    val Title: List<BofMetadataItem>? = null,
-    val Artist: List<BofMetadataItem>? = null,
-    val Team: String? = null,
-    val Genre: String? = null
+    @param:Json(name = "Score") val score: List<BofScoreYear>? = null,
+    @param:Json(name = "Title") val title: List<BofMetadataItem>? = null,
+    @param:Json(name = "Artist") val artist: List<BofMetadataItem>? = null,
+    @param:Json(name = "Team") val team: String? = null,
+    @param:Json(name = "Genre") val genre: String? = null
 )
 
 /**
  * 年度得分数据
  */
 internal data class BofScoreYear(
-    val y: Int, // year
-    val c: List<BofScoreMonth> // months
+    @param:Json(name = "y") val year: Int,
+    @param:Json(name = "c") val months: List<BofScoreMonth>
 )
 
 /**
  * 月度得分数据
  */
 internal data class BofScoreMonth(
-    val m: Int, // month
-    val c: List<BofScoreDay> // days
+    @param:Json(name = "m") val month: Int,
+    @param:Json(name = "c") val days: List<BofScoreDay>
 )
 
 /**
  * 日度得分数据
  */
 internal data class BofScoreDay(
-    val d: Int, // day
-    val c: List<BofScoreHour> // hours
+    @param:Json(name = "d") val day: Int,
+    @param:Json(name = "c") val hours: List<BofScoreHour>
 )
 
 /**
  * 小时得分数据
  */
 internal data class BofScoreHour(
-    val h: Int, // hour
-    val c: List<BofScoreMinute> // minutes
+    @param:Json(name = "h") val hour: Int,
+    @param:Json(name = "c") val minutes: List<BofScoreMinute>
 )
 
 /**
  * 分钟得分数据
  */
 internal data class BofScoreMinute(
-    val n: Int, // minute
-    val v: BofScoreValue // value
+    @param:Json(name = "n") val minute: Int,
+    @param:Json(name = "v") val values: BofScoreValue
 )
 
 /**
  * 得分值
  */
 internal data class BofScoreValue(
-    val i: Int, // index
-    val t: Int, // total score
-    val m: Double, // current score
-    val a: Double // average score
+    @param:Json(name = "i") val impression: Int,
+    @param:Json(name = "t") val total: Int,
+    @param:Json(name = "m") val median: Double,
+    @param:Json(name = "a")val average: Double
 )
 
 /**

@@ -256,18 +256,11 @@ fun BofScreen(
                             label = { 
                                 Column {
                                     Text(
-                                        text = if (range.full.isNotEmpty()) range.full else range.short,
+                                        text = range.short,
                                         color = if (selectedRange?.path == range.path) Beige500 else Beige600,
                                         fontSize = 14.sp,
                                         fontWeight = FontWeight.Medium
                                     )
-                                    if (range.short.isNotEmpty() && range.full.isNotEmpty()) {
-                                        Text(
-                                            text = range.short,
-                                            color = if (selectedRange?.path == range.path) Beige500.copy(alpha = 0.8f) else Beige600.copy(alpha = 0.8f),
-                                            fontSize = 12.sp
-                                        )
-                                    }
                                     Text(
                                         text = "${range.start} - ${range.current}",
                                         color = if (selectedRange?.path == range.path) Beige500.copy(alpha = 0.7f) else Beige600.copy(alpha = 0.7f),
@@ -291,7 +284,7 @@ fun BofScreen(
                                 refreshData()
                                 coroutineScope.launch { 
                                     drawerState.close()
-                                    snackbarHostState.showSnackbar("已切换到 ${if (range.full.isNotEmpty()) range.full else range.short}")
+                                    snackbarHostState.showSnackbar("已切换到 ${range.full.ifEmpty { range.short }}")
                                 }
                             },
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),

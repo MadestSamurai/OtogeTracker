@@ -4,14 +4,15 @@ import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.annotation.Index
 import io.objectbox.annotation.Unique
+import io.objectbox.annotation.ConflictStrategy
 
 /**
  * BOFTT紧凑存储Entity - 层次化数据压缩到单个实体
  */
 @Entity
-internal data class BofTTCompactEntity(
+internal data class BofWorkEntity(
     @Id var id: Long = 0,
-    @Unique @Index var compositeWorkId: String = "", // {path}_{originalWorkId} 格式的复合ID
+    @Unique(onConflict = ConflictStrategy.REPLACE) @Index var compositeWorkId: String = "",
     @Index var path: String = "", // 比赛类型路径 (tt, bms等)
     var originalWorkId: String = "", // 原始workId
     var currentTitle: String = "",

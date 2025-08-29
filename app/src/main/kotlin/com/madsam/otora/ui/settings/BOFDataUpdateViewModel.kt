@@ -6,11 +6,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.madsam.otora.core.database.ObjectBoxManager
 import com.madsam.otora.data.BASE_URL
-import com.madsam.otora.data.bof.local.model.BofTTCompactEntity
+import com.madsam.otora.data.bof.local.model.BofWorkEntity
+import com.madsam.otora.data.bof.local.objectbox.BofObjectBoxService
 import com.madsam.otora.data.bof.local.repository.BofRepository
 import com.madsam.otora.data.bof.remote.api.BofAPI
-import com.madsam.otora.data.bof.remote.model.BofApiResponse
 import com.madsam.otora.data.bof.remote.model.BofWorkData
+import com.madsam.otora.data.bof.remote.model.BofWorkResponse
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers
@@ -38,8 +39,13 @@ class BOFDataUpdateViewModel : ViewModel() {
     // 仓库
     private val bofRepository by lazy {
         val boxStore = ObjectBoxManager.getBoxStore()
-        val bofTTBox = boxStore.boxFor(BofTTCompactEntity::class.java)
-        BofRepository(bofTTBox)
+        val bofWorkBox = boxStore.boxFor(BofWorkEntity::class.java)
+        BofRepository(bofWorkBox)
+    }
+    
+    // ObjectBox服务
+    private val bofObjectBoxService by lazy {
+        BofObjectBoxService()
     }
 
     // Retrofit API
@@ -55,68 +61,244 @@ class BOFDataUpdateViewModel : ViewModel() {
 
     private val api = retrofit.create(BofAPI::class.java)
 
+    init {
+        // 初始化时加载可用的比赛列表
+        loadAvailableCompetitions()
+    }
+
     /**
-     * 下载并保存BOF TT详细数据
+     * 加载可用的比赛列表
      */
-    fun downloadBofTTData() {
+    fun loadAvailableCompetitions() {
         viewModelScope.launch {
             try {
-                // 更新UI状态为下载中
-                _uiState.value = _uiState.value.copy(
-                    isLoading = true,
-                    message = "正在下载 BOF TT 数据...",
-                    isError = false
-                )
-
-                // 调用API
-                val response = withContext(Dispatchers.IO) {
-                    api.getBofWorkData("tt").execute()
-                }
-
-                if (!response.isSuccessful) {
-                    throw Exception("API请求失败: ${response.code()} - ${response.message()}")
-                }
-
-                val worksMap = response.body()
-                if (worksMap == null) {
-                    throw Exception("API响应数据为空")
-                }
-
-                // 转换Map格式到BofTTApiResponse
-                val worksAsMap = worksMap.mapValues { (workId: String, workData: BofWorkData) ->
-                    workData.copy(id = workId)
-                }
-                val bofTTData = BofApiResponse(works = worksAsMap)
-
-                // 更新状态为处理中
-                _uiState.value = _uiState.value.copy(
-                    message = "正在处理并保存数据..."
-                )
-
-                // 保存数据到Repository
-                bofRepository.saveBofTTApiResponse(bofTTData, "tt")
-                val savedCount = bofRepository.getWorksCount("tt")
-
-                // 更新状态为完成
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    message = "成功保存 $savedCount 条作品数据！",
-                    isError = false
-                )
-
-                Log.d(TAG, "Successfully downloaded and saved $savedCount BOF TT works")
-
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to download BOF TT data", e)
+                _uiState.value = _uiState.value.copy(isLoadingCompetitions = true)
                 
-                // 更新状态为错误
+                // 获取数据库中的range数据
+                val competitions = bofObjectBoxService.getAllAvailableCompetitions()
+                
+                // 转换为UI显示项目
+                val competitionItems = competitions.map { range ->
+                    // 每个比赛都获取作品数量和团队数量
+                    val workCount = bofRepository.getWorksCount(range.path)
+                    val teamCount = bofRepository.getTeamCount(range.path)
+                    val totalDataCount = workCount + teamCount
+                    
+                    val lastUpdatedText = if (totalDataCount > 0) {
+                        java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault())
+                            .format(java.util.Date(range.lastUpdated))
+                    } else {
+                        "无数据"
+                    }
+                    
+                    CompetitionUpdateItem(
+                        path = range.path,
+                        shortName = range.shortName.ifEmpty { range.path },
+                        fullName = range.fullName.ifEmpty { range.path },
+                        isStart = range.isStart,
+                        isEnd = range.isEnd,
+                        hasData = totalDataCount > 0,
+                        dataCount = totalDataCount,
+                        lastUpdated = lastUpdatedText,
+                        startTime = range.start,
+                        endTime = range.current,
+                        // 添加详细的数据统计信息
+                        workCount = workCount,
+                        teamCount = teamCount
+                    )
+                }.sortedWith(
+                    compareByDescending { it.startTime }
+                )
+                
                 _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    message = "下载失败: ${e.message}",
+                    availableCompetitions = competitionItems,
+                    isLoadingCompetitions = false
+                )
+                
+                Log.d(TAG, "Loaded ${competitionItems.size} available competitions")
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to load available competitions", e)
+                _uiState.value = _uiState.value.copy(
+                    isLoadingCompetitions = false,
+                    message = "加载比赛列表失败: ${e.message}",
                     isError = true
                 )
             }
         }
+    }
+
+    /**
+     * 下载并保存指定比赛类型的BOF数据
+     * 每个比赛都会同时下载作品数据和团队数据
+     */
+    fun downloadBofData(competitionPath: String, competitionName: String) {
+        viewModelScope.launch {
+            try {
+                // 更新比赛项目状态为更新中
+                updateCompetitionItemStatus(competitionPath, isUpdating = true)
+                
+                // 更新UI状态为下载中
+                _uiState.value = _uiState.value.copy(
+                    isLoading = true,
+                    message = "正在下载 $competitionName 数据...",
+                    isError = false
+                )
+
+                // 每个比赛都同时下载作品数据和团队数据
+                var workCount = 0L
+                var teamCount = 0L
+                val errors = mutableListOf<String>()
+
+                // 下载作品数据
+                try {
+                    _uiState.value = _uiState.value.copy(
+                        message = "正在下载 $competitionName 作品数据..."
+                    )
+                    workCount = downloadWorkData(competitionPath, competitionName)
+                } catch (e: Exception) {
+                    val errorMsg = "作品数据下载失败: ${e.message}"
+                    Log.e(TAG, errorMsg, e)
+                    errors.add(errorMsg)
+                }
+
+                // 下载团队数据
+                try {
+                    _uiState.value = _uiState.value.copy(
+                        message = "正在下载 $competitionName 团队数据..."
+                    )
+                    teamCount = downloadTeamData(competitionPath, competitionName)
+                } catch (e: Exception) {
+                    val errorMsg = "团队数据下载失败: ${e.message}"
+                    Log.e(TAG, errorMsg, e)
+                    errors.add(errorMsg)
+                }
+
+                // 更新完成状态
+                if (errors.isEmpty()) {
+                    // 全部成功
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        message = "成功保存 $competitionName 数据: ${workCount}部作品, ${teamCount}个团队",
+                        isError = false
+                    )
+                } else if (workCount > 0 || teamCount > 0) {
+                    // 部分成功
+                    val successMsg = mutableListOf<String>()
+                    if (workCount > 0) successMsg.add("${workCount}部作品")
+                    if (teamCount > 0) successMsg.add("${teamCount}个团队")
+                    
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        message = "$competitionName 部分成功: ${successMsg.joinToString(", ")}。错误: ${errors.joinToString("; ")}",
+                        isError = true
+                    )
+                } else {
+                    // 全部失败
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        message = "$competitionName 下载失败: ${errors.joinToString("; ")}",
+                        isError = true
+                    )
+                }
+
+                // 重新加载比赛列表以更新数据统计
+                loadAvailableCompetitions()
+
+                Log.d(TAG, "Download completed for $competitionName: $workCount works, $teamCount teams")
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to download $competitionName data", e)
+                
+                // 更新状态为错误
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    message = "下载 $competitionName 失败: ${e.message}",
+                    isError = true
+                )
+            } finally {
+                // 取消比赛项目的更新状态
+                updateCompetitionItemStatus(competitionPath, isUpdating = false)
+            }
+        }
+    }
+    
+    /**
+     * 下载作品数据
+     * @return 保存的作品数量
+     */
+    private suspend fun downloadWorkData(competitionPath: String, competitionName: String): Long {
+        // 调用API
+        val response = withContext(Dispatchers.IO) {
+            api.getBofWorkData(competitionPath).execute()
+        }
+
+        if (!response.isSuccessful) {
+            throw Exception("作品数据API请求失败: ${response.code()} - ${response.message()}")
+        }
+
+        val worksMap = response.body()
+        if (worksMap == null) {
+            throw Exception("作品数据API响应为空")
+        }
+
+        // 转换Map格式到BofWorkResponse
+        val worksAsMap = worksMap.mapValues { (workId: String, workData: BofWorkData) ->
+            workData.copy(id = workId)
+        }
+        val bofData = BofWorkResponse(works = worksAsMap)
+
+        // 保存数据到Repository
+        bofRepository.saveBofApiResponse(bofData, competitionPath)
+        val savedCount = bofRepository.getWorksCount(competitionPath)
+
+        Log.d(TAG, "Successfully downloaded and saved $savedCount $competitionName works")
+        return savedCount
+    }
+    
+    /**
+     * 下载团队数据
+     * @return 保存的团队数量
+     */
+    private suspend fun downloadTeamData(competitionPath: String, competitionName: String): Long {
+        // 调用团队API
+        val response = withContext(Dispatchers.IO) {
+            api.getBofTeamData(competitionPath).execute()
+        }
+
+        if (!response.isSuccessful) {
+            throw Exception("团队数据API请求失败: ${response.code()} - ${response.message()}")
+        }
+
+        val teamDataList = response.body()
+        if (teamDataList == null) {
+            throw Exception("团队数据API响应为空")
+        }
+
+        // 将List转换为Map，以团队名称为key
+        val teamDataMap = teamDataList.associateBy { it.team }
+
+        // 保存团队数据到ObjectBox
+        bofObjectBoxService.saveBofTeamApiResponse(teamDataMap, competitionPath)
+        val savedCount = bofRepository.getTeamCount(competitionPath)
+
+        Log.d(TAG, "Successfully downloaded and saved $savedCount $competitionName teams")
+        return savedCount
+    }
+    
+    /**
+     * 更新特定比赛项目的状态
+     */
+    private fun updateCompetitionItemStatus(path: String, isUpdating: Boolean) {
+        val currentCompetitions = _uiState.value.availableCompetitions
+        val updatedCompetitions = currentCompetitions.map { item ->
+            if (item.path == path) {
+                item.copy(isUpdating = isUpdating)
+            } else {
+                item
+            }
+        }
+        _uiState.value = _uiState.value.copy(availableCompetitions = updatedCompetitions)
     }
 
     /**
@@ -135,9 +317,22 @@ class BOFDataUpdateViewModel : ViewModel() {
     fun getDataStatistics() {
         viewModelScope.launch {
             try {
-                val worksCount = bofRepository.getWorksCount()
-                val message = if (worksCount > 0) {
-                    "当前数据库中有 $worksCount 部作品"
+                val competitions = _uiState.value.availableCompetitions
+                
+                // 统计总数
+                val totalWorks = competitions.sumOf { it.workCount }
+                val totalTeams = competitions.sumOf { it.teamCount }
+                val totalData = totalWorks + totalTeams
+                
+                val activeCompetitions = competitions.count { it.isStart && !it.isEnd }
+                val competitionsWithData = competitions.count { it.hasData }
+                
+                val message = if (totalData > 0) {
+                    val dataParts = mutableListOf<String>()
+                    if (totalWorks > 0) dataParts.add("${totalWorks}部作品")
+                    if (totalTeams > 0) dataParts.add("${totalTeams}个团队")
+                    
+                    "数据库统计: ${dataParts.joinToString(" | ")} | $competitionsWithData/${competitions.size} 个比赛有数据 | $activeCompetitions 个比赛进行中"
                 } else {
                     "数据库为空，请下载数据"
                 }
@@ -163,7 +358,28 @@ class BOFDataUpdateViewModel : ViewModel() {
 data class BOFUpdateUiState(
     val isLoading: Boolean = false,
     val message: String? = null,
-    val isError: Boolean = false
+    val isError: Boolean = false,
+    val availableCompetitions: List<CompetitionUpdateItem> = emptyList(),
+    val isLoadingCompetitions: Boolean = false
+)
+
+/**
+ * 比赛更新项目
+ */
+data class CompetitionUpdateItem(
+    val path: String,
+    val shortName: String,
+    val fullName: String,
+    val isStart: Boolean, // 是否已开始
+    val isEnd: Boolean, // 是否已结束
+    val hasData: Boolean, // 是否已有数据
+    val dataCount: Long, // 总数据数量 (作品+团队)
+    val lastUpdated: String, // 最后更新时间
+    val startTime: String, // 开始时间，用于排序
+    val endTime: String, // 结束时间，用于排序
+    val isUpdating: Boolean = false, // 是否正在更新
+    val workCount: Long = 0, // 作品数量
+    val teamCount: Long = 0 // 团队数量
 )
 
 /**

@@ -2,7 +2,7 @@ package com.madsam.otora.data.bof.remote.model
 
 import com.squareup.moshi.Json
 
-data class BofTeamDetailedResponse(
+data class BofTeamResponse(
     @param:Json(name = "Score") var score: List<TeamYearData>? = null,
     @param:Json(name = "Team") var team: String = "",
     @param:Json(name = "Title1") var title1: List<TeamTimeValue>? = null,
@@ -51,14 +51,14 @@ data class TeamMinuteData(
 
 data class TeamValues(
     @param:Json(name = "t") var total: Double = 0.0,
-    @param:Json(name = "m") var average: Any? = null, // Can be Double or String
+    @param:Json(name = "m") var median: Any? = null, // Can be Double or String
     @param:Json(name = "i") var impression: Double = 0.0,
     @param:Json(name = "t1") var total1: Any? = null, // Can be Double or String
-    @param:Json(name = "m1") var average1: Any? = null, // Can be Double or String
+    @param:Json(name = "m1") var median1: Any? = null, // Can be Double or String
     @param:Json(name = "t2") var total2: Any? = null, // Can be Double or String
-    @param:Json(name = "m2") var average2: Any? = null, // Can be Double or String
+    @param:Json(name = "m2") var median2: Any? = null, // Can be Double or String
     @param:Json(name = "t3") var total3: Any? = null, // Can be Double or String
-    @param:Json(name = "m3") var average3: Any? = null, // Can be Double or String
+    @param:Json(name = "m3") var median3: Any? = null, // Can be Double or String
     @param:Json(name = "t4") var total4: Any? = null, // Can be Double or String
-    @param:Json(name = "m4") var average4: Any? = null // Can be Double or String
+    @param:Json(name = "m4") var median4: Any? = null // Can be Double or String
 )

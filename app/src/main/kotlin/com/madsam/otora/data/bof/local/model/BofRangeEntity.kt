@@ -8,12 +8,11 @@ import io.objectbox.annotation.Unique
 @Entity
 internal data class BofRangeEntity(
     @Id var id: Long = 0,
-    
     @Unique @Index var path: String = "", // 比赛类型路径
     var start: String = "", // 开始日期
     var current: String = "", // 当前日期
-    var short: String = "", // 短名称
-    var full: String = "", // 完整名称
+    var shortName: String = "", // 短名称
+    var fullName: String = "", // 完整名称
     var isStart: Boolean = false, // 是否已开始
     var isEnd: Boolean = false, // 是否已结束
     var singleComment: Boolean = false, // 是否单个评论
@@ -24,8 +23,8 @@ internal data class BofRangeEntity(
         path = "",
         start = "",
         current = "",
-        short = "",
-        full = "",
+        shortName = "",
+        fullName = "",
         isStart = false,
         isEnd = false,
         singleComment = false,

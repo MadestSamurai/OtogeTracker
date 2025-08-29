@@ -11,7 +11,8 @@ import com.madsam.otora.data.bof.ui.model.BofTeamUI
 import com.madsam.otora.data.bof.ui.model.RankTracking
 import com.madsam.otora.data.bof.local.api.BofLocalService
 import com.madsam.otora.data.bof.local.repository.BofRepository
-import com.madsam.otora.data.bof.local.model.BofTTCompactEntity
+import com.madsam.otora.data.bof.local.model.BofWorkEntity
+import com.madsam.otora.data.bof.local.model.BofTeamDetailedEntity
 import com.madsam.otora.data.bof.local.repository.WorkRanking
 import com.madsam.otora.core.database.ObjectBoxManager
 import com.madsam.otora.core.utils.CommonUtils
@@ -34,10 +35,18 @@ internal class BofViewModel(
     // BOFTT Repository for new functionality
     val bofRepository: BofRepository by lazy {
         Log.d(TAG, "BofRepository lazy initialization")
-        BofRepository(ObjectBoxManager.getBoxStore().boxFor(BofTTCompactEntity::class.java))
+        val boxStore = ObjectBoxManager.getBoxStore()
+        BofRepository(
+            boxStore.boxFor(BofWorkEntity::class.java)
+        )
     }
     val teamData = MutableStateFlow(listOf<BofTeamUI>())
     val commentData = MutableStateFlow(listOf<BofCommentUI>())
+
+    // 团队详细数据状态流
+    val teamDetailedData = MutableStateFlow(listOf<BofTeamDetailedEntity>())
+    val isTeamDetailedLoading = MutableStateFlow(false)
+    val teamDetailedError = MutableStateFlow("")
 
     // 新的排名数据流
     val totalRankingData = MutableStateFlow(listOf<WorkRanking>())
@@ -614,6 +623,47 @@ internal class BofViewModel(
         // 重新分配排名
         return diffData.mapIndexed { index, ranking ->
             ranking.copy(rank = index + 1)
+        }
+    }
+    
+    /**
+     * 加载团队详细数据
+     */
+    fun loadTeamDetailedData(path: String) {
+        viewModelScope.launch {
+            try {
+                isTeamDetailedLoading.update { true }
+                teamDetailedError.update { "" }
+                
+                Log.d(TAG, "Loading team detailed data for path: $path")
+                
+                // TODO: Implement when repository methods are ready
+                teamDetailedData.update { emptyList() }
+                
+                Log.d(TAG, "Team detailed data loaded: 0 teams (placeholder)")
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading team detailed data: ${e.message}", e)
+                teamDetailedError.update { "加载团队详细数据失败: ${e.message}" }
+            } finally {
+                isTeamDetailedLoading.update { false }
+            }
+        }
+    }
+    
+    /**
+     * 获取指定团队的详细数据
+     */
+    fun getTeamDetailedData(path: String, teamName: String, callback: (BofTeamDetailedEntity?) -> Unit) {
+        viewModelScope.launch {
+            try {
+                Log.d(TAG, "Getting team detailed data for path: $path, team: $teamName")
+                // TODO: Implement when repository methods are ready
+                callback(null)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error getting team detailed data: ${e.message}", e)
+                callback(null)
+            }
         }
     }
 }
