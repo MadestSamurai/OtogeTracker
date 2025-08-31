@@ -99,7 +99,7 @@ private const val TAG = "BofScreen"
 private fun shouldShowActionButton(selectedTabIndex: Int): Boolean {
     return when (selectedTabIndex) {
         0 -> true  // Entry页面：显示narrow模式切换按钮
-        1 -> true  // Team页面：显示刷新按钮  
+        1 -> true  // Team页面：显示信息切换按钮  
         2 -> true  // Comment页面：显示刷新按钮
         else -> false
     }
@@ -167,6 +167,9 @@ fun BofScreen(
     val configuration = LocalConfiguration.current
     val screenWidthDp = configuration.screenWidthDp
     var narrowMode by remember { mutableIntStateOf(0) }
+    
+    // Team info mode state management  
+    var teamInfoMode by remember { mutableIntStateOf(0) } // 0: 团队信息, 1: 作品详情
 
     fun selectTime() {
         showDateTimeRangePicker = true
@@ -183,12 +186,44 @@ fun BofScreen(
         vm.loadRankingDataWithStreamedParsing()
     }
 
+    // Work数据重新加载 - 当时间范围变化时
+    LaunchedEffect(
+        bofScreenState.selectedCurrentDate.collectAsState().value,
+        bofScreenState.selectedCurrentTime.collectAsState().value,
+        bofScreenState.selectedCompareDate.collectAsState().value,
+        bofScreenState.selectedCompareTime.collectAsState().value
+    ) {
+        vm.loadRankingDataWithStreamedParsing()
+    }
+
+    // 团队数据加载 - 当选择的比赛类型变化时重新加载
+    LaunchedEffect(selectedRange) {
+        selectedRange?.let { range ->
+            if (range.isStart) {
+                vm.loadTeamRankingData(range.path)
+            }
+        }
+    }
+
+    // 团队数据重新加载 - 当时间范围变化时
+    LaunchedEffect(
+        bofScreenState.selectedCurrentDate.collectAsState().value,
+        bofScreenState.selectedCurrentTime.collectAsState().value,
+        bofScreenState.selectedCompareDate.collectAsState().value,
+        bofScreenState.selectedCompareTime.collectAsState().value
+    ) {
+        selectedRange?.let { range ->
+            if (range.isStart) {
+                vm.loadTeamRankingData(range.path)
+            }
+        }
+    }
+
     if (showDateTimeRangePicker) {
         DateTimeRangePicker(
             bofScreenState = bofScreenState,
             onDismissRequest = { 
                 showDateTimeRangePicker = false
-                vm.loadRankingDataWithStreamedParsing()
             }
         )
     }
@@ -555,7 +590,8 @@ fun BofScreen(
 
                                     "Team" -> BofTeamRankingScreen(
                                         bofScreenState = bofScreenState,
-                                        vm = vm
+                                        vm = vm,
+                                        teamInfoMode = teamInfoMode
                                     )
 
                                     "Comment" -> BofCommentScreen(
@@ -679,11 +715,8 @@ fun BofScreen(
                                                 }
 
                                                 1 -> {
-                                                    // Team页面，刷新团队数据
-                                                    coroutineScope.launch {
-                                                        refreshData()
-                                                        snackbarHostState.showSnackbar("团队数据已刷新")
-                                                    }
+                                                    // Team页面，切换信息显示模式
+                                                    teamInfoMode = if (teamInfoMode == 0) 1 else 0
                                                 }
 
                                                 2 -> {
@@ -706,14 +739,14 @@ fun BofScreen(
                                             painter = rememberVectorPainter(
                                                 image = when (tabIndex) {
                                                     0 -> Filled.SwitchArrow  // Entry: 窄屏切换图标
-                                                    1 -> Filled.ArrowRotate  // Team: 刷新图标
+                                                    1 -> Filled.SwitchArrow  // Team: 信息切换图标
                                                     2 -> Filled.ArrowRotate  // Comment: 刷新图标
                                                     else -> Filled.ArrowRotate
                                                 }
                                             ),
                                             contentDescription = when (tabIndex) {
                                                 0 -> if (narrowMode == 1) "Switch to Wide Mode" else "Switch to Narrow Mode"
-                                                1 -> "Refresh Team Data"
+                                                1 -> if (teamInfoMode == 1) "Switch to Team Info" else "Switch to Work Details"
                                                 2 -> "Refresh Comment Data"
                                                 else -> "Refresh"
                                             },

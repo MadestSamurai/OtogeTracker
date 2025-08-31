@@ -683,10 +683,5 @@ data class TeamRankingItem(
     val compareRank: Int? = null,
     val rankChange: Int? = null // 正数表示排名上升，负数表示排名下降
 ) {
-    /**
-     * 是否为新团队（没有对比数据）
-     */
-    val isNewTeam: Boolean get() = compareTotalScore == null || compareTotalScore == 0.0
-
     fun getFormattedImpressionCount(): String = "%.0f".format(impressionCount)
 }

@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,20 +29,26 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.core.theme.BG_DARK_GRAY
+import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.RANKING_YELLOW
 import com.madsam.otora.core.theme.TEXT_GRAY
@@ -51,7 +60,8 @@ import com.madsam.otora.ui.bof.TeamRankingItem
 @Composable
 internal fun BofTeamRankingScreen(
     bofScreenState: BofScreenState,
-    vm: BofViewModel = viewModel()
+    vm: BofViewModel = viewModel(),
+    teamInfoMode: Int = 0
 ) {
     val teamRankingData by vm.teamRankingData.collectAsState()
     val isLoading by vm.isTeamRankingLoading.collectAsState()
@@ -59,13 +69,6 @@ internal fun BofTeamRankingScreen(
     val selectedRange by bofScreenState.selectedRange.collectAsState()
     
     val listState = rememberLazyListState()
-    
-    // 在比赛选择变化时重新加载数据
-    LaunchedEffect(selectedRange) {
-        selectedRange?.let { range ->
-            vm.loadTeamRankingData(range.path)
-        }
-    }
     
     Column(
         modifier = Modifier
@@ -107,8 +110,9 @@ internal fun BofTeamRankingScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = { 
+                                // 通过重新设置相同的selectedRange来触发数据重新加载
                                 selectedRange?.let { range ->
-                                    vm.loadTeamRankingData(range.path)
+                                    bofScreenState.selectedRange.value = range
                                 }
                             }
                         ) {
@@ -144,9 +148,11 @@ internal fun BofTeamRankingScreen(
             }
             
             else -> {
+                // 团队排行数据展示
                 TeamRankingTable(
                     teams = teamRankingData,
-                    listState = listState
+                    listState = listState,
+                    teamInfoMode = teamInfoMode
                 )
             }
         }
@@ -156,11 +162,51 @@ internal fun BofTeamRankingScreen(
 @Composable
 private fun TeamRankingTable(
     teams: List<TeamRankingItem>,
-    listState: androidx.compose.foundation.lazy.LazyListState
+    listState: androidx.compose.foundation.lazy.LazyListState,
+    teamInfoMode: Int
 ) {
+    // 宽度测量（类似RankingTable）
+    var extraWidth by remember { mutableStateOf(50.dp) } // 评价数列宽度
+    var medianWidth by remember { mutableStateOf(60.dp) } // 中位数列宽度
+    
+    val density = LocalDensity.current
+    
+    // 计算分数条宽度（对应中位数+评价数的宽度）
+    val scoreBarWidth = medianWidth + extraWidth
+    
     val maxScore = teams.maxOfOrNull { it.totalScore } ?: 1.0
     
     Column {
+        // 隐藏的测量容器（照搬RankingTable逻辑）
+        Box(modifier = Modifier
+            .size(0.dp)
+            .requiredWidth(500.dp)
+            .requiredHeight(100.dp)
+        ) {
+            // 测量评价数列宽度（四位整数）
+            Text(
+                text = "0000", // 四位整数测量
+                fontFamily = sarasaRegular,
+                fontSize = 14.sp,
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    extraWidth = with(density) {
+                        coordinates.size.width.toDp() + 24.dp
+                    }
+                }
+            )
+            // 测量中位数列宽度（000.00格式）
+            Text(
+                text = "000.00", // 带两位小数测量
+                fontFamily = sarasaRegular,
+                fontSize = 14.sp,
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    medianWidth = with(density) {
+                        coordinates.size.width.toDp() + 24.dp
+                    }
+                }
+            )
+        }
+        
         // 表格标题
         Text(
             text = "团队总分排行榜",
@@ -175,7 +221,7 @@ private fun TeamRankingTable(
         )
 
         // 表格头部
-        TeamTableHeader()
+        TeamTableHeader(teamInfoMode = teamInfoMode, extraWidth = extraWidth, medianWidth = medianWidth)
 
         // 数据列表
         LazyColumn(
@@ -186,7 +232,11 @@ private fun TeamRankingTable(
                 TeamRankingRow(
                     team = team,
                     index = index,
-                    maxScore = maxScore
+                    maxScore = maxScore,
+                    teamInfoMode = teamInfoMode,
+                    extraWidth = extraWidth,
+                    medianWidth = medianWidth,
+                    scoreBarWidth = scoreBarWidth
                 )
             }
         }
@@ -194,7 +244,7 @@ private fun TeamRankingTable(
 }
 
 @Composable
-private fun TeamTableHeader() {
+private fun TeamTableHeader(teamInfoMode: Int, extraWidth: Dp, medianWidth: Dp) {
     Row(
         modifier = Modifier
             .background(BG_DARK_GRAY)
@@ -208,7 +258,7 @@ private fun TeamTableHeader() {
             fontSize = 14.sp,
             color = Color.White,
             textAlign = TextAlign.Center,
-            modifier = Modifier.width(60.dp)
+            modifier = Modifier.width(50.dp) // 照搬RankingTable的排名列宽度
         )
         
         Text(
@@ -216,35 +266,42 @@ private fun TeamTableHeader() {
             fontFamily = sarasaBold,
             fontSize = 14.sp,
             color = Color.White,
-            modifier = Modifier.weight(0.4f)
-        )
-        
-        Text(
-            text = "总分",
-            fontFamily = sarasaBold,
-            fontSize = 14.sp,
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.weight(0.3f)
-        )
-        
-        Text(
-            text = "中位值",
-            fontFamily = sarasaBold,
-            fontSize = 14.sp,
-            color = Color.White,
             textAlign = TextAlign.End,
-            modifier = Modifier.width(70.dp)
+            modifier = Modifier.weight(0.6f) // 照搬RankingTable的作品信息列权重
         )
         
-        Text(
-            text = "评价数",
-            fontFamily = sarasaBold,
-            fontSize = 14.sp,
-            color = Color.White,
-            textAlign = TextAlign.End,
-            modifier = Modifier.width(60.dp)
-        )
+        when (teamInfoMode) {
+            0 -> {
+                // 分数条模式
+                Text(
+                    text = "总分",
+                    fontFamily = sarasaBold,
+                    fontSize = 14.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.width(medianWidth + extraWidth) // 与中位数+评价数宽度一致
+                )
+            }
+            1 -> {
+                // 数字显示模式
+                Text(
+                    text = "中位数",
+                    fontFamily = sarasaBold,
+                    fontSize = 14.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.width(medianWidth)
+                )
+                Text(
+                    text = "评价数",
+                    fontFamily = sarasaBold,
+                    fontSize = 14.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.width(extraWidth)
+                )
+            }
+        }
     }
 }
 
@@ -252,196 +309,227 @@ private fun TeamTableHeader() {
 private fun TeamRankingRow(
     team: TeamRankingItem,
     index: Int,
-    maxScore: Double
+    maxScore: Double,
+    teamInfoMode: Int,
+    extraWidth: Dp,
+    medianWidth: Dp,
+    scoreBarWidth: Dp
 ) {
     val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
     val scoreRatio = if (maxScore > 0) team.totalScore / maxScore else 0.0
+    val rankColor = Color.White
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(backgroundColor)
-            .padding(4.dp)
     ) {
-        // 团队主要信息行（排名、名称、分数条、中位值、评价数）
-        TeamMainInfoRow(
-            team = team,
-            scoreRatio = scoreRatio.toFloat(),
-            maxScore = maxScore
-        )
-        
-        // 团队作品详情行
-        TeamWorksDetail(team = team)
-    }
-}
-
-@Composable
-private fun TeamMainInfoRow(
-    team: TeamRankingItem,
-    scoreRatio: Float,
-    maxScore: Double
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // 排名列（包含排名变化指示器）
-        TeamRankColumn(team = team)
-        
-        // 团队名称列
-        Text(
-            text = team.teamName,
-            fontFamily = sarasaBold,
-            fontSize = 16.sp,
-            color = Color.White,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .weight(0.3f)
-                .padding(horizontal = 4.dp)
-        )
-        
-        // 总分条形图列
-        TeamScoreBar(
-            score = team.totalScore,
-            scoreRatio = scoreRatio,
-            modifier = Modifier.weight(0.25f)
-        )
-        
-        // 中位值列
-        Text(
-            text = "%.2f".format(team.medianScore),
-            fontFamily = sarasaBold,
-            fontSize = 14.sp,
-            color = Color.White,
-            textAlign = TextAlign.End,
-            modifier = Modifier.width(70.dp)
-        )
-        
-        // 评价数列
-        Text(
-            text = team.getFormattedImpressionCount(),
-            fontFamily = sarasaBold,
-            fontSize = 14.sp,
-            color = Color.White,
-            textAlign = TextAlign.End,
-            modifier = Modifier.width(60.dp)
-        )
-    }
-}
-
-@Composable
-private fun TeamRankColumn(team: TeamRankingItem) {
-    Column(
-        modifier = Modifier
-            .width(60.dp)
-            .padding(horizontal = 4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // 排名变化指示器
+        // 团队主要信息行（完全照搬RankingTable的行设计）
         Row(
-            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(36.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            val change = team.rankChange
-            when {
-                change != null && change > 0 -> {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowUp,
-                        contentDescription = "排名上升",
-                        tint = Color.Green,
-                        modifier = Modifier.size(12.dp)
-                    )
-                    Text(
-                        text = change.toString(),
-                        fontFamily = sarasaRegular,
-                        fontSize = 10.sp,
-                        color = Color.Green
-                    )
+            // 排名列 - 完全照搬RankingTable的排名列设计
+            Column(
+                modifier = Modifier
+                    .width(50.dp)
+                    .padding(vertical = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // 上方：排名变化指示器和变化量
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 排名变化指示器（照搬RankingTable逻辑）
+                    val change = team.rankChange
+                    when {
+                        change != null && change > 0 -> {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowUp,
+                                contentDescription = "Rank Up",
+                                tint = Color.Green,
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Text(
+                                text = change.toString(),
+                                fontFamily = sarasaRegular,
+                                fontSize = 10.sp,
+                                color = Color.Green
+                            )
+                        }
+                        change != null && change < 0 -> {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Rank Down",
+                                tint = Color.Red,
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Text(
+                                text = (-change).toString(),
+                                fontFamily = sarasaRegular,
+                                fontSize = 10.sp,
+                                color = Color.Red
+                            )
+                        }
+                        change != null -> {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                contentDescription = "Rank Same",
+                                tint = Color.Gray,
+                                modifier = Modifier.size(12.dp)
+                            )
+                        }
+                        else -> {}
+                    }
                 }
-                change != null && change < 0 -> {
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = "排名下降",
-                        tint = Color.Red,
-                        modifier = Modifier.size(12.dp)
-                    )
-                    Text(
-                        text = (-change).toString(),
-                        fontFamily = sarasaRegular,
-                        fontSize = 10.sp,
-                        color = Color.Red
-                    )
+                
+                // 下方：当前排名
+                Text(
+                    text = team.rank.toString(),
+                    fontFamily = sarasaBold,
+                    fontSize = 16.sp,
+                    color = rankColor,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            // 团队信息列（照搬RankingTable的作品信息列设计，但只显示团队名称）
+            Text(
+                text = team.teamName,
+                fontFamily = sarasaBold,
+                fontSize = 16.sp,
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .weight(0.6f)
+                    .padding(horizontal = 8.dp)
+            )
+
+            // 根据teamInfoMode显示不同的信息
+            when (teamInfoMode) {
+                0 -> {
+                    // 分数条模式（完全照搬RankingTable的分数条设计）
+                    Column(
+                        modifier = Modifier
+                            .width(scoreBarWidth)
+                            .padding(top = 1.dp)
+                    ) {
+                        // 主分数条
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(20.dp)
+                                .padding(horizontal = 2.dp)
+                        ) {
+                            Box {
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
+                                        .height(20.dp)
+                                        .background(
+                                            color = RANKING_RED,
+                                            shape = RoundedCornerShape(
+                                                topEnd = 10.dp,
+                                                bottomEnd = 10.dp
+                                            )
+                                        )
+                                )
+                                Text(
+                                    text = "%.2f".format(team.totalScore),
+                                    fontFamily = sarasaBold,
+                                    fontSize = 14.sp,
+                                    color = Color.White,
+                                    overflow = TextOverflow.Visible,
+                                    maxLines = 1,
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .padding(end = 4.dp)
+                                )
+                            }
+                        }
+                        
+                        // 对比分数条（如果有对比数据）
+                        team.compareTotalScore?.let { compareScore ->
+                            val compareRatio = if (maxScore > 0) compareScore / maxScore else 0.0
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(13.dp)
+                                    .padding(horizontal = 2.dp)
+                            ) {
+                                Box {
+                                    Spacer(
+                                        modifier = Modifier
+                                            .fillMaxWidth(compareRatio.toFloat().coerceAtMost(1f))
+                                            .height(13.dp)
+                                            .background(
+                                                color = RANKING_BLUE,
+                                                shape = RoundedCornerShape(
+                                                    topEnd = 7.dp,
+                                                    bottomEnd = 7.dp
+                                                )
+                                            )
+                                    )
+                                    Text(
+                                        text = "%.1f".format(compareScore),
+                                        fontFamily = sarasaRegular,
+                                        fontSize = 11.sp,
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        overflow = TextOverflow.Visible,
+                                        maxLines = 1,
+                                        modifier = Modifier
+                                            .align(Alignment.CenterEnd)
+                                            .padding(end = 2.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
-                change != null -> {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                        contentDescription = "排名持平",
-                        tint = Color.Gray,
-                        modifier = Modifier.size(12.dp)
-                    )
-                }
-                team.isNewTeam -> {
+                1 -> {
+                    // 数字显示模式
+                    Box(
+                        modifier = Modifier
+                            .width(medianWidth)
+                            .fillMaxHeight()
+                            .background(
+                                if (team.medianScore > 0)
+                                    Color(red = (team.medianScore / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
+                                else
+                                    Color.Transparent
+                            )
+                            .padding(horizontal = 4.dp),
+                        contentAlignment = Alignment.CenterEnd
+                    ) {
+                        Text(
+                            text = "%.2f".format(team.medianScore),
+                            fontFamily = sarasaBold,
+                            fontSize = 16.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.End
+                        )
+                    }
                     Text(
-                        text = "NEW",
-                        fontFamily = sarasaRegular,
-                        fontSize = 10.sp,
-                        color = RANKING_YELLOW
+                        text = team.getFormattedImpressionCount(),
+                        fontFamily = sarasaBold,
+                        fontSize = 16.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier
+                            .width(extraWidth)
+                            .padding(horizontal = 4.dp)
                     )
                 }
             }
         }
         
-        // 当前排名
-        Text(
-            text = team.rank.toString(),
-            fontFamily = sarasaBold,
-            fontSize = 18.sp,
-            color = Color.White,
-            textAlign = TextAlign.Center
-        )
-    }
-}
-
-@Composable
-private fun TeamScoreBar(
-    score: Double,
-    scoreRatio: Float,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier.padding(horizontal = 4.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(24.dp)
-                .background(
-                    color = Color.Gray.copy(alpha = 0.3f),
-                    shape = RoundedCornerShape(12.dp)
-                )
-        )
-        
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(scoreRatio.coerceAtMost(1f))
-                .height(24.dp)
-                .background(
-                    color = RANKING_RED,
-                    shape = RoundedCornerShape(12.dp)
-                )
-        )
-        
-        Text(
-            text = "%.2f".format(score),
-            fontFamily = sarasaBold,
-            fontSize = 13.sp,
-            color = Color.White,
-            textAlign = TextAlign.End,
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 8.dp)
-        )
+        // 团队作品详情行（始终显示）
+        TeamWorksDetail(team = team)
     }
 }
 
