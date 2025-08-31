@@ -299,8 +299,15 @@ internal class BofObjectBoxService {
                 
                 val latestScore = findLatestTeamScore(teamData)
                 this.latestTotalScore = latestScore?.total ?: 0.0
-                this.latestAverage = latestScore?.average ?: 0.0
+                this.latestMedian = latestScore?.median ?: 0.0
                 this.latestImpression = latestScore?.impression ?: 0.0
+                
+                // 获取最新的各作品分数
+                val latestValues = getLatestTeamValues(teamData)
+                this.latestScore1 = parseDoubleValue(latestValues?.total1)
+                this.latestScore2 = parseDoubleValue(latestValues?.total2)
+                this.latestScore3 = parseDoubleValue(latestValues?.total3)
+                this.latestScore4 = parseDoubleValue(latestValues?.total4)
                 
                 this.lastUpdated = System.currentTimeMillis()
             }
@@ -360,7 +367,6 @@ internal class BofObjectBoxService {
                                     latestScore = TeamScoreSnapshot(
                                         timestamp = timestamp,
                                         total = values.total,
-                                        average = 0.0, // Team数据中没有average，可能需要计算
                                         impression = values.impression,
                                         median = parseDoubleValue(values.median)
                                     )
@@ -373,6 +379,34 @@ internal class BofObjectBoxService {
         }
         
         return latestScore
+    }
+    
+    /**
+     * 获取团队最新的Values数据
+     */
+    private fun getLatestTeamValues(teamData: com.madsam.otora.data.bof.remote.model.BofTeamResponse): com.madsam.otora.data.bof.remote.model.TeamValues? {
+        if (teamData.score?.isEmpty() != false) return null
+        
+        var latestValues: com.madsam.otora.data.bof.remote.model.TeamValues? = null
+        var latestTimestamp = Long.MIN_VALUE
+        
+        teamData.score?.forEach { yearData ->
+            yearData.months?.forEach { monthData ->
+                monthData.days?.forEach { dayData ->
+                    dayData.hours?.forEach { hourData ->
+                        hourData.minutes?.forEach { minuteData ->
+                            val timestamp = createTimestamp(yearData.year, monthData.month, dayData.day, hourData.hour, minuteData.minute)
+                            if (timestamp > latestTimestamp) {
+                                latestTimestamp = timestamp
+                                latestValues = minuteData.values
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return latestValues
     }
     
     /**
@@ -412,30 +446,6 @@ internal class BofObjectBoxService {
             }
         }
     }
-
-    /**
-     * 获取指定路径下所有团队的最新得分排行
-     */
-    suspend fun getTeamRankingByPath(path: String): List<TeamRankingData> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val teams = getBofTeamData(path)
-                teams.map { team ->
-                    TeamRankingData(
-                        teamName = team.teamName,
-                        latestTotalScore = team.latestTotalScore,
-                        latestAverage = team.latestAverage,
-                        latestImpression = team.latestImpression,
-                        lastUpdated = team.lastUpdated
-                    )
-                }.sortedByDescending { it.latestTotalScore }
-                    .mapIndexed { index, team -> team.copy(rank = index + 1) }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error getting team ranking for path $path: ${e.message}", e)
-                emptyList()
-            }
-        }
-    }
 }
 
 /**
@@ -444,7 +454,6 @@ internal class BofObjectBoxService {
 internal data class TeamScoreSnapshot(
     val timestamp: Long,
     val total: Double,
-    val average: Double,
     val impression: Double,
     val median: Double
 )
@@ -455,7 +464,7 @@ internal data class TeamScoreSnapshot(
 data class TeamRankingData(
     val teamName: String,
     val latestTotalScore: Double,
-    val latestAverage: Double,
+    val latestMedian: Double,
     val latestImpression: Double,
     val lastUpdated: Long,
     val rank: Int = 0

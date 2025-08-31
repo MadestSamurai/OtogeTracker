@@ -1,9 +1,12 @@
 package com.madsam.otora.data.bof.local.repository
 
 import android.util.Log
+import com.madsam.otora.data.bof.local.model.BofTeamEntity
 import com.madsam.otora.data.bof.local.model.BofWorkEntity
 import com.madsam.otora.data.bof.local.model.BofWorkEntity_
+import com.madsam.otora.data.bof.local.model.BofTeamEntity_
 import com.madsam.otora.data.bof.remote.model.*
+import com.madsam.otora.ui.common.RankingItem
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
@@ -487,6 +490,330 @@ internal class BofRepository(
         
         return latestScore
     }
+    
+    /**
+     * 获取团队排名数据（支持时间解析和分阶段处理）
+     */
+    suspend fun getTeamRankingAtTimeStreamed(
+        currentTimestamp: Long,
+        compareTimestamp: Long? = null,
+        path: String = "tt",
+        batchSize: Int = 10,
+        onBatchReady: suspend (List<com.madsam.otora.ui.bof.TeamRankingItem>) -> Unit
+    ) {
+        Log.d(TAG, "getTeamRankingAtTimeStreamed called with currentTimestamp: $currentTimestamp, compareTimestamp: $compareTimestamp, path: $path")
+        
+        val startTime = System.currentTimeMillis()
+        
+        // 直接从ObjectBox获取团队数据
+        val boxStore = com.madsam.otora.core.database.ObjectBoxManager.getBoxStore()
+        val teamBox = boxStore.boxFor(BofTeamEntity::class.java)
+        val allTeams = teamBox.query(BofTeamEntity_.path.equal(path)).build().find()
+        
+        Log.d(TAG, "Starting team ranking processing of ${allTeams.size} teams for path: $path")
+        
+        val allCurrentResults = mutableListOf<com.madsam.otora.ui.bof.TeamRankingItem>()
+        val compareRankingMap = mutableMapOf<String, com.madsam.otora.ui.bof.TeamRankingItem>()
+        
+        // 如果有对比时间戳，先处理对比数据
+        if (compareTimestamp != null) {
+            Log.d(TAG, "Processing compare data for team ranking")
+            allTeams.forEach { entity ->
+                val compareScoreSnapshot = getTeamScoreAtTime(entity, compareTimestamp)
+                if (compareScoreSnapshot != null) {
+                    val compareItem = com.madsam.otora.ui.bof.TeamRankingItem(
+                        teamName = entity.teamName,
+                        totalScore = compareScoreSnapshot.total,
+                        impressionCount = compareScoreSnapshot.impression,
+                        medianScore = compareScoreSnapshot.median,
+                        score1 = compareScoreSnapshot.score1,
+                        score2 = compareScoreSnapshot.score2,
+                        score3 = compareScoreSnapshot.score3,
+                        score4 = compareScoreSnapshot.score4,
+                        title1 = getTeamTitleAtTime(entity, 1, compareTimestamp),
+                        artist1 = getTeamArtistAtTime(entity, 1, compareTimestamp),
+                        finalStriker1 = getTeamFinalStrikerAtTime(entity, 1, compareTimestamp),
+                        title2 = getTeamTitleAtTime(entity, 2, compareTimestamp),
+                        artist2 = getTeamArtistAtTime(entity, 2, compareTimestamp),
+                        finalStriker2 = getTeamFinalStrikerAtTime(entity, 2, compareTimestamp),
+                        title3 = getTeamTitleAtTime(entity, 3, compareTimestamp),
+                        artist3 = getTeamArtistAtTime(entity, 3, compareTimestamp),
+                        finalStriker3 = getTeamFinalStrikerAtTime(entity, 3, compareTimestamp),
+                        title4 = getTeamTitleAtTime(entity, 4, compareTimestamp),
+                        artist4 = getTeamArtistAtTime(entity, 4, compareTimestamp),
+                        finalStriker4 = getTeamFinalStrikerAtTime(entity, 4, compareTimestamp),
+                        lastUpdated = compareTimestamp
+                    )
+                    compareRankingMap[entity.teamName] = compareItem
+                }
+            }
+            
+            // 对比数据按总分排序并分配排名
+            val sortedCompareData = compareRankingMap.values.sortedByDescending { it.totalScore }
+            sortedCompareData.forEachIndexed { index, item ->
+                compareRankingMap[item.teamName] = item.copy(rank = index + 1)
+            }
+        }
+        
+        // 处理当前时间点数据（分批）
+        allTeams.chunked(batchSize).forEach { batch ->
+            val batchStart = System.currentTimeMillis()
+            
+            val batchResults = batch.mapNotNull { entity ->
+                val scoreSnapshot = getTeamScoreAtTime(entity, currentTimestamp)
+                if (scoreSnapshot != null) {
+                    val compareData = compareRankingMap[entity.teamName]
+                    com.madsam.otora.ui.bof.TeamRankingItem(
+                        teamName = entity.teamName,
+                        totalScore = scoreSnapshot.total,
+                        impressionCount = scoreSnapshot.impression,
+                        medianScore = scoreSnapshot.median,
+                        score1 = scoreSnapshot.score1,
+                        score2 = scoreSnapshot.score2,
+                        score3 = scoreSnapshot.score3,
+                        score4 = scoreSnapshot.score4,
+                        title1 = getTeamTitleAtTime(entity, 1, currentTimestamp),
+                        artist1 = getTeamArtistAtTime(entity, 1, currentTimestamp),
+                        finalStriker1 = getTeamFinalStrikerAtTime(entity, 1, currentTimestamp),
+                        title2 = getTeamTitleAtTime(entity, 2, currentTimestamp),
+                        artist2 = getTeamArtistAtTime(entity, 2, currentTimestamp),
+                        finalStriker2 = getTeamFinalStrikerAtTime(entity, 2, currentTimestamp),
+                        title3 = getTeamTitleAtTime(entity, 3, currentTimestamp),
+                        artist3 = getTeamArtistAtTime(entity, 3, currentTimestamp),
+                        finalStriker3 = getTeamFinalStrikerAtTime(entity, 3, currentTimestamp),
+                        title4 = getTeamTitleAtTime(entity, 4, currentTimestamp),
+                        artist4 = getTeamArtistAtTime(entity, 4, currentTimestamp),
+                        finalStriker4 = getTeamFinalStrikerAtTime(entity, 4, currentTimestamp),
+                        lastUpdated = currentTimestamp,
+                        // 对比数据
+                        compareTotalScore = compareData?.totalScore,
+                        compareImpressionCount = compareData?.impressionCount,
+                        compareMedianScore = compareData?.medianScore,
+                        compareScore1 = compareData?.score1,
+                        compareScore2 = compareData?.score2,
+                        compareScore3 = compareData?.score3,
+                        compareScore4 = compareData?.score4,
+                        compareRank = compareData?.rank
+                    )
+                } else null
+            }
+            
+            allCurrentResults.addAll(batchResults)
+            
+            // 按总分排序并分配排名
+            val sortedResults = allCurrentResults.sortedByDescending { it.totalScore }
+            val rankedResults = sortedResults.mapIndexed { index, item ->
+                val currentRank = index + 1
+                val rankChange = if (item.compareRank != null) {
+                    item.compareRank - currentRank // 对比排名 - 当前排名，正数表示排名上升
+                } else null
+                
+                item.copy(
+                    rank = currentRank,
+                    rankChange = rankChange
+                )
+            }
+            
+            Log.d(TAG, "Team ranking batch processed: ${batchResults.size} teams in ${System.currentTimeMillis() - batchStart}ms")
+            
+            // 返回当前结果
+            onBatchReady(rankedResults)
+            
+            // 短暂延迟防止UI阻塞
+            kotlinx.coroutines.delay(10)
+        }
+        
+        val endTime = System.currentTimeMillis()
+        Log.d(TAG, "getTeamRankingAtTimeStreamed completed in ${endTime - startTime}ms")
+    }
+
+/**
+ * 获取团队指定时间点的得分数据
+ */
+private fun getTeamScoreAtTime(entity: BofTeamEntity, targetTimestamp: Long): TeamScoreSnapshot? {
+    if (entity.scoreDataJson.isEmpty()) return null
+    
+    try {
+        val teamScoreYearsAdapter = moshi.adapter<List<TeamYearData>>(Types.newParameterizedType(List::class.java, TeamYearData::class.java))
+        val scoreYears = teamScoreYearsAdapter.fromJson(entity.scoreDataJson) ?: return null
+        return findTeamScoreByHierarchicalSearch(scoreYears, targetTimestamp)
+    } catch (e: Exception) {
+        Log.e(TAG, "Error parsing team score JSON for entity ${entity.teamName}: ${e.message}", e)
+        return null
+    }
+}
+
+/**
+ * 层次化查找团队指定时间点的得分数据
+ */
+private fun findTeamScoreByHierarchicalSearch(scoreYears: List<TeamYearData>, targetTimestamp: Long): TeamScoreSnapshot? {
+    val calendar = Calendar.getInstance()
+    calendar.timeInMillis = targetTimestamp
+    val targetYear = calendar.get(Calendar.YEAR)
+    val targetMonth = calendar.get(Calendar.MONTH) + 1 // Calendar月份从0开始
+    val targetDay = calendar.get(Calendar.DAY_OF_MONTH)
+    val targetHour = calendar.get(Calendar.HOUR_OF_DAY)
+    val targetMinute = calendar.get(Calendar.MINUTE)
+    
+    var bestMatch: TeamScoreSnapshot? = null
+    var bestTimestamp = Long.MIN_VALUE
+    
+    // 1. 遍历年份（升序）
+    val sortedYears = scoreYears.sortedBy { it.year }
+    for (yearData in sortedYears) {
+        if (yearData.year > targetYear) break
+        
+        // 2. 遍历月份（升序）
+        val sortedMonths = yearData.months?.sortedBy { it.month } ?: continue
+        for (monthData in sortedMonths) {
+            if (yearData.year == targetYear && monthData.month > targetMonth) break
+            
+            // 3. 遍历日期（升序）
+            val sortedDays = monthData.days?.sortedBy { it.day } ?: continue
+            for (dayData in sortedDays) {
+                if (yearData.year == targetYear && monthData.month == targetMonth && dayData.day > targetDay) break
+                
+                // 4. 遍历小时（升序）
+                val sortedHours = dayData.hours?.sortedBy { it.hour } ?: continue
+                for (hourData in sortedHours) {
+                    if (yearData.year == targetYear && monthData.month == targetMonth && 
+                        dayData.day == targetDay && hourData.hour > targetHour) break
+                    
+                    // 5. 遍历分钟（升序，查找所有小于等于目标分钟的记录）
+                    val validMinutes = hourData.minutes?.filter { minuteData ->
+                        if (yearData.year == targetYear && monthData.month == targetMonth && 
+                            dayData.day == targetDay && hourData.hour == targetHour) {
+                            minuteData.minute <= targetMinute
+                        } else {
+                            true
+                        }
+                    } ?: continue
+                    
+                    if (validMinutes.isNotEmpty()) {
+                        // 找到这个小时内的最佳匹配
+                        for (minuteData in validMinutes) {
+                            val currentTimestamp = createTimestamp(
+                                yearData.year, monthData.month, dayData.day, hourData.hour, minuteData.minute
+                            )
+                            
+                            if (currentTimestamp <= targetTimestamp && currentTimestamp > bestTimestamp) {
+                                bestTimestamp = currentTimestamp
+                                val values = minuteData.values
+                                if (values != null) {
+                                    bestMatch = TeamScoreSnapshot(
+                                        timestamp = currentTimestamp,
+                                        total = values.total,
+                                        impression = values.impression,
+                                        median = parseDoubleValue(values.median),
+                                        score1 = parseDoubleValue(values.total1),
+                                        score2 = parseDoubleValue(values.total2),
+                                        score3 = parseDoubleValue(values.total3),
+                                        score4 = parseDoubleValue(values.total4)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return bestMatch
+}
+
+/**
+ * 获取团队指定时间点的作品标题
+ */
+private fun getTeamTitleAtTime(entity: BofTeamEntity, workIndex: Int, targetTimestamp: Long): String {
+    val jsonField = when (workIndex) {
+        1 -> entity.title1Json
+        2 -> entity.title2Json
+        3 -> entity.title3Json
+        4 -> entity.title4Json
+        else -> ""
+    }
+    return getTeamMetadataAtTime(jsonField, targetTimestamp)
+}
+
+/**
+ * 获取团队指定时间点的作品艺术家
+ */
+private fun getTeamArtistAtTime(entity: BofTeamEntity, workIndex: Int, targetTimestamp: Long): String {
+    val jsonField = when (workIndex) {
+        1 -> entity.artist1Json
+        2 -> entity.artist2Json
+        3 -> entity.artist3Json
+        4 -> entity.artist4Json
+        else -> ""
+    }
+    return getTeamMetadataAtTime(jsonField, targetTimestamp)
+}
+
+/**
+ * 获取团队指定时间点的最终打击者
+ */
+private fun getTeamFinalStrikerAtTime(entity: BofTeamEntity, workIndex: Int, targetTimestamp: Long): String {
+    val jsonField = when (workIndex) {
+        1 -> entity.finalStriker1Json
+        2 -> entity.finalStriker2Json
+        3 -> entity.finalStriker3Json
+        4 -> entity.finalStriker4Json
+        else -> ""
+    }
+    return getTeamMetadataAtTime(jsonField, targetTimestamp)
+}
+
+/**
+ * 从JSON数据中获取指定时间点的团队元数据
+ */
+private fun getTeamMetadataAtTime(jsonData: String, targetTimestamp: Long): String {
+    if (jsonData.isEmpty()) return ""
+    
+    try {
+        val teamTimeValueAdapter = moshi.adapter<List<TeamTimeValue>>(Types.newParameterizedType(List::class.java, TeamTimeValue::class.java))
+        val timeValues = teamTimeValueAdapter.fromJson(jsonData) ?: return ""
+        
+        return findTeamMetadataByTimestamp(timeValues, targetTimestamp)
+    } catch (e: Exception) {
+        Log.e(TAG, "Error parsing team metadata JSON: ${e.message}", e)
+        return ""
+    }
+}
+
+/**
+ * 根据时间戳查找团队元数据记录
+ */
+private fun findTeamMetadataByTimestamp(timeValues: List<TeamTimeValue>, targetTimestamp: Long): String {
+    if (timeValues.isEmpty()) return ""
+    
+    // 解析时间戳并找到最接近但不超过目标时间的记录
+    val timestampedValues = timeValues.mapNotNull { item ->
+        try {
+            val timestamp = item.time.toLongOrNull()
+            if (timestamp != null) {
+                TimestampedMetadata(timestamp, item.value)
+            } else null
+        } catch (e: Exception) {
+            null
+        }
+    }.filter { it.timestamp <= targetTimestamp }
+        .sortedByDescending { it.timestamp }
+    
+    return timestampedValues.firstOrNull()?.value ?: timeValues.lastOrNull()?.value ?: ""
+}
+
+/**
+ * 解析Any类型为Double值
+ */
+private fun parseDoubleValue(value: Any?): Double {
+    return when (value) {
+        is Double -> value
+        is Number -> value.toDouble()
+        is String -> value.toDoubleOrNull() ?: 0.0
+        else -> 0.0
+    }
+}
 }
 
 /**
@@ -538,7 +865,7 @@ data class WorkRanking(
     val rankChange: Int? = null // 正数表示排名上升，负数表示排名下降
 ) {
     // 实现 RankingItem 接口的适配器
-    fun toRankingItem(): com.madsam.otora.ui.common.RankingItem = object : com.madsam.otora.ui.common.RankingItem {
+    fun toRankingItem(): RankingItem = object : RankingItem {
         override val rank: Int = this@WorkRanking.rank
         override val title: String = this@WorkRanking.title
         override val artist: String = this@WorkRanking.artist
@@ -552,7 +879,7 @@ data class WorkRanking(
     }
     
     // 专门用于平均分排行的适配器 - 将平均分作为主要分数显示
-    fun toAverageRankingItem(): com.madsam.otora.ui.common.RankingItem = object : com.madsam.otora.ui.common.RankingItem {
+    fun toAverageRankingItem(): RankingItem = object : RankingItem {
         override val rank: Int = this@WorkRanking.rank
         override val title: String = this@WorkRanking.title
         override val artist: String = this@WorkRanking.artist
@@ -566,7 +893,7 @@ data class WorkRanking(
     }
     
     // 专门用于中位数排行的适配器 - 将中位数作为主要分数显示
-    fun toMedianRankingItem(): com.madsam.otora.ui.common.RankingItem = object : com.madsam.otora.ui.common.RankingItem {
+    fun toMedianRankingItem(): RankingItem = object : RankingItem {
         override val rank: Int = this@WorkRanking.rank
         override val title: String = this@WorkRanking.title
         override val artist: String = this@WorkRanking.artist
@@ -580,7 +907,7 @@ data class WorkRanking(
     }
     
     // 专门用于差值排行的适配器 - 将分数差值作为主要分数显示
-    fun toDifferenceRankingItem(): com.madsam.otora.ui.common.RankingItem = object : com.madsam.otora.ui.common.RankingItem {
+    fun toDifferenceRankingItem(): RankingItem = object : RankingItem {
         override val rank: Int = this@WorkRanking.rank
         override val title: String = this@WorkRanking.title
         override val artist: String = this@WorkRanking.artist
@@ -594,7 +921,7 @@ data class WorkRanking(
     }
     
     // 专门用于综合分数排行的适配器 - 将综合分数作为主要分数显示，同时显示原始平均分和中位数
-    fun toCompositeRankingItem(): com.madsam.otora.ui.common.RankingItem = object : com.madsam.otora.ui.common.RankingItem {
+    fun toCompositeRankingItem(): RankingItem = object : RankingItem {
         override val rank: Int = this@WorkRanking.rank
         override val title: String = this@WorkRanking.title
         override val artist: String = this@WorkRanking.artist
@@ -614,4 +941,18 @@ data class WorkRanking(
 private data class TimestampedMetadata(
     val timestamp: Long,
     val value: String
+)
+
+/**
+ * 团队得分快照数据类
+ */
+data class TeamScoreSnapshot(
+    val timestamp: Long,
+    val total: Double,
+    val impression: Double,
+    val median: Double,
+    val score1: Double, // 作品1分数
+    val score2: Double, // 作品2分数
+    val score3: Double, // 作品3分数
+    val score4: Double  // 作品4分数
 )

@@ -229,7 +229,7 @@ private fun TeamTableHeader() {
         )
         
         Text(
-            text = "平均分",
+            text = "中位值",
             fontFamily = sarasaBold,
             fontSize = 14.sp,
             color = Color.White,
@@ -263,57 +263,70 @@ private fun TeamRankingRow(
             .background(backgroundColor)
             .padding(4.dp)
     ) {
-        // 主要排名行
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // 排名列（包含排名变化指示器）
-            TeamRankColumn(team = team)
-            
-            // 团队名称列
-            Text(
-                text = team.teamName,
-                fontFamily = sarasaBold,
-                fontSize = 16.sp,
-                color = Color.White,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .weight(0.4f)
-                    .padding(horizontal = 4.dp)
-            )
-            
-            // 总分条形图列
-            TeamScoreBar(
-                score = team.totalScore,
-                scoreRatio = scoreRatio.toFloat(),
-                modifier = Modifier.weight(0.3f)
-            )
-            
-            // 平均分列
-            Text(
-                text = team.getFormattedAverageScore(),
-                fontFamily = sarasaBold,
-                fontSize = 14.sp,
-                color = Color.White,
-                textAlign = TextAlign.End,
-                modifier = Modifier.width(70.dp)
-            )
-            
-            // 评价数列
-            Text(
-                text = team.getFormattedImpressionCount(),
-                fontFamily = sarasaBold,
-                fontSize = 14.sp,
-                color = Color.White,
-                textAlign = TextAlign.End,
-                modifier = Modifier.width(60.dp)
-            )
-        }
+        // 团队主要信息行（排名、名称、分数条、中位值、评价数）
+        TeamMainInfoRow(
+            team = team,
+            scoreRatio = scoreRatio.toFloat(),
+            maxScore = maxScore
+        )
         
-        // 团队作品详情
+        // 团队作品详情行
         TeamWorksDetail(team = team)
+    }
+}
+
+@Composable
+private fun TeamMainInfoRow(
+    team: TeamRankingItem,
+    scoreRatio: Float,
+    maxScore: Double
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 排名列（包含排名变化指示器）
+        TeamRankColumn(team = team)
+        
+        // 团队名称列
+        Text(
+            text = team.teamName,
+            fontFamily = sarasaBold,
+            fontSize = 16.sp,
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier
+                .weight(0.3f)
+                .padding(horizontal = 4.dp)
+        )
+        
+        // 总分条形图列
+        TeamScoreBar(
+            score = team.totalScore,
+            scoreRatio = scoreRatio,
+            modifier = Modifier.weight(0.25f)
+        )
+        
+        // 中位值列
+        Text(
+            text = "%.2f".format(team.medianScore),
+            fontFamily = sarasaBold,
+            fontSize = 14.sp,
+            color = Color.White,
+            textAlign = TextAlign.End,
+            modifier = Modifier.width(70.dp)
+        )
+        
+        // 评价数列
+        Text(
+            text = team.getFormattedImpressionCount(),
+            fontFamily = sarasaBold,
+            fontSize = 14.sp,
+            color = Color.White,
+            textAlign = TextAlign.End,
+            modifier = Modifier.width(60.dp)
+        )
     }
 }
 
@@ -435,10 +448,10 @@ private fun TeamScoreBar(
 @Composable
 private fun TeamWorksDetail(team: TeamRankingItem) {
     val works = listOf(
-        Triple(team.title1, team.artist1, team.finalStriker1),
-        Triple(team.title2, team.artist2, team.finalStriker2),
-        Triple(team.title3, team.artist3, team.finalStriker3),
-        Triple(team.title4, team.artist4, team.finalStriker4)
+        Triple(team.title1, team.artist1, Triple(team.finalStriker1, team.score1, 1)),
+        Triple(team.title2, team.artist2, Triple(team.finalStriker2, team.score2, 2)),
+        Triple(team.title3, team.artist3, Triple(team.finalStriker3, team.score3, 3)),
+        Triple(team.title4, team.artist4, Triple(team.finalStriker4, team.score4, 4))
     ).filter { it.first.isNotEmpty() }
     
     if (works.isEmpty()) return
@@ -446,38 +459,70 @@ private fun TeamWorksDetail(team: TeamRankingItem) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 64.dp, top = 4.dp)
+            .padding(top = 2.dp)
     ) {
-        works.forEach { (title, artist, finalStriker) ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 2.dp)
-            ) {
-                // Final Striker 星标
-                if (finalStriker == "1") {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Final Striker",
-                        tint = RANKING_YELLOW,
-                        modifier = Modifier.size(14.dp)
-                    )
-                } else {
-                    Spacer(modifier = Modifier.size(14.dp))
-                }
-                
-                Spacer(modifier = Modifier.width(4.dp))
-                
-                // 作品信息
-                Text(
-                    text = "$title - $artist",
-                    fontFamily = sarasaRegular,
-                    fontSize = 12.sp,
-                    color = TEXT_GRAY,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-            }
+        works.forEach { (title, artist, workData) ->
+            val (finalStriker, workScore, workIndex) = workData
+            TeamWorkRow(
+                title = title,
+                artist = artist,
+                finalStriker = finalStriker,
+                workScore = workScore
+            )
         }
+    }
+}
+
+@Composable
+private fun TeamWorkRow(
+    title: String,
+    artist: String,
+    finalStriker: String,
+    workScore: Double
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 1.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 左侧：作品信息
+        Row(
+            modifier = Modifier.weight(1f),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Final Striker 星标
+            if (finalStriker == "1") {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = "Final Striker",
+                    tint = RANKING_YELLOW,
+                    modifier = Modifier.size(14.dp)
+                )
+            } else {
+                Spacer(modifier = Modifier.size(14.dp))
+            }
+            
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Text(
+                text = "$title - $artist",
+                fontFamily = sarasaRegular,
+                fontSize = 12.sp,
+                color = TEXT_GRAY,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Text(
+            text = "%.2f".format(workScore),
+            fontFamily = sarasaBold,
+            fontSize = 12.sp,
+            color = TEXT_GRAY,
+            textAlign = TextAlign.End,
+            modifier = Modifier.width(70.dp)
+        )
     }
 }

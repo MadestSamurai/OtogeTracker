@@ -8,7 +8,7 @@ import io.objectbox.annotation.Index
 internal data class BofCommentDetailEntity(
     @Id var id: Long = 0,
     
-    @Index var detailId: String = "", // 用于存储原来的 id: "${detail.evalNumber}_${detail.workNumber}"
+    @Index var detailId: String = "",
     @Index var user: String = "",
     var score: Int = 0,
     var code: String = "", // evalNumber

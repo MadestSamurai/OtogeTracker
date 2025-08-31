@@ -5,21 +5,22 @@ import android.view.View
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.madsam.otora.BofScreenState
-import com.madsam.otora.data.bof.ui.model.BofCommentUI
-import com.madsam.otora.data.bof.local.api.BofLocalService
-import com.madsam.otora.data.bof.local.repository.BofRepository
-import com.madsam.otora.data.bof.local.model.BofWorkEntity
-import com.madsam.otora.data.bof.local.repository.WorkRanking
 import com.madsam.otora.core.database.ObjectBoxManager
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.ScreenUtil.getSafeInsetLeftDp
 import com.madsam.otora.core.utils.ScreenUtil.getSafeInsetRightDp
+import com.madsam.otora.data.bof.local.api.BofLocalService
+import com.madsam.otora.data.bof.local.model.BofWorkEntity
+import com.madsam.otora.data.bof.local.repository.BofRepository
+import com.madsam.otora.data.bof.local.repository.WorkRanking
+import com.madsam.otora.data.bof.ui.model.BofCommentUI
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.combine
-import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 private const val TAG = "BofViewModel"
 
@@ -547,7 +548,7 @@ internal class BofViewModel(
             } else null
         }.filter { 
             // 可以根据需要添加更多过滤条件
-            Math.abs(it.score) > 0 // 只显示有变化的作品
+            abs(it.score) > 0 // 只显示有变化的作品
         }.sortedByDescending { it.score } // 按分数差值降序排列（正数表示增长）
         
         // 重新分配排名
@@ -557,66 +558,72 @@ internal class BofViewModel(
     }
 
     /**
-     * 加载团队排行数据
+     * 加载团队排行数据 - 支持时间解析和分阶段处理
      */
     fun loadTeamRankingData(path: String) {
+        Log.d(TAG, "Starting team ranking data loading with time-based parsing")
         viewModelScope.launch {
             try {
                 isTeamRankingLoading.update { true }
                 teamRankingError.update { "" }
                 
-                Log.d(TAG, "Loading team ranking data for path: $path")
-                
-                val objectBoxService = com.madsam.otora.data.bof.local.objectbox.BofObjectBoxService()
-                val teamRankings = objectBoxService.getTeamRankingByPath(path)
-                val teamDetails = objectBoxService.getBofTeamData(path)
-                
-                // 转换为新的TeamRankingItem
-                val teamRankingItems = teamRankings.mapIndexed { index, ranking ->
-                    val detail = teamDetails.find { it.teamName == ranking.teamName }
-                    
-                    TeamRankingItem(
-                        rank = ranking.rank,
-                        teamName = ranking.teamName,
-                        totalScore = ranking.latestTotalScore,
-                        averageScore = ranking.latestAverage,
-                        impressionCount = ranking.latestImpression,
-                        medianScore = 0.0, // TODO: 需要从团队详细数据中解析
-                        lastUpdated = ranking.lastUpdated,
-                        
-                        // 从团队详细数据中获取作品信息
-                        title1 = detail?.currentTitle1 ?: "",
-                        artist1 = detail?.currentArtist1 ?: "",
-                        finalStriker1 = detail?.currentFinalStriker1 ?: "",
-                        title2 = detail?.currentTitle2 ?: "",
-                        artist2 = detail?.currentArtist2 ?: "",
-                        finalStriker2 = detail?.currentFinalStriker2 ?: "",
-                        title3 = detail?.currentTitle3 ?: "",
-                        artist3 = detail?.currentArtist3 ?: "",
-                        finalStriker3 = detail?.currentFinalStriker3 ?: "",
-                        title4 = detail?.currentTitle4 ?: "",
-                        artist4 = detail?.currentArtist4 ?: "",
-                        finalStriker4 = detail?.currentFinalStriker4 ?: "",
-                        
-                        // TODO: 实现对比数据逻辑
-                        compareTotalScore = null,
-                        compareAverageScore = null,
-                        compareImpressionCount = null,
-                        compareMedianScore = null,
-                        compareRank = null,
-                        rankChange = null
+                // 计算当前时间戳（主排序时间点）
+                val currentTimestamp = if (bofScreenState.selectedCurrentTime.value == "-1") {
+                    System.currentTimeMillis()
+                } else {
+                    CommonUtils.ymdToMillis(
+                        bofScreenState.selectedCurrentDate.value.toString(),
+                        CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
                     )
                 }
                 
-                teamRankingData.update { teamRankingItems }
+                // 计算对比时间戳（可选）
+                val compareTimestamp = if (bofScreenState.selectedCompareTime.value == "-1") {
+                    null
+                } else {
+                    CommonUtils.ymdToMillis(
+                        bofScreenState.selectedCompareDate.value.toString(),
+                        CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
+                    )
+                }
                 
-                Log.d(TAG, "Team ranking data loaded: ${teamRankingItems.size} teams")
+                Log.d(TAG, "Team ranking - Current timestamp: $currentTimestamp, Compare timestamp: $compareTimestamp")
+                
+                var isFirstBatch = true
+                
+                // 使用支持对比的分阶段处理
+                bofRepository.getTeamRankingAtTimeStreamed(
+                    currentTimestamp = currentTimestamp,
+                    compareTimestamp = compareTimestamp,
+                    path = path,
+                    batchSize = 10
+                ) { currentResults ->
+                    Log.d(TAG, "Team ranking streamed update: ${currentResults.size} teams available")
+                    teamRankingData.update { currentResults }
+                    
+                    // 第一批数据加载完成后就关闭加载状态
+                    if (isFirstBatch && currentResults.isNotEmpty()) {
+                        Log.d(TAG, "First batch of team data loaded, setting isLoading to false")
+                        isTeamRankingLoading.update { false }
+                        isFirstBatch = false
+                    }
+                }
+                
+                if (teamRankingData.value.isEmpty()) {
+                    teamRankingError.update { "该时间点暂无团队排名数据" }
+                }
+                
+                Log.d(TAG, "Team ranking data loading completed successfully")
                 
             } catch (e: Exception) {
                 Log.e(TAG, "Error loading team ranking data: ${e.message}", e)
                 teamRankingError.update { "加载团队排行数据失败: ${e.message}" }
             } finally {
-                isTeamRankingLoading.update { false }
+                // 确保加载状态最终被设置为false
+                if (isTeamRankingLoading.value) {
+                    Log.d(TAG, "Finally setting team ranking isLoading to false")
+                    isTeamRankingLoading.update { false }
+                }
             }
         }
     }
@@ -643,7 +650,6 @@ data class TeamRankingItem(
     val rank: Int = 0,
     val teamName: String = "",
     val totalScore: Double = 0.0,
-    val averageScore: Double = 0.0,
     val impressionCount: Double = 0.0,
     val medianScore: Double = 0.0,
     val lastUpdated: Long = 0,
@@ -652,21 +658,28 @@ data class TeamRankingItem(
     val title1: String = "",
     val artist1: String = "",
     val finalStriker1: String = "",
+    val score1: Double = 0.0, // 作品1分数
     val title2: String = "",
     val artist2: String = "",
     val finalStriker2: String = "",
+    val score2: Double = 0.0, // 作品2分数
     val title3: String = "",
     val artist3: String = "",
     val finalStriker3: String = "",
+    val score3: Double = 0.0, // 作品3分数
     val title4: String = "",
     val artist4: String = "",
     val finalStriker4: String = "",
+    val score4: Double = 0.0, // 作品4分数
     
     // 对比数据（如果有）
     val compareTotalScore: Double? = null,
-    val compareAverageScore: Double? = null,
     val compareImpressionCount: Double? = null,
     val compareMedianScore: Double? = null,
+    val compareScore1: Double? = null, // 对比作品1分数
+    val compareScore2: Double? = null, // 对比作品2分数
+    val compareScore3: Double? = null, // 对比作品3分数
+    val compareScore4: Double? = null, // 对比作品4分数
     val compareRank: Int? = null,
     val rankChange: Int? = null // 正数表示排名上升，负数表示排名下降
 ) {
@@ -675,6 +688,5 @@ data class TeamRankingItem(
      */
     val isNewTeam: Boolean get() = compareTotalScore == null || compareTotalScore == 0.0
 
-    fun getFormattedAverageScore(): String = "%.2f".format(averageScore)
     fun getFormattedImpressionCount(): String = "%.0f".format(impressionCount)
 }

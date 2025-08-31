@@ -6,9 +6,6 @@ import io.objectbox.annotation.Index
 import io.objectbox.annotation.Unique
 import io.objectbox.annotation.ConflictStrategy
 
-/**
- * BOFTT紧凑存储Entity - 层次化数据压缩到单个实体
- */
 @Entity
 internal data class BofWorkEntity(
     @Id var id: Long = 0,
