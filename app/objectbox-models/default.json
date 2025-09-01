@@ -787,7 +787,7 @@
     },
     {
       "id": "23:2818741658071394833",
-      "lastPropertyId": "12:7614785213469666875",
+      "lastPropertyId": "13:2748172345050945522",
       "name": "BofRangeEntity",
       "properties": [
         {
@@ -841,6 +841,11 @@
         {
           "id": "12:7614785213469666875",
           "name": "fullName",
+          "type": 9
+        },
+        {
+          "id": "13:2748172345050945522",
+          "name": "commentDate",
           "type": 9
         }
       ],

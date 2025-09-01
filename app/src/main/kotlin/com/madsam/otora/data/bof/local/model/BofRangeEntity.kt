@@ -16,6 +16,7 @@ internal data class BofRangeEntity(
     var isStart: Boolean = false, // 是否已开始
     var isEnd: Boolean = false, // 是否已结束
     var singleComment: Boolean = false, // 是否单个评论
+    var commentDate: String = "", // 评论日期
     var lastUpdated: Long = 0 // 最后更新时间戳
 ) {
     constructor() : this(
@@ -28,6 +29,7 @@ internal data class BofRangeEntity(
         isStart = false,
         isEnd = false,
         singleComment = false,
+        commentDate = "",
         lastUpdated = 0
     )
 }

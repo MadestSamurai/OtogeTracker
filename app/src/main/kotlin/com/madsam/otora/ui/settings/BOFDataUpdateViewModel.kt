@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
@@ -79,10 +80,22 @@ class BOFDataUpdateViewModel : ViewModel() {
                 
                 // 转换为UI显示项目
                 val competitionItems = competitions.map { range ->
-                    // 每个比赛都获取作品数量和团队数量
+                    // 每个比赛都获取作品数量、团队数量和评论数量
                     val workCount = bofRepository.getWorksCount(range.path)
                     val teamCount = bofRepository.getTeamCount(range.path)
-                    val totalDataCount = workCount + teamCount
+                    // 根据比赛配置使用正确的日期来获取评论数量
+                    val dateToCheck = if (range.commentDate.isNotEmpty()) {
+                        range.commentDate
+                    } else {
+                        range.current.ifEmpty { "2025-01-08" }
+                    }
+                    val commentCount = try {
+                        runBlocking { bofObjectBoxService.getCommentCount(dateToCheck) }
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Failed to get comment count for ${range.path} on date $dateToCheck: ${e.message}")
+                        0L
+                    }
+                    val totalDataCount = workCount + teamCount + commentCount
                     
                     val lastUpdatedText = if (totalDataCount > 0) {
                         java.text.SimpleDateFormat("yyyy-MM-dd HH:mm", java.util.Locale.getDefault())
@@ -104,7 +117,8 @@ class BOFDataUpdateViewModel : ViewModel() {
                         endTime = range.current,
                         // 添加详细的数据统计信息
                         workCount = workCount,
-                        teamCount = teamCount
+                        teamCount = teamCount,
+                        commentCount = commentCount
                     )
                 }.sortedWith(
                     compareByDescending { it.startTime }
@@ -174,19 +188,38 @@ class BOFDataUpdateViewModel : ViewModel() {
                     errors.add(errorMsg)
                 }
 
+                // 下载评论数据
+                var commentCount = 0L
+                try {
+                    _uiState.value = _uiState.value.copy(
+                        message = "正在下载 $competitionName 评论数据..."
+                    )
+                    commentCount = downloadCommentData(competitionPath, competitionName)
+                } catch (e: Exception) {
+                    val errorMsg = "评论数据下载失败: ${e.message}"
+                    Log.e(TAG, errorMsg, e)
+                    errors.add(errorMsg)
+                }
+
                 // 更新完成状态
                 if (errors.isEmpty()) {
                     // 全部成功
+                    val successMsg = mutableListOf<String>()
+                    if (workCount > 0) successMsg.add("${workCount}部作品")
+                    if (teamCount > 0) successMsg.add("${teamCount}个团队") 
+                    if (commentCount > 0) successMsg.add("${commentCount}条评论")
+                    
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        message = "成功保存 $competitionName 数据: ${workCount}部作品, ${teamCount}个团队",
+                        message = "成功保存 $competitionName 数据: ${successMsg.joinToString(", ")}",
                         isError = false
                     )
-                } else if (workCount > 0 || teamCount > 0) {
+                } else if (workCount > 0 || teamCount > 0 || commentCount > 0) {
                     // 部分成功
                     val successMsg = mutableListOf<String>()
                     if (workCount > 0) successMsg.add("${workCount}部作品")
                     if (teamCount > 0) successMsg.add("${teamCount}个团队")
+                    if (commentCount > 0) successMsg.add("${commentCount}条评论")
                     
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
@@ -287,6 +320,68 @@ class BOFDataUpdateViewModel : ViewModel() {
     }
     
     /**
+     * 下载评论数据
+     * @return 保存的评论数量
+     */
+    private suspend fun downloadCommentData(competitionPath: String, competitionName: String): Long {
+        // 首先获取range数据来检查singleComment字段
+        val rangeData = bofObjectBoxService.getBofRangeData()
+        val competitionRange = rangeData.find { it.path == competitionPath }
+        
+        if (competitionRange == null) {
+            Log.w(TAG, "No '$competitionPath' range found in range data, skipping comment data download")
+            return 0L
+        }
+        
+        // 检查比赛是否已开始
+        if (!competitionRange.isStart) {
+            Log.i(TAG, "BOF:${competitionPath.uppercase()} has not started yet, skipping comment data download")
+            return 0L
+        }
+        
+        // 根据singleComment字段选择API端点
+        val response = withContext(Dispatchers.IO) {
+            if (competitionRange.singleComment) {
+                Log.d(TAG, "Using fixed comment data for competition: $competitionPath")
+                api.getBofCommentData(competitionPath).execute()
+            } else {
+                Log.d(TAG, "Time-based comment data not implemented yet for competition: $competitionPath")
+                // 时间序列评论数据还未设计好，跳过
+                return@withContext null
+            }
+        }
+        
+        if (response == null) {
+            Log.w(TAG, "Comment data download skipped for $competitionPath (time-based not implemented)")
+            return 0L
+        }
+        
+        if (!response.isSuccessful) {
+            throw Exception("评论数据API请求失败: ${response.code()} - ${response.message()}")
+        }
+
+        val commentDataList = response.body()
+        if (commentDataList == null) {
+            throw Exception("评论数据API响应为空")
+        }
+
+        // 使用commentDate字段作为保存日期
+        val dateToSave = if (competitionRange.commentDate.isNotEmpty()) {
+            competitionRange.commentDate
+        } else {
+            // 如果没有commentDate，使用current字段或默认日期
+            competitionRange.current.ifEmpty { "2025-01-08" }
+        }
+        
+        // 保存评论数据到ObjectBox
+        bofObjectBoxService.saveBofCommentApiResponse(commentDataList, dateToSave)
+        val savedCount = bofObjectBoxService.getCommentCount(dateToSave)
+
+        Log.d(TAG, "Successfully downloaded and saved $savedCount $competitionName comments")
+        return savedCount
+    }
+    
+    /**
      * 更新特定比赛项目的状态
      */
     private fun updateCompetitionItemStatus(path: String, isUpdating: Boolean) {
@@ -373,13 +468,14 @@ data class CompetitionUpdateItem(
     val isStart: Boolean, // 是否已开始
     val isEnd: Boolean, // 是否已结束
     val hasData: Boolean, // 是否已有数据
-    val dataCount: Long, // 总数据数量 (作品+团队)
+    val dataCount: Long, // 总数据数量 (作品+团队+评论)
     val lastUpdated: String, // 最后更新时间
     val startTime: String, // 开始时间，用于排序
     val endTime: String, // 结束时间，用于排序
     val isUpdating: Boolean = false, // 是否正在更新
     val workCount: Long = 0, // 作品数量
-    val teamCount: Long = 0 // 团队数量
+    val teamCount: Long = 0, // 团队数量
+    val commentCount: Long = 0 // 评论数量
 )
 
 /**

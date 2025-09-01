@@ -62,7 +62,7 @@ import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.bof.BofScreen
 import com.madsam.otora.ui.record.RecordScreen
 import com.madsam.otora.data.bof.remote.api.BofRequestService
-import com.madsam.otora.data.bof.remote.model.BofRangeDTO
+import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -314,5 +314,5 @@ class BofScreenState {
     var selectedCurrentTime = MutableStateFlow("-1")
     var selectedCompareDate = MutableStateFlow(LocalDate.now().minusDays(1))
     var selectedCompareTime = MutableStateFlow("-1")
-    var selectedRange = MutableStateFlow<BofRangeDTO?>(null)
+    var selectedRange = MutableStateFlow<BofRangeResponse?>(null)
 }

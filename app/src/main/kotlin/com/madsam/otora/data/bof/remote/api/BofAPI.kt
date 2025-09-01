@@ -1,7 +1,7 @@
 package com.madsam.otora.data.bof.remote.api
 
-import com.madsam.otora.data.bof.remote.model.BofCommentDTO
-import com.madsam.otora.data.bof.remote.model.BofRangeDTO
+import com.madsam.otora.data.bof.remote.model.BofCommentSingleResponse
+import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.madsam.otora.data.bof.remote.model.BofWorkData
 import com.madsam.otora.data.bof.remote.model.BofTeamResponse
 import retrofit2.Call
@@ -10,7 +10,7 @@ import retrofit2.http.Path
 
 internal interface BofAPI {
     @GET("bof/range.json")
-    fun getBofRangeData(): Call<List<BofRangeDTO>>
+    fun getBofRangeData(): Call<List<BofRangeResponse>>
 
     @GET("bof/{path}/work.json")
     fun getBofWorkData(
@@ -22,8 +22,8 @@ internal interface BofAPI {
         @Path("path") path: String
     ): Call<List<BofTeamResponse>>
 
-    @GET("bof/tt/comment/user{date}.json")
-    fun getBofttComment(
-        @Path("date") date: String
-    ): Call<List<BofCommentDTO>>
+    @GET("bof/{path}/comment.json")
+    fun getBofCommentData(
+        @Path("path") path: String
+    ): Call<List<BofCommentSingleResponse>>
 }

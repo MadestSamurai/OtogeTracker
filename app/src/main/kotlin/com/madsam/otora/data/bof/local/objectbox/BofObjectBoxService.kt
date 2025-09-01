@@ -4,7 +4,7 @@ import android.util.Log
 import com.madsam.otora.core.database.ObjectBoxManager
 import com.madsam.otora.data.bof.local.model.*
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
-import com.madsam.otora.data.bof.remote.model.BofRangeDTO
+import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -121,7 +121,7 @@ internal class BofObjectBoxService {
     /**
      * 保存 BOF Range 数据
      */
-    suspend fun saveBofRangeData(ranges: List<BofRangeDTO>) {
+    suspend fun saveBofRangeData(ranges: List<BofRangeResponse>) {
         withContext(Dispatchers.IO) {
             try {
                 val entities = ranges.map { dto ->
@@ -134,6 +134,7 @@ internal class BofObjectBoxService {
                         isStart = dto.isStart,
                         isEnd = dto.isEnd,
                         singleComment = dto.singleComment,
+                        commentDate = dto.commentDate,
                         lastUpdated = System.currentTimeMillis()
                     )
                 }
@@ -148,12 +149,12 @@ internal class BofObjectBoxService {
     /**
      * 获取所有 BOF Range 数据
      */
-    suspend fun getBofRangeData(): List<BofRangeDTO> {
+    suspend fun getBofRangeData(): List<BofRangeResponse> {
         return withContext(Dispatchers.IO) {
             try {
                 val entities = bofRangeBox.all
                 entities.map { entity ->
-                    BofRangeDTO(
+                    BofRangeResponse(
                         path = entity.path,
                         start = entity.start,
                         current = entity.current,
@@ -161,7 +162,8 @@ internal class BofObjectBoxService {
                         full = entity.fullName,
                         isStart = entity.isStart,
                         isEnd = entity.isEnd,
-                        singleComment = entity.singleComment
+                        singleComment = entity.singleComment,
+                        commentDate = entity.commentDate
                     )
                 }
             } catch (e: Exception) {
@@ -446,6 +448,92 @@ internal class BofObjectBoxService {
             }
         }
     }
+    
+    /**
+     * 保存评论API响应数据
+     */
+    suspend fun saveBofCommentApiResponse(commentList: List<com.madsam.otora.data.bof.remote.model.BofCommentSingleResponse>, date: String) {
+        withContext(Dispatchers.IO) {
+            try {
+                val commentsToSave = mutableListOf<BofCommentEntity>()
+                val detailsToSave = mutableListOf<BofCommentDetailEntity>()
+                
+                commentList.forEach { comment ->
+                    val entity = BofCommentEntity(
+                        commentId = "${date}_${comment.user}${if (comment.pattern != null) "_${comment.pattern}" else ""}",
+                        date = date,
+                        user = comment.user,
+                        pattern = if (comment.pattern != null) comment.pattern.toString() else "",
+                        country = comment.country,
+                        vote = comment.vote,
+                        voteTotal = comment.voteTotal,
+                        voteAve = comment.voteAve,
+                        short = comment.short,
+                        shortTotal = comment.shortTotal,
+                        shortAve = comment.shortAve,
+                        shortComment = comment.shortComment,
+                        long = comment.long,
+                        longTotal = comment.longTotal,
+                        longAve = comment.longAve,
+                        longComment = comment.longComment,
+                        total = comment.total,
+                        totalAve = comment.totalAve
+                    )
+                    commentsToSave.add(entity)
+                    
+                    val details = listOf(comment.voteDetail, comment.shortDetail, comment.longDetail)
+
+                    details.forEach { detailList ->
+                        if (detailList.isNotEmpty()) {
+                            detailList.forEach { detail ->
+                                val detailEntity = BofCommentDetailEntity(
+                                    detailId = "${detail.evalNumber}_${detail.workNumber}",
+                                    user = comment.user,
+                                    score = detail.score,
+                                    code = detail.evalNumber,
+                                    country = detail.evalPosition,
+                                    workNumber = detail.workNumber,
+                                    date = date,
+                                    type = when (detailList) {
+                                        comment.voteDetail -> "vote"
+                                        comment.shortDetail -> "short"
+                                        else -> "long"
+                                    }
+                                )
+                                detailsToSave.add(detailEntity)
+                            }
+                        }
+                    }
+                }
+                
+                // 保存到ObjectBox
+                saveBofCommentData(commentsToSave)
+                saveBofCommentDetailData(detailsToSave)
+                
+                Log.d(TAG, "Saved ${commentsToSave.size} comments and ${detailsToSave.size} comment details for date $date")
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving comment API response for date $date: ${e.message}", e)
+                throw e
+            }
+        }
+    }
+    
+    /**
+     * 获取指定日期的评论数量
+     */
+    suspend fun getCommentCount(date: String): Long {
+        return withContext(Dispatchers.IO) {
+            try {
+                bofCommentBox.query(
+                    BofCommentEntity_.date.equal(date)
+                ).build().count()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error getting comment count for date $date: ${e.message}", e)
+                0L
+            }
+        }
+    }
 }
 
 /**
@@ -456,16 +544,4 @@ internal data class TeamScoreSnapshot(
     val total: Double,
     val impression: Double,
     val median: Double
-)
-
-/**
- * 团队排行数据类
- */
-data class TeamRankingData(
-    val teamName: String,
-    val latestTotalScore: Double,
-    val latestMedian: Double,
-    val latestImpression: Double,
-    val lastUpdated: Long,
-    val rank: Int = 0
 )

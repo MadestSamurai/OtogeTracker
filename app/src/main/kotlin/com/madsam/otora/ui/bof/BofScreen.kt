@@ -77,7 +77,7 @@ import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.data.bof.remote.api.BofRequestService
-import com.madsam.otora.data.bof.remote.model.BofRangeDTO
+import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.madsam.otora.ui.bof.components.DateTimeRangePicker
 import com.madsam.otora.ui.bof.sub.BofCommentScreen
 import com.madsam.otora.ui.bof.sub.BofEntryPagerScreen
@@ -87,7 +87,6 @@ import com.madsam.otora.ui.components.CustomTabRow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 private const val TAG = "BofScreen"
 
@@ -114,7 +113,6 @@ fun BofScreen(
 ) {
     Log.d(TAG, "BofScreen Compose started")
     val coroutineScope = rememberCoroutineScope()
-    val dateTime = LocalDate.now()
 
     Log.d(TAG, "Creating BofRequestService")
     val bofRequestService = BofRequestService()
@@ -127,8 +125,8 @@ fun BofScreen(
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     
     // Range 数据状态
-    var rangeData by remember { mutableStateOf<List<BofRangeDTO>>(emptyList()) }
-    var selectedRange by remember { mutableStateOf<BofRangeDTO?>(null) }
+    var rangeData by remember { mutableStateOf<List<BofRangeResponse>>(emptyList()) }
+    var selectedRange by remember { mutableStateOf<BofRangeResponse?>(null) }
     
     // 获取 range 数据
     LaunchedEffect(Unit) {
@@ -173,12 +171,6 @@ fun BofScreen(
 
     fun selectTime() {
         showDateTimeRangePicker = true
-    }
-
-    fun refreshData() {
-        val competitionType = selectedRange?.path ?: "tt"
-        bofRequestService.requestBofCommentData(dateTime, competitionType) {
-        }
     }
 
     // 流式JSON解析加载
@@ -311,8 +303,6 @@ fun BofScreen(
                                 selectedRange = range
                                 // 同步到 BofScreenState
                                 bofScreenState.selectedRange.value = range
-                                // 根据选择的比赛类型刷新数据
-                                refreshData()
                                 coroutineScope.launch { 
                                     drawerState.close()
                                     snackbarHostState.showSnackbar("已切换到 ${range.full.ifEmpty { range.short }}")
@@ -376,7 +366,6 @@ fun BofScreen(
                     label = { Text("Refresh Data") },
                     selected = false,
                     onClick = {
-                        refreshData()
                         coroutineScope.launch { 
                             drawerState.close()
                             snackbarHostState.showSnackbar("数据已刷新")
@@ -513,13 +502,6 @@ fun BofScreen(
                                     Icon(
                                         painter = rememberVectorPainter(image = Filled.Calendar),
                                         contentDescription = "Date&Time",
-                                        tint = Beige400
-                                    )
-                                }
-                                IconButton(onClick = { refreshData() }) {
-                                    Icon(
-                                        painter = rememberVectorPainter(image = Filled.ArrowRotate),
-                                        contentDescription = "Refresh",
                                         tint = Beige400
                                     )
                                 }
@@ -722,7 +704,6 @@ fun BofScreen(
                                                 2 -> {
                                                     // Comment页面，刷新评论数据
                                                     coroutineScope.launch {
-                                                        refreshData()
                                                         snackbarHostState.showSnackbar("评论数据已刷新")
                                                     }
                                                 }
