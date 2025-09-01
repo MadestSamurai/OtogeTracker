@@ -151,12 +151,9 @@ fun BofScreen(
     val searchText = remember { mutableStateOf("") }
 
     val listStateTeam = rememberLazyListState()
-    val listStateComment = rememberLazyListState()
 
     val currentIndexTeam = vm.currentIndexTeam.asStateFlow().collectAsState().value
     val scrollListTeam = vm.scrollToIndexListTeam.asStateFlow().collectAsState().value
-    val currentIndexComment = vm.currentIndexComment.asStateFlow().collectAsState().value
-    val scrollListComment = vm.scrollToIndexListComment.asStateFlow().collectAsState().value
 
     var showDateTimeRangePicker by remember { mutableStateOf(false) }
     val scrollThreshold = 50f
@@ -168,45 +165,42 @@ fun BofScreen(
     
     // Team info mode state management  
     var teamInfoMode by remember { mutableIntStateOf(0) } // 0: 团队信息, 1: 作品详情
+    
+    // Comment display mode state management
+    var commentDisplayMode by remember { mutableIntStateOf(0) } // 0: 分数条模式, 1: 详细分数模式
 
     fun selectTime() {
         showDateTimeRangePicker = true
     }
 
-    // 流式JSON解析加载
+    // 初始数据加载
     LaunchedEffect(Unit) {
         vm.loadRankingDataWithStreamedParsing()
-    }
-
-    // Work数据重新加载 - 当时间范围变化时
-    LaunchedEffect(
-        bofScreenState.selectedCurrentDate.collectAsState().value,
-        bofScreenState.selectedCurrentTime.collectAsState().value,
-        bofScreenState.selectedCompareDate.collectAsState().value,
-        bofScreenState.selectedCompareTime.collectAsState().value
-    ) {
-        vm.loadRankingDataWithStreamedParsing()
-    }
-
-    // 团队数据加载 - 当选择的比赛类型变化时重新加载
-    LaunchedEffect(selectedRange) {
+        // 如果有选中的range且活动已开始，同时加载团队和评论数据
         selectedRange?.let { range ->
             if (range.isStart) {
                 vm.loadTeamRankingData(range.path)
+                vm.requestCommentData()
             }
         }
     }
 
-    // 团队数据重新加载 - 当时间范围变化时
+    // 数据重新加载 - 当时间范围或选中的比赛变化时
     LaunchedEffect(
+        selectedRange,
         bofScreenState.selectedCurrentDate.collectAsState().value,
         bofScreenState.selectedCurrentTime.collectAsState().value,
         bofScreenState.selectedCompareDate.collectAsState().value,
         bofScreenState.selectedCompareTime.collectAsState().value
     ) {
+        // 加载Work数据
+        vm.loadRankingDataWithStreamedParsing()
+        
+        // 加载团队和评论数据
         selectedRange?.let { range ->
             if (range.isStart) {
                 vm.loadTeamRankingData(range.path)
+                vm.requestCommentData()
             }
         }
     }
@@ -222,8 +216,7 @@ fun BofScreen(
 
     LaunchedEffect(
         selectedTabIndex,
-        currentIndexTeam, scrollListTeam,
-        currentIndexComment, scrollListComment
+        currentIndexTeam, scrollListTeam
     ) {
         when (selectedTabIndex) {
             1 -> {
@@ -231,13 +224,6 @@ fun BofScreen(
                     listStateTeam.scrollToItem(scrollListTeam[currentIndexTeam] + 1)
                 else
                     listStateTeam.scrollToItem(0)
-            }
-
-            2 -> {
-                if (currentIndexComment < scrollListComment.size)
-                    listStateComment.scrollToItem(scrollListComment[currentIndexComment] + 1)
-                else
-                    listStateComment.scrollToItem(0)
             }
         }
     }
@@ -409,8 +395,8 @@ fun BofScreen(
                                         1 -> {
                                             // Team页面的搜索逻辑
                                         }
-                                        // Comment页面暂时使用相同的搜索逻辑，后续可以添加专门的方法
-                                        2 -> {} // 可以后续添加评论搜索
+                                        // Comment页面不需要搜索功能
+                                        2 -> {}
                                     }
                                 }
                             },
@@ -576,13 +562,17 @@ fun BofScreen(
                                         teamInfoMode = teamInfoMode
                                     )
 
-                                    "Comment" -> BofCommentScreen(
-                                        vm,
-                                        snackbarHostState,
-                                        listStateComment,
-                                        scrollThreshold,
-                                        bofScreenState
-                                    ) { isTabRowVisible = it }
+                                    "Comment" -> {
+                                        val commentData by vm.commentData.collectAsState()
+                                        val selectedTimeStrNoComp by vm.selectedTimeStrNoComp.collectAsState()
+                                        
+                                        BofCommentScreen(
+                                            commentData = commentData,
+                                            title = "BOF 评价排行榜",
+                                            subtitle = "时间: $selectedTimeStrNoComp",
+                                            commentDisplayMode = commentDisplayMode
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -702,10 +692,8 @@ fun BofScreen(
                                                 }
 
                                                 2 -> {
-                                                    // Comment页面，刷新评论数据
-                                                    coroutineScope.launch {
-                                                        snackbarHostState.showSnackbar("评论数据已刷新")
-                                                    }
+                                                    // Comment页面，切换显示模式
+                                                    commentDisplayMode = if (commentDisplayMode == 0) 1 else 0
                                                 }
                                             }
                                         },
@@ -721,15 +709,15 @@ fun BofScreen(
                                                 image = when (tabIndex) {
                                                     0 -> Filled.SwitchArrow  // Entry: 窄屏切换图标
                                                     1 -> Filled.SwitchArrow  // Team: 信息切换图标
-                                                    2 -> Filled.ArrowRotate  // Comment: 刷新图标
-                                                    else -> Filled.ArrowRotate
+                                                    2 -> Filled.SwitchArrow  // Comment: 显示模式切换图标
+                                                    else -> Filled.SwitchArrow
                                                 }
                                             ),
                                             contentDescription = when (tabIndex) {
                                                 0 -> if (narrowMode == 1) "Switch to Wide Mode" else "Switch to Narrow Mode"
                                                 1 -> if (teamInfoMode == 1) "Switch to Team Info" else "Switch to Work Details"
-                                                2 -> "Refresh Comment Data"
-                                                else -> "Refresh"
+                                                2 -> if (commentDisplayMode == 1) "Switch to Score Chart Mode" else "Switch to Detailed Score Mode"
+                                                else -> "Switch"
                                             },
                                             tint = Beige500,
                                             modifier = Modifier.size(16.dp)

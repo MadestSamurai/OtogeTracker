@@ -51,16 +51,16 @@ internal class BofObjectBoxService {
                         user = entry.user,
                         pattern = entry.pattern,
                         country = entry.country,
-                        vote = entry.vote,
+                        vote = entry.voteCount,
                         voteTotal = entry.voteTotal,
                         voteAve = entry.voteAve,
                         voteChartData = vote.sortedBy { it.score }.map { it.score },
-                        short = entry.short,
+                        short = entry.shortCount,
                         shortTotal = entry.shortTotal,
                         shortAve = entry.shortAve,
                         shortComment = entry.shortComment,
                         shortChartData = short.sortedBy { it.score }.map { it.score },
-                        long = entry.long,
+                        long = entry.longCount,
                         longTotal = entry.longTotal,
                         longAve = entry.longAve,
                         longComment = entry.longComment,
@@ -82,9 +82,22 @@ internal class BofObjectBoxService {
     suspend fun getBofttCommentLatest(): List<BofCommentUI> {
         return withContext(Dispatchers.IO) {
             try {
-                getBofttCommentByTime("2025-01-08") //TODO: 从数据库中获取最新评价数据
+                val allComments = bofCommentBox.all
+                
+                if (allComments.isEmpty()) {
+                    return@withContext emptyList<BofCommentUI>()
+                }
+                
+                // Find the most recent date
+                val latestDate = allComments.maxByOrNull { it.date }?.date
+                
+                if (latestDate != null) {
+                    return@withContext getBofttCommentByTime(latestDate)
+                } else {
+                    return@withContext emptyList<BofCommentUI>()
+                }
             } catch (e: Exception) {
-                Log.e(TAG, "Error fetching latest comment: ${e.message}")
+                Log.e(TAG, "Error in getBofttCommentLatest: ${e.message}")
                 emptyList()
             }
         }
@@ -465,14 +478,14 @@ internal class BofObjectBoxService {
                         user = comment.user,
                         pattern = if (comment.pattern != null) comment.pattern.toString() else "",
                         country = comment.country,
-                        vote = comment.vote,
+                        voteCount = comment.vote,
                         voteTotal = comment.voteTotal,
                         voteAve = comment.voteAve,
-                        short = comment.short,
+                        shortCount = comment.short,
                         shortTotal = comment.shortTotal,
                         shortAve = comment.shortAve,
                         shortComment = comment.shortComment,
-                        long = comment.long,
+                        longCount = comment.long,
                         longTotal = comment.longTotal,
                         longAve = comment.longAve,
                         longComment = comment.longComment,

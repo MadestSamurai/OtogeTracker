@@ -1,7 +1,6 @@
 package com.madsam.otora.ui.bof
 
 import android.util.Log
-import android.view.View
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -9,8 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.core.database.ObjectBoxManager
 import com.madsam.otora.core.utils.CommonUtils
-import com.madsam.otora.core.utils.ScreenUtil.getSafeInsetLeftDp
-import com.madsam.otora.core.utils.ScreenUtil.getSafeInsetRightDp
 import com.madsam.otora.data.bof.local.api.BofLocalService
 import com.madsam.otora.data.bof.local.model.BofWorkEntity
 import com.madsam.otora.data.bof.local.repository.BofRepository
@@ -86,11 +83,7 @@ internal class BofViewModel(
         }
     }
 
-    var selectedTimeStr = MutableStateFlow("")
     var selectedTimeStrNoComp = MutableStateFlow("")
-
-    val leftPadding = MutableStateFlow(0.dp)
-    val rightPadding = MutableStateFlow(0.dp)
 
     val highlightedText = MutableStateFlow("")
     val scrollToIndexListTotal = MutableStateFlow(listOf<Int>())
@@ -143,31 +136,6 @@ internal class BofViewModel(
         }
     }
 
-    fun updatePadding(view: View) {
-        leftPadding.update { getSafeInsetLeftDp(view) }
-        rightPadding.update { getSafeInsetRightDp(view) }
-    }
-
-    fun generateSelectedTimeStr() {
-        if (totalRankingData.value.isEmpty()) {
-            selectedTimeStr.update {
-                "No data available for the selected date and time."
-            }
-        } else {
-            val currentTime = CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
-            val compareTime = CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
-            selectedTimeStr.update {
-                "Data at ${bofScreenState.selectedCurrentDate.value} $currentTime, " +
-                        "compare with ${bofScreenState.selectedCompareDate.value} $compareTime, " +
-                        "all data scraped by MadSamurai."
-            }
-            selectedTimeStrNoComp.update {
-                "Data at ${bofScreenState.selectedCurrentDate.value} $currentTime, " +
-                        "all data scraped by MadSamurai."
-            }
-        }
-    }
-
     private suspend fun <T> fetchData(
         fetchLatest: suspend () -> List<T>,
         fetchByTime: suspend (Long, Long) -> List<T>
@@ -190,7 +158,7 @@ internal class BofViewModel(
     suspend fun requestCommentData() {
         val data = fetchData(
             { bofLocalService.getBofttCommentLatest() },
-            { currentTime, compareTime -> bofLocalService.getBofttCommentByTime("2025-01-08") }
+            { currentTime, compareTime -> bofLocalService.getBofttCommentLatest() }
         )
         if (data.isEmpty()) {
             Log.d(TAG, "No comment data available for the selected date and time.")
