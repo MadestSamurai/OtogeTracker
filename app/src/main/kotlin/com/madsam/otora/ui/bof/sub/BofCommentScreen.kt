@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,14 +40,42 @@ import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
 import com.madsam.otora.ui.bof.components.ScoreChart
+import com.madsam.otora.ui.common.ColumnWidthType
 
-/**
- * BofCommentScreen: 用户评价排行榜
- * 支持两种显示模式：
- * 1. 分数条模式：显示前50名的得分曲线图
- * 2. 详细分数模式：显示平均分数值
- * 三个信息列为：voteAvg, shortAvg, longAvg
- */
+// 按照RankingTable标准的格式化函数
+private fun formatScore(score: Number, widthType: ColumnWidthType): String {
+    return formatScore(score, widthType, allowNegative = false)
+}
+
+private fun formatScore(score: Number, widthType: ColumnWidthType, allowNegative: Boolean): String {
+    val doubleValue = score.toDouble()
+    return when (widthType) {
+        ColumnWidthType.THREE_DIGIT_INT -> 
+            if (doubleValue > 0 || (allowNegative && doubleValue != 0.0)) {
+                // 整数类型，直接显示整数
+                doubleValue.toInt().toString()
+            } else "---"
+        ColumnWidthType.TWO_DECIMAL -> 
+            if (doubleValue > 0 || (allowNegative && doubleValue != 0.0)) {
+                // 对于整数，显示为一位小数；否则显示两位小数
+                if (doubleValue == doubleValue.toInt().toDouble()) {
+                    String.format("%.1f", doubleValue)
+                } else {
+                    String.format("%.2f", doubleValue)
+                }
+            } else "---"
+        ColumnWidthType.ONE_DECIMAL ->
+            if (doubleValue > 0 || (allowNegative && doubleValue != 0.0)) {
+                // 显示一位小数
+                if (doubleValue == 1000.0) {
+                    doubleValue.toInt().toString()
+                } else {
+                    String.format("%.1f", doubleValue)
+                }
+            } else "---"
+    }
+}
+
 @Composable
 internal fun BofCommentScreen(
     commentData: List<BofCommentUI>,
@@ -62,10 +88,11 @@ internal fun BofCommentScreen(
     val screenWidthDp = configuration.screenWidthDp
     val isNarrowScreen = screenWidthDp < 600
     
-    // 测量各列宽度
+    // 按照RankingTable标准测量各列宽度
     var voteAvgWidth by remember { mutableStateOf(60.dp) }
     var shortAvgWidth by remember { mutableStateOf(60.dp) }
     var longAvgWidth by remember { mutableStateOf(60.dp) }
+    var totalScoreWidth by remember { mutableStateOf(36.dp) }
     
     val density = LocalDensity.current
     
@@ -82,41 +109,52 @@ internal fun BofCommentScreen(
     val maxScore = commentData.maxOfOrNull { it.total.toDouble() } ?: 1.0
 
     Column(modifier = Modifier.fillMaxSize()) {
-        // 隐藏的测量容器
+        // 隐藏的测量容器 - 按照RankingTable标准
         Box(modifier = Modifier
             .size(0.dp)
             .requiredWidth(500.dp)
             .requiredHeight(100.dp)
         ) {
-            // 测量票选平均分宽度
+            // 测量票选平均分宽度 - 使用TWO_DECIMAL标准
             Text(
-                text = "000.00",
+                text = ColumnWidthType.TWO_DECIMAL.measureText,
                 fontFamily = sarasaBold,
-                fontSize = 16.sp, // 增大字号
+                fontSize = 14.sp,
                 modifier = Modifier.onGloballyPositioned { coordinates ->
                     voteAvgWidth = with(density) {
                         coordinates.size.width.toDp() + 8.dp
                     }
                 }
             )
-            // 测量短评平均分宽度
+            // 测量短评平均分宽度 - 使用TWO_DECIMAL标准
             Text(
-                text = "000.00",
+                text = ColumnWidthType.TWO_DECIMAL.measureText,
                 fontFamily = sarasaBold,
-                fontSize = 16.sp, // 增大字号
+                fontSize = 14.sp,
                 modifier = Modifier.onGloballyPositioned { coordinates ->
                     shortAvgWidth = with(density) {
                         coordinates.size.width.toDp() + 8.dp
                     }
                 }
             )
-            // 测量长评平均分宽度
+            // 测量长评平均分宽度 - 使用TWO_DECIMAL标准
             Text(
-                text = "000.00",
+                text = ColumnWidthType.TWO_DECIMAL.measureText,
                 fontFamily = sarasaBold,
-                fontSize = 16.sp, // 增大字号
+                fontSize = 14.sp,
                 modifier = Modifier.onGloballyPositioned { coordinates ->
                     longAvgWidth = with(density) {
+                        coordinates.size.width.toDp() + 8.dp
+                    }
+                }
+            )
+            // 测量总分宽度 - 使用THREE_DIGIT_INT标准
+            Text(
+                text = ColumnWidthType.THREE_DIGIT_INT.measureText,
+                fontFamily = sarasaBold,
+                fontSize = 14.sp,
+                modifier = Modifier.onGloballyPositioned { coordinates ->
+                    totalScoreWidth = with(density) {
                         coordinates.size.width.toDp() + 8.dp
                     }
                 }
@@ -166,15 +204,12 @@ internal fun BofCommentScreen(
                 modifier = Modifier.width(50.dp)
             )
             
-            // 用户列标题 - 使用空白占位，像RankingTable一样
             Text(
                 text = "",
                 modifier = Modifier.weight(0.4f)
             )
             
-            if (isNarrowScreen) {
-                // 窄屏模式：根据commentDisplayMode切换显示
-                if (commentDisplayMode == 0) {
+            if (isNarrowScreen && commentDisplayMode == 0) {
                     Text(
                         text = "总分",
                         fontFamily = sarasaBold,
@@ -183,7 +218,25 @@ internal fun BofCommentScreen(
                         textAlign = TextAlign.Center,
                         modifier = Modifier.width(narrowScoreBarWidth)
                     )
-                } else {
+                }  else {
+                    if (!isNarrowScreen) {
+                        Text(
+                            text = "分数分布",
+                            fontFamily = sarasaBold,
+                            fontSize = 14.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.width(barWidth.dp)
+                        )
+                        Text(
+                            text = "总分",
+                            fontFamily = sarasaBold,
+                            fontSize = 14.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.width(totalScoreWidth)
+                        )
+                    }
                     Text(
                         text = "票平均",
                         fontFamily = sarasaBold,
@@ -208,49 +261,6 @@ internal fun BofCommentScreen(
                         textAlign = TextAlign.End,
                         modifier = Modifier.width(longAvgWidth)
                     )
-                }
-            } else {
-                // 宽屏模式：同时显示所有列
-                Text(
-                    text = "分数分布",
-                    fontFamily = sarasaBold,
-                    fontSize = 14.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.width(barWidth.dp)
-                )
-                Text(
-                    text = "总分",
-                    fontFamily = sarasaBold,
-                    fontSize = 14.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.width(36.dp)
-                )
-                Text(
-                    text = "票选平均",
-                    fontFamily = sarasaBold,
-                    fontSize = 14.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.width(voteAvgWidth)
-                )
-                Text(
-                    text = "短评平均",
-                    fontFamily = sarasaBold,
-                    fontSize = 14.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.width(shortAvgWidth)
-                )
-                Text(
-                    text = "长评平均",
-                    fontFamily = sarasaBold,
-                    fontSize = 14.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.width(longAvgWidth)
-                )
             }
         }
 
@@ -267,6 +277,7 @@ internal fun BofCommentScreen(
                     voteAvgWidth = voteAvgWidth,
                     shortAvgWidth = shortAvgWidth,
                     longAvgWidth = longAvgWidth,
+                    totalScoreWidth = totalScoreWidth,
                     narrowScoreBarWidth = narrowScoreBarWidth
                 )
             }
@@ -285,19 +296,16 @@ private fun BofCommentRow(
     voteAvgWidth: Dp,
     shortAvgWidth: Dp,
     longAvgWidth: Dp,
+    totalScoreWidth: Dp,
     narrowScoreBarWidth: Dp
 ) {
     val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
-    val scoreRatio = if (maxScore > 0) comment.total.toDouble() / maxScore else 0.0
     val rankColor = Color.White
 
-    // 检查是否有有效的分数分布数据
-    val hasValidChartData = comment.voteChartData.isNotEmpty() && 
-                           comment.shortChartData.isNotEmpty() && 
-                           comment.longChartData.isNotEmpty() &&
-                           comment.voteChartData.any { it > 0 } &&
-                           comment.shortChartData.any { it > 0 } &&
-                           comment.longChartData.any { it > 0 }
+    // 检查是否有有效的分数分布数据 - 只要有任何一种评价数据存在且有效即可
+    val hasValidChartData = (comment.voteChartData.isNotEmpty() && comment.voteChartData.any { it > 0 }) ||
+                           (comment.shortChartData.isNotEmpty() && comment.shortChartData.any { it > 0 }) ||
+                           (comment.longChartData.isNotEmpty() && comment.longChartData.any { it > 0 })
 
     Row(
         modifier = Modifier
@@ -319,7 +327,7 @@ private fun BofCommentRow(
         // 用户信息列
         Column(
             modifier = Modifier
-                .weight(0.6f) // 与RankingTable的作品信息列权重保持一致
+                .weight(0.6f)
                 .padding(horizontal = 8.dp),
             horizontalAlignment = Alignment.End
         ) {
@@ -360,328 +368,234 @@ private fun BofCommentRow(
             }
         }
 
-        if (isNarrowScreen) {
-            // 窄屏模式：根据切换状态显示不同内容
-            if (commentDisplayMode == 0) {
-                // 分数条模式 - 只有Top50且有有效图表数据才显示曲线图
-                if (comment.index <= 50 && hasValidChartData) {
-                    // Top50且有有效数据，显示曲线图，宽度按三个固定列的比例分配
+        // 分数条显示逻辑 - 统一处理窄屏mode0和宽屏
+        if (isNarrowScreen && commentDisplayMode == 0) {
+            Box(
+                modifier = Modifier
+                    .width(narrowScoreBarWidth)
+                    .height(24.dp)
+            ) {
+                ScoreBarDisplay(
+                    comment = comment,
+                    maxScore = maxScore,
+                    hasValidChartData = hasValidChartData,
+                    barWidth = narrowScoreBarWidth,
+                    barHeight = 24.dp
+                )
+                Text(
+                    text = formatScore(comment.total, ColumnWidthType.THREE_DIGIT_INT),
+                    fontFamily = sarasaBold,
+                    fontSize = 14.sp,
+                    color = Color.White,
+                    overflow = TextOverflow.Visible,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 4.dp)
+                )
+            }
+        } else {
+            if (!isNarrowScreen) {
+                // 宽屏模式：同时显示分数条图表和详细平均分
+                Row {
+                    // 分数条图表部分 - 使用统一的分数条组件
+                    ScoreBarDisplay(
+                        comment = comment,
+                        maxScore = maxScore,
+                        hasValidChartData = hasValidChartData,
+                        barWidth = barWidth.dp,
+                        barHeight = 34.dp
+                    )
+                    
+                    // 总分文本
                     Box(
                         modifier = Modifier
-                            .width(narrowScoreBarWidth)
-                            .height(24.dp)
+                            .width(totalScoreWidth)
+                            .height(34.dp)
+                            .padding(horizontal = 2.dp),
+                        contentAlignment = Alignment.CenterEnd
                     ) {
-                        Row {
-                            // Vote 图表 - 使用固定列宽度
-                            Box(
-                                modifier = Modifier
-                                    .width(voteAvgWidth)
-                                    .height(24.dp)
-                            ) {
-                                ScoreChart(
-                                    dataList = comment.voteChartData,
-                                    height = 24.dp,
-                                    width = voteAvgWidth,
-                                    color = RANKING_GREEN
-                                )
-                            }
-                            
-                            // Short 图表 - 使用固定列宽度
-                            Box(
-                                modifier = Modifier
-                                    .width(shortAvgWidth)
-                                    .height(24.dp)
-                            ) {
-                                ScoreChart(
-                                    dataList = comment.shortChartData,
-                                    height = 24.dp,
-                                    width = shortAvgWidth,
-                                    color = RANKING_BLUE
-                                )
-                            }
-                            
-                            // Long 图表 - 使用固定列宽度
-                            Box(
-                                modifier = Modifier
-                                    .width(longAvgWidth)
-                                    .height(24.dp)
-                            ) {
-                                ScoreChart(
-                                    dataList = comment.longChartData,
-                                    height = 24.dp,
-                                    width = longAvgWidth,
-                                    color = RANKING_RED
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    // 显示简单总分条（排名50以后或无有效图表数据）
-                    Box(
-                        modifier = Modifier
-                            .width(narrowScoreBarWidth)
-                            .height(24.dp)
-                            .padding(horizontal = 2.dp)
-                    ) {
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
-                                .height(24.dp)
-                                .background(
-                                    color = RANKING_RED,
-                                    shape = RoundedCornerShape(
-                                        topEnd = 12.dp,
-                                        bottomEnd = 12.dp
-                                    )
-                                )
-                        )
                         Text(
-                            text = comment.total.toString(),
-                            fontFamily = sarasaBold,
-                            fontSize = 14.sp,
+                            text = formatScore(comment.total, ColumnWidthType.THREE_DIGIT_INT),
                             color = Color.White,
-                            overflow = TextOverflow.Visible,
-                            maxLines = 1,
-                            modifier = Modifier
-                                .align(Alignment.CenterEnd)
-                                .padding(end = 4.dp)
+                            fontSize = 14.sp,
+                            fontFamily = sarasaBold,
+                            textAlign = TextAlign.End,
+                            maxLines = 1
                         )
                     }
                 }
-            } else {
-                // 详细分数模式 - 显示平均分
-                Row(
-                    modifier = Modifier.width(narrowScoreBarWidth),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+            }
+            
+            // 票选平均分列
+            Box(
+                modifier = Modifier
+                    .width(voteAvgWidth)
+                    .height(34.dp)
+                    .background(
+                        if (comment.voteAve > 0)
+                            Color(red = (comment.voteAve / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
+                        else
+                            Color.Transparent
+                    )
+                    .padding(horizontal = 2.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Text(
+                    text = formatScore(comment.voteAve, ColumnWidthType.TWO_DECIMAL),
+                    fontFamily = sarasaBold,
+                    fontSize = 14.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    maxLines = 1
+                )
+            }
+            
+            // 短评平均分列
+            Box(
+                modifier = Modifier
+                    .width(shortAvgWidth)
+                    .height(34.dp)
+                    .background(
+                        if (comment.shortAve > 0)
+                            Color(red = (comment.shortAve / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
+                        else
+                            Color.Transparent
+                    )
+                    .padding(horizontal = 2.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Text(
+                    text = formatScore(comment.shortAve, ColumnWidthType.TWO_DECIMAL),
+                    fontFamily = sarasaBold,
+                    fontSize = 14.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    maxLines = 1
+                )
+            }
+            
+            // 长评平均分列
+            Box(
+                modifier = Modifier
+                    .width(longAvgWidth)
+                    .height(34.dp)
+                    .background(
+                        if (comment.longAve > 0)
+                            Color(red = (comment.longAve / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
+                        else
+                            Color.Transparent
+                    )
+                    .padding(horizontal = 2.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Text(
+                    text = formatScore(comment.longAve, ColumnWidthType.TWO_DECIMAL),
+                    fontFamily = sarasaBold,
+                    fontSize = 14.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    maxLines = 1
+                )
+            }
+        }
+    }
+}
+
+// 统一的分数条显示组件 - 基于宽屏分数条逻辑
+@Composable
+private fun ScoreBarDisplay(
+    comment: BofCommentUI,
+    maxScore: Double,
+    hasValidChartData: Boolean,
+    barWidth: Dp,
+    barHeight: Dp
+) {
+    Box(
+        modifier = Modifier
+            .width(barWidth)
+            .height(barHeight)
+    ) {
+        if (comment.index <= 50 && hasValidChartData) {
+            // 计算各评价类型相对于全局最高分的比例
+            val voteRatio = if (maxScore > 0) comment.vote.toFloat() / maxScore.toFloat() else 0f
+            val shortRatio = if (maxScore > 0) comment.short.toFloat() / maxScore.toFloat() else 0f
+            val longRatio = if (maxScore > 0) comment.long.toFloat() / maxScore.toFloat() else 0f
+            
+            Row {
+                // Vote 图表 - 使用比例宽度
+                Box(
+                    modifier = Modifier
+                        .width(barWidth * voteRatio)
+                        .height(barHeight)
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .width(voteAvgWidth)
-                            .height(24.dp)
-                            .background(
-                                color = RANKING_GREEN,
-                                shape = RoundedCornerShape(4.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = String.format("%.1f", comment.voteAve),
-                            fontFamily = sarasaBold,
-                            fontSize = 13.sp, // 增大字号
-                            color = Color.White
+                    if (comment.voteChartData.isNotEmpty() && comment.voteChartData.any { it > 0 }) {
+                        ScoreChart(
+                            dataList = comment.voteChartData,
+                            height = barHeight,
+                            width = barWidth * voteRatio,
+                            color = RANKING_GREEN
                         )
                     }
-                    Box(
-                        modifier = Modifier
-                            .width(shortAvgWidth)
-                            .height(24.dp)
-                            .background(
-                                color = RANKING_BLUE,
-                                shape = RoundedCornerShape(4.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = String.format("%.1f", comment.shortAve),
-                            fontFamily = sarasaBold,
-                            fontSize = 13.sp, // 增大字号
-                            color = Color.White
+                }
+                
+                // Short 图表 - 使用比例宽度
+                Box(
+                    modifier = Modifier
+                        .width(barWidth * shortRatio)
+                        .height(barHeight)
+                ) {
+                    if (comment.shortChartData.isNotEmpty() && comment.shortChartData.any { it > 0 }) {
+                        ScoreChart(
+                            dataList = comment.shortChartData,
+                            height = barHeight,
+                            width = barWidth * shortRatio,
+                            color = RANKING_BLUE
                         )
                     }
-                    Box(
-                        modifier = Modifier
-                            .width(longAvgWidth)
-                            .height(24.dp)
-                            .background(
-                                color = RANKING_RED,
-                                shape = RoundedCornerShape(4.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = String.format("%.1f", comment.longAve),
-                            fontFamily = sarasaBold,
-                            fontSize = 13.sp, // 增大字号
-                            color = Color.White
+                }
+                
+                // Long 图表 - 使用比例宽度
+                Box(
+                    modifier = Modifier
+                        .width(barWidth * longRatio)
+                        .height(barHeight)
+                ) {
+                    if (comment.longChartData.isNotEmpty() && comment.longChartData.any { it > 0 }) {
+                        ScoreChart(
+                            dataList = comment.longChartData,
+                            height = barHeight,
+                            width = barWidth * longRatio,
+                            color = RANKING_RED
                         )
                     }
                 }
             }
         } else {
-            // 宽屏模式：同时显示分数条图表和详细平均分
+            // 简化版分数条（排名50以后或无有效图表数据）
+            val voteRatio = if (maxScore > 0) comment.vote.toFloat() / maxScore.toFloat() else 0f
+            val shortRatio = if (maxScore > 0) comment.short.toFloat() / maxScore.toFloat() else 0f
+            val longRatio = if (maxScore > 0) comment.long.toFloat() / maxScore.toFloat() else 0f
+            
             Row {
-                // 分数条图表部分
                 Box(
                     modifier = Modifier
-                        .width(barWidth.dp)
-                        .height(34.dp)
-                        .background(Color.Blue.copy(alpha = 0.1f)) // 调试背景
-                ) {
-                    if (comment.index <= 50) {
-                        Row {
-                            // Vote 图表
-                            if (comment.voteChartData.isNotEmpty()) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(voteAvgWidth) // 使用固定列宽度
-                                        .height(34.dp)
-                                        .background(Color.Yellow.copy(alpha = 0.3f)) // 调试背景
-                                ) {
-                                    ScoreChart(
-                                        dataList = comment.voteChartData,
-                                        height = 34.dp,
-                                        width = voteAvgWidth, // 使用固定列宽度
-                                        color = RANKING_GREEN
-                                    )
-                                }
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .width(voteAvgWidth) // 使用固定列宽度
-                                        .height(34.dp)
-                                        .background(Color.Red.copy(alpha = 0.5f))
-                                )
-                            }
-                            
-                            // Short 图表
-                            if (comment.shortChartData.isNotEmpty()) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(shortAvgWidth) // 使用固定列宽度
-                                        .height(34.dp)
-                                        .background(Color.Cyan.copy(alpha = 0.3f)) // 调试背景
-                                ) {
-                                    ScoreChart(
-                                        dataList = comment.shortChartData,
-                                        height = 34.dp,
-                                        width = shortAvgWidth, // 使用固定列宽度
-                                        color = RANKING_BLUE
-                                    )
-                                }
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .width(shortAvgWidth) // 使用固定列宽度
-                                        .height(34.dp)
-                                        .background(Color.Red.copy(alpha = 0.5f))
-                                )
-                            }
-                            
-                            // Long 图表
-                            if (comment.longChartData.isNotEmpty()) {
-                                Box(
-                                    modifier = Modifier
-                                        .width(longAvgWidth) // 使用固定列宽度
-                                        .height(34.dp)
-                                        .background(Color.Magenta.copy(alpha = 0.3f)) // 调试背景
-                                ) {
-                                    ScoreChart(
-                                        dataList = comment.longChartData,
-                                        height = 34.dp,
-                                        width = longAvgWidth, // 使用固定列宽度
-                                        color = RANKING_RED
-                                    )
-                                }
-                            } else {
-                                Box(
-                                    modifier = Modifier
-                                        .width(longAvgWidth) // 使用固定列宽度
-                                        .height(34.dp)
-                                        .background(Color.Red.copy(alpha = 0.5f))
-                                )
-                            }
-                        }
-                    } else {
-                        // 简化版分数条（排名50以后）
-                        Row {
-                            Box(
-                                modifier = Modifier
-                                    .width(voteAvgWidth) // 使用固定列宽度
-                                    .height(34.dp)
-                                    .background(color = RANKING_GREEN)
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .width(shortAvgWidth) // 使用固定列宽度
-                                    .height(34.dp)
-                                    .background(color = RANKING_BLUE)
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .width(longAvgWidth) // 使用固定列宽度
-                                    .height(34.dp)
-                                    .background(color = RANKING_RED)
-                            )
-                        }
-                    }
-                }
-                
-                // 总分文本
-                Text(
-                    text = comment.total.toString(),
-                    color = Color.White,
-                    fontSize = 20.sp,
-                    fontFamily = sarasaBold,
-                    textAlign = TextAlign.End,
-                    maxLines = 1,
-                    modifier = Modifier
-                        .width(36.dp)
-                        .padding(end = 2.dp)
+                        .width(barWidth * voteRatio)
+                        .height(barHeight)
+                        .background(color = RANKING_GREEN)
                 )
-                
-                // 票选平均分列
                 Box(
                     modifier = Modifier
-                        .width(voteAvgWidth)
-                        .height(34.dp)
-                        .background(Color.Green.copy(alpha = 0.2f))
-                        .padding(horizontal = 4.dp), // 增加水平内边距
-                    contentAlignment = Alignment.CenterStart // 改为左对齐
-                ) {
-                    Text(
-                        text = if (comment.voteAve > 0) "%.2f".format(comment.voteAve) else "---",
-                        fontFamily = sarasaBold,
-                        fontSize = 16.sp, // 增大字号
-                        color = Color.White,
-                        textAlign = TextAlign.Start // 改为左对齐
-                    )
-                }
-                
-                // 短评平均分列
+                        .width(barWidth * shortRatio)
+                        .height(barHeight)
+                        .background(color = RANKING_BLUE)
+                )
                 Box(
                     modifier = Modifier
-                        .width(shortAvgWidth)
-                        .height(34.dp)
-                        .background(Color.Blue.copy(alpha = 0.2f))
-                        .padding(horizontal = 4.dp), // 增加水平内边距
-                    contentAlignment = Alignment.CenterStart // 改为左对齐
-                ) {
-                    Text(
-                        text = if (comment.shortAve > 0) "%.2f".format(comment.shortAve) else "---",
-                        fontFamily = sarasaBold,
-                        fontSize = 16.sp, // 增大字号
-                        color = Color.White,
-                        textAlign = TextAlign.Start // 改为左对齐
-                    )
-                }
-                
-                // 长评平均分列
-                Box(
-                    modifier = Modifier
-                        .width(longAvgWidth)
-                        .height(34.dp)
-                        .background(Color.Red.copy(alpha = 0.2f))
-                        .padding(horizontal = 4.dp), // 增加水平内边距
-                    contentAlignment = Alignment.CenterStart // 改为左对齐
-                ) {
-                    Text(
-                        text = if (comment.longAve > 0) "%.2f".format(comment.longAve) else "---",
-                        fontFamily = sarasaBold,
-                        fontSize = 16.sp, // 增大字号
-                        color = Color.White,
-                        textAlign = TextAlign.Start // 改为左对齐
-                    )
-                }
+                        .width(barWidth * longRatio)
+                        .height(barHeight)
+                        .background(color = RANKING_RED)
+                )
             }
         }
     }

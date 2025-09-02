@@ -565,11 +565,19 @@ fun BofScreen(
                                     "Comment" -> {
                                         val commentData by vm.commentData.collectAsState()
                                         val selectedTimeStrNoComp by vm.selectedTimeStrNoComp.collectAsState()
+                                        val selectedRange = bofScreenState.selectedRange.collectAsState().value
+                                        
+                                        // 根据数据类型确定字幕内容
+                                        val subtitle = if (selectedRange?.singleComment == true && selectedRange.commentDate.isNotEmpty()) {
+                                            "时间: ${selectedRange.commentDate}"
+                                        } else {
+                                            "时间: $selectedTimeStrNoComp"
+                                        }
                                         
                                         BofCommentScreen(
                                             commentData = commentData,
                                             title = "BOF 评价排行榜",
-                                            subtitle = "时间: $selectedTimeStrNoComp",
+                                            subtitle = subtitle,
                                             commentDisplayMode = commentDisplayMode
                                         )
                                     }
