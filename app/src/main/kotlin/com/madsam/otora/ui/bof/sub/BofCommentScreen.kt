@@ -5,15 +5,21 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Text
@@ -31,6 +37,8 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -43,6 +51,7 @@ import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
 import com.madsam.otora.ui.bof.components.ScoreChart
 import com.madsam.otora.ui.common.ColumnWidthType
@@ -86,10 +95,15 @@ internal fun BofCommentScreen(
     scrollThreshold: Float = 50f,
     setIsTabRowVisible: (Boolean) -> Unit = {}
 ) {
-    // 屏幕宽度检测
-    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp
-    val isNarrowScreen = screenWidthDp < 600
+    // 计算屏幕宽度和内容宽度
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
+    val screenWidthDp = with(density) {
+        windowInfo.containerSize.width.toDp()
+    }
+    
+    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
+    val isNarrowScreen = screenWidthDp.value < 600
     
     // 按照RankingTable标准测量各列宽度
     var voteAvgWidth by remember { mutableStateOf(60.dp) }
@@ -97,12 +111,10 @@ internal fun BofCommentScreen(
     var longAvgWidth by remember { mutableStateOf(60.dp) }
     var totalScoreWidth by remember { mutableStateOf(36.dp) }
     
-    val density = LocalDensity.current
-    
     // 计算分数条宽度
     val barWidth = when {
-        screenWidthDp >= 1000 -> 280.0
-        screenWidthDp in 800..999 -> 186.0 + (screenWidthDp - 800) / 200.0 * 94.0
+        screenWidthDp.value >= 1000 -> 280.0
+        screenWidthDp.value.toInt() in 800..999 -> 186.0 + (screenWidthDp.value - 800) / 200.0 * 94.0
         else -> 186.0
     }
     
@@ -111,7 +123,21 @@ internal fun BofCommentScreen(
     
     val maxScore = commentData.maxOfOrNull { it.total.toDouble() } ?: 1.0
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(
+                WindowInsets.displayCutout.only(
+                    if (useNavigationRail) {
+                        // 使用 NavigationRail 时，左侧已由 Rail 处理，只处理右侧
+                        WindowInsetsSides.End
+                    } else {
+                        // 使用 BottomNavigation 时，处理左侧和右侧
+                        WindowInsetsSides.Start + WindowInsetsSides.End
+                    }
+                )
+            )
+    ) {
         // 隐藏的测量容器 - 按照RankingTable标准
         Box(modifier = Modifier
             .size(0.dp)
@@ -304,6 +330,19 @@ internal fun BofCommentScreen(
                     longAvgWidth = longAvgWidth,
                     totalScoreWidth = totalScoreWidth,
                     narrowScoreBarWidth = narrowScoreBarWidth
+                )
+            }
+            // 底部安全区域，让用户滑动到底部时有额外的空间
+            item(key = "bottom_spacer") {
+                androidx.compose.foundation.layout.Spacer(
+                    modifier = Modifier
+                        .windowInsetsPadding(
+                            if (useNavigationRail) {
+                                WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
+                            } else {
+                                WindowInsets(0, 0, 0, 0)
+                            }
+                        )
                 )
             }
         }

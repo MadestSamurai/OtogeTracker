@@ -8,4 +8,22 @@
     <string name="global_ranking">Global Ranking</string>
     <string name="recent_90_days">Recent 90 Days</string>
     <string name="highest_rank">Highest Rank</string>
+
+    <!-- Chunithm Tab Titles -->
+    <string name="chunithm_tab_home">Home</string>
+    <string name="chunithm_tab_song_list">Song List</string>
+    <string name="chunithm_tab_friends">Friends</string>
+    <string name="chunithm_tab_collection">Collection</string>
+
+    <!-- Chunithm Snackbar Messages -->
+    <string name="chunithm_message_refreshed">Refreshed</string>
+    <string name="chunithm_message_scrolled_to_top">Scrolled to top</string>
+    <string name="chunithm_message_friends_refreshed">Friends data refreshed</string>
+    <string name="chunithm_message_collection_refreshed">Collection data refreshed</string>
+
+    <!-- Chunithm Content Descriptions -->
+    <string name="chunithm_cd_refresh">Refresh</string>
+    <string name="chunithm_cd_scroll_to_top">Scroll to Top</string>
+    <string name="chunithm_cd_refresh_friends">Refresh Friends</string>
+    <string name="chunithm_cd_refresh_collection">Refresh Collection</string>
 </resources>

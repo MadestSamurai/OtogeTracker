@@ -257,7 +257,7 @@ fun RecordScreen(
                         ChunithmNavHost(
                             navController = chunithmNavController,
                             viewModel = chunithmViewModel,
-                            chuniScreenState = ChunithmScreenState(),
+                            chunithmScreenState = ChunithmScreenState(),
                             snackbarHostState = snackbarHostState
                         )
                     }

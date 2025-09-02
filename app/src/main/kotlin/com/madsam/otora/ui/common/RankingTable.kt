@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -29,6 +30,7 @@ import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.utils.ScreenUtil
 import java.util.Locale
 
 // 列宽度类型枚举
@@ -77,16 +79,19 @@ fun RankingTable(
     narrowMode: Int = 0
 ) {
     // 屏幕宽度检测
-    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp
-    val isNarrowScreen = screenWidthDp < 600
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
+    val screenWidthDp = with(density) {
+        windowInfo.containerSize.width.toDp()
+    }
+
+    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
+    val isNarrowScreen = screenWidthDp.value < 600
     
     // 测量各列宽度
     var extraWidth by remember { mutableStateOf(50.dp) }
     var avgWidth by remember { mutableStateOf(60.dp) }
     var medianWidth by remember { mutableStateOf(60.dp) }
-    
-    val density = LocalDensity.current
     
     // 计算分数条在窄屏模式下的宽度
     val narrowScoreBarWidth = when {
@@ -320,6 +325,20 @@ fun RankingTable(
                         )
                     }
                 }
+            }
+
+            // 底部安全区域，让用户滑动到底部时有额外的空间
+            item(key = "bottom_spacer") {
+                Spacer(
+                    modifier = Modifier
+                        .windowInsetsPadding(
+                            if (useNavigationRail) {
+                                WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
+                            } else {
+                                WindowInsets(0, 0, 0, 0)
+                            }
+                        )
+                )
             }
         }
     }

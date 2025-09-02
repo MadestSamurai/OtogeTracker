@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.madsam.otora.R
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
@@ -67,24 +68,29 @@ import java.nio.charset.StandardCharsets
 @Composable
 internal fun ChunithmUserPage(
     viewModel: ChunithmViewModel,
-    chuniScreenState: ChunithmScreenState,
+    chunithmScreenState: ChunithmScreenState,
     snackbarHostState: SnackbarHostState,
     navController: NavController
 ) {
-    val selectedTabIndex by chuniScreenState.selectedTab.collectAsState()
+    val selectedTabIndex by chunithmScreenState.selectedTab.collectAsState()
     val scrollThreshold = 50f
 
     var isTabRowVisible by remember { mutableStateOf(true) }
     var showTopRankDialog by remember { mutableStateOf(false) }
-    val tabTitles = listOf("Home", "Song List", "Friends", "Collection")
+    val context = LocalContext.current
+    val tabTitles = listOf(
+        context.getString(R.string.chunithm_tab_home),
+        context.getString(R.string.chunithm_tab_song_list),
+        context.getString(R.string.chunithm_tab_friends),
+        context.getString(R.string.chunithm_tab_collection)
+    )
 
     val pagerState = rememberPagerState { tabTitles.size }
-    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
 
-    // 计算屏幕宽度和内容宽度（参考 ChunithmMainPage 的实现）
+    // 计算屏幕宽度和内容宽度
     val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
     val windowInfo = LocalWindowInfo.current
@@ -111,7 +117,7 @@ internal fun ChunithmUserPage(
 
     LaunchedEffect(pagerState.currentPage) {
         if (selectedTabIndex != pagerState.currentPage) {
-            chuniScreenState.selectedTab.update { pagerState.currentPage }
+            chunithmScreenState.selectedTab.update { pagerState.currentPage }
         }
     }
 
@@ -208,7 +214,7 @@ internal fun ChunithmUserPage(
                                         selected = selectedTabIndex == index,
                                         onClick = {
                                             if (selectedTabIndex != index) {
-                                                chuniScreenState.selectedTab.update { index }
+                                                chunithmScreenState.selectedTab.update { index }
                                                 scope.launch {
                                                     pagerState.animateScrollToPage(index)
                                                 }
@@ -240,28 +246,28 @@ internal fun ChunithmUserPage(
                                         // 主页，刷新
                                         scope.launch {
                                             viewModel.loadData(context)
-                                            snackbarHostState.showSnackbar("已刷新")
+                                            snackbarHostState.showSnackbar(context.getString(R.string.chunithm_message_refreshed))
                                         }
                                     }
                                     1 -> {
                                         // 歌曲列表页，回到顶部
                                         scope.launch {
                                             viewModel.scrollSongListToTop()
-                                            snackbarHostState.showSnackbar("已回到顶部")
+                                            snackbarHostState.showSnackbar(context.getString(R.string.chunithm_message_scrolled_to_top))
                                         }
                                     }
                                     2 -> {
                                         // 好友页面，刷新好友数据
                                         scope.launch {
                                             viewModel.refreshUserData(context)
-                                            snackbarHostState.showSnackbar("好友数据已刷新")
+                                            snackbarHostState.showSnackbar(context.getString(R.string.chunithm_message_friends_refreshed))
                                         }
                                     }
                                     3 -> {
                                         // 藏品页面，刷新藏品数据
                                         scope.launch {
                                             viewModel.loadData(context)
-                                            snackbarHostState.showSnackbar("藏品数据已刷新")
+                                            snackbarHostState.showSnackbar(context.getString(R.string.chunithm_message_collection_refreshed))
                                         }
                                     }
                                 }
@@ -283,13 +289,15 @@ internal fun ChunithmUserPage(
                                         else -> Filled.ArrowRotate
                                     }
                                 ),
-                                contentDescription = when (tabIndex) {
-                                    0 -> "Refresh"
-                                    1 -> "Scroll to Top"
-                                    2 -> "Refresh Friends"
-                                    3 -> "Refresh Collection"
-                                    else -> "Refresh"
-                                },
+                                contentDescription = context.getString(
+                                    when (tabIndex) {
+                                        0 -> R.string.chunithm_cd_refresh
+                                        1 -> R.string.chunithm_cd_scroll_to_top
+                                        2 -> R.string.chunithm_cd_refresh_friends
+                                        3 -> R.string.chunithm_cd_refresh_collection
+                                        else -> R.string.chunithm_cd_refresh
+                                    }
+                                ),
                                 tint = Beige500,
                                 modifier = Modifier.size(16.dp)
                             )

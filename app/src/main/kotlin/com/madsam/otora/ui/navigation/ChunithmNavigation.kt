@@ -49,7 +49,7 @@ internal fun ChunithmNavHost(
     navController: NavHostController,
     startDestination: String = ChunithmRoutes.CHUNITHM_USER,
     viewModel: ChunithmViewModel,
-    chuniScreenState: ChunithmScreenState,
+    chunithmScreenState: ChunithmScreenState,
     snackbarHostState: SnackbarHostState
 ) {
     NavHost(
@@ -60,7 +60,7 @@ internal fun ChunithmNavHost(
         composable(ChunithmRoutes.CHUNITHM_USER) {
             ChunithmUserPage(
                 viewModel = viewModel,
-                chuniScreenState = chuniScreenState,
+                chunithmScreenState = chunithmScreenState,
                 snackbarHostState = snackbarHostState,
                 navController = navController
             )

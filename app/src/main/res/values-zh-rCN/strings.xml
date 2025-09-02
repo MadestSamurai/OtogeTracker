@@ -1,11 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">音游追迹者</string>
-    <string name="online_mark">在线标识</string>
-    <string name="offline_mark">离线标识</string>
+    <string name="online_mark">在线标志</string>
+    <string name="offline_mark">离线标志</string>
     <string name="online">在线</string>
     <string name="offline">离线</string>
-    <string name="global_ranking">全球排行</string>
-    <string name="recent_90_days">最近90天</string>
-    <string name="highest_rank">最高排行</string>
+    <string name="global_ranking">全球排名</string>
+    <string name="recent_90_days">近90天数据</string>
+    <string name="highest_rank">最高排名</string>
+    <string name="chunithm_tab_collection">藏品</string>
+    <string name="chunithm_message_refreshed">已刷新</string>
+    <string name="chunithm_cd_refresh_friends">刷新好友数据</string>
+    <string name="chunithm_cd_refresh_collection">刷新藏品数据</string>
+    <string name="chunithm_tab_home">主页</string>
+    <string name="chunithm_tab_song_list">歌曲列表</string>
+    <string name="chunithm_tab_friends">好友</string>
+    <string name="chunithm_message_scrolled_to_top">已回到顶部</string>
+    <string name="chunithm_message_friends_refreshed">好友数据已刷新</string>
+    <string name="chunithm_message_collection_refreshed">藏品数据已刷新</string>
+    <string name="chunithm_cd_refresh">刷新</string>
+    <string name="chunithm_cd_scroll_to_top">回到顶部</string>
 </resources>

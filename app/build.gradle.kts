@@ -106,6 +106,7 @@ dependencies {
     implementation(libs.androidx.ui.android)
     // Compose Shimmer
     implementation(libs.compose.shimmer)
+    implementation(libs.androidx.foundation.layout)
 
     debugImplementation(libs.androidx.ui.tooling)
 

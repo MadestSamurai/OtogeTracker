@@ -1,7 +1,6 @@
 package com.madsam.otora.ui.bof
 
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -13,13 +12,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -57,9 +61,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -76,6 +81,7 @@ import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red800
+import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.madsam.otora.ui.bof.components.DateTimeRangePicker
@@ -83,7 +89,6 @@ import com.madsam.otora.ui.bof.sub.BofCommentScreen
 import com.madsam.otora.ui.bof.sub.BofEntryPagerScreen
 import com.madsam.otora.ui.bof.sub.BofTeamRankingScreen
 import com.madsam.otora.ui.components.CustomScrollableTabRow
-import com.madsam.otora.ui.components.CustomTabRow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -97,9 +102,9 @@ private const val TAG = "BofScreen"
  */
 private fun shouldShowActionButton(selectedTabIndex: Int): Boolean {
     return when (selectedTabIndex) {
-        0 -> true  // Entry页面：显示narrow模式切换按钮
-        1 -> true  // Team页面：显示信息切换按钮  
-        2 -> true  // Comment页面：显示刷新按钮
+        0 -> true
+        1 -> true
+        2 -> true
         else -> false
     }
 }
@@ -158,16 +163,16 @@ fun BofScreen(
     var showDateTimeRangePicker by remember { mutableStateOf(false) }
     val scrollThreshold = 50f
 
-    // Narrow mode state management
-    val configuration = LocalConfiguration.current
-    val screenWidthDp = configuration.screenWidthDp
-    var narrowMode by remember { mutableIntStateOf(0) }
-    
-    // Team info mode state management  
-    var teamInfoMode by remember { mutableIntStateOf(0) } // 0: 团队信息, 1: 作品详情
-    
-    // Comment display mode state management
-    var commentDisplayMode by remember { mutableIntStateOf(0) } // 0: 分数条模式, 1: 详细分数模式
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
+    val screenWidthDp = with(density) {
+        windowInfo.containerSize.width.toDp()
+    }
+    var entryInfoMode by remember { mutableIntStateOf(0) }
+    var teamInfoMode by remember { mutableIntStateOf(0) }
+    var commentInfoMode by remember { mutableIntStateOf(0) }
+
+    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
 
     fun selectTime() {
         showDateTimeRangePicker = true
@@ -176,7 +181,6 @@ fun BofScreen(
     // 初始数据加载
     LaunchedEffect(Unit) {
         vm.loadRankingDataWithStreamedParsing()
-        // 如果有选中的range且活动已开始，同时加载团队和评论数据
         selectedRange?.let { range ->
             if (range.isStart) {
                 vm.loadTeamRankingData(range.path)
@@ -185,7 +189,6 @@ fun BofScreen(
         }
     }
 
-    // 数据重新加载 - 当时间范围或选中的比赛变化时
     LaunchedEffect(
         selectedRange,
         bofScreenState.selectedCurrentDate.collectAsState().value,
@@ -193,10 +196,8 @@ fun BofScreen(
         bofScreenState.selectedCompareDate.collectAsState().value,
         bofScreenState.selectedCompareTime.collectAsState().value
     ) {
-        // 加载Work数据
         vm.loadRankingDataWithStreamedParsing()
-        
-        // 加载团队和评论数据
+
         selectedRange?.let { range ->
             if (range.isStart) {
                 vm.loadTeamRankingData(range.path)
@@ -230,8 +231,8 @@ fun BofScreen(
 
     val tabTitles = mapOf(
         "Entry" to listOf("Total", "Avg", "Median", "Diff", "Composite"),
-        "Team" to emptyList<String>(),
-        "Comment" to emptyList<String>()
+        "Team" to emptyList(),
+        "Comment" to emptyList()
     )
 
     val mainTabTitles = tabTitles.keys.toList()
@@ -287,7 +288,6 @@ fun BofScreen(
                             selected = selectedRange?.path == range.path,
                             onClick = {
                                 selectedRange = range
-                                // 同步到 BofScreenState
                                 bofScreenState.selectedRange.value = range
                                 coroutineScope.launch { 
                                     drawerState.close()
@@ -550,7 +550,7 @@ fun BofScreen(
                                     "Entry" -> BofEntryPagerScreen(
                                         vm = vm,
                                         bofScreenState = bofScreenState,
-                                        narrowMode = narrowMode,
+                                        narrowMode = entryInfoMode,
                                         searchText = searchText.value,
                                         scrollThreshold = scrollThreshold,
                                         setIsTabRowVisible = { isTabRowVisible = it }
@@ -580,7 +580,7 @@ fun BofScreen(
                                             commentData = commentData,
                                             title = title,
                                             subtitle = subtitle,
-                                            commentDisplayMode = commentDisplayMode,
+                                            commentDisplayMode = commentInfoMode,
                                             scrollThreshold = scrollThreshold,
                                             setIsTabRowVisible = { isTabRowVisible = it }
                                         )
@@ -595,36 +595,64 @@ fun BofScreen(
             if (selectedRange?.isStart == true) {
                 Column(
                     modifier = Modifier.align(Alignment.BottomCenter)
+                        .windowInsetsPadding(
+                            if (useNavigationRail) {
+                                // 使用 NavigationRail 时，需处理底部导航栏
+                                WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
+                            } else {
+                                // 不需要额外处理时，返回空 Insets
+                                WindowInsets(0, 0, 0, 0)
+                            }
+                        )
                 ) {
                     // 子Tab栏（如果有多个子Tab）
-                    AnimatedVisibility(
-                        visible = isTabRowVisible && subTabTitles.size > 1,
-                        enter = fadeIn(animationSpec = tween(300)),
-                        exit = fadeOut(animationSpec = tween(300)),
+                    Row(
                         modifier = Modifier
-                            .padding(horizontal = 12.dp, vertical = 3.dp)
-                            .clip(RoundedCornerShape(20.dp))
+                            .fillMaxWidth()
+                            .height(46.dp) // 40dp tab + 3dp padding + 3dp padding
+                            .padding(start = 12.dp, end = 12.dp, bottom = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        CustomTabRow(
-                            selectedTabIndex = selectedSubTabIndex,
-                            containerColor = Red500
+                        // 计算屏幕宽度和内容宽度
+                        val contentWidthDp = screenWidthDp - 24.dp // 减去水平padding
+                        
+                        Box(
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            subTabTitles.forEachIndexed { index, title ->
-                                Tab(
-                                    selected = selectedSubTabIndex == index,
-                                    onClick = {
-                                        if (selectedSubTabIndex != index) {
-                                            bofScreenState.selectedSubTab.update { index }
-                                            // 不需要导航，因为Pager会自动响应状态变化
+                            // 可滚动TabRow
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = isTabRowVisible && subTabTitles.size > 1,
+                                enter = fadeIn(animationSpec = tween(300)),
+                                exit = fadeOut(animationSpec = tween(300)),
+                                modifier = Modifier
+                                    .wrapContentWidth()
+                                    .widthIn(max = contentWidthDp)
+                                    .clip(RoundedCornerShape(20.dp))
+                            ) {
+                                CustomScrollableTabRow(
+                                    selectedTabIndex = selectedSubTabIndex,
+                                    containerColor = Red500,
+                                    containerWidthDp = contentWidthDp,
+                                    tabs = { selectedIndex ->
+                                        subTabTitles.forEachIndexed { index, title ->
+                                            Tab(
+                                                selected = selectedSubTabIndex == index,
+                                                onClick = {
+                                                    if (selectedSubTabIndex != index) {
+                                                        bofScreenState.selectedSubTab.update { index }
+                                                        // 不需要导航，因为Pager会自动响应状态变化
+                                                    }
+                                                },
+                                                text = {
+                                                    Text(
+                                                        text = title,
+                                                        color = if (selectedSubTabIndex == index) Beige500 else Beige600
+                                                    )
+                                                },
+                                                modifier = Modifier.height(35.dp)
+                                            )
                                         }
-                                    },
-                                    text = {
-                                        Text(
-                                            text = title,
-                                            color = if (selectedSubTabIndex == index) Beige500 else Beige600
-                                        )
-                                    },
-                                    modifier = Modifier.height(35.dp)
+                                    }
                                 )
                             }
                         }
@@ -634,12 +662,12 @@ fun BofScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(46.dp) // 40dp tab + 3dp padding + 3dp padding
+                            .height(46.dp)
                             .padding(start = 12.dp, end = 12.dp, bottom = 5.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // 计算屏幕宽度和内容宽度
-                        val contentWidthDp = screenWidthDp.dp - 24.dp // 减去水平padding
+                        val contentWidthDp = screenWidthDp - 24.dp // 减去水平padding
 
                         Box(
                             modifier = Modifier.fillMaxWidth()
@@ -693,7 +721,7 @@ fun BofScreen(
                                         .clickable {
                                             when (selectedTabIndex) {
                                                 0 -> {
-                                                    narrowMode = if (narrowMode == 0) 1 else 0
+                                                    entryInfoMode = if (entryInfoMode == 0) 1 else 0
                                                 }
 
                                                 1 -> {
@@ -701,7 +729,7 @@ fun BofScreen(
                                                 }
 
                                                 2 -> {
-                                                    commentDisplayMode = if (commentDisplayMode == 0) 1 else 0
+                                                    commentInfoMode = if (commentInfoMode == 0) 1 else 0
                                                 }
                                             }
                                         },

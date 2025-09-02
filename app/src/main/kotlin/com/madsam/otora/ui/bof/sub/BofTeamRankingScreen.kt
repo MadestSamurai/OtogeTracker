@@ -6,15 +6,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -44,6 +49,8 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -58,6 +65,7 @@ import com.madsam.otora.core.theme.RANKING_YELLOW
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.bof.TeamRankingItem
 
@@ -76,10 +84,39 @@ internal fun BofTeamRankingScreen(
     
     val listState = rememberLazyListState()
     
+    // 计算屏幕宽度和内容宽度
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val windowInfo = LocalWindowInfo.current
+    val screenWidthDp = with(density) {
+        windowInfo.containerSize.width.toDp()
+    }
+    
+    // 计算 Cutout 占用的宽度
+    val cutoutWidthDp = with(density) {
+        val cutoutInsets = WindowInsets.displayCutout
+        // 计算左右两侧的 cutout 总宽度
+        cutoutInsets.getLeft(density, layoutDirection).toDp() +
+        cutoutInsets.getRight(density, layoutDirection).toDp()
+    }
+    
+    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
+            .windowInsetsPadding(
+                WindowInsets.displayCutout.only(
+                    if (useNavigationRail) {
+                        // 使用 NavigationRail 时，左侧已由 Rail 处理，只处理右侧
+                        WindowInsetsSides.End
+                    } else {
+                        // 使用 BottomNavigation 时，处理左侧和右侧
+                        WindowInsetsSides.Start + WindowInsetsSides.End
+                    }
+                )
+            )
     ) {
         when {
             isLoading -> {

@@ -12,6 +12,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -19,6 +22,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.common.ColumnWidthType
 import com.madsam.otora.ui.common.RankingTable
@@ -35,6 +39,24 @@ internal fun BofEntryPagerScreen(
     setIsTabRowVisible: (Boolean) -> Unit = {}
 ) {
     val selectedSubTabIndex by bofScreenState.selectedSubTab.collectAsStateWithLifecycle()
+    
+    // 计算屏幕宽度和内容宽度
+    val density = LocalDensity.current
+    val layoutDirection = LocalLayoutDirection.current
+    val windowInfo = LocalWindowInfo.current
+    val screenWidthDp = with(density) {
+        windowInfo.containerSize.width.toDp()
+    }
+    
+    // 计算 Cutout 占用的宽度
+    val cutoutWidthDp = with(density) {
+        val cutoutInsets = WindowInsets.displayCutout
+        // 计算左右两侧的 cutout 总宽度
+        cutoutInsets.getLeft(density, layoutDirection).toDp() +
+        cutoutInsets.getRight(density, layoutDirection).toDp()
+    }
+    
+    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
     // 创建Pager状态，页面数量为5（Total, Avg, Median, Diff, Composite）
     val pagerState = rememberPagerState(
@@ -64,6 +86,17 @@ internal fun BofEntryPagerScreen(
         state = pagerState,
         modifier = Modifier
             .fillMaxSize()
+            .windowInsetsPadding(
+                WindowInsets.displayCutout.only(
+                    if (useNavigationRail) {
+                        // 使用 NavigationRail 时，左侧已由 Rail 处理，只处理右侧
+                        WindowInsetsSides.End
+                    } else {
+                        // 使用 BottomNavigation 时，处理左侧和右侧
+                        WindowInsetsSides.Start + WindowInsetsSides.End
+                    }
+                )
+            )
             .nestedScroll(object : NestedScrollConnection {
                 private var totalScroll = 0f
 
