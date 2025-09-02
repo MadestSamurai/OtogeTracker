@@ -592,7 +592,6 @@ fun BofScreen(
                 }
             }
 
-            // 无论活动是否开始，都显示底部的Tab栏（在活动未开始时可能需要隐藏）
             if (selectedRange?.isStart == true) {
                 Column(
                     modifier = Modifier.align(Alignment.BottomCenter)
@@ -694,17 +693,14 @@ fun BofScreen(
                                         .clickable {
                                             when (selectedTabIndex) {
                                                 0 -> {
-                                                    // Entry页面，切换narrow模式
                                                     narrowMode = if (narrowMode == 0) 1 else 0
                                                 }
 
                                                 1 -> {
-                                                    // Team页面，切换信息显示模式
                                                     teamInfoMode = if (teamInfoMode == 0) 1 else 0
                                                 }
 
                                                 2 -> {
-                                                    // Comment页面，切换显示模式
                                                     commentDisplayMode = if (commentDisplayMode == 0) 1 else 0
                                                 }
                                             }
@@ -719,18 +715,13 @@ fun BofScreen(
                                         Icon(
                                             painter = rememberVectorPainter(
                                                 image = when (tabIndex) {
-                                                    0 -> Filled.SwitchArrow  // Entry: 窄屏切换图标
-                                                    1 -> Filled.SwitchArrow  // Team: 信息切换图标
-                                                    2 -> Filled.SwitchArrow  // Comment: 显示模式切换图标
+                                                    0 -> Filled.SwitchArrow
+                                                    1 -> Filled.SwitchArrow
+                                                    2 -> Filled.SwitchArrow
                                                     else -> Filled.SwitchArrow
                                                 }
                                             ),
-                                            contentDescription = when (tabIndex) {
-                                                0 -> if (narrowMode == 1) "Switch to Wide Mode" else "Switch to Narrow Mode"
-                                                1 -> if (teamInfoMode == 1) "Switch to Team Info" else "Switch to Work Details"
-                                                2 -> if (commentDisplayMode == 1) "Switch to Score Chart Mode" else "Switch to Detailed Score Mode"
-                                                else -> "Switch"
-                                            },
+                                            contentDescription = "Switch",
                                             tint = Beige500,
                                             modifier = Modifier.size(16.dp)
                                         )

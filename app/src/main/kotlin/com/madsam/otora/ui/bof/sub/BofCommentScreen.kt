@@ -164,30 +164,33 @@ internal fun BofCommentScreen(
             )
         }
         
-        // 表格标题
-        Text(
-            text = title,
-            fontFamily = sarasaBold,
-            fontSize = 20.sp,
-            color = Color.White,
-            textAlign = TextAlign.Center,
+        // 表格标题和副标题
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Black)
-                .padding(vertical = 8.dp)
-        )
-
-        Text(
-            text = subtitle,
-            fontFamily = sarasaRegular,
-            fontSize = 12.sp,
-            color = Color.White,
-            textAlign = TextAlign.End,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Black)
-                .padding(horizontal = 16.dp, vertical = 4.dp)
-        )
+                .padding(vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // 主标题
+            Text(
+                text = title,
+                fontFamily = sarasaBold,
+                fontSize = 20.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+            
+            // 副标题
+            Text(
+                text = subtitle,
+                fontFamily = sarasaRegular,
+                fontSize = 12.sp,
+                color = TEXT_GRAY,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
 
         // 表头
         Row(

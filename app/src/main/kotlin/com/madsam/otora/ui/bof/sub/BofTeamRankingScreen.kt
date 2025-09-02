@@ -1,7 +1,6 @@
 package com.madsam.otora.ui.bof.sub
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -161,7 +160,8 @@ internal fun BofTeamRankingScreen(
                     listState = listState,
                     teamInfoMode = teamInfoMode,
                     scrollThreshold = scrollThreshold,
-                    setIsTabRowVisible = setIsTabRowVisible
+                    setIsTabRowVisible = setIsTabRowVisible,
+                    vm = vm
                 )
             }
         }
@@ -174,7 +174,8 @@ private fun TeamRankingTable(
     listState: androidx.compose.foundation.lazy.LazyListState,
     teamInfoMode: Int,
     scrollThreshold: Float = 50f,
-    setIsTabRowVisible: (Boolean) -> Unit = {}
+    setIsTabRowVisible: (Boolean) -> Unit = {},
+    vm: BofViewModel
 ) {
     // 宽度测量（类似RankingTable）
     var extraWidth by remember { mutableStateOf(50.dp) } // 评价数列宽度
@@ -218,18 +219,33 @@ private fun TeamRankingTable(
             )
         }
         
-        // 表格标题
-        Text(
-            text = "团队总分排行榜",
-            fontFamily = sarasaBold,
-            fontSize = 20.sp,
-            color = Color.White,
-            textAlign = TextAlign.Center,
+        // 表格标题和副标题
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Black)
-                .padding(vertical = 8.dp)
-        )
+                .padding(vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // 主标题
+            Text(
+                text = "团队总分排行榜",
+                fontFamily = sarasaBold,
+                fontSize = 20.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+            
+            // 副标题
+            Text(
+                text = "团队总分排行榜 (${teams.size} 团队) | ${vm.getSelectedTimeString()}",
+                fontFamily = sarasaRegular,
+                fontSize = 12.sp,
+                color = TEXT_GRAY,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
 
         // 表格头部
         TeamTableHeader(teamInfoMode = teamInfoMode, extraWidth = extraWidth, medianWidth = medianWidth)

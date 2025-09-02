@@ -29,6 +29,7 @@ import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
+import java.util.Locale
 
 // 列宽度类型枚举
 enum class ColumnWidthType(val measureText: String) {
@@ -148,30 +149,33 @@ fun RankingTable(
             }
         }
         
-        // 表格标题
-        Text(
-            text = config.title,
-            fontFamily = sarasaBold,
-            fontSize = 20.sp,
-            color = Color.White,
-            textAlign = TextAlign.Center,
+        // 表格标题和副标题
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Black)
-                .padding(vertical = 8.dp)
-        )
-
-        Text(
-            text = config.subtitle,
-            fontFamily = sarasaRegular,
-            fontSize = 12.sp,
-            color = Color.White,
-            textAlign = TextAlign.End,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Black)
-                .padding(horizontal = 16.dp, vertical = 4.dp)
-        )
+                .padding(vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // 主标题
+            Text(
+                text = config.title,
+                fontFamily = sarasaBold,
+                fontSize = 20.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+            
+            // 副标题
+            Text(
+                text = config.subtitle,
+                fontFamily = sarasaRegular,
+                fontSize = 12.sp,
+                color = TEXT_GRAY,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
 
         // 表格头部
         Row(
@@ -697,9 +701,9 @@ private fun formatScore(score: Number, widthType: ColumnWidthType, allowNegative
             if (doubleValue > 0 || (allowNegative && doubleValue != 0.0)) {
                 // 对于整数，显示为一位小数；否则显示两位小数
                 if (doubleValue == doubleValue.toInt().toDouble()) {
-                    String.format("%.1f", doubleValue)
+                    String.format(Locale.US,"%.1f", doubleValue)
                 } else {
-                    String.format("%.2f", doubleValue)
+                    String.format(Locale.US,"%.2f", doubleValue)
                 }
             } else "---"
         ColumnWidthType.ONE_DECIMAL ->
@@ -708,7 +712,7 @@ private fun formatScore(score: Number, widthType: ColumnWidthType, allowNegative
                 if (doubleValue == 1000.0) {
                     doubleValue.toInt().toString()
                 } else {
-                    String.format("%.1f", doubleValue)
+                    String.format(Locale.US,"%.1f", doubleValue)
                 }
             } else "---"
     }
