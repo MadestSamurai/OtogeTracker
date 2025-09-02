@@ -1,6 +1,7 @@
 package com.madsam.otora.ui.bof.sub
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,7 +38,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -61,7 +66,9 @@ import com.madsam.otora.ui.bof.TeamRankingItem
 internal fun BofTeamRankingScreen(
     bofScreenState: BofScreenState,
     vm: BofViewModel = viewModel(),
-    teamInfoMode: Int = 0
+    teamInfoMode: Int = 0,
+    scrollThreshold: Float = 50f,
+    setIsTabRowVisible: (Boolean) -> Unit = {}
 ) {
     val teamRankingData by vm.teamRankingData.collectAsState()
     val isLoading by vm.isTeamRankingLoading.collectAsState()
@@ -152,7 +159,9 @@ internal fun BofTeamRankingScreen(
                 TeamRankingTable(
                     teams = teamRankingData,
                     listState = listState,
-                    teamInfoMode = teamInfoMode
+                    teamInfoMode = teamInfoMode,
+                    scrollThreshold = scrollThreshold,
+                    setIsTabRowVisible = setIsTabRowVisible
                 )
             }
         }
@@ -163,7 +172,9 @@ internal fun BofTeamRankingScreen(
 private fun TeamRankingTable(
     teams: List<TeamRankingItem>,
     listState: androidx.compose.foundation.lazy.LazyListState,
-    teamInfoMode: Int
+    teamInfoMode: Int,
+    scrollThreshold: Float = 50f,
+    setIsTabRowVisible: (Boolean) -> Unit = {}
 ) {
     // 宽度测量（类似RankingTable）
     var extraWidth by remember { mutableStateOf(50.dp) } // 评价数列宽度
@@ -226,7 +237,24 @@ private fun TeamRankingTable(
         // 数据列表
         LazyColumn(
             state = listState,
-            modifier = Modifier.clip(RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+            modifier = Modifier
+                .clip(RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+                .nestedScroll(object : NestedScrollConnection {
+                    private var totalScroll = 0f
+
+                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                        // 只在垂直滑动时处理TabRow显示/隐藏
+                        totalScroll += available.y
+                        if (totalScroll < -scrollThreshold) {
+                            setIsTabRowVisible(false)
+                            totalScroll = 0f
+                        } else if (totalScroll > scrollThreshold) {
+                            setIsTabRowVisible(true)
+                            totalScroll = 0f
+                        }
+                        return Offset.Zero
+                    }
+                })
         ) {
             itemsIndexed(teams) { index, team ->
                 TeamRankingRow(

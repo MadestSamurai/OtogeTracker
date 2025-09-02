@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,7 +24,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
@@ -41,36 +46,32 @@ import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
 import com.madsam.otora.ui.bof.components.ScoreChart
 import com.madsam.otora.ui.common.ColumnWidthType
+import java.util.Locale
 
-// 按照RankingTable标准的格式化函数
 private fun formatScore(score: Number, widthType: ColumnWidthType): String {
-    return formatScore(score, widthType, allowNegative = false)
-}
-
-private fun formatScore(score: Number, widthType: ColumnWidthType, allowNegative: Boolean): String {
     val doubleValue = score.toDouble()
     return when (widthType) {
         ColumnWidthType.THREE_DIGIT_INT -> 
-            if (doubleValue > 0 || (allowNegative && doubleValue != 0.0)) {
+            if (doubleValue > 0) {
                 // 整数类型，直接显示整数
                 doubleValue.toInt().toString()
             } else "---"
         ColumnWidthType.TWO_DECIMAL -> 
-            if (doubleValue > 0 || (allowNegative && doubleValue != 0.0)) {
+            if (doubleValue > 0) {
                 // 对于整数，显示为一位小数；否则显示两位小数
                 if (doubleValue == doubleValue.toInt().toDouble()) {
-                    String.format("%.1f", doubleValue)
+                    String.format(Locale.US, "%.1f", doubleValue)
                 } else {
-                    String.format("%.2f", doubleValue)
+                    String.format(Locale.US,"%.2f", doubleValue)
                 }
             } else "---"
         ColumnWidthType.ONE_DECIMAL ->
-            if (doubleValue > 0 || (allowNegative && doubleValue != 0.0)) {
+            if (doubleValue > 0) {
                 // 显示一位小数
                 if (doubleValue == 1000.0) {
                     doubleValue.toInt().toString()
                 } else {
-                    String.format("%.1f", doubleValue)
+                    String.format(Locale.US,"%.1f", doubleValue)
                 }
             } else "---"
     }
@@ -81,7 +82,9 @@ internal fun BofCommentScreen(
     commentData: List<BofCommentUI>,
     title: String = "BOF 评价排行榜",
     subtitle: String = "按总分排序",
-    commentDisplayMode: Int = 0
+    commentDisplayMode: Int = 0,
+    scrollThreshold: Float = 50f,
+    setIsTabRowVisible: (Boolean) -> Unit = {}
 ) {
     // 屏幕宽度检测
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
@@ -265,7 +268,26 @@ internal fun BofCommentScreen(
         }
 
         // 数据列表
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(object : NestedScrollConnection {
+                    private var totalScroll = 0f
+
+                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                        // 只在垂直滑动时处理TabRow显示/隐藏
+                        totalScroll += available.y
+                        if (totalScroll < -scrollThreshold) {
+                            setIsTabRowVisible(false)
+                            totalScroll = 0f
+                        } else if (totalScroll > scrollThreshold) {
+                            setIsTabRowVisible(true)
+                            totalScroll = 0f
+                        }
+                        return Offset.Zero
+                    }
+                })
+        ) {
             itemsIndexed(commentData) { index, comment ->
                 BofCommentRow(
                     comment = comment,
@@ -373,14 +395,14 @@ private fun BofCommentRow(
             Box(
                 modifier = Modifier
                     .width(narrowScoreBarWidth)
-                    .height(24.dp)
+                    .height(34.dp)
             ) {
                 ScoreBarDisplay(
                     comment = comment,
                     maxScore = maxScore,
                     hasValidChartData = hasValidChartData,
                     barWidth = narrowScoreBarWidth,
-                    barHeight = 24.dp
+                    barHeight = 34.dp
                 )
                 Text(
                     text = formatScore(comment.total, ColumnWidthType.THREE_DIGIT_INT),
@@ -431,7 +453,7 @@ private fun BofCommentRow(
             Box(
                 modifier = Modifier
                     .width(voteAvgWidth)
-                    .height(34.dp)
+                    .fillMaxHeight()
                     .background(
                         if (comment.voteAve > 0)
                             Color(red = (comment.voteAve / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
@@ -455,7 +477,7 @@ private fun BofCommentRow(
             Box(
                 modifier = Modifier
                     .width(shortAvgWidth)
-                    .height(34.dp)
+                    .fillMaxHeight()
                     .background(
                         if (comment.shortAve > 0)
                             Color(red = (comment.shortAve / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
@@ -479,7 +501,7 @@ private fun BofCommentRow(
             Box(
                 modifier = Modifier
                     .width(longAvgWidth)
-                    .height(34.dp)
+                    .fillMaxHeight()
                     .background(
                         if (comment.longAve > 0)
                             Color(red = (comment.longAve / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)

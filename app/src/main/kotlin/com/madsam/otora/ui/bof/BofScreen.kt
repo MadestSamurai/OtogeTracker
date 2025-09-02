@@ -559,26 +559,30 @@ fun BofScreen(
                                     "Team" -> BofTeamRankingScreen(
                                         bofScreenState = bofScreenState,
                                         vm = vm,
-                                        teamInfoMode = teamInfoMode
+                                        teamInfoMode = teamInfoMode,
+                                        scrollThreshold = scrollThreshold,
+                                        setIsTabRowVisible = { isTabRowVisible = it }
                                     )
 
                                     "Comment" -> {
                                         val commentData by vm.commentData.collectAsState()
                                         val selectedTimeStrNoComp by vm.selectedTimeStrNoComp.collectAsState()
                                         val selectedRange = bofScreenState.selectedRange.collectAsState().value
-                                        
-                                        // 根据数据类型确定字幕内容
-                                        val subtitle = if (selectedRange?.singleComment == true && selectedRange.commentDate.isNotEmpty()) {
-                                            "时间: ${selectedRange.commentDate}"
-                                        } else {
-                                            "时间: $selectedTimeStrNoComp"
+                                        var title = "BOF 评价排行榜"
+                                        var subtitle = "时间: $selectedTimeStrNoComp"
+
+                                        if (selectedRange?.singleComment == true && selectedRange.commentDate.isNotEmpty()) {
+                                            title = "BOF最终评价排行榜"
+                                            subtitle = "时间: ${selectedRange.commentDate} (仅单日)"
                                         }
                                         
                                         BofCommentScreen(
                                             commentData = commentData,
-                                            title = "BOF 评价排行榜",
+                                            title = title,
                                             subtitle = subtitle,
-                                            commentDisplayMode = commentDisplayMode
+                                            commentDisplayMode = commentDisplayMode,
+                                            scrollThreshold = scrollThreshold,
+                                            setIsTabRowVisible = { isTabRowVisible = it }
                                         )
                                     }
                                 }
