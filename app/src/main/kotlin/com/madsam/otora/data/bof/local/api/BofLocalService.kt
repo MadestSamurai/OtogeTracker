@@ -7,10 +7,6 @@ internal class BofLocalService {
     
     private val bofObjectBoxService = BofObjectBoxService()
 
-    suspend fun getBofttCommentByTime(currentDate: String): List<BofCommentUI> {
-        return bofObjectBoxService.getBofttCommentByTime(currentDate)
-    }
-
     suspend fun getBofttCommentLatest(): List<BofCommentUI> {
         return bofObjectBoxService.getBofttCommentLatest()
     }

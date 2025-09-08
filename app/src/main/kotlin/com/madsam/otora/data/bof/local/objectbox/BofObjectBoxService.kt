@@ -85,7 +85,7 @@ internal class BofObjectBoxService {
                 val allComments = bofCommentBox.all
                 
                 if (allComments.isEmpty()) {
-                    return@withContext emptyList<BofCommentUI>()
+                    return@withContext emptyList()
                 }
                 
                 // Find the most recent date
@@ -94,10 +94,10 @@ internal class BofObjectBoxService {
                 if (latestDate != null) {
                     return@withContext getBofttCommentByTime(latestDate)
                 } else {
-                    return@withContext emptyList<BofCommentUI>()
+                    return@withContext emptyList()
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Error in getBofttCommentLatest: ${e.message}")
+                Log.e(TAG, "Error in getBofCommentLatest: ${e.message}")
                 emptyList()
             }
         }
