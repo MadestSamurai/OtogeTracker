@@ -132,6 +132,20 @@ internal class BofObjectBoxService {
     }
     
     /**
+     * 清除所有 Range 数据
+     */
+    suspend fun clearAllRangeData() {
+        withContext(Dispatchers.IO) {
+            try {
+                bofRangeBox.removeAll()
+                Log.d(TAG, "Cleared all BOF range data")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error clearing BOF range data: ${e.message}", e)
+            }
+        }
+    }
+    
+    /**
      * 保存 BOF Range 数据
      */
     suspend fun saveBofRangeData(ranges: List<BofRangeResponse>) {

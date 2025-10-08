@@ -10,6 +10,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,9 +46,39 @@ fun DateTimeRangePicker(
     var showCompareDatePicker by remember { mutableStateOf(false) }
     var showCurrentDatePicker by remember { mutableStateOf(false) }
 
-    var currentDateState by remember { mutableStateOf(DatePickerDate(2025, 0, 8)) }
+    // 从 BofScreenState 获取当前选中的 Range
+    val selectedRange by bofScreenState.selectedRange.collectAsState()
+    
+    // 解析 Range 的开始和结束日期
+    val (fromDate, toDate) = remember(selectedRange) {
+        try {
+            if (selectedRange != null) {
+                // 解析 start 日期字符串 (格式: "YYYY-MM-DD")
+                val startParts = selectedRange!!.start.split("-")
+                val startYear = startParts[0].toInt()
+                val startMonth = startParts[1].toInt() - 1 // DatePicker month 是 0-based
+                val startDay = startParts[2].toInt()
+                
+                // 解析 current 日期字符串 (格式: "YYYY-MM-DD")
+                val currentParts = selectedRange!!.current.split("-")
+                val currentYear = currentParts[0].toInt()
+                val currentMonth = currentParts[1].toInt() - 1 // DatePicker month 是 0-based
+                val currentDay = currentParts[2].toInt()
+                
+                DatePickerDate(startYear, startMonth, startDay) to DatePickerDate(currentYear, currentMonth, currentDay)
+            } else {
+                // 如果没有选中 Range，使用默认值
+                DatePickerDate(2024, 9, 18) to DatePickerDate(2025, 0, 8)
+            }
+        } catch (e: Exception) {
+            // 解析失败时使用默认值
+            DatePickerDate(2024, 9, 18) to DatePickerDate(2025, 0, 8)
+        }
+    }
+
+    var currentDateState by remember { mutableStateOf(toDate) }
     var currentTimeState by remember { mutableStateOf(TimePickerTime(0, 0)) }
-    var compareDateState by remember { mutableStateOf(DatePickerDate(2025, 0, 8)) }
+    var compareDateState by remember { mutableStateOf(toDate) }
     var compareTimeState by remember { mutableStateOf(TimePickerTime(0, 0)) }
 
     var currentDateText by remember { mutableStateOf(LocalDate.now()) }
@@ -93,8 +124,8 @@ fun DateTimeRangePicker(
                         },
                         date = currentDateState,
                         selectionLimiter = SelectionLimiter(
-                            fromDate = DatePickerDate(2024, 9, 18),
-                            toDate = DatePickerDate(2025, 0, 8)
+                            fromDate = fromDate,
+                            toDate = toDate
                         ),
                         configuration = DatePickerConfiguration.Builder()
                             .headerTextStyle(TextStyle.Default.copy(fontSize = 20.sp))
@@ -176,8 +207,8 @@ fun DateTimeRangePicker(
                         },
                         date = compareDateState,
                         selectionLimiter = SelectionLimiter(
-                            fromDate = DatePickerDate(2024, 9, 18),
-                            toDate = DatePickerDate(2025, 0, 8)
+                            fromDate = fromDate,
+                            toDate = toDate
                         ),
                         configuration = DatePickerConfiguration.Builder()
                             .headerTextStyle(TextStyle.Default.copy(fontSize = 20.sp))
