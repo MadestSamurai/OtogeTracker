@@ -14,10 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -36,10 +32,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.madsam.otora.core.icon.Fa
+import com.madsam.otora.core.icon.fa.`Arrow-right`
+import com.madsam.otora.core.icon.fa.`Arrow-rotate-back`
+import com.madsam.otora.core.icon.fa.Info
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.RANKING_GREEN
 import com.madsam.otora.core.theme.Red300
@@ -79,7 +80,7 @@ fun BOFDataUpdateScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        imageVector = Fa.`Arrow-right`,
                         contentDescription = "返回",
                         tint = Beige400,
                         modifier = Modifier.size(24.dp)
@@ -88,7 +89,7 @@ fun BOFDataUpdateScreen(
             },
             actions = {
                 IconButton(
-                    onClick = { viewModel.loadAvailableCompetitions() },
+                    onClick = { viewModel.downloadRangeData() },
                     enabled = !uiState.isLoadingCompetitions
                 ) {
                     if (uiState.isLoadingCompetitions) {
@@ -99,7 +100,7 @@ fun BOFDataUpdateScreen(
                         )
                     } else {
                         Icon(
-                            imageVector = Icons.Filled.Refresh,
+                            imageVector = Fa.`Arrow-rotate-back`,
                             contentDescription = "刷新比赛列表",
                             tint = Beige400,
                             modifier = Modifier.size(24.dp)
@@ -107,10 +108,11 @@ fun BOFDataUpdateScreen(
                     }
                 }
             },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Red500,
+                scrolledContainerColor = Color.Unspecified, navigationIconContentColor = Beige400,
                 titleContentColor = Beige400,
-                navigationIconContentColor = Beige400
+                actionIconContentColor = Color.Unspecified
             )
         )
         
@@ -169,7 +171,7 @@ fun BOFDataUpdateScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Info,
+                                imageVector = Fa.Info,
                                 contentDescription = null,
                                 tint = if (uiState.isError) White1000 else RANKING_GREEN,
                                 modifier = Modifier.size(20.dp)
@@ -215,7 +217,7 @@ fun BOFDataUpdateScreen(
                     OutlinedButton(
                         onClick = { 
                             viewModel.clearMessage()
-                            viewModel.loadAvailableCompetitions()
+                            viewModel.downloadRangeData()
                         },
                         modifier = Modifier.weight(1f),
                         enabled = !uiState.isLoadingCompetitions,

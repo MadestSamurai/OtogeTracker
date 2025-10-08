@@ -137,6 +137,9 @@ internal class BofObjectBoxService {
     suspend fun saveBofRangeData(ranges: List<BofRangeResponse>) {
         withContext(Dispatchers.IO) {
             try {
+                // 先清除所有旧数据，避免 null 字段问题
+                bofRangeBox.removeAll()
+                
                 val entities = ranges.map { dto ->
                     BofRangeEntity(
                         path = dto.path,
@@ -147,7 +150,7 @@ internal class BofObjectBoxService {
                         isStart = dto.isStart,
                         isEnd = dto.isEnd,
                         singleComment = dto.singleComment,
-                        commentDate = dto.commentDate,
+                        commentDate = dto.commentDate.ifEmpty { "" },
                         lastUpdated = System.currentTimeMillis()
                     )
                 }

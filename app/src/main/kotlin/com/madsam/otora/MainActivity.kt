@@ -20,13 +20,6 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -53,6 +46,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.OtogeTrackerTheme
@@ -73,9 +67,9 @@ import java.time.LocalDate
 fun MainActivityScreen(navController: NavHostController) {
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf(Screen.RecordScreen, Screen.ReportScreen, Screen.BOFScreen)
-    val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.Favorite, Icons.Filled.Star)
+    val selectedIcons = listOf(Filled.Star, Filled.Star, Filled.Star)
     val unselectedIcons =
-        listOf(Icons.Outlined.Home, Icons.Outlined.FavoriteBorder, Icons.Outlined.Star)
+        listOf(Filled.Star, Filled.Star, Filled.Star)
     val snackbarHostState = remember { SnackbarHostState() }
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
 

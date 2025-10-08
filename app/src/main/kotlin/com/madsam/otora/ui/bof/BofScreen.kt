@@ -29,8 +29,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -75,7 +73,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.madsam.otora.BofScreenState
+import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.core.icon.fa.Bars
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
@@ -458,7 +458,7 @@ fun BofScreen(
                             coroutineScope.launch { drawerState.open() }
                         }) {
                             Icon(
-                                imageVector = Icons.Default.Menu,
+                                imageVector = Fa.Bars,
                                 contentDescription = "Menu",
                                 tint = Beige400,
                                 modifier = Modifier.size(24.dp)

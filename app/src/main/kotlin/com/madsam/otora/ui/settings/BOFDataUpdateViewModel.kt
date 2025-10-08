@@ -68,7 +68,57 @@ class BOFDataUpdateViewModel : ViewModel() {
     }
 
     /**
-     * 加载可用的比赛列表
+     * 从网络下载 Range 数据
+     */
+    fun downloadRangeData() {
+        viewModelScope.launch {
+            try {
+                _uiState.value = _uiState.value.copy(
+                    isLoadingCompetitions = true,
+                    message = "正在从网络下载 Range 数据...",
+                    isError = false
+                )
+                
+                // 调用API下载Range数据
+                val response = withContext(Dispatchers.IO) {
+                    api.getBofRangeData().execute()
+                }
+                
+                if (!response.isSuccessful) {
+                    throw Exception("Range 数据API请求失败: ${response.code()} - ${response.message()}")
+                }
+                
+                val rangeDataList = response.body()
+                if (rangeDataList == null) {
+                    throw Exception("Range 数据API响应为空")
+                }
+                
+                // 保存到数据库
+                bofObjectBoxService.saveBofRangeData(rangeDataList)
+                
+                Log.d(TAG, "Successfully downloaded and saved ${rangeDataList.size} range data")
+                
+                // 下载完成后重新加载列表
+                loadAvailableCompetitions()
+                
+                _uiState.value = _uiState.value.copy(
+                    message = "成功从网络下载 ${rangeDataList.size} 个比赛的 Range 数据",
+                    isError = false
+                )
+                
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to download range data", e)
+                _uiState.value = _uiState.value.copy(
+                    isLoadingCompetitions = false,
+                    message = "下载 Range 数据失败: ${e.message}",
+                    isError = true
+                )
+            }
+        }
+    }
+    
+    /**
+     * 加载可用的比赛列表（从本地数据库）
      */
     fun loadAvailableCompetitions() {
         viewModelScope.launch {

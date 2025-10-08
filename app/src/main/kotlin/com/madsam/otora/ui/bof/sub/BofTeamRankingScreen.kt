@@ -24,11 +24,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -49,8 +44,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -58,6 +51,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.BofScreenState
+import com.madsam.otora.core.icon.Fa
+import com.madsam.otora.core.icon.fa.`Arrow-down`
+import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.`Arrow-up`
+import com.madsam.otora.core.icon.fa.Star
 import com.madsam.otora.core.theme.BG_DARK_GRAY
 import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.RANKING_RED
@@ -83,23 +81,6 @@ internal fun BofTeamRankingScreen(
     val selectedRange by bofScreenState.selectedRange.collectAsState()
     
     val listState = rememberLazyListState()
-    
-    // 计算屏幕宽度和内容宽度
-    val density = LocalDensity.current
-    val layoutDirection = LocalLayoutDirection.current
-    val windowInfo = LocalWindowInfo.current
-    val screenWidthDp = with(density) {
-        windowInfo.containerSize.width.toDp()
-    }
-    
-    // 计算 Cutout 占用的宽度
-    val cutoutWidthDp = with(density) {
-        val cutoutInsets = WindowInsets.displayCutout
-        // 计算左右两侧的 cutout 总宽度
-        cutoutInsets.getLeft(density, layoutDirection).toDp() +
-        cutoutInsets.getRight(density, layoutDirection).toDp()
-    }
-    
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
     Column(
@@ -429,7 +410,7 @@ private fun TeamRankingRow(
                     when {
                         change != null && change > 0 -> {
                             Icon(
-                                imageVector = Icons.Default.KeyboardArrowUp,
+                                imageVector = Fa.`Arrow-up`,
                                 contentDescription = "Rank Up",
                                 tint = Color.Green,
                                 modifier = Modifier.size(12.dp)
@@ -443,7 +424,7 @@ private fun TeamRankingRow(
                         }
                         change != null && change < 0 -> {
                             Icon(
-                                imageVector = Icons.Default.KeyboardArrowDown,
+                                imageVector = Fa.`Arrow-down`,
                                 contentDescription = "Rank Down",
                                 tint = Color.Red,
                                 modifier = Modifier.size(12.dp)
@@ -457,7 +438,7 @@ private fun TeamRankingRow(
                         }
                         change != null -> {
                             Icon(
-                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                                imageVector = Fa.`Arrow-left`,
                                 contentDescription = "Rank Same",
                                 tint = Color.Gray,
                                 modifier = Modifier.size(12.dp)
@@ -631,7 +612,7 @@ private fun TeamWorksDetail(team: TeamRankingItem) {
             .padding(top = 2.dp)
     ) {
         works.forEach { (title, artist, workData) ->
-            val (finalStriker, workScore, workIndex) = workData
+            val (finalStriker, workScore, _) = workData
             TeamWorkRow(
                 title = title,
                 artist = artist,
@@ -663,7 +644,7 @@ private fun TeamWorkRow(
             // Final Striker 星标
             if (finalStriker == "1") {
                 Icon(
-                    imageVector = Icons.Default.Star,
+                    imageVector = Fa.Star,
                     contentDescription = "Final Striker",
                     tint = RANKING_YELLOW,
                     modifier = Modifier.size(14.dp)

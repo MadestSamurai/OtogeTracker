@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.madsam.otora.core.icon.Fa
+import com.madsam.otora.core.icon.fa.Cross
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.core.theme.Red700
@@ -110,7 +110,7 @@ internal fun TopRankDialog(
                     )
                     IconButton(onClick = onDismiss) {
                         Icon(
-                            imageVector = Icons.Default.Close,
+                            imageVector = Fa.Cross,
                             contentDescription = "Close",
                             tint = Beige400
                         )

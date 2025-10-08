@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -31,9 +29,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
+import com.madsam.otora.core.icon.fa.`Arrow-right`
 import com.madsam.otora.core.icon.fa.Clock
 import com.madsam.otora.core.icon.fa.Wifi
 import com.madsam.otora.core.theme.Beige400
@@ -69,17 +69,18 @@ fun GeneralDataUpdateScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        imageVector = Fa.`Arrow-right`,
                         contentDescription = "返回",
                         tint = Beige400,
                         modifier = Modifier.size(24.dp)
                     )
                 }
             },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Red500,
+                scrolledContainerColor = Color.Unspecified, navigationIconContentColor = Beige400,
                 titleContentColor = Beige400,
-                navigationIconContentColor = Beige400
+                actionIconContentColor = Color.Unspecified
             )
         )
         
