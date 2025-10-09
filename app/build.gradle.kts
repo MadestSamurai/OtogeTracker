@@ -99,6 +99,8 @@ dependencies {
     // Compose
     implementation(libs.androidx.activity.compose)
     implementation(libs.accompanist.themeadapter.material3)
+    // Material Icons Extended (解决第三方库依赖问题)
+    implementation(libs.androidx.compose.material.icons.extended)
     // Compose Screenshot
     implementation(libs.shreyaspatil.capturable)
     implementation(libs.androidx.foundation.android)
