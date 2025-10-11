@@ -416,9 +416,7 @@ class BOFDataUpdateViewModel : ViewModel() {
         }
 
         // 使用commentDate字段作为保存日期
-        val dateToSave = if (competitionRange.commentDate.isNotEmpty()) {
-            competitionRange.commentDate
-        } else {
+        val dateToSave = competitionRange.commentDate.ifEmpty {
             // 如果没有commentDate，使用current字段或默认日期
             competitionRange.current.ifEmpty { "2025-01-08" }
         }

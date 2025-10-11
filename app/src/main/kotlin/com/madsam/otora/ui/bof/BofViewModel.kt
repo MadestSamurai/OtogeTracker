@@ -1,7 +1,6 @@
 package com.madsam.otora.ui.bof
 
 import android.util.Log
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -156,10 +155,29 @@ internal class BofViewModel(
     }
 
     suspend fun requestCommentData() {
-        val data = fetchData(
-            { bofLocalService.getBofttCommentLatest() },
-            { currentTime, compareTime -> bofLocalService.getBofttCommentLatest() }
-        )
+        // 获取当前选中的 Range
+        val selectedRange = bofScreenState.selectedRange.value
+        
+        // 确定要使用的日期
+        val dateToFetch = if (selectedRange?.singleComment == true && selectedRange.commentDate.isNotEmpty()) {
+            // 如果是单日评论且有指定日期，直接使用该日期
+            selectedRange.commentDate
+        } else if (bofScreenState.selectedCurrentTime.value != "-1") {
+            // 如果用户选择了具体时间，使用选择的日期
+            bofScreenState.selectedCurrentDate.value.toString()
+        } else {
+            // 否则获取最新数据
+            null
+        }
+        
+        val data = if (dateToFetch != null) {
+            // 根据日期获取评论数据
+            bofLocalService.getBofttCommentByTime(dateToFetch)
+        } else {
+            // 获取最新评论数据
+            bofLocalService.getBofttCommentLatest()
+        }
+        
         if (data.isEmpty()) {
             Log.d(TAG, "No comment data available for the selected date and time.")
             return

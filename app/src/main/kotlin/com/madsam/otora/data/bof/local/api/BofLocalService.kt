@@ -10,4 +10,8 @@ internal class BofLocalService {
     suspend fun getBofttCommentLatest(): List<BofCommentUI> {
         return bofObjectBoxService.getBofttCommentLatest()
     }
+    
+    suspend fun getBofttCommentByTime(date: String): List<BofCommentUI> {
+        return bofObjectBoxService.getBofttCommentByTime(date)
+    }
 }

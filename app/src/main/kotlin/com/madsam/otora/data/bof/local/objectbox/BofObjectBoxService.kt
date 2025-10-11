@@ -130,21 +130,7 @@ internal class BofObjectBoxService {
             }
         }
     }
-    
-    /**
-     * 清除所有 Range 数据
-     */
-    suspend fun clearAllRangeData() {
-        withContext(Dispatchers.IO) {
-            try {
-                bofRangeBox.removeAll()
-                Log.d(TAG, "Cleared all BOF range data")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error clearing BOF range data: ${e.message}", e)
-            }
-        }
-    }
-    
+
     /**
      * 保存 BOF Range 数据
      */
@@ -485,6 +471,26 @@ internal class BofObjectBoxService {
     suspend fun saveBofCommentApiResponse(commentList: List<com.madsam.otora.data.bof.remote.model.BofCommentSingleResponse>, date: String) {
         withContext(Dispatchers.IO) {
             try {
+                // 先删除相同日期的旧评论数据
+                val oldComments = bofCommentBox.query(
+                    BofCommentEntity_.date.equal(date)
+                ).build().find()
+                
+                if (oldComments.isNotEmpty()) {
+                    bofCommentBox.remove(oldComments)
+                    Log.d(TAG, "Removed ${oldComments.size} old comments for date $date")
+                }
+                
+                // 删除相同日期的旧评论详情数据
+                val oldDetails = bofCommentDetailBox.query(
+                    BofCommentDetailEntity_.date.equal(date)
+                ).build().find()
+                
+                if (oldDetails.isNotEmpty()) {
+                    bofCommentDetailBox.remove(oldDetails)
+                    Log.d(TAG, "Removed ${oldDetails.size} old comment details for date $date")
+                }
+                
                 val commentsToSave = mutableListOf<BofCommentEntity>()
                 val detailsToSave = mutableListOf<BofCommentDetailEntity>()
                 
