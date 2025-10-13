@@ -12,24 +12,15 @@ import io.objectbox.annotation.ConflictStrategy
 @Entity
 internal data class BofTeamEntity(
     @Id var id: Long = 0,
-    @Unique(onConflict = ConflictStrategy.REPLACE) @Index var compositeTeamId: String = "", // {path}_{teamName} 格式的复合ID
+    @Unique(onConflict = ConflictStrategy.REPLACE) @Index var compositeTeamId: String = "",
     @Index var path: String = "", // 比赛类型路径 (tt, bms等)
     var teamName: String = "", // 团队名称
     
-    // JSON数据存储 - 存储完整的嵌套结构
-    var scoreDataJson: String = "", // Score数据的JSON字符串
-    var title1Json: String = "", // Title1的历史数据JSON
-    var title2Json: String = "", // Title2的历史数据JSON
-    var title3Json: String = "", // Title3的历史数据JSON
-    var title4Json: String = "", // Title4的历史数据JSON
-    var artist1Json: String = "", // Artist1的历史数据JSON
-    var artist2Json: String = "", // Artist2的历史数据JSON
-    var artist3Json: String = "", // Artist3的历史数据JSON
-    var artist4Json: String = "", // Artist4的历史数据JSON
-    var finalStriker1Json: String = "", // FinalStriker1的历史数据JSON
-    var finalStriker2Json: String = "", // FinalStriker2的历史数据JSON
-    var finalStriker3Json: String = "", // FinalStriker3的历史数据JSON
-    var finalStriker4Json: String = "", // FinalStriker4的历史数据JSON
+    // 注意：时序数据已迁移到独立的历史表中：
+    // - BofTeamScoreHistoryEntity: 分数历史
+    // - BofTeamTitleHistoryEntity: 标题历史（workSlot 1-4）
+    // - BofTeamArtistHistoryEntity: 艺术家历史（workSlot 1-4）
+    // - BofTeamFinalStrikerHistoryEntity: 决胜作品历史（workSlot 1-4）
     
     // 缓存的当前状态用于快速查询
     var currentTitle1: String = "",
@@ -63,19 +54,6 @@ internal data class BofTeamEntity(
         compositeTeamId = "",
         path = "",
         teamName = "",
-        scoreDataJson = "",
-        title1Json = "",
-        title2Json = "",
-        title3Json = "",
-        title4Json = "",
-        artist1Json = "",
-        artist2Json = "",
-        artist3Json = "",
-        artist4Json = "",
-        finalStriker1Json = "",
-        finalStriker2Json = "",
-        finalStriker3Json = "",
-        finalStriker4Json = "",
         currentTitle1 = "",
         currentTitle2 = "",
         currentTitle3 = "",

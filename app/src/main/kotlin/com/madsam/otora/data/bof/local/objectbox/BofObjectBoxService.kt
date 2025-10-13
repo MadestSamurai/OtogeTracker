@@ -19,6 +19,10 @@ internal class BofObjectBoxService {
     
     private val boxStore by lazy { ObjectBoxManager.getBoxStore() }
     private val bofTeamBox by lazy { boxStore.boxFor(BofTeamEntity::class.java) }
+    private val teamScoreHistoryBox by lazy { boxStore.boxFor(BofTeamScoreHistoryEntity::class.java) }
+    private val teamTitleHistoryBox by lazy { boxStore.boxFor(BofTeamTitleHistoryEntity::class.java) }
+    private val teamArtistHistoryBox by lazy { boxStore.boxFor(BofTeamArtistHistoryEntity::class.java) }
+    private val teamFinalStrikerHistoryBox by lazy { boxStore.boxFor(BofTeamFinalStrikerHistoryEntity::class.java) }
     private val bofCommentBox by lazy { boxStore.boxFor(BofCommentEntity::class.java) }
     private val bofCommentDetailBox by lazy { boxStore.boxFor(BofCommentDetailEntity::class.java) }
     private val bofRangeBox by lazy { boxStore.boxFor(BofRangeEntity::class.java) }
@@ -26,7 +30,7 @@ internal class BofObjectBoxService {
     /**
      * 根据日期获取评论数据
      */
-    suspend fun getBofttCommentByTime(currentDate: String): List<BofCommentUI> {
+    suspend fun getBofCommentByTime(currentDate: String): List<BofCommentUI> {
         return withContext(Dispatchers.IO) {
             try {
                 val comments = bofCommentBox.query(
@@ -92,7 +96,7 @@ internal class BofObjectBoxService {
                 val latestDate = allComments.maxByOrNull { it.date }?.date
                 
                 if (latestDate != null) {
-                    return@withContext getBofttCommentByTime(latestDate)
+                    return@withContext getBofCommentByTime(latestDate)
                 } else {
                     return@withContext emptyList()
                 }
@@ -231,103 +235,185 @@ internal class BofObjectBoxService {
     }
 
     /**
-     * 保存团队详细数据
-     */
-    suspend fun saveBofTeamData(entities: List<BofTeamEntity>) {
-        withContext(Dispatchers.IO) {
-            try {
-                bofTeamBox.put(entities)
-                Log.d(TAG, "Successfully saved ${entities.size} team entities")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error saving team data: ${e.message}", e)
-                throw e
-            }
-        }
-    }
-    
-    /**
-     * 从API响应保存团队数据
+     * 从API响应保存团队数据到新的数据库结构
      */
     suspend fun saveBofTeamApiResponse(apiResponse: Map<String, com.madsam.otora.data.bof.remote.model.BofTeamResponse>, path: String) {
         withContext(Dispatchers.IO) {
             try {
-                val entities = convertTeamResponseToEntities(apiResponse, path)
-                saveBofTeamData(entities)
-                Log.d(TAG, "Successfully saved team API response for path: $path with ${entities.size} teams")
+                Log.d(TAG, "Starting to save team API response for path: $path")
+                val startTime = System.currentTimeMillis()
+                
+                // 准备数据列表
+                val teamEntities = mutableListOf<BofTeamEntity>()
+                val scoreHistoryEntities = mutableListOf<BofTeamScoreHistoryEntity>()
+                val titleHistoryEntities = mutableListOf<BofTeamTitleHistoryEntity>()
+                val artistHistoryEntities = mutableListOf<BofTeamArtistHistoryEntity>()
+                val finalStrikerHistoryEntities = mutableListOf<BofTeamFinalStrikerHistoryEntity>()
+                
+                apiResponse.forEach { (teamName, teamData) ->
+                    val compositeTeamId = BofTeamEntity.createCompositeTeamId(path, teamName)
+                    
+                    // 1. 创建团队主实体
+                    val teamEntity = BofTeamEntity().apply {
+                        this.path = path
+                        this.teamName = teamName
+                        this.compositeTeamId = compositeTeamId
+                        
+                        // 设置当前值（最新的值）
+                        this.currentTitle1 = teamData.title1?.lastOrNull()?.value ?: ""
+                        this.currentTitle2 = teamData.title2?.lastOrNull()?.value ?: ""
+                        this.currentTitle3 = teamData.title3?.lastOrNull()?.value ?: ""
+                        this.currentTitle4 = teamData.title4?.lastOrNull()?.value ?: ""
+                        this.currentArtist1 = teamData.artist1?.lastOrNull()?.value ?: ""
+                        this.currentArtist2 = teamData.artist2?.lastOrNull()?.value ?: ""
+                        this.currentArtist3 = teamData.artist3?.lastOrNull()?.value ?: ""
+                        this.currentArtist4 = teamData.artist4?.lastOrNull()?.value ?: ""
+                        this.currentFinalStriker1 = teamData.finalStriker1?.lastOrNull()?.value ?: ""
+                        this.currentFinalStriker2 = teamData.finalStriker2?.lastOrNull()?.value ?: ""
+                        this.currentFinalStriker3 = teamData.finalStriker3?.lastOrNull()?.value ?: ""
+                        this.currentFinalStriker4 = teamData.finalStriker4?.lastOrNull()?.value ?: ""
+                        
+                        // 计算时间范围和最新得分
+                        val timeRange = calculateTeamTimeRange(teamData)
+                        this.earliestTimestamp = timeRange.first
+                        this.latestTimestamp = timeRange.second
+                        
+                        val latestScore = findLatestTeamScore(teamData)
+                        this.latestTotalScore = latestScore?.total ?: 0.0
+                        this.latestMedian = latestScore?.median ?: 0.0
+                        this.latestImpression = latestScore?.impression ?: 0.0
+                        
+                        // 获取最新的各作品分数
+                        val latestValues = getLatestTeamValues(teamData)
+                        this.latestScore1 = parseDoubleValue(latestValues?.total1)
+                        this.latestScore2 = parseDoubleValue(latestValues?.total2)
+                        this.latestScore3 = parseDoubleValue(latestValues?.total3)
+                        this.latestScore4 = parseDoubleValue(latestValues?.total4)
+                        
+                        this.lastUpdated = System.currentTimeMillis()
+                    }
+                    teamEntities.add(teamEntity)
+                    
+                    // 2. 解析并保存分数历史
+                    teamData.score?.forEach { yearData ->
+                        yearData.months?.forEach { monthData ->
+                            monthData.days?.forEach { dayData ->
+                                dayData.hours?.forEach { hourData ->
+                                    hourData.minutes?.forEach { minuteData ->
+                                        val timestamp = BofTeamScoreHistoryEntity.createTimestamp(
+                                            yearData.year, monthData.month, dayData.day,
+                                            hourData.hour, minuteData.minute
+                                        )
+                                        
+                                        val values = minuteData.values
+                                        if (values != null) {
+                                            val scoreEntity = BofTeamScoreHistoryEntity(
+                                                compositeTeamId = compositeTeamId,
+                                                path = path,
+                                                timestamp = timestamp,
+                                                year = yearData.year,
+                                                month = monthData.month,
+                                                day = dayData.day,
+                                                hour = hourData.hour,
+                                                minute = minuteData.minute,
+                                                impression = values.impression,
+                                                total = values.total,
+                                                median = parseDoubleValue(values.median),
+                                                average = 0.0 // Team 数据没有 average 字段
+                                            )
+                                            scoreHistoryEntities.add(scoreEntity)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // 3. 解析并保存 Title 历史（workSlot 1-4）
+                    listOf(
+                        1 to teamData.title1,
+                        2 to teamData.title2,
+                        3 to teamData.title3,
+                        4 to teamData.title4
+                    ).forEach { (workSlot, titleList) ->
+                        titleList?.forEach { titleItem ->
+                            val timestamp = BofTeamTitleHistoryEntity.parseTimestamp(titleItem.time)
+                            val titleEntity = BofTeamTitleHistoryEntity(
+                                compositeTeamId = compositeTeamId,
+                                path = path,
+                                workSlot = workSlot,
+                                timestamp = timestamp,
+                                timeString = titleItem.time,
+                                title = titleItem.value
+                            )
+                            titleHistoryEntities.add(titleEntity)
+                        }
+                    }
+                    
+                    // 4. 解析并保存 Artist 历史（workSlot 1-4）
+                    listOf(
+                        1 to teamData.artist1,
+                        2 to teamData.artist2,
+                        3 to teamData.artist3,
+                        4 to teamData.artist4
+                    ).forEach { (workSlot, artistList) ->
+                        artistList?.forEach { artistItem ->
+                            val timestamp = BofTeamArtistHistoryEntity.parseTimestamp(artistItem.time)
+                            val artistEntity = BofTeamArtistHistoryEntity(
+                                compositeTeamId = compositeTeamId,
+                                path = path,
+                                workSlot = workSlot,
+                                timestamp = timestamp,
+                                timeString = artistItem.time,
+                                artist = artistItem.value
+                            )
+                            artistHistoryEntities.add(artistEntity)
+                        }
+                    }
+                    
+                    // 5. 解析并保存 FinalStriker 历史（workSlot 1-4）
+                    listOf(
+                        1 to teamData.finalStriker1,
+                        2 to teamData.finalStriker2,
+                        3 to teamData.finalStriker3,
+                        4 to teamData.finalStriker4
+                    ).forEach { (workSlot, finalStrikerList) ->
+                        finalStrikerList?.forEach { finalStrikerItem ->
+                            val timestamp = BofTeamFinalStrikerHistoryEntity.parseTimestamp(finalStrikerItem.time)
+                            val finalStrikerEntity = BofTeamFinalStrikerHistoryEntity(
+                                compositeTeamId = compositeTeamId,
+                                path = path,
+                                workSlot = workSlot,
+                                timestamp = timestamp,
+                                timeString = finalStrikerItem.time,
+                                finalStriker = finalStrikerItem.value
+                            )
+                            finalStrikerHistoryEntities.add(finalStrikerEntity)
+                        }
+                    }
+                }
+                
+                // 批量保存到数据库
+                Log.d(TAG, "Saving ${teamEntities.size} teams")
+                bofTeamBox.put(teamEntities)
+                
+                Log.d(TAG, "Saving ${scoreHistoryEntities.size} team score history records")
+                teamScoreHistoryBox.put(scoreHistoryEntities)
+                
+                Log.d(TAG, "Saving ${titleHistoryEntities.size} team title history records")
+                teamTitleHistoryBox.put(titleHistoryEntities)
+                
+                Log.d(TAG, "Saving ${artistHistoryEntities.size} team artist history records")
+                teamArtistHistoryBox.put(artistHistoryEntities)
+                
+                Log.d(TAG, "Saving ${finalStrikerHistoryEntities.size} team final striker history records")
+                teamFinalStrikerHistoryBox.put(finalStrikerHistoryEntities)
+                
+                val endTime = System.currentTimeMillis()
+                Log.d(TAG, "Team API response saved in ${endTime - startTime}ms")
             } catch (e: Exception) {
                 Log.e(TAG, "Error saving team API response for path $path: ${e.message}", e)
                 throw e
-            }
-        }
-    }
-    
-    /**
-     * 将团队API响应转换为Entity列表
-     */
-    private fun convertTeamResponseToEntities(
-        response: Map<String, com.madsam.otora.data.bof.remote.model.BofTeamResponse>, 
-        path: String
-    ): List<BofTeamEntity> {
-        val moshi = com.squareup.moshi.Moshi.Builder()
-            .addLast(com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory())
-            .build()
-        
-        val scoreAdapter = moshi.adapter(List::class.java)
-        val teamTimeValueAdapter = moshi.adapter(List::class.java)
-        
-        return response.map { (teamName, teamData) ->
-            BofTeamEntity().apply {
-                this.path = path
-                this.teamName = teamName
-                this.compositeTeamId = BofTeamEntity.createCompositeTeamId(path, teamName)
-                
-                // 存储JSON数据
-                this.scoreDataJson = if (teamData.score?.isNotEmpty() == true) scoreAdapter.toJson(teamData.score) else ""
-                this.title1Json = if (teamData.title1?.isNotEmpty() == true) teamTimeValueAdapter.toJson(teamData.title1) else ""
-                this.title2Json = if (teamData.title2?.isNotEmpty() == true) teamTimeValueAdapter.toJson(teamData.title2) else ""
-                this.title3Json = if (teamData.title3?.isNotEmpty() == true) teamTimeValueAdapter.toJson(teamData.title3) else ""
-                this.title4Json = if (teamData.title4?.isNotEmpty() == true) teamTimeValueAdapter.toJson(teamData.title4) else ""
-                this.artist1Json = if (teamData.artist1?.isNotEmpty() == true) teamTimeValueAdapter.toJson(teamData.artist1) else ""
-                this.artist2Json = if (teamData.artist2?.isNotEmpty() == true) teamTimeValueAdapter.toJson(teamData.artist2) else ""
-                this.artist3Json = if (teamData.artist3?.isNotEmpty() == true) teamTimeValueAdapter.toJson(teamData.artist3) else ""
-                this.artist4Json = if (teamData.artist4?.isNotEmpty() == true) teamTimeValueAdapter.toJson(teamData.artist4) else ""
-                this.finalStriker1Json = if (teamData.finalStriker1?.isNotEmpty() == true) teamTimeValueAdapter.toJson(teamData.finalStriker1) else ""
-                this.finalStriker2Json = if (teamData.finalStriker2?.isNotEmpty() == true) teamTimeValueAdapter.toJson(teamData.finalStriker2) else ""
-                this.finalStriker3Json = if (teamData.finalStriker3?.isNotEmpty() == true) teamTimeValueAdapter.toJson(teamData.finalStriker3) else ""
-                this.finalStriker4Json = if (teamData.finalStriker4?.isNotEmpty() == true) teamTimeValueAdapter.toJson(teamData.finalStriker4) else ""
-                
-                // 设置当前值（最新的值）
-                this.currentTitle1 = teamData.title1?.lastOrNull()?.value ?: ""
-                this.currentTitle2 = teamData.title2?.lastOrNull()?.value ?: ""
-                this.currentTitle3 = teamData.title3?.lastOrNull()?.value ?: ""
-                this.currentTitle4 = teamData.title4?.lastOrNull()?.value ?: ""
-                this.currentArtist1 = teamData.artist1?.lastOrNull()?.value ?: ""
-                this.currentArtist2 = teamData.artist2?.lastOrNull()?.value ?: ""
-                this.currentArtist3 = teamData.artist3?.lastOrNull()?.value ?: ""
-                this.currentArtist4 = teamData.artist4?.lastOrNull()?.value ?: ""
-                this.currentFinalStriker1 = teamData.finalStriker1?.lastOrNull()?.value ?: ""
-                this.currentFinalStriker2 = teamData.finalStriker2?.lastOrNull()?.value ?: ""
-                this.currentFinalStriker3 = teamData.finalStriker3?.lastOrNull()?.value ?: ""
-                this.currentFinalStriker4 = teamData.finalStriker4?.lastOrNull()?.value ?: ""
-                
-                // 计算时间范围和最新得分
-                val timeRange = calculateTeamTimeRange(teamData)
-                this.earliestTimestamp = timeRange.first
-                this.latestTimestamp = timeRange.second
-                
-                val latestScore = findLatestTeamScore(teamData)
-                this.latestTotalScore = latestScore?.total ?: 0.0
-                this.latestMedian = latestScore?.median ?: 0.0
-                this.latestImpression = latestScore?.impression ?: 0.0
-                
-                // 获取最新的各作品分数
-                val latestValues = getLatestTeamValues(teamData)
-                this.latestScore1 = parseDoubleValue(latestValues?.total1)
-                this.latestScore2 = parseDoubleValue(latestValues?.total2)
-                this.latestScore3 = parseDoubleValue(latestValues?.total3)
-                this.latestScore4 = parseDoubleValue(latestValues?.total4)
-                
-                this.lastUpdated = System.currentTimeMillis()
             }
         }
     }

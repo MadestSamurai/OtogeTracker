@@ -41,7 +41,23 @@ class BOFDataUpdateViewModel : ViewModel() {
     private val bofRepository by lazy {
         val boxStore = ObjectBoxManager.getBoxStore()
         val bofWorkBox = boxStore.boxFor(BofWorkEntity::class.java)
-        BofRepository(bofWorkBox)
+        val scoreHistoryBox = boxStore.boxFor(com.madsam.otora.data.bof.local.model.BofWorkScoreHistoryEntity::class.java)
+        val titleHistoryBox = boxStore.boxFor(com.madsam.otora.data.bof.local.model.BofWorkTitleHistoryEntity::class.java)
+        val artistHistoryBox = boxStore.boxFor(com.madsam.otora.data.bof.local.model.BofWorkArtistHistoryEntity::class.java)
+        val teamScoreHistoryBox = boxStore.boxFor(com.madsam.otora.data.bof.local.model.BofTeamScoreHistoryEntity::class.java)
+        val teamTitleHistoryBox = boxStore.boxFor(com.madsam.otora.data.bof.local.model.BofTeamTitleHistoryEntity::class.java)
+        val teamArtistHistoryBox = boxStore.boxFor(com.madsam.otora.data.bof.local.model.BofTeamArtistHistoryEntity::class.java)
+        val teamFinalStrikerHistoryBox = boxStore.boxFor(com.madsam.otora.data.bof.local.model.BofTeamFinalStrikerHistoryEntity::class.java)
+        BofRepository(
+            bofWorkBox, 
+            scoreHistoryBox, 
+            titleHistoryBox, 
+            artistHistoryBox,
+            teamScoreHistoryBox,
+            teamTitleHistoryBox,
+            teamArtistHistoryBox,
+            teamFinalStrikerHistoryBox
+        )
     }
     
     // ObjectBox服务

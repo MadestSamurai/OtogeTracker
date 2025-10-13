@@ -12,6 +12,6 @@ internal class BofLocalService {
     }
     
     suspend fun getBofttCommentByTime(date: String): List<BofCommentUI> {
-        return bofObjectBoxService.getBofttCommentByTime(date)
+        return bofObjectBoxService.getBofCommentByTime(date)
     }
 }

@@ -12,10 +12,12 @@ import com.madsam.otora.data.bof.local.model.BofWorkEntity
 import com.madsam.otora.data.bof.local.repository.BofRepository
 import com.madsam.otora.data.bof.local.repository.WorkRanking
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.abs
 
 private const val TAG = "BofViewModel"
@@ -31,7 +33,14 @@ internal class BofViewModel(
         Log.d(TAG, "BofRepository lazy initialization")
         val boxStore = ObjectBoxManager.getBoxStore()
         BofRepository(
-            boxStore.boxFor(BofWorkEntity::class.java)
+            boxStore.boxFor(BofWorkEntity::class.java),
+            boxStore.boxFor(com.madsam.otora.data.bof.local.model.BofWorkScoreHistoryEntity::class.java),
+            boxStore.boxFor(com.madsam.otora.data.bof.local.model.BofWorkTitleHistoryEntity::class.java),
+            boxStore.boxFor(com.madsam.otora.data.bof.local.model.BofWorkArtistHistoryEntity::class.java),
+            boxStore.boxFor(com.madsam.otora.data.bof.local.model.BofTeamScoreHistoryEntity::class.java),
+            boxStore.boxFor(com.madsam.otora.data.bof.local.model.BofTeamTitleHistoryEntity::class.java),
+            boxStore.boxFor(com.madsam.otora.data.bof.local.model.BofTeamArtistHistoryEntity::class.java),
+            boxStore.boxFor(com.madsam.otora.data.bof.local.model.BofTeamFinalStrikerHistoryEntity::class.java)
         )
     }
     val commentData = MutableStateFlow(listOf<BofCommentUI>())
@@ -196,9 +205,8 @@ internal class BofViewModel(
         commentData.update { updatedData }
     }
 
-    // 流式JSON解析加载 - 支持两时间点对比
-    fun loadRankingDataWithStreamedParsing() {
-        Log.d(TAG, "Starting streamed JSON parsing data loading with comparison")
+    // JSON解析加载 - 支持两时间点对比
+    fun loadRankingData() {
         viewModelScope.launch {
             try {
                 isLoading.update { true }
@@ -224,39 +232,29 @@ internal class BofViewModel(
                     )
                 }
                 
-                Log.d(TAG, "Current timestamp: $currentTimestamp, Compare timestamp: $compareTimestamp")
-                
-                var isFirstBatch = true
-                
-                // 使用支持对比的流式处理
-                bofRepository.getRankingAtTimeStreamedWithComparison(
+                // 使用支持对比的一次性处理
+                bofRepository.getRankingAtTime(
                     currentTimestamp = currentTimestamp,
                     compareTimestamp = compareTimestamp,
-                    path = bofScreenState.selectedRange.value?.path ?: "tt",
-                    batchSize = 30
+                    path = bofScreenState.selectedRange.value?.path ?: "tt"
                 ) { currentResults ->
-                    Log.d(TAG, "Streamed update with comparison: ${currentResults.size} rankings available")
-                    totalRankingData.update { currentResults }
-                    
-                    // 第一批数据加载完成后就关闭加载状态
-                    if (isFirstBatch && currentResults.isNotEmpty()) {
-                        Log.d(TAG, "First batch loaded, setting isLoading to false")
-                        isLoading.update { false }
-                        isFirstBatch = false
+                    // 确保在主线程上更新 UI 状态，避免帧顺序混乱
+                    withContext(Dispatchers.Main.immediate) {
+                        Log.d(TAG, "Loaded full ranking data with comparison: ${currentResults.size} works")
+                        totalRankingData.update { currentResults }
+                        
+                        if (currentResults.isNotEmpty()) {
+                            isLoading.update { false }
+                        }
                     }
                 }
                 
                 if (totalRankingData.value.isEmpty()) {
                     errorMessage.update { "该时间点暂无排名数据" }
                 } else {
-                    // 数据加载完成后，生成其他类型的排行榜
-                    Log.d(TAG, "Generating derived rankings...")
                     generateCompositeRanking()
                     generateDifferenceRanking()
                 }
-                
-                Log.d(TAG, "Streamed data loading with comparison completed successfully")
-                
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load ranking data with streamed parsing and comparison", e)
                 errorMessage.update { "加载失败: ${e.message}" }
@@ -264,7 +262,6 @@ internal class BofViewModel(
             } finally {
                 // 确保加载状态最终被设置为false
                 if (isLoading.value) {
-                    Log.d(TAG, "Finally setting isLoading to false")
                     isLoading.update { false }
                 }
             }
@@ -307,7 +304,6 @@ internal class BofViewModel(
             val newRank = index + 1
             
             // 计算平均分排名变化
-            // 需要基于对比数据重新计算平均分排名
             val compareRankInAverage = if (ranking.compareAverage != null && ranking.compareAverage > 0) {
                 // 在对比数据中找到该作品在平均分排行中的位置
                 val compareFilteredData = totalData.filter { 
@@ -354,7 +350,6 @@ internal class BofViewModel(
             val newRank = index + 1
             
             // 计算中位数排名变化
-            // 需要基于对比数据重新计算中位数排名
             val compareRankInMedian = if (ranking.compareMedian != null && ranking.compareMedian > 0) {
                 // 在对比数据中找到该作品在中位数排行中的位置
                 val compareFilteredData = totalData.filter { 
@@ -574,24 +569,22 @@ internal class BofViewModel(
                 }
                 
                 Log.d(TAG, "Team ranking - Current timestamp: $currentTimestamp, Compare timestamp: $compareTimestamp")
-                
-                var isFirstBatch = true
-                
-                // 使用支持对比的分阶段处理
+
+                // 使用新的索引表结构，一次性返回全部团队数据
                 bofRepository.getTeamRankingAtTimeStreamed(
                     currentTimestamp = currentTimestamp,
                     compareTimestamp = compareTimestamp,
-                    path = path,
-                    batchSize = 10
+                    path = path
                 ) { currentResults ->
-                    Log.d(TAG, "Team ranking streamed update: ${currentResults.size} teams available")
-                    teamRankingData.update { currentResults }
-                    
-                    // 第一批数据加载完成后就关闭加载状态
-                    if (isFirstBatch && currentResults.isNotEmpty()) {
-                        Log.d(TAG, "First batch of team data loaded, setting isLoading to false")
-                        isTeamRankingLoading.update { false }
-                        isFirstBatch = false
+                    // 确保在主线程上更新 UI 状态，避免帧顺序混乱
+                    withContext(Dispatchers.Main.immediate) {
+                        Log.d(TAG, "Team ranking loaded: ${currentResults.size} teams")
+                        teamRankingData.update { currentResults }
+                        
+                        if (currentResults.isNotEmpty()) {
+                            Log.d(TAG, "Team data loaded, setting isLoading to false")
+                            isTeamRankingLoading.update { false }
+                        }
                     }
                 }
                 

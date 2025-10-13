@@ -5,12 +5,22 @@ import com.madsam.otora.data.bof.local.model.BofTeamEntity
 import com.madsam.otora.data.bof.local.model.BofWorkEntity
 import com.madsam.otora.data.bof.local.model.BofWorkEntity_
 import com.madsam.otora.data.bof.local.model.BofTeamEntity_
+import com.madsam.otora.data.bof.local.model.BofWorkScoreHistoryEntity
+import com.madsam.otora.data.bof.local.model.BofWorkScoreHistoryEntity_
+import com.madsam.otora.data.bof.local.model.BofWorkTitleHistoryEntity
+import com.madsam.otora.data.bof.local.model.BofWorkTitleHistoryEntity_
+import com.madsam.otora.data.bof.local.model.BofWorkArtistHistoryEntity
+import com.madsam.otora.data.bof.local.model.BofWorkArtistHistoryEntity_
+import com.madsam.otora.data.bof.local.model.BofTeamScoreHistoryEntity
+import com.madsam.otora.data.bof.local.model.BofTeamScoreHistoryEntity_
+import com.madsam.otora.data.bof.local.model.BofTeamTitleHistoryEntity
+import com.madsam.otora.data.bof.local.model.BofTeamTitleHistoryEntity_
+import com.madsam.otora.data.bof.local.model.BofTeamArtistHistoryEntity
+import com.madsam.otora.data.bof.local.model.BofTeamArtistHistoryEntity_
+import com.madsam.otora.data.bof.local.model.BofTeamFinalStrikerHistoryEntity
+import com.madsam.otora.data.bof.local.model.BofTeamFinalStrikerHistoryEntity_
 import com.madsam.otora.data.bof.remote.model.*
 import com.madsam.otora.ui.common.RankingItem
-import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import io.objectbox.Box
 import java.util.*
 
@@ -18,47 +28,38 @@ private const val TAG = "BofRepository"
 
 /**
  * 统一的BOF仓库
- * 使用层次化二分查找算法，专注于高效查询作品四项数据排行榜
+ * 使用独立的时序数据表，专注于高效查询作品和团队排行榜数据
  */
 internal class BofRepository(
-    private val bofWorkBox: Box<BofWorkEntity>
+    private val bofWorkBox: Box<BofWorkEntity>,
+    private val scoreHistoryBox: Box<BofWorkScoreHistoryEntity>,
+    private val titleHistoryBox: Box<BofWorkTitleHistoryEntity>,
+    private val artistHistoryBox: Box<BofWorkArtistHistoryEntity>,
+    private val teamScoreHistoryBox: Box<BofTeamScoreHistoryEntity>,
+    private val teamTitleHistoryBox: Box<BofTeamTitleHistoryEntity>,
+    private val teamArtistHistoryBox: Box<BofTeamArtistHistoryEntity>,
+    private val teamFinalStrikerHistoryBox: Box<BofTeamFinalStrikerHistoryEntity>
 ) {
-    
-    private val moshi = Moshi.Builder()
-        .addLast(KotlinJsonAdapterFactory())
-        .build()
-        
-    private val scoreYearsAdapter: JsonAdapter<List<BofScoreYear>> =
-        moshi.adapter(Types.newParameterizedType(List::class.java, BofScoreYear::class.java))
-        
-    private val metadataAdapter: JsonAdapter<List<BofMetadataItem>> =
-        moshi.adapter(Types.newParameterizedType(List::class.java, BofMetadataItem::class.java))
 
     /**
-     * 流式分段处理 - 边解析边返回结果，避免JSON解析阻塞
+     * 使用独立时序表，查询速度极快，一次性返回全部数据
      * 支持两个时间点的对比数据
      */
-    suspend fun getRankingAtTimeStreamedWithComparison(
+    suspend fun getRankingAtTime(
         currentTimestamp: Long,
         compareTimestamp: Long? = null,
         path: String = "tt",
-        batchSize: Int = 20,
         onBatchReady: suspend (List<WorkRanking>) -> Unit
-    ) {
-        Log.d(TAG, "getRankingAtTimeStreamedWithComparison called with currentTimestamp: $currentTimestamp, compareTimestamp: $compareTimestamp, path: $path, batchSize: $batchSize")
+    ) = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
         val startTime = System.currentTimeMillis()
-        
+
         val allWorks = bofWorkBox.query(BofWorkEntity_.path.equal(path)).build().find()
-        Log.d(TAG, "Starting streamed processing of ${allWorks.size} works with comparison for path: $path")
-        
-        val allCurrentResults = mutableListOf<WorkRanking>()
-        val compareRankingMap = mutableMapOf<String, WorkRanking>() // workId -> WorkRanking
-        
+
         // 如果有对比时间戳，先计算对比时间点的完整排行榜
+        val compareRankingMap = mutableMapOf<String, WorkRanking>()
         if (compareTimestamp != null) {
-            Log.d(TAG, "Calculating compare ranking for timestamp: $compareTimestamp")
-            val compareStart = System.currentTimeMillis()
-            
+
+            // 一次性处理所有对比数据
             val compareResults = allWorks.mapNotNull { entity ->
                 val scoreSnapshot = getScoreAtTime(entity, compareTimestamp)
                 if (scoreSnapshot != null) {
@@ -74,94 +75,165 @@ internal class BofRepository(
                 } else null
             }.sortedByDescending { it.score }
                 .mapIndexed { index, work -> work.copy(rank = index + 1) }
-            
+
             compareResults.forEach { work ->
                 compareRankingMap[work.workId] = work
             }
-            
-            val compareEnd = System.currentTimeMillis()
-            Log.d(TAG, "Compare ranking calculated in ${compareEnd - compareStart}ms, got ${compareResults.size} works")
         }
+
+        // 一次性处理当前时间点的全部数据
+        val currentStart = System.currentTimeMillis()
         
-        var processedCount = 0
-        
-        // 分批处理当前时间点的数据
-        allWorks.chunked(batchSize).forEach { batch ->
-            val batchStart = System.currentTimeMillis()
-            
-            val batchResults = batch.mapNotNull { entity ->
-                val scoreSnapshot = getScoreAtTime(entity, currentTimestamp)
-                if (scoreSnapshot != null) {
-                    val compareData = compareRankingMap[entity.compositeWorkId]
-                    WorkRanking(
-                        workId = entity.compositeWorkId,
-                        title = getTitleAtTime(entity, currentTimestamp),
-                        artist = getArtistAtTime(entity, currentTimestamp),
-                        score = scoreSnapshot.totalScore,
-                        average = scoreSnapshot.average,
-                        median = scoreSnapshot.median,
-                        impression = scoreSnapshot.impression,
-                        // 对比数据
-                        compareScore = compareData?.score,
-                        compareAverage = compareData?.average,
-                        compareMedian = compareData?.median,
-                        compareImpression = compareData?.impression,
-                        compareRank = compareData?.rank
-                    )
+        val allCurrentResults = allWorks.mapNotNull { entity ->
+            val scoreSnapshot = getScoreAtTime(entity, currentTimestamp)
+            if (scoreSnapshot != null) {
+                val compareData = compareRankingMap[entity.compositeWorkId]
+                WorkRanking(
+                    workId = entity.compositeWorkId,
+                    title = getTitleAtTime(entity, currentTimestamp),
+                    artist = getArtistAtTime(entity, currentTimestamp),
+                    score = scoreSnapshot.totalScore,
+                    average = scoreSnapshot.average,
+                    median = scoreSnapshot.median,
+                    impression = scoreSnapshot.impression,
+                    // 对比数据
+                    compareScore = compareData?.score,
+                    compareAverage = compareData?.average,
+                    compareMedian = compareData?.median,
+                    compareImpression = compareData?.impression,
+                    compareRank = compareData?.rank
+                )
+            } else null
+        }
+
+        val currentEnd = System.currentTimeMillis()
+        Log.d(TAG, "Current data processed in ${currentEnd - currentStart}ms, got ${allCurrentResults.size} works")
+
+        // 排序并分配排名，计算排名变化
+        val finalResults = allCurrentResults.sortedByDescending { it.score }
+            .mapIndexed { index, work ->
+                val rankChange = if (work.compareRank != null) {
+                    work.compareRank - (index + 1) // 对比排名 - 当前排名，正数表示排名上升
                 } else null
+
+                work.copy(
+                    rank = index + 1,
+                    rankChange = rankChange
+                )
             }
-            
-            allCurrentResults.addAll(batchResults)
-            processedCount += batch.size
-            
-            // 重新排序整体结果并分配排名，同时计算排名变化
-            val currentSorted = allCurrentResults.sortedByDescending { it.score }
-                .mapIndexed { index, work -> 
-                    val rankChange = if (work.compareRank != null) {
-                        work.compareRank - (index + 1) // 对比排名 - 当前排名，正数表示排名上升
-                    } else null
-                    
-                    work.copy(
-                        rank = index + 1,
-                        rankChange = rankChange
-                    )
-                }
-            
-            val batchEnd = System.currentTimeMillis()
-            Log.d(TAG, "Streamed batch ${processedCount}/${allWorks.size} completed in ${batchEnd - batchStart}ms")
-            
-            // 立即回调当前结果，让UI可以逐步显示
-            onBatchReady(currentSorted)
-            
-            // 短暂让出线程，避免阻塞UI
-            kotlinx.coroutines.delay(10)
-        }
-        
+
         val endTime = System.currentTimeMillis()
-        Log.d(TAG, "getRankingAtTimeStreamedWithComparison completed in ${endTime - startTime}ms")
-    }
-    
-    /**
-     * 从API响应保存BOF数据
-     */
-    fun saveBofApiResponse(apiResponse: BofWorkResponse, path: String) {
-        val works = apiResponse.getWorksAsList()
-        val compactEntities = works.map { work -> convertToCompactEntity(work, path) }
-        insertWorks(compactEntities)
+        Log.d(TAG, "getRankingAtTime completed in ${endTime - startTime}ms, total ${finalResults.size} works")
+        
+        // 在回调前确保在正确的调度器上
+        onBatchReady(finalResults)
     }
 
     /**
-     * 批量插入或更新作品数据
+     * 从API响应保存BOF数据到新的数据库结构
      */
-    fun insertWorks(works: List<BofWorkEntity>) {
-        bofWorkBox.put(works)
+    fun saveBofApiResponse(apiResponse: BofWorkResponse, path: String) {
+        val startTime = System.currentTimeMillis()
+        Log.d(TAG, "Starting to save BOF API response for path: $path")
+
+        val works = apiResponse.getWorksAsList()
+
+        // 准备数据列表
+        val workEntities = mutableListOf<BofWorkEntity>()
+        val scoreHistoryEntities = mutableListOf<BofWorkScoreHistoryEntity>()
+        val titleHistoryEntities = mutableListOf<BofWorkTitleHistoryEntity>()
+        val artistHistoryEntities = mutableListOf<BofWorkArtistHistoryEntity>()
+
+        // 转换每个作品
+        works.forEach { work ->
+            // 1. 创建主作品实体
+            val workEntity = convertToWorkEntity(work, path)
+            workEntities.add(workEntity)
+
+            val compositeWorkId = workEntity.compositeWorkId
+
+            // 2. 解析并保存分数历史
+            work.score?.forEach { yearData ->
+                yearData.months.forEach { monthData ->
+                    monthData.days.forEach { dayData ->
+                        dayData.hours.forEach { hourData ->
+                            hourData.minutes.forEach { minuteData ->
+                                val timestamp = BofWorkScoreHistoryEntity.createTimestamp(
+                                    yearData.year, monthData.month, dayData.day,
+                                    hourData.hour, minuteData.minute
+                                )
+
+                                val scoreEntity = BofWorkScoreHistoryEntity(
+                                    compositeWorkId = compositeWorkId,
+                                    path = path,
+                                    timestamp = timestamp,
+                                    year = yearData.year,
+                                    month = monthData.month,
+                                    day = dayData.day,
+                                    hour = hourData.hour,
+                                    minute = minuteData.minute,
+                                    impression = minuteData.values.impression,
+                                    total = minuteData.values.total,
+                                    median = minuteData.values.median,
+                                    average = minuteData.values.average
+                                )
+                                scoreHistoryEntities.add(scoreEntity)
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 3. 解析并保存标题历史
+            work.title?.forEach { titleItem ->
+                val timestamp = BofWorkTitleHistoryEntity.parseTimestamp(titleItem.time)
+                val titleEntity = BofWorkTitleHistoryEntity(
+                    compositeWorkId = compositeWorkId,
+                    path = path,
+                    timestamp = timestamp,
+                    timeString = titleItem.time,
+                    title = titleItem.value
+                )
+                titleHistoryEntities.add(titleEntity)
+            }
+
+            // 4. 解析并保存艺术家历史
+            work.artist?.forEach { artistItem ->
+                val timestamp = BofWorkArtistHistoryEntity.parseTimestamp(artistItem.time)
+                val artistEntity = BofWorkArtistHistoryEntity(
+                    compositeWorkId = compositeWorkId,
+                    path = path,
+                    timestamp = timestamp,
+                    timeString = artistItem.time,
+                    artist = artistItem.value
+                )
+                artistHistoryEntities.add(artistEntity)
+            }
+        }
+
+        // 批量保存到数据库
+        Log.d(TAG, "Saving ${workEntities.size} works")
+        bofWorkBox.put(workEntities)
+
+        Log.d(TAG, "Saving ${scoreHistoryEntities.size} score history records")
+        scoreHistoryBox.put(scoreHistoryEntities)
+
+        Log.d(TAG, "Saving ${titleHistoryEntities.size} title history records")
+        titleHistoryBox.put(titleHistoryEntities)
+
+        Log.d(TAG, "Saving ${artistHistoryEntities.size} artist history records")
+        artistHistoryBox.put(artistHistoryEntities)
+
+        val endTime = System.currentTimeMillis()
+        Log.d(TAG, "BOF API response saved in ${endTime - startTime}ms")
     }
-    
+
     /**
      * 获取所有作品数量
      */
-    fun getWorksCount(path: String = "tt"): Long = bofWorkBox.query(BofWorkEntity_.path.equal(path)).build().count()
-    
+    fun getWorksCount(path: String = "tt"): Long =
+        bofWorkBox.query(BofWorkEntity_.path.equal(path)).build().count()
+
     /**
      * 获取团队数据数量
      */
@@ -178,192 +250,80 @@ internal class BofRepository(
     }
 
     /**
-     * 层次化查找指定时间点的得分数据
+     * 从新的分数历史表中查找指定时间点的得分数据
      */
     private fun getScoreAtTime(entity: BofWorkEntity, targetTimestamp: Long): BofTTScoreSnapshot? {
-        if (entity.scoreDataJson.isEmpty()) return null
-        
         try {
-            val scoreYears = scoreYearsAdapter.fromJson(entity.scoreDataJson) ?: return null
-            return findScoreByHierarchicalSearch(scoreYears, targetTimestamp)
+            // 使用 ObjectBox 查询，找到小于等于目标时间的最近记录
+            val scoreHistory = scoreHistoryBox.query(
+                BofWorkScoreHistoryEntity_.compositeWorkId.equal(entity.compositeWorkId)
+                    .and(BofWorkScoreHistoryEntity_.timestamp.lessOrEqual(targetTimestamp))
+            ).orderDesc(BofWorkScoreHistoryEntity_.timestamp)
+                .build()
+                .findFirst()
+
+            return if (scoreHistory != null) {
+                BofTTScoreSnapshot(
+                    timestamp = scoreHistory.timestamp,
+                    year = scoreHistory.year,
+                    month = scoreHistory.month,
+                    day = scoreHistory.day,
+                    hour = scoreHistory.hour,
+                    minute = scoreHistory.minute,
+                    totalScore = scoreHistory.total,
+                    average = scoreHistory.average,
+                    median = scoreHistory.median,
+                    impression = scoreHistory.impression
+                )
+            } else null
         } catch (e: Exception) {
+            Log.e(TAG, "Error getting score at time for ${entity.compositeWorkId}: ${e.message}", e)
             return null
         }
     }
-    
+
     /**
-     * 层次化查找指定时间点的标题
+     * 从新的标题历史表中查找指定时间点的标题
      */
     private fun getTitleAtTime(entity: BofWorkEntity, targetTimestamp: Long): String {
-        if (entity.titleHistoryJson.isEmpty()) return entity.currentTitle
-        
         try {
-            val titleHistory = metadataAdapter.fromJson(entity.titleHistoryJson) ?: return entity.currentTitle
-            return findMetadataByHierarchicalSearch(titleHistory, targetTimestamp) ?: entity.currentTitle
+            val titleHistory = titleHistoryBox.query(
+                BofWorkTitleHistoryEntity_.compositeWorkId.equal(entity.compositeWorkId)
+                    .and(BofWorkTitleHistoryEntity_.timestamp.lessOrEqual(targetTimestamp))
+            ).orderDesc(BofWorkTitleHistoryEntity_.timestamp)
+                .build()
+                .findFirst()
+
+            return titleHistory?.title ?: entity.currentTitle
         } catch (e: Exception) {
+            Log.e(TAG, "Error getting title at time for ${entity.compositeWorkId}: ${e.message}", e)
             return entity.currentTitle
         }
     }
-    
+
     /**
-     * 层次化查找指定时间点的艺术家
+     * 从新的艺术家历史表中查找指定时间点的艺术家
      */
     private fun getArtistAtTime(entity: BofWorkEntity, targetTimestamp: Long): String {
-        if (entity.artistHistoryJson.isEmpty()) return entity.currentArtist
-        
         try {
-            val artistHistory = metadataAdapter.fromJson(entity.artistHistoryJson) ?: return entity.currentArtist
-            return findMetadataByHierarchicalSearch(artistHistory, targetTimestamp) ?: entity.currentArtist
+            val artistHistory = artistHistoryBox.query(
+                BofWorkArtistHistoryEntity_.compositeWorkId.equal(entity.compositeWorkId)
+                    .and(BofWorkArtistHistoryEntity_.timestamp.lessOrEqual(targetTimestamp))
+            ).orderDesc(BofWorkArtistHistoryEntity_.timestamp)
+                .build()
+                .findFirst()
+
+            return artistHistory?.artist ?: entity.currentArtist
         } catch (e: Exception) {
+            Log.e(
+                TAG,
+                "Error getting artist at time for ${entity.compositeWorkId}: ${e.message}",
+                e
+            )
             return entity.currentArtist
         }
     }
-    
-    /**
-     * 核心算法：层次化二分查找得分记录
-     * 直接在 Year -> Month -> Day -> Hour -> Minute 结构上查找
-     */
-    private fun findScoreByHierarchicalSearch(
-        scoreYears: List<BofScoreYear>,
-        targetTimestamp: Long
-    ): BofTTScoreSnapshot? {
-        
-        // 解析目标时间
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = targetTimestamp
-        val targetYear = calendar.get(Calendar.YEAR)
-        val targetMonth = calendar.get(Calendar.MONTH) + 1
-        val targetDay = calendar.get(Calendar.DAY_OF_MONTH)
-        val targetHour = calendar.get(Calendar.HOUR_OF_DAY)
-        val targetMinute = calendar.get(Calendar.MINUTE)
-        
-        var bestMatch: BofTTScoreSnapshot? = null
-        var bestTimestamp = Long.MIN_VALUE
-        
-        // 1. 遍历年份（升序）
-        val sortedYears = scoreYears.sortedBy { it.year }
-        for (yearData in sortedYears) {
-            if (yearData.year > targetYear) break
-            
-            // 2. 遍历月份（升序）
-            val sortedMonths = yearData.months.sortedBy { it.month }
-            for (monthData in sortedMonths) {
-                if (yearData.year == targetYear && monthData.month > targetMonth) break
-                
-                // 3. 遍历日期（升序）
-                val sortedDays = monthData.days.sortedBy { it.day }
-                for (dayData in sortedDays) {
-                    if (yearData.year == targetYear && monthData.month == targetMonth && dayData.day > targetDay) break
-                    
-                    // 4. 遍历小时（升序）
-                    val sortedHours = dayData.hours.sortedBy { it.hour }
-                    for (hourData in sortedHours) {
-                        if (yearData.year == targetYear && monthData.month == targetMonth &&
-                            dayData.day == targetDay && hourData.hour > targetHour) break
-                        
-                        // 5. 遍历分钟（升序，二分查找优化）
-                        val sortedMinutes = hourData.minutes.sortedBy { it.minute }
-                        val validMinutes = if (yearData.year == targetYear && monthData.month == targetMonth &&
-                                            dayData.day == targetDay && hourData.hour == targetHour) {
-                            // 如果是目标时间的精确时分，使用二分查找
-                            val minuteIndex = binarySearchMinute(sortedMinutes, targetMinute)
-                            if (minuteIndex >= 0) sortedMinutes.subList(0, minuteIndex + 1) else emptyList()
-                        } else {
-                            // 否则取所有分钟
-                            sortedMinutes
-                        }
-                        
-                        // 找到这个小时内的最佳匹配
-                        for (minuteData in validMinutes) {
-                            val currentTimestamp = createTimestamp(
-                                yearData.year, monthData.month, dayData.day, hourData.hour, minuteData.minute
-                            )
-                            
-                            if (currentTimestamp <= targetTimestamp && currentTimestamp > bestTimestamp) {
-                                bestTimestamp = currentTimestamp
-                                bestMatch = BofTTScoreSnapshot(
-                                    timestamp = currentTimestamp,
-                                    year = yearData.year,
-                                    month = monthData.month,
-                                    day = dayData.day,
-                                    hour = hourData.hour,
-                                    minute = minuteData.minute,
-                                    totalScore = minuteData.values.total,
-                                    average = minuteData.values.average,
-                                    median = minuteData.values.median,
-                                    impression = minuteData.values.impression
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        return bestMatch
-    }
-    
-    /**
-     * 层次化查找元数据记录
-     */
-    private fun findMetadataByHierarchicalSearch(
-        metadataList: List<BofMetadataItem>,
-        targetTimestamp: Long
-    ): String? {
-        if (metadataList.isEmpty()) return null
-        
-        // 转换并排序
-        val timestampedItems = metadataList.map { item ->
-            TimestampedMetadata(parseTimeString(item.time), item.value)
-        }.sortedBy { it.timestamp }
-        
-        if (targetTimestamp < timestampedItems[0].timestamp) return null
-        if (targetTimestamp >= timestampedItems.last().timestamp) {
-            return timestampedItems.last().value
-        }
-        
-        // 二分查找最佳匹配
-        var left = 0
-        var right = timestampedItems.size - 1
-        var result = timestampedItems[0]
-        
-        while (left <= right) {
-            val mid = left + (right - left) / 2
-            val midItem = timestampedItems[mid]
-            
-            if (midItem.timestamp <= targetTimestamp) {
-                result = midItem
-                left = mid + 1
-            } else {
-                right = mid - 1
-            }
-        }
-        
-        return result.value
-    }
-    
-    /**
-     * 分钟级别的二分查找
-     */
-    private fun binarySearchMinute(minutes: List<BofScoreMinute>, targetMinute: Int): Int {
-        var left = 0
-        var right = minutes.size - 1
-        var result = -1
-        
-        while (left <= right) {
-            val mid = left + (right - left) / 2
-            
-            if (minutes[mid].minute <= targetMinute) {
-                result = mid
-                left = mid + 1
-            } else {
-                right = mid - 1
-            }
-        }
-        
-        return result
-    }
-    
+
     /**
      * 创建时间戳
      */
@@ -373,25 +333,13 @@ internal class BofRepository(
         calendar.set(Calendar.MILLISECOND, 0)
         return calendar.timeInMillis
     }
-    
+
     /**
-     * 解析时间字符串
+     * 将 API 数据转换为 WorkEntity（不再保存 JSON，只保存基本信息和索引）
      */
-    private fun parseTimeString(timeString: String): Long {
-        return try {
-            val format = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-            format.parse(timeString)?.time ?: 0L
-        } catch (e: Exception) {
-            0L
-        }
-    }
-    
-    /**
-     * 将BofTTWork转换为紧凑Entity
-     */
-    private fun convertToCompactEntity(work: BofWorkData, path: String = "tt"): BofWorkEntity {
+    private fun convertToWorkEntity(work: BofWorkData, path: String = "tt"): BofWorkEntity {
         val entity = BofWorkEntity()
-        
+
         entity.path = path
         entity.originalWorkId = work.id
         entity.compositeWorkId = BofWorkEntity.createCompositeWorkId(path, work.id)
@@ -399,34 +347,28 @@ internal class BofRepository(
         entity.currentArtist = work.artist?.lastOrNull()?.value ?: ""
         entity.team = work.team ?: ""
         entity.genre = work.genre ?: ""
-        
-        // 直接存储原始JSON结构
-        val scoreAdapter = moshi.adapter(List::class.java)
-        entity.scoreDataJson = if (work.score != null) scoreAdapter.toJson(work.score) else ""
-        entity.titleHistoryJson = if (work.title != null) moshi.adapter(List::class.java).toJson(work.title) else ""
-        entity.artistHistoryJson = if (work.artist != null) moshi.adapter(List::class.java).toJson(work.artist) else ""
-        
-        // 计算时间范围和最新得分
+
+        // 计算时间范围和最新得分（用于快速筛选和排序）
         val timeRange = calculateTimeRange(work)
         entity.earliestTimestamp = timeRange.first
         entity.latestTimestamp = timeRange.second
-        
+
         val latestScore = findLatestScore(work)
         entity.latestTotalScore = latestScore?.totalScore ?: 0
         entity.latestAverage = latestScore?.average ?: 0.0
-        
+
         entity.lastUpdated = System.currentTimeMillis()
-        
+
         return entity
     }
-    
+
     /**
      * 计算时间范围
      */
     private fun calculateTimeRange(work: BofWorkData): Pair<Long, Long> {
         var earliest = Long.MAX_VALUE
         var latest = Long.MIN_VALUE
-        
+
         work.score?.forEach { yearData ->
             yearData.months.forEach { monthData ->
                 monthData.days.forEach { dayData ->
@@ -443,21 +385,21 @@ internal class BofRepository(
                 }
             }
         }
-        
+
         return if (earliest == Long.MAX_VALUE) {
             0L to 0L
         } else {
             earliest to latest
         }
     }
-    
+
     /**
      * 查找最新得分
      */
     private fun findLatestScore(work: BofWorkData): BofTTScoreSnapshot? {
         var latestScore: BofTTScoreSnapshot? = null
         var latestTimestamp = Long.MIN_VALUE
-        
+
         work.score?.forEach { yearData ->
             yearData.months.forEach { monthData ->
                 monthData.days.forEach { dayData ->
@@ -487,41 +429,45 @@ internal class BofRepository(
                 }
             }
         }
-        
+
         return latestScore
     }
-    
+
     /**
-     * 获取团队排名数据（支持时间解析和分阶段处理）
+     * 优化版：使用独立时序表查询团队排名，一次性返回全部数据
+     * 支持时间对比功能
      */
     suspend fun getTeamRankingAtTimeStreamed(
         currentTimestamp: Long,
         compareTimestamp: Long? = null,
         path: String = "tt",
-        batchSize: Int = 10,
         onBatchReady: suspend (List<com.madsam.otora.ui.bof.TeamRankingItem>) -> Unit
-    ) {
-        Log.d(TAG, "getTeamRankingAtTimeStreamed called with currentTimestamp: $currentTimestamp, compareTimestamp: $compareTimestamp, path: $path")
-        
+    ) = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        Log.d(
+            TAG,
+            "getTeamRankingAtTimeStreamed called with currentTimestamp: $currentTimestamp, compareTimestamp: $compareTimestamp, path: $path"
+        )
+
         val startTime = System.currentTimeMillis()
-        
+
         // 直接从ObjectBox获取团队数据
         val boxStore = com.madsam.otora.core.database.ObjectBoxManager.getBoxStore()
         val teamBox = boxStore.boxFor(BofTeamEntity::class.java)
         val allTeams = teamBox.query(BofTeamEntity_.path.equal(path)).build().find()
-        
-        Log.d(TAG, "Starting team ranking processing of ${allTeams.size} teams for path: $path")
-        
-        val allCurrentResults = mutableListOf<com.madsam.otora.ui.bof.TeamRankingItem>()
+
+        Log.d(TAG, "Processing ${allTeams.size} teams for path: $path")
+
         val compareRankingMap = mutableMapOf<String, com.madsam.otora.ui.bof.TeamRankingItem>()
-        
-        // 如果有对比时间戳，先处理对比数据
+
+        // 步骤1: 如果有对比时间戳，先处理对比数据
         if (compareTimestamp != null) {
-            Log.d(TAG, "Processing compare data for team ranking")
-            allTeams.forEach { entity ->
+            Log.d(TAG, "Calculating compare ranking for teams at timestamp: $compareTimestamp")
+            val compareStart = System.currentTimeMillis()
+            
+            val compareResults = allTeams.mapNotNull { entity ->
                 val compareScoreSnapshot = getTeamScoreAtTime(entity, compareTimestamp)
                 if (compareScoreSnapshot != null) {
-                    val compareItem = com.madsam.otora.ui.bof.TeamRankingItem(
+                    com.madsam.otora.ui.bof.TeamRankingItem(
                         teamName = entity.teamName,
                         totalScore = compareScoreSnapshot.total,
                         impressionCount = compareScoreSnapshot.impression,
@@ -544,276 +490,189 @@ internal class BofRepository(
                         finalStriker4 = getTeamFinalStrikerAtTime(entity, 4, compareTimestamp),
                         lastUpdated = compareTimestamp
                     )
-                    compareRankingMap[entity.teamName] = compareItem
-                }
-            }
-            
-            // 对比数据按总分排序并分配排名
-            val sortedCompareData = compareRankingMap.values.sortedByDescending { it.totalScore }
-            sortedCompareData.forEachIndexed { index, item ->
-                compareRankingMap[item.teamName] = item.copy(rank = index + 1)
-            }
-        }
-        
-        // 处理当前时间点数据（分批）
-        allTeams.chunked(batchSize).forEach { batch ->
-            val batchStart = System.currentTimeMillis()
-            
-            val batchResults = batch.mapNotNull { entity ->
-                val scoreSnapshot = getTeamScoreAtTime(entity, currentTimestamp)
-                if (scoreSnapshot != null) {
-                    val compareData = compareRankingMap[entity.teamName]
-                    com.madsam.otora.ui.bof.TeamRankingItem(
-                        teamName = entity.teamName,
-                        totalScore = scoreSnapshot.total,
-                        impressionCount = scoreSnapshot.impression,
-                        medianScore = scoreSnapshot.median,
-                        score1 = scoreSnapshot.score1,
-                        score2 = scoreSnapshot.score2,
-                        score3 = scoreSnapshot.score3,
-                        score4 = scoreSnapshot.score4,
-                        title1 = getTeamTitleAtTime(entity, 1, currentTimestamp),
-                        artist1 = getTeamArtistAtTime(entity, 1, currentTimestamp),
-                        finalStriker1 = getTeamFinalStrikerAtTime(entity, 1, currentTimestamp),
-                        title2 = getTeamTitleAtTime(entity, 2, currentTimestamp),
-                        artist2 = getTeamArtistAtTime(entity, 2, currentTimestamp),
-                        finalStriker2 = getTeamFinalStrikerAtTime(entity, 2, currentTimestamp),
-                        title3 = getTeamTitleAtTime(entity, 3, currentTimestamp),
-                        artist3 = getTeamArtistAtTime(entity, 3, currentTimestamp),
-                        finalStriker3 = getTeamFinalStrikerAtTime(entity, 3, currentTimestamp),
-                        title4 = getTeamTitleAtTime(entity, 4, currentTimestamp),
-                        artist4 = getTeamArtistAtTime(entity, 4, currentTimestamp),
-                        finalStriker4 = getTeamFinalStrikerAtTime(entity, 4, currentTimestamp),
-                        lastUpdated = currentTimestamp,
-                        // 对比数据
-                        compareTotalScore = compareData?.totalScore,
-                        compareImpressionCount = compareData?.impressionCount,
-                        compareMedianScore = compareData?.medianScore,
-                        compareScore1 = compareData?.score1,
-                        compareScore2 = compareData?.score2,
-                        compareScore3 = compareData?.score3,
-                        compareScore4 = compareData?.score4,
-                        compareRank = compareData?.rank
-                    )
                 } else null
+            }.sortedByDescending { it.totalScore }
+                .mapIndexed { index, item -> item.copy(rank = index + 1) }
+
+            compareResults.forEach { item ->
+                compareRankingMap[item.teamName] = item
             }
             
-            allCurrentResults.addAll(batchResults)
-            
-            // 按总分排序并分配排名
-            val sortedResults = allCurrentResults.sortedByDescending { it.totalScore }
-            val rankedResults = sortedResults.mapIndexed { index, item ->
+            val compareEnd = System.currentTimeMillis()
+            Log.d(TAG, "Compare ranking calculated in ${compareEnd - compareStart}ms, got ${compareResults.size} teams")
+        }
+
+        // 步骤2: 一次性处理当前时间点的全部数据（使用索引查询已经很快）
+        val currentStart = System.currentTimeMillis()
+        
+        val currentResults = allTeams.mapNotNull { entity ->
+            val scoreSnapshot = getTeamScoreAtTime(entity, currentTimestamp)
+            if (scoreSnapshot != null) {
+                val compareData = compareRankingMap[entity.teamName]
+                com.madsam.otora.ui.bof.TeamRankingItem(
+                    teamName = entity.teamName,
+                    totalScore = scoreSnapshot.total,
+                    impressionCount = scoreSnapshot.impression,
+                    medianScore = scoreSnapshot.median,
+                    score1 = scoreSnapshot.score1,
+                    score2 = scoreSnapshot.score2,
+                    score3 = scoreSnapshot.score3,
+                    score4 = scoreSnapshot.score4,
+                    title1 = getTeamTitleAtTime(entity, 1, currentTimestamp),
+                    artist1 = getTeamArtistAtTime(entity, 1, currentTimestamp),
+                    finalStriker1 = getTeamFinalStrikerAtTime(entity, 1, currentTimestamp),
+                    title2 = getTeamTitleAtTime(entity, 2, currentTimestamp),
+                    artist2 = getTeamArtistAtTime(entity, 2, currentTimestamp),
+                    finalStriker2 = getTeamFinalStrikerAtTime(entity, 2, currentTimestamp),
+                    title3 = getTeamTitleAtTime(entity, 3, currentTimestamp),
+                    artist3 = getTeamArtistAtTime(entity, 3, currentTimestamp),
+                    finalStriker3 = getTeamFinalStrikerAtTime(entity, 3, currentTimestamp),
+                    title4 = getTeamTitleAtTime(entity, 4, currentTimestamp),
+                    artist4 = getTeamArtistAtTime(entity, 4, currentTimestamp),
+                    finalStriker4 = getTeamFinalStrikerAtTime(entity, 4, currentTimestamp),
+                    lastUpdated = currentTimestamp,
+                    // 对比数据
+                    compareTotalScore = compareData?.totalScore,
+                    compareImpressionCount = compareData?.impressionCount,
+                    compareMedianScore = compareData?.medianScore,
+                    compareScore1 = compareData?.score1,
+                    compareScore2 = compareData?.score2,
+                    compareScore3 = compareData?.score3,
+                    compareScore4 = compareData?.score4,
+                    compareRank = compareData?.rank
+                )
+            } else null
+        }
+
+        val currentEnd = System.currentTimeMillis()
+        Log.d(TAG, "Current team data processed in ${currentEnd - currentStart}ms, got ${currentResults.size} teams")
+
+        // 按总分排序并分配排名和排名变化
+        val finalResults = currentResults.sortedByDescending { it.totalScore }
+            .mapIndexed { index, item ->
                 val currentRank = index + 1
                 val rankChange = if (item.compareRank != null) {
                     item.compareRank - currentRank // 对比排名 - 当前排名，正数表示排名上升
                 } else null
-                
+
                 item.copy(
                     rank = currentRank,
                     rankChange = rankChange
                 )
             }
-            
-            Log.d(TAG, "Team ranking batch processed: ${batchResults.size} teams in ${System.currentTimeMillis() - batchStart}ms")
-            
-            // 返回当前结果
-            onBatchReady(rankedResults)
-            
-            // 短暂延迟防止UI阻塞
-            kotlinx.coroutines.delay(10)
-        }
-        
+
         val endTime = System.currentTimeMillis()
-        Log.d(TAG, "getTeamRankingAtTimeStreamed completed in ${endTime - startTime}ms")
+        Log.d(TAG, "getTeamRankingAtTimeStreamed completed in ${endTime - startTime}ms, total ${finalResults.size} teams")
+
+        // 在回调前确保在正确的调度器上
+        onBatchReady(finalResults)
     }
 
-/**
- * 获取团队指定时间点的得分数据
- */
-private fun getTeamScoreAtTime(entity: BofTeamEntity, targetTimestamp: Long): TeamScoreSnapshot? {
-    if (entity.scoreDataJson.isEmpty()) return null
-    
-    try {
-        val teamScoreYearsAdapter = moshi.adapter<List<TeamYearData>>(Types.newParameterizedType(List::class.java, TeamYearData::class.java))
-        val scoreYears = teamScoreYearsAdapter.fromJson(entity.scoreDataJson) ?: return null
-        return findTeamScoreByHierarchicalSearch(scoreYears, targetTimestamp)
-    } catch (e: Exception) {
-        Log.e(TAG, "Error parsing team score JSON for entity ${entity.teamName}: ${e.message}", e)
-        return null
-    }
-}
-
-/**
- * 层次化查找团队指定时间点的得分数据
- */
-private fun findTeamScoreByHierarchicalSearch(scoreYears: List<TeamYearData>, targetTimestamp: Long): TeamScoreSnapshot? {
-    val calendar = Calendar.getInstance()
-    calendar.timeInMillis = targetTimestamp
-    val targetYear = calendar.get(Calendar.YEAR)
-    val targetMonth = calendar.get(Calendar.MONTH) + 1 // Calendar月份从0开始
-    val targetDay = calendar.get(Calendar.DAY_OF_MONTH)
-    val targetHour = calendar.get(Calendar.HOUR_OF_DAY)
-    val targetMinute = calendar.get(Calendar.MINUTE)
-    
-    var bestMatch: TeamScoreSnapshot? = null
-    var bestTimestamp = Long.MIN_VALUE
-    
-    // 1. 遍历年份（升序）
-    val sortedYears = scoreYears.sortedBy { it.year }
-    for (yearData in sortedYears) {
-        if (yearData.year > targetYear) break
-        
-        // 2. 遍历月份（升序）
-        val sortedMonths = yearData.months?.sortedBy { it.month } ?: continue
-        for (monthData in sortedMonths) {
-            if (yearData.year == targetYear && monthData.month > targetMonth) break
-            
-            // 3. 遍历日期（升序）
-            val sortedDays = monthData.days?.sortedBy { it.day } ?: continue
-            for (dayData in sortedDays) {
-                if (yearData.year == targetYear && monthData.month == targetMonth && dayData.day > targetDay) break
-                
-                // 4. 遍历小时（升序）
-                val sortedHours = dayData.hours?.sortedBy { it.hour } ?: continue
-                for (hourData in sortedHours) {
-                    if (yearData.year == targetYear && monthData.month == targetMonth && 
-                        dayData.day == targetDay && hourData.hour > targetHour) break
-                    
-                    // 5. 遍历分钟（升序，查找所有小于等于目标分钟的记录）
-                    val validMinutes = hourData.minutes?.filter { minuteData ->
-                        if (yearData.year == targetYear && monthData.month == targetMonth && 
-                            dayData.day == targetDay && hourData.hour == targetHour) {
-                            minuteData.minute <= targetMinute
-                        } else {
-                            true
-                        }
-                    } ?: continue
-                    
-                    if (validMinutes.isNotEmpty()) {
-                        // 找到这个小时内的最佳匹配
-                        for (minuteData in validMinutes) {
-                            val currentTimestamp = createTimestamp(
-                                yearData.year, monthData.month, dayData.day, hourData.hour, minuteData.minute
-                            )
-                            
-                            if (currentTimestamp <= targetTimestamp && currentTimestamp > bestTimestamp) {
-                                bestTimestamp = currentTimestamp
-                                val values = minuteData.values
-                                if (values != null) {
-                                    bestMatch = TeamScoreSnapshot(
-                                        timestamp = currentTimestamp,
-                                        total = values.total,
-                                        impression = values.impression,
-                                        median = parseDoubleValue(values.median),
-                                        score1 = parseDoubleValue(values.total1),
-                                        score2 = parseDoubleValue(values.total2),
-                                        score3 = parseDoubleValue(values.total3),
-                                        score4 = parseDoubleValue(values.total4)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    return bestMatch
-}
-
-/**
- * 获取团队指定时间点的作品标题
- */
-private fun getTeamTitleAtTime(entity: BofTeamEntity, workIndex: Int, targetTimestamp: Long): String {
-    val jsonField = when (workIndex) {
-        1 -> entity.title1Json
-        2 -> entity.title2Json
-        3 -> entity.title3Json
-        4 -> entity.title4Json
-        else -> ""
-    }
-    return getTeamMetadataAtTime(jsonField, targetTimestamp)
-}
-
-/**
- * 获取团队指定时间点的作品艺术家
- */
-private fun getTeamArtistAtTime(entity: BofTeamEntity, workIndex: Int, targetTimestamp: Long): String {
-    val jsonField = when (workIndex) {
-        1 -> entity.artist1Json
-        2 -> entity.artist2Json
-        3 -> entity.artist3Json
-        4 -> entity.artist4Json
-        else -> ""
-    }
-    return getTeamMetadataAtTime(jsonField, targetTimestamp)
-}
-
-/**
- * 获取团队指定时间点的最终打击者
- */
-private fun getTeamFinalStrikerAtTime(entity: BofTeamEntity, workIndex: Int, targetTimestamp: Long): String {
-    val jsonField = when (workIndex) {
-        1 -> entity.finalStriker1Json
-        2 -> entity.finalStriker2Json
-        3 -> entity.finalStriker3Json
-        4 -> entity.finalStriker4Json
-        else -> ""
-    }
-    return getTeamMetadataAtTime(jsonField, targetTimestamp)
-}
-
-/**
- * 从JSON数据中获取指定时间点的团队元数据
- */
-private fun getTeamMetadataAtTime(jsonData: String, targetTimestamp: Long): String {
-    if (jsonData.isEmpty()) return ""
-    
-    try {
-        val teamTimeValueAdapter = moshi.adapter<List<TeamTimeValue>>(Types.newParameterizedType(List::class.java, TeamTimeValue::class.java))
-        val timeValues = teamTimeValueAdapter.fromJson(jsonData) ?: return ""
-        
-        return findTeamMetadataByTimestamp(timeValues, targetTimestamp)
-    } catch (e: Exception) {
-        Log.e(TAG, "Error parsing team metadata JSON: ${e.message}", e)
-        return ""
-    }
-}
-
-/**
- * 根据时间戳查找团队元数据记录
- */
-private fun findTeamMetadataByTimestamp(timeValues: List<TeamTimeValue>, targetTimestamp: Long): String {
-    if (timeValues.isEmpty()) return ""
-    
-    // 解析时间戳并找到最接近但不超过目标时间的记录
-    val timestampedValues = timeValues.mapNotNull { item ->
+    /**
+     * 使用新的时序表获取团队指定时间点的得分数据
+     */
+    private fun getTeamScoreAtTime(
+        entity: BofTeamEntity,
+        targetTimestamp: Long
+    ): TeamScoreSnapshot? {
         try {
-            val timestamp = item.time.toLongOrNull()
-            if (timestamp != null) {
-                TimestampedMetadata(timestamp, item.value)
+            // 使用 ObjectBox 查询，找到小于等于目标时间的最近记录
+            val scoreHistory = teamScoreHistoryBox.query(
+                BofTeamScoreHistoryEntity_.compositeTeamId.equal(entity.compositeTeamId)
+                    .and(BofTeamScoreHistoryEntity_.timestamp.lessOrEqual(targetTimestamp))
+            ).orderDesc(BofTeamScoreHistoryEntity_.timestamp)
+                .build()
+                .findFirst()
+
+            return if (scoreHistory != null) {
+                TeamScoreSnapshot(
+                    timestamp = scoreHistory.timestamp,
+                    total = scoreHistory.total,
+                    impression = scoreHistory.impression,
+                    median = scoreHistory.median,
+                    score1 = 0.0, // Team score history 不分别存储，需要从 values 解析
+                    score2 = 0.0,
+                    score3 = 0.0,
+                    score4 = 0.0
+                )
             } else null
         } catch (e: Exception) {
-            null
+            Log.e(TAG, "Error getting team score at time for ${entity.teamName}: ${e.message}", e)
+            return null
         }
-    }.filter { it.timestamp <= targetTimestamp }
-        .sortedByDescending { it.timestamp }
-    
-    return timestampedValues.firstOrNull()?.value ?: timeValues.lastOrNull()?.value ?: ""
-}
-
-/**
- * 解析Any类型为Double值
- */
-private fun parseDoubleValue(value: Any?): Double {
-    return when (value) {
-        is Double -> value
-        is Number -> value.toDouble()
-        is String -> value.toDoubleOrNull() ?: 0.0
-        else -> 0.0
     }
-}
+
+    /**
+     * 使用新的时序表获取团队指定时间点的作品标题
+     */
+    private fun getTeamTitleAtTime(
+        entity: BofTeamEntity,
+        workSlot: Int,
+        targetTimestamp: Long
+    ): String {
+        return try {
+            val titleHistory = teamTitleHistoryBox.query(
+                BofTeamTitleHistoryEntity_.compositeTeamId.equal(entity.compositeTeamId)
+                    .and(BofTeamTitleHistoryEntity_.workSlot.equal(workSlot))
+                    .and(BofTeamTitleHistoryEntity_.timestamp.lessOrEqual(targetTimestamp))
+            ).orderDesc(BofTeamTitleHistoryEntity_.timestamp)
+                .build()
+                .findFirst()
+            
+            titleHistory?.title ?: ""
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting team title at time for ${entity.teamName} workSlot $workSlot: ${e.message}", e)
+            ""
+        }
+    }
+
+    /**
+     * 使用新的时序表获取团队指定时间点的作品艺术家
+     */
+    private fun getTeamArtistAtTime(
+        entity: BofTeamEntity,
+        workSlot: Int,
+        targetTimestamp: Long
+    ): String {
+        return try {
+            val artistHistory = teamArtistHistoryBox.query(
+                BofTeamArtistHistoryEntity_.compositeTeamId.equal(entity.compositeTeamId)
+                    .and(BofTeamArtistHistoryEntity_.workSlot.equal(workSlot))
+                    .and(BofTeamArtistHistoryEntity_.timestamp.lessOrEqual(targetTimestamp))
+            ).orderDesc(BofTeamArtistHistoryEntity_.timestamp)
+                .build()
+                .findFirst()
+            
+            artistHistory?.artist ?: ""
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting team artist at time for ${entity.teamName} workSlot $workSlot: ${e.message}", e)
+            ""
+        }
+    }
+
+    /**
+     * 使用新的时序表获取团队指定时间点的最终打击者
+     */
+    private fun getTeamFinalStrikerAtTime(
+        entity: BofTeamEntity,
+        workSlot: Int,
+        targetTimestamp: Long
+    ): String {
+        return try {
+            val finalStrikerHistory = teamFinalStrikerHistoryBox.query(
+                BofTeamFinalStrikerHistoryEntity_.compositeTeamId.equal(entity.compositeTeamId)
+                    .and(BofTeamFinalStrikerHistoryEntity_.workSlot.equal(workSlot))
+                    .and(BofTeamFinalStrikerHistoryEntity_.timestamp.lessOrEqual(targetTimestamp))
+            ).orderDesc(BofTeamFinalStrikerHistoryEntity_.timestamp)
+                .build()
+                .findFirst()
+            
+            finalStrikerHistory?.finalStriker ?: ""
+        } catch (e: Exception) {
+            Log.e(TAG, "Error getting team final striker at time for ${entity.teamName} workSlot $workSlot: ${e.message}", e)
+            ""
+        }
+    }
 }
 
 /**
@@ -870,78 +729,81 @@ data class WorkRanking(
         override val title: String = this@WorkRanking.title
         override val artist: String = this@WorkRanking.artist
         override val score: Number = this@WorkRanking.score
-        override val extraData: Number? = if (this@WorkRanking.impression > 0) this@WorkRanking.impression else null
-        override val avgScore: Double? = if (this@WorkRanking.average > 0) this@WorkRanking.average else null
-        override val medianScore: Double? = if (this@WorkRanking.median > 0) this@WorkRanking.median else null
+        override val extraData: Number? =
+            if (this@WorkRanking.impression > 0) this@WorkRanking.impression else null
+        override val avgScore: Double? =
+            if (this@WorkRanking.average > 0) this@WorkRanking.average else null
+        override val medianScore: Double? =
+            if (this@WorkRanking.median > 0) this@WorkRanking.median else null
         override val rankChange: Int? = this@WorkRanking.rankChange
         override val compareRank: Int? = this@WorkRanking.compareRank
         override val compareScore: Number? = this@WorkRanking.compareScore
     }
-    
+
     // 专门用于平均分排行的适配器 - 将平均分作为主要分数显示
     fun toAverageRankingItem(): RankingItem = object : RankingItem {
         override val rank: Int = this@WorkRanking.rank
         override val title: String = this@WorkRanking.title
         override val artist: String = this@WorkRanking.artist
         override val score: Number = this@WorkRanking.average // 将平均分作为主要分数
-        override val extraData: Number? = if (this@WorkRanking.impression > 0) this@WorkRanking.impression else null
+        override val extraData: Number? =
+            if (this@WorkRanking.impression > 0) this@WorkRanking.impression else null
         override val avgScore: Double? = null // 不显示额外的平均分列
         override val medianScore: Double? = null // 不显示中位数列
         override val rankChange: Int? = this@WorkRanking.rankChange
         override val compareRank: Int? = this@WorkRanking.compareRank
         override val compareScore: Number? = this@WorkRanking.compareAverage // 对比平均分
     }
-    
+
     // 专门用于中位数排行的适配器 - 将中位数作为主要分数显示
     fun toMedianRankingItem(): RankingItem = object : RankingItem {
         override val rank: Int = this@WorkRanking.rank
         override val title: String = this@WorkRanking.title
         override val artist: String = this@WorkRanking.artist
         override val score: Number = this@WorkRanking.median // 将中位数作为主要分数
-        override val extraData: Number? = if (this@WorkRanking.impression > 0) this@WorkRanking.impression else null
+        override val extraData: Number? =
+            if (this@WorkRanking.impression > 0) this@WorkRanking.impression else null
         override val avgScore: Double? = null // 不显示额外的平均分列
         override val medianScore: Double? = null // 不显示额外的中位数列
         override val rankChange: Int? = this@WorkRanking.rankChange
         override val compareRank: Int? = this@WorkRanking.compareRank
         override val compareScore: Number? = this@WorkRanking.compareMedian // 对比中位数
     }
-    
+
     // 专门用于差值排行的适配器 - 将分数差值作为主要分数显示
     fun toDifferenceRankingItem(): RankingItem = object : RankingItem {
         override val rank: Int = this@WorkRanking.rank
         override val title: String = this@WorkRanking.title
         override val artist: String = this@WorkRanking.artist
         override val score: Number = this@WorkRanking.score // 分数差值作为主要分数
-        override val extraData: Number? = if (this@WorkRanking.impression != 0) this@WorkRanking.impression else null // 评价数差值，允许负数
+        override val extraData: Number? =
+            if (this@WorkRanking.impression != 0) this@WorkRanking.impression else null // 评价数差值，允许负数
         override val avgScore: Double? = null // 不显示额外的平均分列
         override val medianScore: Double? = null // 不显示额外的中位数列
         override val rankChange: Int? = null // 差值排行不显示排名变化
         override val compareRank: Int? = null // 不显示对比排名
         override val compareScore: Number? = null // 不显示对比分数
     }
-    
+
     // 专门用于综合分数排行的适配器 - 将综合分数作为主要分数显示，同时显示原始平均分和中位数
     fun toCompositeRankingItem(): RankingItem = object : RankingItem {
         override val rank: Int = this@WorkRanking.rank
         override val title: String = this@WorkRanking.title
         override val artist: String = this@WorkRanking.artist
-        override val score: Number = this@WorkRanking.compositeScore ?: this@WorkRanking.score // 使用Double类型的综合分数，如果没有则回退到Int分数
-        override val extraData: Number? = if (this@WorkRanking.impression > 0) this@WorkRanking.impression else null
-        override val avgScore: Double? = if (this@WorkRanking.average > 0) this@WorkRanking.average else null // 显示原始平均分
-        override val medianScore: Double? = if (this@WorkRanking.median > 0) this@WorkRanking.median else null // 显示原始中位数
+        override val score: Number = this@WorkRanking.compositeScore
+            ?: this@WorkRanking.score // 使用Double类型的综合分数，如果没有则回退到Int分数
+        override val extraData: Number? =
+            if (this@WorkRanking.impression > 0) this@WorkRanking.impression else null
+        override val avgScore: Double? =
+            if (this@WorkRanking.average > 0) this@WorkRanking.average else null // 显示原始平均分
+        override val medianScore: Double? =
+            if (this@WorkRanking.median > 0) this@WorkRanking.median else null // 显示原始中位数
         override val rankChange: Int? = this@WorkRanking.rankChange
         override val compareRank: Int? = this@WorkRanking.compareRank
-        override val compareScore: Number? = this@WorkRanking.compareCompositeScore ?: this@WorkRanking.compareScore // 使用Double类型的对比综合分数
+        override val compareScore: Number? = this@WorkRanking.compareCompositeScore
+            ?: this@WorkRanking.compareScore // 使用Double类型的对比综合分数
     }
 }
-
-/**
- * 带时间戳的元数据
- */
-private data class TimestampedMetadata(
-    val timestamp: Long,
-    val value: String
-)
 
 /**
  * 团队得分快照数据类

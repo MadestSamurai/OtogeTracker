@@ -1,10 +1,23 @@
 package com.madsam.otora.ui.bof.sub
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -12,9 +25,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,23 +49,7 @@ internal fun BofEntryPagerScreen(
     setIsTabRowVisible: (Boolean) -> Unit = {}
 ) {
     val selectedSubTabIndex by bofScreenState.selectedSubTab.collectAsStateWithLifecycle()
-    
-    // 计算屏幕宽度和内容宽度
-    val density = LocalDensity.current
-    val layoutDirection = LocalLayoutDirection.current
-    val windowInfo = LocalWindowInfo.current
-    val screenWidthDp = with(density) {
-        windowInfo.containerSize.width.toDp()
-    }
-    
-    // 计算 Cutout 占用的宽度
-    val cutoutWidthDp = with(density) {
-        val cutoutInsets = WindowInsets.displayCutout
-        // 计算左右两侧的 cutout 总宽度
-        cutoutInsets.getLeft(density, layoutDirection).toDp() +
-        cutoutInsets.getRight(density, layoutDirection).toDp()
-    }
-    
+
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
     // 创建Pager状态，页面数量为5（Total, Avg, Median, Diff, Composite）
@@ -302,7 +296,7 @@ private fun <T> EntryPageContent(
                         modifier = Modifier.padding(top = 8.dp)
                     )
                     Button(
-                        onClick = { vm.loadRankingDataWithStreamedParsing() },
+                        onClick = { vm.loadRankingData() },
                         modifier = Modifier.padding(top = 16.dp)
                     ) {
                         Text("重试")

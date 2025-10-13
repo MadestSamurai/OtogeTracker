@@ -180,7 +180,7 @@ fun BofScreen(
 
     // 初始数据加载
     LaunchedEffect(Unit) {
-        vm.loadRankingDataWithStreamedParsing()
+        vm.loadRankingData()
         selectedRange?.let { range ->
             if (range.isStart) {
                 vm.loadTeamRankingData(range.path)
@@ -196,7 +196,7 @@ fun BofScreen(
         bofScreenState.selectedCompareDate.collectAsState().value,
         bofScreenState.selectedCompareTime.collectAsState().value
     ) {
-        vm.loadRankingDataWithStreamedParsing()
+        vm.loadRankingData()
 
         selectedRange?.let { range ->
             if (range.isStart) {

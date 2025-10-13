@@ -17,11 +17,6 @@ internal data class BofWorkEntity(
     var team: String = "",
     var genre: String = "",
     
-    // JSON数据存储
-    var scoreDataJson: String = "",
-    var titleHistoryJson: String = "",
-    var artistHistoryJson: String = "",
-    
     // 查询优化索引
     @Index var earliestTimestamp: Long = 0,
     @Index var latestTimestamp: Long = 0,
@@ -38,9 +33,6 @@ internal data class BofWorkEntity(
         currentArtist = "",
         team = "",
         genre = "",
-        scoreDataJson = "",
-        titleHistoryJson = "",
-        artistHistoryJson = "",
         earliestTimestamp = 0,
         latestTimestamp = 0,
         latestTotalScore = 0,
