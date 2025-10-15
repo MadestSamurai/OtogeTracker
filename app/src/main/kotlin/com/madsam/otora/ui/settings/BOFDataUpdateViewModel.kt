@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.madsam.otora.core.database.ObjectBoxManager
-import com.madsam.otora.data.BASE_URL
+import com.madsam.otora.data.BOF_URL
 import com.madsam.otora.data.bof.local.model.BofWorkEntity
 import com.madsam.otora.data.bof.local.objectbox.BofObjectBoxService
 import com.madsam.otora.data.bof.local.repository.BofRepository
@@ -71,7 +71,7 @@ class BOFDataUpdateViewModel : ViewModel() {
         .build()
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
+        .baseUrl(BOF_URL)
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
         .build()
@@ -150,9 +150,7 @@ class BOFDataUpdateViewModel : ViewModel() {
                     val workCount = bofRepository.getWorksCount(range.path)
                     val teamCount = bofRepository.getTeamCount(range.path)
                     // 根据比赛配置使用正确的日期来获取评论数量
-                    val dateToCheck = if (range.commentDate.isNotEmpty()) {
-                        range.commentDate
-                    } else {
+                    val dateToCheck = range.commentDate.ifEmpty {
                         range.current.ifEmpty { "2025-01-08" }
                     }
                     val commentCount = try {

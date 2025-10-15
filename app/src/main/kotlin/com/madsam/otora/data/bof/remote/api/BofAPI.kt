@@ -9,20 +9,20 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 
 internal interface BofAPI {
-    @GET("bof/range.json")
+    @GET("range.json")
     fun getBofRangeData(): Call<List<BofRangeResponse>>
 
-    @GET("bof/{path}/work.json")
+    @GET("{path}/work.json")
     fun getBofWorkData(
         @Path("path") path: String
     ): Call<Map<String, BofWorkData>>
 
-    @GET("bof/{path}/team.json")
+    @GET("{path}/team.json")
     fun getBofTeamData(
         @Path("path") path: String
     ): Call<List<BofTeamResponse>>
 
-    @GET("bof/{path}/comment.json")
+    @GET("{path}/comment.json")
     fun getBofCommentData(
         @Path("path") path: String
     ): Call<List<BofCommentSingleResponse>>

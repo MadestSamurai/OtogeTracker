@@ -2,7 +2,7 @@ package com.madsam.otora.data.bof.remote.api
 
 import android.util.Log
 import com.madsam.otora.data.bof.local.objectbox.BofObjectBoxService
-import com.madsam.otora.data.BASE_URL
+import com.madsam.otora.data.BOF_URL
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -20,7 +20,7 @@ class BofRequestService() {
         .build()
 
     private val retrofit = Retrofit.Builder()
-        .baseUrl(BASE_URL)
+        .baseUrl(BOF_URL)
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
         .build()
