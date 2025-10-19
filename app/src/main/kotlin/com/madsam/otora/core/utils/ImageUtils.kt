@@ -37,4 +37,51 @@ object ImageUtils {
             }
         }
     }
+
+    /**
+     * 拼接多张bitmap为一张大图，如果总高度超过maxHeight（默认30000），则先等比缩放再拼接。
+     * 这样可以避免超过Android Bitmap的最大尺寸限制（32767px）。
+     */
+    fun combineBitmaps(bitmaps: List<Bitmap>, maxHeight: Int = 30000): Bitmap {
+        if (bitmaps.isEmpty()) throw IllegalArgumentException("Bitmap list is empty")
+        val width = bitmaps[0].width
+        
+        // 1. 先计算总高度
+        val totalHeight = bitmaps.sumOf { it.height }
+        
+        // 2. 如果总高度超过限制，计算缩放比例
+        val scale = if (totalHeight > maxHeight) {
+            maxHeight.toFloat() / totalHeight.toFloat()
+        } else {
+            1.0f
+        }
+        
+        // 3. 计算缩放后的尺寸
+        val finalWidth = (width * scale).toInt()
+        val finalHeight = if (totalHeight > maxHeight) maxHeight else totalHeight
+        
+        // 4. 创建最终的bitmap
+        val result = Bitmap.createBitmap(finalWidth, finalHeight, Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(result)
+        
+        // 5. 逐个缩放并绘制每个bitmap
+        var y = 0
+        for (bmp in bitmaps) {
+            if (scale < 1.0f) {
+                // 需要缩放
+                val scaledHeight = (bmp.height * scale).toInt()
+                val scaledWidth = (bmp.width * scale).toInt()
+                val scaledBmp = bmp.scale(scaledWidth, scaledHeight)
+                canvas.drawBitmap(scaledBmp, 0f, y.toFloat(), null)
+                scaledBmp.recycle()
+                y += scaledHeight
+            } else {
+                // 不需要缩放，直接绘制
+                canvas.drawBitmap(bmp, 0f, y.toFloat(), null)
+                y += bmp.height
+            }
+        }
+        
+        return result
+    }
 }

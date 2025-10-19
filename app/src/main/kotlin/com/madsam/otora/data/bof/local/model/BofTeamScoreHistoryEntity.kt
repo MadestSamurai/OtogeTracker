@@ -23,11 +23,23 @@ internal data class BofTeamScoreHistoryEntity(
     var hour: Int = 0,
     var minute: Int = 0,
     
-    // 分数数据
+    // 团队总分数据
     var impression: Double = 0.0,
     var total: Double = 0.0,
     var median: Double = 0.0,
-    var average: Double = 0.0
+    var average: Double = 0.0,
+    
+    // 各作品分数（total）
+    var total1: Double = 0.0,
+    var total2: Double = 0.0,
+    var total3: Double = 0.0,
+    var total4: Double = 0.0,
+    
+    // 各作品中位数
+    var median1: Double = 0.0,
+    var median2: Double = 0.0,
+    var median3: Double = 0.0,
+    var median4: Double = 0.0
 ) {
     companion object {
         /**

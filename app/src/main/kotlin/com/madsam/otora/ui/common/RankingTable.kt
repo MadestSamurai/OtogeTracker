@@ -98,7 +98,9 @@ data class RankingTableConfig(
 fun RankingTable(
     items: List<RankingItem>,
     config: RankingTableConfig,
-    narrowMode: Int = 0
+    narrowMode: Int = 0,
+    showTitle: Boolean = true,
+    showHeader: Boolean = true
 ) {
     // 屏幕宽度检测
     val density = LocalDensity.current
@@ -176,36 +178,39 @@ fun RankingTable(
             }
         }
         
-        // 表格标题和副标题
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Black)
-                .padding(vertical = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // 主标题
-            Text(
-                text = config.title,
-                fontFamily = sarasaBold,
-                fontSize = 20.sp,
-                color = Color.White,
-                textAlign = TextAlign.Center
-            )
-            
-            // 副标题
-            Text(
-                text = config.subtitle,
-                fontFamily = sarasaRegular,
-                fontSize = 12.sp,
-                color = TEXT_GRAY,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 4.dp)
-            )
+        // 表格标题和副标题（可选）
+        if (showTitle) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Black)
+                    .padding(vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // 主标题
+                Text(
+                    text = config.title,
+                    fontFamily = sarasaBold,
+                    fontSize = 20.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+                
+                // 副标题
+                Text(
+                    text = config.subtitle,
+                    fontFamily = sarasaRegular,
+                    fontSize = 12.sp,
+                    color = TEXT_GRAY,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
         }
 
-        // 表格头部
-        Row(
+        // 表格头部（可选）
+        if (showHeader) {
+            Row(
             modifier = Modifier
                 .background(BG_DARK_GRAY)
                 .fillMaxWidth()
@@ -309,6 +314,7 @@ fun RankingTable(
                     )
                 }
             }
+        }
         }
 
         // 数据列表
@@ -756,5 +762,162 @@ private fun formatScore(score: Number, widthType: ColumnWidthType, allowNegative
                     String.format(Locale.US,"%.1f", doubleValue)
                 }
             } else "---"
+    }
+}
+
+/**
+ * 用于截图的RankingTable版本，使用Column代替LazyColumn，
+ * 避免LazyColumn在capturable中无法正确测量高度导致的空白区域。
+ */
+@Composable
+fun RankingTableForCapture(
+    items: List<RankingItem>,
+    config: RankingTableConfig,
+    showTitle: Boolean = true,
+    showHeader: Boolean = true,
+    globalMaxScore: Double? = null  // 全局最大分数，用于多批次截图时保持分数条比例一致
+) {
+    // 如果提供了全局最大值则使用，否则计算当前items的最大值
+    val maxScore = globalMaxScore ?: run {
+        val currentMaxScore = items.maxOfOrNull { it.score.toDouble() } ?: 1.0
+        val compareMaxScore = items.mapNotNull { it.compareScore?.toDouble() }.maxOfOrNull { it } ?: 0.0
+        maxOf(currentMaxScore, compareMaxScore)
+    }
+    
+    // 固定列宽（用于截图）
+    val extraWidth = 60.dp
+    val avgWidth = 70.dp
+    val medianWidth = 70.dp
+    
+    Column(modifier = Modifier.fillMaxWidth()) {
+        // 表格标题和副标题（可选）
+        if (showTitle) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Black)
+                    .padding(vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // 主标题
+                Text(
+                    text = config.title,
+                    fontFamily = sarasaBold,
+                    fontSize = 20.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+                
+                // 副标题
+                Text(
+                    text = config.subtitle,
+                    fontFamily = sarasaRegular,
+                    fontSize = 12.sp,
+                    color = TEXT_GRAY,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
+
+        // 表格头部（可选）
+        if (showHeader) {
+            Row(
+                modifier = Modifier
+                    .background(BG_DARK_GRAY)
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 2.dp)
+            ) {
+                Text(
+                    text = "排名",
+                    fontFamily = sarasaBold,
+                    fontSize = 14.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.width(50.dp)
+                )
+                Text(
+                    text = "",
+                    modifier = Modifier.weight(0.4f)
+                )
+                
+                // 正常模式，显示所有列
+                Text(
+                    text = config.scoreColumnName,
+                    fontFamily = sarasaBold,
+                    fontSize = 14.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(0.6f)
+                )
+                config.extraColumnName?.let { name ->
+                    Text(
+                        text = name,
+                        fontFamily = sarasaBold,
+                        fontSize = 14.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.width(extraWidth)
+                    )
+                }
+                config.avgColumnName?.let { name ->
+                    Text(
+                        text = name,
+                        fontFamily = sarasaBold,
+                        fontSize = 14.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.width(avgWidth)
+                    )
+                }
+                config.medianColumnName?.let { name ->
+                    Text(
+                        text = name,
+                        fontFamily = sarasaBold,
+                        fontSize = 14.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.width(medianWidth)
+                    )
+                }
+            }
+        }
+
+        // 数据列表 - 使用Column而不是LazyColumn
+        Column(
+            modifier = Modifier.clip(RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+        ) {
+            items.take(config.maxItems).forEachIndexed { index, item ->
+                RankingTableRow(
+                    item = item,
+                    index = index,
+                    maxScore = maxScore,
+                    config = config,
+                    isNarrowScreen = false,
+                    narrowMode = 0,
+                    extraWidth = extraWidth,
+                    avgWidth = avgWidth,
+                    medianWidth = medianWidth,
+                    narrowScoreBarWidth = 100.dp
+                )
+            }
+            
+            if (items.size > config.maxItems) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(if (config.maxItems % 2 == 0) BG_DARK_GRAY else Color.Black)
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "还有 ${items.size - config.maxItems} 个作品..",
+                        fontFamily = sarasaRegular,
+                        color = TEXT_GRAY,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+        }
     }
 }

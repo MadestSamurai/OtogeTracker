@@ -299,9 +299,16 @@ internal class BofViewModel(
         // 按平均分降序排列
         val sortedByAverage = filteredData.sortedByDescending { it.average }
         
-        // 重新分配排名并计算平均分排名变化
+        // 重新分配排名并计算平均分排名变化（同分同排名）
+        var currentRank = 1
+        var previousAverage: Double? = null
         return sortedByAverage.mapIndexed { index, ranking -> 
-            val newRank = index + 1
+            // 如果分数与前一个不同，更新排名为当前位置+1
+            if (previousAverage != null && ranking.average != previousAverage) {
+                currentRank = index + 1
+            }
+            previousAverage = ranking.average
+            val newRank = currentRank
             
             // 计算平均分排名变化
             val compareRankInAverage = if (ranking.compareAverage != null && ranking.compareAverage > 0) {
@@ -345,9 +352,16 @@ internal class BofViewModel(
         // 按中位数降序排列
         val sortedByMedian = filteredData.sortedByDescending { it.median }
         
-        // 重新分配排名并计算中位数排名变化
+        // 重新分配排名并计算中位数排名变化（同分同排名）
+        var currentRank = 1
+        var previousMedian: Double? = null
         return sortedByMedian.mapIndexed { index, ranking -> 
-            val newRank = index + 1
+            // 如果分数与前一个不同，更新排名为当前位置+1
+            if (previousMedian != null && ranking.median != previousMedian) {
+                currentRank = index + 1
+            }
+            previousMedian = ranking.median
+            val newRank = currentRank
             
             // 计算中位数排名变化
             val compareRankInMedian = if (ranking.compareMedian != null && ranking.compareMedian > 0) {
@@ -466,9 +480,17 @@ internal class BofViewModel(
             }
         }
         
-        // 重新分配排名并计算排名变化
+        // 重新分配排名并计算排名变化（同分同排名）
+        var currentRank = 1
+        var previousScore: Double? = null
         return currentCompositeData.mapIndexed { index, ranking ->
-            val currentRank = index + 1
+            // 如果综合分数与前一个不同，更新排名为当前位置+1
+            val currentScore = ranking.compositeScore ?: ranking.score.toDouble()
+            if (previousScore != null && currentScore != previousScore) {
+                currentRank = index + 1
+            }
+            previousScore = currentScore
+            
             val compareRank = compareCompositeMap[ranking.workId]
             val compareCompositeScore = compareCompositeScoreMap[ranking.workId]
             val rankChange = if (compareRank != null) {
@@ -532,9 +554,16 @@ internal class BofViewModel(
             abs(it.score) > 0 // 只显示有变化的作品
         }.sortedByDescending { it.score } // 按分数差值降序排列（正数表示增长）
         
-        // 重新分配排名
+        // 重新分配排名（同分同排名）
+        var currentRank = 1
+        var previousScore: Int? = null
         return diffData.mapIndexed { index, ranking ->
-            ranking.copy(rank = index + 1)
+            // 如果分数差值与前一个不同，更新排名为当前位置+1
+            if (previousScore != null && ranking.score != previousScore) {
+                currentRank = index + 1
+            }
+            previousScore = ranking.score
+            ranking.copy(rank = currentRank)
         }
     }
 

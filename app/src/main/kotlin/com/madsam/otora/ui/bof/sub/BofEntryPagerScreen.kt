@@ -13,11 +13,16 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,15 +30,19 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.madsam.otora.BofScreenState
+import com.madsam.otora.core.icon.Fa
+import com.madsam.otora.core.icon.fa.Camera
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.bof.BofViewModel
+import com.madsam.otora.ui.bof.components.BofEntryCaptureDialog
 import com.madsam.otora.ui.common.ColumnWidthType
 import com.madsam.otora.ui.common.RankingTable
 import com.madsam.otora.ui.common.RankingTableConfig
@@ -43,12 +52,16 @@ import kotlinx.coroutines.flow.update
 internal fun BofEntryPagerScreen(
     vm: BofViewModel,
     bofScreenState: BofScreenState,
+    snackbarHostState: SnackbarHostState,
     narrowMode: Int = 0,
     searchText: String = "",
     scrollThreshold: Float = 50f,
-    setIsTabRowVisible: (Boolean) -> Unit = {}
+    setIsTabRowVisible: (Boolean) -> Unit = {},
+    showCaptureDialog: Boolean = false,
+    onCaptureDialogDismiss: () -> Unit = {}
 ) {
     val selectedSubTabIndex by bofScreenState.selectedSubTab.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
@@ -127,7 +140,11 @@ internal fun BofEntryPagerScreen(
                 errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
                 narrowMode = narrowMode,
                 vm = vm,
-                dataConverter = { it.toRankingItem() }
+                context = context,
+                snackbarHostState = snackbarHostState,
+                dataConverter = { it.toRankingItem() },
+                showCaptureDialog = showCaptureDialog,
+                onCaptureDialogDismiss = onCaptureDialogDismiss
             )
             
             1 -> {
@@ -154,7 +171,11 @@ internal fun BofEntryPagerScreen(
                     errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
                     narrowMode = narrowMode,
                     vm = vm,
-                    dataConverter = { it.toAverageRankingItem() }
+                    context = context,
+                    snackbarHostState = snackbarHostState,
+                    dataConverter = { it.toAverageRankingItem() },
+                    showCaptureDialog = showCaptureDialog,
+                    onCaptureDialogDismiss = onCaptureDialogDismiss
                 )
             }
             
@@ -182,7 +203,11 @@ internal fun BofEntryPagerScreen(
                     errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
                     narrowMode = narrowMode,
                     vm = vm,
-                    dataConverter = { it.toMedianRankingItem() }
+                    context = context,
+                    snackbarHostState = snackbarHostState,
+                    dataConverter = { it.toMedianRankingItem() },
+                    showCaptureDialog = showCaptureDialog,
+                    onCaptureDialogDismiss = onCaptureDialogDismiss
                 )
             }
             
@@ -210,7 +235,11 @@ internal fun BofEntryPagerScreen(
                     errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
                     narrowMode = narrowMode,
                     vm = vm,
-                    dataConverter = { it.toDifferenceRankingItem() }
+                    context = context,
+                    snackbarHostState = snackbarHostState,
+                    dataConverter = { it.toDifferenceRankingItem() },
+                    showCaptureDialog = showCaptureDialog,
+                    onCaptureDialogDismiss = onCaptureDialogDismiss
                 )
             }
             
@@ -240,7 +269,11 @@ internal fun BofEntryPagerScreen(
                     errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
                     narrowMode = narrowMode,
                     vm = vm,
-                    dataConverter = { it.toCompositeRankingItem() }
+                    context = context,
+                    snackbarHostState = snackbarHostState,
+                    dataConverter = { it.toCompositeRankingItem() },
+                    showCaptureDialog = showCaptureDialog,
+                    onCaptureDialogDismiss = onCaptureDialogDismiss
                 )
             }
         }
@@ -266,8 +299,18 @@ private fun <T> EntryPageContent(
     errorMessage: String,
     narrowMode: Int,
     vm: BofViewModel,
-    dataConverter: (T) -> com.madsam.otora.ui.common.RankingItem
+    context: android.content.Context,
+    snackbarHostState: SnackbarHostState,
+    dataConverter: (T) -> com.madsam.otora.ui.common.RankingItem,
+    showCaptureDialog: Boolean = false,
+    onCaptureDialogDismiss: () -> Unit = {}
 ) {
+    val showDialogState = remember { mutableStateOf(false) }
+    
+    LaunchedEffect(showCaptureDialog) {
+        showDialogState.value = showCaptureDialog
+    }
+    
     Box(modifier = Modifier.fillMaxSize()) {
         when {
             isLoading -> {
@@ -315,23 +358,35 @@ private fun <T> EntryPageContent(
             }
             
             else -> {
+                val rankingItems = ranking.map(dataConverter)
+                val tableConfig = RankingTableConfig(
+                    title = title,
+                    subtitle = "$subtitle (${ranking.size} 作品) | ${vm.getSelectedTimeString()}",
+                    scoreColumnName = scoreColumnName,
+                    extraColumnName = extraColumnName,
+                    avgColumnName = avgColumnName,
+                    medianColumnName = medianColumnName,
+                    scoreWidthType = scoreWidthType,
+                    extraWidthType = extraWidthType,
+                    avgWidthType = avgWidthType,
+                    medianWidthType = medianWidthType,
+                    enableNarrowToggle = enableNarrowToggle,
+                    maxItems = maxItems
+                )
+                
                 RankingTable(
-                    items = ranking.map(dataConverter),
-                    config = RankingTableConfig(
-                        title = title,
-                        subtitle = "$subtitle (${ranking.size} 作品) | ${vm.getSelectedTimeString()}",
-                        scoreColumnName = scoreColumnName,
-                        extraColumnName = extraColumnName,
-                        avgColumnName = avgColumnName,
-                        medianColumnName = medianColumnName,
-                        scoreWidthType = scoreWidthType,
-                        extraWidthType = extraWidthType,
-                        avgWidthType = avgWidthType,
-                        medianWidthType = medianWidthType,
-                        enableNarrowToggle = enableNarrowToggle,
-                        maxItems = maxItems
-                    ),
+                    items = rankingItems,
+                    config = tableConfig,
                     narrowMode = narrowMode
+                )
+                
+                // 截图对话框
+                BofEntryCaptureDialog(
+                    showDialog = showDialogState,
+                    context = context,
+                    snackbarHostState = snackbarHostState,
+                    items = rankingItems,
+                    config = tableConfig
                 )
             }
         }

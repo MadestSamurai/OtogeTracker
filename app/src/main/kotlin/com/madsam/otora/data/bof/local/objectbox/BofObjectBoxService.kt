@@ -243,6 +243,28 @@ internal class BofObjectBoxService {
                 Log.d(TAG, "Starting to save team API response for path: $path")
                 val startTime = System.currentTimeMillis()
                 
+                // 先删除该 path 的所有旧历史数据
+                Log.d(TAG, "Removing old team history data for path: $path")
+                val oldScoreCount = teamScoreHistoryBox.query(
+                    BofTeamScoreHistoryEntity_.path.equal(path)
+                ).build().remove()
+                Log.d(TAG, "Removed $oldScoreCount old team score history records")
+                
+                val oldTitleCount = teamTitleHistoryBox.query(
+                    BofTeamTitleHistoryEntity_.path.equal(path)
+                ).build().remove()
+                Log.d(TAG, "Removed $oldTitleCount old team title history records")
+                
+                val oldArtistCount = teamArtistHistoryBox.query(
+                    BofTeamArtistHistoryEntity_.path.equal(path)
+                ).build().remove()
+                Log.d(TAG, "Removed $oldArtistCount old team artist history records")
+                
+                val oldFinalStrikerCount = teamFinalStrikerHistoryBox.query(
+                    BofTeamFinalStrikerHistoryEntity_.path.equal(path)
+                ).build().remove()
+                Log.d(TAG, "Removed $oldFinalStrikerCount old team final striker history records")
+                
                 // 准备数据列表
                 val teamEntities = mutableListOf<BofTeamEntity>()
                 val scoreHistoryEntities = mutableListOf<BofTeamScoreHistoryEntity>()
@@ -319,7 +341,17 @@ internal class BofObjectBoxService {
                                                 impression = values.impression,
                                                 total = values.total,
                                                 median = parseDoubleValue(values.median),
-                                                average = 0.0 // Team 数据没有 average 字段
+                                                average = 0.0, // Team 数据没有 average 字段
+                                                // 保存各作品分数
+                                                total1 = parseDoubleValue(values.total1),
+                                                total2 = parseDoubleValue(values.total2),
+                                                total3 = parseDoubleValue(values.total3),
+                                                total4 = parseDoubleValue(values.total4),
+                                                // 保存各作品中位数
+                                                median1 = parseDoubleValue(values.median1),
+                                                median2 = parseDoubleValue(values.median2),
+                                                median3 = parseDoubleValue(values.median3),
+                                                median4 = parseDoubleValue(values.median4)
                                             )
                                             scoreHistoryEntities.add(scoreEntity)
                                         }

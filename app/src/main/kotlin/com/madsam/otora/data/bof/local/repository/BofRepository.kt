@@ -74,9 +74,19 @@ internal class BofRepository(
                     )
                 } else null
             }.sortedByDescending { it.score }
-                .mapIndexed { index, work -> work.copy(rank = index + 1) }
+            
+            // 分配排名（同分同排名）
+            var currentRank = 1
+            var previousScore: Int? = null
+            val rankedCompareResults = compareResults.mapIndexed { index, work ->
+                if (previousScore != null && work.score != previousScore) {
+                    currentRank = index + 1
+                }
+                previousScore = work.score
+                work.copy(rank = currentRank)
+            }
 
-            compareResults.forEach { work ->
+            rankedCompareResults.forEach { work ->
                 compareRankingMap[work.workId] = work
             }
         }
@@ -109,18 +119,26 @@ internal class BofRepository(
         val currentEnd = System.currentTimeMillis()
         Log.d(TAG, "Current data processed in ${currentEnd - currentStart}ms, got ${allCurrentResults.size} works")
 
-        // 排序并分配排名，计算排名变化
-        val finalResults = allCurrentResults.sortedByDescending { it.score }
-            .mapIndexed { index, work ->
-                val rankChange = if (work.compareRank != null) {
-                    work.compareRank - (index + 1) // 对比排名 - 当前排名，正数表示排名上升
-                } else null
-
-                work.copy(
-                    rank = index + 1,
-                    rankChange = rankChange
-                )
+        // 排序并分配排名，计算排名变化（同分同排名）
+        val sortedResults = allCurrentResults.sortedByDescending { it.score }
+        var currentRank = 1
+        var previousScore: Int? = null
+        val finalResults = sortedResults.mapIndexed { index, work ->
+            // 如果分数与前一个不同，更新排名为当前位置+1
+            if (previousScore != null && work.score != previousScore) {
+                currentRank = index + 1
             }
+            previousScore = work.score
+            
+            val rankChange = if (work.compareRank != null) {
+                work.compareRank - currentRank // 对比排名 - 当前排名，正数表示排名上升
+            } else null
+
+            work.copy(
+                rank = currentRank,
+                rankChange = rankChange
+            )
+        }
 
         val endTime = System.currentTimeMillis()
         Log.d(TAG, "getRankingAtTime completed in ${endTime - startTime}ms, total ${finalResults.size} works")
@@ -135,6 +153,23 @@ internal class BofRepository(
     fun saveBofApiResponse(apiResponse: BofWorkResponse, path: String) {
         val startTime = System.currentTimeMillis()
         Log.d(TAG, "Starting to save BOF API response for path: $path")
+
+        // 先删除该 path 的所有旧历史数据
+        Log.d(TAG, "Removing old work history data for path: $path")
+        val oldScoreCount = scoreHistoryBox.query(
+            BofWorkScoreHistoryEntity_.path.equal(path)
+        ).build().remove()
+        Log.d(TAG, "Removed $oldScoreCount old work score history records")
+        
+        val oldTitleCount = titleHistoryBox.query(
+            BofWorkTitleHistoryEntity_.path.equal(path)
+        ).build().remove()
+        Log.d(TAG, "Removed $oldTitleCount old work title history records")
+        
+        val oldArtistCount = artistHistoryBox.query(
+            BofWorkArtistHistoryEntity_.path.equal(path)
+        ).build().remove()
+        Log.d(TAG, "Removed $oldArtistCount old work artist history records")
 
         val works = apiResponse.getWorksAsList()
 
@@ -492,9 +527,19 @@ internal class BofRepository(
                     )
                 } else null
             }.sortedByDescending { it.totalScore }
-                .mapIndexed { index, item -> item.copy(rank = index + 1) }
+            
+            // 分配排名（同分同排名）
+            var currentRank = 1
+            var previousScore: Double? = null
+            val rankedCompareResults = compareResults.mapIndexed { index, item ->
+                if (previousScore != null && item.totalScore != previousScore) {
+                    currentRank = index + 1
+                }
+                previousScore = item.totalScore
+                item.copy(rank = currentRank)
+            }
 
-            compareResults.forEach { item ->
+            rankedCompareResults.forEach { item ->
                 compareRankingMap[item.teamName] = item
             }
             
@@ -547,19 +592,26 @@ internal class BofRepository(
         val currentEnd = System.currentTimeMillis()
         Log.d(TAG, "Current team data processed in ${currentEnd - currentStart}ms, got ${currentResults.size} teams")
 
-        // 按总分排序并分配排名和排名变化
-        val finalResults = currentResults.sortedByDescending { it.totalScore }
-            .mapIndexed { index, item ->
-                val currentRank = index + 1
-                val rankChange = if (item.compareRank != null) {
-                    item.compareRank - currentRank // 对比排名 - 当前排名，正数表示排名上升
-                } else null
-
-                item.copy(
-                    rank = currentRank,
-                    rankChange = rankChange
-                )
+        // 按总分排序并分配排名和排名变化（同分同排名）
+        val sortedResults = currentResults.sortedByDescending { it.totalScore }
+        var currentRank = 1
+        var previousScore: Double? = null
+        val finalResults = sortedResults.mapIndexed { index, item ->
+            // 如果总分与前一个不同，更新排名为当前位置+1
+            if (previousScore != null && item.totalScore != previousScore) {
+                currentRank = index + 1
             }
+            previousScore = item.totalScore
+            
+            val rankChange = if (item.compareRank != null) {
+                item.compareRank - currentRank // 对比排名 - 当前排名，正数表示排名上升
+            } else null
+
+            item.copy(
+                rank = currentRank,
+                rankChange = rankChange
+            )
+        }
 
         val endTime = System.currentTimeMillis()
         Log.d(TAG, "getTeamRankingAtTimeStreamed completed in ${endTime - startTime}ms, total ${finalResults.size} teams")
@@ -590,10 +642,10 @@ internal class BofRepository(
                     total = scoreHistory.total,
                     impression = scoreHistory.impression,
                     median = scoreHistory.median,
-                    score1 = 0.0, // Team score history 不分别存储，需要从 values 解析
-                    score2 = 0.0,
-                    score3 = 0.0,
-                    score4 = 0.0
+                    score1 = scoreHistory.total1,
+                    score2 = scoreHistory.total2,
+                    score3 = scoreHistory.total3,
+                    score4 = scoreHistory.total4
                 )
             } else null
         } catch (e: Exception) {

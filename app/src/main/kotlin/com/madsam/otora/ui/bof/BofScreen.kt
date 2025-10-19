@@ -76,6 +76,7 @@ import com.madsam.otora.BofScreenState
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.icon.fa.Bars
+import com.madsam.otora.core.icon.fa.Camera
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
@@ -173,6 +174,10 @@ fun BofScreen(
     var commentInfoMode by remember { mutableIntStateOf(0) }
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
+    
+    // 截图对话框状态
+    var showEntryCaptureDialog by remember { mutableStateOf(false) }
+    var showTeamCaptureDialog by remember { mutableStateOf(false) }
 
     fun selectTime() {
         showDateTimeRangePicker = true
@@ -484,11 +489,34 @@ fun BofScreen(
                                     )
                                 }
                             } else {
+                                // Entry 页面显示截图按钮
+                                if (selectedTabIndex == 0) {
+                                    IconButton(onClick = { showEntryCaptureDialog = true }) {
+                                        Icon(
+                                            imageVector = Fa.Camera,
+                                            contentDescription = "Screenshot",
+                                            tint = Beige400,
+                                            modifier = Modifier.height(20.dp)
+                                        )
+                                    }
+                                }
+                                // Team 页面显示截图按钮
+                                if (selectedTabIndex == 1) {
+                                    IconButton(onClick = { showTeamCaptureDialog = true }) {
+                                        Icon(
+                                            imageVector = Fa.Camera,
+                                            contentDescription = "Screenshot",
+                                            tint = Beige400,
+                                            modifier = Modifier.height(20.dp)
+                                        )
+                                    }
+                                }
                                 IconButton(onClick = { selectTime() }) {
                                     Icon(
                                         painter = rememberVectorPainter(image = Filled.Calendar),
                                         contentDescription = "Date&Time",
-                                        tint = Beige400
+                                        tint = Beige400,
+                                        modifier = Modifier.height(20.dp)
                                     )
                                 }
                             }
@@ -550,18 +578,24 @@ fun BofScreen(
                                     "Entry" -> BofEntryPagerScreen(
                                         vm = vm,
                                         bofScreenState = bofScreenState,
+                                        snackbarHostState = snackbarHostState,
                                         narrowMode = entryInfoMode,
                                         searchText = searchText.value,
                                         scrollThreshold = scrollThreshold,
-                                        setIsTabRowVisible = { isTabRowVisible = it }
+                                        setIsTabRowVisible = { isTabRowVisible = it },
+                                        showCaptureDialog = showEntryCaptureDialog,
+                                        onCaptureDialogDismiss = { showEntryCaptureDialog = false }
                                     )
 
                                     "Team" -> BofTeamRankingScreen(
                                         bofScreenState = bofScreenState,
                                         vm = vm,
+                                        snackbarHostState = snackbarHostState,
                                         teamInfoMode = teamInfoMode,
                                         scrollThreshold = scrollThreshold,
-                                        setIsTabRowVisible = { isTabRowVisible = it }
+                                        setIsTabRowVisible = { isTabRowVisible = it },
+                                        showCaptureDialog = showTeamCaptureDialog,
+                                        onCaptureDialogDismiss = { showTeamCaptureDialog = false }
                                     )
 
                                     "Comment" -> {

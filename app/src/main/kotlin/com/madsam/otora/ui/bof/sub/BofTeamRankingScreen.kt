@@ -27,8 +27,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,7 +46,9 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -55,6 +60,7 @@ import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-down`
 import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.`Arrow-up`
+import com.madsam.otora.core.icon.fa.Camera
 import com.madsam.otora.core.icon.fa.Star
 import com.madsam.otora.core.theme.BG_DARK_GRAY
 import com.madsam.otora.core.theme.RANKING_BLUE
@@ -66,20 +72,25 @@ import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.bof.TeamRankingItem
+import com.madsam.otora.ui.bof.components.BofTeamCaptureDialog
 
 @Composable
 internal fun BofTeamRankingScreen(
     bofScreenState: BofScreenState,
     vm: BofViewModel = viewModel(),
+    snackbarHostState: SnackbarHostState,
     teamInfoMode: Int = 0,
     scrollThreshold: Float = 50f,
-    setIsTabRowVisible: (Boolean) -> Unit = {}
+    setIsTabRowVisible: (Boolean) -> Unit = {},
+    showCaptureDialog: Boolean = false,
+    onCaptureDialogDismiss: () -> Unit = {}
 ) {
     val teamRankingData by vm.teamRankingData.collectAsState()
     val isLoading by vm.isTeamRankingLoading.collectAsState()
     val errorMessage by vm.teamRankingError.collectAsState()
     val selectedRange by bofScreenState.selectedRange.collectAsState()
     
+    val context = LocalContext.current
     val listState = rememberLazyListState()
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
@@ -181,6 +192,25 @@ internal fun BofTeamRankingScreen(
                     setIsTabRowVisible = setIsTabRowVisible,
                     vm = vm
                 )
+                
+                // 截图对话框
+                val showDialogState = remember(showCaptureDialog) { mutableStateOf(showCaptureDialog) }
+                LaunchedEffect(showCaptureDialog) {
+                    showDialogState.value = showCaptureDialog
+                }
+                LaunchedEffect(showDialogState.value) {
+                    if (!showDialogState.value && showCaptureDialog) {
+                        onCaptureDialogDismiss()
+                    }
+                }
+                
+                BofTeamCaptureDialog(
+                    showDialog = showDialogState,
+                    context = context,
+                    snackbarHostState = snackbarHostState,
+                    teams = teamRankingData,
+                    subtitle = "团队总分排行榜 (${teamRankingData.size} 团队) | ${vm.getSelectedTimeString()}"
+                )
             }
         }
     }
@@ -195,11 +225,18 @@ private fun TeamRankingTable(
     setIsTabRowVisible: (Boolean) -> Unit = {},
     vm: BofViewModel
 ) {
+    // 屏幕宽度检测（参考RankingTable）
+    val density = LocalDensity.current
+    val windowInfo = LocalWindowInfo.current
+    val screenWidthDp = with(density) {
+        windowInfo.containerSize.width.toDp()
+    }
+    
+    val isNarrowScreen = screenWidthDp.value < 600
+    
     // 宽度测量（类似RankingTable）
     var extraWidth by remember { mutableStateOf(50.dp) } // 评价数列宽度
     var medianWidth by remember { mutableStateOf(60.dp) } // 中位数列宽度
-    
-    val density = LocalDensity.current
     
     // 计算分数条宽度（对应中位数+评价数的宽度）
     val scoreBarWidth = medianWidth + extraWidth
@@ -266,7 +303,12 @@ private fun TeamRankingTable(
         }
 
         // 表格头部
-        TeamTableHeader(teamInfoMode = teamInfoMode, extraWidth = extraWidth, medianWidth = medianWidth)
+        TeamTableHeader(
+            teamInfoMode = teamInfoMode,
+            isNarrowScreen = isNarrowScreen,
+            extraWidth = extraWidth,
+            medianWidth = medianWidth
+        )
 
         // 数据列表
         LazyColumn(
@@ -296,6 +338,7 @@ private fun TeamRankingTable(
                     index = index,
                     maxScore = maxScore,
                     teamInfoMode = teamInfoMode,
+                    isNarrowScreen = isNarrowScreen,
                     extraWidth = extraWidth,
                     medianWidth = medianWidth,
                     scoreBarWidth = scoreBarWidth
@@ -306,7 +349,12 @@ private fun TeamRankingTable(
 }
 
 @Composable
-private fun TeamTableHeader(teamInfoMode: Int, extraWidth: Dp, medianWidth: Dp) {
+internal fun TeamTableHeader(
+    teamInfoMode: Int,
+    isNarrowScreen: Boolean,
+    extraWidth: Dp,
+    medianWidth: Dp
+) {
     Row(
         modifier = Modifier
             .background(BG_DARK_GRAY)
@@ -332,47 +380,78 @@ private fun TeamTableHeader(teamInfoMode: Int, extraWidth: Dp, medianWidth: Dp) 
             modifier = Modifier.weight(0.6f) // 照搬RankingTable的作品信息列权重
         )
         
-        when (teamInfoMode) {
-            0 -> {
-                // 分数条模式
-                Text(
-                    text = "总分",
-                    fontFamily = sarasaBold,
-                    fontSize = 14.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.width(medianWidth + extraWidth) // 与中位数+评价数宽度一致
-                )
+        // 根据屏幕宽度决定显示内容
+        if (isNarrowScreen) {
+            // 窄屏模式：根据teamInfoMode切换显示
+            when (teamInfoMode) {
+                0 -> {
+                    // 只显示分数条
+                    Text(
+                        text = "总分",
+                        fontFamily = sarasaBold,
+                        fontSize = 14.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.width(medianWidth + extraWidth)
+                    )
+                }
+                1 -> {
+                    // 显示中位数和评价数
+                    Text(
+                        text = "中位数",
+                        fontFamily = sarasaBold,
+                        fontSize = 14.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.width(medianWidth)
+                    )
+                    Text(
+                        text = "评价数",
+                        fontFamily = sarasaBold,
+                        fontSize = 14.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.width(extraWidth)
+                    )
+                }
             }
-            1 -> {
-                // 数字显示模式
-                Text(
-                    text = "中位数",
-                    fontFamily = sarasaBold,
-                    fontSize = 14.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.width(medianWidth)
-                )
-                Text(
-                    text = "评价数",
-                    fontFamily = sarasaBold,
-                    fontSize = 14.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.width(extraWidth)
-                )
-            }
+        } else {
+            // 宽屏模式：始终显示所有列
+            Text(
+                text = "总分",
+                fontFamily = sarasaBold,
+                fontSize = 14.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(0.4f)
+            )
+            Text(
+                text = "中位数",
+                fontFamily = sarasaBold,
+                fontSize = 14.sp,
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier.width(medianWidth)
+            )
+            Text(
+                text = "评价数",
+                fontFamily = sarasaBold,
+                fontSize = 14.sp,
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier.width(extraWidth)
+            )
         }
     }
 }
 
 @Composable
-private fun TeamRankingRow(
+internal fun TeamRankingRow(
     team: TeamRankingItem,
     index: Int,
     maxScore: Double,
     teamInfoMode: Int,
+    isNarrowScreen: Boolean,
     extraWidth: Dp,
     medianWidth: Dp,
     scoreBarWidth: Dp
@@ -472,121 +551,238 @@ private fun TeamRankingRow(
                     .padding(horizontal = 8.dp)
             )
 
-            // 根据teamInfoMode显示不同的信息
-            when (teamInfoMode) {
-                0 -> {
-                    // 分数条模式（完全照搬RankingTable的分数条设计）
-                    Column(
-                        modifier = Modifier
-                            .width(scoreBarWidth)
-                            .padding(top = 1.dp)
-                    ) {
-                        // 主分数条
-                        Box(
+            // 根据屏幕宽度决定显示内容
+            if (isNarrowScreen) {
+                // 窄屏模式：根据teamInfoMode切换显示
+                when (teamInfoMode) {
+                    0 -> {
+                        // 只显示分数条
+                        Column(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(20.dp)
-                                .padding(horizontal = 2.dp)
+                                .width(scoreBarWidth)
+                                .padding(top = 1.dp)
                         ) {
-                            Box {
-                                Spacer(
-                                    modifier = Modifier
-                                        .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
-                                        .height(20.dp)
-                                        .background(
-                                            color = RANKING_RED,
-                                            shape = RoundedCornerShape(
-                                                topEnd = 10.dp,
-                                                bottomEnd = 10.dp
-                                            )
-                                        )
-                                )
-                                Text(
-                                    text = "%.2f".format(team.totalScore),
-                                    fontFamily = sarasaBold,
-                                    fontSize = 14.sp,
-                                    color = Color.White,
-                                    overflow = TextOverflow.Visible,
-                                    maxLines = 1,
-                                    modifier = Modifier
-                                        .align(Alignment.CenterEnd)
-                                        .padding(end = 4.dp)
-                                )
-                            }
-                        }
-                        
-                        // 对比分数条（如果有对比数据）
-                        team.compareTotalScore?.let { compareScore ->
-                            val compareRatio = if (maxScore > 0) compareScore / maxScore else 0.0
+                            // 主分数条
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(13.dp)
+                                    .height(20.dp)
                                     .padding(horizontal = 2.dp)
                             ) {
                                 Box {
                                     Spacer(
                                         modifier = Modifier
-                                            .fillMaxWidth(compareRatio.toFloat().coerceAtMost(1f))
-                                            .height(13.dp)
+                                            .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
+                                            .height(20.dp)
                                             .background(
-                                                color = RANKING_BLUE,
+                                                color = RANKING_RED,
                                                 shape = RoundedCornerShape(
-                                                    topEnd = 7.dp,
-                                                    bottomEnd = 7.dp
+                                                    topEnd = 10.dp,
+                                                    bottomEnd = 10.dp
                                                 )
                                             )
                                     )
                                     Text(
-                                        text = "%.1f".format(compareScore),
-                                        fontFamily = sarasaRegular,
-                                        fontSize = 11.sp,
-                                        color = Color.White.copy(alpha = 0.8f),
+                                        text = "%.2f".format(team.totalScore),
+                                        fontFamily = sarasaBold,
+                                        fontSize = 14.sp,
+                                        color = Color.White,
                                         overflow = TextOverflow.Visible,
                                         maxLines = 1,
                                         modifier = Modifier
                                             .align(Alignment.CenterEnd)
-                                            .padding(end = 2.dp)
+                                            .padding(end = 4.dp)
                                     )
+                                }
+                            }
+                            
+                            // 对比分数条（如果有对比数据）
+                            team.compareTotalScore?.let { compareScore ->
+                                val compareRatio = if (maxScore > 0) compareScore / maxScore else 0.0
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(13.dp)
+                                        .padding(horizontal = 2.dp)
+                                ) {
+                                    Box {
+                                        Spacer(
+                                            modifier = Modifier
+                                                .fillMaxWidth(compareRatio.toFloat().coerceAtMost(1f))
+                                                .height(13.dp)
+                                                .background(
+                                                    color = RANKING_BLUE,
+                                                    shape = RoundedCornerShape(
+                                                        topEnd = 7.dp,
+                                                        bottomEnd = 7.dp
+                                                    )
+                                                )
+                                        )
+                                        Text(
+                                            text = "%.1f".format(compareScore),
+                                            fontFamily = sarasaRegular,
+                                            fontSize = 11.sp,
+                                            color = Color.White.copy(alpha = 0.8f),
+                                            overflow = TextOverflow.Visible,
+                                            maxLines = 1,
+                                            modifier = Modifier
+                                                .align(Alignment.CenterEnd)
+                                                .padding(end = 2.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                1 -> {
-                    // 数字显示模式
-                    Box(
-                        modifier = Modifier
-                            .width(medianWidth)
-                            .fillMaxHeight()
-                            .background(
-                                if (team.medianScore > 0)
-                                    Color(red = (team.medianScore / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
-                                else
-                                    Color.Transparent
+                    1 -> {
+                        // 显示中位数和评价数
+                        Box(
+                            modifier = Modifier
+                                .width(medianWidth)
+                                .fillMaxHeight()
+                                .background(
+                                    if (team.medianScore > 0)
+                                        Color(red = (team.medianScore / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
+                                    else
+                                        Color.Transparent
+                                )
+                                .padding(horizontal = 4.dp),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            Text(
+                                text = "%.2f".format(team.medianScore),
+                                fontFamily = sarasaBold,
+                                fontSize = 16.sp,
+                                color = Color.White,
+                                textAlign = TextAlign.End
                             )
-                            .padding(horizontal = 4.dp),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
+                        }
                         Text(
-                            text = "%.2f".format(team.medianScore),
+                            text = team.getFormattedImpressionCount(),
                             fontFamily = sarasaBold,
                             fontSize = 16.sp,
                             color = Color.White,
-                            textAlign = TextAlign.End
+                            textAlign = TextAlign.End,
+                            modifier = Modifier
+                                .width(extraWidth)
+                                .padding(horizontal = 4.dp)
                         )
                     }
+                }
+            } else {
+                // 宽屏模式：始终显示所有列
+                // 总分条
+                Column(
+                    modifier = Modifier
+                        .weight(0.4f)
+                        .padding(top = 1.dp, start = 2.dp)
+                ) {
+                    // 主分数条
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(20.dp)
+                            .padding(horizontal = 2.dp)
+                    ) {
+                        Box {
+                            Spacer(
+                                modifier = Modifier
+                                    .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
+                                    .height(20.dp)
+                                    .background(
+                                        color = RANKING_RED,
+                                        shape = RoundedCornerShape(
+                                            topEnd = 10.dp,
+                                            bottomEnd = 10.dp
+                                        )
+                                    )
+                            )
+                            Text(
+                                text = "%.2f".format(team.totalScore),
+                                fontFamily = sarasaBold,
+                                fontSize = 14.sp,
+                                color = Color.White,
+                                overflow = TextOverflow.Visible,
+                                maxLines = 1,
+                                modifier = Modifier
+                                    .align(Alignment.CenterEnd)
+                                    .padding(end = 4.dp)
+                            )
+                        }
+                    }
+                    
+                    // 对比分数条（如果有对比数据）
+                    team.compareTotalScore?.let { compareScore ->
+                        val compareRatio = if (maxScore > 0) compareScore / maxScore else 0.0
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(13.dp)
+                                .padding(horizontal = 2.dp)
+                        ) {
+                            Box {
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth(compareRatio.toFloat().coerceAtMost(1f))
+                                        .height(13.dp)
+                                        .background(
+                                            color = RANKING_BLUE,
+                                            shape = RoundedCornerShape(
+                                                topEnd = 7.dp,
+                                                bottomEnd = 7.dp
+                                            )
+                                        )
+                                )
+                                Text(
+                                    text = "%.1f".format(compareScore),
+                                    fontFamily = sarasaRegular,
+                                    fontSize = 11.sp,
+                                    color = Color.White.copy(alpha = 0.8f),
+                                    overflow = TextOverflow.Visible,
+                                    maxLines = 1,
+                                    modifier = Modifier
+                                        .align(Alignment.CenterEnd)
+                                        .padding(end = 2.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                // 中位数列
+                Box(
+                    modifier = Modifier
+                        .width(medianWidth)
+                        .fillMaxHeight()
+                        .background(
+                            if (team.medianScore > 0)
+                                Color(red = (team.medianScore / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
+                            else
+                                Color.Transparent
+                        )
+                        .padding(horizontal = 4.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
                     Text(
-                        text = team.getFormattedImpressionCount(),
+                        text = "%.2f".format(team.medianScore),
                         fontFamily = sarasaBold,
                         fontSize = 16.sp,
                         color = Color.White,
-                        textAlign = TextAlign.End,
-                        modifier = Modifier
-                            .width(extraWidth)
-                            .padding(horizontal = 4.dp)
+                        textAlign = TextAlign.End
                     )
                 }
+                
+                // 评价数列
+                Text(
+                    text = team.getFormattedImpressionCount(),
+                    fontFamily = sarasaBold,
+                    fontSize = 16.sp,
+                    color = Color.White,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                        .width(extraWidth)
+                        .padding(horizontal = 4.dp)
+                )
             }
         }
         

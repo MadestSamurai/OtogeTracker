@@ -59,13 +59,22 @@ fun DateTimeRangePicker(
                 val startMonth = startParts[1].toInt() - 1 // DatePicker month 是 0-based
                 val startDay = startParts[2].toInt()
                 
-                // 解析 current 日期字符串 (格式: "YYYY-MM-DD")
-                val currentParts = selectedRange!!.current.split("-")
-                val currentYear = currentParts[0].toInt()
-                val currentMonth = currentParts[1].toInt() - 1 // DatePicker month 是 0-based
-                val currentDay = currentParts[2].toInt()
+                // 对于正在进行的活动(isStart=true, isEnd=false)，只考虑起点
+                // 对于已结束的活动，使用current作为终点
+                val endDate = if (selectedRange!!.isStart && !selectedRange!!.isEnd) {
+                    // 正在进行中：使用start作为起点，不限制终点（使用当前日期）
+                    val today = java.time.LocalDate.now()
+                    DatePickerDate(today.year, today.monthValue - 1, today.dayOfMonth)
+                } else {
+                    // 已结束或未开始：使用current作为终点
+                    val currentParts = selectedRange!!.current.split("-")
+                    val currentYear = currentParts[0].toInt()
+                    val currentMonth = currentParts[1].toInt() - 1 // DatePicker month 是 0-based
+                    val currentDay = currentParts[2].toInt()
+                    DatePickerDate(currentYear, currentMonth, currentDay)
+                }
                 
-                DatePickerDate(startYear, startMonth, startDay) to DatePickerDate(currentYear, currentMonth, currentDay)
+                DatePickerDate(startYear, startMonth, startDay) to endDate
             } else {
                 // 如果没有选中 Range，使用默认值
                 DatePickerDate(2024, 9, 18) to DatePickerDate(2025, 0, 8)
