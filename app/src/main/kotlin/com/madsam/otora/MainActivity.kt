@@ -53,15 +53,16 @@ import com.madsam.otora.core.theme.OtogeTrackerTheme
 import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.Red900
 import com.madsam.otora.core.utils.ScreenUtil
-import com.madsam.otora.ui.bof.BofScreen
-import com.madsam.otora.ui.record.RecordScreen
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.madsam.otora.ui.bof.BofScreen
+import com.madsam.otora.ui.record.RecordScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun MainActivityScreen(navController: NavHostController) {
@@ -71,8 +72,11 @@ fun MainActivityScreen(navController: NavHostController) {
     val unselectedIcons =
         listOf(Filled.Star, Filled.Star, Filled.Star)
     val snackbarHostState = remember { SnackbarHostState() }
+
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
 
+    val bofScreenState = remember { BofScreenState() } // 记住BOF屏幕状态
+    
     LaunchedEffect(navController) {
         navController.currentBackStackEntryFlow.collect { backStackEntry ->
             selectedItem = when (backStackEntry.destination.route) {
@@ -95,13 +99,10 @@ fun MainActivityScreen(navController: NavHostController) {
                 )
             ) {
                 NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
-                    lateinit var bofNavController: NavHostController
-                    val bofScreenState = BofScreenState()
                     composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
                     composable(Screen.ReportScreen.route) { Screen2() }
                     composable(Screen.BOFScreen.route) {
-                        bofNavController = rememberNavController()
-                        BofScreen(snackbarHostState, bofNavController, bofScreenState)
+                        BofScreen(snackbarHostState, bofScreenState)
                     }
                 }
             }
@@ -168,13 +169,10 @@ fun MainActivityScreen(navController: NavHostController) {
                 .windowInsetsPadding(WindowInsets.navigationBars)
             ) {
                 NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
-                    lateinit var bofNavController: NavHostController
-                    val bofScreenState = BofScreenState()
                     composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
                     composable(Screen.ReportScreen.route) { Screen2() }
                     composable(Screen.BOFScreen.route) {
-                        bofNavController = rememberNavController()
-                        BofScreen(snackbarHostState, bofNavController, bofScreenState)
+                        BofScreen(snackbarHostState, bofScreenState)
                     }
                 }
             }
@@ -302,11 +300,17 @@ fun Screen2() {
 }
 
 class BofScreenState {
+    // 计算当前时间的五分钟粒度
+    private val now = LocalDateTime.now()
+    private val currentMinutes = now.minute / 5 * 5
+    private val roundedNow = now.withMinute(currentMinutes).withSecond(0).withNano(0)
+    private val compareDateTime = roundedNow.minusHours(24)
+    
     var selectedTab = MutableStateFlow(0)
     var selectedSubTab = MutableStateFlow(0)
-    var selectedCurrentDate = MutableStateFlow(LocalDate.now())
-    var selectedCurrentTime = MutableStateFlow("-1")
-    var selectedCompareDate = MutableStateFlow(LocalDate.now().minusDays(1))
-    var selectedCompareTime = MutableStateFlow("-1")
+    var selectedCurrentDate = MutableStateFlow(roundedNow.toLocalDate())
+    var selectedCurrentTime = MutableStateFlow(roundedNow.format(DateTimeFormatter.ofPattern("HH:mm")))
+    var selectedCompareDate = MutableStateFlow(compareDateTime.toLocalDate())
+    var selectedCompareTime = MutableStateFlow(compareDateTime.format(DateTimeFormatter.ofPattern("HH:mm")))
     var selectedRange = MutableStateFlow<BofRangeResponse?>(null)
 }

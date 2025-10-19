@@ -33,7 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Arrow-right`
+import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.Clock
 import com.madsam.otora.core.icon.fa.Wifi
 import com.madsam.otora.core.theme.Beige400
@@ -69,7 +69,7 @@ fun GeneralDataUpdateScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        imageVector = Fa.`Arrow-right`,
+                        imageVector = Fa.`Arrow-left`,
                         contentDescription = "返回",
                         tint = Beige400,
                         modifier = Modifier.size(24.dp)

@@ -13,8 +13,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -36,8 +34,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.madsam.otora.BofScreenState
-import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.Camera
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.utils.ScreenUtil
@@ -73,20 +69,30 @@ internal fun BofEntryPagerScreen(
     
     // 使用snapshotFlow更安全地处理状态同步
     LaunchedEffect(selectedSubTabIndex) {
-        // 只有当Tab状态与Pager状态不同步时才滚动
-        if (pagerState.currentPage != selectedSubTabIndex && !pagerState.isScrollInProgress) {
+        // 当Tab被点击时，滚动Pager到对应页面
+        if (pagerState.currentPage != selectedSubTabIndex) {
             pagerState.animateScrollToPage(selectedSubTabIndex)
         }
     }
     
     LaunchedEffect(pagerState) {
-        // 使用snapshotFlow监听Pager状态变化，避免在动画过程中频繁更新
-        snapshotFlow { pagerState.currentPage }
-            .collect { currentPage ->
-                if (selectedSubTabIndex != currentPage && !pagerState.isScrollInProgress) {
-                    bofScreenState.selectedSubTab.update { currentPage }
-                }
+        // 使用snapshotFlow监听Pager状态变化
+        snapshotFlow { pagerState.currentPage }.collect { currentPage ->
+            // 只在Pager滚动结束后更新Tab状态，避免Tab点击时的动画被中断
+            if (selectedSubTabIndex != currentPage && !pagerState.isScrollInProgress) {
+                bofScreenState.selectedSubTab.update { currentPage }
             }
+        }
+    }
+    
+    // 监听settled状态，确保手势滑动后Tab能及时更新
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.isScrollInProgress }.collect { isScrolling ->
+            // 滚动结束时，确保Tab状态与Pager同步
+            if (!isScrolling && pagerState.currentPage != selectedSubTabIndex) {
+                bofScreenState.selectedSubTab.update { pagerState.currentPage }
+            }
+        }
     }
     
     HorizontalPager(
@@ -121,6 +127,9 @@ internal fun BofEntryPagerScreen(
                 }
             })
     ) { page ->
+        // 只有当前页面才响应截图对话框
+        val shouldShowCaptureDialog = showCaptureDialog && page == pagerState.currentPage
+        
         when (page) {
             0 -> EntryPageContent(
                 title = "总分排行榜",
@@ -134,7 +143,7 @@ internal fun BofEntryPagerScreen(
                 avgWidthType = ColumnWidthType.TWO_DECIMAL,
                 medianWidthType = ColumnWidthType.ONE_DECIMAL,
                 enableNarrowToggle = true,
-                maxItems = 500,
+                maxItems = 600,
                 ranking = vm.totalRankingData.collectAsStateWithLifecycle().value,
                 isLoading = vm.isLoading.collectAsStateWithLifecycle().value,
                 errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
@@ -143,7 +152,7 @@ internal fun BofEntryPagerScreen(
                 context = context,
                 snackbarHostState = snackbarHostState,
                 dataConverter = { it.toRankingItem() },
-                showCaptureDialog = showCaptureDialog,
+                showCaptureDialog = shouldShowCaptureDialog,
                 onCaptureDialogDismiss = onCaptureDialogDismiss
             )
             
@@ -165,7 +174,7 @@ internal fun BofEntryPagerScreen(
                     avgWidthType = ColumnWidthType.TWO_DECIMAL,
                     medianWidthType = ColumnWidthType.ONE_DECIMAL,
                     enableNarrowToggle = false,
-                    maxItems = 500,
+                    maxItems = 600,
                     ranking = vm.avgRankingData.collectAsStateWithLifecycle().value,
                     isLoading = vm.isLoading.collectAsStateWithLifecycle().value,
                     errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
@@ -174,7 +183,7 @@ internal fun BofEntryPagerScreen(
                     context = context,
                     snackbarHostState = snackbarHostState,
                     dataConverter = { it.toAverageRankingItem() },
-                    showCaptureDialog = showCaptureDialog,
+                    showCaptureDialog = shouldShowCaptureDialog,
                     onCaptureDialogDismiss = onCaptureDialogDismiss
                 )
             }
@@ -197,7 +206,7 @@ internal fun BofEntryPagerScreen(
                     avgWidthType = ColumnWidthType.TWO_DECIMAL,
                     medianWidthType = ColumnWidthType.ONE_DECIMAL,
                     enableNarrowToggle = false,
-                    maxItems = 500,
+                    maxItems = 600,
                     ranking = vm.medianRankingData.collectAsStateWithLifecycle().value,
                     isLoading = vm.isLoading.collectAsStateWithLifecycle().value,
                     errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
@@ -206,7 +215,7 @@ internal fun BofEntryPagerScreen(
                     context = context,
                     snackbarHostState = snackbarHostState,
                     dataConverter = { it.toMedianRankingItem() },
-                    showCaptureDialog = showCaptureDialog,
+                    showCaptureDialog = shouldShowCaptureDialog,
                     onCaptureDialogDismiss = onCaptureDialogDismiss
                 )
             }
@@ -229,7 +238,7 @@ internal fun BofEntryPagerScreen(
                     avgWidthType = ColumnWidthType.TWO_DECIMAL,
                     medianWidthType = ColumnWidthType.ONE_DECIMAL,
                     enableNarrowToggle = false,
-                    maxItems = 500,
+                    maxItems = 600,
                     ranking = vm.diffRankingData.collectAsStateWithLifecycle().value,
                     isLoading = vm.isLoading.collectAsStateWithLifecycle().value,
                     errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
@@ -238,7 +247,7 @@ internal fun BofEntryPagerScreen(
                     context = context,
                     snackbarHostState = snackbarHostState,
                     dataConverter = { it.toDifferenceRankingItem() },
-                    showCaptureDialog = showCaptureDialog,
+                    showCaptureDialog = shouldShowCaptureDialog,
                     onCaptureDialogDismiss = onCaptureDialogDismiss
                 )
             }
@@ -263,7 +272,7 @@ internal fun BofEntryPagerScreen(
                     avgWidthType = ColumnWidthType.TWO_DECIMAL,
                     medianWidthType = ColumnWidthType.ONE_DECIMAL,
                     enableNarrowToggle = false,
-                    maxItems = 500,
+                    maxItems = 600,
                     ranking = vm.compositeRankingData.collectAsStateWithLifecycle().value,
                     isLoading = vm.isLoading.collectAsStateWithLifecycle().value,
                     errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
@@ -272,7 +281,7 @@ internal fun BofEntryPagerScreen(
                     context = context,
                     snackbarHostState = snackbarHostState,
                     dataConverter = { it.toCompositeRankingItem() },
-                    showCaptureDialog = showCaptureDialog,
+                    showCaptureDialog = shouldShowCaptureDialog,
                     onCaptureDialogDismiss = onCaptureDialogDismiss
                 )
             }
@@ -307,8 +316,18 @@ private fun <T> EntryPageContent(
 ) {
     val showDialogState = remember { mutableStateOf(false) }
     
+    // 只有当 showCaptureDialog 从 false 变为 true 时才打开对话框
     LaunchedEffect(showCaptureDialog) {
-        showDialogState.value = showCaptureDialog
+        if (showCaptureDialog && !showDialogState.value) {
+            showDialogState.value = true
+        }
+    }
+    
+    // 监听对话框关闭，通知父组件
+    LaunchedEffect(showDialogState.value) {
+        if (!showDialogState.value && showCaptureDialog) {
+            onCaptureDialogDismiss()
+        }
     }
     
     Box(modifier = Modifier.fillMaxSize()) {

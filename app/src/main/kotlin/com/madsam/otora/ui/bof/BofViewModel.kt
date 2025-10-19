@@ -144,25 +144,6 @@ internal class BofViewModel(
         }
     }
 
-    private suspend fun <T> fetchData(
-        fetchLatest: suspend () -> List<T>,
-        fetchByTime: suspend (Long, Long) -> List<T>
-    ): List<T> {
-        return if (bofScreenState.selectedCurrentTime.value == "-1") {
-            fetchLatest()
-        } else {
-            val currentTime = CommonUtils.ymdToMillis(
-                bofScreenState.selectedCurrentDate.value.toString(),
-                CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
-            )
-            val compareTime = CommonUtils.ymdToMillis(
-                bofScreenState.selectedCompareDate.value.toString(),
-                CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
-            )
-            fetchByTime(currentTime, compareTime)
-        }
-    }
-
     suspend fun requestCommentData() {
         // 获取当前选中的 Range
         val selectedRange = bofScreenState.selectedRange.value
@@ -171,21 +152,12 @@ internal class BofViewModel(
         val dateToFetch = if (selectedRange?.singleComment == true && selectedRange.commentDate.isNotEmpty()) {
             // 如果是单日评论且有指定日期，直接使用该日期
             selectedRange.commentDate
-        } else if (bofScreenState.selectedCurrentTime.value != "-1") {
-            // 如果用户选择了具体时间，使用选择的日期
-            bofScreenState.selectedCurrentDate.value.toString()
         } else {
-            // 否则获取最新数据
-            null
+            // 使用选择的日期
+            bofScreenState.selectedCurrentDate.value.toString()
         }
         
-        val data = if (dateToFetch != null) {
-            // 根据日期获取评论数据
-            bofLocalService.getBofttCommentByTime(dateToFetch)
-        } else {
-            // 获取最新评论数据
-            bofLocalService.getBofttCommentLatest()
-        }
+        val data = bofLocalService.getBofttCommentByTime(dateToFetch)
         
         if (data.isEmpty()) {
             Log.d(TAG, "No comment data available for the selected date and time.")
@@ -213,30 +185,22 @@ internal class BofViewModel(
                 errorMessage.update { "" }
                 
                 // 计算当前时间戳（主排序时间点）
-                val currentTimestamp = if (bofScreenState.selectedCurrentTime.value == "-1") {
-                    System.currentTimeMillis()
-                } else {
-                    CommonUtils.ymdToMillis(
-                        bofScreenState.selectedCurrentDate.value.toString(),
-                        CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
-                    )
-                }
+                val currentTimestamp = CommonUtils.ymdToMillis(
+                    bofScreenState.selectedCurrentDate.value.toString(),
+                    CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
+                )
                 
-                // 计算对比时间戳（可选）
-                val compareTimestamp = if (bofScreenState.selectedCompareTime.value == "-1") {
-                    null
-                } else {
-                    CommonUtils.ymdToMillis(
-                        bofScreenState.selectedCompareDate.value.toString(),
-                        CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
-                    )
-                }
+                // 计算对比时间戳
+                val compareTimestamp = CommonUtils.ymdToMillis(
+                    bofScreenState.selectedCompareDate.value.toString(),
+                    CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
+                )
                 
                 // 使用支持对比的一次性处理
                 bofRepository.getRankingAtTime(
                     currentTimestamp = currentTimestamp,
                     compareTimestamp = compareTimestamp,
-                    path = bofScreenState.selectedRange.value?.path ?: "tt"
+                    path = bofScreenState.selectedRange.value?.path?:""
                 ) { currentResults ->
                     // 确保在主线程上更新 UI 状态，避免帧顺序混乱
                     withContext(Dispatchers.Main.immediate) {
@@ -270,25 +234,10 @@ internal class BofViewModel(
     
     // 获取当前选择的时间字符串 - 支持对比时间显示
     fun getSelectedTimeString(): String {
-        val currentTime = if (bofScreenState.selectedCurrentTime.value == "-1") {
-            "最新数据"
-        } else {
-            val time = CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
-            "${bofScreenState.selectedCurrentDate.value} $time"
-        }
+        val currentTime = CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
+        val compareTime = CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
         
-        val compareTime = if (bofScreenState.selectedCompareTime.value == "-1") {
-            null
-        } else {
-            val time = CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
-            "${bofScreenState.selectedCompareDate.value} $time"
-        }
-        
-        return if (compareTime != null) {
-            "当前: $currentTime | 对比: $compareTime"
-        } else {
-            "数据时间: $currentTime"
-        }
+        return "当前: ${bofScreenState.selectedCurrentDate.value} $currentTime | 对比: ${bofScreenState.selectedCompareDate.value} $compareTime"
     }
     
     // 基于总分排行数据生成平均分排行数据

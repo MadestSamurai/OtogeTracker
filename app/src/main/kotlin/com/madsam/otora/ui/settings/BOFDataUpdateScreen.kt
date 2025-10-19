@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Arrow-right`
+import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.`Arrow-rotate-back`
 import com.madsam.otora.core.icon.fa.Info
 import com.madsam.otora.core.theme.Beige400
@@ -80,7 +80,7 @@ fun BOFDataUpdateScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        imageVector = Fa.`Arrow-right`,
+                        imageVector = Fa.`Arrow-left`,
                         contentDescription = "返回",
                         tint = Beige400,
                         modifier = Modifier.size(24.dp)

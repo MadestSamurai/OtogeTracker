@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-down`
-import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.`Arrow-right`
 import com.madsam.otora.core.icon.fa.`Arrow-up`
 import com.madsam.otora.core.theme.BG_DARK_GRAY
 import com.madsam.otora.core.theme.RANKING_BLUE
@@ -441,7 +441,7 @@ private fun RankingTableRow(
                     }
                     change != null && change == 0 -> {
                         Icon(
-                            imageVector = Fa.`Arrow-left`,
+                            imageVector = Fa.`Arrow-right`,
                             contentDescription = "Rank Same",
                             tint = Color.Gray,
                             modifier = Modifier.size(12.dp)

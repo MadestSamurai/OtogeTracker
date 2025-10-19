@@ -63,7 +63,7 @@ fun DateTimeRangePicker(
                 // 对于已结束的活动，使用current作为终点
                 val endDate = if (selectedRange!!.isStart && !selectedRange!!.isEnd) {
                     // 正在进行中：使用start作为起点，不限制终点（使用当前日期）
-                    val today = java.time.LocalDate.now()
+                    val today = LocalDate.now()
                     DatePickerDate(today.year, today.monthValue - 1, today.dayOfMonth)
                 } else {
                     // 已结束或未开始：使用current作为终点
@@ -85,16 +85,47 @@ fun DateTimeRangePicker(
         }
     }
 
-    var currentDateState by remember { mutableStateOf(toDate) }
-    var currentTimeState by remember { mutableStateOf(TimePickerTime(0, 0)) }
-    var compareDateState by remember { mutableStateOf(toDate) }
-    var compareTimeState by remember { mutableStateOf(TimePickerTime(0, 0)) }
+    // 从 bofScreenState 读取当前选择的日期和时间作为初始值
+    val currentSelectedDate = bofScreenState.selectedCurrentDate.collectAsState().value
+    val currentSelectedTime = bofScreenState.selectedCurrentTime.collectAsState().value
+    val compareSelectedDate = bofScreenState.selectedCompareDate.collectAsState().value
+    val compareSelectedTime = bofScreenState.selectedCompareTime.collectAsState().value
+    
+    // 初始化状态
+    var currentDateState by remember { 
+        mutableStateOf(DatePickerDate(
+            currentSelectedDate.year,
+            currentSelectedDate.monthValue - 1,
+            currentSelectedDate.dayOfMonth
+        ))
+    }
+    var currentTimeState by remember {
+        val timeParts = currentSelectedTime.split(":")
+        mutableStateOf(TimePickerTime(
+            timeParts.getOrNull(0)?.toIntOrNull() ?: 0,
+            timeParts.getOrNull(1)?.toIntOrNull() ?: 0
+        ))
+    }
 
-    var currentDateText by remember { mutableStateOf(LocalDate.now()) }
-    var currentTimeText by remember { mutableStateOf("00:00") }
-    var compareDateText by remember { mutableStateOf(LocalDate.now()) }
-    var compareTimeText by remember { mutableStateOf("00:00") }
+    var compareDateState by remember { 
+        mutableStateOf(DatePickerDate(
+            compareSelectedDate.year,
+            compareSelectedDate.monthValue - 1,
+            compareSelectedDate.dayOfMonth
+        ))
+    }
+    var compareTimeState by remember {
+        val timeParts = compareSelectedTime.split(":")
+        mutableStateOf(TimePickerTime(
+            timeParts.getOrNull(0)?.toIntOrNull() ?: 0,
+            timeParts.getOrNull(1)?.toIntOrNull() ?: 0
+        ))
+    }
 
+    var currentDateText by remember { mutableStateOf(currentSelectedDate) }
+    var currentTimeText by remember { mutableStateOf(currentSelectedTime) }
+    var compareDateText by remember { mutableStateOf(compareSelectedDate) }
+    var compareTimeText by remember { mutableStateOf(compareSelectedTime) }
 
     if (showCurrentDatePicker) {
         AlertDialog(

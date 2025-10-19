@@ -69,9 +69,9 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
@@ -114,11 +114,13 @@ private fun shouldShowActionButton(selectedTabIndex: Int): Boolean {
 @Composable
 fun BofScreen(
     snackbarHostState: SnackbarHostState,
-    navController: NavHostController,
     bofScreenState: BofScreenState
 ) {
     Log.d(TAG, "BofScreen Compose started")
     val coroutineScope = rememberCoroutineScope()
+    
+    // BofScreen 内部创建自己的 NavController
+    val navController = rememberNavController()
 
     Log.d(TAG, "Creating BofRequestService")
     val bofRequestService = BofRequestService()
@@ -132,19 +134,21 @@ fun BofScreen(
     
     // Range 数据状态
     var rangeData by remember { mutableStateOf<List<BofRangeResponse>>(emptyList()) }
-    var selectedRange by remember { mutableStateOf<BofRangeResponse?>(null) }
+    // 统一使用 bofScreenState.selectedRange，不再使用本地状态
+    val selectedRange by bofScreenState.selectedRange.collectAsState()
     
     // 获取 range 数据
     LaunchedEffect(Unit) {
         try {
             val ranges = bofRequestService.getBofRangeDataPublic()
             if (ranges != null) {
-                rangeData = ranges
-                // 默认选择第一个可用的 range
-                val defaultRange = ranges.firstOrNull { it.isStart }
-                selectedRange = defaultRange
-                // 同步到 BofScreenState
-                bofScreenState.selectedRange.value = defaultRange
+                // 按日期倒序排序（最新的在前）
+                rangeData = ranges.sortedByDescending { it.start }
+                // 默认选择第一个可用的 range（只在首次或为空时设置）
+                if (bofScreenState.selectedRange.value == null) {
+                    val defaultRange = rangeData.firstOrNull { it.isStart }
+                    bofScreenState.selectedRange.value = defaultRange
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load range data: ${e.message}")
@@ -183,17 +187,7 @@ fun BofScreen(
         showDateTimeRangePicker = true
     }
 
-    // 初始数据加载
-    LaunchedEffect(Unit) {
-        vm.loadRankingData()
-        selectedRange?.let { range ->
-            if (range.isStart) {
-                vm.loadTeamRankingData(range.path)
-                vm.requestCommentData()
-            }
-        }
-    }
-
+    // 监听 selectedRange 和时间变化，自动加载数据
     LaunchedEffect(
         selectedRange,
         bofScreenState.selectedCurrentDate.collectAsState().value,
@@ -201,9 +195,10 @@ fun BofScreen(
         bofScreenState.selectedCompareDate.collectAsState().value,
         bofScreenState.selectedCompareTime.collectAsState().value
     ) {
-        vm.loadRankingData()
-
+        // 只有当 selectedRange 不为空时才加载数据
         selectedRange?.let { range ->
+            vm.loadRankingData()
+            
             if (range.isStart) {
                 vm.loadTeamRankingData(range.path)
                 vm.requestCommentData()
@@ -292,7 +287,7 @@ fun BofScreen(
                             },
                             selected = selectedRange?.path == range.path,
                             onClick = {
-                                selectedRange = range
+                                // 统一更新到 bofScreenState
                                 bofScreenState.selectedRange.value = range
                                 coroutineScope.launch { 
                                     drawerState.close()

@@ -39,7 +39,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Arrow-right`
+import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
@@ -90,7 +90,7 @@ internal fun TopRating(
         ) {
             IconButton(onClick = onBack) {
                 Icon(
-                    Fa.`Arrow-right`,
+                    Fa.`Arrow-left`,
                     contentDescription = "Back",
                     tint = Beige400
                 )

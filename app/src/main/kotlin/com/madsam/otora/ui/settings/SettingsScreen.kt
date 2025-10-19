@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.icon.fa.`Arrow-right`
+import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.Cloud
 import com.madsam.otora.core.icon.fa.Cog
 import com.madsam.otora.core.icon.fa.Font
@@ -141,7 +141,7 @@ fun SettingsScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Fa.`Arrow-right`,
+                            imageVector = Fa.`Arrow-left`,
                             contentDescription = "返回",
                             tint = Beige400,
                             modifier = Modifier.size(24.dp)
@@ -319,7 +319,7 @@ private fun DataUpdateSettingItem(
         }
         
         Icon(
-            imageVector = Fa.`Arrow-right`,
+            imageVector = Fa.`Arrow-left`,
             contentDescription = null,
             tint = White1000.copy(alpha = 0.5f),
             modifier = Modifier.size(18.dp)
@@ -482,7 +482,7 @@ private fun SelectionSettingItem(
         }
         
         Icon(
-            imageVector = Fa.`Arrow-right`,
+            imageVector = Fa.`Arrow-left`,
             contentDescription = null,
             tint = White1000.copy(alpha = 0.5f),
             modifier = Modifier.size(18.dp)
@@ -537,7 +537,7 @@ private fun NetworkSelectionSettingItem(
         }
         
         Icon(
-            imageVector = Fa.`Arrow-right`,
+            imageVector = Fa.`Arrow-left`,
             contentDescription = null,
             tint = White1000.copy(alpha = 0.5f),
             modifier = Modifier.size(18.dp)

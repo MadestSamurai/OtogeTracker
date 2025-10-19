@@ -16,12 +16,6 @@ internal data class BofTeamEntity(
     @Index var path: String = "", // 比赛类型路径 (tt, bms等)
     var teamName: String = "", // 团队名称
     
-    // 注意：时序数据已迁移到独立的历史表中：
-    // - BofTeamScoreHistoryEntity: 分数历史
-    // - BofTeamTitleHistoryEntity: 标题历史（workSlot 1-4）
-    // - BofTeamArtistHistoryEntity: 艺术家历史（workSlot 1-4）
-    // - BofTeamFinalStrikerHistoryEntity: 决胜作品历史（workSlot 1-4）
-    
     // 缓存的当前状态用于快速查询
     var currentTitle1: String = "",
     var currentTitle2: String = "",

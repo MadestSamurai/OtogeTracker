@@ -48,7 +48,7 @@ internal class BofRepository(
     suspend fun getRankingAtTime(
         currentTimestamp: Long,
         compareTimestamp: Long? = null,
-        path: String = "tt",
+        path: String,
         onBatchReady: suspend (List<WorkRanking>) -> Unit
     ) = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
         val startTime = System.currentTimeMillis()

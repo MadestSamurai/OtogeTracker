@@ -27,7 +27,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,9 +57,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-down`
-import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.`Arrow-right`
 import com.madsam.otora.core.icon.fa.`Arrow-up`
-import com.madsam.otora.core.icon.fa.Camera
 import com.madsam.otora.core.icon.fa.Star
 import com.madsam.otora.core.theme.BG_DARK_GRAY
 import com.madsam.otora.core.theme.RANKING_BLUE
@@ -517,7 +515,7 @@ internal fun TeamRankingRow(
                         }
                         change != null -> {
                             Icon(
-                                imageVector = Fa.`Arrow-left`,
+                                imageVector = Fa.`Arrow-right`,
                                 contentDescription = "Rank Same",
                                 tint = Color.Gray,
                                 modifier = Modifier.size(12.dp)

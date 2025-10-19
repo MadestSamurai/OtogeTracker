@@ -4,11 +4,13 @@ import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.SnackbarHostState
@@ -18,12 +20,12 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.ui.common.RankingItem
-import com.madsam.otora.ui.common.RankingTable
 import com.madsam.otora.ui.common.RankingTableConfig
 import dev.shreyaspatil.capturable.capturable
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
@@ -59,7 +61,6 @@ fun BofEntryCaptureDialog(
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
             title = { Text(text = "截图功能") },
-            modifier = Modifier.height(300.dp),
             text = {
                 Column {
                     Text(
@@ -67,16 +68,19 @@ fun BofEntryCaptureDialog(
                         modifier = Modifier.padding(8.dp)
                     )
                     
-                    // 渲染所有批次（第一批可见作为预览，其他批次在屏幕外但会被渲染用于截图）
+                    // 渲染所有批次（隐藏但会被渲染用于截图）
                     batches.forEachIndexed { index, batch ->
                         Box(
                             modifier = Modifier
-                                .height(10.dp)
-                                .requiredWidth(900.dp)
+                                .clip(RoundedCornerShape(15.dp))
+                                .height(0.dp)
                                 .requiredHeight(5000.dp)
+                                .requiredWidth(900.dp)
                         ) {
                             Column(
-                                modifier = Modifier.capturable(controllers[index])
+                                modifier = Modifier
+                                    .capturable(controllers[index])
+                                    .fillMaxWidth()
                             ) {
                                 BofEntryCaptureContent(
                                     items = batch,
@@ -100,7 +104,7 @@ fun BofEntryCaptureDialog(
                         scope.launch {
                             // 依次截图所有批次
                             val bitmaps = mutableListOf<android.graphics.Bitmap>()
-                            for ((i, batch) in batches.withIndex()) {
+                            for ((i, _) in batches.withIndex()) {
                                 val bmp = controllers[i].captureAsync().await().asAndroidBitmap()
                                 // 将硬件加速的bitmap转换为软件bitmap，避免"Software rendering doesn't support hardware bitmaps"错误
                                 val softwareBitmap = if (bmp.config == android.graphics.Bitmap.Config.HARDWARE) {
