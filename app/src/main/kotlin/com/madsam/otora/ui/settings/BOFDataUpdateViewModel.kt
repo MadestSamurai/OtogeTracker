@@ -403,44 +403,56 @@ class BOFDataUpdateViewModel : ViewModel() {
             return 0L
         }
         
-        // 根据singleComment字段选择API端点
-        val response = withContext(Dispatchers.IO) {
+        // 根据singleComment字段选择API端点和处理方式
+        return withContext(Dispatchers.IO) {
             if (competitionRange.singleComment) {
+                // 使用固定评论数据（旧格式）
                 Log.d(TAG, "Using fixed comment data for competition: $competitionPath")
-                api.getBofCommentData(competitionPath).execute()
+                val response = api.getBofCommentData(competitionPath).execute()
+                
+                if (!response.isSuccessful) {
+                    throw Exception("评论数据API请求失败: ${response.code()} - ${response.message()}")
+                }
+
+                val commentDataList = response.body()
+                if (commentDataList == null) {
+                    throw Exception("评论数据API响应为空")
+                }
+
+                // 使用commentDate字段作为保存日期
+                val dateToSave = competitionRange.commentDate.ifEmpty {
+                    // 如果没有commentDate，使用current字段或默认日期
+                    competitionRange.current.ifEmpty { "2025-01-08" }
+                }
+                
+                // 保存评论数据到ObjectBox
+                bofObjectBoxService.saveBofCommentApiResponse(commentDataList, dateToSave)
+                val savedCount = bofObjectBoxService.getCommentCount(dateToSave)
+
+                Log.d(TAG, "Successfully downloaded and saved $savedCount $competitionName comments")
+                savedCount
             } else {
-                Log.d(TAG, "Time-based comment data not implemented yet for competition: $competitionPath")
-                // 时间序列评论数据还未设计好，跳过
-                return@withContext null
+                // 使用时序评论数据（新格式）
+                Log.d(TAG, "Using time series comment data for competition: $competitionPath")
+                val timeSeriesResponse = api.getBofCommentTimeSeriesData(competitionPath).execute()
+                
+                if (!timeSeriesResponse.isSuccessful) {
+                    throw Exception("时序评论数据API请求失败: ${timeSeriesResponse.code()} - ${timeSeriesResponse.message()}")
+                }
+                
+                val timeSeriesData = timeSeriesResponse.body()
+                if (timeSeriesData == null) {
+                    throw Exception("时序评论数据API响应为空")
+                }
+                
+                // 保存时序评论数据
+                bofObjectBoxService.saveBofCommentTimeSeriesApiResponse(timeSeriesData, competitionPath)
+                val savedCount = bofObjectBoxService.getCommentTimeSeriesCount(competitionPath)
+                
+                Log.d(TAG, "Successfully downloaded and saved $savedCount $competitionName time series comments")
+                savedCount
             }
         }
-        
-        if (response == null) {
-            Log.w(TAG, "Comment data download skipped for $competitionPath (time-based not implemented)")
-            return 0L
-        }
-        
-        if (!response.isSuccessful) {
-            throw Exception("评论数据API请求失败: ${response.code()} - ${response.message()}")
-        }
-
-        val commentDataList = response.body()
-        if (commentDataList == null) {
-            throw Exception("评论数据API响应为空")
-        }
-
-        // 使用commentDate字段作为保存日期
-        val dateToSave = competitionRange.commentDate.ifEmpty {
-            // 如果没有commentDate，使用current字段或默认日期
-            competitionRange.current.ifEmpty { "2025-01-08" }
-        }
-        
-        // 保存评论数据到ObjectBox
-        bofObjectBoxService.saveBofCommentApiResponse(commentDataList, dateToSave)
-        val savedCount = bofObjectBoxService.getCommentCount(dateToSave)
-
-        Log.d(TAG, "Successfully downloaded and saved $savedCount $competitionName comments")
-        return savedCount
     }
     
     /**

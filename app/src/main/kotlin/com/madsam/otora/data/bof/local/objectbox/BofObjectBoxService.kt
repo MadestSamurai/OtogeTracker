@@ -26,6 +26,12 @@ internal class BofObjectBoxService {
     private val bofCommentBox by lazy { boxStore.boxFor(BofCommentEntity::class.java) }
     private val bofCommentDetailBox by lazy { boxStore.boxFor(BofCommentDetailEntity::class.java) }
     private val bofRangeBox by lazy { boxStore.boxFor(BofRangeEntity::class.java) }
+    
+    // 时序评论数据相关 Box
+    private val bofCommentTimeSeriesBox by lazy { boxStore.boxFor(BofCommentTimeSeriesEntity::class.java) }
+    private val bofCommentStatsHistoryBox by lazy { boxStore.boxFor(BofCommentStatsHistoryEntity::class.java) }
+    private val bofCommentTextHistoryBox by lazy { boxStore.boxFor(BofCommentTextHistoryEntity::class.java) }
+    private val bofCommentDetailTimeSeriesBox by lazy { boxStore.boxFor(BofCommentDetailTimeSeriesEntity::class.java) }
 
     /**
      * 根据日期获取评论数据
@@ -685,6 +691,365 @@ internal class BofObjectBoxService {
             } catch (e: Exception) {
                 Log.e(TAG, "Error getting comment count for date $date: ${e.message}", e)
                 0L
+            }
+        }
+    }
+    
+    /**
+     * 保存时序评论数据到数据库
+     */
+    suspend fun saveBofCommentTimeSeriesApiResponse(
+        commentMap: Map<String, com.madsam.otora.data.bof.remote.model.BofUserCommentData>,
+        path: String
+    ) {
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Starting to save time series comment data for path: $path")
+                val startTime = System.currentTimeMillis()
+                
+                // 先删除该 path 的所有旧数据
+                Log.d(TAG, "Removing old time series comment data for path: $path")
+                val oldUserCount = bofCommentTimeSeriesBox.query(
+                    BofCommentTimeSeriesEntity_.path.equal(path)
+                ).build().remove()
+                Log.d(TAG, "Removed $oldUserCount old user records")
+                
+                val oldStatsCount = bofCommentStatsHistoryBox.query(
+                    BofCommentStatsHistoryEntity_.path.equal(path)
+                ).build().remove()
+                Log.d(TAG, "Removed $oldStatsCount old stats history records")
+                
+                val oldTextCount = bofCommentTextHistoryBox.query(
+                    BofCommentTextHistoryEntity_.path.equal(path)
+                ).build().remove()
+                Log.d(TAG, "Removed $oldTextCount old text history records")
+                
+                val oldDetailCount = bofCommentDetailTimeSeriesBox.query(
+                    BofCommentDetailTimeSeriesEntity_.path.equal(path)
+                ).build().remove()
+                Log.d(TAG, "Removed $oldDetailCount old detail records")
+                
+                // 准备数据列表
+                val userEntities = mutableListOf<BofCommentTimeSeriesEntity>()
+                val statsHistoryEntities = mutableListOf<BofCommentStatsHistoryEntity>()
+                val textHistoryEntities = mutableListOf<BofCommentTextHistoryEntity>()
+                val detailEntities = mutableListOf<BofCommentDetailTimeSeriesEntity>()
+                
+                // 遍历每个用户
+                commentMap.forEach { (username, userData) ->
+                    // 1. 解析并保存统计历史（Stats 树形结构扁平化）
+                    userData.stats?.forEach { yearNode ->
+                        yearNode.children?.forEach { monthNode ->
+                            monthNode.children?.forEach { dayNode ->
+                                dayNode.children?.forEach { hourNode ->
+                                    hourNode.children?.forEach { minuteNode ->
+                                        val timestamp = BofCommentStatsHistoryEntity.createTimestamp(
+                                            yearNode.year,
+                                            monthNode.month,
+                                            dayNode.day,
+                                            hourNode.hour,
+                                            minuteNode.minute
+                                        )
+                                        
+                                        val values = minuteNode.values
+                                        if (values != null) {
+                                            val statsEntity = BofCommentStatsHistoryEntity(
+                                                username = username,
+                                                path = path,
+                                                timestamp = timestamp,
+                                                year = yearNode.year,
+                                                month = monthNode.month,
+                                                day = dayNode.day,
+                                                hour = hourNode.hour,
+                                                minute = minuteNode.minute,
+                                                vote = values.vote,
+                                                voteTotal = values.voteTotal,
+                                                short = values.short,
+                                                shortTotal = values.shortTotal,
+                                                shortComment = values.shortComment,
+                                                long = values.long,
+                                                longTotal = values.longTotal,
+                                                longComment = values.longComment,
+                                                total = values.total
+                                            )
+                                            statsHistoryEntities.add(statsEntity)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    
+                    // 2. 解析并保存文本字段历史（user, pattern, country）
+                    userData.user?.forEach { record ->
+                        val textEntity = BofCommentTextHistoryEntity(
+                            username = username,
+                            path = path,
+                            fieldType = BofCommentTextHistoryEntity.FIELD_TYPE_USER,
+                            timestamp = BofCommentTextHistoryEntity.parseTimestamp(record.time),
+                            timeString = record.time,
+                            value = record.value
+                        )
+                        textHistoryEntities.add(textEntity)
+                    }
+                    
+                    userData.pattern?.forEach { record ->
+                        val textEntity = BofCommentTextHistoryEntity(
+                            username = username,
+                            path = path,
+                            fieldType = BofCommentTextHistoryEntity.FIELD_TYPE_PATTERN,
+                            timestamp = BofCommentTextHistoryEntity.parseTimestamp(record.time),
+                            timeString = record.time,
+                            value = record.value
+                        )
+                        textHistoryEntities.add(textEntity)
+                    }
+                    
+                    userData.country?.forEach { record ->
+                        val textEntity = BofCommentTextHistoryEntity(
+                            username = username,
+                            path = path,
+                            fieldType = BofCommentTextHistoryEntity.FIELD_TYPE_COUNTRY,
+                            timestamp = BofCommentTextHistoryEntity.parseTimestamp(record.time),
+                            timeString = record.time,
+                            value = record.value
+                        )
+                        textHistoryEntities.add(textEntity)
+                    }
+                    
+                    // 3. 解析并保存详细评价记录
+                    userData.voteDetail?.forEach { detail ->
+                        val detailEntity = BofCommentDetailTimeSeriesEntity(
+                            username = username,
+                            path = path,
+                            type = BofCommentDetailTimeSeriesEntity.TYPE_VOTE,
+                            workId = detail.workId,
+                            timestamp = BofCommentDetailTimeSeriesEntity.parseTimestamp(detail.date),
+                            dateString = detail.date,
+                            score = detail.score
+                        )
+                        detailEntities.add(detailEntity)
+                    }
+                    
+                    userData.shortDetail?.forEach { detail ->
+                        val detailEntity = BofCommentDetailTimeSeriesEntity(
+                            username = username,
+                            path = path,
+                            type = BofCommentDetailTimeSeriesEntity.TYPE_SHORT,
+                            workId = detail.workId,
+                            timestamp = BofCommentDetailTimeSeriesEntity.parseTimestamp(detail.date),
+                            dateString = detail.date,
+                            score = detail.score
+                        )
+                        detailEntities.add(detailEntity)
+                    }
+                    
+                    userData.longDetail?.forEach { detail ->
+                        val detailEntity = BofCommentDetailTimeSeriesEntity(
+                            username = username,
+                            path = path,
+                            type = BofCommentDetailTimeSeriesEntity.TYPE_LONG,
+                            workId = detail.workId,
+                            timestamp = BofCommentDetailTimeSeriesEntity.parseTimestamp(detail.date),
+                            dateString = detail.date,
+                            score = detail.score
+                        )
+                        detailEntities.add(detailEntity)
+                    }
+                    
+                    // 4. 创建用户主实体
+                    val latestStats = findLatestCommentStats(statsHistoryEntities.filter { it.username == username })
+                    val timeRange = calculateCommentTimeRange(statsHistoryEntities.filter { it.username == username })
+                    
+                    val currentUser = userData.user?.lastOrNull()?.value ?: username
+                    val currentPattern = userData.pattern?.lastOrNull()?.value ?: ""
+                    val currentCountry = userData.country?.lastOrNull()?.value ?: ""
+                    
+                    // 将 id_code 列表转换为 JSON 字符串
+                    val idCodesJson = com.squareup.moshi.Moshi.Builder().build()
+                        .adapter<List<String>>(List::class.java)
+                        .toJson(userData.idCode ?: emptyList())
+                    
+                    val userEntity = BofCommentTimeSeriesEntity(
+                        username = username,
+                        path = path,
+                        currentUser = currentUser,
+                        currentPattern = currentPattern,
+                        currentCountry = currentCountry,
+                        idCodesJson = idCodesJson,
+                        latestVote = latestStats?.vote ?: 0,
+                        latestVoteTotal = latestStats?.voteTotal ?: 0,
+                        latestShort = latestStats?.short ?: 0,
+                        latestShortTotal = latestStats?.shortTotal ?: 0,
+                        latestShortComment = latestStats?.shortComment ?: 0,
+                        latestLong = latestStats?.long ?: 0,
+                        latestLongTotal = latestStats?.longTotal ?: 0,
+                        latestLongComment = latestStats?.longComment ?: 0,
+                        latestTotal = latestStats?.total ?: 0,
+                        earliestTimestamp = timeRange.first,
+                        latestTimestamp = timeRange.second,
+                        lastUpdated = System.currentTimeMillis()
+                    )
+                    userEntities.add(userEntity)
+                }
+                
+                // 批量保存到数据库
+                Log.d(TAG, "Saving ${userEntities.size} users")
+                bofCommentTimeSeriesBox.put(userEntities)
+                
+                Log.d(TAG, "Saving ${statsHistoryEntities.size} stats history records")
+                bofCommentStatsHistoryBox.put(statsHistoryEntities)
+                
+                Log.d(TAG, "Saving ${textHistoryEntities.size} text history records")
+                bofCommentTextHistoryBox.put(textHistoryEntities)
+                
+                Log.d(TAG, "Saving ${detailEntities.size} detail records")
+                bofCommentDetailTimeSeriesBox.put(detailEntities)
+                
+                val endTime = System.currentTimeMillis()
+                Log.d(TAG, "Time series comment data saved in ${endTime - startTime}ms")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving time series comment data for path $path: ${e.message}", e)
+                throw e
+            }
+        }
+    }
+    
+    /**
+     * 查找最新的评论统计数据
+     */
+    private fun findLatestCommentStats(stats: List<BofCommentStatsHistoryEntity>): BofCommentStatsHistoryEntity? {
+        return stats.maxByOrNull { it.timestamp }
+    }
+    
+    /**
+     * 计算评论数据的时间范围
+     */
+    private fun calculateCommentTimeRange(stats: List<BofCommentStatsHistoryEntity>): Pair<Long, Long> {
+        if (stats.isEmpty()) return 0L to 0L
+        
+        val timestamps = stats.map { it.timestamp }
+        return timestamps.minOrNull()!! to timestamps.maxOrNull()!!
+    }
+    
+    /**
+     * 获取时序评论数据的统计数量
+     */
+    suspend fun getCommentTimeSeriesCount(path: String): Long {
+        return withContext(Dispatchers.IO) {
+            try {
+                bofCommentTimeSeriesBox.query(
+                    BofCommentTimeSeriesEntity_.path.equal(path)
+                ).build().count()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error getting time series comment count for path $path: ${e.message}", e)
+                0L
+            }
+        }
+    }
+    
+    /**
+     * 获取指定用户的时序评论数据
+     */
+    suspend fun getUserCommentTimeSeries(path: String, username: String): BofCommentTimeSeriesEntity? {
+        return withContext(Dispatchers.IO) {
+            try {
+                bofCommentTimeSeriesBox.query(
+                    BofCommentTimeSeriesEntity_.path.equal(path)
+                        .and(BofCommentTimeSeriesEntity_.username.equal(username))
+                ).build().findFirst()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error getting user comment time series: ${e.message}", e)
+                null
+            }
+        }
+    }
+    
+    /**
+     * 获取指定用户的统计历史
+     */
+    suspend fun getUserStatsHistory(path: String, username: String): List<BofCommentStatsHistoryEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                bofCommentStatsHistoryBox.query(
+                    BofCommentStatsHistoryEntity_.path.equal(path)
+                        .and(BofCommentStatsHistoryEntity_.username.equal(username))
+                ).order(BofCommentStatsHistoryEntity_.timestamp).build().find()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error getting user stats history: ${e.message}", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 获取指定用户的文本字段历史
+     */
+    suspend fun getUserTextHistory(
+        path: String,
+        username: String,
+        fieldType: String
+    ): List<BofCommentTextHistoryEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                bofCommentTextHistoryBox.query(
+                    BofCommentTextHistoryEntity_.path.equal(path)
+                        .and(BofCommentTextHistoryEntity_.username.equal(username))
+                        .and(BofCommentTextHistoryEntity_.fieldType.equal(fieldType))
+                ).order(BofCommentTextHistoryEntity_.timestamp).build().find()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error getting user text history: ${e.message}", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 获取指定用户的详细评价记录
+     */
+    suspend fun getUserDetailRecords(
+        path: String,
+        username: String,
+        type: String? = null
+    ): List<BofCommentDetailTimeSeriesEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val query = if (type != null) {
+                    bofCommentDetailTimeSeriesBox.query(
+                        BofCommentDetailTimeSeriesEntity_.path.equal(path)
+                            .and(BofCommentDetailTimeSeriesEntity_.username.equal(username))
+                            .and(BofCommentDetailTimeSeriesEntity_.type.equal(type))
+                    )
+                } else {
+                    bofCommentDetailTimeSeriesBox.query(
+                        BofCommentDetailTimeSeriesEntity_.path.equal(path)
+                            .and(BofCommentDetailTimeSeriesEntity_.username.equal(username))
+                    )
+                }
+                query.order(BofCommentDetailTimeSeriesEntity_.timestamp).build().find()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error getting user detail records: ${e.message}", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 获取指定作品的所有评价
+     */
+    suspend fun getWorkEvaluations(
+        path: String,
+        workId: String
+    ): List<BofCommentDetailTimeSeriesEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                bofCommentDetailTimeSeriesBox.query(
+                    BofCommentDetailTimeSeriesEntity_.path.equal(path)
+                        .and(BofCommentDetailTimeSeriesEntity_.workId.equal(workId))
+                ).order(BofCommentDetailTimeSeriesEntity_.timestamp).build().find()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error getting work evaluations: ${e.message}", e)
+                emptyList()
             }
         }
     }

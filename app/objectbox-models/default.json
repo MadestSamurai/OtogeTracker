@@ -1537,10 +1537,324 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "34:1445203858491683709",
+      "lastPropertyId": "8:8076195223312135380",
+      "name": "BofCommentDetailTimeSeriesEntity",
+      "properties": [
+        {
+          "id": "1:5245461070545727832",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7212784956917174232",
+          "name": "username",
+          "indexId": "104:1172700865718802947",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:1751168582078694757",
+          "name": "path",
+          "indexId": "105:9093178810870301714",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:1786763202172154153",
+          "name": "type",
+          "indexId": "106:2769403186622629049",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:4818544111302966928",
+          "name": "workId",
+          "indexId": "107:3497796739822970946",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "6:1816789076278580798",
+          "name": "timestamp",
+          "indexId": "108:6608117395603154783",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "7:3352108460582774110",
+          "name": "dateString",
+          "type": 9
+        },
+        {
+          "id": "8:8076195223312135380",
+          "name": "score",
+          "type": 5
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "35:8795785466007921620",
+      "lastPropertyId": "16:6347555864086013716",
+      "name": "BofCommentStatsHistoryEntity",
+      "properties": [
+        {
+          "id": "1:142625219790937270",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6731155520968058364",
+          "name": "username",
+          "indexId": "109:6739877281189088874",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:3260205123428929662",
+          "name": "path",
+          "indexId": "110:4170476610360194832",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:3888886416575717825",
+          "name": "timestamp",
+          "indexId": "111:1804985825671323162",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "5:6378819768285535059",
+          "name": "year",
+          "type": 5
+        },
+        {
+          "id": "6:4664200848315011639",
+          "name": "month",
+          "type": 5
+        },
+        {
+          "id": "7:4361105575075697393",
+          "name": "day",
+          "type": 5
+        },
+        {
+          "id": "8:2317359269330332696",
+          "name": "hour",
+          "type": 5
+        },
+        {
+          "id": "9:2729943953610632399",
+          "name": "minute",
+          "type": 5
+        },
+        {
+          "id": "10:4351027923781717758",
+          "name": "vote",
+          "type": 5
+        },
+        {
+          "id": "11:951694669064132192",
+          "name": "voteTotal",
+          "type": 5
+        },
+        {
+          "id": "12:7790989687445373079",
+          "name": "shortTotal",
+          "type": 5
+        },
+        {
+          "id": "13:4384876496111719973",
+          "name": "shortComment",
+          "type": 5
+        },
+        {
+          "id": "14:4798512203139614452",
+          "name": "longTotal",
+          "type": 5
+        },
+        {
+          "id": "15:8575634362537278505",
+          "name": "longComment",
+          "type": 5
+        },
+        {
+          "id": "16:6347555864086013716",
+          "name": "total",
+          "type": 5
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "36:2066024985055876769",
+      "lastPropertyId": "7:5848046000280743252",
+      "name": "BofCommentTextHistoryEntity",
+      "properties": [
+        {
+          "id": "1:6068397969660359717",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7392813308408212044",
+          "name": "username",
+          "indexId": "112:5610815381537191078",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:1576337344200320726",
+          "name": "path",
+          "indexId": "113:4308684731080570674",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:5110943811638435260",
+          "name": "fieldType",
+          "indexId": "114:4988614522766573059",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:6707214955416500495",
+          "name": "timestamp",
+          "indexId": "115:8589191655759142320",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "6:5954702432624931219",
+          "name": "timeString",
+          "type": 9
+        },
+        {
+          "id": "7:5848046000280743252",
+          "name": "value",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "37:5042140330721282768",
+      "lastPropertyId": "19:4492926575917476656",
+      "name": "BofCommentTimeSeriesEntity",
+      "properties": [
+        {
+          "id": "1:2225726600600323026",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4567064290500634440",
+          "name": "username",
+          "indexId": "116:1221876607640019963",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:5026700022678505983",
+          "name": "path",
+          "indexId": "117:4309156580114974612",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:1955957098664548297",
+          "name": "currentUser",
+          "type": 9
+        },
+        {
+          "id": "5:7350064668204800504",
+          "name": "currentPattern",
+          "type": 9
+        },
+        {
+          "id": "6:3814759208751705986",
+          "name": "currentCountry",
+          "type": 9
+        },
+        {
+          "id": "7:6562357250628090396",
+          "name": "idCodesJson",
+          "type": 9
+        },
+        {
+          "id": "8:172203429723608667",
+          "name": "latestVote",
+          "type": 5
+        },
+        {
+          "id": "9:3824844452886677411",
+          "name": "latestVoteTotal",
+          "type": 5
+        },
+        {
+          "id": "10:3766276626216834154",
+          "name": "latestShort",
+          "type": 5
+        },
+        {
+          "id": "11:7977391467044131915",
+          "name": "latestShortTotal",
+          "type": 5
+        },
+        {
+          "id": "12:6243275666650104406",
+          "name": "latestShortComment",
+          "type": 5
+        },
+        {
+          "id": "13:3356637683866604707",
+          "name": "latestLong",
+          "type": 5
+        },
+        {
+          "id": "14:2627995776989827638",
+          "name": "latestLongTotal",
+          "type": 5
+        },
+        {
+          "id": "15:2365862637170608219",
+          "name": "latestLongComment",
+          "type": 5
+        },
+        {
+          "id": "16:1224336971502952610",
+          "name": "latestTotal",
+          "type": 5
+        },
+        {
+          "id": "17:8287414308174752545",
+          "name": "earliestTimestamp",
+          "type": 6
+        },
+        {
+          "id": "18:532762185858162062",
+          "name": "latestTimestamp",
+          "type": 6
+        },
+        {
+          "id": "19:4492926575917476656",
+          "name": "lastUpdated",
+          "type": 6
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "33:7935668960383465870",
-  "lastIndexId": "103:5842925147544503379",
+  "lastEntityId": "37:5042140330721282768",
+  "lastIndexId": "117:4309156580114974612",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
