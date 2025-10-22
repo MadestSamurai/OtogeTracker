@@ -7,11 +7,19 @@ internal class BofLocalService {
     
     private val bofObjectBoxService = BofObjectBoxService()
 
-    suspend fun getBofttCommentLatest(): List<BofCommentUI> {
-        return bofObjectBoxService.getBofttCommentLatest()
+    suspend fun getCommentByTime(date: String): List<BofCommentUI> {
+        return bofObjectBoxService.getCommentByTime(date)
     }
     
-    suspend fun getBofttCommentByTime(date: String): List<BofCommentUI> {
-        return bofObjectBoxService.getBofCommentByTime(date)
+    /**
+     * 获取时序评论数据
+     * @param path 比赛路径
+     * @param timestamp 指定的时间戳（毫秒），如果为 null 则获取最新数据
+     */
+    suspend fun getCommentTimeSeries(
+        path: String,
+        timestamp: Long? = null
+    ): List<BofCommentUI> {
+        return bofObjectBoxService.getCommentTimeSeriesAsUI(path, timestamp)
     }
 }

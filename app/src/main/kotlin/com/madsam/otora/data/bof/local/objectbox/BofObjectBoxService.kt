@@ -36,7 +36,7 @@ internal class BofObjectBoxService {
     /**
      * 根据日期获取评论数据
      */
-    suspend fun getBofCommentByTime(currentDate: String): List<BofCommentUI> {
+    suspend fun getCommentByTime(currentDate: String): List<BofCommentUI> {
         return withContext(Dispatchers.IO) {
             try {
                 val comments = bofCommentBox.query(
@@ -81,33 +81,6 @@ internal class BofObjectBoxService {
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching comment by time: ${e.message}")
-                emptyList()
-            }
-        }
-    }
-
-    /**
-     * 获取最新的评论数据
-     */
-    suspend fun getBofttCommentLatest(): List<BofCommentUI> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val allComments = bofCommentBox.all
-                
-                if (allComments.isEmpty()) {
-                    return@withContext emptyList()
-                }
-                
-                // Find the most recent date
-                val latestDate = allComments.maxByOrNull { it.date }?.date
-                
-                if (latestDate != null) {
-                    return@withContext getBofCommentByTime(latestDate)
-                } else {
-                    return@withContext emptyList()
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error in getBofCommentLatest: ${e.message}")
                 emptyList()
             }
         }
@@ -762,12 +735,12 @@ internal class BofObjectBoxService {
                                                 day = dayNode.day,
                                                 hour = hourNode.hour,
                                                 minute = minuteNode.minute,
-                                                vote = values.vote,
+                                                voteCount = values.vote,
                                                 voteTotal = values.voteTotal,
-                                                short = values.short,
+                                                shortCount = values.short,
                                                 shortTotal = values.shortTotal,
                                                 shortComment = values.shortComment,
-                                                long = values.long,
+                                                longCount = values.long,
                                                 longTotal = values.longTotal,
                                                 longComment = values.longComment,
                                                 total = values.total
@@ -877,12 +850,12 @@ internal class BofObjectBoxService {
                         currentPattern = currentPattern,
                         currentCountry = currentCountry,
                         idCodesJson = idCodesJson,
-                        latestVote = latestStats?.vote ?: 0,
+                        latestVote = latestStats?.voteCount ?: 0,
                         latestVoteTotal = latestStats?.voteTotal ?: 0,
-                        latestShort = latestStats?.short ?: 0,
+                        latestShort = latestStats?.shortCount ?: 0,
                         latestShortTotal = latestStats?.shortTotal ?: 0,
                         latestShortComment = latestStats?.shortComment ?: 0,
-                        latestLong = latestStats?.long ?: 0,
+                        latestLong = latestStats?.longCount ?: 0,
                         latestLongTotal = latestStats?.longTotal ?: 0,
                         latestLongComment = latestStats?.longComment ?: 0,
                         latestTotal = latestStats?.total ?: 0,
@@ -947,108 +920,165 @@ internal class BofObjectBoxService {
             }
         }
     }
-    
+
     /**
-     * 获取指定用户的时序评论数据
+     * 获取时序评论数据并转换为 UI 模型
+     * @param path 比赛路径
+     * @param timestamp 指定的时间戳（毫秒），如果为 null 则获取最新数据
      */
-    suspend fun getUserCommentTimeSeries(path: String, username: String): BofCommentTimeSeriesEntity? {
+    suspend fun getCommentTimeSeriesAsUI(
+        path: String,
+        timestamp: Long? = null
+    ): List<BofCommentUI> {
         return withContext(Dispatchers.IO) {
             try {
-                bofCommentTimeSeriesBox.query(
+                // 获取所有用户
+                val users = bofCommentTimeSeriesBox.query(
                     BofCommentTimeSeriesEntity_.path.equal(path)
-                        .and(BofCommentTimeSeriesEntity_.username.equal(username))
-                ).build().findFirst()
-            } catch (e: Exception) {
-                Log.e(TAG, "Error getting user comment time series: ${e.message}", e)
-                null
-            }
-        }
-    }
-    
-    /**
-     * 获取指定用户的统计历史
-     */
-    suspend fun getUserStatsHistory(path: String, username: String): List<BofCommentStatsHistoryEntity> {
-        return withContext(Dispatchers.IO) {
-            try {
-                bofCommentStatsHistoryBox.query(
-                    BofCommentStatsHistoryEntity_.path.equal(path)
-                        .and(BofCommentStatsHistoryEntity_.username.equal(username))
-                ).order(BofCommentStatsHistoryEntity_.timestamp).build().find()
-            } catch (e: Exception) {
-                Log.e(TAG, "Error getting user stats history: ${e.message}", e)
-                emptyList()
-            }
-        }
-    }
-    
-    /**
-     * 获取指定用户的文本字段历史
-     */
-    suspend fun getUserTextHistory(
-        path: String,
-        username: String,
-        fieldType: String
-    ): List<BofCommentTextHistoryEntity> {
-        return withContext(Dispatchers.IO) {
-            try {
-                bofCommentTextHistoryBox.query(
-                    BofCommentTextHistoryEntity_.path.equal(path)
-                        .and(BofCommentTextHistoryEntity_.username.equal(username))
-                        .and(BofCommentTextHistoryEntity_.fieldType.equal(fieldType))
-                ).order(BofCommentTextHistoryEntity_.timestamp).build().find()
-            } catch (e: Exception) {
-                Log.e(TAG, "Error getting user text history: ${e.message}", e)
-                emptyList()
-            }
-        }
-    }
-    
-    /**
-     * 获取指定用户的详细评价记录
-     */
-    suspend fun getUserDetailRecords(
-        path: String,
-        username: String,
-        type: String? = null
-    ): List<BofCommentDetailTimeSeriesEntity> {
-        return withContext(Dispatchers.IO) {
-            try {
-                val query = if (type != null) {
-                    bofCommentDetailTimeSeriesBox.query(
+                ).build().find()
+                
+                if (users.isEmpty()) {
+                    return@withContext emptyList()
+                }
+                
+                // 对每个用户，获取指定时间点的统计数据
+                val commentUIList = users.mapNotNull { user ->
+                    // 获取统计历史
+                    val statsHistory = bofCommentStatsHistoryBox.query(
+                        BofCommentStatsHistoryEntity_.path.equal(path)
+                            .and(BofCommentStatsHistoryEntity_.username.equal(user.username))
+                    ).order(BofCommentStatsHistoryEntity_.timestamp).build().find()
+                    
+                    if (statsHistory.isEmpty()) {
+                        return@mapNotNull null
+                    }
+                    
+                    // 找到指定时间点或最近的统计数据
+                    val targetStats = if (timestamp != null) {
+                        // 找到小于等于指定时间戳的最后一条记录
+                        statsHistory.lastOrNull { it.timestamp <= timestamp }
+                    } else {
+                        // 获取最新的数据
+                        statsHistory.lastOrNull()
+                    }
+                    
+                    if (targetStats == null) {
+                        return@mapNotNull null
+                    }
+                    
+                    // 获取详细评价记录，用于生成图表数据
+                    val voteDetails = bofCommentDetailTimeSeriesBox.query(
                         BofCommentDetailTimeSeriesEntity_.path.equal(path)
-                            .and(BofCommentDetailTimeSeriesEntity_.username.equal(username))
-                            .and(BofCommentDetailTimeSeriesEntity_.type.equal(type))
-                    )
-                } else {
-                    bofCommentDetailTimeSeriesBox.query(
+                            .and(BofCommentDetailTimeSeriesEntity_.username.equal(user.username))
+                            .and(BofCommentDetailTimeSeriesEntity_.type.equal(BofCommentDetailTimeSeriesEntity.TYPE_VOTE))
+                    ).build().find()
+                    
+                    val shortDetails = bofCommentDetailTimeSeriesBox.query(
                         BofCommentDetailTimeSeriesEntity_.path.equal(path)
-                            .and(BofCommentDetailTimeSeriesEntity_.username.equal(username))
+                            .and(BofCommentDetailTimeSeriesEntity_.username.equal(user.username))
+                            .and(BofCommentDetailTimeSeriesEntity_.type.equal(BofCommentDetailTimeSeriesEntity.TYPE_SHORT))
+                    ).build().find()
+                    
+                    val longDetails = bofCommentDetailTimeSeriesBox.query(
+                        BofCommentDetailTimeSeriesEntity_.path.equal(path)
+                            .and(BofCommentDetailTimeSeriesEntity_.username.equal(user.username))
+                            .and(BofCommentDetailTimeSeriesEntity_.type.equal(BofCommentDetailTimeSeriesEntity.TYPE_LONG))
+                    ).build().find()
+                    
+                    // 过滤到指定时间点之前的有效评价
+                    val effectiveVotes = if (timestamp != null) {
+                        voteDetails.filter { it.timestamp <= timestamp && BofCommentDetailTimeSeriesEntity.isValidScore(it.score) }
+                    } else {
+                        voteDetails.filter { BofCommentDetailTimeSeriesEntity.isValidScore(it.score) }
+                    }
+                    
+                    val effectiveShorts = if (timestamp != null) {
+                        shortDetails.filter { it.timestamp <= timestamp && BofCommentDetailTimeSeriesEntity.isValidScore(it.score) }
+                    } else {
+                        shortDetails.filter { BofCommentDetailTimeSeriesEntity.isValidScore(it.score) }
+                    }
+                    
+                    val effectiveLongs = if (timestamp != null) {
+                        longDetails.filter { it.timestamp <= timestamp && BofCommentDetailTimeSeriesEntity.isValidScore(it.score) }
+                    } else {
+                        longDetails.filter { BofCommentDetailTimeSeriesEntity.isValidScore(it.score) }
+                    }
+                    
+                    // 生成图表数据（按分数排序）
+                    val voteChartData = effectiveVotes
+                        .groupBy { it.workId }
+                        .mapValues { it.value.maxByOrNull { detail -> detail.timestamp } }
+                        .values
+                        .mapNotNull { it?.score }
+                        .sorted()
+                    
+                    val shortChartData = effectiveShorts
+                        .groupBy { it.workId }
+                        .mapValues { it.value.maxByOrNull { detail -> detail.timestamp } }
+                        .values
+                        .mapNotNull { it?.score }
+                        .sorted()
+                    
+                    val longChartData = effectiveLongs
+                        .groupBy { it.workId }
+                        .mapValues { it.value.maxByOrNull { detail -> detail.timestamp } }
+                        .values
+                        .mapNotNull { it?.score }
+                        .sorted()
+                    
+                    // 计算平均分
+                    val voteAve = if (targetStats.voteCount > 0) {
+                        targetStats.voteTotal.toDouble() / targetStats.voteCount
+                    } else {
+                        0.0
+                    }
+                    
+                    val shortAve = if (targetStats.shortCount > 0) {
+                        targetStats.shortTotal.toDouble() / targetStats.shortCount
+                    } else {
+                        0.0
+                    }
+                    
+                    val longAve = if (targetStats.longCount > 0) {
+                        targetStats.longTotal.toDouble() / targetStats.longCount
+                    } else {
+                        0.0
+                    }
+                    
+                    val totalAve = if (targetStats.total > 0) {
+                        (targetStats.voteTotal + targetStats.shortTotal + targetStats.longTotal).toDouble() / targetStats.total
+                    } else {
+                        0.0
+                    }
+                    
+                    // 创建 BofCommentUI 对象
+                    BofCommentUI(
+                        index = 0, // 排名将在外部设置
+                        user = user.currentUser,
+                        pattern = user.currentPattern,
+                        country = user.currentCountry,
+                        vote = targetStats.voteCount,
+                        voteTotal = targetStats.voteTotal,
+                        voteAve = voteAve,
+                        voteChartData = voteChartData,
+                        short = targetStats.shortCount,
+                        shortTotal = targetStats.shortTotal,
+                        shortAve = shortAve,
+                        shortComment = targetStats.shortComment,
+                        shortChartData = shortChartData,
+                        long = targetStats.longCount,
+                        longTotal = targetStats.longTotal,
+                        longAve = longAve,
+                        longComment = targetStats.longComment,
+                        longChartData = longChartData,
+                        total = targetStats.total,
+                        totalAve = totalAve
                     )
                 }
-                query.order(BofCommentDetailTimeSeriesEntity_.timestamp).build().find()
+                
+                commentUIList
             } catch (e: Exception) {
-                Log.e(TAG, "Error getting user detail records: ${e.message}", e)
-                emptyList()
-            }
-        }
-    }
-    
-    /**
-     * 获取指定作品的所有评价
-     */
-    suspend fun getWorkEvaluations(
-        path: String,
-        workId: String
-    ): List<BofCommentDetailTimeSeriesEntity> {
-        return withContext(Dispatchers.IO) {
-            try {
-                bofCommentDetailTimeSeriesBox.query(
-                    BofCommentDetailTimeSeriesEntity_.path.equal(path)
-                        .and(BofCommentDetailTimeSeriesEntity_.workId.equal(workId))
-                ).order(BofCommentDetailTimeSeriesEntity_.timestamp).build().find()
-            } catch (e: Exception) {
-                Log.e(TAG, "Error getting work evaluations: ${e.message}", e)
+                Log.e(TAG, "Error getting comment time series as UI: ${e.message}", e)
                 emptyList()
             }
         }

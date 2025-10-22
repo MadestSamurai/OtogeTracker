@@ -37,7 +37,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -93,7 +92,9 @@ internal fun BofCommentScreen(
     subtitle: String = "按总分排序",
     commentDisplayMode: Int = 0,
     scrollThreshold: Float = 50f,
-    setIsTabRowVisible: (Boolean) -> Unit = {}
+    setIsTabRowVisible: (Boolean) -> Unit = {},
+    showCaptureDialog: Boolean = false,
+    onCaptureDialogDismiss: () -> Unit = {}
 ) {
     // 计算屏幕宽度和内容宽度
     val density = LocalDensity.current
@@ -347,6 +348,32 @@ internal fun BofCommentScreen(
             }
         }
     }
+    
+    // 截图对话框
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val snackbarHostState = androidx.compose.material3.SnackbarHostState()
+    val showDialogState = remember { mutableStateOf(showCaptureDialog) }
+    
+    // 同步外部状态到内部状态
+    androidx.compose.runtime.LaunchedEffect(showCaptureDialog) {
+        showDialogState.value = showCaptureDialog
+    }
+    
+    // 当对话框关闭时通知外部
+    androidx.compose.runtime.LaunchedEffect(showDialogState.value) {
+        if (!showDialogState.value && showCaptureDialog) {
+            onCaptureDialogDismiss()
+        }
+    }
+    
+    com.madsam.otora.ui.bof.components.BofCommentCaptureDialog(
+        showDialog = showDialogState,
+        context = context,
+        snackbarHostState = snackbarHostState,
+        commentData = commentData,
+        title = title,
+        subtitle = subtitle
+    )
 }
 
 @Composable

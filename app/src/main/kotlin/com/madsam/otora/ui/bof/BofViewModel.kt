@@ -148,21 +148,35 @@ internal class BofViewModel(
         // 获取当前选中的 Range
         val selectedRange = bofScreenState.selectedRange.value
         
-        // 确定要使用的日期
-        val dateToFetch = if (selectedRange?.singleComment == true && selectedRange.commentDate.isNotEmpty()) {
-            // 如果是单日评论且有指定日期，直接使用该日期
-            selectedRange.commentDate
-        } else {
-            // 使用选择的日期
-            bofScreenState.selectedCurrentDate.value.toString()
+        if (selectedRange == null) {
+            Log.d(TAG, "No range selected")
+            return
         }
         
-        val data = bofLocalService.getBofttCommentByTime(dateToFetch)
+        val data = if (selectedRange.singleComment) {
+            // 使用固定评论数据（旧格式）
+            val dateToFetch = if (selectedRange.commentDate.isNotEmpty()) {
+                selectedRange.commentDate
+            } else {
+                bofScreenState.selectedCurrentDate.value.toString()
+            }
+            bofLocalService.getCommentByTime(dateToFetch)
+        } else {
+            // 使用时序评论数据（新格式）
+            val timestamp = CommonUtils.ymdToMillis(
+                bofScreenState.selectedCurrentDate.value.toString(),
+                CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
+            )
+            bofLocalService.getCommentTimeSeries(selectedRange.path, timestamp)
+        }
         
         if (data.isEmpty()) {
             Log.d(TAG, "No comment data available for the selected date and time.")
+            commentData.update { emptyList() }
             return
         }
+        
+        // 排序并设置排名
         val updatedData = data.sortedWith(compareByDescending(BofCommentUI::total)
                 .thenByDescending(BofCommentUI::long)
                 .thenByDescending(BofCommentUI::short)
@@ -175,6 +189,21 @@ internal class BofViewModel(
             entry.index = currentRank
         }
         commentData.update { updatedData }
+        
+        // 更新显示的时间字符串
+        if (selectedRange.singleComment) {
+            selectedTimeStrNoComp.update { 
+                if (selectedRange.commentDate.isNotEmpty()) {
+                    selectedRange.commentDate
+                } else {
+                    bofScreenState.selectedCurrentDate.value.toString()
+                }
+            }
+        } else {
+            selectedTimeStrNoComp.update { 
+                "${bofScreenState.selectedCurrentDate.value} ${CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)}"
+            }
+        }
     }
 
     // JSON解析加载 - 支持两时间点对比

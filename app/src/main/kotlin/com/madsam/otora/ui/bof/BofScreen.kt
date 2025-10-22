@@ -182,6 +182,7 @@ fun BofScreen(
     // 截图对话框状态
     var showEntryCaptureDialog by remember { mutableStateOf(false) }
     var showTeamCaptureDialog by remember { mutableStateOf(false) }
+    var showCommentCaptureDialog by remember { mutableStateOf(false) }
 
     fun selectTime() {
         showDateTimeRangePicker = true
@@ -506,6 +507,17 @@ fun BofScreen(
                                         )
                                     }
                                 }
+                                // Comment 页面显示截图按钮
+                                if (selectedTabIndex == 2) {
+                                    IconButton(onClick = { showCommentCaptureDialog = true }) {
+                                        Icon(
+                                            imageVector = Fa.Camera,
+                                            contentDescription = "Screenshot",
+                                            tint = Beige400,
+                                            modifier = Modifier.height(20.dp)
+                                        )
+                                    }
+                                }
                                 IconButton(onClick = { selectTime() }) {
                                     Icon(
                                         painter = rememberVectorPainter(image = Filled.Calendar),
@@ -611,7 +623,9 @@ fun BofScreen(
                                             subtitle = subtitle,
                                             commentDisplayMode = commentInfoMode,
                                             scrollThreshold = scrollThreshold,
-                                            setIsTabRowVisible = { isTabRowVisible = it }
+                                            setIsTabRowVisible = { isTabRowVisible = it },
+                                            showCaptureDialog = showCommentCaptureDialog,
+                                            onCaptureDialogDismiss = { showCommentCaptureDialog = false }
                                         )
                                     }
                                 }

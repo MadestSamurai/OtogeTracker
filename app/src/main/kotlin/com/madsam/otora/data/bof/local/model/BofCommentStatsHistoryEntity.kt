@@ -31,12 +31,12 @@ internal data class BofCommentStatsHistoryEntity(
     var minute: Int = 0,
     
     // 统计数据（Stats.v 中的字段）
-    var vote: Int = 0,           // v
+    var voteCount: Int = 0,      // v
     var voteTotal: Int = 0,      // vt
-    var short: Int = 0,          // s
+    var shortCount: Int = 0,     // s
     var shortTotal: Int = 0,     // st
     var shortComment: Int = 0,   // sc
-    var long: Int = 0,           // l
+    var longCount: Int = 0,      // l
     var longTotal: Int = 0,      // lt
     var longComment: Int = 0,    // lc
     var total: Int = 0           // t
@@ -51,12 +51,12 @@ internal data class BofCommentStatsHistoryEntity(
         day = 0,
         hour = 0,
         minute = 0,
-        vote = 0,
+        voteCount = 0,
         voteTotal = 0,
-        short = 0,
+        shortCount = 0,
         shortTotal = 0,
         shortComment = 0,
-        long = 0,
+        longCount = 0,
         longTotal = 0,
         longComment = 0,
         total = 0
