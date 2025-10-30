@@ -120,12 +120,8 @@ internal class ChunithmRequestService(private val context: Context) {
                 val response = httpClient.newCall(request).execute()
                 
                 if (response.isSuccessful) {
-                    val html = response.body?.string()
-                    if (html != null) {
-                        Ksoup.parse(html)
-                    } else {
-                        null
-                    }
+                    val html = response.body.string()
+                    Ksoup.parse(html)
                 } else {
                     Log.e(TAG, "HTTP error ${response.code} occurred in $link")
                     null
