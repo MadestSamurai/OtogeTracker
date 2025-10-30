@@ -6,11 +6,6 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toLowerCase
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.JsonUtil
-import com.madsam.otora.core.utils.SafeSoupUtil.safeAttr
-import com.madsam.otora.core.utils.SafeSoupUtil.safeFirst
-import com.madsam.otora.core.utils.SafeSoupUtil.safeFirstText
-import com.madsam.otora.core.utils.SafeSoupUtil.safeSelectFirst
-import com.madsam.otora.core.utils.SafeSoupUtil.safeText
 import com.madsam.otora.core.utils.ShareUtil
 import com.madsam.otora.core.utils.UserAgentUtils
 import com.madsam.otora.data.BASE_URL
@@ -45,10 +40,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.jsoup.Connection
-import org.jsoup.Connection.Method
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Document
+import com.fleeksoft.ksoup.nodes.Element
+import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -60,6 +57,7 @@ import kotlin.reflect.jvm.jvmErasure
 internal class ChunithmRequestService(private val context: Context) {
     companion object {
         private const val TAG = "ChunithmRequestService"
+        private val HONOR_STYLE_REGEX = Regex("honor_bg_([a-zA-Z0-9]+)")
     }
 
     private val serviceScope = CoroutineScope(Dispatchers.IO)
@@ -92,35 +90,70 @@ internal class ChunithmRequestService(private val context: Context) {
         .addLast(KotlinJsonAdapterFactory())
         .build()
 
-    private fun requestDataFromServer(
+    private val httpClient = OkHttpClient.Builder().build()
+
+    private suspend fun requestDataFromServer(
         link: String,
-        requestBody: String = "",
-        method: Method = Method.GET
-    ): Document {
-        lateinit var doc: Document
-        try {
-            val connect = Jsoup.connect(CommonUtils.encodeURL(link))
-            val header = connect.header("User-Agent", userAgent)
-            header.cookie("_t", cookie.token)
-            header.cookie("expires", cookie.expires)
-            header.cookie("Max-Age", cookie.maxAge)
-            header.cookie("path", cookie.path)
-            header.cookie("SameSite", cookie.sameSite)
-            if(cookie.gaKey.isNotEmpty()) {
-                header.cookie(cookie.gaKey, cookie.gaValue)
-                header.cookie("_ga", cookie.ga)
+        requestBody: Map<String, String> = emptyMap(),
+        isPost: Boolean = false
+    ): Document? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val encodedUrl = CommonUtils.encodeURL(link)
+                val cookies = buildCookieString()
+                
+                val requestBuilder = Request.Builder()
+                    .url(encodedUrl)
+                    .header("User-Agent", userAgent)
+                    .header("Cookie", cookies)
+                
+                val request = if (isPost && requestBody.isNotEmpty()) {
+                    val formBody = FormBody.Builder()
+                    requestBody.forEach { (key, value) ->
+                        formBody.add(key, value)
+                    }
+                    requestBuilder.post(formBody.build()).build()
+                } else {
+                    requestBuilder.get().build()
+                }
+                
+                val response = httpClient.newCall(request).execute()
+                
+                if (response.isSuccessful) {
+                    val html = response.body?.string()
+                    if (html != null) {
+                        Ksoup.parse(html)
+                    } else {
+                        null
+                    }
+                } else {
+                    Log.e(TAG, "HTTP error ${response.code} occurred in $link")
+                    null
+                }
+            } catch (e: IOException) {
+                Log.e(TAG, "IOException occurred in $link: ${e.message}")
+                null
             }
-            header.cookie("userId", cookie.userId)
-            header.cookie("friendCodeList", cookie.friendCodeList)
-            if (requestBody.isNotEmpty())
-                connect.requestBody(requestBody)
-            val response = connect.method(method).execute()
-            updateCookie(response)
-            doc = response.parse()
-        } catch (e: IOException) {
-            Log.e(TAG, "IOException occurred in $link: ${e.message}")
         }
-        return doc
+    }
+    
+    private fun buildCookieString(): String {
+        val cookies = mutableListOf(
+            "_t=${cookie.token}",
+            "expires=${cookie.expires}",
+            "Max-Age=${cookie.maxAge}",
+            "path=${cookie.path}",
+            "SameSite=${cookie.sameSite}",
+            "userId=${cookie.userId}",
+            "friendCodeList=${cookie.friendCodeList}"
+        )
+        
+        if (cookie.gaKey.isNotEmpty()) {
+            cookies.add("${cookie.gaKey}=${cookie.gaValue}")
+            cookies.add("_ga=${cookie.ga}")
+        }
+        
+        return cookies.joinToString("; ")
     }
 
     private inline fun <reified T> saveDataToLocal(data: T, filename: String) {
@@ -136,86 +169,107 @@ internal class ChunithmRequestService(private val context: Context) {
 
     private fun parseChuniUser(doc: Document): ChuniUserDTO {
         val chuniUserDTO = ChuniUserDTO()
-        chuniUserDTO.nameIn = doc.safeSelectFirst("div.player_name_in").safeText()
+        chuniUserDTO.nameIn = doc.selectFirst("div.player_name_in")?.text() ?: ""
 
-        chuniUserDTO.profileBackground = doc.safeSelectFirst("div.box_playerprofile")
-            .safeAttr("style")
-            .split("/").last()
-            .split(".").first()
-            .removePrefix("profile_")
+        chuniUserDTO.profileBackground = doc.selectFirst("div.box_playerprofile")
+            ?.attr("style")
+            ?.split("/")?.lastOrNull()
+            ?.split(".")?.firstOrNull()
+            ?.removePrefix("profile_")
+            ?: ""
 
-        chuniUserDTO.reborn = doc.safeSelectFirst("div.player_reborn").safeText()
-            .toIntOrNull() ?: 0
-        chuniUserDTO.level = doc.safeSelectFirst("div.player_lv").safeText()
-            .toIntOrNull() ?: 0
+        chuniUserDTO.reborn = doc.selectFirst("div.player_reborn")?.text()?.toIntOrNull() ?: 0
+        chuniUserDTO.level = doc.selectFirst("div.player_lv")?.text()?.toIntOrNull() ?: 0
 
-        chuniUserDTO.rating = doc.safeSelectFirst("div.player_rating_num_block")
-            .select("img")
-            .joinToString("") { img ->
-                val srcFile = img.safeAttr("src").split("/").last()
+        chuniUserDTO.rating = doc.selectFirst("div.player_rating_num_block")
+            ?.select("img")
+            ?.joinToString("") { img ->
+                val srcFile = img.attr("src").split("/").lastOrNull() ?: ""
 
                 if (srcFile.contains("comma")) "."
-                else srcFile.split(".").first().split("_").last()
-                    .toInt().toString()
-            }
-        chuniUserDTO.ratingMax = doc.safeSelectFirst("div.player_rating_max").safeText()
-        chuniUserDTO.overpower = doc.safeSelectFirst("div.player_overpower_text").safeText()
-        chuniUserDTO.lastPlay = doc.safeSelectFirst("div.player_lastplaydate_text").safeText()
+                else srcFile.split(".").firstOrNull()?.split("_")?.lastOrNull()
+                    ?.toIntOrNull()?.toString() ?: ""
+            } ?: ""
+        chuniUserDTO.ratingMax = doc.selectFirst("div.player_rating_max")?.text() ?: ""
+        chuniUserDTO.overpower = doc.selectFirst("div.player_overpower_text")?.text() ?: ""
+        chuniUserDTO.lastPlay = doc.selectFirst("div.player_lastplaydate_text")?.text() ?: ""
 
-        chuniUserDTO.roleImageUrl = doc.safeSelectFirst("div.player_chara_info img")
-            .safeAttr("src")
-        chuniUserDTO.roleBase = doc.safeSelectFirst("div.player_chara_info")
-            .safeAttr("style")
-            .split("/").last()
-            .split(".").first()
-            .split("_").last()
+        chuniUserDTO.roleImageUrl = doc.selectFirst("div.player_chara_info img")?.attr("src") ?: ""
+        chuniUserDTO.roleBase = doc.selectFirst("div.player_chara_info")
+            ?.attr("style")
+            ?.split("/")?.lastOrNull()
+            ?.split(".")?.firstOrNull()
+            ?.split("_")?.lastOrNull()
+            ?: ""
 
-        chuniUserDTO.honorBase = doc.safeSelectFirst("div.player_honor_short")
-            .safeAttr("style")
-            .split("/").last()
-            .split(".").first()
-            .split("_").last()
+        val (honorText, honorBase) = extractHonorInfo(doc)
+        chuniUserDTO.honorText = honorText
+        chuniUserDTO.honorBase = honorBase
 
-        chuniUserDTO.honorText = doc.safeSelectFirst("div.player_honor_text").safeText()
+        chuniUserDTO.classEmblemBase = doc.selectFirst("div.player_classemblem_base")
+            ?.selectFirst("img")?.attr("src") ?: ""
 
-        chuniUserDTO.classEmblemBase = doc.safeSelectFirst("div.player_classemblem_base")
-            .safeSelectFirst("img").safeAttr("src")
-
-        chuniUserDTO.classEmblemTop = doc.safeSelectFirst("div.player_classemblem_top")
-            .safeSelectFirst("img").safeAttr("src")
+        chuniUserDTO.classEmblemTop = doc.selectFirst("div.player_classemblem_top")
+            ?.selectFirst("img")?.attr("src") ?: ""
 
         return chuniUserDTO
     }
 
+    private fun extractHonorInfo(root: Element): Pair<String, String> {
+        val honorBlocks = root.select("div.player_honor_short")
+        if (honorBlocks.isEmpty()) {
+            return "" to ""
+        }
+
+        val honorTexts = honorBlocks.mapNotNull { honorBlock ->
+            honorBlock.selectFirst("div.player_honor_text span")
+                ?.text()
+                ?.takeIf { it.isNotBlank() }
+        }
+
+        val honorBase = honorBlocks.firstOrNull()
+            ?.attr("style")
+            ?.let { style ->
+                HONOR_STYLE_REGEX.find(style)?.groupValues?.getOrNull(1)
+                    ?: style.split("/").lastOrNull()
+                        ?.split(".")?.firstOrNull()
+                        ?.split("_")?.lastOrNull()
+            }
+            ?: ""
+
+        val honorText = honorTexts.joinToString(separator = " / ")
+        return honorText to honorBase
+    }
+
     private fun parseChuniPenguin(doc: Document): ChuniPenguinDTO {
         return ChuniPenguinDTO().apply {
-            back = doc.safeSelectFirst("div.avatar_back img").safeAttr("src")
-            skinfootR = doc.safeSelectFirst("div.avatar_skinfoot_r img").safeAttr("src")
-            skinfootL = doc.safeSelectFirst("div.avatar_skinfoot_l img").safeAttr("src")
-            skin = doc.safeSelectFirst("div.avatar_skin img").safeAttr("src")
-            wear = doc.safeSelectFirst("div.avatar_wear img").safeAttr("src")
-            face = doc.safeSelectFirst("div.avatar_face img").safeAttr("src")
-            faceCover = doc.safeSelectFirst("div.avatar_faceCover img").safeAttr("src")
-            head = doc.safeSelectFirst("div.avatar_head img").safeAttr("src")
-            handR = doc.safeSelectFirst("div.avatar_hand_r img").safeAttr("src")
-            handL = doc.safeSelectFirst("div.avatar_hand_l img").safeAttr("src")
-            itemR = doc.safeSelectFirst("div.avatar_item_r img").safeAttr("src")
-            itemL = doc.safeSelectFirst("div.avatar_item_l img").safeAttr("src")
+            back = doc.selectFirst("div.avatar_back img")?.attr("src") ?: ""
+            skinfootR = doc.selectFirst("div.avatar_skinfoot_r img")?.attr("src") ?: ""
+            skinfootL = doc.selectFirst("div.avatar_skinfoot_l img")?.attr("src") ?: ""
+            skin = doc.selectFirst("div.avatar_skin img")?.attr("src") ?: ""
+            wear = doc.selectFirst("div.avatar_wear img")?.attr("src") ?: ""
+            face = doc.selectFirst("div.avatar_face img")?.attr("src") ?: ""
+            faceCover = doc.selectFirst("div.avatar_faceCover img")?.attr("src") ?: ""
+            head = doc.selectFirst("div.avatar_head img")?.attr("src") ?: ""
+            handR = doc.selectFirst("div.avatar_hand_r img")?.attr("src") ?: ""
+            handL = doc.selectFirst("div.avatar_hand_l img")?.attr("src") ?: ""
+            itemR = doc.selectFirst("div.avatar_item_r img")?.attr("src") ?: ""
+            itemL = doc.selectFirst("div.avatar_item_l img")?.attr("src") ?: ""
         }
     }
 
     private fun parseChuniUserExtend(doc: Document): ChuniUserExtendDTO {
         val chuniUserExtendDTO = ChuniUserExtendDTO()
-        chuniUserExtendDTO.friendCode = doc.getElementsByClass("user_data_friend_code").safeFirst()
-            .getElementsByAttributeValue("style", "display:none;").text()
-        chuniUserExtendDTO.point = doc.getElementsByClass("user_data_point").safeFirstText()
-        chuniUserExtendDTO.totalPoint = doc.getElementsByClass("user_data_total_point").safeFirstText()
-        chuniUserExtendDTO.playCount = doc.getElementsByClass("user_data_play_count").safeFirstText()
+        chuniUserExtendDTO.friendCode = doc.getElementsByClass("user_data_friend_code").firstOrNull()
+            ?.getElementsByAttributeValue("style", "display:none;")?.text() ?: ""
+        chuniUserExtendDTO.point = doc.getElementsByClass("user_data_point").firstOrNull()?.text() ?: ""
+        chuniUserExtendDTO.totalPoint = doc.getElementsByClass("user_data_total_point").firstOrNull()?.text() ?: ""
+        chuniUserExtendDTO.playCount = doc.getElementsByClass("user_data_play_count").firstOrNull()?.text() ?: ""
         return chuniUserExtendDTO
     }
 
-    private fun requestPlayerData() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData")
+    private suspend fun requestPlayerData() {
+        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData") ?: return
 
         val chuniUser = parseChuniUser(doc)
         val emptyCount = chuniUser::class.memberProperties.count {
@@ -243,18 +297,18 @@ internal class ChunithmRequestService(private val context: Context) {
         return chuniRating
     }
 
-    private fun requestRatingBest() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailBest")
+    private suspend fun requestRatingBest() {
+        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailBest") ?: return
         saveDataToLocal(parseRatingData(doc), "chuniRatingBest.json")
     }
 
-    private fun requestRatingRecent() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailRecent")
+    private suspend fun requestRatingRecent() {
+        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailRecent") ?: return
         saveDataToLocal(parseRatingData(doc), "chuniRatingRecent.json")
     }
 
-    private fun requestRatingNext() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailNext")
+    private suspend fun requestRatingNext() {
+        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailNext") ?: return
         saveDataToLocal(parseRatingData(doc), "chuniRatingNext.json")
     }
 
@@ -295,8 +349,8 @@ internal class ChunithmRequestService(private val context: Context) {
         return chuniMapDTOS
     }
 
-    private fun requestMapRecord() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/record")
+    private suspend fun requestMapRecord() {
+        val doc = requestDataFromServer("$CHUNITHM_URL/record") ?: return
         saveDataToLocal(parseChuniMaps(doc), "chuniMapRecord.json")
     }
 
@@ -368,8 +422,8 @@ internal class ChunithmRequestService(private val context: Context) {
         return chuniPlayLog
     }
 
-    private fun requestPlayLog() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/record/playlog")
+    private suspend fun requestPlayLog() {
+        val doc = requestDataFromServer("$CHUNITHM_URL/record/playlog") ?: return
         saveDataToLocal(parsePlayLog(doc), "chuniPlayLog.json")
     }
 
@@ -509,24 +563,28 @@ internal class ChunithmRequestService(private val context: Context) {
         val chunithmObjectBoxService = ChunithmObjectBoxService()
         
         for (diff in diffArray) {
+            val requestBody = mapOf(
+                "genre" to "99",
+                "token" to cookie.token
+            )
             val doc = requestDataFromServer(
                 link = "$CHUNITHM_URL/record/musicGenre/send$diff",
-                requestBody = "genre=99&token=${cookie.token}",
-                method = Method.POST
-            )
-            val playRecordData = parsePlayRecord(doc, diff)
+                requestBody = requestBody,
+                isPost = true
+            ) ?: continue
             
+            val playRecordData = parsePlayRecord(doc, diff)
             chunithmObjectBoxService.savePlayRecordData(playRecordData, diff)
         }
     }
 
     private fun parseChuniUserRole(doc: Document): ChuniUserRoleDTO {
-        val roleName = doc.selectFirst("div.character_image_box_name").safeText()
-        val roleImageUrl = doc.selectFirst("div.character_image_box img").safeAttr("src")
+        val roleName = doc.selectFirst("div.character_image_box_name")?.text() ?: ""
+        val roleImageUrl = doc.selectFirst("div.character_image_box img")?.attr("src") ?: ""
         val roleLevel = doc.select("div.character_lv_box_num img")
             .joinToString(separator = "") { img ->
                 Regex("num_lv_(\\d+)")
-                    .find(img.safeAttr("src"))
+                    .find(img.attr("src"))
                     ?.groupValues?.get(1) ?: ""
             }
 
@@ -542,7 +600,7 @@ internal class ChunithmRequestService(private val context: Context) {
         penguinContainer?.select("div.ticket_block_block")?.forEach { block ->
             block.select("div.ticket_hold_mini span.font_large")
                 .forEach { span ->
-                    penguinCounts.add(span.safeText().toIntOrNull() ?: 0)
+                    penguinCounts.add(span.text().toIntOrNull() ?: 0)
                 }
         }
 
@@ -554,8 +612,8 @@ internal class ChunithmRequestService(private val context: Context) {
         )
     }
 
-    private fun requestCollection() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/collection")
+    private suspend fun requestCollection() {
+        val doc = requestDataFromServer("$CHUNITHM_URL/collection") ?: return
         saveDataToLocal(parseChuniUserRole(doc), "chuniUserRole.json")
         saveDataToLocal(parseChuniStatue(doc), "chuniStatue.json")
     }
@@ -566,54 +624,49 @@ internal class ChunithmRequestService(private val context: Context) {
         val friendBlocks = doc.select("div.friend_block")
         friendBlocks.forEach { block ->
             // 获取角色相关信息
-            val roleImageUrl =
-                block.safeSelectFirst("div.player_data_left div.player_chara_info img")
-                    .safeAttr("src")
+            val roleImageUrl = block.selectFirst("div.player_data_left div.player_chara_info img")
+                ?.attr("src") ?: ""
 
-            val roleBase = block.safeSelectFirst("div.player_data_left div.player_chara_info")
-                .safeAttr("style").split("/").last()
-                .split(".").first()
-                .split("_").last()
+            val roleBase = block.selectFirst("div.player_data_left div.player_chara_info")
+                ?.attr("style")?.split("/")?.lastOrNull()
+                ?.split(".")?.firstOrNull()
+                ?.split("_")?.lastOrNull()
+                ?: ""
 
             // 获取背景板信息
-            val profileBackground = block.safeSelectFirst("div.box_playerprofile")
-                .safeAttr("style").split("/").last()
-                .split(".").first()
-                .removePrefix("profile_")
+            val profileBackground = block.selectFirst("div.box_playerprofile")
+                ?.attr("style")?.split("/")?.lastOrNull()
+                ?.split(".")?.firstOrNull()
+                ?.removePrefix("profile_")
+                ?: ""
 
-            // 获取荣誉相关信息
-            val honorText = block.safeSelectFirst("div.player_honor_text span").safeText()
-            val honorBase = block.safeSelectFirst("div.player_honor_short")
-                .safeAttr("style")
-                .split("/").last()
-                .split(".").first()
-                .split("_").last()
+            // 获取荣誉相关信息（支持多个荣誉）
+            val (honorText, honorBase) = extractHonorInfo(block)
 
-            val classEmblemBase = block.safeSelectFirst("div.player_classemblem_base")
-                .safeSelectFirst("img").safeAttr("src")
-            val classEmblemTop = block.safeSelectFirst("div.player_classemblem_top")
-                .safeSelectFirst("img").safeAttr("src")
+            val classEmblemBase = block.selectFirst("div.player_classemblem_base")
+                ?.selectFirst("img")?.attr("src") ?: ""
+            val classEmblemTop = block.selectFirst("div.player_classemblem_top")
+                ?.selectFirst("img")?.attr("src") ?: ""
 
             // 获取基本信息
-            val reborn = block.safeSelectFirst("div.player_reborn").safeText().toIntOrNull() ?: 0
-            val level = block.safeSelectFirst("div.player_lv").safeText().toIntOrNull() ?: 0
-            val friendName = block.safeSelectFirst("div.player_name_in form a").safeText()
-            val friendCode = block.safeSelectFirst("input[name=idx]").safeAttr("value")
-            val ratingMax = block.safeSelectFirst("div.player_rating_max").safeText()
-            val rating = block.safeSelectFirst("div.player_rating_num_block")
-                .select("img")
-                .joinToString("") { img ->
-                    val srcFile = img.safeAttr("src")
-                        .split("/").last()
+            val reborn = block.selectFirst("div.player_reborn")?.text()?.toIntOrNull() ?: 0
+            val level = block.selectFirst("div.player_lv")?.text()?.toIntOrNull() ?: 0
+            val friendName = block.selectFirst("div.player_name_in form a")?.text() ?: ""
+            val friendCode = block.selectFirst("input[name=idx]")?.attr("value") ?: ""
+            val ratingMax = block.selectFirst("div.player_rating_max")?.text() ?: ""
+            val rating = block.selectFirst("div.player_rating_num_block")
+                ?.select("img")
+                ?.joinToString("") { img ->
+                    val srcFile = img.attr("src").split("/").lastOrNull() ?: ""
 
                     if (srcFile.contains("comma")) "."
-                    else srcFile.split(".").first()
-                        .split("_").last()
-                        .toInt()
-                        .toString()
-                }
-            val overpower = block.safeSelectFirst("div.player_overpower_text").safeText()
-            val lastPlayDate = block.safeSelectFirst("div.player_lastplaydate_text").safeText()
+                    else srcFile.split(".").firstOrNull()
+                        ?.split("_")?.lastOrNull()
+                        ?.toIntOrNull()
+                        ?.toString() ?: ""
+                } ?: ""
+            val overpower = block.selectFirst("div.player_overpower_text")?.text() ?: ""
+            val lastPlayDate = block.selectFirst("div.player_lastplaydate_text")?.text() ?: ""
 
             // 检查按钮状态
             val isFavorite = block.selectFirst("div.friend_favorite_off") != null
@@ -647,7 +700,7 @@ internal class ChunithmRequestService(private val context: Context) {
     private suspend fun requestFriend(
         onProgress: ((Float, String) -> Unit)? = null
     ) {
-        val doc = requestDataFromServer("$CHUNITHM_URL/friend/")
+        val doc = requestDataFromServer("$CHUNITHM_URL/friend/") ?: return
         val friendListData = parseFriendList(doc)
         
         val chunithmObjectBoxService = ChunithmObjectBoxService()
@@ -696,7 +749,7 @@ internal class ChunithmRequestService(private val context: Context) {
                 Regex("num_lv_(\\d+)").find(src)?.groupValues?.get(1)?.toIntOrNull()
             } ?: 0
         val totalDays = doc.select("div.bonus_block_off div.bonus_days_block")
-            .last()
+            .lastOrNull()
             ?.text()
             ?.let { text ->
                 Regex("第 (\\d+) 天").find(text)?.groupValues?.get(1)?.toIntOrNull()
@@ -709,8 +762,8 @@ internal class ChunithmRequestService(private val context: Context) {
         )
     }
 
-    private fun requestLoginBonus() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/loginBonus")
+    private suspend fun requestLoginBonus() {
+        val doc = requestDataFromServer("$CHUNITHM_URL/loginBonus") ?: return
         saveDataToLocal(parseLoginBonus(doc), "chuniLoginBonus.json")
     }
 
@@ -768,13 +821,18 @@ internal class ChunithmRequestService(private val context: Context) {
 
     private suspend fun requestFriendScoreList(friendCode: String, difficulty: Int) {
         try {
-            val requestBody = "genre=99&friend=$friendCode&radio_diff=$difficulty&token=${cookie.token}"
+            val requestBody = mapOf(
+                "genre" to "99",
+                "friend" to friendCode,
+                "radio_diff" to difficulty.toString(),
+                "token" to cookie.token
+            )
             
             val doc = requestDataFromServer(
                 link = "$CHUNITHM_URL/friend/genreVs/sendBattleStart/",
                 requestBody = requestBody,
-                method = Method.POST
-            )
+                isPost = true
+            ) ?: return
             
             val friendScoreData = parseFriendScoreList(doc)
             
@@ -831,20 +889,6 @@ internal class ChunithmRequestService(private val context: Context) {
         } catch (e: IOException) {
             Log.e(TAG, "IOException occurred in $dataType: ${e.message}")
             null
-        }
-    }
-
-    private fun updateCookie(response: Connection.Response) {
-        val cookies = response.cookies()
-
-        cookies.forEach { (name, value) ->
-            when (name) {
-                "_t" -> cookie.token = value
-                "expires" -> cookie.expires = value
-                "userId" -> cookie.userId = value
-                "_ga" -> cookie.ga = value
-                cookie.gaKey -> cookie.gaValue = value
-            }
         }
     }
 

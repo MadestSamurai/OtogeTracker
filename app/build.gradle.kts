@@ -130,6 +130,9 @@ dependencies {
     // UtilCode
     implementation(libs.utilcode)
 
-    // JSoup
+    // JSoup (legacy, will be removed)
     implementation(libs.jsoup)
+    
+    // Ksoup (Kotlin HTML parser)
+    implementation(libs.ksoup)
 }

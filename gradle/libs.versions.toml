@@ -16,6 +16,7 @@ androidxConstraintlayoutCompose = "1.1.1"
 coilVersion = "2.7.0"
 foundation = "1.9.3"
 jsoup = "1.21.2"
+ksoup = "0.1.9"
 kotlin = "2.2.20"
 loggingInterceptor = "5.2.0"
 materialVersion = "1.4.0"
@@ -49,6 +50,7 @@ compose-shimmer = { module = "com.valentinilk.shimmer:compose-shimmer", version.
 composedatepicker = { module = "com.github.vsnappy1:ComposeDatePicker", version.ref = "composedatepicker" }
 foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
 objectbox-android = { module = "io.objectbox:objectbox-android", version.ref = "objectbox" }
 objectbox-android-objectbrowser = { module = "io.objectbox:objectbox-android-objectbrowser", version.ref = "objectbox" }

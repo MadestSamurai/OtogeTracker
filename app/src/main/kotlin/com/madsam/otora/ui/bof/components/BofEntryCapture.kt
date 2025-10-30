@@ -25,8 +25,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.madsam.otora.core.utils.ImageUtils
 import com.madsam.otora.ui.common.RankingItem
 import com.madsam.otora.ui.common.RankingTableConfig
+import com.madsam.otora.ui.common.RankingTableForCapture
 import dev.shreyaspatil.capturable.capturable
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.launch
@@ -43,19 +45,20 @@ fun BofEntryCaptureDialog(
     config: RankingTableConfig
 ) {
     val scope = rememberCoroutineScope()
-    
+
     if (showDialog.value) {
         // 过滤掉总分小于等于0的数据
         val filteredItems = items.filter { it.score.toDouble() > 0 }
-        
+
         // 分批，每100行一组
         val batchSize = 100
         val batches = filteredItems.chunked(batchSize)
         val controllers = List(batches.size) { rememberCaptureController() }
-        
+
         // 计算全局最大分数（所有items，不是每批单独计算）
         val globalCurrentMaxScore = filteredItems.maxOfOrNull { it.score.toDouble() } ?: 1.0
-        val globalCompareMaxScore = filteredItems.mapNotNull { it.compareScore?.toDouble() }.maxOfOrNull { it } ?: 0.0
+        val globalCompareMaxScore =
+            filteredItems.mapNotNull { it.compareScore?.toDouble() }.maxOfOrNull { it } ?: 0.0
         val globalMaxScore = maxOf(globalCurrentMaxScore, globalCompareMaxScore)
 
         AlertDialog(
@@ -67,7 +70,7 @@ fun BofEntryCaptureDialog(
                         text = "将保存${config.title}内容到相册，分批截图后自动拼接（每批100行，最大高度30000像素）",
                         modifier = Modifier.padding(8.dp)
                     )
-                    
+
                     // 渲染所有批次（隐藏但会被渲染用于截图）
                     batches.forEachIndexed { index, batch ->
                         Box(
@@ -92,9 +95,14 @@ fun BofEntryCaptureDialog(
                             }
                         }
                     }
-                    
+
                     if (batches.size > 1) {
-                        Text(text = "共${batches.size}批，截图时会自动拼接全部内容", fontSize = 13.sp, color = Color.Gray, modifier = Modifier.padding(top = 8.dp))
+                        Text(
+                            text = "共${batches.size}批，截图时会自动拼接全部内容",
+                            fontSize = 13.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
                     }
                 }
             },
@@ -107,11 +115,12 @@ fun BofEntryCaptureDialog(
                             for ((i, _) in batches.withIndex()) {
                                 val bmp = controllers[i].captureAsync().await().asAndroidBitmap()
                                 // 将硬件加速的bitmap转换为软件bitmap，避免"Software rendering doesn't support hardware bitmaps"错误
-                                val softwareBitmap = if (bmp.config == android.graphics.Bitmap.Config.HARDWARE) {
-                                    bmp.copy(android.graphics.Bitmap.Config.ARGB_8888, false)
-                                } else {
-                                    bmp
-                                }
+                                val softwareBitmap =
+                                    if (bmp.config == android.graphics.Bitmap.Config.HARDWARE) {
+                                        bmp.copy(android.graphics.Bitmap.Config.ARGB_8888, false)
+                                    } else {
+                                        bmp
+                                    }
                                 bitmaps.add(softwareBitmap)
                                 // 如果创建了副本，回收原始bitmap
                                 if (softwareBitmap != bmp) {
@@ -119,7 +128,7 @@ fun BofEntryCaptureDialog(
                                 }
                             }
                             // 拼接所有bitmap，最大高度30000
-                            val finalBitmap = com.madsam.otora.core.utils.ImageUtils.combineBitmaps(bitmaps, maxHeight = 30000)
+                            val finalBitmap = ImageUtils.combineBitmaps(bitmaps, maxHeight = 30000)
                             val current = LocalDateTime.now()
                             val formatter = DateTimeFormatter.ofPattern("MMddHHmm")
                             val timeStr = current.format(formatter)
@@ -131,7 +140,7 @@ fun BofEntryCaptureDialog(
                                 config.title.contains("综合") -> "BOF_Composite"
                                 else -> "BOF_Ranking"
                             }
-                            com.madsam.otora.core.utils.ImageUtils.saveBitmapToGallery(
+                            ImageUtils.saveBitmapToGallery(
                                 context = context,
                                 bitmap = finalBitmap,
                                 title = "${filePrefix}_$timeStr",
@@ -172,7 +181,7 @@ internal fun BofEntryCaptureContent(
             .width(900.dp)
             .background(Color.Black)
     ) {
-        com.madsam.otora.ui.common.RankingTableForCapture(
+        RankingTableForCapture(
             items = items,
             config = config,
             showTitle = showTitle,
