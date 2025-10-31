@@ -6,28 +6,28 @@ capturableVersion = "3.0.1"
 composedatepicker = "2.2.0"
 composeShimmer = "1.3.3"
 coreSplashscreen = "1.1.0-rc01"
+datastore = "1.1.7"
 glanceAppwidget = "1.1.1"
 glanceMaterial3 = "1.1.1"
 objectbox = "5.0.1"
 moshiKotlin = "1.15.2"
 retrofit = "3.0.0"
-androidxComposeBom = "2025.10.00"
+androidxComposeBom = "2025.10.01"
 androidxConstraintlayoutCompose = "1.1.1"
 coilVersion = "2.7.0"
-foundation = "1.9.3"
-jsoup = "1.21.2"
-ksoup = "0.1.9"
-kotlin = "2.2.20"
-loggingInterceptor = "5.2.0"
+foundation = "1.9.4"
+ksoup = "0.2.5"
+kotlin = "2.2.21"
+loggingInterceptor = "5.2.1"
 materialVersion = "1.4.0"
 androidGradle = "8.13.0"
 navigation = "2.9.5"
-okhttp = "5.2.0"
-runtime = "1.9.3"
+okhttp = "5.2.1"
+runtime = "1.9.4"
 utilcode = "1.30.7"
 vico = "2.2.1"
-uiAndroid = "1.9.3"
-foundationLayout = "1.9.3"
+uiAndroid = "1.9.4"
+foundationLayout = "1.9.4"
 
 [libraries]
 accompanist-themeadapter-material3 = { module = "com.google.accompanist:accompanist-themeadapter-material3", version.ref = "accompanistThemeadapterMaterial3" }
@@ -38,6 +38,7 @@ androidx-compose-compose-bom = { module = "androidx.compose:compose-bom", versio
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-constraintlayout-constraintlayout-compose = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "androidxConstraintlayoutCompose" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 androidx-glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glanceMaterial3" }
 androidx-glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glanceAppwidget" }
 androidx-material3 = { module = "androidx.compose.material3:material3", version.ref = "materialVersion" }
@@ -49,7 +50,6 @@ coil-kt-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil
 compose-shimmer = { module = "com.valentinilk.shimmer:compose-shimmer", version.ref = "composeShimmer" }
 composedatepicker = { module = "com.github.vsnappy1:ComposeDatePicker", version.ref = "composedatepicker" }
 foundation = { module = "androidx.compose.foundation:foundation", version.ref = "foundation" }
-jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 ksoup = { module = "com.fleeksoft.ksoup:ksoup", version.ref = "ksoup" }
 kotlin-bom = { module = "org.jetbrains.kotlin:kotlin-bom", version.ref = "kotlin" }
 objectbox-android = { module = "io.objectbox:objectbox-android", version.ref = "objectbox" }

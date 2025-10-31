@@ -13,6 +13,12 @@ internal data class ChuniUserDTO(
     var roleBase: String = "",
     var classEmblemTop: String = "",
     var classEmblemBase: String = "",
-    var honorText: String = "",
-    var honorBase: String = ""
+    // 荣誉称号（支持最多3个）
+    var honor1: String = "",
+    var honor2: String = "",
+    var honor3: String = "",
+    // 荣誉背景类型（支持最多3个）
+    var honorBase1: String = "",
+    var honorBase2: String = "",
+    var honorBase3: String = ""
 )

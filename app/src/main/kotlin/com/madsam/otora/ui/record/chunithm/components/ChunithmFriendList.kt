@@ -122,7 +122,9 @@ internal fun FriendCard(
         ) {
             val (
                 charaImage,
-                honor,
+                honor1,
+                honor2,
+                honor3,
                 reborn,
                 rebornBase,
                 lvText,
@@ -159,34 +161,99 @@ internal fun FriendCard(
                     )
             )
 
-            Text(
-                text = chuniFriend.honorText,
-                modifier = Modifier
-                    .constrainAs(honor) {
-                        top.linkTo(parent.top)
-                        start.linkTo(charaImage.end)
-                        end.linkTo(parent.end)
-                    }
-                    .width(width - 100.dp)
-                    .padding(top = 5.dp, end = 5.dp)
-                    .clip(RoundedCornerShape(5.dp))
-                    .background(
-                        when (chuniFriend.honorBase) {
-                            "silver" -> SilverGradientBg
-                            "gold" -> GoldGradientBg
-                            "platina" -> PlatinumGradientBg
-                            "rainbow" -> RainbowGradientBg
-                            else -> WhiteGradientBg
+            // Honor 1
+            if (chuniFriend.honor1.isNotBlank()) {
+                Text(
+                    text = chuniFriend.honor1,
+                    modifier = Modifier
+                        .constrainAs(honor1) {
+                            top.linkTo(parent.top)
+                            start.linkTo(charaImage.end)
                         }
-                    )
-                    .basicMarquee(spacing = MarqueeSpacing(15.ndp())),
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = Color.Black,
-                fontSize = 16.sp,
-                fontFamily = sarasaBold,
-            )
+                        .width((width - 100.dp) / 3 - 3.dp)
+                        .padding(top = 5.dp, end = 1.5.dp)
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(
+                            when (chuniFriend.honorBase1) {
+                                "silver" -> SilverGradientBg
+                                "gold" -> GoldGradientBg
+                                "platina" -> PlatinumGradientBg
+                                "rainbow" -> RainbowGradientBg
+                                else -> WhiteGradientBg
+                            }
+                        )
+                        .basicMarquee(spacing = MarqueeSpacing(15.ndp())),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.Black,
+                    fontSize = 14.sp,
+                    fontFamily = sarasaBold,
+                )
+            }
+
+            // Honor 2
+            if (chuniFriend.honor2.isNotBlank()) {
+                Text(
+                    text = chuniFriend.honor2,
+                    modifier = Modifier
+                        .constrainAs(honor2) {
+                            top.linkTo(parent.top)
+                            start.linkTo(honor1.end)
+                        }
+                        .width((width - 100.dp) / 3 - 3.dp)
+                        .padding(start = 1.5.dp, top = 5.dp, end = 1.5.dp)
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(
+                            when (chuniFriend.honorBase2) {
+                                "silver" -> SilverGradientBg
+                                "gold" -> GoldGradientBg
+                                "platina" -> PlatinumGradientBg
+                                "rainbow" -> RainbowGradientBg
+                                else -> WhiteGradientBg
+                            }
+                        )
+                        .basicMarquee(spacing = MarqueeSpacing(15.ndp())),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.Black,
+                    fontSize = 14.sp,
+                    fontFamily = sarasaBold,
+                )
+            }
+
+            // Honor 3
+            if (chuniFriend.honor3.isNotBlank()) {
+                Text(
+                    text = chuniFriend.honor3,
+                    modifier = Modifier
+                        .constrainAs(honor3) {
+                            top.linkTo(parent.top)
+                            start.linkTo(honor2.end)
+                            end.linkTo(parent.end)
+                        }
+                        .width((width - 100.dp) / 3 - 3.dp)
+                        .padding(start = 1.5.dp, top = 5.dp, end = 5.dp)
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(
+                            when (chuniFriend.honorBase3) {
+                                "silver" -> SilverGradientBg
+                                "gold" -> GoldGradientBg
+                                "platina" -> PlatinumGradientBg
+                                "rainbow" -> RainbowGradientBg
+                                else -> WhiteGradientBg
+                            }
+                        )
+                        .basicMarquee(spacing = MarqueeSpacing(15.ndp())),
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color.Black,
+                    fontSize = 14.sp,
+                    fontFamily = sarasaBold,
+                )
+            }
 
             if (chuniFriend.reborn > 0) {
                 Image(
@@ -195,7 +262,7 @@ internal fun FriendCard(
                     contentDescription = "Reborn",
                     modifier = Modifier
                         .constrainAs(rebornBase) {
-                            top.linkTo(honor.bottom)
+                            top.linkTo(honor1.bottom)
                             start.linkTo(charaImage.end)
                         }
                         .size(16.dp)
@@ -226,7 +293,7 @@ internal fun FriendCard(
                             top.linkTo(rebornBase.top, margin = 12.dp)
                             start.linkTo(rebornBase.start)
                         } else {
-                            top.linkTo(honor.bottom, margin = 6.dp)
+                            top.linkTo(honor1.bottom, margin = 6.dp)
                             start.linkTo(charaImage.end)
                         }
                     }
@@ -270,7 +337,7 @@ internal fun FriendCard(
                 modifier = Modifier
                     .padding(horizontal = 5.dp)
                     .constrainAs(classEmblemBase) {
-                        top.linkTo(honor.bottom)
+                        top.linkTo(honor1.bottom)
                         end.linkTo(parent.end)
                     }
                     .width(60.dp)

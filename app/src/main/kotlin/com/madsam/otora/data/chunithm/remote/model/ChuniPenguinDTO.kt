@@ -13,4 +13,5 @@ internal data class ChuniPenguinDTO(
     var handL : String = "",
     var itemR : String = "",
     var itemL : String = "",
+    var front : String = "",  // 新增：前景装饰
 )

@@ -18,6 +18,7 @@ import com.madsam.otora.data.adapter.SafeIntPairAdapter
 import com.madsam.otora.data.adapter.SafeLongAdapter
 import com.madsam.otora.data.adapter.SafeStringAdapter
 import com.madsam.otora.data.adapter.SafeStringListAdapter
+import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserDataStore
 import com.madsam.otora.data.chunithm.local.objectbox.ChunithmObjectBoxService
 import com.madsam.otora.data.chunithm.remote.model.ChuniCookieDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
@@ -167,40 +168,60 @@ internal class ChunithmRequestService(private val context: Context) {
         val chuniUserDTO = ChuniUserDTO()
         chuniUserDTO.nameIn = doc.selectFirst("div.player_name_in")?.text() ?: ""
 
+        // 更健壮的背景解析，直接从 style 属性中提取
         chuniUserDTO.profileBackground = doc.selectFirst("div.box_playerprofile")
             ?.attr("style")
-            ?.split("/")?.lastOrNull()
-            ?.split(".")?.firstOrNull()
-            ?.removePrefix("profile_")
-            ?: ""
+            ?.let { style ->
+                // 匹配 url(...) 中的内容
+                Regex("url\\(([^)]+)\\)").find(style)?.groupValues?.getOrNull(1)
+                    ?.split("/")?.lastOrNull()
+                    ?.split(".")?.firstOrNull()
+                    ?.removePrefix("profile_")
+            } ?: ""
 
         chuniUserDTO.reborn = doc.selectFirst("div.player_reborn")?.text()?.toIntOrNull() ?: 0
         chuniUserDTO.level = doc.selectFirst("div.player_lv")?.text()?.toIntOrNull() ?: 0
 
+        // 简化 rating 解析逻辑
         chuniUserDTO.rating = doc.selectFirst("div.player_rating_num_block")
             ?.select("img")
             ?.joinToString("") { img ->
                 val srcFile = img.attr("src").split("/").lastOrNull() ?: ""
 
-                if (srcFile.contains("comma")) "."
-                else srcFile.split(".").firstOrNull()?.split("_")?.lastOrNull()
-                    ?.toIntOrNull()?.toString() ?: ""
+                when {
+                    srcFile.contains("comma") -> "."
+                    else -> {
+                        // 从文件名中提取数字，如 rating_platinum_01.png -> 01 -> 1
+                        srcFile.split(".").firstOrNull()
+                            ?.split("_")?.lastOrNull()
+                            ?.padStart(1, '0') // 保持原始格式
+                            ?: ""
+                    }
+                }
             } ?: ""
         chuniUserDTO.ratingMax = doc.selectFirst("div.player_rating_max")?.text() ?: ""
         chuniUserDTO.overpower = doc.selectFirst("div.player_overpower_text")?.text() ?: ""
         chuniUserDTO.lastPlay = doc.selectFirst("div.player_lastplaydate_text")?.text() ?: ""
 
         chuniUserDTO.roleImageUrl = doc.selectFirst("div.player_chara_info img")?.attr("src") ?: ""
+        
+        // 使用正则表达式更精确地提取 charaframe 类型
         chuniUserDTO.roleBase = doc.selectFirst("div.player_chara_info")
             ?.attr("style")
-            ?.split("/")?.lastOrNull()
-            ?.split(".")?.firstOrNull()
-            ?.split("_")?.lastOrNull()
-            ?: ""
+            ?.let { style ->
+                Regex("url\\(([^)]+)\\)").find(style)?.groupValues?.getOrNull(1)
+                    ?.split("/")?.lastOrNull()
+                    ?.split(".")?.firstOrNull()
+                    ?.removePrefix("charaframe_")
+            } ?: ""
 
-        val (honorText, honorBase) = extractHonorInfo(doc)
-        chuniUserDTO.honorText = honorText
-        chuniUserDTO.honorBase = honorBase
+        val (honor1, honor2, honor3, honorBase1, honorBase2, honorBase3) = extractHonorInfo(doc)
+        chuniUserDTO.honor1 = honor1
+        chuniUserDTO.honor2 = honor2
+        chuniUserDTO.honor3 = honor3
+        chuniUserDTO.honorBase1 = honorBase1
+        chuniUserDTO.honorBase2 = honorBase2
+        chuniUserDTO.honorBase3 = honorBase3
 
         chuniUserDTO.classEmblemBase = doc.selectFirst("div.player_classemblem_base")
             ?.selectFirst("img")?.attr("src") ?: ""
@@ -211,31 +232,53 @@ internal class ChunithmRequestService(private val context: Context) {
         return chuniUserDTO
     }
 
-    private fun extractHonorInfo(root: Element): Pair<String, String> {
+    /**
+     * 提取荣誉信息，支持最多3个荣誉称号及其背景类型
+     * @return Sextuple(honor1, honor2, honor3, honorBase1, honorBase2, honorBase3)
+     */
+    private fun extractHonorInfo(root: Element): Sextuple<String, String, String, String, String, String> {
         val honorBlocks = root.select("div.player_honor_short")
         if (honorBlocks.isEmpty()) {
-            return "" to ""
+            return Sextuple("", "", "", "", "", "")
         }
 
+        // 提取所有荣誉文本（从 span 中），最多3个
         val honorTexts = honorBlocks.mapNotNull { honorBlock ->
-            honorBlock.selectFirst("div.player_honor_text span")
+            honorBlock.selectFirst("span")
                 ?.text()
                 ?.takeIf { it.isNotBlank() }
         }
 
-        val honorBase = honorBlocks.firstOrNull()
-            ?.attr("style")
-            ?.let { style ->
-                HONOR_STYLE_REGEX.find(style)?.groupValues?.getOrNull(1)
-                    ?: style.split("/").lastOrNull()
-                        ?.split(".")?.firstOrNull()
-                        ?.split("_")?.lastOrNull()
-            }
-            ?: ""
+        // 从每个荣誉的 style 属性中提取背景类型
+        // 例如：style="background-image:url(...honor_bg_platina.png)" -> "platina"
+        val honorBases = honorBlocks.map { honorBlock ->
+            honorBlock.attr("style")
+                .let { style ->
+                    HONOR_STYLE_REGEX.find(style)?.groupValues?.getOrNull(1) ?: ""
+                }
+        }
 
-        val honorText = honorTexts.joinToString(separator = " / ")
-        return honorText to honorBase
+        return Sextuple(
+            honorTexts.getOrNull(0) ?: "",
+            honorTexts.getOrNull(1) ?: "",
+            honorTexts.getOrNull(2) ?: "",
+            honorBases.getOrNull(0) ?: "",
+            honorBases.getOrNull(1) ?: "",
+            honorBases.getOrNull(2) ?: ""
+        )
     }
+
+    /**
+     * 六元组数据类，用于返回六个值
+     */
+    private data class Sextuple<out A, out B, out C, out D, out E, out F>(
+        val first: A,
+        val second: B,
+        val third: C,
+        val fourth: D,
+        val fifth: E,
+        val sixth: F
+    )
 
     private fun parseChuniPenguin(doc: Document): ChuniPenguinDTO {
         return ChuniPenguinDTO().apply {
@@ -251,6 +294,7 @@ internal class ChunithmRequestService(private val context: Context) {
             handL = doc.selectFirst("div.avatar_hand_l img")?.attr("src") ?: ""
             itemR = doc.selectFirst("div.avatar_item_r img")?.attr("src") ?: ""
             itemL = doc.selectFirst("div.avatar_item_l img")?.attr("src") ?: ""
+            front = doc.selectFirst("div.avatar_front img")?.attr("src") ?: ""  // 新增
         }
     }
 
@@ -271,8 +315,13 @@ internal class ChunithmRequestService(private val context: Context) {
         val emptyCount = chuniUser::class.memberProperties.count {
             it.returnType.jvmErasure == String::class && it.getter.call(chuniUser) == ""
         }
-        if (emptyCount > 5) println("Empty fields found in the file")
-        else saveDataToLocal(chuniUser, "chuniUser.json")
+        if (emptyCount > 5) {
+            println("Empty fields found in the file")
+        } else {
+            // 使用 DataStore 存储用户数据
+            val userDataStore = ChunithmUserDataStore(context)
+            userDataStore.saveUserData(chuniUser)
+        }
 
         saveDataToLocal(parseChuniPenguin(doc), "chuniPenguin.json")
         saveDataToLocal(parseChuniUserExtend(doc), "chuniUserExt.json")
@@ -636,8 +685,8 @@ internal class ChunithmRequestService(private val context: Context) {
                 ?.removePrefix("profile_")
                 ?: ""
 
-            // 获取荣誉相关信息（支持多个荣誉）
-            val (honorText, honorBase) = extractHonorInfo(block)
+            // 获取荣誉相关信息（支持最多3个荣誉及其背景）
+            val (honor1, honor2, honor3, honorBase1, honorBase2, honorBase3) = extractHonorInfo(block)
 
             val classEmblemBase = block.selectFirst("div.player_classemblem_base")
                 ?.selectFirst("img")?.attr("src") ?: ""
@@ -681,8 +730,12 @@ internal class ChunithmRequestService(private val context: Context) {
                     lastPlay = lastPlayDate,
                     roleImageUrl = roleImageUrl,
                     roleBase = roleBase,
-                    honorText = honorText,
-                    honorBase = honorBase,
+                    honor1 = honor1,
+                    honor2 = honor2,
+                    honor3 = honor3,
+                    honorBase1 = honorBase1,
+                    honorBase2 = honorBase2,
+                    honorBase3 = honorBase3,
                     isFavorite = isFavorite,
                     isScored = isScored,
                     classEmblemBase = classEmblemBase,

@@ -22,6 +22,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -73,7 +74,9 @@ internal fun Card(
         ) {
             val (
                 charaImage,
-                honor,
+                honor1,
+                honor2,
+                honor3,
                 reborn,
                 rebornBase,
                 lvText,
@@ -85,30 +88,95 @@ internal fun Card(
                 playData
             ) = createRefs()
 
-            Text(
-                text = cardData.honorText,
-                modifier = Modifier
-                    .constrainAs(honor) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                    }
-                    .width(cardWidthDp)
-                    .padding(5.dp)
-                    .clip(RoundedCornerShape(5.dp))
-                    .background(
-                        when (cardData.honorBase) {
-                            "silver" -> SilverGradientBg
-                            "gold" -> GoldGradientBg
-                            "platina" -> PlatinumGradientBg
-                            "rainbow" -> RainbowGradientBg
-                            else -> WhiteGradientBg
+            // Honor 1
+            if (cardData.honor1.isNotBlank()) {
+                Text(
+                    text = cardData.honor1,
+                    modifier = Modifier
+                        .constrainAs(honor1) {
+                            top.linkTo(parent.top)
+                            start.linkTo(parent.start)
                         }
-                    ),
-                textAlign = TextAlign.Center,
-                color = Color.Black,
-                fontSize = 16.sp,
-                fontFamily = sarasaBold
-            )
+                        .width(cardWidthDp / 3 - 3.dp)
+                        .padding(start = 5.dp, top = 5.dp, end = 1.5.dp)
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(
+                            when (cardData.honorBase1) {
+                                "silver" -> SilverGradientBg
+                                "gold" -> GoldGradientBg
+                                "platina" -> PlatinumGradientBg
+                                "rainbow" -> RainbowGradientBg
+                                else -> WhiteGradientBg
+                            }
+                        ),
+                    textAlign = TextAlign.Center,
+                    color = Color.Black,
+                    fontSize = 14.sp,
+                    fontFamily = sarasaBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            // Honor 2
+            if (cardData.honor2.isNotBlank()) {
+                Text(
+                    text = cardData.honor2,
+                    modifier = Modifier
+                        .constrainAs(honor2) {
+                            top.linkTo(parent.top)
+                            start.linkTo(honor1.end)
+                        }
+                        .width(cardWidthDp / 3 - 3.dp)
+                        .padding(start = 1.5.dp, top = 5.dp, end = 1.5.dp)
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(
+                            when (cardData.honorBase2) {
+                                "silver" -> SilverGradientBg
+                                "gold" -> GoldGradientBg
+                                "platina" -> PlatinumGradientBg
+                                "rainbow" -> RainbowGradientBg
+                                else -> WhiteGradientBg
+                            }
+                        ),
+                    textAlign = TextAlign.Center,
+                    color = Color.Black,
+                    fontSize = 14.sp,
+                    fontFamily = sarasaBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            // Honor 3
+            if (cardData.honor3.isNotBlank()) {
+                Text(
+                    text = cardData.honor3,
+                    modifier = Modifier
+                        .constrainAs(honor3) {
+                            top.linkTo(parent.top)
+                            start.linkTo(honor2.end)
+                        }
+                        .width(cardWidthDp / 3 - 3.dp)
+                        .padding(start = 1.5.dp, top = 5.dp, end = 5.dp)
+                        .clip(RoundedCornerShape(5.dp))
+                        .background(
+                            when (cardData.honorBase3) {
+                                "silver" -> SilverGradientBg
+                                "gold" -> GoldGradientBg
+                                "platina" -> PlatinumGradientBg
+                                "rainbow" -> RainbowGradientBg
+                                else -> WhiteGradientBg
+                            }
+                        ),
+                    textAlign = TextAlign.Center,
+                    color = Color.Black,
+                    fontSize = 14.sp,
+                    fontFamily = sarasaBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
             Image(
                 painter = rememberAsyncImagePainter(cardData.roleImageUrl),
@@ -116,7 +184,7 @@ internal fun Card(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .constrainAs(charaImage) {
-                        top.linkTo(honor.bottom)
+                        top.linkTo(honor1.bottom)
                         start.linkTo(parent.start)
                         bottom.linkTo(parent.bottom)
                     }
@@ -140,7 +208,7 @@ internal fun Card(
                 contentDescription = "Reborn",
                 modifier = Modifier
                     .constrainAs(rebornBase) {
-                        top.linkTo(honor.bottom)
+                        top.linkTo(honor1.bottom)
                         start.linkTo(charaImage.end, margin = 5.dp)
                     }
                     .size(16.dp)
@@ -206,7 +274,7 @@ internal fun Card(
                 modifier = Modifier
                     .padding(horizontal = 5.dp)
                     .constrainAs(classEmblemBase) {
-                        top.linkTo(honor.bottom)
+                        top.linkTo(honor1.bottom)
                         end.linkTo(parent.end)
                     }
                     .width(60.dp)

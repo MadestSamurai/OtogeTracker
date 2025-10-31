@@ -2,7 +2,6 @@ package com.madsam.otora.data.osu.remote.api
 
 import android.util.Log
 import com.madsam.otora.core.utils.CommonUtils
-import com.madsam.otora.core.utils.SafeSoupUtil.safeAttr
 import com.madsam.otora.data.OSU_URL
 import com.madsam.otora.data.adapter.SafeBooleanAdapter
 import com.madsam.otora.data.adapter.SafeDoubleAdapter
@@ -35,7 +34,10 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.jsoup.Jsoup
+import kotlinx.coroutines.withContext
+import com.fleeksoft.ksoup.Ksoup
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -83,6 +85,7 @@ class OsuRequestService {
         .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
         .build()
     private val api = retrofit.create(OsuAPI::class.java)
+    private val httpClient = OkHttpClient.Builder().build()
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
     internal fun getOsuCard(callback: (OsuCardListDTO) -> Unit, userId: String) {
@@ -225,15 +228,24 @@ class OsuRequestService {
     internal fun getOsuMedals(callback: (OsuInfoDTO) -> Unit, userId: String, mode: String) {
         serviceScope.launch {
             try {
-                val doc =
-                    Jsoup.connect(CommonUtils.encodeURL("https://osu.ppy.sh/users/$userId/$mode"))
-                        .get()
-                val medals = doc.selectFirst("div.js-react--profile-page.u-contents")
-                val medalsJson = medals.safeAttr("data-initial-data")
-                val osuInfoDTO = moshi.adapter(OsuInfoDTO::class.java).fromJson(medalsJson)
-                if (osuInfoDTO != null) {
-                    callback(osuInfoDTO)
-                } else Log.e(TAG, "OsuInfo is null")
+                val url = CommonUtils.encodeURL("https://osu.ppy.sh/users/$userId/$mode")
+                val html = withContext(Dispatchers.IO) {
+                    val request = Request.Builder().url(url).build()
+                    val response = httpClient.newCall(request).execute()
+                    response.body?.string()
+                }
+                
+                if (html != null) {
+                    val doc = Ksoup.parse(html)
+                    val medals = doc.selectFirst("div.js-react--profile-page.u-contents")
+                    val medalsJson = medals?.attr("data-initial-data") ?: ""
+                    val osuInfoDTO = moshi.adapter(OsuInfoDTO::class.java).fromJson(medalsJson)
+                    if (osuInfoDTO != null) {
+                        callback(osuInfoDTO)
+                    } else Log.e(TAG, "OsuInfo is null")
+                } else {
+                    Log.e(TAG, "Failed to fetch HTML for OsuMedals")
+                }
             } catch (e: IOException) {
                 Log.e(TAG, "IOException occurred in OsuMedalsThread: $e")
             }

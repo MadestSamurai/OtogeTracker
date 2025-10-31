@@ -73,6 +73,7 @@ dependencies {
     implementation(libs.androidx.runtime)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.datastore.preferences)
 
     // Glance
     implementation(libs.androidx.glance.appwidget)
@@ -129,9 +130,6 @@ dependencies {
 
     // UtilCode
     implementation(libs.utilcode)
-
-    // JSoup (legacy, will be removed)
-    implementation(libs.jsoup)
     
     // Ksoup (Kotlin HTML parser)
     implementation(libs.ksoup)
