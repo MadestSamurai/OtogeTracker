@@ -93,55 +93,136 @@ internal class BofViewModel(
 
     var selectedTimeStrNoComp = MutableStateFlow("")
 
-    val highlightedText = MutableStateFlow("")
-    val scrollToIndexListTotal = MutableStateFlow(listOf<Int>())
-    val currentIndexTotal = MutableStateFlow(0)
-    val scrollToIndexListAvg = MutableStateFlow(listOf<Int>())
-    val currentIndexAvg = MutableStateFlow(0)
-    val scrollToIndexListMedian = MutableStateFlow(listOf<Int>())
-    val currentIndexMedian = MutableStateFlow(0)
-    val scrollToIndexListDiff = MutableStateFlow(listOf<Int>())
-    val currentIndexDiff = MutableStateFlow(0)
-    val scrollToIndexListTeam = MutableStateFlow(listOf<Int>())
-    val currentIndexTeam = MutableStateFlow(0)
-    val scrollToIndexListComment = MutableStateFlow(listOf<Int>())
-    val currentIndexComment = MutableStateFlow(0)
+    // 搜索相关状态
+    val searchText = MutableStateFlow("")
+    val matchedIndices = MutableStateFlow(listOf<Int>()) // 匹配的索引列表
+    val currentMatchIndex = MutableStateFlow(0) // 当前高亮的匹配项索引（在matchedIndices中的位置）
 
-    fun scrollToPrevious(pageIndex: Int) {
-        val currentIndex = when (pageIndex) {
-            0 -> currentIndexTotal
-            1 -> currentIndexAvg
-            2 -> currentIndexMedian
-            3 -> currentIndexDiff
-            else -> currentIndexTotal
+    /**
+     * 执行搜索，根据当前 tab 页搜索对应的列表
+     * @param query 搜索关键字
+     * @param tabIndex 当前 tab 索引 (0=总分, 1=平均分, 2=中位数, 3=差值, 4=综合, 5=团队, 6=评论)
+     */
+    fun search(query: String, tabIndex: Int) {
+        Log.d(TAG, "search called: query='$query', tabIndex=$tabIndex")
+        
+        if (query.isBlank()) {
+            matchedIndices.update { emptyList() }
+            currentMatchIndex.update { 0 }
+            searchText.update { "" }
+            Log.d(TAG, "Search cleared")
+            return
         }
-        if (currentIndex.value > 0) {
-            currentIndex.update { it - 1 }
-        } else {
-            currentIndex.update { it }
+        
+        searchText.update { query }
+        val lowerQuery = query.lowercase()
+        
+        // 根据 tab 页获取对应的数据列表并搜索
+        val indices = when (tabIndex) {
+            0 -> { // 总分排行
+                totalRankingData.value.mapIndexedNotNull { index, item ->
+                    if (item.title.lowercase().contains(lowerQuery) || 
+                        item.artist.lowercase().contains(lowerQuery)) {
+                        index
+                    } else null
+                }
+            }
+            1 -> { // 平均分排行
+                avgRankingData.value.mapIndexedNotNull { index, item ->
+                    if (item.title.lowercase().contains(lowerQuery) || 
+                        item.artist.lowercase().contains(lowerQuery)) {
+                        index
+                    } else null
+                }
+            }
+            2 -> { // 中位数排行
+                medianRankingData.value.mapIndexedNotNull { index, item ->
+                    if (item.title.lowercase().contains(lowerQuery) || 
+                        item.artist.lowercase().contains(lowerQuery)) {
+                        index
+                    } else null
+                }
+            }
+            3 -> { // 差值排行
+                diffRankingData.value.mapIndexedNotNull { index, item ->
+                    if (item.title.lowercase().contains(lowerQuery) || 
+                        item.artist.lowercase().contains(lowerQuery)) {
+                        index
+                    } else null
+                }
+            }
+            4 -> { // 综合排行
+                compositeRankingData.value.mapIndexedNotNull { index, item ->
+                    if (item.title.lowercase().contains(lowerQuery) || 
+                        item.artist.lowercase().contains(lowerQuery)) {
+                        index
+                    } else null
+                }
+            }
+            5 -> { // 团队排行
+                teamRankingData.value.mapIndexedNotNull { index, item ->
+                    if (item.teamName.lowercase().contains(lowerQuery) ||
+                        item.title1.lowercase().contains(lowerQuery) ||
+                        item.artist1.lowercase().contains(lowerQuery) ||
+                        item.title2.lowercase().contains(lowerQuery) ||
+                        item.artist2.lowercase().contains(lowerQuery) ||
+                        item.title3.lowercase().contains(lowerQuery) ||
+                        item.artist3.lowercase().contains(lowerQuery) ||
+                        item.title4.lowercase().contains(lowerQuery) ||
+                        item.artist4.lowercase().contains(lowerQuery)) {
+                        index
+                    } else null
+                }
+            }
+            6 -> { // 评论
+                commentData.value.mapIndexedNotNull { index, item ->
+                    if (item.user.lowercase().contains(lowerQuery)) {
+                        index
+                    } else null
+                }
+            }
+            else -> emptyList()
+        }
+        
+        Log.d(TAG, "Search found ${indices.size} matches for query '$query' in tab $tabIndex")
+        matchedIndices.update { indices }
+        currentMatchIndex.update { if (indices.isNotEmpty()) 0 else -1 }
+        
+        if (indices.isNotEmpty()) {
+            Log.d(TAG, "First match at index: ${indices[0]}")
         }
     }
-
-    fun scrollToNext(pageIndex: Int) {
-        val currentIndex = when (pageIndex) {
-            0 -> currentIndexTotal
-            1 -> currentIndexAvg
-            2 -> currentIndexMedian
-            3 -> currentIndexDiff
-            else -> currentIndexTotal
+    
+    /**
+     * 跳转到上一个匹配项
+     */
+    fun scrollToPrevious() {
+        val indices = matchedIndices.value
+        if (indices.isEmpty()) {
+            Log.d(TAG, "scrollToPrevious: no matches")
+            return
         }
-        val scrollToIndexList = when (pageIndex) {
-            0 -> scrollToIndexListTotal
-            1 -> scrollToIndexListAvg
-            2 -> scrollToIndexListMedian
-            3 -> scrollToIndexListDiff
-            else -> scrollToIndexListTotal
+        
+        val current = currentMatchIndex.value
+        val newIndex = if (current > 0) current - 1 else indices.size - 1
+        currentMatchIndex.update { newIndex }
+        Log.d(TAG, "scrollToPrevious: $current -> $newIndex (list index: ${indices[newIndex]})")
+    }
+    
+    /**
+     * 跳转到下一个匹配项
+     */
+    fun scrollToNext() {
+        val indices = matchedIndices.value
+        if (indices.isEmpty()) {
+            Log.d(TAG, "scrollToNext: no matches")
+            return
         }
-        if (currentIndex.value < scrollToIndexList.value.size - 1) {
-            currentIndex.update { it + 1 }
-        } else {
-            currentIndex.update { it }
-        }
+        
+        val current = currentMatchIndex.value
+        val newIndex = if (current < indices.size - 1) current + 1 else 0
+        currentMatchIndex.update { newIndex }
+        Log.d(TAG, "scrollToNext: $current -> $newIndex (list index: ${indices[newIndex]})")
     }
 
     suspend fun requestCommentData() {

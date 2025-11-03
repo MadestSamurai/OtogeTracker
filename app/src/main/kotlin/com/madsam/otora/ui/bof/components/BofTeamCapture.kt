@@ -174,10 +174,8 @@ internal fun BofTeamCaptureContent(
     showHeader: Boolean = true,
     globalMaxScore: Double? = null
 ) {
-    // 如果提供了全局最大值则使用，否则计算当前teams的最大值
     val maxScore = globalMaxScore ?: (teams.maxOfOrNull { it.totalScore } ?: 1.0)
 
-    // 测量列宽（复用原有逻辑）
     val density = LocalDensity.current
     var extraWidth by remember { mutableStateOf(50.dp) }
     var medianWidth by remember { mutableStateOf(60.dp) }
@@ -218,7 +216,6 @@ internal fun BofTeamCaptureContent(
                 )
             }
 
-            // 表格标题和副标题（可选）
             if (showTitle) {
                 Column(
                     modifier = Modifier
@@ -246,7 +243,6 @@ internal fun BofTeamCaptureContent(
                 }
             }
 
-            // 表格头部 - 直接复用原有组件
             if (showHeader) {
                 TeamTableHeader(
                     teamInfoMode = 0,
@@ -256,7 +252,6 @@ internal fun BofTeamCaptureContent(
                 )
             }
 
-            // 数据列表 - 直接复用原有组件
             Column {
                 teams.forEachIndexed { index, team ->
                     TeamRankingRow(

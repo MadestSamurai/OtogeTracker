@@ -158,12 +158,22 @@ fun BofScreen(
     var isTabRowVisible by remember { mutableStateOf(true) }
     val selectedTabIndex = bofScreenState.selectedTab.asStateFlow().collectAsState().value
     val selectedSubTabIndex = bofScreenState.selectedSubTab.asStateFlow().collectAsState().value
-    val searchText = remember { mutableStateOf("") }
+    
+    // 使用 ViewModel 的 searchText
+    val searchText = vm.searchText.collectAsState()
 
+    // 为每个页面创建 LazyListState
+    val listStateTotal = rememberLazyListState()
+    val listStateAvg = rememberLazyListState()
+    val listStateMedian = rememberLazyListState()
+    val listStateDiff = rememberLazyListState()
+    val listStateComposite = rememberLazyListState()
     val listStateTeam = rememberLazyListState()
+    val listStateComment = rememberLazyListState()
 
-    val currentIndexTeam = vm.currentIndexTeam.asStateFlow().collectAsState().value
-    val scrollListTeam = vm.scrollToIndexListTeam.asStateFlow().collectAsState().value
+    // 监听搜索结果，自动滚动到匹配项
+    val currentMatchIndex = vm.currentMatchIndex.collectAsState()
+    val matchedIndices = vm.matchedIndices.collectAsState()
 
     var showDateTimeRangePicker by remember { mutableStateOf(false) }
     val scrollThreshold = 50f
@@ -218,15 +228,45 @@ fun BofScreen(
 
     LaunchedEffect(
         selectedTabIndex,
-        currentIndexTeam, scrollListTeam
+        selectedSubTabIndex,
+        currentMatchIndex.value,
+        matchedIndices.value
     ) {
-        when (selectedTabIndex) {
-            1 -> {
-                if (currentIndexTeam < scrollListTeam.size)
-                    listStateTeam.scrollToItem(scrollListTeam[currentIndexTeam] + 1)
-                else
-                    listStateTeam.scrollToItem(0)
+        // 计算当前应该滚动到的索引
+        val scrollIndex = if (matchedIndices.value.isNotEmpty() && 
+                               currentMatchIndex.value >= 0 && 
+                               currentMatchIndex.value < matchedIndices.value.size) {
+            matchedIndices.value[currentMatchIndex.value]
+        } else {
+            -1
+        }
+        
+        // 只有当有匹配项时才滚动
+        if (scrollIndex >= 0) {
+            Log.d("BofScreen", "Scrolling to index: $scrollIndex, mainTab: $selectedTabIndex, subTab: $selectedSubTabIndex, match: ${currentMatchIndex.value}/${matchedIndices.value.size}")
+            
+            when (selectedTabIndex) {
+                0 -> { // Entry 页面，根据子页面选择不同的 listState
+                    when (selectedSubTabIndex) {
+                        0 -> listStateTotal.animateScrollToItem(scrollIndex)
+                        1 -> listStateAvg.animateScrollToItem(scrollIndex)
+                        2 -> listStateMedian.animateScrollToItem(scrollIndex)
+                        3 -> listStateDiff.animateScrollToItem(scrollIndex)
+                        4 -> listStateComposite.animateScrollToItem(scrollIndex)
+                    }
+                    Log.d("BofScreen", "Entry subTab $selectedSubTabIndex scrolled to: $scrollIndex")
+                }
+                1 -> { // Team 页面
+                    listStateTeam.animateScrollToItem(scrollIndex)
+                    Log.d("BofScreen", "Team scrolled to: $scrollIndex")
+                }
+                2 -> { // Comment 页面
+                    listStateComment.animateScrollToItem(scrollIndex)
+                    Log.d("BofScreen", "Comment scrolled to: $scrollIndex")
+                }
             }
+        } else {
+            Log.d("BofScreen", "No scroll - scrollIndex: $scrollIndex, matches: ${matchedIndices.value.size}")
         }
     }
 
@@ -385,20 +425,28 @@ fun BofScreen(
                         val keyboardController = LocalSoftwareKeyboardController.current
                         TextField(
                             value = searchText.value,
-                            onValueChange = {
+                            onValueChange = { query ->
                                 // 只有在活动开始时才处理搜索
                                 if (selectedRange?.isStart == true) {
-                                    searchText.value = it
+                                    // 根据当前 tab 执行搜索
                                     when (selectedTabIndex) {
                                         0 -> {
-                                            // Entry页面的搜索由BofEntryPagerScreen处理
+                                            // Entry 页面 - 根据 sub tab 搜索对应的排行榜
+                                            val subTab = selectedSubTabIndex // 0=总分, 1=平均, 2=中位数, 3=差值, 4=综合
+                                            vm.search(query, subTab)
                                         }
                                         1 -> {
-                                            // Team页面的搜索逻辑
+                                            // Team 页面 - tabIndex = 5
+                                            vm.search(query, 5)
                                         }
-                                        // Comment页面不需要搜索功能
-                                        2 -> {}
+                                        2 -> {
+                                            // Comment 页面 - tabIndex = 6
+                                            vm.search(query, 6)
+                                        }
                                     }
+                                } else {
+                                    // 如果不在活动期间，清空搜索
+                                    vm.search("", 0)
                                 }
                             },
                             modifier = Modifier.fillMaxWidth(),
@@ -470,14 +518,14 @@ fun BofScreen(
                         // 只有在活动开始时才显示搜索和功能按钮
                         if (selectedRange?.isStart == true) {
                             if (searchText.value.isNotEmpty()) {
-                                IconButton(onClick = { vm.scrollToPrevious(selectedTabIndex) }) {
+                                IconButton(onClick = { vm.scrollToPrevious() }) {
                                     Icon(
                                         painter = rememberVectorPainter(image = Filled.ChevronUp),
                                         contentDescription = "Previous",
                                         tint = Beige400
                                     )
                                 }
-                                IconButton(onClick = { vm.scrollToNext(selectedTabIndex) }) {
+                                IconButton(onClick = { vm.scrollToNext() }) {
                                     Icon(
                                         painter = rememberVectorPainter(image = Filled.ChevronDown),
                                         contentDescription = "Next",
@@ -588,10 +636,16 @@ fun BofScreen(
                                         snackbarHostState = snackbarHostState,
                                         narrowMode = entryInfoMode,
                                         searchText = searchText.value,
+                                        matchedIndices = matchedIndices.value,
                                         scrollThreshold = scrollThreshold,
                                         setIsTabRowVisible = { isTabRowVisible = it },
                                         showCaptureDialog = showEntryCaptureDialog,
-                                        onCaptureDialogDismiss = { showEntryCaptureDialog = false }
+                                        onCaptureDialogDismiss = { showEntryCaptureDialog = false },
+                                        listStateTotal = listStateTotal,
+                                        listStateAvg = listStateAvg,
+                                        listStateMedian = listStateMedian,
+                                        listStateDiff = listStateDiff,
+                                        listStateComposite = listStateComposite
                                     )
 
                                     "Team" -> BofTeamRankingScreen(

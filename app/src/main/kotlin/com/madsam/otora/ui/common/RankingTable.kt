@@ -100,7 +100,10 @@ fun RankingTable(
     config: RankingTableConfig,
     narrowMode: Int = 0,
     showTitle: Boolean = true,
-    showHeader: Boolean = true
+    showHeader: Boolean = true,
+    listState: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
+    searchText: String = "",
+    matchedIndices: List<Int> = emptyList()
 ) {
     // 屏幕宽度检测
     val density = LocalDensity.current
@@ -319,9 +322,11 @@ fun RankingTable(
 
         // 数据列表
         LazyColumn(
+            state = listState,
             modifier = Modifier.clip(RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
         ) {
             itemsIndexed(items.take(config.maxItems)) { index, item ->
+                val isMatched = matchedIndices.contains(index)
                 RankingTableRow(
                     item = item,
                     index = index,
@@ -332,7 +337,9 @@ fun RankingTable(
                     extraWidth = extraWidth,
                     avgWidth = avgWidth,
                     medianWidth = medianWidth,
-                    narrowScoreBarWidth = narrowScoreBarWidth
+                    narrowScoreBarWidth = narrowScoreBarWidth,
+                    searchText = searchText,
+                    isHighlighted = isMatched
                 )
             }
             
@@ -383,9 +390,17 @@ private fun RankingTableRow(
     extraWidth: Dp,
     avgWidth: Dp,
     medianWidth: Dp,
-    narrowScoreBarWidth: Dp
+    narrowScoreBarWidth: Dp,
+    searchText: String = "",
+    isHighlighted: Boolean = false
 ) {
-    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
+    val backgroundColor = if (isHighlighted) {
+        Color(0xFFCC0000) // 深红色背景用于高亮
+    } else if (index % 2 == 0) {
+        BG_DARK_GRAY
+    } else {
+        Color.Black
+    }
     val scoreRatio = if (maxScore > 0) item.score.toDouble() / maxScore else 0.0
     val rankColor = Color.White
 
@@ -439,7 +454,7 @@ private fun RankingTableRow(
                             color = Color.Red
                         )
                     }
-                    change != null && change == 0 -> {
+                    change != null -> {
                         Icon(
                             imageVector = Fa.`Arrow-right`,
                             contentDescription = "Rank Same",

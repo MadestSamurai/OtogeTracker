@@ -171,7 +171,7 @@ internal fun FriendCard(
                             start.linkTo(charaImage.end)
                         }
                         .width((width - 100.dp) / 3 - 3.dp)
-                        .padding(top = 5.dp, end = 1.5.dp)
+                        .padding(start = 0.dp, top = 5.dp, end = 1.5.dp)
                         .clip(RoundedCornerShape(5.dp))
                         .background(
                             when (chuniFriend.honorBase1) {
@@ -234,7 +234,7 @@ internal fun FriendCard(
                             end.linkTo(parent.end)
                         }
                         .width((width - 100.dp) / 3 - 3.dp)
-                        .padding(start = 1.5.dp, top = 5.dp, end = 5.dp)
+                        .padding(start = 1.5.dp, top = 5.dp, end = 0.dp)
                         .clip(RoundedCornerShape(5.dp))
                         .background(
                             when (chuniFriend.honorBase3) {

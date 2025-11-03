@@ -51,10 +51,16 @@ internal fun BofEntryPagerScreen(
     snackbarHostState: SnackbarHostState,
     narrowMode: Int = 0,
     searchText: String = "",
+    matchedIndices: List<Int> = emptyList(),
     scrollThreshold: Float = 50f,
     setIsTabRowVisible: (Boolean) -> Unit = {},
     showCaptureDialog: Boolean = false,
-    onCaptureDialogDismiss: () -> Unit = {}
+    onCaptureDialogDismiss: () -> Unit = {},
+    listStateTotal: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
+    listStateAvg: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
+    listStateMedian: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
+    listStateDiff: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
+    listStateComposite: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState()
 ) {
     val selectedSubTabIndex by bofScreenState.selectedSubTab.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -153,7 +159,10 @@ internal fun BofEntryPagerScreen(
                 snackbarHostState = snackbarHostState,
                 dataConverter = { it.toRankingItem() },
                 showCaptureDialog = shouldShowCaptureDialog,
-                onCaptureDialogDismiss = onCaptureDialogDismiss
+                onCaptureDialogDismiss = onCaptureDialogDismiss,
+                listState = listStateTotal,
+                searchText = searchText,
+                matchedIndices = matchedIndices
             )
             
             1 -> {
@@ -184,7 +193,10 @@ internal fun BofEntryPagerScreen(
                     snackbarHostState = snackbarHostState,
                     dataConverter = { it.toAverageRankingItem() },
                     showCaptureDialog = shouldShowCaptureDialog,
-                    onCaptureDialogDismiss = onCaptureDialogDismiss
+                    onCaptureDialogDismiss = onCaptureDialogDismiss,
+                    listState = listStateAvg,
+                    searchText = searchText,
+                    matchedIndices = matchedIndices
                 )
             }
             
@@ -216,7 +228,10 @@ internal fun BofEntryPagerScreen(
                     snackbarHostState = snackbarHostState,
                     dataConverter = { it.toMedianRankingItem() },
                     showCaptureDialog = shouldShowCaptureDialog,
-                    onCaptureDialogDismiss = onCaptureDialogDismiss
+                    onCaptureDialogDismiss = onCaptureDialogDismiss,
+                    listState = listStateMedian,
+                    searchText = searchText,
+                    matchedIndices = matchedIndices
                 )
             }
             
@@ -248,7 +263,10 @@ internal fun BofEntryPagerScreen(
                     snackbarHostState = snackbarHostState,
                     dataConverter = { it.toDifferenceRankingItem() },
                     showCaptureDialog = shouldShowCaptureDialog,
-                    onCaptureDialogDismiss = onCaptureDialogDismiss
+                    onCaptureDialogDismiss = onCaptureDialogDismiss,
+                    listState = listStateDiff,
+                    searchText = searchText,
+                    matchedIndices = matchedIndices
                 )
             }
             
@@ -282,7 +300,10 @@ internal fun BofEntryPagerScreen(
                     snackbarHostState = snackbarHostState,
                     dataConverter = { it.toCompositeRankingItem() },
                     showCaptureDialog = shouldShowCaptureDialog,
-                    onCaptureDialogDismiss = onCaptureDialogDismiss
+                    onCaptureDialogDismiss = onCaptureDialogDismiss,
+                    listState = listStateComposite,
+                    searchText = searchText,
+                    matchedIndices = matchedIndices
                 )
             }
         }
@@ -312,7 +333,10 @@ private fun <T> EntryPageContent(
     snackbarHostState: SnackbarHostState,
     dataConverter: (T) -> com.madsam.otora.ui.common.RankingItem,
     showCaptureDialog: Boolean = false,
-    onCaptureDialogDismiss: () -> Unit = {}
+    onCaptureDialogDismiss: () -> Unit = {},
+    listState: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
+    searchText: String = "",
+    matchedIndices: List<Int> = emptyList()
 ) {
     val showDialogState = remember { mutableStateOf(false) }
     
@@ -396,7 +420,10 @@ private fun <T> EntryPageContent(
                 RankingTable(
                     items = rankingItems,
                     config = tableConfig,
-                    narrowMode = narrowMode
+                    narrowMode = narrowMode,
+                    listState = listState,
+                    searchText = searchText,
+                    matchedIndices = matchedIndices
                 )
                 
                 // 截图对话框
