@@ -285,7 +285,6 @@ internal class ChunithmObjectBoxService {
                         reborn = entity.reborn,
                         level = entity.level,
                         rating = entity.rating,
-                        ratingMax = entity.ratingMax,
                         overpower = entity.overpower,
                         lastPlay = entity.lastPlay,
                         roleImageUrl = entity.roleImageUrl,
@@ -419,7 +418,6 @@ internal class ChunithmObjectBoxService {
                         reborn = it.reborn,
                         level = it.level,
                         rating = it.rating,
-                        ratingMax = it.ratingMax,
                         overpower = it.overpower,
                         lastPlay = it.lastPlay,
                         roleImageUrl = it.roleImageUrl,
@@ -600,7 +598,6 @@ internal class ChunithmObjectBoxService {
                         reborn = friendDto.reborn
                         level = friendDto.level
                         rating = friendDto.rating
-                        ratingMax = friendDto.ratingMax
                         overpower = friendDto.overpower
                         lastPlay = friendDto.lastPlay
                         roleImageUrl = friendDto.roleImageUrl

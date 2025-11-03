@@ -109,7 +109,6 @@ internal fun BofCommentCaptureDialog(
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
             title = { Text(text = "截图功能") },
-            modifier = Modifier.height(300.dp),
             text = {
                 Column {
                     Text(

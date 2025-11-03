@@ -3,6 +3,7 @@ package com.madsam.otora.ui.record.chunithm.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -96,9 +97,10 @@ internal fun Card(
                         .constrainAs(honor1) {
                             top.linkTo(parent.top)
                             start.linkTo(parent.start)
+                            end.linkTo(parent.end)
                         }
-                        .width(cardWidthDp / 3 - 3.dp)
-                        .padding(start = 5.dp, top = 5.dp, end = 1.5.dp)
+                        .fillMaxWidth()
+                        .padding(start = 5.dp, top = 5.dp, end = 5.dp)
                         .clip(RoundedCornerShape(5.dp))
                         .background(
                             when (cardData.honorBase1) {
@@ -124,11 +126,12 @@ internal fun Card(
                     text = cardData.honor2,
                     modifier = Modifier
                         .constrainAs(honor2) {
-                            top.linkTo(parent.top)
-                            start.linkTo(honor1.end)
+                            top.linkTo(honor1.bottom)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
                         }
-                        .width(cardWidthDp / 3 - 3.dp)
-                        .padding(start = 1.5.dp, top = 5.dp, end = 1.5.dp)
+                        .fillMaxWidth()
+                        .padding(start = 5.dp, top = 2.dp, end = 5.dp)
                         .clip(RoundedCornerShape(5.dp))
                         .background(
                             when (cardData.honorBase2) {
@@ -154,11 +157,12 @@ internal fun Card(
                     text = cardData.honor3,
                     modifier = Modifier
                         .constrainAs(honor3) {
-                            top.linkTo(parent.top)
-                            start.linkTo(honor2.end)
+                            top.linkTo(honor2.bottom)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
                         }
-                        .width(cardWidthDp / 3 - 3.dp)
-                        .padding(start = 1.5.dp, top = 5.dp, end = 5.dp)
+                        .fillMaxWidth()
+                        .padding(start = 5.dp, top = 2.dp, end = 5.dp)
                         .clip(RoundedCornerShape(5.dp))
                         .background(
                             when (cardData.honorBase3) {
@@ -184,7 +188,7 @@ internal fun Card(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .constrainAs(charaImage) {
-                        top.linkTo(honor1.bottom)
+                        top.linkTo(honor3.bottom, margin = 5.dp)
                         start.linkTo(parent.start)
                         bottom.linkTo(parent.bottom)
                     }
@@ -208,7 +212,7 @@ internal fun Card(
                 contentDescription = "Reborn",
                 modifier = Modifier
                     .constrainAs(rebornBase) {
-                        top.linkTo(honor1.bottom)
+                        top.linkTo(honor3.bottom, margin = 5.dp)
                         start.linkTo(charaImage.end, margin = 5.dp)
                     }
                     .size(16.dp)
@@ -274,7 +278,7 @@ internal fun Card(
                 modifier = Modifier
                     .padding(horizontal = 5.dp)
                     .constrainAs(classEmblemBase) {
-                        top.linkTo(honor1.bottom)
+                        top.linkTo(honor3.bottom, margin = 5.dp)
                         end.linkTo(parent.end)
                     }
                     .width(60.dp)
@@ -315,17 +319,6 @@ internal fun Card(
                     ) {
                         append(cardData.rating)
                     }
-                    append(" (MAX ")
-                    withStyle(
-                        style = SpanStyle(
-                            color = Beige500,
-                            fontSize = 12.sp,
-                            fontFamily = sarasaBold
-                        )
-                    ) {
-                        append(cardData.ratingMax)
-                    }
-                    append(")")
                 },
                 color = Beige500,
                 fontSize = 12.sp,

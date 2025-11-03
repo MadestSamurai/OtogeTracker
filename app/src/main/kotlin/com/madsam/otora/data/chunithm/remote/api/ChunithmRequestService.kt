@@ -165,55 +165,90 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private fun parseChuniUser(doc: Document): ChuniUserDTO {
+        Log.d(TAG, "=== Starting parseChuniUser ===")
         val chuniUserDTO = ChuniUserDTO()
+        
         chuniUserDTO.nameIn = doc.selectFirst("div.player_name_in")?.text() ?: ""
+        Log.d(TAG, "nameIn: ${chuniUserDTO.nameIn}")
 
         // 更健壮的背景解析，直接从 style 属性中提取
         chuniUserDTO.profileBackground = doc.selectFirst("div.box_playerprofile")
             ?.attr("style")
             ?.let { style ->
+                Log.d(TAG, "Profile background style: $style")
                 // 匹配 url(...) 中的内容
                 Regex("url\\(([^)]+)\\)").find(style)?.groupValues?.getOrNull(1)
                     ?.split("/")?.lastOrNull()
                     ?.split(".")?.firstOrNull()
                     ?.removePrefix("profile_")
             } ?: ""
+        Log.d(TAG, "profileBackground: ${chuniUserDTO.profileBackground}")
 
         chuniUserDTO.reborn = doc.selectFirst("div.player_reborn")?.text()?.toIntOrNull() ?: 0
+        Log.d(TAG, "reborn: ${chuniUserDTO.reborn}")
+        
         chuniUserDTO.level = doc.selectFirst("div.player_lv")?.text()?.toIntOrNull() ?: 0
+        Log.d(TAG, "level: ${chuniUserDTO.level}")
 
         // 简化 rating 解析逻辑
-        chuniUserDTO.rating = doc.selectFirst("div.player_rating_num_block")
-            ?.select("img")
-            ?.joinToString("") { img ->
-                val srcFile = img.attr("src").split("/").lastOrNull() ?: ""
+        val ratingBlock = doc.selectFirst("div.player_rating_num_block")
+        Log.d(TAG, "Rating block found: ${ratingBlock != null}")
+        
+        val ratingImages = ratingBlock?.select("img")
+        Log.d(TAG, "Rating images count: ${ratingImages?.size ?: 0}")
+        
+        chuniUserDTO.rating = ratingImages
+            ?.mapNotNull { img ->
+                val srcFile = img.attr("src").split("/").lastOrNull() ?: return@mapNotNull null
+                Log.d(TAG, "Processing rating image: $srcFile")
 
                 when {
-                    srcFile.contains("comma") -> "."
+                    srcFile.contains("comma") -> {
+                        Log.d(TAG, "Found comma")
+                        "."
+                    }
                     else -> {
                         // 从文件名中提取数字，如 rating_platinum_01.png -> 01 -> 1
-                        srcFile.split(".").firstOrNull()
+                        val number = srcFile.split(".").firstOrNull()
                             ?.split("_")?.lastOrNull()
-                            ?.padStart(1, '0') // 保持原始格式
-                            ?: ""
+                            ?.toIntOrNull()
+                            ?.toString()
+                        
+                        if (number == null) {
+                            Log.w(TAG, "Failed to parse rating number from: $srcFile")
+                        } else {
+                            Log.d(TAG, "Parsed rating digit: $number from $srcFile")
+                        }
+                        number
                     }
                 }
-            } ?: ""
-        chuniUserDTO.ratingMax = doc.selectFirst("div.player_rating_max")?.text() ?: ""
+            }
+            ?.joinToString("")
+            ?.also { Log.d(TAG, "Joined rating string: '$it'") }
+            ?.takeIf { it.isNotBlank() } // 如果结果为空则返回 null
+            ?: "0.00" // 默认值改为 "0.00" 而不是空字符串
+        Log.d(TAG, "Final rating: ${chuniUserDTO.rating}")
+        
         chuniUserDTO.overpower = doc.selectFirst("div.player_overpower_text")?.text() ?: ""
+        Log.d(TAG, "overpower: ${chuniUserDTO.overpower}")
+        
         chuniUserDTO.lastPlay = doc.selectFirst("div.player_lastplaydate_text")?.text() ?: ""
+        Log.d(TAG, "lastPlay: ${chuniUserDTO.lastPlay}")
 
         chuniUserDTO.roleImageUrl = doc.selectFirst("div.player_chara_info img")?.attr("src") ?: ""
+        Log.d(TAG, "roleImageUrl: ${chuniUserDTO.roleImageUrl}")
         
         // 使用正则表达式更精确地提取 charaframe 类型
         chuniUserDTO.roleBase = doc.selectFirst("div.player_chara_info")
             ?.attr("style")
             ?.let { style ->
+                Log.d(TAG, "Role base style: $style")
                 Regex("url\\(([^)]+)\\)").find(style)?.groupValues?.getOrNull(1)
                     ?.split("/")?.lastOrNull()
                     ?.split(".")?.firstOrNull()
                     ?.removePrefix("charaframe_")
             } ?: ""
+        Log.d(TAG, "roleBase: ${chuniUserDTO.roleBase}")
 
         val (honor1, honor2, honor3, honorBase1, honorBase2, honorBase3) = extractHonorInfo(doc)
         chuniUserDTO.honor1 = honor1
@@ -222,13 +257,18 @@ internal class ChunithmRequestService(private val context: Context) {
         chuniUserDTO.honorBase1 = honorBase1
         chuniUserDTO.honorBase2 = honorBase2
         chuniUserDTO.honorBase3 = honorBase3
+        Log.d(TAG, "Honors: [$honor1, $honor2, $honor3]")
+        Log.d(TAG, "Honor bases: [$honorBase1, $honorBase2, $honorBase3]")
 
         chuniUserDTO.classEmblemBase = doc.selectFirst("div.player_classemblem_base")
             ?.selectFirst("img")?.attr("src") ?: ""
+        Log.d(TAG, "classEmblemBase: ${chuniUserDTO.classEmblemBase}")
 
         chuniUserDTO.classEmblemTop = doc.selectFirst("div.player_classemblem_top")
             ?.selectFirst("img")?.attr("src") ?: ""
+        Log.d(TAG, "classEmblemTop: ${chuniUserDTO.classEmblemTop}")
 
+        Log.d(TAG, "=== Completed parseChuniUser ===")
         return chuniUserDTO
     }
 
@@ -309,22 +349,40 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private suspend fun requestPlayerData() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData") ?: return
-
+        Log.d(TAG, "=== requestPlayerData started ===")
+        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData")
+        
+        if (doc == null) {
+            Log.e(TAG, "Failed to get document from server")
+            return
+        }
+        
+        Log.d(TAG, "Document received, parsing user data...")
         val chuniUser = parseChuniUser(doc)
+        
+        Log.d(TAG, "Checking empty fields...")
         val emptyCount = chuniUser::class.memberProperties.count {
             it.returnType.jvmErasure == String::class && it.getter.call(chuniUser) == ""
         }
+        Log.d(TAG, "Empty string fields count: $emptyCount")
+        
         if (emptyCount > 5) {
-            println("Empty fields found in the file")
+            Log.w(TAG, "Too many empty fields ($emptyCount), not saving user data")
         } else {
+            Log.d(TAG, "Saving user data to DataStore...")
             // 使用 DataStore 存储用户数据
             val userDataStore = ChunithmUserDataStore(context)
             userDataStore.saveUserData(chuniUser)
+            Log.d(TAG, "User data saved successfully")
         }
 
+        Log.d(TAG, "Parsing and saving penguin data...")
         saveDataToLocal(parseChuniPenguin(doc), "chuniPenguin.json")
+        
+        Log.d(TAG, "Parsing and saving user extend data...")
         saveDataToLocal(parseChuniUserExtend(doc), "chuniUserExt.json")
+        
+        Log.d(TAG, "=== requestPlayerData completed ===")
     }
 
     private fun parseRatingData(doc: Document): List<ChuniScoreDTO> {
@@ -698,18 +756,24 @@ internal class ChunithmRequestService(private val context: Context) {
             val level = block.selectFirst("div.player_lv")?.text()?.toIntOrNull() ?: 0
             val friendName = block.selectFirst("div.player_name_in form a")?.text() ?: ""
             val friendCode = block.selectFirst("input[name=idx]")?.attr("value") ?: ""
-            val ratingMax = block.selectFirst("div.player_rating_max")?.text() ?: ""
             val rating = block.selectFirst("div.player_rating_num_block")
                 ?.select("img")
-                ?.joinToString("") { img ->
-                    val srcFile = img.attr("src").split("/").lastOrNull() ?: ""
+                ?.mapNotNull { img ->
+                    val srcFile = img.attr("src").split("/").lastOrNull() ?: return@mapNotNull null
 
-                    if (srcFile.contains("comma")) "."
-                    else srcFile.split(".").firstOrNull()
-                        ?.split("_")?.lastOrNull()
-                        ?.toIntOrNull()
-                        ?.toString() ?: ""
-                } ?: ""
+                    when {
+                        srcFile.contains("comma") -> "."
+                        else -> {
+                            srcFile.split(".").firstOrNull()
+                                ?.split("_")?.lastOrNull()
+                                ?.toIntOrNull()
+                                ?.toString()
+                        }
+                    }
+                }
+                ?.joinToString("")
+                ?.takeIf { it.isNotBlank() }
+                ?: "0.00"
             val overpower = block.selectFirst("div.player_overpower_text")?.text() ?: ""
             val lastPlayDate = block.selectFirst("div.player_lastplaydate_text")?.text() ?: ""
 
@@ -725,7 +789,6 @@ internal class ChunithmRequestService(private val context: Context) {
                     reborn = reborn,
                     level = level,
                     rating = rating,
-                    ratingMax = ratingMax,
                     overpower = overpower,
                     lastPlay = lastPlayDate,
                     roleImageUrl = roleImageUrl,

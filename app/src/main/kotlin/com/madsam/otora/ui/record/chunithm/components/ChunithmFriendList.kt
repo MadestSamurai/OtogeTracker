@@ -378,17 +378,6 @@ internal fun FriendCard(
                     ) {
                         append(chuniFriend.rating)
                     }
-                    append(" (MAX ")
-                    withStyle(
-                        style = SpanStyle(
-                            color = Beige500,
-                            fontSize = 12.sp,
-                            fontFamily = sarasaBold
-                        )
-                    ) {
-                        append(chuniFriend.ratingMax)
-                    }
-                    append(")")
                 },
                 color = Beige500,
                 fontSize = 12.sp,

@@ -38,7 +38,7 @@ internal fun TopRank(
     // 动态分配两个图表的宽度
     val idealSpacingRatio = 0.8f // 理想的柱间距与柱宽比例
     val barCount30 = 30
-    val barCount10 = 10
+    val barCount20 = 20
     val totalPadding = 48.dp
     val availableWidth = cardWidthDp - totalPadding - 4.dp// 减去容器间的间距
     
@@ -47,12 +47,12 @@ internal fun TopRank(
     // 其中：柱间距 = 柱宽 * spacingRatio
     // 所以：图表宽度 = 柱宽 * (柱数量 + (柱数量-1) * spacingRatio)
     val ratio30 = barCount30 + (barCount30 - 1) * idealSpacingRatio
-    val ratio10 = barCount10 + (barCount10 - 1) * idealSpacingRatio
-    val totalRatio = ratio30 + ratio10
+    val ratio20 = barCount20 + (barCount20 - 1) * idealSpacingRatio
+    val totalRatio = ratio30 + ratio20
     
     // 按比例分配宽度
     val bestChartWidth = availableWidth * (ratio30 / totalRatio)
-    val recentChartWidth = availableWidth * (ratio10 / totalRatio)
+    val newChartWidth = availableWidth * (ratio20 / totalRatio)
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -103,11 +103,11 @@ internal fun TopRank(
                 )
             }
         }
-        // Recent 10 图表容器
+        // New 20 图表容器
         Box(
             modifier = Modifier
                 .padding(start = 4.dp)
-                .width(recentChartWidth + 24.dp) // 加上内部padding
+                .width(newChartWidth + 24.dp) // 加上内部padding
                 .clip(RoundedCornerShape(
                     topStart = 6.dp, topEnd = 10.dp,
                     bottomStart = 6.dp, bottomEnd = 10.dp
@@ -122,30 +122,30 @@ internal fun TopRank(
                     .padding(horizontal = 4.dp, vertical = 2.dp)
             ) {
                 Text(
-                    text = "Recent 10",
+                    text = "New 20",
                     fontSize = 11.sp,
                     color = White1000
                 )
                 Text(
-                    text = String.format(Locale.US, "%.2f", topRank.recent10),
+                    text = String.format(Locale.US, "%.2f", topRank.new20),
                     fontSize = 14.sp,
                     fontFamily = sarasaBold,
                     style = TextStyle(
-                        brush = getRatingBrush(topRank.recent10.toString())
+                        brush = getRatingBrush(topRank.new20.toString())
                     )
                 )
             }
-            if (topRank.bestList.isNotEmpty()) {
+            if (topRank.newList.isNotEmpty()) {
                 RoundedBarChart(
-                    values = topRank.recentList.map { it.rating },
-                    minValue = topRank.recentList.minOfOrNull { it.rating } ?: 0.0,
-                    maxValue = topRank.recentList.maxOfOrNull { it.rating } ?: 0.0,
+                    values = topRank.newList.map { it.rating },
+                    minValue = topRank.newList.minOfOrNull { it.rating } ?: 0.0,
+                    maxValue = topRank.newList.maxOfOrNull { it.rating } ?: 0.0,
                     height = 80.dp,
                     spacingRatio = idealSpacingRatio,
                     fillWidth = true,
                     modifier = Modifier
                         .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 4.dp)
-                        .width(recentChartWidth)
+                        .width(newChartWidth)
                 )
             }
         }

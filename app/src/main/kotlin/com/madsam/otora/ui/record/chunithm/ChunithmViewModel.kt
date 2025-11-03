@@ -9,11 +9,11 @@ import com.madsam.otora.core.utils.CalcUtils.calcChuniRank
 import com.madsam.otora.core.utils.CalcUtils.calcChuniRating
 import com.madsam.otora.core.utils.CommonUtils.bigNumberToInt
 import com.madsam.otora.core.utils.JsonUtil
+import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserDataStore
 import com.madsam.otora.data.chunithm.local.objectbox.ChunithmObjectBoxService
 import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniPenguinDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniScoreDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniUserDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniUserExtendDTO
 import com.madsam.otora.data.chunithm.ui.model.ChunithmAvatarUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmCardUiModel
@@ -119,16 +119,34 @@ internal class ChunithmViewModel() : ViewModel() {
     }
 
     private fun loadCardFromLocal(context: Context) {
-        val jsonUser = JsonUtil.readJsonFromFile(context, "chuniUser.json")
-        val jsonUserExt = JsonUtil.readJsonFromFile(context, "chuniUserExt.json")
-        if (jsonUser.isNullOrEmpty() || jsonUserExt.isNullOrEmpty()) return
-        val chuniUserDTO = Moshi.Builder()
-            .addLast(KotlinJsonAdapterFactory())
-            .build().adapter(ChuniUserDTO::class.java).fromJson(jsonUser) ?: ChuniUserDTO()
-        val chuniUserExt = Moshi.Builder()
-            .addLast(KotlinJsonAdapterFactory())
-            .build().adapter(ChuniUserExtendDTO::class.java).fromJson(jsonUserExt) ?: ChuniUserExtendDTO()
-        chunithmCardUiModel.update { ChunithmCardUiModel(chuniUserDTO, chuniUserExt) }
+        Log.d("ChunithmViewModel", "loadCardFromLocal called")
+        viewModelScope.launch {
+            try {
+                Log.d("ChunithmViewModel", "Starting to load user data from DataStore...")
+                // 从 DataStore 读取用户数据
+                val userDataStore = ChunithmUserDataStore(context)
+                val chuniUserDTO = userDataStore.getUserData()
+                Log.d("ChunithmViewModel", "DataStore returned: ${chuniUserDTO != null}")
+                
+                // 从 JSON 读取扩展数据（这个暂时还是用文件）
+                val jsonUserExt = JsonUtil.readJsonFromFile(context, "chuniUserExt.json")
+                Log.d("ChunithmViewModel", "UserExt JSON loaded: ${!jsonUserExt.isNullOrEmpty()}")
+                
+                if (chuniUserDTO == null || jsonUserExt.isNullOrEmpty()) {
+                    Log.w("ChunithmViewModel", "User data not found in DataStore or UserExt file missing")
+                    return@launch
+                }
+                
+                val chuniUserExt = Moshi.Builder()
+                    .addLast(KotlinJsonAdapterFactory())
+                    .build().adapter(ChuniUserExtendDTO::class.java).fromJson(jsonUserExt) ?: ChuniUserExtendDTO()
+                
+                chunithmCardUiModel.update { ChunithmCardUiModel(chuniUserDTO, chuniUserExt) }
+                Log.d("ChunithmViewModel", "Card data loaded from DataStore successfully")
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Error loading card data: ${e.message}", e)
+            }
+        }
     }
 
     private fun loadAvatarFromLocal(context: Context) {
@@ -229,7 +247,6 @@ internal class ChunithmViewModel() : ViewModel() {
                         reborn = entity.reborn,
                         level = entity.level,
                         rating = entity.rating,
-                        ratingMax = entity.ratingMax,
                         overpower = entity.overpower,
                         lastPlay = entity.lastPlay,
                         roleImageUrl = entity.roleImageUrl,
@@ -344,8 +361,8 @@ internal class ChunithmViewModel() : ViewModel() {
                         )
                     )
                 }
-                topRank.recentList = recentList
-                topRank.recent10 = recentList.map { it.rating }.average()
+                topRank.newList = recentList
+                topRank.new20 = recentList.map { it.rating }.average()
             }
             val ratingSuggestListType = Types.newParameterizedType(List::class.java, ChuniScoreDTO::class.java)
             val ratingSuggestJsonAdapter = moshi.adapter<List<ChuniScoreDTO>>(ratingSuggestListType)

@@ -138,7 +138,7 @@ internal fun TopRating(
         ) { page ->
             val currentList = when (page) {
                 0 -> topRank.bestList
-                1 -> topRank.recentList
+                1 -> topRank.newList
                 2 -> topRank.suggestList
                 else -> emptyList()
             }

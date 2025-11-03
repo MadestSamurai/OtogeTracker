@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -36,14 +34,13 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.theme.BG_DARK_GRAY
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.utils.ImageUtils
 import com.madsam.otora.ui.bof.TeamRankingItem
-import com.madsam.otora.ui.bof.sub.TeamTableHeader
 import com.madsam.otora.ui.bof.sub.TeamRankingRow
+import com.madsam.otora.ui.bof.sub.TeamTableHeader
 import dev.shreyaspatil.capturable.capturable
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import kotlinx.coroutines.launch
@@ -76,7 +73,6 @@ fun BofTeamCaptureDialog(
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
             title = { Text(text = "截图功能") },
-            modifier = Modifier.height(300.dp),
             text = {
                 Column {
                     Text(

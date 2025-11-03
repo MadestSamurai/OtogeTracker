@@ -208,9 +208,9 @@ internal fun TopRankCaptureContent(
         }
         
         // Recent 10 - 2行，每行5个
-        if (topRank.recentList.isNotEmpty()) {
+        if (topRank.newList.isNotEmpty()) {
             Text(
-                text = "Recent 10 (平均: ${String.format(Locale.US, "%.2f", topRank.recent10)})",
+                text = "Recent 10 (平均: ${String.format(Locale.US, "%.2f", topRank.new20)})",
                 fontFamily = sarasaBold,
                 fontSize = 20.sp,
                 color = White1000,
@@ -226,9 +226,9 @@ internal fun TopRankCaptureContent(
                 ) {
                     for (col in 0 until 5) {
                         val index = row * 5 + col
-                        if (index < topRank.recentList.size) {
+                        if (index < topRank.newList.size) {
                             CaptureItemCard(
-                                item = topRank.recentList[index],
+                                item = topRank.newList[index],
                                 rank = index + 1,
                                 cardWidth = cardWidth,
                                 cardHeight = cardHeight

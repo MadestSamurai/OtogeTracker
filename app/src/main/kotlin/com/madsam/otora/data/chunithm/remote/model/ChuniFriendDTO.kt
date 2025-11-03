@@ -7,7 +7,6 @@ internal data class ChuniFriendDTO (
     var reborn: Int = 0,
     var level: Int,
     var rating: String,
-    var ratingMax: String,
     var overpower: String,
     var lastPlay: String,
     var roleImageUrl: String,
