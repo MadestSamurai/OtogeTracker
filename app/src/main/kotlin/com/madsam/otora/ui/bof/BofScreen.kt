@@ -226,6 +226,28 @@ fun BofScreen(
         )
     }
 
+    // 监听 tab 切换，重新执行搜索
+    LaunchedEffect(selectedTabIndex, selectedSubTabIndex) {
+        val query = searchText.value
+        if (query.isNotEmpty() && selectedRange?.isStart == true) {
+            Log.d("BofScreen", "Tab switched, re-executing search: mainTab=$selectedTabIndex, subTab=$selectedSubTabIndex")
+            when (selectedTabIndex) {
+                0 -> {
+                    // Entry 页面 - 根据 sub tab 搜索对应的排行榜
+                    vm.search(query, selectedSubTabIndex) // 0=总分, 1=平均, 2=中位数, 3=差值, 4=综合
+                }
+                1 -> {
+                    // Team 页面 - tabIndex = 5
+                    vm.search(query, 5)
+                }
+                2 -> {
+                    // Comment 页面 - tabIndex = 6
+                    vm.search(query, 6)
+                }
+            }
+        }
+    }
+
     LaunchedEffect(
         selectedTabIndex,
         selectedSubTabIndex,
@@ -636,7 +658,6 @@ fun BofScreen(
                                         snackbarHostState = snackbarHostState,
                                         narrowMode = entryInfoMode,
                                         searchText = searchText.value,
-                                        matchedIndices = matchedIndices.value,
                                         scrollThreshold = scrollThreshold,
                                         setIsTabRowVisible = { isTabRowVisible = it },
                                         showCaptureDialog = showEntryCaptureDialog,

@@ -39,6 +39,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -102,8 +106,7 @@ fun RankingTable(
     showTitle: Boolean = true,
     showHeader: Boolean = true,
     listState: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
-    searchText: String = "",
-    matchedIndices: List<Int> = emptyList()
+    searchText: String = ""
 ) {
     // 屏幕宽度检测
     val density = LocalDensity.current
@@ -326,7 +329,6 @@ fun RankingTable(
             modifier = Modifier.clip(RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
         ) {
             itemsIndexed(items.take(config.maxItems)) { index, item ->
-                val isMatched = matchedIndices.contains(index)
                 RankingTableRow(
                     item = item,
                     index = index,
@@ -338,8 +340,7 @@ fun RankingTable(
                     avgWidth = avgWidth,
                     medianWidth = medianWidth,
                     narrowScoreBarWidth = narrowScoreBarWidth,
-                    searchText = searchText,
-                    isHighlighted = isMatched
+                    searchText = searchText
                 )
             }
             
@@ -379,6 +380,56 @@ fun RankingTable(
     }
 }
 
+/**
+ * 创建带高亮的文本 AnnotatedString
+ * @param text 完整文本
+ * @param searchText 要高亮的搜索文本
+ * @param highlightColor 高亮背景色
+ * @return AnnotatedString 带高亮的文本
+ */
+private fun buildHighlightedText(
+    text: String,
+    searchText: String,
+    highlightColor: Color = Color(0xFFCC0000)
+): AnnotatedString {
+    if (searchText.isEmpty()) {
+        return AnnotatedString(text)
+    }
+    
+    return buildAnnotatedString {
+        var currentIndex = 0
+        val lowerText = text.lowercase()
+        val lowerSearch = searchText.lowercase()
+        
+        while (currentIndex < text.length) {
+            val matchIndex = lowerText.indexOf(lowerSearch, currentIndex)
+            
+            if (matchIndex == -1) {
+                // 没有更多匹配，添加剩余文本
+                append(text.substring(currentIndex))
+                break
+            }
+            
+            // 添加匹配前的普通文本
+            if (matchIndex > currentIndex) {
+                append(text.substring(currentIndex, matchIndex))
+            }
+            
+            // 添加高亮的匹配文本
+            withStyle(
+                style = SpanStyle(
+                    background = highlightColor,
+                    color = Color.White
+                )
+            ) {
+                append(text.substring(matchIndex, matchIndex + searchText.length))
+            }
+            
+            currentIndex = matchIndex + searchText.length
+        }
+    }
+}
+
 @Composable
 private fun RankingTableRow(
     item: RankingItem,
@@ -391,16 +442,9 @@ private fun RankingTableRow(
     avgWidth: Dp,
     medianWidth: Dp,
     narrowScoreBarWidth: Dp,
-    searchText: String = "",
-    isHighlighted: Boolean = false
+    searchText: String = ""
 ) {
-    val backgroundColor = if (isHighlighted) {
-        Color(0xFFCC0000) // 深红色背景用于高亮
-    } else if (index % 2 == 0) {
-        BG_DARK_GRAY
-    } else {
-        Color.Black
-    }
+    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
     val scoreRatio = if (maxScore > 0) item.score.toDouble() / maxScore else 0.0
     val rankColor = Color.White
 
@@ -485,7 +529,7 @@ private fun RankingTableRow(
             horizontalAlignment = Alignment.End
         ) {
             Text(
-                text = item.title,
+                text = buildHighlightedText(item.title, searchText),
                 fontFamily = sarasaBold,
                 fontSize = 14.sp,
                 color = Color.White,
@@ -495,7 +539,7 @@ private fun RankingTableRow(
                 modifier = Modifier.fillMaxWidth()
             )
             Text(
-                text = item.artist,
+                text = buildHighlightedText(item.artist, searchText),
                 fontFamily = sarasaRegular,
                 fontSize = 12.sp,
                 color = TEXT_GRAY,

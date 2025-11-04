@@ -51,7 +51,6 @@ internal fun BofEntryPagerScreen(
     snackbarHostState: SnackbarHostState,
     narrowMode: Int = 0,
     searchText: String = "",
-    matchedIndices: List<Int> = emptyList(),
     scrollThreshold: Float = 50f,
     setIsTabRowVisible: (Boolean) -> Unit = {},
     showCaptureDialog: Boolean = false,
@@ -161,8 +160,7 @@ internal fun BofEntryPagerScreen(
                 showCaptureDialog = shouldShowCaptureDialog,
                 onCaptureDialogDismiss = onCaptureDialogDismiss,
                 listState = listStateTotal,
-                searchText = searchText,
-                matchedIndices = matchedIndices
+                searchText = searchText
             )
             
             1 -> {
@@ -195,8 +193,7 @@ internal fun BofEntryPagerScreen(
                     showCaptureDialog = shouldShowCaptureDialog,
                     onCaptureDialogDismiss = onCaptureDialogDismiss,
                     listState = listStateAvg,
-                    searchText = searchText,
-                    matchedIndices = matchedIndices
+                    searchText = searchText
                 )
             }
             
@@ -230,8 +227,7 @@ internal fun BofEntryPagerScreen(
                     showCaptureDialog = shouldShowCaptureDialog,
                     onCaptureDialogDismiss = onCaptureDialogDismiss,
                     listState = listStateMedian,
-                    searchText = searchText,
-                    matchedIndices = matchedIndices
+                    searchText = searchText
                 )
             }
             
@@ -265,8 +261,7 @@ internal fun BofEntryPagerScreen(
                     showCaptureDialog = shouldShowCaptureDialog,
                     onCaptureDialogDismiss = onCaptureDialogDismiss,
                     listState = listStateDiff,
-                    searchText = searchText,
-                    matchedIndices = matchedIndices
+                    searchText = searchText
                 )
             }
             
@@ -302,8 +297,7 @@ internal fun BofEntryPagerScreen(
                     showCaptureDialog = shouldShowCaptureDialog,
                     onCaptureDialogDismiss = onCaptureDialogDismiss,
                     listState = listStateComposite,
-                    searchText = searchText,
-                    matchedIndices = matchedIndices
+                    searchText = searchText
                 )
             }
         }
@@ -335,8 +329,7 @@ private fun <T> EntryPageContent(
     showCaptureDialog: Boolean = false,
     onCaptureDialogDismiss: () -> Unit = {},
     listState: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
-    searchText: String = "",
-    matchedIndices: List<Int> = emptyList()
+    searchText: String = ""
 ) {
     val showDialogState = remember { mutableStateOf(false) }
     
@@ -422,8 +415,7 @@ private fun <T> EntryPageContent(
                     config = tableConfig,
                     narrowMode = narrowMode,
                     listState = listState,
-                    searchText = searchText,
-                    matchedIndices = matchedIndices
+                    searchText = searchText
                 )
                 
                 // 截图对话框
