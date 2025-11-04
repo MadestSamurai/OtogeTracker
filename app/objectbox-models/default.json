@@ -1881,10 +1881,353 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "38:6369654039158555261",
+      "lastPropertyId": "10:4792154837805788250",
+      "name": "ChunithmRatingEntity",
+      "properties": [
+        {
+          "id": "1:4776033552139488017",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7981244307303212905",
+          "name": "songId",
+          "type": 9
+        },
+        {
+          "id": "3:4450922101786943131",
+          "name": "title",
+          "indexId": "118:6429032523308084853",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:7525308911280320380",
+          "name": "genre",
+          "type": 9
+        },
+        {
+          "id": "5:4778636495744365363",
+          "name": "diff",
+          "type": 9
+        },
+        {
+          "id": "6:8094577661198111916",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "7:167250289930748459",
+          "name": "highScore",
+          "type": 9
+        },
+        {
+          "id": "8:4521044427421865516",
+          "name": "ratingType",
+          "indexId": "119:6146167097318044755",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "9:2328461957956236944",
+          "name": "createdAt",
+          "type": 6
+        },
+        {
+          "id": "10:4792154837805788250",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "39:8022462250134677036",
+      "lastPropertyId": "9:1206582774270030304",
+      "name": "ChunithmMapAreaEntity",
+      "properties": [
+        {
+          "id": "1:4838134505472670622",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1414784920116923696",
+          "name": "mapName",
+          "indexId": "120:6729909435668240769",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:4629240630261896161",
+          "name": "pageNumber",
+          "indexId": "121:4504493889265633762",
+          "type": 5,
+          "flags": 8
+        },
+        {
+          "id": "4:6862823254090814130",
+          "name": "position",
+          "indexId": "122:6552928466448898919",
+          "type": 5,
+          "flags": 8
+        },
+        {
+          "id": "5:3649217270489874983",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "6:2349951245381256187",
+          "name": "remain",
+          "type": 5
+        },
+        {
+          "id": "7:1509212746373432890",
+          "name": "skillSeed",
+          "type": 9
+        },
+        {
+          "id": "8:3101579633273521828",
+          "name": "isEmpty",
+          "type": 1
+        },
+        {
+          "id": "9:1206582774270030304",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "40:6214870921577740002",
+      "lastPropertyId": "8:727143979656395948",
+      "name": "ChunithmMapEntity",
+      "properties": [
+        {
+          "id": "1:4271033785936377141",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8807379081137606831",
+          "name": "mapName",
+          "indexId": "123:6703736740964752214",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:3085216042326915249",
+          "name": "totalPages",
+          "type": 5
+        },
+        {
+          "id": "4:2359713053860488202",
+          "name": "completedAreas",
+          "type": 5
+        },
+        {
+          "id": "5:3250910584657400807",
+          "name": "totalAreas",
+          "type": 5
+        },
+        {
+          "id": "6:1118348571417556059",
+          "name": "progressPercentage",
+          "type": 8
+        },
+        {
+          "id": "7:4883690390371730084",
+          "name": "createdAt",
+          "type": 6
+        },
+        {
+          "id": "8:727143979656395948",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "41:171021126756624048",
+      "lastPropertyId": "15:4182295342213149404",
+      "name": "ChunithmPlayLogEntity",
+      "properties": [
+        {
+          "id": "1:2153557790749135735",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8178338443033101967",
+          "name": "songId",
+          "type": 9
+        },
+        {
+          "id": "3:5837746931247818209",
+          "name": "title",
+          "indexId": "124:8913356468475615948",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:1459453264283113437",
+          "name": "genre",
+          "type": 9
+        },
+        {
+          "id": "5:7413246345228992598",
+          "name": "diff",
+          "type": 9
+        },
+        {
+          "id": "6:3836897436437933899",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "7:955791552047934530",
+          "name": "score",
+          "type": 9
+        },
+        {
+          "id": "8:7828008892452814832",
+          "name": "clear",
+          "type": 9
+        },
+        {
+          "id": "9:4461788564083928740",
+          "name": "combo",
+          "type": 9
+        },
+        {
+          "id": "10:4875099386490627584",
+          "name": "chain",
+          "type": 9
+        },
+        {
+          "id": "11:4893780786059740476",
+          "name": "rank",
+          "type": 5
+        },
+        {
+          "id": "12:4871160256796234476",
+          "name": "playDate",
+          "type": 9
+        },
+        {
+          "id": "13:8489087044677337195",
+          "name": "trackNumber",
+          "type": 9
+        },
+        {
+          "id": "14:2290778575639053283",
+          "name": "createdAt",
+          "type": 6
+        },
+        {
+          "id": "15:4182295342213149404",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "42:8885191850255465808",
+      "lastPropertyId": "14:280337685995526063",
+      "name": "ChunithmCharacterEntity",
+      "properties": [
+        {
+          "id": "1:3569464554229851631",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6050132447839700067",
+          "name": "charaId",
+          "indexId": "125:4910642040646251144",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:6642477572476595327",
+          "name": "name",
+          "indexId": "126:6603408938052969342",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:7762628988706609538",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "5:5068397821605154492",
+          "name": "frameType",
+          "type": 9
+        },
+        {
+          "id": "6:6257563399620843724",
+          "name": "level",
+          "type": 5
+        },
+        {
+          "id": "7:7247246113472723875",
+          "name": "expBarWidth",
+          "type": 5
+        },
+        {
+          "id": "8:3478117825075642501",
+          "name": "isMaxLevel",
+          "type": 1
+        },
+        {
+          "id": "9:4753019610529237430",
+          "name": "skillSeedImageUrl",
+          "type": 9
+        },
+        {
+          "id": "10:162151282837946096",
+          "name": "skillSeedText",
+          "type": 9
+        },
+        {
+          "id": "11:7495966421090873125",
+          "name": "skillSeedVersionImageUrl",
+          "type": 9
+        },
+        {
+          "id": "12:6517767223030414662",
+          "name": "isCurrentlyUsed",
+          "type": 1
+        },
+        {
+          "id": "13:4536251529908714749",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "14:280337685995526063",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "37:5042140330721282768",
-  "lastIndexId": "117:4309156580114974612",
+  "lastEntityId": "42:8885191850255465808",
+  "lastIndexId": "126:6603408938052969342",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

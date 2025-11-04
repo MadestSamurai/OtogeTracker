@@ -8,13 +8,12 @@ import androidx.lifecycle.viewModelScope
 import com.madsam.otora.core.utils.CalcUtils.calcChuniRank
 import com.madsam.otora.core.utils.CalcUtils.calcChuniRating
 import com.madsam.otora.core.utils.CommonUtils.bigNumberToInt
-import com.madsam.otora.core.utils.JsonUtil
+import com.madsam.otora.data.chunithm.local.datastore.ChunithmPenguinDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserDataStore
+import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserExtDataStore
+import com.madsam.otora.data.chunithm.local.model.ChunithmRatingEntity
 import com.madsam.otora.data.chunithm.local.objectbox.ChunithmObjectBoxService
 import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniPenguinDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniScoreDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniUserExtendDTO
 import com.madsam.otora.data.chunithm.ui.model.ChunithmAvatarUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmCardUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmFriendUiModel
@@ -24,9 +23,6 @@ import com.madsam.otora.data.chunithm.ui.model.ChunithmScoreUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.ui.record.chunithm.components.SheetScoreInfo
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -128,18 +124,15 @@ internal class ChunithmViewModel() : ViewModel() {
                 val chuniUserDTO = userDataStore.getUserData()
                 Log.d("ChunithmViewModel", "DataStore returned: ${chuniUserDTO != null}")
                 
-                // 从 JSON 读取扩展数据（这个暂时还是用文件）
-                val jsonUserExt = JsonUtil.readJsonFromFile(context, "chuniUserExt.json")
-                Log.d("ChunithmViewModel", "UserExt JSON loaded: ${!jsonUserExt.isNullOrEmpty()}")
+                // 从 DataStore 读取扩展数据
+                val userExtDataStore = ChunithmUserExtDataStore(context)
+                val chuniUserExt = userExtDataStore.getUserExtData()
+                Log.d("ChunithmViewModel", "UserExt loaded from DataStore: ${chuniUserExt != null}")
                 
-                if (chuniUserDTO == null || jsonUserExt.isNullOrEmpty()) {
-                    Log.w("ChunithmViewModel", "User data not found in DataStore or UserExt file missing")
+                if (chuniUserDTO == null || chuniUserExt == null) {
+                    Log.w("ChunithmViewModel", "User data or UserExt not found in DataStore")
                     return@launch
                 }
-                
-                val chuniUserExt = Moshi.Builder()
-                    .addLast(KotlinJsonAdapterFactory())
-                    .build().adapter(ChuniUserExtendDTO::class.java).fromJson(jsonUserExt) ?: ChuniUserExtendDTO()
                 
                 chunithmCardUiModel.update { ChunithmCardUiModel(chuniUserDTO, chuniUserExt) }
                 Log.d("ChunithmViewModel", "Card data loaded from DataStore successfully")
@@ -150,12 +143,20 @@ internal class ChunithmViewModel() : ViewModel() {
     }
 
     private fun loadAvatarFromLocal(context: Context) {
-        val json = JsonUtil.readJsonFromFile(context, "chuniPenguin.json")
-        if (json.isNullOrEmpty()) return
-        val chuniPenguinDTO = Moshi.Builder()
-            .addLast(KotlinJsonAdapterFactory())
-            .build().adapter(ChuniPenguinDTO::class.java).fromJson(json) ?: ChuniPenguinDTO()
-        chunithmAvatarUiModel.update { ChunithmAvatarUiModel(chuniPenguinDTO) }
+        viewModelScope.launch {
+            try {
+                val penguinDataStore = ChunithmPenguinDataStore(context)
+                val chuniPenguinDTO = penguinDataStore.getPenguinData()
+                if (chuniPenguinDTO == null) {
+                    Log.w("ChunithmViewModel", "Penguin data not found in DataStore")
+                    return@launch
+                }
+                chunithmAvatarUiModel.update { ChunithmAvatarUiModel(chuniPenguinDTO) }
+                Log.d("ChunithmViewModel", "Avatar data loaded from DataStore successfully")
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Error loading avatar data: ${e.message}", e)
+            }
+        }
     }
 
     private fun loadPlayDataFromLocal() {
@@ -274,139 +275,148 @@ internal class ChunithmViewModel() : ViewModel() {
 
     private fun loadTopRankDataFromLocal(context: Context) {
         viewModelScope.launch {
-            val chunithmLocalService = ChunithmObjectBoxService()
-            val topRank = ChunithmTopRankUiModel()
-            val moshi = Moshi.Builder()
-                .addLast(KotlinJsonAdapterFactory())
-                .build()
-            val ratingBestListType =
-                Types.newParameterizedType(List::class.java, ChuniScoreDTO::class.java)
-            val ratingBestJsonAdapter = moshi.adapter<List<ChuniScoreDTO>>(ratingBestListType)
-            val ratingBestJson = JsonUtil.readJsonFromFile(context, "chuniRatingBest.json")
-            if (ratingBestJson != null) {
-                val bestListData = ratingBestJsonAdapter.fromJson(ratingBestJson) ?: listOf()
-                val bestList = mutableListOf<ChunithmScoreUiModel>()
-                for (best in bestListData) {
-                    val songData = chunithmLocalService.getChunithmSongData(best.title)
-                    val diff = when (best.diff) {
-                        "0" -> "basic"
-                        "1" -> "advanced"
-                        "2" -> "expert"
-                        "3" -> "master"
-                        "4" -> "ultima"
-                        else -> "master"
-                    }
-                    val songSheetData = chunithmLocalService.getChunithmSongSheetData(best.title, diff)
-                    bestList.add(
-                        ChunithmScoreUiModel(
-                            title = songData.title,
-                            artist = songData.artist,
-                            noteDesigner = songSheetData.noteDesigner,
-                            genre = songData.genre,
-                            diff = diff,
-                            level = songSheetData.levelCn,
-                            levelValue = songSheetData.levelValueCn,
-                            score = best.highScore,
-                            rank = calcChuniRank(bigNumberToInt(best.highScore)),
-                            rating = calcChuniRating(bigNumberToInt(best.highScore), songSheetData.levelValueCn),
-                            jacket = songData.imageName,
-                            tap = songSheetData.tap,
-                            hold = songSheetData.hold,
-                            slide = songSheetData.slide,
-                            air = songSheetData.air,
-                            flick = songSheetData.flick,
-                            total = songSheetData.total
+            try {
+                Log.d("ChunithmViewModel", "Loading rating data from ObjectBox...")
+                val chunithmLocalService = ChunithmObjectBoxService()
+                val topRank = ChunithmTopRankUiModel()
+                
+                // 加载 Best Rating 数据
+                val bestListData = chunithmLocalService.getRatingData(ChunithmRatingEntity.TYPE_BEST)
+                Log.d("ChunithmViewModel", "Loaded ${bestListData.size} best records from ObjectBox")
+                
+                if (bestListData.isNotEmpty()) {
+                    val bestList = mutableListOf<ChunithmScoreUiModel>()
+                    for (best in bestListData) {
+                        val songData = chunithmLocalService.getChunithmSongData(best.title)
+                        val diff = when (best.diff) {
+                            "0" -> "basic"
+                            "1" -> "advanced"
+                            "2" -> "expert"
+                            "3" -> "master"
+                            "4" -> "ultima"
+                            else -> "master"
+                        }
+                        val songSheetData = chunithmLocalService.getChunithmSongSheetData(best.title, diff)
+                        bestList.add(
+                            ChunithmScoreUiModel(
+                                title = songData.title,
+                                artist = songData.artist,
+                                noteDesigner = songSheetData.noteDesigner,
+                                genre = songData.genre,
+                                diff = diff,
+                                level = songSheetData.levelCn,
+                                levelValue = songSheetData.levelValueCn,
+                                score = best.highScore,
+                                rank = calcChuniRank(bigNumberToInt(best.highScore)),
+                                rating = calcChuniRating(bigNumberToInt(best.highScore), songSheetData.levelValueCn),
+                                jacket = songData.imageName,
+                                tap = songSheetData.tap,
+                                hold = songSheetData.hold,
+                                slide = songSheetData.slide,
+                                air = songSheetData.air,
+                                flick = songSheetData.flick,
+                                total = songSheetData.total
+                            )
                         )
-                    )
-                }
-                topRank.bestList = bestList
-                topRank.best30 = bestList.map { it.rating }.average()
-            }
-            val ratingRecentListType = Types.newParameterizedType(List::class.java, ChuniScoreDTO::class.java)
-            val ratingRecentJsonAdapter = moshi.adapter<List<ChuniScoreDTO>>(ratingRecentListType)
-            val ratingRecentJson = JsonUtil.readJsonFromFile(context, "chuniRatingRecent.json")
-            if (ratingRecentJson != null) {
-                val recentListData = ratingRecentJsonAdapter.fromJson(ratingRecentJson) ?: listOf()
-                val recentList = mutableListOf<ChunithmScoreUiModel>()
-                for (recent in recentListData) {
-                    val songData = chunithmLocalService.getChunithmSongData(recent.title)
-                    val diff = when (recent.diff) {
-                        "0" -> "basic"
-                        "1" -> "advanced"
-                        "2" -> "expert"
-                        "3" -> "master"
-                        "4" -> "ultima"
-                        else -> "master"
                     }
-                    val songSheetData = chunithmLocalService.getChunithmSongSheetData(recent.title, diff)
-                    recentList.add(
-                        ChunithmScoreUiModel(
-                            title = songData.title,
-                            artist = songData.artist,
-                            noteDesigner = songSheetData.noteDesigner,
-                            genre = songData.genre,
-                            diff = diff,
-                            level = songSheetData.levelCn,
-                            levelValue = songSheetData.levelValueCn,
-                            score = recent.highScore,
-                            rank = calcChuniRank(bigNumberToInt(recent.highScore)),
-                            rating = calcChuniRating(bigNumberToInt(recent.highScore), songSheetData.levelValueCn),
-                            jacket = songData.imageName,
-                            tap = songSheetData.tap,
-                            hold = songSheetData.hold,
-                            slide = songSheetData.slide,
-                            air = songSheetData.air,
-                            flick = songSheetData.flick,
-                            total = songSheetData.total
-                        )
-                    )
+                    topRank.bestList = bestList
+                    topRank.best30 = bestList.map { it.rating }.average()
+                    Log.d("ChunithmViewModel", "Best30 average: ${topRank.best30}")
                 }
-                topRank.newList = recentList
-                topRank.new20 = recentList.map { it.rating }.average()
-            }
-            val ratingSuggestListType = Types.newParameterizedType(List::class.java, ChuniScoreDTO::class.java)
-            val ratingSuggestJsonAdapter = moshi.adapter<List<ChuniScoreDTO>>(ratingSuggestListType)
-            val ratingSuggestJson = JsonUtil.readJsonFromFile(context, "chuniRatingNext.json")
-            if (ratingSuggestJson != null) {
-                val suggestListData = ratingSuggestJsonAdapter.fromJson(ratingSuggestJson) ?: listOf()
-                val suggestList = mutableListOf<ChunithmScoreUiModel>()
-                for (suggest in suggestListData) {
-                    val songData = chunithmLocalService.getChunithmSongData(suggest.title)
-                    val diff = when (suggest.diff) {
-                        "0" -> "basic"
-                        "1" -> "advanced"
-                        "2" -> "expert"
-                        "3" -> "master"
-                        "4" -> "ultima"
-                        else -> "master"
+                
+                // 加载 Recent Rating 数据
+                val recentListData = chunithmLocalService.getRatingData(ChunithmRatingEntity.TYPE_RECENT)
+                Log.d("ChunithmViewModel", "Loaded ${recentListData.size} recent records from ObjectBox")
+                
+                if (recentListData.isNotEmpty()) {
+                    val recentList = mutableListOf<ChunithmScoreUiModel>()
+                    for (recent in recentListData) {
+                        val songData = chunithmLocalService.getChunithmSongData(recent.title)
+                        val diff = when (recent.diff) {
+                            "0" -> "basic"
+                            "1" -> "advanced"
+                            "2" -> "expert"
+                            "3" -> "master"
+                            "4" -> "ultima"
+                            else -> "master"
+                        }
+                        val songSheetData = chunithmLocalService.getChunithmSongSheetData(recent.title, diff)
+                        recentList.add(
+                            ChunithmScoreUiModel(
+                                title = songData.title,
+                                artist = songData.artist,
+                                noteDesigner = songSheetData.noteDesigner,
+                                genre = songData.genre,
+                                diff = diff,
+                                level = songSheetData.levelCn,
+                                levelValue = songSheetData.levelValueCn,
+                                score = recent.highScore,
+                                rank = calcChuniRank(bigNumberToInt(recent.highScore)),
+                                rating = calcChuniRating(bigNumberToInt(recent.highScore), songSheetData.levelValueCn),
+                                jacket = songData.imageName,
+                                tap = songSheetData.tap,
+                                hold = songSheetData.hold,
+                                slide = songSheetData.slide,
+                                air = songSheetData.air,
+                                flick = songSheetData.flick,
+                                total = songSheetData.total
+                            )
+                        )
                     }
-                    val songSheetData = chunithmLocalService.getChunithmSongSheetData(suggest.title, diff)
-                    suggestList.add(
-                        ChunithmScoreUiModel(
-                            title = songData.title,
-                            artist = songData.artist,
-                            noteDesigner = songSheetData.noteDesigner,
-                            genre = songData.genre,
-                            diff = diff,
-                            level = songSheetData.levelCn,
-                            levelValue = songSheetData.levelValueCn,
-                            score = suggest.highScore,
-                            rank = calcChuniRank(bigNumberToInt(suggest.highScore)),
-                            rating = calcChuniRating(bigNumberToInt(suggest.highScore), songSheetData.levelValueCn),
-                            jacket = songData.imageName,
-                            tap = songSheetData.tap,
-                            hold = songSheetData.hold,
-                            slide = songSheetData.slide,
-                            air = songSheetData.air,
-                            flick = songSheetData.flick,
-                            total = songSheetData.total
-                        )
-                    )
+                    topRank.newList = recentList
+                    topRank.new20 = recentList.map { it.rating }.average()
+                    Log.d("ChunithmViewModel", "Recent20 average: ${topRank.new20}")
                 }
-                topRank.suggestList = suggestList
-                topRank.suggest10 = suggestList.map { it.rating }.average()
+                
+                // 加载 Suggest Rating 数据
+                val suggestListData = chunithmLocalService.getRatingData(ChunithmRatingEntity.TYPE_SUGGEST)
+                Log.d("ChunithmViewModel", "Loaded ${suggestListData.size} suggest records from ObjectBox")
+                
+                if (suggestListData.isNotEmpty()) {
+                    val suggestList = mutableListOf<ChunithmScoreUiModel>()
+                    for (suggest in suggestListData) {
+                        val songData = chunithmLocalService.getChunithmSongData(suggest.title)
+                        val diff = when (suggest.diff) {
+                            "0" -> "basic"
+                            "1" -> "advanced"
+                            "2" -> "expert"
+                            "3" -> "master"
+                            "4" -> "ultima"
+                            else -> "master"
+                        }
+                        val songSheetData = chunithmLocalService.getChunithmSongSheetData(suggest.title, diff)
+                        suggestList.add(
+                            ChunithmScoreUiModel(
+                                title = songData.title,
+                                artist = songData.artist,
+                                noteDesigner = songSheetData.noteDesigner,
+                                genre = songData.genre,
+                                diff = diff,
+                                level = songSheetData.levelCn,
+                                levelValue = songSheetData.levelValueCn,
+                                score = suggest.highScore,
+                                rank = calcChuniRank(bigNumberToInt(suggest.highScore)),
+                                rating = calcChuniRating(bigNumberToInt(suggest.highScore), songSheetData.levelValueCn),
+                                jacket = songData.imageName,
+                                tap = songSheetData.tap,
+                                hold = songSheetData.hold,
+                                slide = songSheetData.slide,
+                                air = songSheetData.air,
+                                flick = songSheetData.flick,
+                                total = songSheetData.total
+                            )
+                        )
+                    }
+                    topRank.suggestList = suggestList
+                    topRank.suggest10 = suggestList.map { it.rating }.average()
+                    Log.d("ChunithmViewModel", "Suggest10 average: ${topRank.suggest10}")
+                }
+                
+                chunithmTopRankUiModel.update { topRank }
+                Log.d("ChunithmViewModel", "Rating data loaded successfully from ObjectBox")
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Error loading rating data from ObjectBox", e)
             }
-            chunithmTopRankUiModel.update { topRank }
         }
     }
 

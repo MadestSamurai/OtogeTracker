@@ -4,6 +4,9 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toLowerCase
+import com.fleeksoft.ksoup.Ksoup
+import com.fleeksoft.ksoup.nodes.Document
+import com.fleeksoft.ksoup.nodes.Element
 import com.madsam.otora.core.utils.CommonUtils
 import com.madsam.otora.core.utils.JsonUtil
 import com.madsam.otora.core.utils.ShareUtil
@@ -18,7 +21,12 @@ import com.madsam.otora.data.adapter.SafeIntPairAdapter
 import com.madsam.otora.data.adapter.SafeLongAdapter
 import com.madsam.otora.data.adapter.SafeStringAdapter
 import com.madsam.otora.data.adapter.SafeStringListAdapter
+import com.madsam.otora.data.chunithm.local.datastore.ChunithmPenguinDataStore
+import com.madsam.otora.data.chunithm.local.datastore.ChunithmStatueDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserDataStore
+import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserExtDataStore
+import com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity
+import com.madsam.otora.data.chunithm.local.model.ChunithmRatingEntity
 import com.madsam.otora.data.chunithm.local.objectbox.ChunithmObjectBoxService
 import com.madsam.otora.data.chunithm.remote.model.ChuniCookieDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
@@ -33,7 +41,6 @@ import com.madsam.otora.data.chunithm.remote.model.ChuniScoreDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniStatueDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniUserDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniUserExtendDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniUserRoleDTO
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
@@ -41,9 +48,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.fleeksoft.ksoup.Ksoup
-import com.fleeksoft.ksoup.nodes.Document
-import com.fleeksoft.ksoup.nodes.Element
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -64,6 +68,7 @@ internal class ChunithmRequestService(private val context: Context) {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
     private val isUserRequestRunning = AtomicBoolean(false)
     private val isSongsRequestRunning = AtomicBoolean(false)
+    private val chunithmLocalService = ChunithmObjectBoxService()
     private val userAgent = UserAgentUtils.getUserAgent(context).ifBlank { 
         UserAgentUtils.getDefaultUserAgent() 
     }
@@ -377,10 +382,16 @@ internal class ChunithmRequestService(private val context: Context) {
         }
 
         Log.d(TAG, "Parsing and saving penguin data...")
-        saveDataToLocal(parseChuniPenguin(doc), "chuniPenguin.json")
+        val penguinData = parseChuniPenguin(doc)
+        val penguinDataStore = ChunithmPenguinDataStore(context)
+        penguinDataStore.savePenguinData(penguinData)
+        Log.d(TAG, "Penguin data saved to DataStore")
         
         Log.d(TAG, "Parsing and saving user extend data...")
-        saveDataToLocal(parseChuniUserExtend(doc), "chuniUserExt.json")
+        val userExtData = parseChuniUserExtend(doc)
+        val userExtDataStore = ChunithmUserExtDataStore(context)
+        userExtDataStore.saveUserExtData(userExtData)
+        Log.d(TAG, "User extend data saved to DataStore")
         
         Log.d(TAG, "=== requestPlayerData completed ===")
     }
@@ -402,17 +413,29 @@ internal class ChunithmRequestService(private val context: Context) {
 
     private suspend fun requestRatingBest() {
         val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailBest") ?: return
-        saveDataToLocal(parseRatingData(doc), "chuniRatingBest.json")
+        val ratingData = parseRatingData(doc)
+        Log.d(TAG, "Saving Rating Best data to ObjectBox, count: ${ratingData.size}")
+        val objectBoxService = ChunithmObjectBoxService()
+        objectBoxService.saveRatingData(ratingData, ChunithmRatingEntity.TYPE_BEST)
+        Log.d(TAG, "Rating Best data saved successfully")
     }
 
     private suspend fun requestRatingRecent() {
         val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailRecent") ?: return
-        saveDataToLocal(parseRatingData(doc), "chuniRatingRecent.json")
+        val ratingData = parseRatingData(doc)
+        Log.d(TAG, "Saving Rating Recent data to ObjectBox, count: ${ratingData.size}")
+        val objectBoxService = ChunithmObjectBoxService()
+        objectBoxService.saveRatingData(ratingData, ChunithmRatingEntity.TYPE_RECENT)
+        Log.d(TAG, "Rating Recent data saved successfully")
     }
 
     private suspend fun requestRatingNext() {
         val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailNext") ?: return
-        saveDataToLocal(parseRatingData(doc), "chuniRatingNext.json")
+        val ratingData = parseRatingData(doc)
+        Log.d(TAG, "Saving Rating Suggest data to ObjectBox, count: ${ratingData.size}")
+        val objectBoxService = ChunithmObjectBoxService()
+        objectBoxService.saveRatingData(ratingData, ChunithmRatingEntity.TYPE_SUGGEST)
+        Log.d(TAG, "Rating Suggest data saved successfully")
     }
 
     private fun parseChuniMaps(doc: Document): List<ChuniMapDTO> {
@@ -454,7 +477,9 @@ internal class ChunithmRequestService(private val context: Context) {
 
     private suspend fun requestMapRecord() {
         val doc = requestDataFromServer("$CHUNITHM_URL/record") ?: return
-        saveDataToLocal(parseChuniMaps(doc), "chuniMapRecord.json")
+        val mapData = parseChuniMaps(doc)
+        // 保存到 ObjectBox
+        chunithmLocalService.saveMapData(mapData)
     }
 
     private fun parsePlayLog(doc: Document): List<ChuniFullScoreDTO> {
@@ -527,7 +552,11 @@ internal class ChunithmRequestService(private val context: Context) {
 
     private suspend fun requestPlayLog() {
         val doc = requestDataFromServer("$CHUNITHM_URL/record/playlog") ?: return
-        saveDataToLocal(parsePlayLog(doc), "chuniPlayLog.json")
+        val playLogs = parsePlayLog(doc)
+        Log.d(TAG, "Saving PlayLog data to ObjectBox, count: ${playLogs.size}")
+        val objectBoxService = ChunithmObjectBoxService()
+        objectBoxService.savePlayLogs(playLogs)
+        Log.d(TAG, "PlayLog data saved successfully, total records: ${objectBoxService.getPlayLogCount()}")
     }
 
     private fun parsePlayRecord(doc: Document, diff: String): ChuniPlayRecordDTO {
@@ -681,19 +710,6 @@ internal class ChunithmRequestService(private val context: Context) {
         }
     }
 
-    private fun parseChuniUserRole(doc: Document): ChuniUserRoleDTO {
-        val roleName = doc.selectFirst("div.character_image_box_name")?.text() ?: ""
-        val roleImageUrl = doc.selectFirst("div.character_image_box img")?.attr("src") ?: ""
-        val roleLevel = doc.select("div.character_lv_box_num img")
-            .joinToString(separator = "") { img ->
-                Regex("num_lv_(\\d+)")
-                    .find(img.attr("src"))
-                    ?.groupValues?.get(1) ?: ""
-            }
-
-        return ChuniUserRoleDTO(roleName, roleLevel, roleImageUrl)
-    }
-
     private fun parseChuniStatue(doc: Document): ChuniStatueDTO {
         val penguinCounts = mutableListOf<Int>()
         val penguinContainer = doc.select("div.box01_title.text_b")
@@ -714,11 +730,184 @@ internal class ChunithmRequestService(private val context: Context) {
             rainbow = penguinCounts.getOrNull(3) ?: 0
         )
     }
+    
+    /**
+     * 解析角色列表页面
+     * 从 /mobile/collection/characterList/ 页面提取所有角色数据
+     */
+    private fun parseCharacterList(doc: Document): List<ChunithmCharacterEntity> {
+        val characters = mutableListOf<ChunithmCharacterEntity>()
+        val currentTime = System.currentTimeMillis()
+        
+        try {
+            // 获取 token
+            val token = doc.select("input[name=token]").firstOrNull()?.attr("value") ?: ""
+            
+            // 获取当前使用的角色名称
+            // 找到包含"使用中的角色"标题的 box01，然后在其内部找 character_list_block
+            val currentCharacterName = doc.select("div.box01.w420")
+                .firstOrNull { box -> 
+                    box.select("div.box01_title").text().contains("使用中的角色")
+                }
+                ?.select("div.character_list_block div.character_name_block")
+                ?.text()
+                ?.trim() ?: ""
+            
+            // 解析所有拥有的角色
+            val characterBlocks = doc.select("div.box01.w420.mt_25")
+            characterBlocks.forEach { categoryBlock ->
+                categoryBlock.select("div.character_list_block").forEach { block ->
+                    // 获取角色名称，判断是否是当前使用的角色
+                    val characterName = block.select("div.character_name_block form a").text().trim()
+                    val isCurrentlyUsed = characterName == currentCharacterName
+                    
+                    parseCharacterBlock(block, isCurrentlyUsed = isCurrentlyUsed, token = token, syncedAt = currentTime)?.let {
+                        characters.add(it)
+                    }
+                }
+            }
+            
+            Log.d(TAG, "Parsed ${characters.size} characters (current: ${characters.count { it.isCurrentlyUsed }}, owned: ${characters.count { !it.isCurrentlyUsed }})")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing character list", e)
+        }
+        
+        return characters
+    }
+    
+    /**
+     * 解析单个角色块
+     */
+    private fun parseCharacterBlock(
+        block: Element, 
+        isCurrentlyUsed: Boolean, 
+        token: String,
+        syncedAt: Long
+    ): ChunithmCharacterEntity? {
+        try {
+            // 获取角色ID（从 input[name=chara] 中获取）
+            val charaId = block.select("input[name=chara]").firstOrNull()?.attr("value") ?: ""
+            if (charaId.isEmpty()) {
+                Log.w(TAG, "Character ID is empty, skipping")
+                return null
+            }
+            
+            // 获取角色名称（在 form a 标签中）
+            val name = block.select("div.character_name_block form a").text().trim()
+            if (name.isEmpty()) {
+                Log.w(TAG, "Character name is empty, skipping")
+                return null
+            }
+            
+            // 获取角色图片URL（使用 data-original 属性，因为是懒加载）
+            val imageUrl = block.select("div.list_chara_img img.lazy").attr("data-original")
+            
+            // 解析边框类型（从 div.list_chara_img 的背景图片URL提取）
+            val frameStyle = block.select("div.list_chara_img").attr("style")
+            val frameType = when {
+                frameStyle.contains("charaframe_normal.png") -> ChunithmCharacterEntity.FRAME_NORMAL
+                frameStyle.contains("charaframe_copper.png") -> ChunithmCharacterEntity.FRAME_COPPER
+                frameStyle.contains("charaframe_silver.png") -> ChunithmCharacterEntity.FRAME_SILVER
+                frameStyle.contains("charaframe_gold.png") -> ChunithmCharacterEntity.FRAME_GOLD
+                frameStyle.contains("charaframe_platina.png") -> ChunithmCharacterEntity.FRAME_PLATINA
+                else -> ChunithmCharacterEntity.FRAME_NORMAL
+            }
+            
+            // 检查是否满级（查找 span.character_list_rank_max）
+            val isMaxLevel = block.select("span.character_list_rank_max img").isNotEmpty()
+            
+            // 解析等级（从 span.character_list_rank_num 中的数字图片拼接）
+            val levelImages = block.select("span.character_list_rank_num img")
+            val level = levelImages
+                .mapNotNull { img ->
+                    val src = img.attr("src")
+                    val digitMatch = Regex("num_s_lv_(\\d)\\.png").find(src)
+                    digitMatch?.groupValues?.get(1)
+                }
+                .joinToString("")
+                .toIntOrNull() ?: 0
+            
+            // 获取经验条宽度
+            val expBarWidth = if (!isMaxLevel) {
+                block.select("div.character_list_gage_base img")
+                    .firstOrNull()
+                    ?.attr("width")
+                    ?.replace("px", "")
+                    ?.toIntOrNull() ?: 0
+            } else {
+                0 // 满级时经验条宽度为0
+            }
+            
+            // 解析技能种子信息（可选）
+            val skillSeedBlock = block.select("div.character_list_skillseed_block").firstOrNull()
+            val skillSeedImageUrl = skillSeedBlock?.select("img.character_list_skillseed_img")
+                ?.attr("src") ?: ""
+            val skillSeedText = skillSeedBlock?.select("div.character_list_skillseed_txt")
+                ?.text()?.trim() ?: ""
+            val skillSeedVersionImageUrl = skillSeedBlock?.select("img.character_list_skillseed_version")
+                ?.attr("src") ?: ""
+            
+            return ChunithmCharacterEntity(
+                id = 0, // ObjectBox will auto-generate
+                charaId = charaId,
+                name = name,
+                imageUrl = imageUrl,
+                frameType = frameType,
+                level = level,
+                expBarWidth = expBarWidth,
+                isMaxLevel = isMaxLevel,
+                skillSeedImageUrl = skillSeedImageUrl,
+                skillSeedText = skillSeedText,
+                skillSeedVersionImageUrl = skillSeedVersionImageUrl,
+                isCurrentlyUsed = isCurrentlyUsed,
+                token = token,
+                syncedAt = syncedAt
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing character block", e)
+            return null
+        }
+    }
 
     private suspend fun requestCollection() {
         val doc = requestDataFromServer("$CHUNITHM_URL/collection") ?: return
-        saveDataToLocal(parseChuniUserRole(doc), "chuniUserRole.json")
-        saveDataToLocal(parseChuniStatue(doc), "chuniStatue.json")
+        
+        // 保存企鹅雕像数据到 DataStore
+        val statueData = parseChuniStatue(doc)
+        val statueDataStore = ChunithmStatueDataStore(context)
+        statueDataStore.saveStatueData(statueData)
+        Log.d(TAG, "Statue data saved to DataStore: soul=${statueData.soul}, sliver=${statueData.sliver}, gold=${statueData.gold}, rainbow=${statueData.rainbow}")
+    }
+    
+    /**
+     * 请求角色列表数据
+     */
+    private suspend fun requestCharacterList() {
+        try {
+            Log.d(TAG, "Requesting character list...")
+            val doc = requestDataFromServer("$CHUNITHM_URL/collection/characterList/") ?: return
+            
+            // 解析角色数据
+            val characters = parseCharacterList(doc)
+            
+            if (characters.isEmpty()) {
+                Log.w(TAG, "No character data found")
+                return
+            }
+            
+            // 保存到 ObjectBox
+            chunithmLocalService.saveCharacterData(characters, replaceAll = true)
+            Log.d(TAG, "Character list saved: ${characters.size} characters")
+            
+            // 记录一些统计信息
+            val currentChar = characters.firstOrNull { it.isCurrentlyUsed }
+            val maxLevelCount = characters.count { it.isMaxLevel }
+            val skillSeedCount = characters.count { it.skillSeedText.isNotEmpty() }
+            
+            Log.d(TAG, "Character stats - Current: ${currentChar?.name}, Max level: $maxLevelCount, With skill seed: $skillSeedCount")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error requesting character list", e)
+        }
     }
 
     private fun parseFriendList(doc: Document): List<ChuniFriendDTO> {
@@ -1046,6 +1235,9 @@ internal class ChunithmRequestService(private val context: Context) {
                     
                     updateBaseProgress("获取收藏数据...")
                     requestCollection()
+                    
+                    updateBaseProgress("获取角色列表...")
+                    requestCharacterList()
                     
                     updateBaseProgress("获取登录奖励...")
                     requestLoginBonus()
