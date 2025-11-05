@@ -135,10 +135,23 @@ internal fun BofEntryPagerScreen(
         // 只有当前页面才响应截图对话框
         val shouldShowCaptureDialog = showCaptureDialog && page == pagerState.currentPage
         
+        // 页面标题列表
+        val pageNames = listOf("总分", "平均分", "中位数", "差值", "综合")
+        val previousPageTitle = if (page > 0) pageNames[page - 1] else null
+        val nextPageTitle = if (page < pageNames.size - 1) pageNames[page + 1] else null
+        
         when (page) {
             0 -> EntryPageContent(
                 title = "总分排行榜",
-                subtitle = "BOF 总分排行榜",
+                subtitle = "时间: ${vm.getSelectedTimeString()}",
+                previousPageTitle = previousPageTitle,
+                nextPageTitle = nextPageTitle,
+                onNavigateToPrevious = { 
+                    bofScreenState.selectedSubTab.update { page - 1 }
+                },
+                onNavigateToNext = { 
+                    bofScreenState.selectedSubTab.update { page + 1 }
+                },
                 scoreColumnName = "分数条",
                 extraColumnName = "评价",
                 avgColumnName = "均分",
@@ -171,7 +184,15 @@ internal fun BofEntryPagerScreen(
                 
                 EntryPageContent(
                     title = "平均分排行榜",
-                    subtitle = "BOF 平均分排行榜",
+                    subtitle = "时间: ${vm.getSelectedTimeString()}",
+                    previousPageTitle = previousPageTitle,
+                    nextPageTitle = nextPageTitle,
+                    onNavigateToPrevious = { 
+                        bofScreenState.selectedSubTab.update { page - 1 }
+                    },
+                    onNavigateToNext = { 
+                        bofScreenState.selectedSubTab.update { page + 1 }
+                    },
                     scoreColumnName = "均分",
                     extraColumnName = "评价",
                     avgColumnName = null,
@@ -205,7 +226,15 @@ internal fun BofEntryPagerScreen(
                 
                 EntryPageContent(
                     title = "中位数排行榜",
-                    subtitle = "BOF 中位数排行榜",
+                    subtitle = "时间: ${vm.getSelectedTimeString()}",
+                    previousPageTitle = previousPageTitle,
+                    nextPageTitle = nextPageTitle,
+                    onNavigateToPrevious = { 
+                        bofScreenState.selectedSubTab.update { page - 1 }
+                    },
+                    onNavigateToNext = { 
+                        bofScreenState.selectedSubTab.update { page + 1 }
+                    },
                     scoreColumnName = "中位",
                     extraColumnName = "评价",
                     avgColumnName = null,
@@ -239,7 +268,15 @@ internal fun BofEntryPagerScreen(
                 
                 EntryPageContent(
                     title = "差值排行榜",
-                    subtitle = "BOF 差值排行榜",
+                    subtitle = "时间: ${vm.getSelectedTimeString()}",
+                    previousPageTitle = previousPageTitle,
+                    nextPageTitle = nextPageTitle,
+                    onNavigateToPrevious = { 
+                        bofScreenState.selectedSubTab.update { page - 1 }
+                    },
+                    onNavigateToNext = { 
+                        bofScreenState.selectedSubTab.update { page + 1 }
+                    },
                     scoreColumnName = "差值",
                     extraColumnName = "评价",
                     avgColumnName = null,
@@ -275,7 +312,11 @@ internal fun BofEntryPagerScreen(
                 
                 EntryPageContent(
                     title = "综合分数排行榜",
-                    subtitle = "BOF 综合分数排行榜 (评价≥${minImpression})",
+                    subtitle = "时间: ${vm.getSelectedTimeString()} | 评价≥${minImpression}",
+                    previousPageTitle = previousPageTitle,
+                    nextPageTitle = nextPageTitle,
+                    onNavigateToPrevious = { bofScreenState.selectedSubTab.update { page - 1 } },
+                    onNavigateToNext = { bofScreenState.selectedSubTab.update { page + 1 } },
                     scoreColumnName = "综合",
                     extraColumnName = "评价",
                     avgColumnName = null,
@@ -329,7 +370,11 @@ private fun <T> EntryPageContent(
     showCaptureDialog: Boolean = false,
     onCaptureDialogDismiss: () -> Unit = {},
     listState: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
-    searchText: String = ""
+    searchText: String = "",
+    previousPageTitle: String? = null,
+    nextPageTitle: String? = null,
+    onNavigateToPrevious: () -> Unit = {},
+    onNavigateToNext: () -> Unit = {}
 ) {
     val showDialogState = remember { mutableStateOf(false) }
     
@@ -397,7 +442,7 @@ private fun <T> EntryPageContent(
                 val rankingItems = ranking.map(dataConverter)
                 val tableConfig = RankingTableConfig(
                     title = title,
-                    subtitle = "$subtitle (${ranking.size} 作品) | ${vm.getSelectedTimeString()}",
+                    subtitle = subtitle,
                     scoreColumnName = scoreColumnName,
                     extraColumnName = extraColumnName,
                     avgColumnName = avgColumnName,
@@ -407,7 +452,9 @@ private fun <T> EntryPageContent(
                     avgWidthType = avgWidthType,
                     medianWidthType = medianWidthType,
                     enableNarrowToggle = enableNarrowToggle,
-                    maxItems = maxItems
+                    maxItems = maxItems,
+                    previousPageTitle = previousPageTitle,
+                    nextPageTitle = nextPageTitle
                 )
                 
                 RankingTable(
@@ -415,7 +462,9 @@ private fun <T> EntryPageContent(
                     config = tableConfig,
                     narrowMode = narrowMode,
                     listState = listState,
-                    searchText = searchText
+                    searchText = searchText,
+                    onNavigateToPrevious = onNavigateToPrevious,
+                    onNavigateToNext = onNavigateToNext
                 )
                 
                 // 截图对话框

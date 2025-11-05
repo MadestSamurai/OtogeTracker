@@ -73,7 +73,7 @@ internal fun TopRating(
         LocalWindowInfo.current.containerSize.width.toDp()
     }
     
-    val tabTitles = listOf("Best 30", "Recent 10", "Suggest")
+    val tabTitles = listOf("Best 30", "New 20", "Suggest")
     val pagerState = rememberPagerState { tabTitles.size }
     val scope = rememberCoroutineScope()
 

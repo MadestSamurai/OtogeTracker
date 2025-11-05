@@ -207,7 +207,7 @@ internal fun BofTeamRankingScreen(
                     context = context,
                     snackbarHostState = snackbarHostState,
                     teams = teamRankingData,
-                    subtitle = "团队总分排行榜 (${teamRankingData.size} 团队) | ${vm.getSelectedTimeString()}"
+                    subtitle = "时间: ${vm.getSelectedTimeString()}"
                 )
             }
         }
@@ -291,7 +291,7 @@ private fun TeamRankingTable(
             
             // 副标题
             Text(
-                text = "团队总分排行榜 (${teams.size} 团队) | ${vm.getSelectedTimeString()}",
+                text = "时间: ${vm.getSelectedTimeString()}",
                 fontFamily = sarasaRegular,
                 fontSize = 12.sp,
                 color = TEXT_GRAY,

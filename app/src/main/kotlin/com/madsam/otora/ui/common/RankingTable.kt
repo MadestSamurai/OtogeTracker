@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,11 +47,14 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import com.madsam.otora.core.icon.Fa
+import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.icon.fa.`Arrow-down`
 import com.madsam.otora.core.icon.fa.`Arrow-right`
 import com.madsam.otora.core.icon.fa.`Arrow-up`
 import com.madsam.otora.core.theme.BG_DARK_GRAY
+import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.TEXT_GRAY
@@ -95,7 +99,9 @@ data class RankingTableConfig(
     val medianWidthType: ColumnWidthType = ColumnWidthType.TWO_DECIMAL,
     val enableNarrowToggle: Boolean = false, // 是否启用窄屏切换
     val maxItems: Int = 50,
-    val allowNegativeScore: Boolean = false // 是否允许显示负数分数
+    val allowNegativeScore: Boolean = false, // 是否允许显示负数分数
+    val previousPageTitle: String? = null,  // 上一页标题，null表示没有上一页
+    val nextPageTitle: String? = null       // 下一页标题，null表示没有下一页
 )
 
 @Composable
@@ -106,7 +112,9 @@ fun RankingTable(
     showTitle: Boolean = true,
     showHeader: Boolean = true,
     listState: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
-    searchText: String = ""
+    searchText: String = "",
+    onNavigateToPrevious: () -> Unit = {},
+    onNavigateToNext: () -> Unit = {}
 ) {
     // 屏幕宽度检测
     val density = LocalDensity.current
@@ -193,14 +201,80 @@ fun RankingTable(
                     .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // 主标题
-                Text(
-                    text = config.title,
-                    fontFamily = sarasaBold,
-                    fontSize = 20.sp,
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
+                // 主标题行（带左右箭头）
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 左箭头（上一页）
+                    if (config.previousPageTitle != null) {
+                        IconButton(
+                            onClick = onNavigateToPrevious,
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    painter = rememberVectorPainter(image = Filled.ChevronLeft),
+                                    contentDescription = "上一页",
+                                    tint = Beige400,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    text = config.previousPageTitle,
+                                    fontFamily = sarasaRegular,
+                                    fontSize = 12.sp,
+                                    color = TEXT_GRAY,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.size(40.dp))
+                    }
+                    
+                    // 中间主标题
+                    Text(
+                        text = config.title,
+                        fontFamily = sarasaBold,
+                        fontSize = 20.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    // 右箭头（下一页）
+                    if (config.nextPageTitle != null) {
+                        IconButton(
+                            onClick = onNavigateToNext,
+                            modifier = Modifier.size(40.dp)
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Icon(
+                                    painter = rememberVectorPainter(image = Filled.ChevronRight),
+                                    contentDescription = "下一页",
+                                    tint = Beige400,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    text = config.nextPageTitle,
+                                    fontFamily = sarasaRegular,
+                                    fontSize = 12.sp,
+                                    color = TEXT_GRAY,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.size(40.dp))
+                    }
+                }
                 
                 // 副标题
                 Text(

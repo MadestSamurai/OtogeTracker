@@ -1,10 +1,17 @@
 package com.madsam.otora.ui.bof
 
 import android.util.Log
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,14 +24,15 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -42,8 +50,6 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -75,14 +81,15 @@ import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.icon.fa.Bars
+import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.Calendar
 import com.madsam.otora.core.icon.fa.Camera
+import com.madsam.otora.core.icon.fa.Xmark
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red800
-import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.madsam.otora.ui.bof.components.DateTimeRangePicker
@@ -95,20 +102,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 private const val TAG = "BofScreen"
-
-/**
- * 判断是否应该显示操作按钮
- * @param selectedTabIndex 当前选中的主Tab索引
- * @return true表示应该显示按钮
- */
-private fun shouldShowActionButton(selectedTabIndex: Int): Boolean {
-    return when (selectedTabIndex) {
-        0 -> true
-        1 -> true
-        2 -> true
-        else -> false
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -187,8 +180,6 @@ fun BofScreen(
     var teamInfoMode by remember { mutableIntStateOf(0) }
     var commentInfoMode by remember { mutableIntStateOf(0) }
 
-    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
-    
     // 截图对话框状态
     var showEntryCaptureDialog by remember { mutableStateOf(false) }
     var showTeamCaptureDialog by remember { mutableStateOf(false) }
@@ -299,7 +290,6 @@ fun BofScreen(
     )
 
     val mainTabTitles = tabTitles.keys.toList()
-    val subTabTitles = tabTitles[mainTabTitles[selectedTabIndex]] ?: emptyList()
 
     Log.d(TAG, "Starting UI render")
     
@@ -441,171 +431,72 @@ fun BofScreen(
                     .fillMaxSize()
                     .background(Color.Black)
             ) {
-                TopAppBar(
-                    title = {
-                        val focusManager = LocalFocusManager.current
-                        val keyboardController = LocalSoftwareKeyboardController.current
-                        TextField(
-                            value = searchText.value,
-                            onValueChange = { query ->
-                                // 只有在活动开始时才处理搜索
-                                if (selectedRange?.isStart == true) {
-                                    // 根据当前 tab 执行搜索
-                                    when (selectedTabIndex) {
-                                        0 -> {
-                                            // Entry 页面 - 根据 sub tab 搜索对应的排行榜
-                                            val subTab = selectedSubTabIndex // 0=总分, 1=平均, 2=中位数, 3=差值, 4=综合
-                                            vm.search(query, subTab)
-                                        }
-                                        1 -> {
-                                            // Team 页面 - tabIndex = 5
-                                            vm.search(query, 5)
-                                        }
-                                        2 -> {
-                                            // Comment 页面 - tabIndex = 6
-                                            vm.search(query, 6)
-                                        }
-                                    }
-                                } else {
-                                    // 如果不在活动期间，清空搜索
-                                    vm.search("", 0)
-                                }
+                // 顶部导航栏：左侧返回按钮 + 右侧主Tab
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                        .background(Color.Black)
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 左侧圆形返回按钮
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(Red500)
+                            .clickable {
+                                // TODO: 添加返回逻辑
                             },
-                            modifier = Modifier.fillMaxWidth(),
-                            textStyle = TextStyle(
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Normal
-                            ),
-                            placeholder = {
-                                Text(
-                                    "Search",
-                                    color = Beige400,
-                                    fontSize = 16.sp
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    painter = rememberVectorPainter(image = Filled.Magnify),
-                                    contentDescription = "Search Icon",
-                                    tint = Beige400,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                            keyboardActions = KeyboardActions(
-                                onDone = {
-                                    focusManager.clearFocus()
-                                    keyboardController?.hide()
-                                }
-                            ),
-                            colors = TextFieldDefaults.colors(
-                                focusedTextColor = Beige400,
-                                unfocusedTextColor = Beige400,
-                                disabledTextColor = Beige400,
-                                errorTextColor = Beige400,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                disabledIndicatorColor = Color.Transparent,
-                                errorIndicatorColor = Color.Transparent,
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                disabledContainerColor = Color.Transparent,
-                                errorContainerColor = Color.Transparent,
-                                focusedPlaceholderColor = Beige400,
-                                unfocusedPlaceholderColor = Beige400,
-                                disabledPlaceholderColor = Beige400,
-                                errorPlaceholderColor = Beige400,
-                                focusedLeadingIconColor = Beige400,
-                                unfocusedLeadingIconColor = Beige400,
-                                disabledLeadingIconColor = Beige400,
-                                errorLeadingIconColor = Beige400,
-                                cursorColor = Beige400,
-                            )
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Fa.`Arrow-left`,
+                            contentDescription = "Back",
+                            tint = Beige400,
+                            modifier = Modifier.size(20.dp)
                         )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            coroutineScope.launch { drawerState.open() }
-                        }) {
-                            Icon(
-                                imageVector = Fa.Bars,
-                                contentDescription = "Menu",
-                                tint = Beige400,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    },
-                    actions = {
-                        // 只有在活动开始时才显示搜索和功能按钮
-                        if (selectedRange?.isStart == true) {
-                            if (searchText.value.isNotEmpty()) {
-                                IconButton(onClick = { vm.scrollToPrevious() }) {
-                                    Icon(
-                                        painter = rememberVectorPainter(image = Filled.ChevronUp),
-                                        contentDescription = "Previous",
-                                        tint = Beige400
-                                    )
-                                }
-                                IconButton(onClick = { vm.scrollToNext() }) {
-                                    Icon(
-                                        painter = rememberVectorPainter(image = Filled.ChevronDown),
-                                        contentDescription = "Next",
-                                        tint = Beige400
-                                    )
-                                }
-                            } else {
-                                // Entry 页面显示截图按钮
-                                if (selectedTabIndex == 0) {
-                                    IconButton(onClick = { showEntryCaptureDialog = true }) {
-                                        Icon(
-                                            imageVector = Fa.Camera,
-                                            contentDescription = "Screenshot",
-                                            tint = Beige400,
-                                            modifier = Modifier.height(20.dp)
-                                        )
-                                    }
-                                }
-                                // Team 页面显示截图按钮
-                                if (selectedTabIndex == 1) {
-                                    IconButton(onClick = { showTeamCaptureDialog = true }) {
-                                        Icon(
-                                            imageVector = Fa.Camera,
-                                            contentDescription = "Screenshot",
-                                            tint = Beige400,
-                                            modifier = Modifier.height(20.dp)
-                                        )
-                                    }
-                                }
-                                // Comment 页面显示截图按钮
-                                if (selectedTabIndex == 2) {
-                                    IconButton(onClick = { showCommentCaptureDialog = true }) {
-                                        Icon(
-                                            imageVector = Fa.Camera,
-                                            contentDescription = "Screenshot",
-                                            tint = Beige400,
-                                            modifier = Modifier.height(20.dp)
-                                        )
-                                    }
-                                }
-                                IconButton(onClick = { selectTime() }) {
-                                    Icon(
-                                        painter = rememberVectorPainter(image = Filled.Calendar),
-                                        contentDescription = "Date&Time",
-                                        tint = Beige400,
-                                        modifier = Modifier.height(20.dp)
+                    }
+
+                    // 右侧主Tab栏
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(24.dp))
+                    ) {
+                        val contentWidthDp = screenWidthDp - 24.dp - 48.dp - 12.dp // 减去左侧按钮和间距
+
+                        CustomScrollableTabRow(
+                            selectedTabIndex = selectedTabIndex,
+                            containerColor = Red500,
+                            containerWidthDp = contentWidthDp,
+                            tabs = { selectedIndex ->
+                                mainTabTitles.forEachIndexed { index, title ->
+                                    Tab(
+                                        selected = selectedTabIndex == index,
+                                        onClick = {
+                                            if (selectedTabIndex != index) {
+                                                bofScreenState.selectedTab.update { index }
+                                                bofScreenState.selectedSubTab.update { 0 }
+                                                navController.navigate(title)
+                                            }
+                                        },
+                                        text = {
+                                            Text(
+                                                text = title,
+                                                color = if (selectedTabIndex == index) Beige500 else Beige600
+                                            )
+                                        },
+                                        modifier = Modifier.height(48.dp)
                                     )
                                 }
                             }
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Red500,
-                        titleContentColor = Beige400,
-                        actionIconContentColor = Beige400
-                    )
-                )
-                    
+                        )
+                    }
+                }
+
                 // 检查活动是否开始
                 if (selectedRange?.isStart != true) {
                     // 活动未开始时显示提示信息
@@ -683,15 +574,16 @@ fun BofScreen(
                                     "Comment" -> {
                                         val commentData by vm.commentData.collectAsState()
                                         val selectedTimeStrNoComp by vm.selectedTimeStrNoComp.collectAsState()
-                                        val selectedRange = bofScreenState.selectedRange.collectAsState().value
-                                        var title = "BOF 评价排行榜"
+                                        val selectedRange =
+                                            bofScreenState.selectedRange.collectAsState().value
+                                        var title = "评价排行榜"
                                         var subtitle = "时间: $selectedTimeStrNoComp"
 
                                         if (selectedRange?.singleComment == true && selectedRange.commentDate.isNotEmpty()) {
-                                            title = "BOF最终评价排行榜"
+                                            title = "最终评价排行榜"
                                             subtitle = "时间: ${selectedRange.commentDate} (仅单日)"
                                         }
-                                        
+
                                         BofCommentScreen(
                                             commentData = commentData,
                                             title = title,
@@ -700,7 +592,9 @@ fun BofScreen(
                                             scrollThreshold = scrollThreshold,
                                             setIsTabRowVisible = { isTabRowVisible = it },
                                             showCaptureDialog = showCommentCaptureDialog,
-                                            onCaptureDialogDismiss = { showCommentCaptureDialog = false }
+                                            onCaptureDialogDismiss = {
+                                                showCommentCaptureDialog = false
+                                            }
                                         )
                                     }
                                 }
@@ -710,168 +604,219 @@ fun BofScreen(
                 }
             }
 
+            // 底部工具栏（仅在活动开始时显示）
             if (selectedRange?.isStart == true) {
-                Column(
-                    modifier = Modifier.align(Alignment.BottomCenter)
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
                         .windowInsetsPadding(
-                            if (useNavigationRail) {
-                                // 使用 NavigationRail 时，需处理底部导航栏
-                                WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
-                            } else {
-                                // 不需要额外处理时，返回空 Insets
-                                WindowInsets(0, 0, 0, 0)
-                            }
+                            WindowInsets.navigationBars.union(WindowInsets.ime)
+                                .only(WindowInsetsSides.Bottom)
                         )
+                        .padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // 子Tab栏（如果有多个子Tab）
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(46.dp) // 40dp tab + 3dp padding + 3dp padding
-                            .padding(start = 12.dp, end = 12.dp, bottom = 5.dp),
+                            .height(56.dp)
+                            .clip(RoundedCornerShape(28.dp))
+                            .background(Red500)
+                            .animateContentSize(animationSpec = tween(300))
+                            .padding(horizontal = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // 计算屏幕宽度和内容宽度
-                        val contentWidthDp = screenWidthDp - 24.dp // 减去水平padding
-                        
-                        Box(
-                            modifier = Modifier.fillMaxWidth()
+                        val isSearching = searchText.value.isNotEmpty()
+
+                        // 截图按钮（带动画）
+                        AnimatedVisibility(
+                            visible = !isSearching && (selectedTabIndex == 0 || selectedTabIndex == 1 || selectedTabIndex == 2),
+                            enter = fadeIn(animationSpec = tween(300)) + 
+                                    expandHorizontally(animationSpec = tween(300)) +
+                                    scaleIn(animationSpec = tween(300)),
+                            exit = fadeOut(animationSpec = tween(300)) + 
+                                   shrinkHorizontally(animationSpec = tween(300)) +
+                                   scaleOut(animationSpec = tween(300))
                         ) {
-                            // 可滚动TabRow
-                            androidx.compose.animation.AnimatedVisibility(
-                                visible = isTabRowVisible && subTabTitles.size > 1,
-                                enter = fadeIn(animationSpec = tween(300)),
-                                exit = fadeOut(animationSpec = tween(300)),
-                                modifier = Modifier
-                                    .wrapContentWidth()
-                                    .widthIn(max = contentWidthDp)
-                                    .clip(RoundedCornerShape(20.dp))
-                            ) {
-                                CustomScrollableTabRow(
-                                    selectedTabIndex = selectedSubTabIndex,
-                                    containerColor = Red500,
-                                    containerWidthDp = contentWidthDp,
-                                    tabs = { selectedIndex ->
-                                        subTabTitles.forEachIndexed { index, title ->
-                                            Tab(
-                                                selected = selectedSubTabIndex == index,
-                                                onClick = {
-                                                    if (selectedSubTabIndex != index) {
-                                                        bofScreenState.selectedSubTab.update { index }
-                                                        // 不需要导航，因为Pager会自动响应状态变化
-                                                    }
-                                                },
-                                                text = {
-                                                    Text(
-                                                        text = title,
-                                                        color = if (selectedSubTabIndex == index) Beige500 else Beige600
-                                                    )
-                                                },
-                                                modifier = Modifier.height(35.dp)
-                                            )
-                                        }
+                            IconButton(
+                                onClick = {
+                                    when (selectedTabIndex) {
+                                        0 -> showEntryCaptureDialog = true
+                                        1 -> showTeamCaptureDialog = true
+                                        2 -> showCommentCaptureDialog = true
                                     }
+                                },
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Fa.Camera,
+                                    contentDescription = "Screenshot",
+                                    tint = Beige400,
+                                    modifier = Modifier.height(24.dp)
                                 )
                             }
                         }
-                    }
 
-                    // 主Tab栏 - 左侧可滚动TabRow + 右侧圆形按钮
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(46.dp)
-                            .padding(start = 12.dp, end = 12.dp, bottom = 5.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // 计算屏幕宽度和内容宽度
-                        val contentWidthDp = screenWidthDp - 24.dp // 减去水平padding
-
-                        Box(
-                            modifier = Modifier.fillMaxWidth()
+                        // 日期时间选择按钮（带动画）
+                        AnimatedVisibility(
+                            visible = !isSearching,
+                            enter = fadeIn(animationSpec = tween(300)) + 
+                                    expandHorizontally(animationSpec = tween(300)) +
+                                    scaleIn(animationSpec = tween(300)),
+                            exit = fadeOut(animationSpec = tween(300)) + 
+                                   shrinkHorizontally(animationSpec = tween(300)) +
+                                   scaleOut(animationSpec = tween(300))
                         ) {
-                            // 左侧可滚动TabRow
-                            androidx.compose.animation.AnimatedVisibility(
-                                visible = isTabRowVisible,
-                                enter = fadeIn(animationSpec = tween(300)),
-                                exit = fadeOut(animationSpec = tween(300)),
-                                modifier = Modifier
-                                    .wrapContentWidth()
-                                    .widthIn(max = contentWidthDp - 48.dp) // 减去按钮宽度和间隙
-                                    .clip(RoundedCornerShape(20.dp))
+                            IconButton(
+                                onClick = { selectTime() },
+                                modifier = Modifier.size(48.dp)
                             ) {
-                                CustomScrollableTabRow(
-                                    selectedTabIndex = selectedTabIndex,
-                                    containerColor = Red500,
-                                    containerWidthDp = contentWidthDp - 48.dp,
-                                    tabs = { selectedIndex ->
-                                        mainTabTitles.forEachIndexed { index, title ->
-                                            Tab(
-                                                selected = selectedTabIndex == index,
-                                                onClick = {
-                                                    if (selectedTabIndex != index) {
-                                                        bofScreenState.selectedTab.update { index }
-                                                        bofScreenState.selectedSubTab.update { 0 }
-                                                        navController.navigate(title)
-                                                    }
-                                                },
-                                                text = {
-                                                    Text(
-                                                        text = title,
-                                                        color = if (selectedTabIndex == index) Beige500 else Beige600
-                                                    )
-                                                },
-                                                modifier = Modifier.height(40.dp)
+                                Icon(
+                                    imageVector = Fa.Calendar,
+                                    contentDescription = "Date&Time",
+                                    tint = Beige400,
+                                    modifier = Modifier.height(24.dp)
+                                )
+                            }
+                        }
+
+                        // 搜索框
+                        val focusManager = LocalFocusManager.current
+                        val keyboardController = LocalSoftwareKeyboardController.current
+
+                        TextField(
+                            value = searchText.value,
+                            onValueChange = { query ->
+                                // 只有在活动开始时才处理搜索
+                                if (selectedRange?.isStart == true) {
+                                    when (selectedTabIndex) {
+                                        0 -> vm.search(query, selectedSubTabIndex)
+                                        1 -> vm.search(query, 5)
+                                        2 -> vm.search(query, 6)
+                                    }
+                                } else {
+                                    vm.search("", 0)
+                                }
+                            },
+                            modifier = Modifier
+                                .weight(1f, fill = true)
+                                .height(48.dp)
+                                .animateContentSize(animationSpec = tween(300)),
+                            textStyle = TextStyle(
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Normal
+                            ),
+                            placeholder = {
+                                Text(
+                                    "搜索...",
+                                    color = Beige600,
+                                    fontSize = 14.sp
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    painter = rememberVectorPainter(image = Filled.Magnify),
+                                    contentDescription = "Search",
+                                    tint = Beige400,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            },
+                            trailingIcon = {
+                                if (searchText.value.isNotEmpty()) {
+                                    Row {
+                                        IconButton(onClick = {
+                                            vm.search("", 0)
+                                            focusManager.clearFocus()
+                                        }) {
+                                            Icon(
+                                                painter = rememberVectorPainter(image = Fa.Xmark),
+                                                contentDescription = "Clear",
+                                                tint = Beige400,
+                                                modifier = Modifier.size(16.dp)
                                             )
                                         }
                                     }
-                                )
-                            }
+                                }
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(24.dp),
+                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    focusManager.clearFocus()
+                                    keyboardController?.hide()
+                                }
+                            ),
+                            colors = TextFieldDefaults.colors(
+                                focusedTextColor = Beige400,
+                                unfocusedTextColor = Beige400,
+                                disabledTextColor = Beige400,
+                                errorTextColor = Beige400,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                disabledIndicatorColor = Color.Transparent,
+                                errorIndicatorColor = Color.Transparent,
+                                focusedContainerColor = Red800,
+                                unfocusedContainerColor = Red800,
+                                disabledContainerColor = Red800,
+                                errorContainerColor = Red800,
+                                focusedPlaceholderColor = Beige600,
+                                unfocusedPlaceholderColor = Beige600,
+                                disabledPlaceholderColor = Beige600,
+                                errorPlaceholderColor = Beige600,
+                                focusedLeadingIconColor = Beige400,
+                                unfocusedLeadingIconColor = Beige400,
+                                disabledLeadingIconColor = Beige400,
+                                errorLeadingIconColor = Beige400,
+                                cursorColor = Beige400,
+                            )
+                        )
 
-                            // 右侧圆形按钮 - 根据页面类型选择性显示
-                            if (shouldShowActionButton(selectedTabIndex)) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .align(Alignment.CenterEnd)
-                                        .clip(RoundedCornerShape(50))
-                                        .background(Red500)
-                                        .clickable {
-                                            when (selectedTabIndex) {
-                                                0 -> {
-                                                    entryInfoMode = if (entryInfoMode == 0) 1 else 0
-                                                }
-
-                                                1 -> {
-                                                    teamInfoMode = if (teamInfoMode == 0) 1 else 0
-                                                }
-
-                                                2 -> {
-                                                    commentInfoMode = if (commentInfoMode == 0) 1 else 0
-                                                }
-                                            }
-                                        },
-                                    contentAlignment = Alignment.Center
+                        // 搜索导航按钮（带动画）
+                        AnimatedVisibility(
+                            visible = isSearching && matchedIndices.value.isNotEmpty(),
+                            enter = fadeIn(animationSpec = tween(300)) + 
+                                    expandHorizontally(animationSpec = tween(300)) +
+                                    slideInHorizontally(
+                                        initialOffsetX = { it / 2 },
+                                        animationSpec = tween(300)
+                                    ),
+                            exit = fadeOut(animationSpec = tween(300)) + 
+                                   shrinkHorizontally(animationSpec = tween(300)) +
+                                   slideOutHorizontally(
+                                        targetOffsetX = { it / 2 },
+                                        animationSpec = tween(300)
+                                    )
+                        ) {
+                            Column(
+                                modifier = Modifier.size(48.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                IconButton(
+                                    onClick = { vm.scrollToPrevious() },
+                                    modifier = Modifier.size(24.dp)
                                 ) {
-                                    Crossfade(
-                                        targetState = selectedTabIndex,
-                                        animationSpec = tween(durationMillis = 300),
-                                        label = "icon_crossfade"
-                                    ) { tabIndex ->
-                                        Icon(
-                                            painter = rememberVectorPainter(
-                                                image = when (tabIndex) {
-                                                    0 -> Filled.SwitchArrow
-                                                    1 -> Filled.SwitchArrow
-                                                    2 -> Filled.SwitchArrow
-                                                    else -> Filled.SwitchArrow
-                                                }
-                                            ),
-                                            contentDescription = "Switch",
-                                            tint = Beige500,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
+                                    Icon(
+                                        painter = rememberVectorPainter(image = Filled.ChevronUp),
+                                        contentDescription = "上一个",
+                                        tint = Beige400,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                                IconButton(
+                                    onClick = { vm.scrollToNext() },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        painter = rememberVectorPainter(image = Filled.ChevronDown),
+                                        contentDescription = "下一个",
+                                        tint = Beige400,
+                                        modifier = Modifier.size(16.dp)
+                                    )
                                 }
                             }
                         }

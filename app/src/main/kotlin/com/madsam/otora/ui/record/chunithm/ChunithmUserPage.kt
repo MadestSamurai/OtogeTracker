@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.madsam.otora.R
 import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.ui.record.chunithm.components.ChunithmSongDetailOverlay
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
@@ -77,6 +78,7 @@ internal fun ChunithmUserPage(
 
     var isTabRowVisible by remember { mutableStateOf(true) }
     var showTopRankDialog by remember { mutableStateOf(false) }
+    val selectedSongTitle = remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val tabTitles = listOf(
         context.getString(R.string.chunithm_tab_home),
@@ -120,6 +122,25 @@ internal fun ChunithmUserPage(
             chunithmScreenState.selectedTab.update { pagerState.currentPage }
         }
     }
+    
+    // 设置返回回调，用于关闭覆盖层
+    LaunchedEffect(Unit) {
+        viewModel.setOnBackCallback {
+            if (selectedSongTitle.value != null) {
+                // 如果覆盖层是打开的，关闭它
+                selectedSongTitle.value = null
+            }
+        }
+    }
+    
+    // 监听覆盖层状态，控制返回按钮显示
+    LaunchedEffect(selectedSongTitle.value) {
+        if (selectedSongTitle.value != null) {
+            viewModel.updatePageTitle(selectedSongTitle.value ?: "")
+        } else {
+            viewModel.resetPageTitle()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         HorizontalPager(
@@ -139,6 +160,7 @@ internal fun ChunithmUserPage(
                     viewModel = viewModel,
                     scrollThreshold = scrollThreshold,
                     setIsTabRowVisible = { isTabRowVisible = it },
+                    selectedSongTitle = selectedSongTitle,
                     onNavigateToSongDetail = { songTitle ->
                         // 对歌曲标题进行URL编码以处理特殊字符
                         val encodedTitle = URLEncoder.encode(songTitle, StandardCharsets.UTF_8.toString())
@@ -305,6 +327,15 @@ internal fun ChunithmUserPage(
                     }
                 }
             }
+        }
+        
+        // 歌曲详情覆盖层 - 放在最外层 Box 中，覆盖所有页面包括 Pager
+        selectedSongTitle.value?.let { songTitle ->
+            ChunithmSongDetailOverlay(
+                songTitle = songTitle,
+                viewModel = viewModel,
+                onDismiss = { selectedSongTitle.value = null }
+            )
         }
     }
 

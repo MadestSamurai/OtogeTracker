@@ -18,7 +18,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,8 +30,12 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.utils.ScreenUtil
@@ -50,6 +54,7 @@ internal fun ChunithmMainPage(
     onNavigateToTopRating: () -> Unit,
 ) {
     val context = LocalContext.current
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
     // 计算屏幕宽度和内容宽度
@@ -80,9 +85,19 @@ internal fun ChunithmMainPage(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val state = rememberPullToRefreshState()
 
-    // 在页面进入时加载数据
-    LaunchedEffect(Unit) {
-        viewModel.loadData(context)
+    // 监听生命周期，在页面可见时重新加载数据
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // 页面恢复可见时重新加载数据
+                viewModel.loadData(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
     }
 
     PullToRefreshBox(

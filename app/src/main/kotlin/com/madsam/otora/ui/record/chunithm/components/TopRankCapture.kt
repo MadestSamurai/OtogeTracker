@@ -207,17 +207,17 @@ internal fun TopRankCaptureContent(
             }
         }
         
-        // Recent 10 - 2行，每行5个
+        // New 20 - 4行，每行5个
         if (topRank.newList.isNotEmpty()) {
             Text(
-                text = "Recent 10 (平均: ${String.format(Locale.US, "%.2f", topRank.new20)})",
+                text = "New 20 (平均: ${String.format(Locale.US, "%.2f", topRank.new20)})",
                 fontFamily = sarasaBold,
                 fontSize = 20.sp,
                 color = White1000,
                 modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
             )
             
-            for (row in 0 until 2) {
+            for (row in 0 until 4) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

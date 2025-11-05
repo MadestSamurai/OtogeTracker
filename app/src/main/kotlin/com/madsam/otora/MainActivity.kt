@@ -45,6 +45,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Beige500
@@ -56,6 +57,7 @@ import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.madsam.otora.ui.bof.BofScreen
+import com.madsam.otora.ui.home.HomeScreen
 import com.madsam.otora.ui.record.RecordScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -66,23 +68,41 @@ import java.time.format.DateTimeFormatter
 
 @Composable
 fun MainActivityScreen(navController: NavHostController) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val bofScreenState = remember { BofScreenState() } // 记住BOF屏幕状态
+    
+    // 监听当前路由，判断是否在 BOF 页面
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+    val isInBofScreen = currentRoute == Screen.BOFScreen.route
+    
+    // 如果在 BOF 页面，直接显示 BOF，不显示底部导航
+    if (isInBofScreen) {
+        BofScreen(snackbarHostState, bofScreenState)
+    } else {
+        // 否则显示主界面（带底部导航）
+        MainScreenWithNavigation(navController, snackbarHostState)
+    }
+}
+
+@Composable
+fun MainScreenWithNavigation(
+    navController: NavHostController,
+    snackbarHostState: SnackbarHostState
+) {
     var selectedItem by remember { mutableIntStateOf(0) }
-    val items = listOf(Screen.RecordScreen, Screen.ReportScreen, Screen.BOFScreen)
+    val items = listOf(Screen.HomeScreen, Screen.RecordScreen, Screen.ReportScreen)
     val selectedIcons = listOf(Filled.Star, Filled.Star, Filled.Star)
     val unselectedIcons =
         listOf(Filled.Star, Filled.Star, Filled.Star)
-    val snackbarHostState = remember { SnackbarHostState() }
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
-
-    val bofScreenState = remember { BofScreenState() } // 记住BOF屏幕状态
     
     LaunchedEffect(navController) {
         navController.currentBackStackEntryFlow.collect { backStackEntry ->
             selectedItem = when (backStackEntry.destination.route) {
-                Screen.RecordScreen.route -> 0
-                Screen.ReportScreen.route -> 1
-                 Screen.BOFScreen.route -> 2
+                Screen.HomeScreen.route -> 0
+                Screen.RecordScreen.route -> 1
+                Screen.ReportScreen.route -> 2
                 else -> 0
             }
         }
@@ -98,12 +118,16 @@ fun MainActivityScreen(navController: NavHostController) {
                     WindowInsets.displayCutout.only(WindowInsetsSides.Start)
                 )
             ) {
-                NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
+                NavHost(navController = navController, startDestination = Screen.HomeScreen.route) {
+                    composable(Screen.HomeScreen.route) { 
+                        HomeScreen(
+                            onNavigateToBOF = { navController.navigate(Screen.BOFScreen.route) }
+                        )
+                    }
                     composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
                     composable(Screen.ReportScreen.route) { Screen2() }
-                    composable(Screen.BOFScreen.route) {
-                        BofScreen(snackbarHostState, bofScreenState)
-                    }
+                    // BOF Screen 路由保留，但会在外层处理
+                    composable(Screen.BOFScreen.route) { /* 不会到这里 */ }
                 }
             }
 
@@ -168,12 +192,16 @@ fun MainActivityScreen(navController: NavHostController) {
                 .padding(bottom = 64.dp) // 导航栏高度
                 .windowInsetsPadding(WindowInsets.navigationBars)
             ) {
-                NavHost(navController = navController, startDestination = Screen.RecordScreen.route) {
+                NavHost(navController = navController, startDestination = Screen.HomeScreen.route) {
+                    composable(Screen.HomeScreen.route) { 
+                        HomeScreen(
+                            onNavigateToBOF = { navController.navigate(Screen.BOFScreen.route) }
+                        )
+                    }
                     composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
                     composable(Screen.ReportScreen.route) { Screen2() }
-                    composable(Screen.BOFScreen.route) {
-                        BofScreen(snackbarHostState, bofScreenState)
-                    }
+                    // BOF Screen 路由保留，但会在外层处理
+                    composable(Screen.BOFScreen.route) { /* 不会到这里 */ }
                 }
             }
 
@@ -289,6 +317,7 @@ class MainActivity : AppCompatActivity() {
 }
 
 sealed class Screen(val route: String, val label: String) {
+    data object HomeScreen : Screen("home", "Home")
     data object RecordScreen : Screen("record", "Record")
     data object ReportScreen : Screen("report", "Report")
     data object BOFScreen : Screen("bof", "BOF")
