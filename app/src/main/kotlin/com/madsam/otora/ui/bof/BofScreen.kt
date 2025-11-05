@@ -1,6 +1,7 @@
 package com.madsam.otora.ui.bof
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -107,10 +108,16 @@ private const val TAG = "BofScreen"
 @Composable
 fun BofScreen(
     snackbarHostState: SnackbarHostState,
-    bofScreenState: BofScreenState
+    bofScreenState: BofScreenState,
+    onNavigateBack: () -> Unit = {}
 ) {
     Log.d(TAG, "BofScreen Compose started")
     val coroutineScope = rememberCoroutineScope()
+    
+    // 拦截系统返回事件（包括边缘侧滑返回）
+    BackHandler {
+        onNavigateBack()
+    }
     
     // BofScreen 内部创建自己的 NavController
     val navController = rememberNavController()
@@ -148,7 +155,6 @@ fun BofScreen(
         }
     }
 
-    var isTabRowVisible by remember { mutableStateOf(true) }
     val selectedTabIndex = bofScreenState.selectedTab.asStateFlow().collectAsState().value
     val selectedSubTabIndex = bofScreenState.selectedSubTab.asStateFlow().collectAsState().value
     
@@ -211,8 +217,7 @@ fun BofScreen(
     if (showDateTimeRangePicker) {
         DateTimeRangePicker(
             bofScreenState = bofScreenState,
-            onDismissRequest = { 
-                showDateTimeRangePicker = false
+            onDismissRequest = {
             }
         )
     }
@@ -380,7 +385,6 @@ fun BofScreen(
                     label = { Text("Date Range") },
                     selected = false,
                     onClick = {
-                        showDateTimeRangePicker = true
                         coroutineScope.launch { drawerState.close() }
                     },
                     modifier = Modifier.padding(horizontal = 12.dp),
@@ -448,7 +452,7 @@ fun BofScreen(
                             .clip(RoundedCornerShape(50))
                             .background(Red500)
                             .clickable {
-                                // TODO: 添加返回逻辑
+                                onNavigateBack()
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -472,7 +476,7 @@ fun BofScreen(
                             selectedTabIndex = selectedTabIndex,
                             containerColor = Red500,
                             containerWidthDp = contentWidthDp,
-                            tabs = { selectedIndex ->
+                            tabs = { _ ->
                                 mainTabTitles.forEachIndexed { index, title ->
                                     Tab(
                                         selected = selectedTabIndex == index,
@@ -550,7 +554,7 @@ fun BofScreen(
                                         narrowMode = entryInfoMode,
                                         searchText = searchText.value,
                                         scrollThreshold = scrollThreshold,
-                                        setIsTabRowVisible = { isTabRowVisible = it },
+                                        setIsTabRowVisible = { },
                                         showCaptureDialog = showEntryCaptureDialog,
                                         onCaptureDialogDismiss = { showEntryCaptureDialog = false },
                                         listStateTotal = listStateTotal,
@@ -566,7 +570,7 @@ fun BofScreen(
                                         snackbarHostState = snackbarHostState,
                                         teamInfoMode = teamInfoMode,
                                         scrollThreshold = scrollThreshold,
-                                        setIsTabRowVisible = { isTabRowVisible = it },
+                                        setIsTabRowVisible = { },
                                         showCaptureDialog = showTeamCaptureDialog,
                                         onCaptureDialogDismiss = { showTeamCaptureDialog = false }
                                     )
@@ -590,7 +594,7 @@ fun BofScreen(
                                             subtitle = subtitle,
                                             commentDisplayMode = commentInfoMode,
                                             scrollThreshold = scrollThreshold,
-                                            setIsTabRowVisible = { isTabRowVisible = it },
+                                            setIsTabRowVisible = { },
                                             showCaptureDialog = showCommentCaptureDialog,
                                             onCaptureDialogDismiss = {
                                                 showCommentCaptureDialog = false
@@ -626,7 +630,7 @@ fun BofScreen(
                             .background(Red500)
                             .animateContentSize(animationSpec = tween(300))
                             .padding(horizontal = 4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         val isSearching = searchText.value.isNotEmpty()
@@ -635,28 +639,36 @@ fun BofScreen(
                         AnimatedVisibility(
                             visible = !isSearching && (selectedTabIndex == 0 || selectedTabIndex == 1 || selectedTabIndex == 2),
                             enter = fadeIn(animationSpec = tween(300)) + 
-                                    expandHorizontally(animationSpec = tween(300)) +
+                                    expandHorizontally(
+                                        animationSpec = tween(300),
+                                        expandFrom = Alignment.Start
+                                    ) +
                                     scaleIn(animationSpec = tween(300)),
                             exit = fadeOut(animationSpec = tween(300)) + 
-                                   shrinkHorizontally(animationSpec = tween(300)) +
+                                   shrinkHorizontally(
+                                       animationSpec = tween(300),
+                                       shrinkTowards = Alignment.Start
+                                   ) +
                                    scaleOut(animationSpec = tween(300))
                         ) {
-                            IconButton(
-                                onClick = {
-                                    when (selectedTabIndex) {
-                                        0 -> showEntryCaptureDialog = true
-                                        1 -> showTeamCaptureDialog = true
-                                        2 -> showCommentCaptureDialog = true
-                                    }
-                                },
-                                modifier = Modifier.size(48.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Fa.Camera,
-                                    contentDescription = "Screenshot",
-                                    tint = Beige400,
-                                    modifier = Modifier.height(24.dp)
-                                )
+                            Box(modifier = Modifier.padding(end = 8.dp)) {
+                                IconButton(
+                                    onClick = {
+                                        when (selectedTabIndex) {
+                                            0 -> showEntryCaptureDialog = true
+                                            1 -> showTeamCaptureDialog = true
+                                            2 -> showCommentCaptureDialog = true
+                                        }
+                                    },
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Fa.Camera,
+                                        contentDescription = "Screenshot",
+                                        tint = Beige400,
+                                        modifier = Modifier.height(24.dp)
+                                    )
+                                }
                             }
                         }
 
@@ -664,22 +676,30 @@ fun BofScreen(
                         AnimatedVisibility(
                             visible = !isSearching,
                             enter = fadeIn(animationSpec = tween(300)) + 
-                                    expandHorizontally(animationSpec = tween(300)) +
+                                    expandHorizontally(
+                                        animationSpec = tween(300),
+                                        expandFrom = Alignment.Start
+                                    ) +
                                     scaleIn(animationSpec = tween(300)),
                             exit = fadeOut(animationSpec = tween(300)) + 
-                                   shrinkHorizontally(animationSpec = tween(300)) +
+                                   shrinkHorizontally(
+                                       animationSpec = tween(300),
+                                       shrinkTowards = Alignment.Start
+                                   ) +
                                    scaleOut(animationSpec = tween(300))
                         ) {
-                            IconButton(
-                                onClick = { selectTime() },
-                                modifier = Modifier.size(48.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Fa.Calendar,
-                                    contentDescription = "Date&Time",
-                                    tint = Beige400,
-                                    modifier = Modifier.height(24.dp)
-                                )
+                            Box(modifier = Modifier.padding(end = 8.dp)) {
+                                IconButton(
+                                    onClick = { selectTime() },
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Fa.Calendar,
+                                        contentDescription = "Date&Time",
+                                        tint = Beige400,
+                                        modifier = Modifier.height(24.dp)
+                                    )
+                                }
                             }
                         }
 
@@ -779,44 +799,52 @@ fun BofScreen(
                         AnimatedVisibility(
                             visible = isSearching && matchedIndices.value.isNotEmpty(),
                             enter = fadeIn(animationSpec = tween(300)) + 
-                                    expandHorizontally(animationSpec = tween(300)) +
+                                    expandHorizontally(
+                                        animationSpec = tween(300),
+                                        expandFrom = Alignment.End
+                                    ) +
                                     slideInHorizontally(
                                         initialOffsetX = { it / 2 },
                                         animationSpec = tween(300)
                                     ),
                             exit = fadeOut(animationSpec = tween(300)) + 
-                                   shrinkHorizontally(animationSpec = tween(300)) +
+                                   shrinkHorizontally(
+                                       animationSpec = tween(300),
+                                       shrinkTowards = Alignment.End
+                                   ) +
                                    slideOutHorizontally(
                                         targetOffsetX = { it / 2 },
                                         animationSpec = tween(300)
                                     )
                         ) {
-                            Column(
-                                modifier = Modifier.size(48.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.Center
-                            ) {
-                                IconButton(
-                                    onClick = { vm.scrollToPrevious() },
-                                    modifier = Modifier.size(24.dp)
+                            Box(modifier = Modifier.padding(start = 8.dp)) {
+                                Column(
+                                    modifier = Modifier.size(48.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
                                 ) {
-                                    Icon(
-                                        painter = rememberVectorPainter(image = Filled.ChevronUp),
-                                        contentDescription = "上一个",
-                                        tint = Beige400,
-                                        modifier = Modifier.size(16.dp)
-                                    )
-                                }
-                                IconButton(
-                                    onClick = { vm.scrollToNext() },
-                                    modifier = Modifier.size(24.dp)
-                                ) {
-                                    Icon(
-                                        painter = rememberVectorPainter(image = Filled.ChevronDown),
-                                        contentDescription = "下一个",
-                                        tint = Beige400,
-                                        modifier = Modifier.size(16.dp)
-                                    )
+                                    IconButton(
+                                        onClick = { vm.scrollToPrevious() },
+                                        modifier = Modifier.size(24.dp)
+                                    ) {
+                                        Icon(
+                                            painter = rememberVectorPainter(image = Filled.ChevronUp),
+                                            contentDescription = "上一个",
+                                            tint = Beige400,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                    IconButton(
+                                        onClick = { vm.scrollToNext() },
+                                        modifier = Modifier.size(24.dp)
+                                    ) {
+                                        Icon(
+                                            painter = rememberVectorPainter(image = Filled.ChevronDown),
+                                            contentDescription = "下一个",
+                                            tint = Beige400,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
                                 }
                             }
                         }
