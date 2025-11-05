@@ -1,12 +1,20 @@
 package com.madsam.otora.ui.bof.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -17,15 +25,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.madsam.otora.BofScreenState
+import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.core.theme.Beige400
+import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Black333
 import com.madsam.otora.core.theme.PurpleTheme
+import com.madsam.otora.core.theme.Red500
+import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.White1000
+import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.vsnappy1.datepicker.DatePicker
 import com.vsnappy1.datepicker.data.DefaultDatePickerConfig
 import com.vsnappy1.datepicker.data.model.DatePickerDate
@@ -41,10 +58,12 @@ import java.util.Locale
 @Composable
 fun DateTimeRangePicker(
     bofScreenState: BofScreenState,
+    rangeData: List<BofRangeResponse>,
     onDismissRequest: () -> Unit
 ) {
     var showCompareDatePicker by remember { mutableStateOf(false) }
     var showCurrentDatePicker by remember { mutableStateOf(false) }
+    var showRangeDropdown by remember { mutableStateOf(false) }
 
     // 从 BofScreenState 获取当前选中的 Range
     val selectedRange by bofScreenState.selectedRange.collectAsState()
@@ -298,6 +317,95 @@ fun DateTimeRangePicker(
         title = { Text(text = "Select Date&Time") },
         text = {
             Column {
+                // 竞赛选择下拉框
+                Text(
+                    text = "Competition:",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Black333,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Red500)
+                        .clickable { showRangeDropdown = !showRangeDropdown }
+                        .padding(horizontal = 12.dp, vertical = 12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = selectedRange?.short ?: "Select Competition",
+                                color = Beige400,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                            if (selectedRange != null) {
+                                Text(
+                                    text = "${selectedRange!!.start} - ${selectedRange!!.current}",
+                                    color = Beige600,
+                                    fontSize = 11.sp
+                                )
+                                if (!selectedRange!!.isStart) {
+                                    Text(
+                                        text = "Not Started",
+                                        color = Red800,
+                                        fontSize = 10.sp
+                                    )
+                                }
+                            }
+                        }
+                        Icon(
+                            imageVector = Filled.ChevronDown,
+                            contentDescription = "Dropdown",
+                            tint = Beige400,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
+                    
+                    DropdownMenu(
+                        expanded = showRangeDropdown,
+                        onDismissRequest = { showRangeDropdown = false },
+                        modifier = Modifier.fillMaxWidth(0.8f)
+                    ) {
+                        rangeData.forEach { range ->
+                            DropdownMenuItem(
+                                text = {
+                                    Column {
+                                        Text(
+                                            text = range.short,
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Medium
+                                        )
+                                        Text(
+                                            text = "${range.start} - ${range.current}",
+                                            fontSize = 11.sp,
+                                            color = Color.Gray
+                                        )
+                                        if (!range.isStart) {
+                                            Text(
+                                                text = "Not Started",
+                                                fontSize = 10.sp,
+                                                color = Color.Red
+                                            )
+                                        }
+                                    }
+                                },
+                                onClick = {
+                                    bofScreenState.selectedRange.value = range
+                                    showRangeDropdown = false
+                                }
+                            )
+                        }
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
                 Row {
                     Text("Current: $currentDateText - $currentTimeText")
                 }

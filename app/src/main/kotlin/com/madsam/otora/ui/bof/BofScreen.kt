@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,26 +31,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -59,7 +51,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -100,7 +91,6 @@ import com.madsam.otora.ui.bof.sub.BofTeamRankingScreen
 import com.madsam.otora.ui.components.CustomScrollableTabRow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 private const val TAG = "BofScreen"
 
@@ -112,13 +102,12 @@ fun BofScreen(
     onNavigateBack: () -> Unit = {}
 ) {
     Log.d(TAG, "BofScreen Compose started")
-    val coroutineScope = rememberCoroutineScope()
-    
+
     // 拦截系统返回事件（包括边缘侧滑返回）
     BackHandler {
         onNavigateBack()
     }
-    
+
     // BofScreen 内部创建自己的 NavController
     val navController = rememberNavController()
 
@@ -129,14 +118,11 @@ fun BofScreen(
     val vm: BofViewModel = viewModel(factory = BofViewModelFactory(bofScreenState))
     Log.d(TAG, "BofViewModel created")
 
-    // 抽屉状态
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    
     // Range 数据状态
     var rangeData by remember { mutableStateOf<List<BofRangeResponse>>(emptyList()) }
     // 统一使用 bofScreenState.selectedRange，不再使用本地状态
     val selectedRange by bofScreenState.selectedRange.collectAsState()
-    
+
     // 获取 range 数据
     LaunchedEffect(Unit) {
         try {
@@ -157,7 +143,7 @@ fun BofScreen(
 
     val selectedTabIndex = bofScreenState.selectedTab.asStateFlow().collectAsState().value
     val selectedSubTabIndex = bofScreenState.selectedSubTab.asStateFlow().collectAsState().value
-    
+
     // 使用 ViewModel 的 searchText
     val searchText = vm.searchText.collectAsState()
 
@@ -206,7 +192,7 @@ fun BofScreen(
         // 只有当 selectedRange 不为空时才加载数据
         selectedRange?.let { range ->
             vm.loadRankingData()
-            
+
             if (range.isStart) {
                 vm.loadTeamRankingData(range.path)
                 vm.requestCommentData()
@@ -217,7 +203,9 @@ fun BofScreen(
     if (showDateTimeRangePicker) {
         DateTimeRangePicker(
             bofScreenState = bofScreenState,
+            rangeData = rangeData,
             onDismissRequest = {
+                showDateTimeRangePicker = false
             }
         )
     }
@@ -226,16 +214,21 @@ fun BofScreen(
     LaunchedEffect(selectedTabIndex, selectedSubTabIndex) {
         val query = searchText.value
         if (query.isNotEmpty() && selectedRange?.isStart == true) {
-            Log.d("BofScreen", "Tab switched, re-executing search: mainTab=$selectedTabIndex, subTab=$selectedSubTabIndex")
+            Log.d(
+                "BofScreen",
+                "Tab switched, re-executing search: mainTab=$selectedTabIndex, subTab=$selectedSubTabIndex"
+            )
             when (selectedTabIndex) {
                 0 -> {
                     // Entry 页面 - 根据 sub tab 搜索对应的排行榜
                     vm.search(query, selectedSubTabIndex) // 0=总分, 1=平均, 2=中位数, 3=差值, 4=综合
                 }
+
                 1 -> {
                     // Team 页面 - tabIndex = 5
                     vm.search(query, 5)
                 }
+
                 2 -> {
                     // Comment 页面 - tabIndex = 6
                     vm.search(query, 6)
@@ -251,18 +244,22 @@ fun BofScreen(
         matchedIndices.value
     ) {
         // 计算当前应该滚动到的索引
-        val scrollIndex = if (matchedIndices.value.isNotEmpty() && 
-                               currentMatchIndex.value >= 0 && 
-                               currentMatchIndex.value < matchedIndices.value.size) {
+        val scrollIndex = if (matchedIndices.value.isNotEmpty() &&
+            currentMatchIndex.value >= 0 &&
+            currentMatchIndex.value < matchedIndices.value.size
+        ) {
             matchedIndices.value[currentMatchIndex.value]
         } else {
             -1
         }
-        
+
         // 只有当有匹配项时才滚动
         if (scrollIndex >= 0) {
-            Log.d("BofScreen", "Scrolling to index: $scrollIndex, mainTab: $selectedTabIndex, subTab: $selectedSubTabIndex, match: ${currentMatchIndex.value}/${matchedIndices.value.size}")
-            
+            Log.d(
+                "BofScreen",
+                "Scrolling to index: $scrollIndex, mainTab: $selectedTabIndex, subTab: $selectedSubTabIndex, match: ${currentMatchIndex.value}/${matchedIndices.value.size}"
+            )
+
             when (selectedTabIndex) {
                 0 -> { // Entry 页面，根据子页面选择不同的 listState
                     when (selectedSubTabIndex) {
@@ -272,19 +269,27 @@ fun BofScreen(
                         3 -> listStateDiff.animateScrollToItem(scrollIndex)
                         4 -> listStateComposite.animateScrollToItem(scrollIndex)
                     }
-                    Log.d("BofScreen", "Entry subTab $selectedSubTabIndex scrolled to: $scrollIndex")
+                    Log.d(
+                        "BofScreen",
+                        "Entry subTab $selectedSubTabIndex scrolled to: $scrollIndex"
+                    )
                 }
+
                 1 -> { // Team 页面
                     listStateTeam.animateScrollToItem(scrollIndex)
                     Log.d("BofScreen", "Team scrolled to: $scrollIndex")
                 }
+
                 2 -> { // Comment 页面
                     listStateComment.animateScrollToItem(scrollIndex)
                     Log.d("BofScreen", "Comment scrolled to: $scrollIndex")
                 }
             }
         } else {
-            Log.d("BofScreen", "No scroll - scrollIndex: $scrollIndex, matches: ${matchedIndices.value.size}")
+            Log.d(
+                "BofScreen",
+                "No scroll - scrollIndex: $scrollIndex, matches: ${matchedIndices.value.size}"
+            )
         }
     }
 
@@ -297,554 +302,422 @@ fun BofScreen(
     val mainTabTitles = tabTitles.keys.toList()
 
     Log.d(TAG, "Starting UI render")
-    
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        gesturesEnabled = true,
-        drawerContent = {
-            ModalDrawerSheet(
-                modifier = Modifier.width(280.dp),
-                drawerContainerColor = Red500,
-                drawerContentColor = Beige400
-            ) {
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                // 显示 Range 数据列表
-                if (rangeData.isNotEmpty()) {
-                    Text(
-                        text = "BOF Competitions",
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        color = Beige500,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    
-                    rangeData.forEach { range ->
-                        NavigationDrawerItem(
-                            label = { 
-                                Column {
-                                    Text(
-                                        text = range.short,
-                                        color = if (selectedRange?.path == range.path) Beige500 else Beige600,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                    Text(
-                                        text = "${range.start} - ${range.current}",
-                                        color = if (selectedRange?.path == range.path) Beige500.copy(alpha = 0.7f) else Beige600.copy(alpha = 0.7f),
-                                        fontSize = 11.sp
-                                    )
-                                    if (!range.isStart) {
-                                        Text(
-                                            text = "Not Started",
-                                            color = Red800,
-                                            fontSize = 10.sp
-                                        )
-                                    }
-                                }
-                            },
-                            selected = selectedRange?.path == range.path,
-                            onClick = {
-                                // 统一更新到 bofScreenState
-                                bofScreenState.selectedRange.value = range
-                                coroutineScope.launch { 
-                                    drawerState.close()
-                                    snackbarHostState.showSnackbar("已切换到 ${range.full.ifEmpty { range.short }}")
-                                }
-                            },
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
-                            colors = NavigationDrawerItemDefaults.colors(
-                                selectedContainerColor = Red800,
-                                unselectedContainerColor = Red500,
-                                selectedIconColor = Beige500,
-                                unselectedIconColor = Beige600,
-                                selectedTextColor = Beige500,
-                                unselectedTextColor = Beige600
-                            )
-                        )
-                    }
-                } else {
-                    Text(
-                        text = "Loading competitions...",
-                        modifier = Modifier.padding(16.dp),
-                        color = Beige600
-                    )
-                }
-                
-                Spacer(modifier = Modifier.weight(1f))
-                
-                // 底部功能按钮
-                NavigationDrawerItem(
-                    icon = {
-                        Icon(
-                            painter = rememberVectorPainter(image = Filled.Calendar),
-                            contentDescription = "Date Range",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    },
-                    label = { Text("Date Range") },
-                    selected = false,
-                    onClick = {
-                        coroutineScope.launch { drawerState.close() }
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                    colors = NavigationDrawerItemDefaults.colors(
-                        selectedContainerColor = Red800,
-                        unselectedContainerColor = Red500,
-                        selectedIconColor = Beige500,
-                        unselectedIconColor = Beige600,
-                        selectedTextColor = Beige500,
-                        unselectedTextColor = Beige600
-                    )
-                )
-                
-                NavigationDrawerItem(
-                    icon = {
-                        Icon(
-                            painter = rememberVectorPainter(image = Filled.ArrowRotate),
-                            contentDescription = "Refresh",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    },
-                    label = { Text("Refresh Data") },
-                    selected = false,
-                    onClick = {
-                        coroutineScope.launch { 
-                            drawerState.close()
-                            snackbarHostState.showSnackbar("数据已刷新")
-                        }
-                    },
-                    modifier = Modifier.padding(horizontal = 12.dp),
-                    colors = NavigationDrawerItemDefaults.colors(
-                        selectedContainerColor = Red800,
-                        unselectedContainerColor = Red500,
-                        selectedIconColor = Beige500,
-                        unselectedIconColor = Beige600,
-                        selectedTextColor = Beige500,
-                        unselectedTextColor = Beige600
-                    )
-                )
-                
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-        }
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column(
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+        ) {
+            // 顶部导航栏：左侧返回按钮 + 右侧主Tab
+            Row(
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
+                    .windowInsetsPadding(WindowInsets.statusBars)
                     .background(Color.Black)
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                // 顶部导航栏：左侧返回按钮 + 右侧主Tab
-                Row(
+                // 左侧圆形返回按钮
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .windowInsetsPadding(WindowInsets.statusBars)
-                        .background(Color.Black)
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .size(48.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(Red500)
+                        .clickable {
+                            onNavigateBack()
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
-                    // 左侧圆形返回按钮
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(Red500)
-                            .clickable {
-                                onNavigateBack()
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Fa.`Arrow-left`,
-                            contentDescription = "Back",
-                            tint = Beige400,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
-                    // 右侧主Tab栏
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(24.dp))
-                    ) {
-                        val contentWidthDp = screenWidthDp - 24.dp - 48.dp - 12.dp // 减去左侧按钮和间距
-
-                        CustomScrollableTabRow(
-                            selectedTabIndex = selectedTabIndex,
-                            containerColor = Red500,
-                            containerWidthDp = contentWidthDp,
-                            tabs = { _ ->
-                                mainTabTitles.forEachIndexed { index, title ->
-                                    Tab(
-                                        selected = selectedTabIndex == index,
-                                        onClick = {
-                                            if (selectedTabIndex != index) {
-                                                bofScreenState.selectedTab.update { index }
-                                                bofScreenState.selectedSubTab.update { 0 }
-                                                navController.navigate(title)
-                                            }
-                                        },
-                                        text = {
-                                            Text(
-                                                text = title,
-                                                color = if (selectedTabIndex == index) Beige500 else Beige600
-                                            )
-                                        },
-                                        modifier = Modifier.height(48.dp)
-                                    )
-                                }
-                            }
-                        )
-                    }
+                    Icon(
+                        imageVector = Fa.`Arrow-left`,
+                        contentDescription = "Back",
+                        tint = Beige400,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
 
-                // 检查活动是否开始
-                if (selectedRange?.isStart != true) {
-                    // 活动未开始时显示提示信息
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = "活动尚未开始",
-                                fontSize = 24.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Beige400,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                            Text(
-                                text = selectedRange?.full ?: "请选择一个活动",
-                                fontSize = 16.sp,
-                                color = Beige600,
-                                modifier = Modifier.padding(horizontal = 16.dp)
-                            )
-                            selectedRange?.start?.let { startTime ->
-                                Text(
-                                    text = "开始时间: $startTime",
-                                    fontSize = 14.sp,
-                                    color = Beige600,
-                                    modifier = Modifier.padding(top = 8.dp)
-                                )
-                            }
-                        }
-                    }
-                } else {
-                    // 活动已开始时显示正常内容
-                    NavHost(
-                        navController = navController,
-                        startDestination = mainTabTitles[selectedTabIndex],
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        mainTabTitles.forEach { mainTab ->
-                            composable(mainTab) {
-                                when (mainTab) {
-                                    "Entry" -> BofEntryPagerScreen(
-                                        vm = vm,
-                                        bofScreenState = bofScreenState,
-                                        snackbarHostState = snackbarHostState,
-                                        narrowMode = entryInfoMode,
-                                        searchText = searchText.value,
-                                        scrollThreshold = scrollThreshold,
-                                        setIsTabRowVisible = { },
-                                        showCaptureDialog = showEntryCaptureDialog,
-                                        onCaptureDialogDismiss = { showEntryCaptureDialog = false },
-                                        listStateTotal = listStateTotal,
-                                        listStateAvg = listStateAvg,
-                                        listStateMedian = listStateMedian,
-                                        listStateDiff = listStateDiff,
-                                        listStateComposite = listStateComposite
-                                    )
-
-                                    "Team" -> BofTeamRankingScreen(
-                                        bofScreenState = bofScreenState,
-                                        vm = vm,
-                                        snackbarHostState = snackbarHostState,
-                                        teamInfoMode = teamInfoMode,
-                                        scrollThreshold = scrollThreshold,
-                                        setIsTabRowVisible = { },
-                                        showCaptureDialog = showTeamCaptureDialog,
-                                        onCaptureDialogDismiss = { showTeamCaptureDialog = false }
-                                    )
-
-                                    "Comment" -> {
-                                        val commentData by vm.commentData.collectAsState()
-                                        val selectedTimeStrNoComp by vm.selectedTimeStrNoComp.collectAsState()
-                                        val selectedRange =
-                                            bofScreenState.selectedRange.collectAsState().value
-                                        var title = "评价排行榜"
-                                        var subtitle = "时间: $selectedTimeStrNoComp"
-
-                                        if (selectedRange?.singleComment == true && selectedRange.commentDate.isNotEmpty()) {
-                                            title = "最终评价排行榜"
-                                            subtitle = "时间: ${selectedRange.commentDate} (仅单日)"
-                                        }
-
-                                        BofCommentScreen(
-                                            commentData = commentData,
-                                            title = title,
-                                            subtitle = subtitle,
-                                            commentDisplayMode = commentInfoMode,
-                                            scrollThreshold = scrollThreshold,
-                                            setIsTabRowVisible = { },
-                                            showCaptureDialog = showCommentCaptureDialog,
-                                            onCaptureDialogDismiss = {
-                                                showCommentCaptureDialog = false
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // 底部工具栏（仅在活动开始时显示）
-            if (selectedRange?.isStart == true) {
-                Row(
+                // 右侧主Tab栏
+                Box(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .windowInsetsPadding(
-                            WindowInsets.navigationBars.union(WindowInsets.ime)
-                                .only(WindowInsetsSides.Bottom)
-                        )
-                        .padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                        .weight(1f)
+                        .clip(RoundedCornerShape(24.dp))
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                            .clip(RoundedCornerShape(28.dp))
-                            .background(Red500)
-                            .animateContentSize(animationSpec = tween(300))
-                            .padding(horizontal = 4.dp),
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        val isSearching = searchText.value.isNotEmpty()
+                    val contentWidthDp = screenWidthDp - 24.dp - 48.dp - 12.dp // 减去左侧按钮和间距
 
-                        // 截图按钮（带动画）
-                        AnimatedVisibility(
-                            visible = !isSearching && (selectedTabIndex == 0 || selectedTabIndex == 1 || selectedTabIndex == 2),
-                            enter = fadeIn(animationSpec = tween(300)) + 
-                                    expandHorizontally(
-                                        animationSpec = tween(300),
-                                        expandFrom = Alignment.Start
-                                    ) +
-                                    scaleIn(animationSpec = tween(300)),
-                            exit = fadeOut(animationSpec = tween(300)) + 
-                                   shrinkHorizontally(
-                                       animationSpec = tween(300),
-                                       shrinkTowards = Alignment.Start
-                                   ) +
-                                   scaleOut(animationSpec = tween(300))
-                        ) {
-                            Box(modifier = Modifier.padding(end = 8.dp)) {
-                                IconButton(
+                    CustomScrollableTabRow(
+                        selectedTabIndex = selectedTabIndex,
+                        containerColor = Red500,
+                        containerWidthDp = contentWidthDp,
+                        tabs = { _ ->
+                            mainTabTitles.forEachIndexed { index, title ->
+                                Tab(
+                                    selected = selectedTabIndex == index,
                                     onClick = {
-                                        when (selectedTabIndex) {
-                                            0 -> showEntryCaptureDialog = true
-                                            1 -> showTeamCaptureDialog = true
-                                            2 -> showCommentCaptureDialog = true
+                                        if (selectedTabIndex != index) {
+                                            bofScreenState.selectedTab.update { index }
+                                            bofScreenState.selectedSubTab.update { 0 }
+                                            navController.navigate(title)
                                         }
                                     },
-                                    modifier = Modifier.size(48.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Fa.Camera,
-                                        contentDescription = "Screenshot",
-                                        tint = Beige400,
-                                        modifier = Modifier.height(24.dp)
-                                    )
-                                }
+                                    text = {
+                                        Text(
+                                            text = title,
+                                            color = if (selectedTabIndex == index) Beige500 else Beige600
+                                        )
+                                    },
+                                    modifier = Modifier.height(48.dp)
+                                )
                             }
                         }
+                    )
+                }
+            }
 
-                        // 日期时间选择按钮（带动画）
-                        AnimatedVisibility(
-                            visible = !isSearching,
-                            enter = fadeIn(animationSpec = tween(300)) + 
-                                    expandHorizontally(
-                                        animationSpec = tween(300),
-                                        expandFrom = Alignment.Start
-                                    ) +
-                                    scaleIn(animationSpec = tween(300)),
-                            exit = fadeOut(animationSpec = tween(300)) + 
-                                   shrinkHorizontally(
-                                       animationSpec = tween(300),
-                                       shrinkTowards = Alignment.Start
-                                   ) +
-                                   scaleOut(animationSpec = tween(300))
-                        ) {
-                            Box(modifier = Modifier.padding(end = 8.dp)) {
-                                IconButton(
-                                    onClick = { selectTime() },
-                                    modifier = Modifier.size(48.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Fa.Calendar,
-                                        contentDescription = "Date&Time",
-                                        tint = Beige400,
-                                        modifier = Modifier.height(24.dp)
-                                    )
-                                }
-                            }
-                        }
-
-                        // 搜索框
-                        val focusManager = LocalFocusManager.current
-                        val keyboardController = LocalSoftwareKeyboardController.current
-
-                        TextField(
-                            value = searchText.value,
-                            onValueChange = { query ->
-                                // 只有在活动开始时才处理搜索
-                                if (selectedRange?.isStart == true) {
-                                    when (selectedTabIndex) {
-                                        0 -> vm.search(query, selectedSubTabIndex)
-                                        1 -> vm.search(query, 5)
-                                        2 -> vm.search(query, 6)
-                                    }
-                                } else {
-                                    vm.search("", 0)
-                                }
-                            },
-                            modifier = Modifier
-                                .weight(1f, fill = true)
-                                .height(48.dp)
-                                .animateContentSize(animationSpec = tween(300)),
-                            textStyle = TextStyle(
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Normal
-                            ),
-                            placeholder = {
-                                Text(
-                                    "搜索...",
-                                    color = Beige600,
-                                    fontSize = 14.sp
-                                )
-                            },
-                            leadingIcon = {
-                                Icon(
-                                    painter = rememberVectorPainter(image = Filled.Magnify),
-                                    contentDescription = "Search",
-                                    tint = Beige400,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            },
-                            trailingIcon = {
-                                if (searchText.value.isNotEmpty()) {
-                                    Row {
-                                        IconButton(onClick = {
-                                            vm.search("", 0)
-                                            focusManager.clearFocus()
-                                        }) {
-                                            Icon(
-                                                painter = rememberVectorPainter(image = Fa.Xmark),
-                                                contentDescription = "Clear",
-                                                tint = Beige400,
-                                                modifier = Modifier.size(16.dp)
-                                            )
-                                        }
-                                    }
-                                }
-                            },
-                            singleLine = true,
-                            shape = RoundedCornerShape(24.dp),
-                            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
-                            keyboardActions = KeyboardActions(
-                                onDone = {
-                                    focusManager.clearFocus()
-                                    keyboardController?.hide()
-                                }
-                            ),
-                            colors = TextFieldDefaults.colors(
-                                focusedTextColor = Beige400,
-                                unfocusedTextColor = Beige400,
-                                disabledTextColor = Beige400,
-                                errorTextColor = Beige400,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                disabledIndicatorColor = Color.Transparent,
-                                errorIndicatorColor = Color.Transparent,
-                                focusedContainerColor = Red800,
-                                unfocusedContainerColor = Red800,
-                                disabledContainerColor = Red800,
-                                errorContainerColor = Red800,
-                                focusedPlaceholderColor = Beige600,
-                                unfocusedPlaceholderColor = Beige600,
-                                disabledPlaceholderColor = Beige600,
-                                errorPlaceholderColor = Beige600,
-                                focusedLeadingIconColor = Beige400,
-                                unfocusedLeadingIconColor = Beige400,
-                                disabledLeadingIconColor = Beige400,
-                                errorLeadingIconColor = Beige400,
-                                cursorColor = Beige400,
-                            )
+            // 检查活动是否开始
+            if (selectedRange?.isStart != true) {
+                // 活动未开始时显示提示信息
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "活动尚未开始",
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Beige400,
+                            modifier = Modifier.padding(16.dp)
                         )
+                        Text(
+                            text = selectedRange?.full ?: "请选择一个活动",
+                            fontSize = 16.sp,
+                            color = Beige600,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                        selectedRange?.start?.let { startTime ->
+                            Text(
+                                text = "开始时间: $startTime",
+                                fontSize = 14.sp,
+                                color = Beige600,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+                    }
+                }
+            } else {
+                // 活动已开始时显示正常内容
+                NavHost(
+                    navController = navController,
+                    startDestination = mainTabTitles[selectedTabIndex],
+                    modifier = Modifier.weight(1f)
+                ) {
+                    mainTabTitles.forEach { mainTab ->
+                        composable(mainTab) {
+                            when (mainTab) {
+                                "Entry" -> BofEntryPagerScreen(
+                                    vm = vm,
+                                    bofScreenState = bofScreenState,
+                                    snackbarHostState = snackbarHostState,
+                                    narrowMode = entryInfoMode,
+                                    searchText = searchText.value,
+                                    scrollThreshold = scrollThreshold,
+                                    setIsTabRowVisible = { },
+                                    showCaptureDialog = showEntryCaptureDialog,
+                                    onCaptureDialogDismiss = { showEntryCaptureDialog = false },
+                                    listStateTotal = listStateTotal,
+                                    listStateAvg = listStateAvg,
+                                    listStateMedian = listStateMedian,
+                                    listStateDiff = listStateDiff,
+                                    listStateComposite = listStateComposite
+                                )
 
-                        // 搜索导航按钮（带动画）
-                        AnimatedVisibility(
-                            visible = isSearching && matchedIndices.value.isNotEmpty(),
-                            enter = fadeIn(animationSpec = tween(300)) + 
-                                    expandHorizontally(
-                                        animationSpec = tween(300),
-                                        expandFrom = Alignment.End
-                                    ) +
-                                    slideInHorizontally(
-                                        initialOffsetX = { it / 2 },
-                                        animationSpec = tween(300)
-                                    ),
-                            exit = fadeOut(animationSpec = tween(300)) + 
-                                   shrinkHorizontally(
-                                       animationSpec = tween(300),
-                                       shrinkTowards = Alignment.End
-                                   ) +
-                                   slideOutHorizontally(
-                                        targetOffsetX = { it / 2 },
-                                        animationSpec = tween(300)
+                                "Team" -> BofTeamRankingScreen(
+                                    bofScreenState = bofScreenState,
+                                    vm = vm,
+                                    snackbarHostState = snackbarHostState,
+                                    teamInfoMode = teamInfoMode,
+                                    scrollThreshold = scrollThreshold,
+                                    setIsTabRowVisible = { },
+                                    showCaptureDialog = showTeamCaptureDialog,
+                                    onCaptureDialogDismiss = { showTeamCaptureDialog = false }
+                                )
+
+                                "Comment" -> {
+                                    val commentData by vm.commentData.collectAsState()
+                                    val selectedTimeStrNoComp by vm.selectedTimeStrNoComp.collectAsState()
+                                    val selectedRange =
+                                        bofScreenState.selectedRange.collectAsState().value
+                                    var title = "评价排行榜"
+                                    var subtitle = "时间: $selectedTimeStrNoComp"
+
+                                    if (selectedRange?.singleComment == true && selectedRange.commentDate.isNotEmpty()) {
+                                        title = "最终评价排行榜"
+                                        subtitle = "时间: ${selectedRange.commentDate} (仅单日)"
+                                    }
+
+                                    BofCommentScreen(
+                                        commentData = commentData,
+                                        title = title,
+                                        subtitle = subtitle,
+                                        commentDisplayMode = commentInfoMode,
+                                        scrollThreshold = scrollThreshold,
+                                        setIsTabRowVisible = { },
+                                        showCaptureDialog = showCommentCaptureDialog,
+                                        onCaptureDialogDismiss = {
+                                            showCommentCaptureDialog = false
+                                        }
                                     )
-                        ) {
-                            Box(modifier = Modifier.padding(start = 8.dp)) {
-                                Column(
-                                    modifier = Modifier.size(48.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // 底部工具栏（仅在活动开始时显示）
+        if (selectedRange?.isStart == true) {
+            Row(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .windowInsetsPadding(
+                        WindowInsets.navigationBars.union(WindowInsets.ime)
+                            .only(WindowInsetsSides.Bottom)
+                    )
+                    .padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(Red500)
+                        .animateContentSize(animationSpec = tween(300))
+                        .padding(horizontal = 4.dp),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val isSearching = searchText.value.isNotEmpty()
+
+                    // 截图按钮（带动画）
+                    AnimatedVisibility(
+                        visible = !isSearching && (selectedTabIndex == 0 || selectedTabIndex == 1 || selectedTabIndex == 2),
+                        enter = fadeIn(animationSpec = tween(300)) +
+                                expandHorizontally(
+                                    animationSpec = tween(300),
+                                    expandFrom = Alignment.Start
+                                ) +
+                                scaleIn(animationSpec = tween(300)),
+                        exit = fadeOut(animationSpec = tween(300)) +
+                                shrinkHorizontally(
+                                    animationSpec = tween(300),
+                                    shrinkTowards = Alignment.Start
+                                ) +
+                                scaleOut(animationSpec = tween(300))
+                    ) {
+                        Box(modifier = Modifier.padding(end = 8.dp)) {
+                            IconButton(
+                                onClick = {
+                                    when (selectedTabIndex) {
+                                        0 -> showEntryCaptureDialog = true
+                                        1 -> showTeamCaptureDialog = true
+                                        2 -> showCommentCaptureDialog = true
+                                    }
+                                },
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Fa.Camera,
+                                    contentDescription = "Screenshot",
+                                    tint = Beige400,
+                                    modifier = Modifier.height(24.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    // 日期时间选择按钮（带动画）
+                    AnimatedVisibility(
+                        visible = !isSearching,
+                        enter = fadeIn(animationSpec = tween(300)) +
+                                expandHorizontally(
+                                    animationSpec = tween(300),
+                                    expandFrom = Alignment.Start
+                                ) +
+                                scaleIn(animationSpec = tween(300)),
+                        exit = fadeOut(animationSpec = tween(300)) +
+                                shrinkHorizontally(
+                                    animationSpec = tween(300),
+                                    shrinkTowards = Alignment.Start
+                                ) +
+                                scaleOut(animationSpec = tween(300))
+                    ) {
+                        Box(modifier = Modifier.padding(end = 8.dp)) {
+                            IconButton(
+                                onClick = { selectTime() },
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Fa.Calendar,
+                                    contentDescription = "Date&Time",
+                                    tint = Beige400,
+                                    modifier = Modifier.height(24.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    // 搜索框
+                    val focusManager = LocalFocusManager.current
+                    val keyboardController = LocalSoftwareKeyboardController.current
+
+                    TextField(
+                        value = searchText.value,
+                        onValueChange = { query ->
+                            // 只有在活动开始时才处理搜索
+                            if (selectedRange?.isStart == true) {
+                                when (selectedTabIndex) {
+                                    0 -> vm.search(query, selectedSubTabIndex)
+                                    1 -> vm.search(query, 5)
+                                    2 -> vm.search(query, 6)
+                                }
+                            } else {
+                                vm.search("", 0)
+                            }
+                        },
+                        modifier = Modifier
+                            .weight(1f, fill = true)
+                            .height(48.dp)
+                            .animateContentSize(animationSpec = tween(300)),
+                        textStyle = TextStyle(
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Normal
+                        ),
+                        placeholder = {
+                            Text(
+                                "搜索...",
+                                color = Beige600,
+                                fontSize = 14.sp
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                painter = rememberVectorPainter(image = Filled.Magnify),
+                                contentDescription = "Search",
+                                tint = Beige400,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        },
+                        trailingIcon = {
+                            if (searchText.value.isNotEmpty()) {
+                                Row {
+                                    IconButton(onClick = {
+                                        vm.search("", 0)
+                                        focusManager.clearFocus()
+                                    }) {
+                                        Icon(
+                                            painter = rememberVectorPainter(image = Fa.Xmark),
+                                            contentDescription = "Clear",
+                                            tint = Beige400,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                        singleLine = true,
+                        shape = RoundedCornerShape(24.dp),
+                        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                focusManager.clearFocus()
+                                keyboardController?.hide()
+                            }
+                        ),
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = Beige400,
+                            unfocusedTextColor = Beige400,
+                            disabledTextColor = Beige400,
+                            errorTextColor = Beige400,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent,
+                            errorIndicatorColor = Color.Transparent,
+                            focusedContainerColor = Red800,
+                            unfocusedContainerColor = Red800,
+                            disabledContainerColor = Red800,
+                            errorContainerColor = Red800,
+                            focusedPlaceholderColor = Beige600,
+                            unfocusedPlaceholderColor = Beige600,
+                            disabledPlaceholderColor = Beige600,
+                            errorPlaceholderColor = Beige600,
+                            focusedLeadingIconColor = Beige400,
+                            unfocusedLeadingIconColor = Beige400,
+                            disabledLeadingIconColor = Beige400,
+                            errorLeadingIconColor = Beige400,
+                            cursorColor = Beige400,
+                        )
+                    )
+
+                    // 搜索导航按钮（带动画）
+                    AnimatedVisibility(
+                        visible = isSearching && matchedIndices.value.isNotEmpty(),
+                        enter = fadeIn(animationSpec = tween(300)) +
+                                expandHorizontally(
+                                    animationSpec = tween(300),
+                                    expandFrom = Alignment.End
+                                ) +
+                                slideInHorizontally(
+                                    initialOffsetX = { it / 2 },
+                                    animationSpec = tween(300)
+                                ),
+                        exit = fadeOut(animationSpec = tween(300)) +
+                                shrinkHorizontally(
+                                    animationSpec = tween(300),
+                                    shrinkTowards = Alignment.End
+                                ) +
+                                slideOutHorizontally(
+                                    targetOffsetX = { it / 2 },
+                                    animationSpec = tween(300)
+                                )
+                    ) {
+                        Box(modifier = Modifier.padding(start = 8.dp)) {
+                            Column(
+                                modifier = Modifier.size(48.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                IconButton(
+                                    onClick = { vm.scrollToPrevious() },
+                                    modifier = Modifier.size(24.dp)
                                 ) {
-                                    IconButton(
-                                        onClick = { vm.scrollToPrevious() },
-                                        modifier = Modifier.size(24.dp)
-                                    ) {
-                                        Icon(
-                                            painter = rememberVectorPainter(image = Filled.ChevronUp),
-                                            contentDescription = "上一个",
-                                            tint = Beige400,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-                                    IconButton(
-                                        onClick = { vm.scrollToNext() },
-                                        modifier = Modifier.size(24.dp)
-                                    ) {
-                                        Icon(
-                                            painter = rememberVectorPainter(image = Filled.ChevronDown),
-                                            contentDescription = "下一个",
-                                            tint = Beige400,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
+                                    Icon(
+                                        painter = rememberVectorPainter(image = Filled.ChevronUp),
+                                        contentDescription = "上一个",
+                                        tint = Beige400,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                }
+                                IconButton(
+                                    onClick = { vm.scrollToNext() },
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(
+                                        painter = rememberVectorPainter(image = Filled.ChevronDown),
+                                        contentDescription = "下一个",
+                                        tint = Beige400,
+                                        modifier = Modifier.size(16.dp)
+                                    )
                                 }
                             }
                         }
