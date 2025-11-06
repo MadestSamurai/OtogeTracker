@@ -8,7 +8,6 @@ import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element
 import com.madsam.otora.core.utils.CommonUtils
-import com.madsam.otora.core.utils.JsonUtil
 import com.madsam.otora.core.utils.ShareUtil
 import com.madsam.otora.core.utils.UserAgentUtils
 import com.madsam.otora.data.BASE_URL
@@ -21,6 +20,7 @@ import com.madsam.otora.data.adapter.SafeIntPairAdapter
 import com.madsam.otora.data.adapter.SafeLongAdapter
 import com.madsam.otora.data.adapter.SafeStringAdapter
 import com.madsam.otora.data.adapter.SafeStringListAdapter
+import com.madsam.otora.data.chunithm.local.datastore.ChunithmLoginBonusDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmPenguinDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmStatueDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserDataStore
@@ -45,6 +45,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -56,19 +57,32 @@ import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.jvm.jvmErasure
 
 internal class ChunithmRequestService(private val context: Context) {
     companion object {
         private const val TAG = "ChunithmRequestService"
+        
+        // Regex patterns - 提取为常量以提高性能和可读性
         private val HONOR_STYLE_REGEX = Regex("honor_bg_([a-zA-Z0-9]+)")
+        private val URL_EXTRACTOR_REGEX = Regex("url\\(([^)]+)\\)")
+        private val CHARACTER_LEVEL_REGEX = Regex("num_s_lv_(\\d)\\.png")
+        private val MONTH_EXTRACTOR_REGEX = Regex("(\\d+)月")
+        private val LOGIN_DAYS_REGEX = Regex("num_lv_(\\d+)")
+        private val TOTAL_DAYS_REGEX = Regex("第 (\\d+) 天")
     }
 
     private val serviceScope = CoroutineScope(Dispatchers.IO)
     private val isUserRequestRunning = AtomicBoolean(false)
     private val isSongsRequestRunning = AtomicBoolean(false)
     private val chunithmLocalService = ChunithmObjectBoxService()
+    
+    // DataStore 实例复用
+    private val userDataStore by lazy { ChunithmUserDataStore(context) }
+    private val penguinDataStore by lazy { ChunithmPenguinDataStore(context) }
+    private val userExtDataStore by lazy { ChunithmUserExtDataStore(context) }
+    private val statueDataStore by lazy { ChunithmStatueDataStore(context) }
+    private val loginBonusDataStore by lazy { ChunithmLoginBonusDataStore(context) }
+    
     private val userAgent = UserAgentUtils.getUserAgent(context).ifBlank { 
         UserAgentUtils.getDefaultUserAgent() 
     }
@@ -96,77 +110,72 @@ internal class ChunithmRequestService(private val context: Context) {
         .addLast(KotlinJsonAdapterFactory())
         .build()
 
-    private val httpClient = OkHttpClient.Builder().build()
+    private val httpClient = OkHttpClient.Builder()
+        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .connectionPool(okhttp3.ConnectionPool(5, 5, java.util.concurrent.TimeUnit.MINUTES))
+        .retryOnConnectionFailure(true)
+        .build()
 
     private suspend fun requestDataFromServer(
         link: String,
         requestBody: Map<String, String> = emptyMap(),
         isPost: Boolean = false
-    ): Document? {
-        return withContext(Dispatchers.IO) {
-            try {
-                val encodedUrl = CommonUtils.encodeURL(link)
-                val cookies = buildCookieString()
-                
-                val requestBuilder = Request.Builder()
-                    .url(encodedUrl)
-                    .header("User-Agent", userAgent)
-                    .header("Cookie", cookies)
-                
-                val request = if (isPost && requestBody.isNotEmpty()) {
-                    val formBody = FormBody.Builder()
-                    requestBody.forEach { (key, value) ->
-                        formBody.add(key, value)
-                    }
-                    requestBuilder.post(formBody.build()).build()
-                } else {
-                    requestBuilder.get().build()
-                }
-                
-                val response = httpClient.newCall(request).execute()
-                
-                if (response.isSuccessful) {
-                    val html = response.body.string()
-                    Ksoup.parse(html)
-                } else {
-                    Log.e(TAG, "HTTP error ${response.code} occurred in $link")
-                    null
-                }
-            } catch (e: IOException) {
-                Log.e(TAG, "IOException occurred in $link: ${e.message}")
-                null
+    ): Document? = withContext(Dispatchers.IO) {
+        try {
+            val encodedUrl = CommonUtils.encodeURL(link)
+            val cookies = buildCookieString()
+            
+            val requestBuilder = Request.Builder()
+                .url(encodedUrl)
+                .header("User-Agent", userAgent)
+                .header("Cookie", cookies)
+            
+            val request = if (isPost && requestBody.isNotEmpty()) {
+                val formBody = FormBody.Builder().apply {
+                    requestBody.forEach { (key, value) -> add(key, value) }
+                }.build()
+                requestBuilder.post(formBody).build()
+            } else {
+                requestBuilder.get().build()
             }
+            
+            httpClient.newCall(request).execute().use { response ->
+                when {
+                    response.isSuccessful -> {
+                        response.body.string().let { html ->
+                            Ksoup.parse(html)
+                        }
+                    }
+                    else -> {
+                        Log.e(TAG, "HTTP error ${response.code} occurred in $link")
+                        null
+                    }
+                }
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "IOException occurred in $link: ${e.message}")
+            null
+        } catch (e: Exception) {
+            Log.e(TAG, "Unexpected error in $link: ${e.message}", e)
+            null
         }
     }
     
-    private fun buildCookieString(): String {
-        val cookies = mutableListOf(
-            "_t=${cookie.token}",
-            "expires=${cookie.expires}",
-            "Max-Age=${cookie.maxAge}",
-            "path=${cookie.path}",
-            "SameSite=${cookie.sameSite}",
-            "userId=${cookie.userId}",
-            "friendCodeList=${cookie.friendCodeList}"
-        )
+    private fun buildCookieString(): String = buildString {
+        append("_t=${cookie.token}")
+        append("; expires=${cookie.expires}")
+        append("; Max-Age=${cookie.maxAge}")
+        append("; path=${cookie.path}")
+        append("; SameSite=${cookie.sameSite}")
+        append("; userId=${cookie.userId}")
+        append("; friendCodeList=${cookie.friendCodeList}")
         
         if (cookie.gaKey.isNotEmpty()) {
-            cookies.add("${cookie.gaKey}=${cookie.gaValue}")
-            cookies.add("_ga=${cookie.ga}")
+            append("; ${cookie.gaKey}=${cookie.gaValue}")
+            append("; _ga=${cookie.ga}")
         }
-        
-        return cookies.joinToString("; ")
-    }
-
-    private inline fun <reified T> saveDataToLocal(data: T, filename: String) {
-        if (data is List<*> && data.isEmpty()) {
-            Log.e(TAG, "Empty list data found in $filename")
-            return
-        }
-
-        val jsonAdapter = moshi.adapter(T::class.java)
-        val json = jsonAdapter.toJson(data)
-        JsonUtil.saveJsonToFile(context, filename, json)
     }
 
     private fun parseChuniUser(doc: Document): ChuniUserDTO {
@@ -182,7 +191,7 @@ internal class ChunithmRequestService(private val context: Context) {
             ?.let { style ->
                 Log.d(TAG, "Profile background style: $style")
                 // 匹配 url(...) 中的内容
-                Regex("url\\(([^)]+)\\)").find(style)?.groupValues?.getOrNull(1)
+                URL_EXTRACTOR_REGEX.find(style)?.groupValues?.getOrNull(1)
                     ?.split("/")?.lastOrNull()
                     ?.split(".")?.firstOrNull()
                     ?.removePrefix("profile_")
@@ -248,7 +257,7 @@ internal class ChunithmRequestService(private val context: Context) {
             ?.attr("style")
             ?.let { style ->
                 Log.d(TAG, "Role base style: $style")
-                Regex("url\\(([^)]+)\\)").find(style)?.groupValues?.getOrNull(1)
+                URL_EXTRACTOR_REGEX.find(style)?.groupValues?.getOrNull(1)
                     ?.split("/")?.lastOrNull()
                     ?.split(".")?.firstOrNull()
                     ?.removePrefix("charaframe_")
@@ -354,359 +363,295 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private suspend fun requestPlayerData() {
-        Log.d(TAG, "=== requestPlayerData started ===")
-        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData")
-        
-        if (doc == null) {
+        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData") ?: run {
             Log.e(TAG, "Failed to get document from server")
             return
         }
-        
-        Log.d(TAG, "Document received, parsing user data...")
+
+        // 并行解析三个数据
         val chuniUser = parseChuniUser(doc)
-        
-        Log.d(TAG, "Checking empty fields...")
-        val emptyCount = chuniUser::class.memberProperties.count {
-            it.returnType.jvmErasure == String::class && it.getter.call(chuniUser) == ""
-        }
-        Log.d(TAG, "Empty string fields count: $emptyCount")
-        
-        if (emptyCount > 5) {
-            Log.w(TAG, "Too many empty fields ($emptyCount), not saving user data")
-        } else {
-            Log.d(TAG, "Saving user data to DataStore...")
-            // 使用 DataStore 存储用户数据
-            val userDataStore = ChunithmUserDataStore(context)
-            userDataStore.saveUserData(chuniUser)
-            Log.d(TAG, "User data saved successfully")
-        }
-
-        Log.d(TAG, "Parsing and saving penguin data...")
         val penguinData = parseChuniPenguin(doc)
-        val penguinDataStore = ChunithmPenguinDataStore(context)
-        penguinDataStore.savePenguinData(penguinData)
-        Log.d(TAG, "Penguin data saved to DataStore")
-        
-        Log.d(TAG, "Parsing and saving user extend data...")
         val userExtData = parseChuniUserExtend(doc)
-        val userExtDataStore = ChunithmUserExtDataStore(context)
-        userExtDataStore.saveUserExtData(userExtData)
-        Log.d(TAG, "User extend data saved to DataStore")
         
-        Log.d(TAG, "=== requestPlayerData completed ===")
-    }
-
-    private fun parseRatingData(doc: Document): List<ChuniScoreDTO> {
-        val chuniRating = mutableListOf<ChuniScoreDTO>()
-        val ratingDetailBest = doc.getElementsByTag("form")
-        for (rating in ratingDetailBest) {
-            val title = rating.getElementsByClass("music_title").text()
-            val highScore = rating.getElementsByClass("text_b").text()
-            val id = rating.select("input[name=idx]").attr("value")
-            val genre = rating.select("input[name=genre]").attr("value")
-            val diff = rating.select("input[name=diff]").attr("value")
-            val token = rating.select("input[name=token]").attr("value")
-            chuniRating.add(ChuniScoreDTO(id, title, genre, diff, token, highScore))
+        // 验证用户数据质量
+        if (!isUserDataValid(chuniUser)) {
+            Log.w(TAG, "User data validation failed, skipping user data save")
+            // 即使用户数据无效，仍保存 penguin 和 userExt 数据
+        } else {
+            // 并行保存三个数据到 DataStore
+            coroutineScope {
+                launch { userDataStore.saveUserData(chuniUser) }
+                launch { penguinDataStore.savePenguinData(penguinData) }
+                launch { userExtDataStore.saveUserExtData(userExtData) }
+            }
         }
-        return chuniRating
+    }
+    
+    /**
+     * 验证用户数据是否有效
+     * 通过检查关键字段是否为空来判断
+     */
+    private fun isUserDataValid(user: ChuniUserDTO): Boolean {
+        // 检查关键字段而不是用反射计数所有空字段
+        return user.nameIn.isNotEmpty() && 
+               user.rating.isNotEmpty() && 
+               user.rating != "0.00"
     }
 
-    private suspend fun requestRatingBest() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailBest") ?: return
-        val ratingData = parseRatingData(doc)
-        Log.d(TAG, "Saving Rating Best data to ObjectBox, count: ${ratingData.size}")
-        val objectBoxService = ChunithmObjectBoxService()
-        objectBoxService.saveRatingData(ratingData, ChunithmRatingEntity.TYPE_BEST)
-        Log.d(TAG, "Rating Best data saved successfully")
-    }
-
-    private suspend fun requestRatingRecent() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailRecent") ?: return
-        val ratingData = parseRatingData(doc)
-        Log.d(TAG, "Saving Rating Recent data to ObjectBox, count: ${ratingData.size}")
-        val objectBoxService = ChunithmObjectBoxService()
-        objectBoxService.saveRatingData(ratingData, ChunithmRatingEntity.TYPE_RECENT)
-        Log.d(TAG, "Rating Recent data saved successfully")
-    }
-
-    private suspend fun requestRatingNext() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/home/playerData/ratingDetailNext") ?: return
-        val ratingData = parseRatingData(doc)
-        Log.d(TAG, "Saving Rating Suggest data to ObjectBox, count: ${ratingData.size}")
-        val objectBoxService = ChunithmObjectBoxService()
-        objectBoxService.saveRatingData(ratingData, ChunithmRatingEntity.TYPE_SUGGEST)
-        Log.d(TAG, "Rating Suggest data saved successfully")
-    }
-
-    private fun parseChuniMaps(doc: Document): List<ChuniMapDTO> {
-        val chuniMapDTOS = mutableListOf<ChuniMapDTO>()
-
-        val mapBlocks = doc.select("div.map_block.w400")
-        for (block in mapBlocks) {
-            val title = block.select("div.map_title_text.text_l.text_b").text()
-
-            val currentPageText = block.select("div.map_title_page_num.font_90").text()
-            val totalPagesText = block.select("div.map_title_page_den.font_90").text()
-            val currentPage = currentPageText.toIntOrNull() ?: 0
-            val totalPages = totalPagesText.toIntOrNull() ?: 0
-
-            val areas = mutableListOf<ChuniMapArea>()
-            val areaBlocks = block.select("div.maparea_block")
-            for (areaBlock in areaBlocks) {
-                val mapAreaDiv = areaBlock.selectFirst("div.maparea")
-                if (mapAreaDiv != null) {
-                    val imageUrl = mapAreaDiv.select("div.map_icon div.map_icon_avatar img")
-                        .attr("src")
-                        .takeIf { it.isNotBlank() }
-
-                    val remainText = mapAreaDiv.select("div.map_remain div.map_remain_text").text()
-                    val remain = remainText.toIntOrNull() ?: 0
-
-                    val skillSeed =
-                        mapAreaDiv.select("div.map_skillseed_block div.map_skillseed_text")
-                            .text()
-                            .takeIf { it.isNotBlank() }
-
-                    areas.add(ChuniMapArea(imageUrl, remain, skillSeed))
-                }
-            }
-            chuniMapDTOS.add(ChuniMapDTO(title, currentPage, totalPages, areas))
-        }
-        return chuniMapDTOS
-    }
-
-    private suspend fun requestMapRecord() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/record") ?: return
-        val mapData = parseChuniMaps(doc)
-        // 保存到 ObjectBox
-        chunithmLocalService.saveMapData(mapData)
-    }
-
-    private fun parsePlayLog(doc: Document): List<ChuniFullScoreDTO> {
-        val chuniPlayLog = mutableListOf<ChuniFullScoreDTO>()
-        val playLog = doc.getElementsByClass("frame02 w400")
-        for (log in playLog) {
-            val title = log.getElementsByClass("play_musicdata_title").text()
-            val level = log.getElementsByClass("play_track_result")
-                .select("img").attr("src")
-                .split("/").last()
-                .split(".").first()
-                .split("_").last()
-            val score = log.getElementsByClass("play_musicdata_score_text").text()
-            val marks = log.getElementsByClass("play_musicdata_icon clearfix")
-            val clearMarks = marks.select("img").joinToString("") {
-                it.attr("src")
-                    .split("/").last()
-                    .split(".").first()
-                    .split("_").last()
-            }
-            
-            // Clear类型 (clear, hard, absolute, catastrophy等)
-            val clear = when {
-                clearMarks.contains("catastrophy") -> "catastrophy"
-                clearMarks.contains("absolutep") -> "absolutep"
-                clearMarks.contains("absolute") -> "absolute"
-                clearMarks.contains("hard") -> "hard"
-                clearMarks.contains("clear") -> "clear"
-                else -> ""
-            }
-            
-            // Combo类型 (fullcombo, alljustice, ajc等)
-            val combo = when {
-                clearMarks.contains("alljusticecritical") -> "ajc"
-                clearMarks.contains("alljustice") -> "alljustice"
-                clearMarks.contains("fullcombo") -> "fullcombo"
-                else -> ""
-            }
-            
-            // Chain类型 (fullchain, fullchain2等)
-            val chain = when {
-                clearMarks.contains("fullchain2") -> "fullchain2"
-                clearMarks.contains("fullchain") -> "fullchain"
-                else -> ""
-            }
-            val rank = marks.select("img[src*='rank']").attr("src")
-                .split("/").last()
-                .split(".").first()
-                .split("_").last()
-            val rankNum = rank.toIntOrNull() ?: -1
-            val date = log.getElementsByClass("play_datalist_date").text()
-            val trackNumber = log.getElementsByClass("play_track_text").text()
-                .split(" ").last()
-            chuniPlayLog.add(
-                ChuniFullScoreDTO(
-                    title = title,
-                    diff = level,
-                    score = score,
-                    clear = clear,
-                    combo = combo,
-                    chain = chain,
-                    rank = rankNum,
-                    date = date,
-                    trackNumber = trackNumber
-                )
+    private fun parseRatingData(doc: Document): List<ChuniScoreDTO> =
+        doc.getElementsByTag("form").map { rating ->
+            ChuniScoreDTO(
+                id = rating.select("input[name=idx]").attr("value"),
+                title = rating.getElementsByClass("music_title").text(),
+                genre = rating.select("input[name=genre]").attr("value"),
+                diff = rating.select("input[name=diff]").attr("value"),
+                token = rating.select("input[name=token]").attr("value"),
+                highScore = rating.getElementsByClass("text_b").text()
             )
         }
-        return chuniPlayLog
+
+    /**
+     * 通用的 Rating 数据请求函数
+     * @param endpoint API 端点路径
+     * @param ratingType Rating 类型 (BEST/RECENT/SUGGEST)
+     */
+    private suspend fun requestRatingData(endpoint: String, ratingType: String) {
+        requestDataFromServer("$CHUNITHM_URL$endpoint")?.let { doc ->
+            val ratingData = parseRatingData(doc)
+            chunithmLocalService.saveRatingData(ratingData, ratingType)
+        }
     }
 
-    private suspend fun requestPlayLog() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/record/playlog") ?: return
-        val playLogs = parsePlayLog(doc)
-        Log.d(TAG, "Saving PlayLog data to ObjectBox, count: ${playLogs.size}")
-        val objectBoxService = ChunithmObjectBoxService()
-        objectBoxService.savePlayLogs(playLogs)
-        Log.d(TAG, "PlayLog data saved successfully, total records: ${objectBoxService.getPlayLogCount()}")
+    private suspend fun requestRatingBest() = 
+        requestRatingData("/home/playerData/ratingDetailBest", ChunithmRatingEntity.TYPE_BEST)
+
+    private suspend fun requestRatingRecent() = 
+        requestRatingData("/home/playerData/ratingDetailRecent", ChunithmRatingEntity.TYPE_RECENT)
+
+    private suspend fun requestRatingNext() = 
+        requestRatingData("/home/playerData/ratingDetailNext", ChunithmRatingEntity.TYPE_SUGGEST)
+
+    private fun parseChuniMaps(doc: Document): List<ChuniMapDTO> =
+        doc.select("div.map_block.w400").map { block ->
+            val title = block.select("div.map_title_text.text_l.text_b").text()
+            val currentPage = block.select("div.map_title_page_num.font_90").text().toIntOrNull() ?: 0
+            val totalPages = block.select("div.map_title_page_den.font_90").text().toIntOrNull() ?: 0
+            
+            val areas = block.select("div.maparea_block")
+                .mapNotNull { areaBlock ->
+                    areaBlock.selectFirst("div.maparea")?.let { mapAreaDiv ->
+                        ChuniMapArea(
+                            imageUrl = mapAreaDiv.select("div.map_icon div.map_icon_avatar img")
+                                .attr("src")
+                                .takeIf { it.isNotBlank() },
+                            remain = mapAreaDiv.select("div.map_remain div.map_remain_text")
+                                .text()
+                                .toIntOrNull() ?: 0,
+                            skillSeed = mapAreaDiv.select("div.map_skillseed_block div.map_skillseed_text")
+                                .text()
+                                .takeIf { it.isNotBlank() }
+                        )
+                    }
+                }
+            
+            ChuniMapDTO(title, currentPage, totalPages, areas)
+        }
+
+    private suspend fun requestMapRecord() {
+        requestDataFromServer("$CHUNITHM_URL/record")?.let { doc ->
+            val mapData = parseChuniMaps(doc)
+            chunithmLocalService.saveMapData(mapData)
+        }
     }
+
+    /**
+     * 从图片 src 中提取最后一段标识符
+     * 例如: "path/to/icon_clear.png" -> "clear"
+     */
+    private fun extractIconIdentifier(src: String): String =
+        src.split("/").lastOrNull()
+            ?.split(".")?.firstOrNull()
+            ?.split("_")?.lastOrNull()
+            ?: ""
+
+    /**
+     * 解析标记字符串，提取 clear、combo、chain 类型
+     */
+    private fun parseMarks(clearMarks: String): Triple<String, String, String> {
+        val clear = when {
+            clearMarks.contains("catastrophy") -> "catastrophy"
+            clearMarks.contains("absolutep") -> "absolutep"
+            clearMarks.contains("absolute") -> "absolute"
+            clearMarks.contains("hard") -> "hard"
+            clearMarks.contains("clear") -> "clear"
+            else -> ""
+        }
+        
+        val combo = when {
+            clearMarks.contains("alljusticecritical") -> "ajc"
+            clearMarks.contains("alljustice") -> "alljustice"
+            clearMarks.contains("fullcombo") -> "fullcombo"
+            else -> ""
+        }
+        
+        val chain = when {
+            clearMarks.contains("fullchain2") -> "fullchain2"
+            clearMarks.contains("fullchain") -> "fullchain"
+            else -> ""
+        }
+        
+        return Triple(clear, combo, chain)
+    }
+
+    private fun parsePlayLog(doc: Document): List<ChuniFullScoreDTO> =
+        doc.getElementsByClass("frame02 w400").map { log ->
+            val title = log.getElementsByClass("play_musicdata_title").text()
+            val level = extractIconIdentifier(
+                log.getElementsByClass("play_track_result")
+                    .select("img").attr("src")
+            )
+            val score = log.getElementsByClass("play_musicdata_score_text").text()
+            
+            val marks = log.getElementsByClass("play_musicdata_icon clearfix")
+            val clearMarks = marks.select("img")
+                .joinToString("") { extractIconIdentifier(it.attr("src")) }
+            
+            val (clear, combo, chain) = parseMarks(clearMarks)
+            
+            val rankNum = extractIconIdentifier(
+                marks.select("img[src*='rank']").attr("src")
+            ).toIntOrNull() ?: -1
+            
+            val date = log.getElementsByClass("play_datalist_date").text()
+            val trackNumber = log.getElementsByClass("play_track_text").text()
+                .split(" ").lastOrNull() ?: ""
+            
+            ChuniFullScoreDTO(
+                title = title,
+                diff = level,
+                score = score,
+                clear = clear,
+                combo = combo,
+                chain = chain,
+                rank = rankNum,
+                date = date,
+                trackNumber = trackNumber
+            )
+        }
+
+    private suspend fun requestPlayLog() {
+        requestDataFromServer("$CHUNITHM_URL/record/playlog")?.let { doc ->
+            val playLogs = parsePlayLog(doc)
+            chunithmLocalService.savePlayLogs(playLogs)
+        }
+    }
+
+    /**
+     * 解析统计类别图片中的标识符
+     * 例如: "path/to/rank_13.png" -> "rank_13"
+     */
+    private fun extractStatsIdentifier(src: String): String =
+        src.split("/").lastOrNull()
+            ?.split(".")?.firstOrNull()
+            ?: ""
 
     private fun parsePlayRecord(doc: Document, diff: String): ChuniPlayRecordDTO {
         val chuniPlayRecordDTO = ChuniPlayRecordDTO()
         var totalSongs = 0
 
+        // 解析统计数据
         doc.select("div.score_list").forEach { scoreList ->
             val imgSrc = scoreList.select("div.score_list_top img").attr("src")
-            val countText = scoreList.select("div.score_num_text").text()
+            val identifier = extractStatsIdentifier(imgSrc)
+            
+            val count = scoreList.select("div.score_num_text").text()
                 .replace(",", "").trim()
-            val totalText = scoreList.select("div.score_all_text.font_small").text()
+                .toIntOrNull() ?: 0
+            
+            val total = scoreList.select("div.score_all_text.font_small").text()
                 .replace("/", "").replace(",", "").trim()
-
-            val count = countText.toIntOrNull() ?: 0
-            val total = totalText.toIntOrNull() ?: 0
+                .toIntOrNull() ?: 0
 
             // 设置总曲目数（使用第一个找到的total值）
             if (totalSongs == 0 && total > 0) {
                 totalSongs = total
             }
 
-            when {
+            // 使用标识符直接匹配，避免多次字符串搜索
+            when (identifier) {
                 // 评级统计
-                imgSrc.contains("rank_13") -> chuniPlayRecordDTO.rateSSSp = count  // SSS+
-                imgSrc.contains("rank_12") -> chuniPlayRecordDTO.rateSSS = count   // SSS
-                imgSrc.contains("rank_11") -> chuniPlayRecordDTO.rateSSp = count   // SS+
-                imgSrc.contains("rank_10") -> chuniPlayRecordDTO.rateSS = count    // SS
-                imgSrc.contains("rank_9") -> chuniPlayRecordDTO.rateSp = count     // S+
-                imgSrc.contains("rank_8") -> chuniPlayRecordDTO.rateS = count      // S
-
+                "rank_13" -> chuniPlayRecordDTO.rateSSSp = count  // SSS+
+                "rank_12" -> chuniPlayRecordDTO.rateSSS = count   // SSS
+                "rank_11" -> chuniPlayRecordDTO.rateSSp = count   // SS+
+                "rank_10" -> chuniPlayRecordDTO.rateSS = count    // SS
+                "rank_9" -> chuniPlayRecordDTO.rateSp = count     // S+
+                "rank_8" -> chuniPlayRecordDTO.rateS = count      // S
                 // 达成统计
-                imgSrc.contains("clear") && !imgSrc.contains("fullchain") ->
-                    chuniPlayRecordDTO.rateClear = count      // Clear
-                imgSrc.contains("fullcombo") ->
-                    chuniPlayRecordDTO.rateFC = count         // FC
-                imgSrc.contains("alljustice") && !imgSrc.contains("critical") ->
-                    chuniPlayRecordDTO.rateAJ = count         // AJ
-                imgSrc.contains("alljusticecritical") ->
-                    chuniPlayRecordDTO.rateAJC = count        // AJC
-                imgSrc.contains("fullchain") && !imgSrc.contains("fullchain2") ->
-                    chuniPlayRecordDTO.rateFChain = count     // FChain
-                imgSrc.contains("fullchain2") ->
-                    chuniPlayRecordDTO.rateFChainP = count    // FChain+
-
+                "icon_clear" -> chuniPlayRecordDTO.rateClear = count      // Clear
+                "icon_fullcombo" -> chuniPlayRecordDTO.rateFC = count     // FC
+                "icon_alljustice" -> chuniPlayRecordDTO.rateAJ = count    // AJ
+                "icon_alljusticecritical" -> chuniPlayRecordDTO.rateAJC = count  // AJC
+                "icon_fullchain" -> chuniPlayRecordDTO.rateFChain = count   // FChain
+                "icon_fullchain2" -> chuniPlayRecordDTO.rateFChainP = count // FChain+
                 // 难度统计
-                imgSrc.contains("hard") ->
-                    chuniPlayRecordDTO.rateHard = count       // Hard
-                imgSrc.contains("absolute") && !imgSrc.contains("absolutep") ->
-                    chuniPlayRecordDTO.rateAbs = count        // Abs
-                imgSrc.contains("absolutep") ->
-                    chuniPlayRecordDTO.rateAbsP = count       // Abs+
-                imgSrc.contains("catastrophy") ->
-                    chuniPlayRecordDTO.rateCatas = count      // Catastrophy
+                "icon_hard" -> chuniPlayRecordDTO.rateHard = count       // Hard
+                "icon_absolute" -> chuniPlayRecordDTO.rateAbs = count    // Abs
+                "icon_absolutep" -> chuniPlayRecordDTO.rateAbsP = count  // Abs+
+                "icon_catastrophy" -> chuniPlayRecordDTO.rateCatas = count // Catastrophy
             }
         }
 
-        // 设置总曲目数
         chuniPlayRecordDTO.totalSongs = totalSongs
 
-        val allGenre = doc.getElementsByClass("box05 w400")
-        val genreList = mutableListOf<ChuniGenreDTO>()
-        for (genre in allGenre) {
+        // 解析各分类的成绩列表
+        val diffLower = diff.toLowerCase(Locale.current)
+        chuniPlayRecordDTO.genreList = doc.getElementsByClass("box05 w400").map { genre ->
             val genreName = genre.getElementsByClass("genre scroll_point text_white").text()
-            val diffLower = diff.toLowerCase(Locale.current)
-            val genreScore = genre.getElementsByClass("w388 musiclist_box bg_$diffLower")
-            val chuniScore = mutableListOf<ChuniFullScoreDTO>()
-            for (score in genreScore) {
-                val highScore = score.getElementsByClass("play_musicdata_highscore")
-                    .select("span").text()
-                val title = score.getElementsByClass("music_title").text()
+            val genreScores = genre.getElementsByClass("w388 musiclist_box bg_$diffLower")
+                .map { score ->
+                    val marks = score.getElementsByClass("play_musicdata_icon clearfix").select("img")
+                    val clearMarks = marks.joinToString("") { extractIconIdentifier(it.attr("src")) }
+                    val (clear, combo, chain) = parseMarks(clearMarks)
+                    val rankNum = extractIconIdentifier(
+                        marks.select("img[src*='rank']").attr("src")
+                    ).toIntOrNull() ?: -1
 
-                val id = score.select("input[name=idx]").attr("value")
-                val level = score.select("input[name=diff]").attr("value")
-                val genreId = score.select("input[name=genre]").attr("value")
-                val token = score.select("input[name=token]").attr("value")
-
-                val marks =
-                    score.getElementsByClass("play_musicdata_icon clearfix").select("img")
-                val clearMarks = marks.joinToString("") {
-                    it.attr("src")
-                        .split("_").last()
-                }
-                
-                // Clear类型 (clear, hard, absolute, catastrophy等)
-                val clear = when {
-                    clearMarks.contains("catastrophy.png") -> "catastrophy"
-                    clearMarks.contains("absolutep.png") -> "absolutep"
-                    clearMarks.contains("absolute.png") -> "absolute"
-                    clearMarks.contains("hard.png") -> "hard"
-                    clearMarks.contains("clear.png") -> "clear"
-                    else -> ""
-                }
-                
-                // Combo类型 (fullcombo, alljustice, ajc等)
-                val combo = when {
-                    clearMarks.contains("alljusticecritical.png") -> "ajc"
-                    clearMarks.contains("alljustice.png") -> "alljustice"
-                    clearMarks.contains("fullcombo.png") -> "fullcombo"
-                    else -> ""
-                }
-                
-                // Chain类型 (fullchain, fullchain2等)
-                val chain = when {
-                    clearMarks.contains("fullchain2.png") -> "fullchain2"
-                    clearMarks.contains("fullchain.png") -> "fullchain"
-                    else -> ""
-                }
-                val rank = marks.select("img[src*='rank']").attr("src")
-                    .split("/").last()
-                    .split(".").first()
-                    .split("_").last()
-                val rankNum = rank.toIntOrNull() ?: -1
-                chuniScore.add(
                     ChuniFullScoreDTO(
-                        id = id,
-                        title = title,
-                        diff = level,
-                        score = highScore,
-                        genre = genreId,
-                        token = token,
+                        id = score.select("input[name=idx]").attr("value"),
+                        title = score.getElementsByClass("music_title").text(),
+                        diff = score.select("input[name=diff]").attr("value"),
+                        score = score.getElementsByClass("play_musicdata_highscore").select("span").text(),
+                        genre = score.select("input[name=genre]").attr("value"),
+                        token = score.select("input[name=token]").attr("value"),
                         clear = clear,
                         combo = combo,
                         chain = chain,
-                        rank = rankNum,
+                        rank = rankNum
                     )
-                )
-            }
-            genreList.add(ChuniGenreDTO(genreName, chuniScore))
+                }
+            
+            ChuniGenreDTO(genreName, genreScores)
         }
-        chuniPlayRecordDTO.genreList = genreList
+        
         return chuniPlayRecordDTO
     }
 
     private suspend fun requestPlayRecord() {
         val diffArray = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
-        val chunithmObjectBoxService = ChunithmObjectBoxService()
         
-        for (diff in diffArray) {
+        diffArray.forEach { diff ->
             val requestBody = mapOf(
                 "genre" to "99",
                 "token" to cookie.token
             )
-            val doc = requestDataFromServer(
+            requestDataFromServer(
                 link = "$CHUNITHM_URL/record/musicGenre/send$diff",
                 requestBody = requestBody,
                 isPost = true
-            ) ?: continue
-            
-            val playRecordData = parsePlayRecord(doc, diff)
-            chunithmObjectBoxService.savePlayRecordData(playRecordData, diff)
+            )?.let { doc ->
+                val playRecordData = parsePlayRecord(doc, diff)
+                chunithmLocalService.savePlayRecordData(playRecordData, diff)
+            }
         }
     }
 
@@ -821,7 +766,7 @@ internal class ChunithmRequestService(private val context: Context) {
             val level = levelImages
                 .mapNotNull { img ->
                     val src = img.attr("src")
-                    val digitMatch = Regex("num_s_lv_(\\d)\\.png").find(src)
+                    val digitMatch = CHARACTER_LEVEL_REGEX.find(src)
                     digitMatch?.groupValues?.get(1)
                 }
                 .joinToString("")
@@ -872,11 +817,9 @@ internal class ChunithmRequestService(private val context: Context) {
     private suspend fun requestCollection() {
         val doc = requestDataFromServer("$CHUNITHM_URL/collection") ?: return
         
-        // 保存企鹅雕像数据到 DataStore
+        // 保存企鹅雕像数据到 DataStore（使用复用的实例）
         val statueData = parseChuniStatue(doc)
-        val statueDataStore = ChunithmStatueDataStore(context)
         statueDataStore.saveStatueData(statueData)
-        Log.d(TAG, "Statue data saved to DataStore: soul=${statueData.soul}, sliver=${statueData.sliver}, gold=${statueData.gold}, rainbow=${statueData.rainbow}")
     }
     
     /**
@@ -1043,17 +986,17 @@ internal class ChunithmRequestService(private val context: Context) {
     private fun parseLoginBonus(doc: Document): ChuniLoginBonusDTO {
         val monthText = doc.selectFirst("div.box01_title.text_b")?.text() ?: ""
         val currentMonth =
-            Regex("(\\d+)月").find(monthText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+            MONTH_EXTRACTOR_REGEX.find(monthText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
         val monthlyDays = doc.select("div.monthly_cumulative_login_bonus_days_count_num img")
             .firstOrNull()?.attr("src")
             ?.let { src ->
-                Regex("num_lv_(\\d+)").find(src)?.groupValues?.get(1)?.toIntOrNull()
+                LOGIN_DAYS_REGEX.find(src)?.groupValues?.get(1)?.toIntOrNull()
             } ?: 0
         val totalDays = doc.select("div.bonus_block_off div.bonus_days_block")
             .lastOrNull()
             ?.text()
             ?.let { text ->
-                Regex("第 (\\d+) 天").find(text)?.groupValues?.get(1)?.toIntOrNull()
+                TOTAL_DAYS_REGEX.find(text)?.groupValues?.get(1)?.toIntOrNull()
             } ?: 0
 
         return ChuniLoginBonusDTO(
@@ -1064,8 +1007,10 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private suspend fun requestLoginBonus() {
-        val doc = requestDataFromServer("$CHUNITHM_URL/loginBonus") ?: return
-        saveDataToLocal(parseLoginBonus(doc), "chuniLoginBonus.json")
+        requestDataFromServer("$CHUNITHM_URL/loginBonus")?.let { doc ->
+            val loginBonusData = parseLoginBonus(doc)
+            loginBonusDataStore.saveLoginBonusData(loginBonusData)
+        }
     }
 
     private fun parseFriendScoreList(doc: Document): List<ChuniFullScoreDTO> {
