@@ -1,8 +1,8 @@
 package com.madsam.otora.ui.components
 
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
@@ -207,14 +207,20 @@ fun Modifier.tabIndicatorOffset(currentTabPosition: CustomTabPosition): Modifier
         val currentTabWidth by
         animateDpAsState(
             targetValue = currentTabPosition.width,
-            animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing),
-            label = ""
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioNoBouncy,
+                stiffness = Spring.StiffnessMedium
+            ),
+            label = "tabIndicatorWidth"
         )
         val indicatorOffset by
         animateDpAsState(
             targetValue = currentTabPosition.left,
-            animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing),
-            label = ""
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioNoBouncy,
+                stiffness = Spring.StiffnessMedium
+            ),
+            label = "tabIndicatorOffset"
         )
         fillMaxWidth()
             .wrapContentSize(Alignment.BottomStart)

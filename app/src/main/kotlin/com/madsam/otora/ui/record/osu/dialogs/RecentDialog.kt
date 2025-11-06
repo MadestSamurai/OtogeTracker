@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.Cross
+import com.madsam.otora.core.icon.fa.Xmark
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.core.theme.Red700
@@ -108,9 +109,10 @@ internal fun RecentDialog(
                     )
                     IconButton(onClick = onDismiss) {
                         Icon(
-                            imageVector = Fa.Cross,
+                            imageVector = Fa.Xmark,
                             contentDescription = "Close",
-                            tint = Beige400
+                            tint = Beige400,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }

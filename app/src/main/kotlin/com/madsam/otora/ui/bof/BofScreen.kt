@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.fadeIn
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,9 +33,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,8 +46,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -56,6 +58,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -76,6 +79,7 @@ import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.Calendar
 import com.madsam.otora.core.icon.fa.Camera
+import com.madsam.otora.core.icon.fa.`Magnifying-glass`
 import com.madsam.otora.core.icon.fa.Xmark
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
@@ -93,6 +97,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 private const val TAG = "BofScreen"
+
+// Material 3 Motion 规范的缓动曲线
+// https://m3.material.io/styles/motion/easing-and-duration/tokens-specs
+// Standard easing - 更温和，适合小到中等尺寸的UI元素
+private val StandardDecelerate = CubicBezierEasing(0f, 0f, 0f, 1f) // 进入动画：线性开始，减速结束
+private val StandardAccelerate = CubicBezierEasing(0.3f, 0f, 1f, 1f) // 退出动画：加速开始，线性结束
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -504,7 +514,7 @@ fun BofScreen(
                         .height(56.dp)
                         .clip(RoundedCornerShape(28.dp))
                         .background(Red500)
-                        .animateContentSize(animationSpec = tween(300))
+                        .animateContentSize(animationSpec = tween(250))
                         .padding(horizontal = 4.dp),
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically
@@ -512,20 +522,45 @@ fun BofScreen(
                     val isSearching = searchText.value.isNotEmpty()
 
                     // 截图按钮（带动画）
+                    // 注意：为了配合搜索框的扩展/收缩动画，按钮的进入和退出都使用 StandardDecelerate
                     AnimatedVisibility(
                         visible = !isSearching && (selectedTabIndex == 0 || selectedTabIndex == 1 || selectedTabIndex == 2),
-                        enter = fadeIn(animationSpec = tween(300)) +
-                                expandHorizontally(
-                                    animationSpec = tween(300),
-                                    expandFrom = Alignment.Start
-                                ) +
-                                scaleIn(animationSpec = tween(300)),
-                        exit = fadeOut(animationSpec = tween(300)) +
-                                shrinkHorizontally(
-                                    animationSpec = tween(300),
-                                    shrinkTowards = Alignment.Start
-                                ) +
-                                scaleOut(animationSpec = tween(300))
+                        enter = fadeIn(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            )
+                        ) + expandHorizontally(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            expandFrom = Alignment.Start
+                        ) + scaleIn(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            initialScale = 0.8f
+                        ),
+                        exit = fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            )
+                        ) + shrinkHorizontally(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            shrinkTowards = Alignment.Start
+                        ) + scaleOut(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            targetScale = 0.8f
+                        )
                     ) {
                         Box(modifier = Modifier.padding(end = 8.dp)) {
                             IconButton(
@@ -549,20 +584,45 @@ fun BofScreen(
                     }
 
                     // 日期时间选择按钮（带动画）
+                    // 注意：为了配合搜索框的扩展/收缩动画，按钮的进入和退出都使用 StandardDecelerate
                     AnimatedVisibility(
                         visible = !isSearching,
-                        enter = fadeIn(animationSpec = tween(300)) +
-                                expandHorizontally(
-                                    animationSpec = tween(300),
-                                    expandFrom = Alignment.Start
-                                ) +
-                                scaleIn(animationSpec = tween(300)),
-                        exit = fadeOut(animationSpec = tween(300)) +
-                                shrinkHorizontally(
-                                    animationSpec = tween(300),
-                                    shrinkTowards = Alignment.Start
-                                ) +
-                                scaleOut(animationSpec = tween(300))
+                        enter = fadeIn(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            )
+                        ) + expandHorizontally(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            expandFrom = Alignment.Start
+                        ) + scaleIn(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            initialScale = 0.8f
+                        ),
+                        exit = fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            )
+                        ) + shrinkHorizontally(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            shrinkTowards = Alignment.Start
+                        ) + scaleOut(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            targetScale = 0.8f
+                        )
                     ) {
                         Box(modifier = Modifier.padding(end = 8.dp)) {
                             IconButton(
@@ -579,11 +639,11 @@ fun BofScreen(
                         }
                     }
 
-                    // 搜索框
+                    // 搜索框 - 使用 BasicTextField 自定义布局以精确控制 48dp 高度
                     val focusManager = LocalFocusManager.current
                     val keyboardController = LocalSoftwareKeyboardController.current
 
-                    TextField(
+                    BasicTextField(
                         value = searchText.value,
                         onValueChange = { query ->
                             // 只有在活动开始时才处理搜索
@@ -600,45 +660,18 @@ fun BofScreen(
                         modifier = Modifier
                             .weight(1f, fill = true)
                             .height(48.dp)
-                            .animateContentSize(animationSpec = tween(300)),
+                            .animateContentSize(
+                                animationSpec = tween(
+                                    durationMillis = 300,
+                                    easing = StandardDecelerate
+                                )
+                            ),
                         textStyle = TextStyle(
                             fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal
+                            fontWeight = FontWeight.Normal,
+                            color = Beige400,
+                            lineHeight = 20.sp
                         ),
-                        placeholder = {
-                            Text(
-                                "搜索...",
-                                color = Beige600,
-                                fontSize = 14.sp
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                painter = rememberVectorPainter(image = Filled.Magnify),
-                                contentDescription = "Search",
-                                tint = Beige400,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        },
-                        trailingIcon = {
-                            if (searchText.value.isNotEmpty()) {
-                                Row {
-                                    IconButton(onClick = {
-                                        vm.search("", 0)
-                                        focusManager.clearFocus()
-                                    }) {
-                                        Icon(
-                                            painter = rememberVectorPainter(image = Fa.Xmark),
-                                            contentDescription = "Clear",
-                                            tint = Beige400,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        },
-                        singleLine = true,
-                        shape = RoundedCornerShape(24.dp),
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(
                             onDone = {
@@ -646,52 +679,104 @@ fun BofScreen(
                                 keyboardController?.hide()
                             }
                         ),
-                        colors = TextFieldDefaults.colors(
-                            focusedTextColor = Beige400,
-                            unfocusedTextColor = Beige400,
-                            disabledTextColor = Beige400,
-                            errorTextColor = Beige400,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent,
-                            errorIndicatorColor = Color.Transparent,
-                            focusedContainerColor = Red800,
-                            unfocusedContainerColor = Red800,
-                            disabledContainerColor = Red800,
-                            errorContainerColor = Red800,
-                            focusedPlaceholderColor = Beige600,
-                            unfocusedPlaceholderColor = Beige600,
-                            disabledPlaceholderColor = Beige600,
-                            errorPlaceholderColor = Beige600,
-                            focusedLeadingIconColor = Beige400,
-                            unfocusedLeadingIconColor = Beige400,
-                            disabledLeadingIconColor = Beige400,
-                            errorLeadingIconColor = Beige400,
-                            cursorColor = Beige400,
-                        )
+                        singleLine = true,
+                        cursorBrush = SolidColor(Beige400),
+                        decorationBox = { innerTextField ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Red800, RoundedCornerShape(24.dp))
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // Leading icon
+                                Icon(
+                                    painter = rememberVectorPainter(image = Fa.`Magnifying-glass`),
+                                    contentDescription = "Search",
+                                    tint = Beige400,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                
+                                Spacer(modifier = Modifier.width(12.dp))
+                                
+                                // Text field with placeholder
+                                Box(
+                                    modifier = Modifier.weight(1f),
+                                    contentAlignment = Alignment.CenterStart
+                                ) {
+                                    if (searchText.value.isEmpty()) {
+                                        Text(
+                                            text = "搜索...",
+                                            color = Beige600,
+                                            fontSize = 14.sp,
+                                            lineHeight = 20.sp
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                                
+                                // Trailing clear button
+                                if (searchText.value.isNotEmpty()) {
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    IconButton(
+                                        onClick = {
+                                            vm.search("", 0)
+                                            focusManager.clearFocus()
+                                        },
+                                        modifier = Modifier.size(32.dp)
+                                    ) {
+                                        Icon(
+                                            painter = rememberVectorPainter(image = Fa.Xmark),
+                                            contentDescription = "Clear",
+                                            tint = Beige400,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     )
 
                     // 搜索导航按钮（带动画）
+                    // 注意：为了配合搜索框的扩展/收缩动画，按钮的进入和退出都使用 StandardDecelerate
                     AnimatedVisibility(
                         visible = isSearching && matchedIndices.value.isNotEmpty(),
-                        enter = fadeIn(animationSpec = tween(300)) +
-                                expandHorizontally(
-                                    animationSpec = tween(300),
-                                    expandFrom = Alignment.End
-                                ) +
-                                slideInHorizontally(
-                                    initialOffsetX = { it / 2 },
-                                    animationSpec = tween(300)
-                                ),
-                        exit = fadeOut(animationSpec = tween(300)) +
-                                shrinkHorizontally(
-                                    animationSpec = tween(300),
-                                    shrinkTowards = Alignment.End
-                                ) +
-                                slideOutHorizontally(
-                                    targetOffsetX = { it / 2 },
-                                    animationSpec = tween(300)
-                                )
+                        enter = fadeIn(
+                            animationSpec = tween(
+                                durationMillis = 200,
+                                easing = StandardDecelerate
+                            )
+                        ) + expandHorizontally(
+                            animationSpec = tween(
+                                durationMillis = 200,
+                                easing = StandardDecelerate
+                            ),
+                            expandFrom = Alignment.End
+                        ) + slideInHorizontally(
+                            initialOffsetX = { it / 2 },
+                            animationSpec = tween(
+                                durationMillis = 200,
+                                easing = StandardDecelerate
+                            )
+                        ),
+                        exit = fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 200,
+                                easing = StandardDecelerate
+                            )
+                        ) + shrinkHorizontally(
+                            animationSpec = tween(
+                                durationMillis = 200,
+                                easing = StandardDecelerate
+                            ),
+                            shrinkTowards = Alignment.End
+                        ) + slideOutHorizontally(
+                            targetOffsetX = { it / 2 },
+                            animationSpec = tween(
+                                durationMillis = 200,
+                                easing = StandardDecelerate
+                            )
+                        )
                     ) {
                         Box(modifier = Modifier.padding(start = 8.dp)) {
                             Column(
