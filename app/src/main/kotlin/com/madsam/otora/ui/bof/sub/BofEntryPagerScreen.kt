@@ -428,16 +428,6 @@ private fun <T> EntryPageContent(
                 }
             }
             
-            ranking.isEmpty() -> {
-                Text(
-                    text = "暂无数据\n请选择时间范围或调整过滤条件",
-                    fontFamily = sarasaRegular,
-                    fontSize = 16.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.align(Alignment.Center)
-                )
-            }
-            
             else -> {
                 val rankingItems = ranking.map(dataConverter)
                 val tableConfig = RankingTableConfig(

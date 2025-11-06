@@ -8,6 +8,11 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -56,6 +61,7 @@ import com.madsam.otora.core.theme.Red900
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
+import com.madsam.otora.ui.bof.BofScreen
 import com.madsam.otora.ui.home.HomeScreen
 import com.madsam.otora.ui.record.RecordScreen
 import kotlinx.coroutines.CoroutineScope
@@ -68,18 +74,42 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun MainActivityScreen(navController: NavHostController) {
     val snackbarHostState = remember { SnackbarHostState() }
+    var showBofScreen by remember { mutableStateOf(false) }
+    val bofScreenState = remember { BofScreenState() }
     
-    // 直接显示主界面（带底部导航）
-    MainScreenWithNavigation(navController, snackbarHostState)
+    Box(modifier = Modifier.fillMaxSize()) {
+        // 主界面（带底部导航）
+        MainScreenWithNavigation(
+            navController = navController,
+            snackbarHostState = snackbarHostState,
+            onShowBofScreen = { showBofScreen = true }
+        )
+        
+        // BOF覆盖层 - 覆盖整个应用（包括导航栏）
+        AnimatedVisibility(
+            visible = showBofScreen,
+            enter = slideInHorizontally(
+                initialOffsetX = { it }
+            ) + fadeIn(),
+            exit = slideOutHorizontally(
+                targetOffsetX = { it }
+            ) + fadeOut()
+        ) {
+            BofScreen(
+                bofScreenState = bofScreenState,
+                onNavigateBack = { showBofScreen = false }
+            )
+        }
+    }
 }
 
 @Composable
 fun MainScreenWithNavigation(
     navController: NavHostController,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    onShowBofScreen: () -> Unit
 ) {
     var selectedItem by remember { mutableIntStateOf(0) }
-    var isNavigationBarVisible by remember { mutableStateOf(true) }
     val items = listOf(Screen.HomeScreen, Screen.RecordScreen, Screen.ReportScreen)
     val selectedIcons = listOf(Filled.Star, Filled.Star, Filled.Star)
     val unselectedIcons =
@@ -112,9 +142,7 @@ fun MainScreenWithNavigation(
                     composable(Screen.HomeScreen.route) { 
                         HomeScreen(
                             snackbarHostState = snackbarHostState,
-                            onNavigationBarVisibilityChange = { visible ->
-                                isNavigationBarVisible = visible
-                            }
+                            onShowBofScreen = onShowBofScreen
                         )
                     }
                     composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
@@ -123,8 +151,7 @@ fun MainScreenWithNavigation(
             }
 
             // NavigationRail 覆盖在最上层
-            if (isNavigationBarVisible) {
-                NavigationRail(
+            NavigationRail(
                 modifier = Modifier
                     .align(Alignment.CenterStart)
                     .background(Red900)
@@ -170,7 +197,6 @@ fun MainScreenWithNavigation(
                     )
                 }
             }
-            }
 
             SnackbarHost(
                 hostState = snackbarHostState,
@@ -182,16 +208,14 @@ fun MainScreenWithNavigation(
             // 主内容区域 - 添加底部 padding 避免被导航栏覆盖
             Box(modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = if (isNavigationBarVisible) 64.dp else 0.dp) // 导航栏高度
+                .padding(bottom = 64.dp) // 导航栏高度
                 .windowInsetsPadding(WindowInsets.navigationBars)
             ) {
                 NavHost(navController = navController, startDestination = Screen.HomeScreen.route) {
                     composable(Screen.HomeScreen.route) { 
                         HomeScreen(
                             snackbarHostState = snackbarHostState,
-                            onNavigationBarVisibilityChange = { visible ->
-                                isNavigationBarVisible = visible
-                            }
+                            onShowBofScreen = onShowBofScreen
                         )
                     }
                     composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
@@ -199,8 +223,7 @@ fun MainScreenWithNavigation(
                 }
             }
 
-            if (isNavigationBarVisible) {
-                NavigationBar(
+            NavigationBar(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .background(Red900)
@@ -246,7 +269,6 @@ fun MainScreenWithNavigation(
                         }
                     )
                 }
-            }
             }
 
             SnackbarHost(

@@ -1,5 +1,9 @@
 package com.madsam.otora.ui.common
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,27 +32,30 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.icon.fa.`Arrow-down`
@@ -61,6 +69,8 @@ import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.utils.ScreenUtil
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import java.util.Locale
 
 // 列宽度类型枚举
@@ -125,6 +135,39 @@ fun RankingTable(
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     val isNarrowScreen = screenWidthDp.value < 600
+    
+    // 标题区域可见性状态
+    var isTitleVisible by remember { mutableStateOf(true) }
+    var lastScrollIndex by remember { mutableIntStateOf(0) }
+    var lastScrollOffset by remember { mutableIntStateOf(0) }
+    
+    // 监听滚动状态来控制标题显示/隐藏
+    LaunchedEffect(listState) {
+        snapshotFlow { 
+            listState.firstVisibleItemIndex to listState.firstVisibleItemScrollOffset 
+        }
+        .distinctUntilChanged()
+        .filter { listState.isScrollInProgress }
+        .collect { (currentIndex, currentOffset) ->
+            val scrollingDown = when {
+                currentIndex > lastScrollIndex -> true
+                currentIndex < lastScrollIndex -> false
+                else -> currentOffset > lastScrollOffset
+            }
+            
+            // 向下滚动时隐藏标题（但需要滚动超过一定距离）
+            if (scrollingDown && currentIndex > 0) {
+                isTitleVisible = false
+            } 
+            // 向上滚动时显示标题
+            else if (!scrollingDown || currentIndex == 0) {
+                isTitleVisible = true
+            }
+            
+            lastScrollIndex = currentIndex
+            lastScrollOffset = currentOffset
+        }
+    }
     
     // 测量各列宽度
     var extraWidth by remember { mutableStateOf(50.dp) }
@@ -192,23 +235,39 @@ fun RankingTable(
             }
         }
         
-        // 表格标题和副标题（可选）
+        // 表格标题和副标题（可选）- 带滚动收缩效果
         if (showTitle) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.Black)
-                    .padding(vertical = 8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            AnimatedVisibility(
+                visible = isTitleVisible,
+                enter = expandVertically(
+                    animationSpec = tween(durationMillis = 200),
+                    expandFrom = Alignment.Top
+                ),
+                exit = shrinkVertically(
+                    animationSpec = tween(durationMillis = 200),
+                    shrinkTowards = Alignment.Top
+                )
             ) {
-                // 主标题行（带左右箭头）
-                Row(
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .background(Color.Black)
+                        .windowInsetsPadding(
+                            WindowInsets.displayCutout.only(
+                                WindowInsetsSides.Horizontal
+                            )
+                        )
+                        .padding(vertical = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // 主标题行（带左右箭头）
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                     // 左箭头（上一页）
                     if (config.previousPageTitle != null) {
                         IconButton(
@@ -222,7 +281,7 @@ fun RankingTable(
                                     painter = rememberVectorPainter(image = Filled.ChevronLeft),
                                     contentDescription = "上一页",
                                     tint = Beige400,
-                                    modifier = Modifier.size(18.dp)
+                                    modifier = Modifier.size(12.dp)
                                 )
                                 Text(
                                     text = config.previousPageTitle,
@@ -237,54 +296,55 @@ fun RankingTable(
                         Spacer(modifier = Modifier.size(40.dp))
                     }
                     
-                    // 中间主标题
-                    Text(
-                        text = config.title,
-                        fontFamily = sarasaBold,
-                        fontSize = 20.sp,
-                        color = Color.White,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(1f)
-                    )
-                    
-                    // 右箭头（下一页）
-                    if (config.nextPageTitle != null) {
-                        IconButton(
-                            onClick = onNavigateToNext,
-                            modifier = Modifier.size(40.dp)
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally
+                        // 中间主标题
+                        Text(
+                            text = config.title,
+                            fontFamily = sarasaBold,
+                            fontSize = 20.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(1f)
+                        )
+                        
+                        // 右箭头（下一页）
+                        if (config.nextPageTitle != null) {
+                            IconButton(
+                                onClick = onNavigateToNext,
+                                modifier = Modifier.size(40.dp)
                             ) {
-                                Icon(
-                                    painter = rememberVectorPainter(image = Filled.ChevronRight),
-                                    contentDescription = "下一页",
-                                    tint = Beige400,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Text(
-                                    text = config.nextPageTitle,
-                                    fontFamily = sarasaRegular,
-                                    fontSize = 12.sp,
-                                    color = TEXT_GRAY,
-                                    maxLines = 1
-                                )
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Icon(
+                                        painter = rememberVectorPainter(image = Filled.ChevronRight),
+                                        contentDescription = "下一页",
+                                        tint = Beige400,
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                    Text(
+                                        text = config.nextPageTitle,
+                                        fontFamily = sarasaRegular,
+                                        fontSize = 12.sp,
+                                        color = TEXT_GRAY,
+                                        maxLines = 1
+                                    )
+                                }
                             }
+                        } else {
+                            Spacer(modifier = Modifier.size(40.dp))
                         }
-                    } else {
-                        Spacer(modifier = Modifier.size(40.dp))
                     }
+                    
+                    // 副标题
+                    Text(
+                        text = config.subtitle,
+                        fontFamily = sarasaRegular,
+                        fontSize = 12.sp,
+                        color = TEXT_GRAY,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
-                
-                // 副标题
-                Text(
-                    text = config.subtitle,
-                    fontFamily = sarasaRegular,
-                    fontSize = 12.sp,
-                    color = TEXT_GRAY,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
             }
         }
 
@@ -294,6 +354,11 @@ fun RankingTable(
             modifier = Modifier
                 .background(BG_DARK_GRAY)
                 .fillMaxWidth()
+                .windowInsetsPadding(
+                    WindowInsets.displayCutout.only(
+                        WindowInsetsSides.Horizontal
+                    )
+                )
                 .padding(vertical = 8.dp, horizontal = 2.dp)
         ) {
             Text(
@@ -402,37 +467,77 @@ fun RankingTable(
             state = listState,
             modifier = Modifier.clip(RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
         ) {
-            itemsIndexed(items.take(config.maxItems)) { index, item ->
-                RankingTableRow(
-                    item = item,
-                    index = index,
-                    maxScore = maxScore,
-                    config = config,
-                    isNarrowScreen = isNarrowScreen,
-                    narrowMode = narrowMode,
-                    extraWidth = extraWidth,
-                    avgWidth = avgWidth,
-                    medianWidth = medianWidth,
-                    narrowScoreBarWidth = narrowScoreBarWidth,
-                    searchText = searchText
-                )
-            }
-            
-            if (items.size > config.maxItems) {
+            if (items.isEmpty()) {
+                // 列表为空时显示提示信息
                 item {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(if (config.maxItems % 2 == 0) BG_DARK_GRAY else Color.Black)
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.Center
+                            .background(Color.Black)
+                            .windowInsetsPadding(
+                                WindowInsets.displayCutout.only(
+                                    WindowInsetsSides.Horizontal
+                                )
+                            )
+                            .padding(vertical = 48.dp, horizontal = 24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "还有 ${items.size - config.maxItems} 个作品..",
-                            fontFamily = sarasaRegular,
-                            color = TEXT_GRAY,
-                            fontSize = 14.sp
+                            text = "暂无数据",
+                            fontFamily = sarasaBold,
+                            fontSize = 18.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Center
                         )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "当前筛选条件下没有符合的作品",
+                            fontFamily = sarasaRegular,
+                            fontSize = 14.sp,
+                            color = TEXT_GRAY,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            } else {
+                itemsIndexed(items.take(config.maxItems)) { index, item ->
+                    RankingTableRow(
+                        item = item,
+                        index = index,
+                        maxScore = maxScore,
+                        config = config,
+                        isNarrowScreen = isNarrowScreen,
+                        narrowMode = narrowMode,
+                        extraWidth = extraWidth,
+                        avgWidth = avgWidth,
+                        medianWidth = medianWidth,
+                        narrowScoreBarWidth = narrowScoreBarWidth,
+                        searchText = searchText
+                    )
+                }
+                
+                if (items.size > config.maxItems) {
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(if (config.maxItems % 2 == 0) BG_DARK_GRAY else Color.Black)
+                                .windowInsetsPadding(
+                                    WindowInsets.displayCutout.only(
+                                        WindowInsetsSides.Horizontal
+                                    )
+                                )
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "还有 ${items.size - config.maxItems} 个作品..",
+                                fontFamily = sarasaRegular,
+                                color = TEXT_GRAY,
+                                fontSize = 14.sp
+                            )
+                        }
                     }
                 }
             }
@@ -526,7 +631,12 @@ private fun RankingTableRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(36.dp)
-            .background(backgroundColor),
+            .background(backgroundColor)
+            .windowInsetsPadding(
+                WindowInsets.displayCutout.only(
+                    WindowInsetsSides.Horizontal
+                )
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // 排名列 - 包含排名变化指示器（常显）
@@ -1020,35 +1130,63 @@ fun RankingTableForCapture(
         Column(
             modifier = Modifier.clip(RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
         ) {
-            items.take(config.maxItems).forEachIndexed { index, item ->
-                RankingTableRow(
-                    item = item,
-                    index = index,
-                    maxScore = maxScore,
-                    config = config,
-                    isNarrowScreen = false,
-                    narrowMode = 0,
-                    extraWidth = extraWidth,
-                    avgWidth = avgWidth,
-                    medianWidth = medianWidth,
-                    narrowScoreBarWidth = 100.dp
-                )
-            }
-            
-            if (items.size > config.maxItems) {
-                Row(
+            if (items.isEmpty()) {
+                // 列表为空时显示提示信息
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(if (config.maxItems % 2 == 0) BG_DARK_GRAY else Color.Black)
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.Center
+                        .background(Color.Black)
+                        .padding(vertical = 48.dp, horizontal = 24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "还有 ${items.size - config.maxItems} 个作品..",
-                        fontFamily = sarasaRegular,
-                        color = TEXT_GRAY,
-                        fontSize = 14.sp
+                        text = "暂无数据",
+                        fontFamily = sarasaBold,
+                        fontSize = 18.sp,
+                        color = Color.White,
+                        textAlign = TextAlign.Center
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "当前筛选条件下没有符合的作品",
+                        fontFamily = sarasaRegular,
+                        fontSize = 14.sp,
+                        color = TEXT_GRAY,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            } else {
+                items.take(config.maxItems).forEachIndexed { index, item ->
+                    RankingTableRow(
+                        item = item,
+                        index = index,
+                        maxScore = maxScore,
+                        config = config,
+                        isNarrowScreen = false,
+                        narrowMode = 0,
+                        extraWidth = extraWidth,
+                        avgWidth = avgWidth,
+                        medianWidth = medianWidth,
+                        narrowScoreBarWidth = 100.dp
+                    )
+                }
+                
+                if (items.size > config.maxItems) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(if (config.maxItems % 2 == 0) BG_DARK_GRAY else Color.Black)
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "还有 ${items.size - config.maxItems} 个作品..",
+                            fontFamily = sarasaRegular,
+                            color = TEXT_GRAY,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
             }
         }

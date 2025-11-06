@@ -70,12 +70,20 @@ internal class ChunithmViewModel() : ViewModel() {
     val allScoresCache: StateFlow<Map<String, Map<String, ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel>>> = _allScoresCache.asStateFlow()
     private var scoresCacheLoaded = false
 
+    // 角色数据
+    private val _characters = MutableStateFlow<List<com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity>>(emptyList())
+    val characters: StateFlow<List<com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity>> = _characters.asStateFlow()
+
+    private val _isCharactersLoading = MutableStateFlow(false)
+    val isCharactersLoading: StateFlow<Boolean> = _isCharactersLoading.asStateFlow()
+
     fun loadData(context: Context) {
         loadCardFromLocal(context)
         loadAvatarFromLocal(context)
         loadPlayDataFromLocal()
         loadFriendDataFromLocal()
         loadTopRankDataFromLocal(context)
+        loadCharacters()
         preloadAllScores()
     }
 
@@ -418,6 +426,29 @@ internal class ChunithmViewModel() : ViewModel() {
                 Log.e("ChunithmViewModel", "Error loading rating data from ObjectBox", e)
             }
         }
+    }
+
+    // 加载角色数据
+    fun loadCharacters() {
+        viewModelScope.launch {
+            _isCharactersLoading.value = true
+            try {
+                Log.d("ChunithmViewModel", "Loading characters from ObjectBox...")
+                val chunithmLocalService = ChunithmObjectBoxService()
+                val allCharacters = chunithmLocalService.getAllCharacters()
+                _characters.value = allCharacters
+                Log.d("ChunithmViewModel", "Loaded ${allCharacters.size} characters from ObjectBox")
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Error loading characters from ObjectBox", e)
+            } finally {
+                _isCharactersLoading.value = false
+            }
+        }
+    }
+
+    // 获取当前使用的角色
+    fun getCurrentCharacter(): com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity? {
+        return _characters.value.find { it.isCurrentlyUsed }
     }
 
     internal fun loadAllSongsData() {

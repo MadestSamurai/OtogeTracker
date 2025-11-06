@@ -97,11 +97,13 @@ private const val TAG = "BofScreen"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BofScreen(
-    snackbarHostState: SnackbarHostState,
     bofScreenState: BofScreenState,
     onNavigateBack: () -> Unit = {}
 ) {
     Log.d(TAG, "BofScreen Compose started")
+    
+    // BofScreen 内部创建自己的 SnackbarHostState
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // 拦截系统返回事件（包括边缘侧滑返回）
     BackHandler {
