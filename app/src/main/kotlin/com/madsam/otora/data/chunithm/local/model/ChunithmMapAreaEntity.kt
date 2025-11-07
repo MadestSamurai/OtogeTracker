@@ -15,6 +15,7 @@ internal data class ChunithmMapAreaEntity(
     // 关联信息
     @Index var mapName: String = "",    // 地图名称（外键，建立索引）
     @Index var pageNumber: Int = 0,     // 页码（从1开始，建立索引）
+    var totalPages: Int = 0,             // 该地图的总页数
     @Index var position: Int = 0,       // 格子位置（0-8，从左到右、从上到下）
     
     // 格子内容
@@ -30,6 +31,7 @@ internal data class ChunithmMapAreaEntity(
         id = 0,
         mapName = "",
         pageNumber = 0,
+        totalPages = 0,
         position = 0,
         imageUrl = "",
         remain = 0,

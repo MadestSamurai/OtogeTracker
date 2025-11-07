@@ -462,20 +462,40 @@ internal class ChunithmRequestService(private val context: Context) {
             val currentPage = block.select("div.map_title_page_num.font_90").text().toIntOrNull() ?: 0
             val totalPages = block.select("div.map_title_page_den.font_90").text().toIntOrNull() ?: 0
             
+            // 获取所有9个格子（包括空白格子），保持位置信息
             val areas = block.select("div.maparea_block")
-                .mapNotNull { areaBlock ->
-                    areaBlock.selectFirst("div.maparea")?.let { mapAreaDiv ->
+                .map { areaBlock ->
+                    // 检查是否是空白格子
+                    val isBlank = areaBlock.selectFirst("div.maparea_blank") != null
+                    
+                    if (isBlank) {
+                        // 空白格子
                         ChuniMapArea(
-                            imageUrl = mapAreaDiv.select("div.map_icon div.map_icon_avatar img")
-                                .attr("src")
-                                .takeIf { it.isNotBlank() },
-                            remain = mapAreaDiv.select("div.map_remain div.map_remain_text")
-                                .text()
-                                .toIntOrNull() ?: 0,
-                            skillSeed = mapAreaDiv.select("div.map_skillseed_block div.map_skillseed_text")
-                                .text()
-                                .takeIf { it.isNotBlank() }
+                            imageUrl = null,
+                            remain = 0,
+                            skillSeed = null
                         )
+                    } else {
+                        // 有内容的格子
+                        areaBlock.selectFirst("div.maparea")?.let { mapAreaDiv ->
+                            // 尝试多种可能的图标选择器
+                            val imageUrl = mapAreaDiv.select("div.map_icon div.map_icon_avatar img").attr("src")
+                                .takeIf { it.isNotBlank() }
+                                ?: mapAreaDiv.select("div.map_icon div.map_icon_chara img").attr("src")
+                                    .takeIf { it.isNotBlank() }
+                                ?: mapAreaDiv.select("div.map_icon div.map_icon_nameplate img").attr("src")
+                                    .takeIf { it.isNotBlank() }
+                            
+                            ChuniMapArea(
+                                imageUrl = imageUrl,
+                                remain = mapAreaDiv.select("div.map_remain div.map_remain_text")
+                                    .text()
+                                    .toIntOrNull() ?: 0,
+                                skillSeed = mapAreaDiv.select("div.map_skillseed_block div.map_skillseed_text")
+                                    .text()
+                                    .takeIf { it.isNotBlank() }
+                            )
+                        } ?: ChuniMapArea(null, 0, null) // 防御性代码
                     }
                 }
             

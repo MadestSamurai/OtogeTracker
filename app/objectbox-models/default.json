@@ -1947,7 +1947,7 @@
     },
     {
       "id": "39:8022462250134677036",
-      "lastPropertyId": "9:1206582774270030304",
+      "lastPropertyId": "10:468032089509016064",
       "name": "ChunithmMapAreaEntity",
       "properties": [
         {
@@ -2001,6 +2001,11 @@
           "id": "9:1206582774270030304",
           "name": "syncedAt",
           "type": 6
+        },
+        {
+          "id": "10:468032089509016064",
+          "name": "totalPages",
+          "type": 5
         }
       ],
       "relations": []

@@ -863,31 +863,7 @@ internal class ChunithmObjectBoxService {
             }
         }
     }
-    
-    /**
-     * 清空指定类型的 Rating 数据
-     * @param ratingType 类型：best/recent/suggest，如果为空则清空所有
-     */
-    suspend fun clearRatingData(ratingType: String? = null) {
-        withContext(Dispatchers.IO) {
-            try {
-                if (ratingType.isNullOrEmpty()) {
-                    val count = ratingBox.count()
-                    ratingBox.removeAll()
-                    Log.d(TAG, "Cleared all rating data, removed $count records")
-                } else {
-                    val deletedCount = ratingBox.query(
-                        ChunithmRatingEntity_.ratingType.equal(ratingType)
-                    ).build().remove()
-                    Log.d(TAG, "Cleared $ratingType rating data, removed $deletedCount records")
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error clearing rating data", e)
-                throw e
-            }
-        }
-    }
-    
+
     /**
      * 获取 Rating 数据的最后更新时间
      * @param ratingType 类型：best/recent/suggest
@@ -1044,44 +1020,7 @@ internal class ChunithmObjectBoxService {
             }
         }
     }
-    
-    /**
-     * 清空所有游玩历史记录
-     */
-    suspend fun clearAllPlayLogs() {
-        withContext(Dispatchers.IO) {
-            try {
-                val count = playLogBox.count()
-                playLogBox.removeAll()
-                Log.d(TAG, "Cleared all play logs, removed $count records")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error clearing play logs", e)
-                throw e
-            }
-        }
-    }
-    
-    /**
-     * 删除指定时间之前的游玩历史记录
-     * @param beforeTimestamp 时间戳（毫秒）
-     * @return 删除的记录数量
-     */
-    suspend fun deletePlayLogsBefore(beforeTimestamp: Long): Long {
-        return withContext(Dispatchers.IO) {
-            try {
-                val deletedCount = playLogBox.query(
-                    ChunithmPlayLogEntity_.syncedAt.less(beforeTimestamp)
-                ).build().remove()
-                
-                Log.d(TAG, "Deleted $deletedCount play logs before timestamp: $beforeTimestamp")
-                deletedCount
-            } catch (e: Exception) {
-                Log.e(TAG, "Error deleting old play logs", e)
-                0L
-            }
-        }
-    }
-    
+
     /**
      * 获取游玩历史记录总数
      */
@@ -1128,263 +1067,56 @@ internal class ChunithmObjectBoxService {
             try {
                 Log.d(TAG, "Saving map data, count: ${mapDataList.size}")
                 
-                // 按地图名称分组
-                val groupedMaps = mapDataList.groupBy { it.title }
+                val currentTime = System.currentTimeMillis()
                 
-                groupedMaps.forEach { (mapName, pages) ->
-                    // 删除该地图的旧数据
-                    mapAreaBox.query(ChunithmMapAreaEntity_.mapName.equal(mapName)).build().remove()
-                    mapBox.query(ChunithmMapEntity_.mapName.equal(mapName)).build().remove()
+                // 每个 DTO 代表一个地图的一页数据，独立保存
+                mapDataList.forEach { mapData ->
+                    val mapName = mapData.title
+                    val pageNumber = mapData.currentPage
                     
-                    val currentTime = System.currentTimeMillis()
-                    val allAreas = mutableListOf<ChunithmMapAreaEntity>()
+                    Log.d(TAG, "Saving map: $mapName, page: $pageNumber/${mapData.totalPages}")
                     
-                    // 处理每一页
-                    pages.forEach { page ->
-                        page.areas.forEachIndexed { index, area ->
-                            // 判断格子是否为空
-                            val isEmpty = area.imageUrl.isNullOrBlank() && 
-                                         area.remain == 0 && 
-                                         area.skillSeed.isNullOrBlank()
-                            
-                            // 只保存非空格子（优化存储空间）
-                            if (!isEmpty) {
-                                allAreas.add(
-                                    ChunithmMapAreaEntity().apply {
-                                        this.mapName = mapName
-                                        this.pageNumber = page.currentPage
-                                        this.position = index
-                                        this.imageUrl = area.imageUrl ?: ""
-                                        this.remain = area.remain
-                                        this.skillSeed = area.skillSeed ?: ""
-                                        this.isEmpty = false
-                                        this.syncedAt = currentTime
-                                    }
-                                )
+                    // 删除该地图该页的旧数据
+                    mapAreaBox.query(
+                        ChunithmMapAreaEntity_.mapName.equal(mapName)
+                            .and(ChunithmMapAreaEntity_.pageNumber.equal(pageNumber))
+                    ).build().remove()
+                    
+                    // 保存该页的格子数据
+                    val pageAreas = mutableListOf<ChunithmMapAreaEntity>()
+                    mapData.areas.forEachIndexed { index, area ->
+                        // 判断格子是否为空
+                        val isEmpty = area.imageUrl.isNullOrBlank() && 
+                                     area.remain == 0 && 
+                                     area.skillSeed.isNullOrBlank()
+                        
+                        pageAreas.add(
+                            ChunithmMapAreaEntity().apply {
+                                this.mapName = mapName
+                                this.pageNumber = pageNumber
+                                this.totalPages = mapData.totalPages
+                                this.position = index
+                                this.imageUrl = area.imageUrl ?: ""
+                                this.remain = area.remain
+                                this.skillSeed = area.skillSeed ?: ""
+                                this.isEmpty = isEmpty
+                                this.syncedAt = currentTime
                             }
-                        }
+                        )
                     }
                     
-                    // 保存格子数据
-                    mapAreaBox.put(allAreas)
-                    
-                    // 计算统计信息
-                    val completedAreas = allAreas.count { it.remain == 0 }
-                    val totalAreas = allAreas.size
-                    val progressPercentage = if (totalAreas > 0) {
-                        (completedAreas.toDouble() / totalAreas * 100)
-                    } else 0.0
-                    
-                    // 保存地图主表数据
-                    val mapEntity = ChunithmMapEntity().apply {
-                        this.mapName = mapName
-                        this.totalPages = pages.maxOfOrNull { it.totalPages } ?: 0
-                        this.completedAreas = completedAreas
-                        this.totalAreas = totalAreas
-                        this.progressPercentage = progressPercentage
-                        this.createdAt = currentTime
-                        this.updatedAt = currentTime
-                    }
-                    mapBox.put(mapEntity)
-                    
-                    Log.d(TAG, "Saved map '$mapName': $completedAreas/$totalAreas completed (${String.format("%.1f", progressPercentage)}%)")
+                    mapAreaBox.put(pageAreas)
+                    Log.d(TAG, "Saved map '$mapName' page $pageNumber with ${pageAreas.size} areas")
                 }
                 
-                Log.d(TAG, "Map data saved successfully, total maps: ${groupedMaps.size}")
+                Log.d(TAG, "Map data saved successfully")
             } catch (e: Exception) {
                 Log.e(TAG, "Error saving map data", e)
                 throw e
             }
         }
     }
-    
-    /**
-     * 获取所有地图列表
-     * @return 地图列表（包含统计信息）
-     */
-    suspend fun getAllMaps(): List<ChunithmMapEntity> {
-        return withContext(Dispatchers.IO) {
-            try {
-                Log.d(TAG, "Loading all maps")
-                val maps = mapBox.all
-                Log.d(TAG, "Loaded ${maps.size} maps")
-                maps
-            } catch (e: Exception) {
-                Log.e(TAG, "Error loading maps", e)
-                emptyList()
-            }
-        }
-    }
-    
-    /**
-     * 获取指定地图的信息
-     * @param mapName 地图名称
-     * @return 地图信息，如果不存在返回 null
-     */
-    suspend fun getMapByName(mapName: String): ChunithmMapEntity? {
-        return withContext(Dispatchers.IO) {
-            try {
-                mapBox.query(ChunithmMapEntity_.mapName.equal(mapName)).build().findFirst()
-            } catch (e: Exception) {
-                Log.e(TAG, "Error loading map: $mapName", e)
-                null
-            }
-        }
-    }
-    
-    /**
-     * 获取指定地图指定页的所有格子
-     * @param mapName 地图名称
-     * @param pageNumber 页码
-     * @return 格子列表（已按 position 排序）
-     */
-    suspend fun getMapAreas(mapName: String, pageNumber: Int): List<ChunithmMapAreaEntity> {
-        return withContext(Dispatchers.IO) {
-            try {
-                Log.d(TAG, "Loading map areas: $mapName, page: $pageNumber")
-                
-                val areas = mapAreaBox.query(
-                    ChunithmMapAreaEntity_.mapName.equal(mapName)
-                        .and(ChunithmMapAreaEntity_.pageNumber.equal(pageNumber))
-                ).build()
-                    .find()
-                    .sortedBy { it.position }
-                
-                Log.d(TAG, "Loaded ${areas.size} areas")
-                areas
-            } catch (e: Exception) {
-                Log.e(TAG, "Error loading map areas", e)
-                emptyList()
-            }
-        }
-    }
-    
-    /**
-     * 获取指定地图的所有格子（所有页）
-     * @param mapName 地图名称
-     * @return 格子列表（按页码和位置排序）
-     */
-    suspend fun getAllMapAreas(mapName: String): List<ChunithmMapAreaEntity> {
-        return withContext(Dispatchers.IO) {
-            try {
-                Log.d(TAG, "Loading all areas for map: $mapName")
-                
-                val areas = mapAreaBox.query(ChunithmMapAreaEntity_.mapName.equal(mapName))
-                    .build()
-                    .find()
-                    .sortedWith(compareBy({ it.pageNumber }, { it.position }))
-                
-                Log.d(TAG, "Loaded ${areas.size} areas")
-                areas
-            } catch (e: Exception) {
-                Log.e(TAG, "Error loading all map areas", e)
-                emptyList()
-            }
-        }
-    }
-    
-    /**
-     * 获取指定地图的未完成格子
-     * @param mapName 地图名称
-     * @return 未完成格子列表（remain > 0）
-     */
-    suspend fun getUncompletedMapAreas(mapName: String): List<ChunithmMapAreaEntity> {
-        return withContext(Dispatchers.IO) {
-            try {
-                Log.d(TAG, "Loading uncompleted areas for map: $mapName")
-                
-                val areas = mapAreaBox.query(
-                    ChunithmMapAreaEntity_.mapName.equal(mapName)
-                        .and(ChunithmMapAreaEntity_.remain.greater(0))
-                ).build()
-                    .find()
-                    .sortedWith(compareBy({ it.pageNumber }, { it.position }))
-                
-                Log.d(TAG, "Found ${areas.size} uncompleted areas")
-                areas
-            } catch (e: Exception) {
-                Log.e(TAG, "Error loading uncompleted areas", e)
-                emptyList()
-            }
-        }
-    }
-    
-    /**
-     * 获取包含指定技能种子的格子
-     * @param skillSeed 技能种子关键词
-     * @return 格子列表
-     */
-    suspend fun getMapAreasBySkillSeed(skillSeed: String): List<ChunithmMapAreaEntity> {
-        return withContext(Dispatchers.IO) {
-            try {
-                Log.d(TAG, "Searching areas by skill seed: $skillSeed")
-                
-                val areas = mapAreaBox.query(ChunithmMapAreaEntity_.skillSeed.contains(skillSeed))
-                    .build()
-                    .find()
-                    .sortedWith(compareBy({ it.mapName }, { it.pageNumber }, { it.position }))
-                
-                Log.d(TAG, "Found ${areas.size} areas")
-                areas
-            } catch (e: Exception) {
-                Log.e(TAG, "Error searching areas by skill seed", e)
-                emptyList()
-            }
-        }
-    }
-    
-    /**
-     * 清空所有地图数据
-     */
-    suspend fun clearAllMapData() {
-        withContext(Dispatchers.IO) {
-            try {
-                val mapCount = mapBox.count()
-                val areaCount = mapAreaBox.count()
-                
-                mapBox.removeAll()
-                mapAreaBox.removeAll()
-                
-                Log.d(TAG, "Cleared all map data: $mapCount maps, $areaCount areas")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error clearing map data", e)
-                throw e
-            }
-        }
-    }
-    
-    /**
-     * 清空指定地图的数据
-     * @param mapName 地图名称
-     */
-    suspend fun clearMapData(mapName: String) {
-        withContext(Dispatchers.IO) {
-            try {
-                val areaCount = mapAreaBox.query(ChunithmMapAreaEntity_.mapName.equal(mapName)).build().remove()
-                val mapCount = mapBox.query(ChunithmMapEntity_.mapName.equal(mapName)).build().remove()
-                
-                Log.d(TAG, "Cleared map '$mapName': $mapCount maps, $areaCount areas")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error clearing map: $mapName", e)
-                throw e
-            }
-        }
-    }
-    
-    /**
-     * 获取地图总数
-     */
-    suspend fun getMapCount(): Long {
-        return withContext(Dispatchers.IO) {
-            try {
-                mapBox.count()
-            } catch (e: Exception) {
-                Log.e(TAG, "Error getting map count", e)
-                0L
-            }
-        }
-    }
-    
+
     // ==================== 角色数据相关方法 ====================
     
     /**
@@ -1579,6 +1311,138 @@ internal class ChunithmObjectBoxService {
             } catch (e: Exception) {
                 Log.e(TAG, "Error getting character last sync time", e)
                 0L
+            }
+        }
+    }
+    
+    // ==================== 地图相关操作 ====================
+    
+    /**
+     * 获取所有地图
+     * @return 地图列表（按更新时间降序）
+     */
+    suspend fun getAllMaps(): List<ChunithmMapEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Loading all maps")
+                val maps = mapBox.all.sortedByDescending { it.updatedAt }
+                Log.d(TAG, "Loaded ${maps.size} maps")
+                maps
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading maps", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 根据地图名称获取地图
+     * @param mapName 地图名称
+     * @return 地图实体，如果不存在返回 null
+     */
+    suspend fun getMapByName(mapName: String): ChunithmMapEntity? {
+        return withContext(Dispatchers.IO) {
+            try {
+                mapBox.query(ChunithmMapEntity_.mapName.equal(mapName))
+                    .build()
+                    .findFirst()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading map by name: $mapName", e)
+                null
+            }
+        }
+    }
+    
+    /**
+     * 获取指定地图的所有格子数据
+     * @param mapName 地图名称
+     * @return 格子列表（按页码和位置排序）
+     */
+    suspend fun getMapAreas(mapName: String): List<ChunithmMapAreaEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Loading areas for map: $mapName")
+                val areas = mapAreaBox.query(ChunithmMapAreaEntity_.mapName.equal(mapName))
+                    .build()
+                    .find()
+                    .sortedWith(compareBy<ChunithmMapAreaEntity> { it.pageNumber }
+                        .thenBy { it.position })
+                Log.d(TAG, "Loaded ${areas.size} areas for map: $mapName")
+                areas
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading map areas for: $mapName", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 保存或更新地图数据
+     * @param mapEntity 地图实体
+     */
+    suspend fun saveOrUpdateMap(mapEntity: ChunithmMapEntity) {
+        withContext(Dispatchers.IO) {
+            try {
+                val existingMap = getMapByName(mapEntity.mapName)
+                if (existingMap != null) {
+                    mapEntity.id = existingMap.id
+                    mapEntity.createdAt = existingMap.createdAt
+                }
+                mapEntity.updatedAt = System.currentTimeMillis()
+                mapBox.put(mapEntity)
+                Log.d(TAG, "Saved map: ${mapEntity.mapName}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving map", e)
+                throw e
+            }
+        }
+    }
+    
+    /**
+     * 获取所有地图格子数据
+     * @return 所有格子列表
+     */
+    suspend fun getAllMapAreas(): List<ChunithmMapAreaEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                mapAreaBox.all
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading all map areas", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 批量保存地图格子数据
+     * @param areas 格子列表
+     */
+    suspend fun saveMapAreas(areas: List<ChunithmMapAreaEntity>) {
+        withContext(Dispatchers.IO) {
+            try {
+                areas.forEach { it.syncedAt = System.currentTimeMillis() }
+                mapAreaBox.put(areas)
+                Log.d(TAG, "Saved ${areas.size} map areas")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving map areas", e)
+                throw e
+            }
+        }
+    }
+    
+    /**
+     * 清空指定地图的所有格子数据
+     * @param mapName 地图名称
+     */
+    suspend fun clearMapAreas(mapName: String) {
+        withContext(Dispatchers.IO) {
+            try {
+                val areas = getMapAreas(mapName)
+                mapAreaBox.remove(areas)
+                Log.d(TAG, "Cleared ${areas.size} areas for map: $mapName")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error clearing map areas", e)
+                throw e
             }
         }
     }

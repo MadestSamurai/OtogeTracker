@@ -38,6 +38,9 @@ internal class ChunithmViewModel() : ViewModel() {
     val chuniFriendDataUI = MutableStateFlow(listOf<ChunithmFriendUiModel>())
 
     val chunithmTopRankUiModel = MutableStateFlow(ChunithmTopRankUiModel())
+    
+    // 地图数据
+    val chunithmMapDataUI = MutableStateFlow(listOf<com.madsam.otora.ui.record.chunithm.components.ChunithmMapUiModel>())
 
     private val _chuniSongs = MutableStateFlow<List<ChunithmSongUiModel>>(emptyList())
     val chuniSongs = _chuniSongs.asStateFlow()
@@ -83,6 +86,7 @@ internal class ChunithmViewModel() : ViewModel() {
         loadPlayDataFromLocal()
         loadFriendDataFromLocal()
         loadTopRankDataFromLocal()
+        loadMapDataFromLocal()
         loadCharacters()
         preloadAllScores()
     }
@@ -424,6 +428,71 @@ internal class ChunithmViewModel() : ViewModel() {
                 Log.d("ChunithmViewModel", "Rating data loaded successfully from ObjectBox")
             } catch (e: Exception) {
                 Log.e("ChunithmViewModel", "Error loading rating data from ObjectBox", e)
+            }
+        }
+    }
+
+    private fun loadMapDataFromLocal() {
+        viewModelScope.launch {
+            try {
+                Log.d("ChunithmViewModel", "Loading map data from ObjectBox...")
+                val chunithmLocalService = ChunithmObjectBoxService()
+                
+                // 直接获取所有格子数据
+                val allAreas = chunithmLocalService.getAllMapAreas()
+                
+                if (allAreas.isNotEmpty()) {
+                    val mapUiList = mutableListOf<com.madsam.otora.ui.record.chunithm.components.ChunithmMapUiModel>()
+                    
+                    // 按 (地图名称, 页码) 分组
+                    val groupedByMapAndPage = allAreas.groupBy { it.mapName to it.pageNumber }
+                    
+                    // 为每个 (地图-页码) 组合创建一个 UI Model
+                    groupedByMapAndPage.forEach { (key, areasInPage) ->
+                        val (mapName, pageNumber) = key
+                        val areaUiList = areasInPage
+                            .sortedBy { it.position }
+                            .map { areaEntity ->
+                                com.madsam.otora.ui.record.chunithm.components.MapAreaUiModel(
+                                    position = areaEntity.position,
+                                    imageUrl = areaEntity.imageUrl,
+                                    remain = areaEntity.remain,
+                                    skillSeed = areaEntity.skillSeed,
+                                    isEmpty = areaEntity.isEmpty
+                                )
+                            }
+                        
+                        // 计算这一页的完成度
+                        val nonEmptyAreas = areaUiList.filter { !it.isEmpty }
+                        val completedInPage = nonEmptyAreas.count { it.remain == 0 }
+                        val totalInPage = nonEmptyAreas.size
+                        val progressInPage = if (totalInPage > 0) {
+                            (completedInPage.toDouble() / totalInPage * 100)
+                        } else 0.0
+                        
+                        // 获取 totalPages（同一页的所有格子的 totalPages 都相同，取第一个）
+                        val totalPages = areasInPage.firstOrNull()?.totalPages ?: 0
+                        
+                        mapUiList.add(
+                            com.madsam.otora.ui.record.chunithm.components.ChunithmMapUiModel(
+                                mapName = mapName,
+                                currentPage = pageNumber,
+                                totalPages = totalPages,
+                                completedAreas = completedInPage,
+                                totalAreas = totalInPage,
+                                progressPercentage = progressInPage,
+                                areas = areaUiList
+                            )
+                        )
+                    }
+                    
+                    chunithmMapDataUI.update { mapUiList }
+                    Log.d("ChunithmViewModel", "Loaded ${mapUiList.size} map pages from ObjectBox")
+                } else {
+                    Log.d("ChunithmViewModel", "No map data found in ObjectBox")
+                }
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Error loading map data from ObjectBox", e)
             }
         }
     }
