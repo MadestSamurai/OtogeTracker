@@ -1,7 +1,7 @@
 package com.madsam.otora.data.osu.remote.api
 
 import android.util.Log
-import com.madsam.otora.core.utils.CommonUtils
+import com.madsam.otora.core.utils.StringUtils
 import com.madsam.otora.data.OSU_URL
 import com.madsam.otora.data.adapter.SafeBooleanAdapter
 import com.madsam.otora.data.adapter.SafeDoubleAdapter
@@ -228,24 +228,20 @@ class OsuRequestService {
     internal fun getOsuMedals(callback: (OsuInfoDTO) -> Unit, userId: String, mode: String) {
         serviceScope.launch {
             try {
-                val url = CommonUtils.encodeURL("https://osu.ppy.sh/users/$userId/$mode")
+                val url = StringUtils.encodeURL("https://osu.ppy.sh/users/$userId/$mode")
                 val html = withContext(Dispatchers.IO) {
                     val request = Request.Builder().url(url).build()
                     val response = httpClient.newCall(request).execute()
-                    response.body?.string()
+                    response.body.string()
                 }
-                
-                if (html != null) {
-                    val doc = Ksoup.parse(html)
-                    val medals = doc.selectFirst("div.js-react--profile-page.u-contents")
-                    val medalsJson = medals?.attr("data-initial-data") ?: ""
-                    val osuInfoDTO = moshi.adapter(OsuInfoDTO::class.java).fromJson(medalsJson)
-                    if (osuInfoDTO != null) {
-                        callback(osuInfoDTO)
-                    } else Log.e(TAG, "OsuInfo is null")
-                } else {
-                    Log.e(TAG, "Failed to fetch HTML for OsuMedals")
-                }
+
+                val doc = Ksoup.parse(html)
+                val medals = doc.selectFirst("div.js-react--profile-page.u-contents")
+                val medalsJson = medals?.attr("data-initial-data") ?: ""
+                val osuInfoDTO = moshi.adapter(OsuInfoDTO::class.java).fromJson(medalsJson)
+                if (osuInfoDTO != null) {
+                    callback(osuInfoDTO)
+                } else Log.e(TAG, "OsuInfo is null")
             } catch (e: IOException) {
                 Log.e(TAG, "IOException occurred in OsuMedalsThread: $e")
             }

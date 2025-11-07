@@ -22,7 +22,7 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.utils.ShareUtil
+import com.madsam.otora.glance.data.GlanceWidgetDataStore
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
@@ -37,7 +37,7 @@ class SmallWidget : GlanceAppWidget() {
     @Composable
     private fun MyContent() {
         val context = LocalContext.current
-        val osuGlanceJson = ShareUtil.getString("osuGlance", context)?: "{}"
+        val osuGlanceJson = GlanceWidgetDataStore.getOsuWidgetData(context) ?: "{}"
         val moshi = Moshi.Builder()
             .addLast(KotlinJsonAdapterFactory())
             .build()

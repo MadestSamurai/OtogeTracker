@@ -36,7 +36,7 @@ import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.utils.CommonUtils.formatNumberThousand
+import com.madsam.otora.core.utils.NumberFormatUtils.formatThousand
 import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayDataUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -159,7 +159,7 @@ internal fun PlayDataItem(
         }
         Text(
             text = when (type) {
-                "Total" -> formatNumberThousand(playDataItem.scoreTotal)
+                "Total" -> formatThousand(playDataItem.scoreTotal)
                 "SSSp" -> "${playDataItem.rateSSSp}/${playDataItem.totalSongs}"
                 "SSS" -> "${playDataItem.rateSSS}/${playDataItem.totalSongs}"
                 "SSp" -> "${playDataItem.rateSSp}/${playDataItem.totalSongs}"

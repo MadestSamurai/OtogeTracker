@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.madsam.otora.core.utils.DateTimeUtils.secondToDHMS
 import com.madsam.otora.ui.record.osu.constant.OsuFlagAlphabet
 import com.madsam.otora.glance.SmallWidget
 import com.madsam.otora.data.osu.ui.model.OsuBadgeUiModel
@@ -20,11 +21,11 @@ import com.madsam.otora.data.osu.remote.model.OsuInfoDTO
 import com.madsam.otora.data.osu.remote.model.OsuRecentActivityDTO
 import com.madsam.otora.data.osu.remote.model.OsuTopRankItemDTO
 import com.madsam.otora.data.osu.remote.api.OsuRequestService
-import com.madsam.otora.core.utils.CommonUtils
-import com.madsam.otora.core.utils.CommonUtils.formatNumberThousand
-import com.madsam.otora.core.utils.CommonUtils.formatPercent
-import com.madsam.otora.core.utils.ShareUtil
+import com.madsam.otora.core.utils.NumberFormatUtils.formatThousand
+import com.madsam.otora.core.utils.NumberFormatUtils.formatPercent
+import com.madsam.otora.data.osu.local.datastore.OsuConfigDataStore
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
+import com.madsam.otora.glance.data.GlanceWidgetDataStore
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
@@ -56,27 +57,31 @@ internal class OsuViewModel() : ViewModel() {
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
     fun loadData(context: Context) {
-        val osuRequestService = OsuRequestService()
-        val userId = ShareUtil.getString("userId", context) ?: "2"
-        val mode = ShareUtil.getString("mode", context) ?: "osu"
-        osuRequestService.getOsuMedals(
-            { osuInfoDTO: OsuInfoDTO -> fetchMedals(osuInfoDTO, context) }, userId, mode
-        )
-        osuRequestService.getOsuCard(
-            { osuCardListDTO: OsuCardListDTO -> fetchCard(osuCardListDTO) }, userId
-        )
-        osuRequestService.getOsuRecentActivity({ osuRecentActivityDTO: List<OsuRecentActivityDTO> ->
-            fetchRecentActivity(osuRecentActivityDTO)
-        }, userId)
-        osuRequestService.getOsuPinnedMap({ osuPinnedMap: List<OsuTopRankItemDTO> ->
-            fetchPinnedMap(osuPinnedMap)
-        }, userId, mode)
-        osuRequestService.getOsuFirstMap({ osuFirstMap: List<OsuTopRankItemDTO> ->
-            fetchFirstMap(osuFirstMap)
-        }, userId, mode)
-        osuRequestService.getOsuBestMap({ osuBestMap: List<OsuTopRankItemDTO> ->
-            fetchBestMap(osuBestMap)
-        }, userId, mode)
+        serviceScope.launch {
+            val osuConfigDataStore = OsuConfigDataStore(context)
+            val (userId, mode) = osuConfigDataStore.getConfig()
+            val userIdOrDefault = userId.ifBlank { "2" }
+            
+            val osuRequestService = OsuRequestService()
+            osuRequestService.getOsuMedals(
+                { osuInfoDTO: OsuInfoDTO -> fetchMedals(osuInfoDTO, context) }, userIdOrDefault, mode
+            )
+            osuRequestService.getOsuCard(
+                { osuCardListDTO: OsuCardListDTO -> fetchCard(osuCardListDTO) }, userIdOrDefault
+            )
+            osuRequestService.getOsuRecentActivity({ osuRecentActivityDTO: List<OsuRecentActivityDTO> ->
+                fetchRecentActivity(osuRecentActivityDTO)
+            }, userIdOrDefault)
+            osuRequestService.getOsuPinnedMap({ osuPinnedMap: List<OsuTopRankItemDTO> ->
+                fetchPinnedMap(osuPinnedMap)
+            }, userIdOrDefault, mode)
+            osuRequestService.getOsuFirstMap({ osuFirstMap: List<OsuTopRankItemDTO> ->
+                fetchFirstMap(osuFirstMap)
+            }, userIdOrDefault, mode)
+            osuRequestService.getOsuBestMap({ osuBestMap: List<OsuTopRankItemDTO> ->
+                fetchBestMap(osuBestMap)
+            }, userIdOrDefault, mode)
+        }
 //        osuDataRequestService.getOsuBeatmap({ osuUserBeatmap: OsuUserBeatmap -> setOsuUserBeatmap(osuUserBeatmap) }, userId, mode)
 //        osuDataRequestService.getOsuHistorical({ osuHistorical: OsuHistorical -> setOsuHistorical(osuHistorical) }, userId, mode)
     }
@@ -246,7 +251,7 @@ internal class OsuViewModel() : ViewModel() {
             date = osuInfoDTO.user.rankHighest.updatedAt
         )
         val playTime = if (osuInfoDTO.user.statistics.playTime != 0) {
-            CommonUtils.secondToDHMS(osuInfoDTO.user.statistics.playTime.toLong())
+            secondToDHMS(osuInfoDTO.user.statistics.playTime.toLong())
         } else {
             "0,0,0,0"
         }
@@ -261,17 +266,17 @@ internal class OsuViewModel() : ViewModel() {
                 medalCount = osuInfoDTO.user.userAchievements.size,
                 pp = osuInfoDTO.user.statistics.pp,
                 playTime = playTime,
-                rankedScore = formatNumberThousand(osuInfoDTO.user.statistics.rankedScore),
+                rankedScore = formatThousand(osuInfoDTO.user.statistics.rankedScore),
                 hitAccuracy = formatPercent(osuInfoDTO.user.statistics.hitAccuracy),
-                playCount = formatNumberThousand(osuInfoDTO.user.statistics.playCount.toLong()),
-                totalScore = formatNumberThousand(osuInfoDTO.user.statistics.totalScore),
-                totalHits = formatNumberThousand(osuInfoDTO.user.statistics.totalHits),
-                maximumCombo = formatNumberThousand(osuInfoDTO.user.statistics.maximumCombo.toLong()),
-                replaysWatchedByOthers = formatNumberThousand(osuInfoDTO.user.statistics.replaysWatchedByOthers.toLong()),
-                followerCount = formatNumberThousand(osuInfoDTO.user.followerCount.toLong()),
-                mappingFollowerCount = formatNumberThousand(osuInfoDTO.user.mappingFollowerCount.toLong()),
-                postCount = formatNumberThousand(osuInfoDTO.user.postCount.toLong()),
-                commentsCount = formatNumberThousand(osuInfoDTO.user.commentsCount.toLong())
+                playCount = formatThousand(osuInfoDTO.user.statistics.playCount.toLong()),
+                totalScore = formatThousand(osuInfoDTO.user.statistics.totalScore),
+                totalHits = formatThousand(osuInfoDTO.user.statistics.totalHits),
+                maximumCombo = formatThousand(osuInfoDTO.user.statistics.maximumCombo.toLong()),
+                replaysWatchedByOthers = formatThousand(osuInfoDTO.user.statistics.replaysWatchedByOthers.toLong()),
+                followerCount = formatThousand(osuInfoDTO.user.followerCount.toLong()),
+                mappingFollowerCount = formatThousand(osuInfoDTO.user.mappingFollowerCount.toLong()),
+                postCount = formatThousand(osuInfoDTO.user.postCount.toLong()),
+                commentsCount = formatThousand(osuInfoDTO.user.commentsCount.toLong())
             )
         }
 
@@ -318,7 +323,7 @@ internal class OsuViewModel() : ViewModel() {
             .addLast(KotlinJsonAdapterFactory())
             .build()
         val osuGlanceJson = moshi.adapter(OsuGlanceUiModel::class.java).toJson(glanceUI.value)
-        ShareUtil.putString("osuGlance", osuGlanceJson, context)
+        GlanceWidgetDataStore.saveOsuWidgetData(context, osuGlanceJson)
         serviceScope.launch {
             val manager = GlanceAppWidgetManager(context)
             val widget = SmallWidget()

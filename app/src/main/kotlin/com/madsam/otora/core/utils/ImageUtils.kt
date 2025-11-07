@@ -7,6 +7,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import java.io.OutputStream
 import androidx.core.graphics.scale
+import androidx.core.graphics.createBitmap
 
 object ImageUtils {
     private const val MAX_BITMAP_HEIGHT = 32000
@@ -61,7 +62,7 @@ object ImageUtils {
         val finalHeight = if (totalHeight > maxHeight) maxHeight else totalHeight
         
         // 4. 创建最终的bitmap
-        val result = Bitmap.createBitmap(finalWidth, finalHeight, Bitmap.Config.ARGB_8888)
+        val result = createBitmap(finalWidth, finalHeight)
         val canvas = android.graphics.Canvas(result)
         
         // 5. 逐个缩放并绘制每个bitmap

@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.core.database.ObjectBoxManager
-import com.madsam.otora.core.utils.CommonUtils
+import com.madsam.otora.core.utils.DateTimeUtils
 import com.madsam.otora.data.bof.local.api.BofLocalService
 import com.madsam.otora.data.bof.local.model.BofWorkEntity
 import com.madsam.otora.data.bof.local.repository.BofRepository
@@ -244,9 +244,9 @@ internal class BofViewModel(
             bofLocalService.getCommentByTime(dateToFetch)
         } else {
             // 使用时序评论数据（新格式）
-            val timestamp = CommonUtils.ymdToMillis(
+            val timestamp = DateTimeUtils.ymdToMillis(
                 bofScreenState.selectedCurrentDate.value.toString(),
-                CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
+                DateTimeUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
             )
             bofLocalService.getCommentTimeSeries(selectedRange.path, timestamp)
         }
@@ -282,7 +282,7 @@ internal class BofViewModel(
             }
         } else {
             selectedTimeStrNoComp.update { 
-                "${bofScreenState.selectedCurrentDate.value} ${CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)}"
+                "${bofScreenState.selectedCurrentDate.value} ${DateTimeUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)}"
             }
         }
     }
@@ -295,15 +295,15 @@ internal class BofViewModel(
                 errorMessage.update { "" }
                 
                 // 计算当前时间戳（主排序时间点）
-                val currentTimestamp = CommonUtils.ymdToMillis(
+                val currentTimestamp = DateTimeUtils.ymdToMillis(
                     bofScreenState.selectedCurrentDate.value.toString(),
-                    CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
+                    DateTimeUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
                 )
                 
                 // 计算对比时间戳
-                val compareTimestamp = CommonUtils.ymdToMillis(
+                val compareTimestamp = DateTimeUtils.ymdToMillis(
                     bofScreenState.selectedCompareDate.value.toString(),
-                    CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
+                    DateTimeUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
                 )
                 
                 // 使用支持对比的一次性处理
@@ -344,8 +344,8 @@ internal class BofViewModel(
     
     // 获取当前选择的时间字符串 - 支持对比时间显示
     fun getSelectedTimeString(): String {
-        val currentTime = CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
-        val compareTime = CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
+        val currentTime = DateTimeUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
+        val compareTime = DateTimeUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
         
         return "当前: ${bofScreenState.selectedCurrentDate.value} $currentTime | 对比: ${bofScreenState.selectedCompareDate.value} $compareTime"
     }
@@ -640,9 +640,9 @@ internal class BofViewModel(
                 val currentTimestamp = if (bofScreenState.selectedCurrentTime.value == "-1") {
                     System.currentTimeMillis()
                 } else {
-                    CommonUtils.ymdToMillis(
+                    DateTimeUtils.ymdToMillis(
                         bofScreenState.selectedCurrentDate.value.toString(),
-                        CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
+                        DateTimeUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
                     )
                 }
                 
@@ -650,9 +650,9 @@ internal class BofViewModel(
                 val compareTimestamp = if (bofScreenState.selectedCompareTime.value == "-1") {
                     null
                 } else {
-                    CommonUtils.ymdToMillis(
+                    DateTimeUtils.ymdToMillis(
                         bofScreenState.selectedCompareDate.value.toString(),
-                        CommonUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
+                        DateTimeUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
                     )
                 }
                 

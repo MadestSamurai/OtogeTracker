@@ -32,6 +32,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,10 +53,11 @@ import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.theme.sarasaSemiBold
-import com.madsam.otora.core.utils.CommonUtils
-import com.madsam.otora.core.utils.ShareUtil
+import com.madsam.otora.core.utils.StringUtils.parseCookie
 import com.madsam.otora.core.utils.UserAgentUtils
+import com.madsam.otora.data.chunithm.local.datastore.ChunithmCookieDataStore
 import com.madsam.otora.data.chunithm.remote.api.ChunithmRequestService
+import com.madsam.otora.data.chunithm.remote.model.ChuniCookieDTO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -87,6 +89,12 @@ fun ChunithmDataUpdateScreen(
     val cookieState = remember { mutableStateOf(ProgressState()) }
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
+    val isUserAgentValid = remember { mutableStateOf(true) }
+    
+    // 检查 UserAgent 是否有效
+    LaunchedEffect(Unit) {
+        isUserAgentValid.value = UserAgentUtils.isUserAgentValid(context)
+    }
 
     Column(
         modifier = Modifier
@@ -134,7 +142,7 @@ fun ChunithmDataUpdateScreen(
                     .verticalScroll(scrollState)
             ) {
                 // User-Agent检查提示
-                if (!UserAgentUtils.isUserAgentValid(context)) {
+                if (!isUserAgentValid.value) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Red300),
@@ -401,8 +409,8 @@ fun ChunithmDataUpdateScreen(
                                 return@Button
                             }
                             
-                            val requestCookieMap = CommonUtils.parseCookie(requestState.value)
-                            val responseCookieMap = CommonUtils.parseCookie(responseState.value)
+                            val requestCookieMap = parseCookie(requestState.value)
+                            val responseCookieMap = parseCookie(responseState.value)
                             
                             if (requestCookieMap.isEmpty() || responseCookieMap.isEmpty()) {
                                 scope.launch {
@@ -416,21 +424,23 @@ fun ChunithmDataUpdateScreen(
                                 snackbarHostState.showSnackbar("开始保存Cookie并获取用户数据")
                             }
                             
-                            // 保存Cookie信息
-                            ShareUtil.putString("chuniToken", responseCookieMap["_t"] ?: "", context)
-                            ShareUtil.putString("chuniUserId", requestCookieMap["userId"] ?: "", context)
-                            ShareUtil.putString("chuniFriendCodeList", requestCookieMap["friendCodeList"] ?: "", context)
-                            ShareUtil.putString("chuniExpires", responseCookieMap["expires"] ?: "", context)
-                            ShareUtil.putString("chuniMaxAge", responseCookieMap["Max-Age"] ?: "", context)
-                            ShareUtil.putString("chuniPath", responseCookieMap["path"] ?: "", context)
-                            ShareUtil.putString("chuniSameSite", responseCookieMap["SameSite"] ?: "", context)
-                            ShareUtil.putString("chuniGa", requestCookieMap["_ga"] ?: "", context)
-                            
-                            val gaCount = requestCookieMap.count { it.key.startsWith("_ga_") }
-                            if (gaCount == 1) {
-                                val entry = requestCookieMap.entries.first { it.key.startsWith("_ga_") }
-                                ShareUtil.putString("chuniGaKey", entry.key, context)
-                                ShareUtil.putString("chuniGaValue", entry.value, context)
+                            // 保存Cookie信息到DataStore
+                            scope.launch {
+                                val cookieDTO = ChuniCookieDTO(
+                                    token = responseCookieMap["_t"] ?: "",
+                                    expires = responseCookieMap["expires"] ?: "",
+                                    maxAge = responseCookieMap["Max-Age"] ?: "",
+                                    path = responseCookieMap["path"] ?: "",
+                                    sameSite = responseCookieMap["SameSite"] ?: "",
+                                    userId = requestCookieMap["userId"] ?: "",
+                                    friendCodeList = requestCookieMap["friendCodeList"] ?: "",
+                                    ga = requestCookieMap["_ga"] ?: "",
+                                    gaKey = requestCookieMap.entries.firstOrNull { it.key.startsWith("_ga_") }?.key ?: "",
+                                    gaValue = requestCookieMap.entries.firstOrNull { it.key.startsWith("_ga_") }?.value ?: ""
+                                )
+                                
+                                val cookieDataStore = ChunithmCookieDataStore(context)
+                                cookieDataStore.saveCookie(cookieDTO)
                             }
                             
                             // 获取用户数据，类似Dialog中的逻辑

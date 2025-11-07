@@ -41,8 +41,8 @@ import com.madsam.otora.core.theme.OSU_DISCORD_TEXT
 import com.madsam.otora.core.theme.OSU_X_BG
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.utils.CommonUtils
-import com.madsam.otora.core.utils.CommonUtils.dateCodeToRecent
+import com.madsam.otora.core.utils.DateTimeUtils.dateCodeToRecent
+import com.madsam.otora.core.utils.DateTimeUtils.dateCodeToYMDHMSU
 import com.madsam.otora.data.osu.ui.model.OsuSocialUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -84,7 +84,7 @@ private fun UserInfoSection(data: OsuSocialUiModel) {
     ) {
         InfoText(
             prefix = "Joined ",
-            text = CommonUtils.dateCodeToYMDHMSU(data.joinDate)
+            text = dateCodeToYMDHMSU(data.joinDate)
         )
         
         InfoText(

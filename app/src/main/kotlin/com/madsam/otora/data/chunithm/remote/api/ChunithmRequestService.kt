@@ -7,9 +7,9 @@ import androidx.compose.ui.text.toLowerCase
 import com.fleeksoft.ksoup.Ksoup
 import com.fleeksoft.ksoup.nodes.Document
 import com.fleeksoft.ksoup.nodes.Element
-import com.madsam.otora.core.utils.CommonUtils
-import com.madsam.otora.core.utils.ShareUtil
+import com.madsam.otora.core.utils.StringUtils
 import com.madsam.otora.core.utils.UserAgentUtils
+import com.madsam.otora.core.datastore.UserAgentDataStore
 import com.madsam.otora.data.BASE_URL
 import com.madsam.otora.data.CHUNITHM_URL
 import com.madsam.otora.data.adapter.SafeBooleanAdapter
@@ -20,6 +20,7 @@ import com.madsam.otora.data.adapter.SafeIntPairAdapter
 import com.madsam.otora.data.adapter.SafeLongAdapter
 import com.madsam.otora.data.adapter.SafeStringAdapter
 import com.madsam.otora.data.adapter.SafeStringListAdapter
+import com.madsam.otora.data.chunithm.local.datastore.ChunithmCookieDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmLoginBonusDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmPenguinDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmStatueDataStore
@@ -82,22 +83,44 @@ internal class ChunithmRequestService(private val context: Context) {
     private val userExtDataStore by lazy { ChunithmUserExtDataStore(context) }
     private val statueDataStore by lazy { ChunithmStatueDataStore(context) }
     private val loginBonusDataStore by lazy { ChunithmLoginBonusDataStore(context) }
+    private val cookieDataStore by lazy { ChunithmCookieDataStore(context) }
+    private val userAgentDataStore by lazy { UserAgentDataStore(context) }
     
-    private val userAgent = UserAgentUtils.getUserAgent(context).ifBlank { 
-        UserAgentUtils.getDefaultUserAgent() 
+    // UserAgent 从 DataStore 延迟加载
+    private var userAgent: String? = null
+    
+    /**
+     * 获取 UserAgent，首次调用时从 DataStore 加载
+     */
+    private suspend fun getUserAgent(): String {
+        if (userAgent == null) {
+            userAgent = userAgentDataStore.getUserAgent().ifBlank { 
+                UserAgentUtils.getDefaultUserAgent() 
+            }
+        }
+        return userAgent!!
     }
-    private var cookie = ChuniCookieDTO(
-        ShareUtil.getString("chuniToken", context) ?: "",
-        ShareUtil.getString("chuniExpires", context) ?: "",
-        ShareUtil.getString("chuniMaxAge", context) ?: "",
-        ShareUtil.getString("chuniPath", context) ?: "",
-        ShareUtil.getString("chuniSameSite", context) ?: "",
-        ShareUtil.getString("chuniUserId", context) ?: "",
-        ShareUtil.getString("chuniFriendCodeList", context) ?: "",
-        ShareUtil.getString("chuniGa", context) ?: "",
-        ShareUtil.getString("chuniGaKey", context) ?: "",
-        ShareUtil.getString("chuniGaValue", context) ?: ""
-    )
+    
+    // Cookie 从 DataStore 延迟加载
+    private var cookie: ChuniCookieDTO? = null
+    
+    /**
+     * 获取 Cookie，首次调用时从 DataStore 加载
+     */
+    private suspend fun getCookie(): ChuniCookieDTO {
+        if (cookie == null) {
+            cookie = cookieDataStore.getCookie()
+        }
+        return cookie!!
+    }
+    
+    /**
+     * 更新 Cookie 并保存到 DataStore
+     */
+    private suspend fun updateCookie(newCookie: ChuniCookieDTO) {
+        cookie = newCookie
+        cookieDataStore.saveCookie(newCookie)
+    }
     private val moshi = Moshi.Builder()
         .add(SafeStringAdapter())
         .add(SafeLongAdapter())
@@ -124,12 +147,14 @@ internal class ChunithmRequestService(private val context: Context) {
         isPost: Boolean = false
     ): Document? = withContext(Dispatchers.IO) {
         try {
-            val encodedUrl = CommonUtils.encodeURL(link)
-            val cookies = buildCookieString()
+            val encodedUrl = StringUtils.encodeURL(link)
+            val currentCookie = getCookie()
+            val currentUserAgent = getUserAgent()
+            val cookies = buildCookieString(currentCookie)
             
             val requestBuilder = Request.Builder()
                 .url(encodedUrl)
-                .header("User-Agent", userAgent)
+                .header("User-Agent", currentUserAgent)
                 .header("Cookie", cookies)
             
             val request = if (isPost && requestBody.isNotEmpty()) {
@@ -163,7 +188,7 @@ internal class ChunithmRequestService(private val context: Context) {
         }
     }
     
-    private fun buildCookieString(): String = buildString {
+    private fun buildCookieString(cookie: ChuniCookieDTO): String = buildString {
         append("_t=${cookie.token}")
         append("; expires=${cookie.expires}")
         append("; Max-Age=${cookie.maxAge}")
@@ -638,11 +663,12 @@ internal class ChunithmRequestService(private val context: Context) {
 
     private suspend fun requestPlayRecord() {
         val diffArray = arrayOf("Basic", "Advanced", "Expert", "Master", "Ultima")
+        val currentCookie = getCookie()
         
         diffArray.forEach { diff ->
             val requestBody = mapOf(
                 "genre" to "99",
-                "token" to cookie.token
+                "token" to currentCookie.token
             )
             requestDataFromServer(
                 link = "$CHUNITHM_URL/record/musicGenre/send$diff",
@@ -1067,11 +1093,12 @@ internal class ChunithmRequestService(private val context: Context) {
 
     private suspend fun requestFriendScoreList(friendCode: String, difficulty: Int) {
         try {
+            val currentCookie = getCookie()
             val requestBody = mapOf(
                 "genre" to "99",
                 "friend" to friendCode,
                 "radio_diff" to difficulty.toString(),
-                "token" to cookie.token
+                "token" to currentCookie.token
             )
             
             val doc = requestDataFromServer(
@@ -1197,10 +1224,9 @@ internal class ChunithmRequestService(private val context: Context) {
                         onProgress?.invoke(totalProgress, friendMessage)
                     }
 
-                    ShareUtil.putString("chuniToken", cookie.token, context)
-                    ShareUtil.putString("chuniExpires", cookie.expires, context)
-                    ShareUtil.putString("chuniUserId", cookie.userId, context)
-                    ShareUtil.putString("chuniGa", cookie.ga, context)
+                    // 保存 Cookie 到 DataStore（只保存必要的字段）
+                    val currentCookie = getCookie()
+                    updateCookie(currentCookie)
                     
                     withContext(Dispatchers.Main) {
                         onSuccess?.invoke()

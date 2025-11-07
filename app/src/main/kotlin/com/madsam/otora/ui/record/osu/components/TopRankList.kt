@@ -48,8 +48,8 @@ import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaSemiBold
-import com.madsam.otora.core.utils.CommonUtils.dateCodeToRecent
-import com.madsam.otora.core.utils.CommonUtils.formatNumberThousand
+import com.madsam.otora.core.utils.DateTimeUtils.dateCodeToRecent
+import com.madsam.otora.core.utils.NumberFormatUtils.formatThousand
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 import com.madsam.otora.ui.record.osu.constant.OsuDifficultyColor
@@ -331,7 +331,7 @@ private fun ScoreSection(
                     withStyle(
                         style = MaterialTheme.typography.bodySmall.toSpanStyle()
                     ) {
-                        append(formatNumberThousand(score))
+                        append(formatThousand(score))
                     }
                 }
             }
@@ -339,7 +339,7 @@ private fun ScoreSection(
                 withStyle(
                     style = MaterialTheme.typography.titleMedium.toSpanStyle()
                 ) {
-                    append(formatNumberThousand(item.score))
+                    append(formatThousand(item.score))
                 }
                 if (item.accuracy != "0.00%") {
                     appendInlineContent("rank", "[rank]")

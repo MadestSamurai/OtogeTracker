@@ -41,7 +41,7 @@ import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.utils.ShareUtil
+import com.madsam.otora.core.datastore.UserAgentDataStore
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,7 +56,8 @@ fun UserAgentSettingScreen(
     
     // 加载已保存的User-Agent
     LaunchedEffect(Unit) {
-        val savedUserAgent = ShareUtil.getString("userAgent", context) ?: ""
+        val userAgentDataStore = UserAgentDataStore(context)
+        val savedUserAgent = userAgentDataStore.getUserAgent()
         userAgentState.value = savedUserAgent
     }
 
@@ -183,8 +184,9 @@ fun UserAgentSettingScreen(
                 // 保存按钮
                 Button(
                     onClick = {
-                        ShareUtil.putString("userAgent", userAgentState.value, context)
                         scope.launch {
+                            val userAgentDataStore = UserAgentDataStore(context)
+                            userAgentDataStore.saveUserAgent(userAgentState.value)
                             snackbarHostState.showSnackbar(
                                 if (userAgentState.value.isNotBlank()) "User-Agent已保存" else "已清空User-Agent设置"
                             )

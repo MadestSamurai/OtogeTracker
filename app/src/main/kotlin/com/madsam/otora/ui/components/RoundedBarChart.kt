@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.utils.CommonUtils.getRatingBrush
+import com.madsam.otora.core.utils.BrushUtils.getRatingBrush
 
 @Composable
 fun RoundedBarChart(

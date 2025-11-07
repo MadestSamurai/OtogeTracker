@@ -26,8 +26,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -42,7 +44,8 @@ import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.theme.sarasaSemiBold
-import com.madsam.otora.core.utils.ShareUtil
+import com.madsam.otora.data.osu.local.datastore.OsuConfigDataStore
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,10 +53,19 @@ fun OsuDataUpdateScreen(
     onNavigateBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val userState = remember { mutableStateOf(ShareUtil.getString("userId", context) ?: "") }
-    val modeState = remember { mutableStateOf(ShareUtil.getString("mode", context) ?: "osu") }
+    val userState = remember { mutableStateOf("") }
+    val modeState = remember { mutableStateOf("osu") }
     val isClicked = remember { mutableStateOf(false) }
     val items = remember { listOf("mania", "osu", "taiko", "fruits") }
+    val scope = rememberCoroutineScope()
+    
+    // 加载已保存的配置
+    LaunchedEffect(Unit) {
+        val osuConfigDataStore = OsuConfigDataStore(context)
+        val (userId, mode) = osuConfigDataStore.getConfig()
+        userState.value = userId
+        modeState.value = mode
+    }
 
     Column(
         modifier = Modifier
@@ -194,8 +206,10 @@ fun OsuDataUpdateScreen(
                 // 保存设置按钮
                 Button(
                     onClick = {
-                        ShareUtil.putString("userId", userState.value, context)
-                        ShareUtil.putString("mode", modeState.value, context)
+                        scope.launch {
+                            val osuConfigDataStore = OsuConfigDataStore(context)
+                            osuConfigDataStore.saveConfig(userState.value, modeState.value)
+                        }
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(

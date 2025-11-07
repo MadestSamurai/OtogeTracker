@@ -26,7 +26,7 @@ import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.OSU_DARK_RED
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Red900
-import com.madsam.otora.core.utils.CommonUtils
+import com.madsam.otora.core.utils.BrushUtils.getLevelBrush
 import com.madsam.otora.data.osu.ui.model.OsuLevelUiModel
 import com.madsam.otora.ui.components.GradientBorderCircle
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -53,7 +53,7 @@ internal fun Level(
             contentAlignment = Alignment.Center,
             modifier = Modifier.size(55.dp)
         ) {
-            val levelBrush = CommonUtils.getLevelBrush(levelData.level.toInt())
+            val levelBrush = getLevelBrush(levelData.level.toInt())
             GradientBorderCircle(
                 gradient = levelBrush,
                 borderSize = 3.dp,

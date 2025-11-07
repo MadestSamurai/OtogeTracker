@@ -47,8 +47,7 @@ import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.utils.CommonUtils.getRatingBrush
-import com.madsam.otora.core.utils.ndp
+import com.madsam.otora.core.utils.BrushUtils.getRatingBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmFriendUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -182,7 +181,7 @@ internal fun FriendCard(
                                 else -> WhiteGradientBg
                             }
                         )
-                        .basicMarquee(spacing = MarqueeSpacing(15.ndp())),
+                        .basicMarquee(spacing = MarqueeSpacing(15.dp)),
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -213,7 +212,7 @@ internal fun FriendCard(
                                 else -> WhiteGradientBg
                             }
                         )
-                        .basicMarquee(spacing = MarqueeSpacing(15.ndp())),
+                        .basicMarquee(spacing = MarqueeSpacing(15.dp)),
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -245,7 +244,7 @@ internal fun FriendCard(
                                 else -> WhiteGradientBg
                             }
                         )
-                        .basicMarquee(spacing = MarqueeSpacing(15.ndp())),
+                        .basicMarquee(spacing = MarqueeSpacing(15.dp)),
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

@@ -20,6 +20,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,6 +48,13 @@ fun MaimaiDataUpdateScreen(
     onNavigateToUserAgent: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
+    val isUserAgentValid = remember { mutableStateOf(true) }
+    
+    // 检查 UserAgent 是否有效
+    LaunchedEffect(Unit) {
+        isUserAgentValid.value = UserAgentUtils.isUserAgentValid(context)
+    }
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -90,7 +100,7 @@ fun MaimaiDataUpdateScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // User-Agent检查提示
-                if (!UserAgentUtils.isUserAgentValid(context)) {
+                if (!isUserAgentValid.value) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(containerColor = Red300),

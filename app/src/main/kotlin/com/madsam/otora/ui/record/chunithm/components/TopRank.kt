@@ -22,7 +22,7 @@ import com.madsam.otora.core.theme.BlackAlpha50
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.utils.CommonUtils.getRatingBrush
+import com.madsam.otora.core.utils.BrushUtils.getRatingBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.ui.components.RoundedBarChart
 import kotlinx.coroutines.flow.MutableStateFlow

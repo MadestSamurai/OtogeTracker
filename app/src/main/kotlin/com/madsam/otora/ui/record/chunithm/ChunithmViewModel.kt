@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.madsam.otora.core.utils.CalcUtils.calcChuniRank
 import com.madsam.otora.core.utils.CalcUtils.calcChuniRating
-import com.madsam.otora.core.utils.CommonUtils.bigNumberToInt
+import com.madsam.otora.core.utils.NumberFormatUtils.bigNumberToInt
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmPenguinDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserExtDataStore
@@ -82,7 +82,7 @@ internal class ChunithmViewModel() : ViewModel() {
         loadAvatarFromLocal(context)
         loadPlayDataFromLocal()
         loadFriendDataFromLocal()
-        loadTopRankDataFromLocal(context)
+        loadTopRankDataFromLocal()
         loadCharacters()
         preloadAllScores()
     }
@@ -281,7 +281,7 @@ internal class ChunithmViewModel() : ViewModel() {
         }
     }
 
-    private fun loadTopRankDataFromLocal(context: Context) {
+    private fun loadTopRankDataFromLocal() {
         viewModelScope.launch {
             try {
                 Log.d("ChunithmViewModel", "Loading rating data from ObjectBox...")

@@ -50,7 +50,7 @@ import com.madsam.otora.core.theme.OSU_ROTATE_GREEN
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Yellow1000
-import com.madsam.otora.core.utils.CommonUtils.dateCodeToRecent
+import com.madsam.otora.core.utils.DateTimeUtils.dateCodeToRecent
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.data.osu.ui.model.OsuRecentUiModel
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -45,7 +45,7 @@ import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.utils.CommonUtils.getRatingBrush
+import com.madsam.otora.core.utils.BrushUtils.getRatingBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmCardUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
