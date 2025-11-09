@@ -93,6 +93,7 @@ import com.madsam.otora.ui.bof.sub.BofCommentScreen
 import com.madsam.otora.ui.bof.sub.BofEntryPagerScreen
 import com.madsam.otora.ui.bof.sub.BofTeamRankingScreen
 import com.madsam.otora.ui.components.CustomScrollableTabRow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
@@ -101,8 +102,7 @@ private const val TAG = "BofScreen"
 // Material 3 Motion 规范的缓动曲线
 // https://m3.material.io/styles/motion/easing-and-duration/tokens-specs
 // Standard easing - 更温和，适合小到中等尺寸的UI元素
-private val StandardDecelerate = CubicBezierEasing(0f, 0f, 0f, 1f) // 进入动画：线性开始，减速结束
-private val StandardAccelerate = CubicBezierEasing(0.3f, 0f, 1f, 1f) // 退出动画：加速开始，线性结束
+private val StandardDecelerate = CubicBezierEasing(0f, 0f, 0f, 1f) // 线性开始，减速结束
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,8 +111,7 @@ fun BofScreen(
     onNavigateBack: () -> Unit = {}
 ) {
     Log.d(TAG, "BofScreen Compose started")
-    
-    // BofScreen 内部创建自己的 SnackbarHostState
+
     val snackbarHostState = remember { SnackbarHostState() }
 
     // 拦截系统返回事件（包括边缘侧滑返回）
@@ -120,15 +119,10 @@ fun BofScreen(
         onNavigateBack()
     }
 
-    // BofScreen 内部创建自己的 NavController
     val navController = rememberNavController()
 
-    Log.d(TAG, "Creating BofRequestService")
     val bofRequestService = BofRequestService()
-
-    Log.d(TAG, "Creating BofViewModel")
     val vm: BofViewModel = viewModel(factory = BofViewModelFactory(bofScreenState))
-    Log.d(TAG, "BofViewModel created")
 
     // Range 数据状态
     var rangeData by remember { mutableStateOf<List<BofRangeResponse>>(emptyList()) }
@@ -172,13 +166,14 @@ fun BofScreen(
     val currentMatchIndex = vm.currentMatchIndex.collectAsState()
     val matchedIndices = vm.matchedIndices.collectAsState()
 
-    var showDateTimeRangePicker by remember { mutableStateOf(false) }
+    // 日期时间范围选择器的显示状态
+    val showDateTimeRangePicker = remember { MutableStateFlow(false) }
+    val showDateTimeRangePickerState = showDateTimeRangePicker.collectAsState()
     val scrollThreshold = 50f
 
     val density = LocalDensity.current
-    val windowInfo = LocalWindowInfo.current
     val screenWidthDp = with(density) {
-        windowInfo.containerSize.width.toDp()
+        LocalWindowInfo.current.containerSize.width.toDp()
     }
     var entryInfoMode by remember { mutableIntStateOf(0) }
     var teamInfoMode by remember { mutableIntStateOf(0) }
@@ -190,7 +185,7 @@ fun BofScreen(
     var showCommentCaptureDialog by remember { mutableStateOf(false) }
 
     fun selectTime() {
-        showDateTimeRangePicker = true
+        showDateTimeRangePicker.update { true }
     }
 
     // 监听 selectedRange 和时间变化，自动加载数据
@@ -212,12 +207,12 @@ fun BofScreen(
         }
     }
 
-    if (showDateTimeRangePicker) {
+    if (showDateTimeRangePickerState.value) {
         DateTimeRangePicker(
             bofScreenState = bofScreenState,
             rangeData = rangeData,
             onDismissRequest = {
-                showDateTimeRangePicker = false
+                showDateTimeRangePicker.update { false }
             }
         )
     }

@@ -1,5 +1,6 @@
 package com.madsam.otora.ui.bof.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -51,6 +52,7 @@ import com.vsnappy1.datepicker.ui.model.DatePickerConfiguration
 import com.vsnappy1.timepicker.TimePicker
 import com.vsnappy1.timepicker.data.model.TimePickerTime
 import com.vsnappy1.timepicker.enums.MinuteGap
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import java.time.LocalDate
 import java.util.Locale
@@ -61,8 +63,10 @@ fun DateTimeRangePicker(
     rangeData: List<BofRangeResponse>,
     onDismissRequest: () -> Unit
 ) {
-    var showCompareDatePicker by remember { mutableStateOf(false) }
-    var showCurrentDatePicker by remember { mutableStateOf(false) }
+    val showCompareDatePicker = remember { MutableStateFlow(false) }
+    val showCompareDatePickerState = showCompareDatePicker.collectAsState()
+    val showCurrentDatePicker = remember { MutableStateFlow(false) }
+    val showCurrentDatePickerState = showCurrentDatePicker.collectAsState()
     var showRangeDropdown by remember { mutableStateOf(false) }
 
     // 从 BofScreenState 获取当前选中的 Range
@@ -100,6 +104,7 @@ fun DateTimeRangePicker(
             }
         } catch (e: Exception) {
             // 解析失败时使用默认值
+            Log.e("DateTimeRangePicker", "Failed to parse date range: ${e.message}", e)
             DatePickerDate(2024, 9, 18) to DatePickerDate(2025, 0, 8)
         }
     }
@@ -146,11 +151,11 @@ fun DateTimeRangePicker(
     var compareDateText by remember { mutableStateOf(compareSelectedDate) }
     var compareTimeText by remember { mutableStateOf(compareSelectedTime) }
 
-    if (showCurrentDatePicker) {
+    if (showCurrentDatePickerState.value) {
         AlertDialog(
-            onDismissRequest = { showCurrentDatePicker = false },
+            onDismissRequest = { showCurrentDatePicker.update { false } },
             dismissButton = {
-                TextButton(onClick = { showCurrentDatePicker = false }) {
+                TextButton(onClick = { showCurrentDatePicker.update { false } }) {
                     Text("Cancel")
                 }
             },
@@ -165,7 +170,7 @@ fun DateTimeRangePicker(
                         Locale.getDefault(), "%02d:%02d",
                         currentTimeState.hour, currentTimeState.minute
                     )
-                    showCurrentDatePicker = false
+                    showCurrentDatePicker.update { false }
                 }) {
                     Text("OK")
                 }
@@ -229,11 +234,11 @@ fun DateTimeRangePicker(
         )
     }
 
-    if (showCompareDatePicker) {
+    if (showCompareDatePickerState.value) {
         AlertDialog(
-            onDismissRequest = { showCompareDatePicker = false },
+            onDismissRequest = { showCompareDatePicker.update { false } },
             dismissButton = {
-                TextButton(onClick = { showCompareDatePicker = false }) {
+                TextButton(onClick = { showCompareDatePicker.update { false } }) {
                     Text("Cancel")
                 }
             },
@@ -248,7 +253,7 @@ fun DateTimeRangePicker(
                         Locale.getDefault(), "%02d:%02d",
                         compareTimeState.hour, compareTimeState.minute
                     )
-                    showCompareDatePicker = false
+                    showCompareDatePicker.update { false }
                 }) {
                     Text("OK")
                 }
@@ -409,13 +414,13 @@ fun DateTimeRangePicker(
                 Row {
                     Text("Current: $currentDateText - $currentTimeText")
                 }
-                Button(onClick = { showCurrentDatePicker = true }) {
+                Button(onClick = { showCurrentDatePicker.update { true } }) {
                     Text(text = "Select Date&Time")
                 }
                 Row {
                     Text("Compare: $compareDateText - $compareTimeText")
                 }
-                Button(onClick = { showCompareDatePicker = true }) {
+                Button(onClick = { showCompareDatePicker.update { true } }) {
                     Text(text = "Select Compare Date&Time")
                 }
             }
