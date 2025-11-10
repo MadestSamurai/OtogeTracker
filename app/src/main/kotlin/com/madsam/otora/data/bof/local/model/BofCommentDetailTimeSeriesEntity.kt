@@ -1,5 +1,6 @@
 package com.madsam.otora.data.bof.local.model
 
+import android.util.Log
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.annotation.Index
@@ -38,25 +39,10 @@ internal data class BofCommentDetailTimeSeriesEntity(
     // = -1: 评价被删除
     var score: Int = 0
 ) {
-    constructor() : this(
-        id = 0,
-        username = "",
-        path = "",
-        type = "",
-        workId = "",
-        timestamp = 0,
-        dateString = "",
-        score = 0
-    )
-    
     companion object {
         const val TYPE_VOTE = "vote"
         const val TYPE_SHORT = "short"
         const val TYPE_LONG = "long"
-        
-        // 特殊分数标记
-        const val SCORE_DISQUALIFIED = 0  // 作品被取消资格
-        const val SCORE_DELETED = -1       // 评价被删除
         
         /**
          * 解析时间字符串为时间戳
@@ -66,6 +52,7 @@ internal data class BofCommentDetailTimeSeriesEntity(
                 val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
                 format.parse(timeString)?.time ?: 0L
             } catch (e: Exception) {
+                Log.e("BofCommentDetailTimeSeriesEntity", "Failed to parse timestamp: $timeString", e)
                 0L
             }
         }
@@ -75,32 +62,6 @@ internal data class BofCommentDetailTimeSeriesEntity(
          */
         fun isValidScore(score: Int): Boolean {
             return score > 0
-        }
-        
-        /**
-         * 判断作品是否被取消资格
-         */
-        fun isDisqualified(score: Int): Boolean {
-            return score == SCORE_DISQUALIFIED
-        }
-        
-        /**
-         * 判断评价是否被删除
-         */
-        fun isDeleted(score: Int): Boolean {
-            return score == SCORE_DELETED
-        }
-        
-        /**
-         * 获取评价状态描述
-         */
-        fun getScoreStatusDescription(score: Int): String {
-            return when {
-                score > 0 -> "有效评价"
-                score == SCORE_DISQUALIFIED -> "作品已取消资格"
-                score == SCORE_DELETED -> "评价已删除"
-                else -> "未知状态"
-            }
         }
     }
 }

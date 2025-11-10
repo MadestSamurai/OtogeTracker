@@ -44,7 +44,7 @@ internal class BofObjectBoxService {
                 ).build().find()
 
                 if (comments.isEmpty()) {
-                    return@withContext emptyList<BofCommentUI>()
+                    return@withContext emptyList()
                 }
                 
                 comments.map { entry ->

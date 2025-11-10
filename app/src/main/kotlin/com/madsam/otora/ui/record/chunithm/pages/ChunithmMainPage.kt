@@ -40,6 +40,7 @@ import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.AvatarLayout
 import com.madsam.otora.ui.record.chunithm.components.Card
+import com.madsam.otora.ui.record.chunithm.components.LoginBonusTracker
 import com.madsam.otora.ui.record.chunithm.components.MapCard
 import com.madsam.otora.ui.record.chunithm.components.PlayDataList
 import com.madsam.otora.ui.record.chunithm.components.TopRank
@@ -141,6 +142,10 @@ internal fun ChunithmMainPage(
                     viewModel.chunithmCardUiModel,
                     contentWidthDp
                 )
+            }
+            item {
+                val loginBonus by viewModel.chunithmLoginBonus.collectAsState()
+                LoginBonusTracker(loginBonus = loginBonus)
             }
             item {
                 Box(

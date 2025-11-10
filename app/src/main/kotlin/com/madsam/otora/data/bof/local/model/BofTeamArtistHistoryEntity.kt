@@ -1,5 +1,6 @@
 package com.madsam.otora.data.bof.local.model
 
+import android.util.Log
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.annotation.Index
@@ -10,7 +11,7 @@ import io.objectbox.annotation.Index
  * 使用 workSlot 字段区分不同的作品位置（1-4）
  */
 @Entity
-internal data class BofTeamArtistHistoryEntity(
+internal data class  BofTeamArtistHistoryEntity(
     @Id var id: Long = 0,
     @Index var compositeTeamId: String = "", // {path}_{teamName}
     @Index var path: String = "",
@@ -46,6 +47,7 @@ internal data class BofTeamArtistHistoryEntity(
                 calendar.set(java.util.Calendar.MILLISECOND, 0)
                 calendar.timeInMillis
             } catch (e: Exception) {
+                Log.e("BofTeamArtistHistory", "Failed to parse timestamp: $timeString", e)
                 0L
             }
         }

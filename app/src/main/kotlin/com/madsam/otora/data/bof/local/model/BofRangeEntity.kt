@@ -18,18 +18,4 @@ internal data class BofRangeEntity(
     var singleComment: Boolean = false, // 是否单个评论
     var commentDate: String = "", // 评论日期
     var lastUpdated: Long = 0 // 最后更新时间戳
-) {
-    constructor() : this(
-        id = 0,
-        path = "",
-        start = "",
-        current = "",
-        shortName = "",
-        fullName = "",
-        isStart = false,
-        isEnd = false,
-        singleComment = false,
-        commentDate = "",
-        lastUpdated = 0
-    )
-}
+)

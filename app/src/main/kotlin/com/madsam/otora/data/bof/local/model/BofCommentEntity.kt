@@ -26,26 +26,4 @@ internal data class BofCommentEntity(
     var longComment: Int = 0,
     var total: Int = 0,
     var totalAve: Double = 0.0
-) {
-    constructor() : this(
-        id = 0,
-        commentId = "",
-        date = "",
-        user = "",
-        pattern = "",
-        country = "",
-        voteCount = 0,
-        voteTotal = 0,
-        voteAve = 0.0,
-        shortCount = 0,
-        shortTotal = 0,
-        shortAve = 0.0,
-        shortComment = 0,
-        longCount = 0,
-        longTotal = 0,
-        longAve = 0.0,
-        longComment = 0,
-        total = 0,
-        totalAve = 0.0
-    )
-}
+)

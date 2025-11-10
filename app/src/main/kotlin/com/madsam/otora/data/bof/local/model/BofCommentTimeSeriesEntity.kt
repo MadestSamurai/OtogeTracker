@@ -43,32 +43,4 @@ internal data class BofCommentTimeSeriesEntity(
     
     // 更新时间
     var lastUpdated: Long = 0
-) {
-    constructor() : this(
-        id = 0,
-        username = "",
-        path = "",
-        currentUser = "",
-        currentPattern = "",
-        currentCountry = "",
-        idCodesJson = "[]",
-        latestVote = 0,
-        latestVoteTotal = 0,
-        latestShort = 0,
-        latestShortTotal = 0,
-        latestShortComment = 0,
-        latestLong = 0,
-        latestLongTotal = 0,
-        latestLongComment = 0,
-        latestTotal = 0,
-        earliestTimestamp = 0,
-        latestTimestamp = 0,
-        lastUpdated = 0
-    )
-    
-    companion object {
-        fun createCompositeId(path: String, username: String): String {
-            return "${path}_${username}"
-        }
-    }
-}
+)

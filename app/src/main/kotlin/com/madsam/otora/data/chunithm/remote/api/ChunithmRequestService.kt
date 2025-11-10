@@ -21,7 +21,6 @@ import com.madsam.otora.data.adapter.SafeLongAdapter
 import com.madsam.otora.data.adapter.SafeStringAdapter
 import com.madsam.otora.data.adapter.SafeStringListAdapter
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmCookieDataStore
-import com.madsam.otora.data.chunithm.local.datastore.ChunithmLoginBonusDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmPenguinDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmStatueDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserDataStore
@@ -42,6 +41,9 @@ import com.madsam.otora.data.chunithm.remote.model.ChuniScoreDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniStatueDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniUserDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniUserExtendDTO
+import com.madsam.otora.data.chunithm.remote.model.DailyReward
+import com.madsam.otora.data.chunithm.remote.model.MonthlyReward
+import com.madsam.otora.data.chunithm.remote.model.WeekdayBonus
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.CoroutineScope
@@ -67,9 +69,7 @@ internal class ChunithmRequestService(private val context: Context) {
         private val HONOR_STYLE_REGEX = Regex("honor_bg_([a-zA-Z0-9]+)")
         private val URL_EXTRACTOR_REGEX = Regex("url\\(([^)]+)\\)")
         private val CHARACTER_LEVEL_REGEX = Regex("num_s_lv_(\\d)\\.png")
-        private val MONTH_EXTRACTOR_REGEX = Regex("(\\d+)月")
         private val LOGIN_DAYS_REGEX = Regex("num_lv_(\\d+)")
-        private val TOTAL_DAYS_REGEX = Regex("第 (\\d+) 天")
     }
 
     private val serviceScope = CoroutineScope(Dispatchers.IO)
@@ -82,7 +82,6 @@ internal class ChunithmRequestService(private val context: Context) {
     private val penguinDataStore by lazy { ChunithmPenguinDataStore(context) }
     private val userExtDataStore by lazy { ChunithmUserExtDataStore(context) }
     private val statueDataStore by lazy { ChunithmStatueDataStore(context) }
-    private val loginBonusDataStore by lazy { ChunithmLoginBonusDataStore(context) }
     private val cookieDataStore by lazy { ChunithmCookieDataStore(context) }
     private val userAgentDataStore by lazy { UserAgentDataStore(context) }
     
@@ -1030,32 +1029,115 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     private fun parseLoginBonus(doc: Document): ChuniLoginBonusDTO {
-        val monthText = doc.selectFirst("div.box01_title.text_b")?.text() ?: ""
-        val currentMonth =
-            MONTH_EXTRACTOR_REGEX.find(monthText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+        // 解析月度累计登录天数
         val monthlyDays = doc.select("div.monthly_cumulative_login_bonus_days_count_num img")
             .firstOrNull()?.attr("src")
             ?.let { src ->
                 LOGIN_DAYS_REGEX.find(src)?.groupValues?.get(1)?.toIntOrNull()
             } ?: 0
-        val totalDays = doc.select("div.bonus_block_off div.bonus_days_block")
-            .lastOrNull()
-            ?.text()
-            ?.let { text ->
-                TOTAL_DAYS_REGEX.find(text)?.groupValues?.get(1)?.toIntOrNull()
-            } ?: 0
+        
+        // 解析月度累计奖励列表
+        val monthlyRewards = mutableListOf<MonthlyReward>()
+        val monthlyRewardBlocks = doc.select("div.monthly_cumulative_login_bonus_reward")
+        for (block in monthlyRewardBlocks) {
+            val dayText = block.selectFirst("div.bonus_days_block")?.text() ?: ""
+            val day = dayText.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0
+            
+            val imageUrl = block.selectFirst("div.monthly_cumulative_login_bonus_reward_img img")?.attr("src") ?: ""
+            val rewardName = block.selectFirst("div.bonus_reward_name span")?.text() ?: ""
+            // 根据当前累计天数判断是否已完成（达到或超过里程碑天数即为已完成）
+            val isCompleted = monthlyDays >= day
+            
+            if (day > 0) {
+                monthlyRewards.add(
+                    MonthlyReward(
+                        day = day,
+                        imageUrl = imageUrl,
+                        rewardName = rewardName,
+                        isCompleted = isCompleted
+                    )
+                )
+            }
+        }
+        
+        // 解析每日登录奖励
+        val dailyRewards = mutableListOf<DailyReward>()
+        val dailyBlocks = doc.select("div.bonus_block_off, div.bonus_block_on, div.bonus_block_next")
+        var dailyLoginDay = 0
+        
+        for (block in dailyBlocks) {
+            val dayText = block.selectFirst("div.bonus_days_block")?.text() ?: ""
+            val day = dayText.replace(Regex("[^0-9]"), "").toIntOrNull() ?: 0
+            
+            val imageUrl = block.selectFirst("div.bonus_reward_block img")?.attr("src") ?: ""
+            val rewardName = block.selectFirst("div.bonus_reward_name span")?.text() ?: ""
+            
+            val isReceived = block.hasClass("bonus_block_off")
+            val isNext = block.hasClass("bonus_block_next")
+            val isCurrent = block.hasClass("bonus_block_on") && !isNext
+            
+            if (day > 0) {
+                dailyRewards.add(
+                    DailyReward(
+                        day = day,
+                        imageUrl = imageUrl,
+                        rewardName = rewardName,
+                        isReceived = isReceived,
+                        isNext = isNext
+                    )
+                )
+                
+                // 计算当前登录天数（最后一个已领取的天数）
+                if (isReceived && day > dailyLoginDay) {
+                    dailyLoginDay = day
+                }
+            }
+        }
+        
+        // 解析每周奖励（不记录isToday，使用时动态判断）
+        val weekdayBonuses = mutableListOf<WeekdayBonus>()
+        val weekdayBlocks = doc.select("div.weekday_bonus_list_block div.weekday_bonus_block, div.weekday_bonus_today div.weekday_bonus_today_block")
+        
+        for (block in weekdayBlocks) {
+            val weekday = block.selectFirst("div.weekday_bonus_week")?.text() ?: ""
+            val iconUrl = block.selectFirst("div.weekday_bonus_info_icon img")?.attr("src") ?: ""
+            val description = block.selectFirst("div.weekday_bonus_info_text")?.text() ?: ""
+            
+            if (weekday.isNotEmpty()) {
+                weekdayBonuses.add(
+                    WeekdayBonus(
+                        weekday = weekday,
+                        iconUrl = iconUrl,
+                        description = description,
+                        isToday = false  // 固定为false，使用时动态判断
+                    )
+                )
+            }
+        }
 
         return ChuniLoginBonusDTO(
-            currentMonth = currentMonth,
+            currentMonth = monthlyDays,
             monthlyDays = monthlyDays,
-            totalDays = totalDays
+            totalDays = 0, // 总天数信息在HTML中不明确，保留为0
+            monthlyRewards = monthlyRewards,
+            dailyLoginDay = dailyLoginDay,
+            dailyRewards = dailyRewards,
+            weekdayBonuses = weekdayBonuses
         )
     }
 
     private suspend fun requestLoginBonus() {
         requestDataFromServer("$CHUNITHM_URL/loginBonus")?.let { doc ->
             val loginBonusData = parseLoginBonus(doc)
-            loginBonusDataStore.saveLoginBonusData(loginBonusData)
+            // 保存到 ObjectBox
+            val objectBoxService = ChunithmObjectBoxService()
+            objectBoxService.saveLoginBonusData(
+                currentMonthDays = loginBonusData.currentMonth,
+                dailyStreakDay = loginBonusData.dailyLoginDay,
+                monthlyRewards = loginBonusData.monthlyRewards,
+                dailyRewards = loginBonusData.dailyRewards,
+                weekdayBonuses = loginBonusData.weekdayBonuses
+            )
         }
     }
 

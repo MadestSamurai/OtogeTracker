@@ -3,15 +3,6 @@ package com.madsam.otora.data.bof.remote.model
 import com.squareup.moshi.Json
 
 /**
- * BOF 时序评论数据 API 响应
- * 对应 comment.json 的数据结构
- */
-internal data class BofCommentTimeSeriesResponse(
-    // Map<用户名, 用户数据>
-    val users: Map<String, BofUserCommentData> = emptyMap()
-)
-
-/**
  * 用户评论数据
  */
 internal data class BofUserCommentData(

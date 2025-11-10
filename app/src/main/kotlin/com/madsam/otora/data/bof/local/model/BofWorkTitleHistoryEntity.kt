@@ -1,5 +1,6 @@
 package com.madsam.otora.data.bof.local.model
 
+import android.util.Log
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.annotation.Index
@@ -23,15 +24,6 @@ internal data class BofWorkTitleHistoryEntity(
     // 标题值
     var title: String = ""
 ) {
-    constructor() : this(
-        id = 0,
-        compositeWorkId = "",
-        path = "",
-        timestamp = 0,
-        timeString = "",
-        title = ""
-    )
-    
     companion object {
         /**
          * 从时间字符串解析时间戳
@@ -55,6 +47,7 @@ internal data class BofWorkTitleHistoryEntity(
                 calendar.set(java.util.Calendar.MILLISECOND, 0)
                 calendar.timeInMillis
             } catch (e: Exception) {
+                Log.e("BofWorkTitleHistory", "Failed to parse timestamp: $timeString", e)
                 0L
             }
         }

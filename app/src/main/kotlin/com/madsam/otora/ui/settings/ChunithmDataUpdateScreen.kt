@@ -419,56 +419,67 @@ fun ChunithmDataUpdateScreen(
                                 return@Button
                             }
                             
-                            cookieState.value = ProgressState(UpdateState.LOADING, 0.1f, "验证Cookie...")
+                            cookieState.value = ProgressState(UpdateState.LOADING, 0.05f, "保存Cookie...")
                             scope.launch {
                                 snackbarHostState.showSnackbar("开始保存Cookie并获取用户数据")
                             }
                             
-                            // 保存Cookie信息到DataStore
+                            // 先保存Cookie，然后再获取用户数据，确保使用新的Cookie
                             scope.launch {
-                                val cookieDTO = ChuniCookieDTO(
-                                    token = responseCookieMap["_t"] ?: "",
-                                    expires = responseCookieMap["expires"] ?: "",
-                                    maxAge = responseCookieMap["Max-Age"] ?: "",
-                                    path = responseCookieMap["path"] ?: "",
-                                    sameSite = responseCookieMap["SameSite"] ?: "",
-                                    userId = requestCookieMap["userId"] ?: "",
-                                    friendCodeList = requestCookieMap["friendCodeList"] ?: "",
-                                    ga = requestCookieMap["_ga"] ?: "",
-                                    gaKey = requestCookieMap.entries.firstOrNull { it.key.startsWith("_ga_") }?.key ?: "",
-                                    gaValue = requestCookieMap.entries.firstOrNull { it.key.startsWith("_ga_") }?.value ?: ""
-                                )
-                                
-                                val cookieDataStore = ChunithmCookieDataStore(context)
-                                cookieDataStore.saveCookie(cookieDTO)
-                            }
-                            
-                            // 获取用户数据，类似Dialog中的逻辑
-                            val chunithmRequestService = ChunithmRequestService(context)
-                            
-                            chunithmRequestService.getUserData(
-                                onSuccess = {
-                                    cookieState.value = ProgressState(UpdateState.SUCCESS, 1.0f, "获取完成")
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar("用户数据获取成功")
-                                    }
+                                try {
+                                    // 1. 保存Cookie到DataStore
+                                    val cookieDTO = ChuniCookieDTO(
+                                        token = responseCookieMap["_t"] ?: "",
+                                        expires = responseCookieMap["expires"] ?: "",
+                                        maxAge = responseCookieMap["Max-Age"] ?: "",
+                                        path = responseCookieMap["path"] ?: "",
+                                        sameSite = responseCookieMap["SameSite"] ?: "",
+                                        userId = requestCookieMap["userId"] ?: "",
+                                        friendCodeList = requestCookieMap["friendCodeList"] ?: "",
+                                        ga = requestCookieMap["_ga"] ?: "",
+                                        gaKey = requestCookieMap.entries.firstOrNull { it.key.startsWith("_ga_") }?.key ?: "",
+                                        gaValue = requestCookieMap.entries.firstOrNull { it.key.startsWith("_ga_") }?.value ?: ""
+                                    )
                                     
-                                    // 延时后恢复到空闲状态
-                                    scope.launch {
-                                        delay(1500)
-                                        cookieState.value = ProgressState()
-                                    }
-                                },
-                                onError = { errorMessage ->
+                                    val cookieDataStore = ChunithmCookieDataStore(context)
+                                    cookieDataStore.saveCookie(cookieDTO)
+                                    
+                                    // 2. Cookie保存完成后，开始获取用户数据
+                                    cookieState.value = ProgressState(UpdateState.LOADING, 0.1f, "验证Cookie...")
+                                    
+                                    val chunithmRequestService = ChunithmRequestService(context)
+                                    chunithmRequestService.getUserData(
+                                        onSuccess = {
+                                            cookieState.value = ProgressState(UpdateState.SUCCESS, 1.0f, "获取完成")
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar("用户数据获取成功")
+                                            }
+                                            
+                                            // 延时后恢复到空闲状态
+                                            scope.launch {
+                                                delay(1500)
+                                                cookieState.value = ProgressState()
+                                            }
+                                        },
+                                        onError = { errorMessage ->
+                                            cookieState.value = ProgressState()
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar("用户数据获取失败: $errorMessage")
+                                            }
+                                        },
+                                        onProgress = { progress, message ->
+                                            // 将进度映射到 0.1-1.0 区间（前面0.05-0.1用于保存Cookie）
+                                            val adjustedProgress = 0.1f + (progress * 0.9f)
+                                            cookieState.value = ProgressState(UpdateState.LOADING, adjustedProgress, message)
+                                        }
+                                    )
+                                } catch (e: Exception) {
                                     cookieState.value = ProgressState()
                                     scope.launch {
-                                        snackbarHostState.showSnackbar("Cookie保存成功，但用户数据获取失败: $errorMessage")
+                                        snackbarHostState.showSnackbar("Cookie保存失败: ${e.message}")
                                     }
-                                },
-                                onProgress = { progress, message ->
-                                    cookieState.value = ProgressState(UpdateState.LOADING, progress, message)
                                 }
-                            )
+                            }
                         }
                     },
                     enabled = cookieState.value.state == UpdateState.IDLE,

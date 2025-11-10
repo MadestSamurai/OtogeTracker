@@ -1,5 +1,6 @@
 package com.madsam.otora.data.bof.local.model
 
+import android.util.Log
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.annotation.Index
@@ -46,6 +47,7 @@ internal data class BofTeamFinalStrikerHistoryEntity(
                 calendar.set(java.util.Calendar.MILLISECOND, 0)
                 calendar.timeInMillis
             } catch (e: Exception) {
+                Log.e("BofTeamFinalStrikerHistoryEntity", "Failed to parse timestamp: $timeString", e)
                 0L
             }
         }

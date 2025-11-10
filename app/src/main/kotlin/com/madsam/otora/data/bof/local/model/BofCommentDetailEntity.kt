@@ -16,16 +16,4 @@ internal data class BofCommentDetailEntity(
     var workNumber: Int = 0,
     @Index var date: String = "",
     @Index var type: String = "" // "vote", "short", "long"
-) {
-    constructor() : this(
-        id = 0,
-        detailId = "",
-        user = "",
-        score = 0,
-        code = "",
-        country = "",
-        workNumber = 0,
-        date = "",
-        type = ""
-    )
-}
+)

@@ -30,22 +30,6 @@ internal data class BofWorkScoreHistoryEntity(
     var median: Double = 0.0,      // m: median score (中位数)
     var average: Double = 0.0      // a: average score (平均分)
 ) {
-    constructor() : this(
-        id = 0,
-        compositeWorkId = "",
-        path = "",
-        timestamp = 0,
-        year = 0,
-        month = 0,
-        day = 0,
-        hour = 0,
-        minute = 0,
-        impression = 0,
-        total = 0,
-        median = 0.0,
-        average = 0.0
-    )
-    
     companion object {
         /**
          * 从年月日时分创建时间戳

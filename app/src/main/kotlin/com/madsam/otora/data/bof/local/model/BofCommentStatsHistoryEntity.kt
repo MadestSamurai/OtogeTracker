@@ -1,5 +1,6 @@
 package com.madsam.otora.data.bof.local.model
 
+import android.util.Log
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.annotation.Index
@@ -41,27 +42,6 @@ internal data class BofCommentStatsHistoryEntity(
     var longComment: Int = 0,    // lc
     var total: Int = 0           // t
 ) {
-    constructor() : this(
-        id = 0,
-        username = "",
-        path = "",
-        timestamp = 0,
-        year = 0,
-        month = 0,
-        day = 0,
-        hour = 0,
-        minute = 0,
-        voteCount = 0,
-        voteTotal = 0,
-        shortCount = 0,
-        shortTotal = 0,
-        shortComment = 0,
-        longCount = 0,
-        longTotal = 0,
-        longComment = 0,
-        total = 0
-    )
-    
     companion object {
         /**
          * 创建时间戳
@@ -81,6 +61,7 @@ internal data class BofCommentStatsHistoryEntity(
                 val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
                 format.parse(timeString)?.time ?: 0L
             } catch (e: Exception) {
+                Log.e("BofCommentStatsHistory", "Failed to parse timestamp: $timeString", e)
                 0L
             }
         }

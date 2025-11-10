@@ -2229,10 +2229,162 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "43:2198993999732884035",
+      "lastPropertyId": "7:5091847082240943667",
+      "name": "ChunithmDailyRewardEntity",
+      "properties": [
+        {
+          "id": "1:6494767816005425441",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:325078068456959036",
+          "name": "day",
+          "indexId": "127:134589462354452342",
+          "type": 5,
+          "flags": 8
+        },
+        {
+          "id": "3:5040652339676913033",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "4:8049610131188702154",
+          "name": "rewardName",
+          "type": 9
+        },
+        {
+          "id": "5:5699018695667906089",
+          "name": "isReceived",
+          "type": 1
+        },
+        {
+          "id": "6:6185608347844836010",
+          "name": "isNext",
+          "type": 1
+        },
+        {
+          "id": "7:5091847082240943667",
+          "name": "lastUpdated",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "44:6457123980481380594",
+      "lastPropertyId": "4:8355677652347053585",
+      "name": "ChunithmLoginBonusEntity",
+      "properties": [
+        {
+          "id": "1:2429464866793926037",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6707867011277092894",
+          "name": "currentMonthDays",
+          "type": 5
+        },
+        {
+          "id": "3:6468265391286979459",
+          "name": "dailyStreakDay",
+          "type": 5
+        },
+        {
+          "id": "4:8355677652347053585",
+          "name": "lastUpdated",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "45:639974447222658106",
+      "lastPropertyId": "6:3275788103047597546",
+      "name": "ChunithmMonthlyRewardEntity",
+      "properties": [
+        {
+          "id": "1:9154985151285985693",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2295029653255998629",
+          "name": "day",
+          "indexId": "128:2054023523605079486",
+          "type": 5,
+          "flags": 8
+        },
+        {
+          "id": "3:5832182808297614302",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "4:5688241691111045334",
+          "name": "rewardName",
+          "type": 9
+        },
+        {
+          "id": "5:3358213895399054671",
+          "name": "isCompleted",
+          "type": 1
+        },
+        {
+          "id": "6:3275788103047597546",
+          "name": "lastUpdated",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "46:4583087702082708126",
+      "lastPropertyId": "6:5243894013110491383",
+      "name": "ChunithmWeekdayBonusEntity",
+      "properties": [
+        {
+          "id": "1:6532269320901262678",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:191631072889987129",
+          "name": "weekday",
+          "indexId": "129:6044301559898436613",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:4507498549745278943",
+          "name": "iconUrl",
+          "type": 9
+        },
+        {
+          "id": "4:4429946345033906533",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "6:5243894013110491383",
+          "name": "lastUpdated",
+          "type": 6
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "42:8885191850255465808",
-  "lastIndexId": "126:6603408938052969342",
+  "lastEntityId": "46:4583087702082708126",
+  "lastIndexId": "129:6044301559898436613",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
@@ -2578,7 +2730,8 @@
     4169776967989209638,
     4351027923781717758,
     8876910718545201237,
-    3327608175031019186
+    3327608175031019186,
+    6667136809241911251
   ],
   "retiredRelationUids": [],
   "version": 1

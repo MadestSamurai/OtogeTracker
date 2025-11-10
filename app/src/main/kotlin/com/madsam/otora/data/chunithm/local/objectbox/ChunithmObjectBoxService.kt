@@ -2,18 +2,23 @@ package com.madsam.otora.data.chunithm.local.objectbox
 
 import android.util.Log
 import com.madsam.otora.core.database.ObjectBoxManager
+import com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity
+import com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity_
+import com.madsam.otora.data.chunithm.local.model.ChunithmDailyRewardEntity
+import com.madsam.otora.data.chunithm.local.model.ChunithmDailyRewardEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmFriendEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmFriendEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmFriendScoreEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmFriendScoreEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmFullScoreEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmFullScoreEntity_
-import com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity
-import com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity_
+import com.madsam.otora.data.chunithm.local.model.ChunithmLoginBonusEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmMapAreaEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmMapAreaEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmMapEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmMapEntity_
+import com.madsam.otora.data.chunithm.local.model.ChunithmMonthlyRewardEntity
+import com.madsam.otora.data.chunithm.local.model.ChunithmMonthlyRewardEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmPlayLogEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmPlayLogEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmPlayRecordEntity
@@ -24,12 +29,13 @@ import com.madsam.otora.data.chunithm.local.model.ChunithmSheetsEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmSheetsEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmSongsEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmSongsEntity_
+import com.madsam.otora.data.chunithm.local.model.ChunithmWeekdayBonusEntity
 import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniFullScoreDTO
-import com.madsam.otora.data.chunithm.remote.model.ChunithmDataDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniMapDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniPlayRecordDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniScoreDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmDataDTO
 import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayRecordUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
@@ -57,6 +63,10 @@ internal class ChunithmObjectBoxService {
     private val mapBox: Box<ChunithmMapEntity> = boxStore.boxFor(ChunithmMapEntity::class.java)
     private val mapAreaBox: Box<ChunithmMapAreaEntity> = boxStore.boxFor(ChunithmMapAreaEntity::class.java)
     private val characterBox: Box<ChunithmCharacterEntity> = boxStore.boxFor(ChunithmCharacterEntity::class.java)
+    private val loginBonusBox: Box<ChunithmLoginBonusEntity> = boxStore.boxFor(ChunithmLoginBonusEntity::class.java)
+    private val monthlyRewardBox: Box<ChunithmMonthlyRewardEntity> = boxStore.boxFor(ChunithmMonthlyRewardEntity::class.java)
+    private val dailyRewardBox: Box<ChunithmDailyRewardEntity> = boxStore.boxFor(ChunithmDailyRewardEntity::class.java)
+    private val weekdayBonusBox: Box<ChunithmWeekdayBonusEntity> = boxStore.boxFor(ChunithmWeekdayBonusEntity::class.java)
     
     /**
      * 获取歌曲的最新成绩
@@ -1430,19 +1440,136 @@ internal class ChunithmObjectBoxService {
         }
     }
     
+    // ============ 登录奖励相关方法 ============
+    
     /**
-     * 清空指定地图的所有格子数据
-     * @param mapName 地图名称
+     * 保存登录奖励数据
      */
-    suspend fun clearMapAreas(mapName: String) {
+    suspend fun saveLoginBonusData(
+        currentMonthDays: Int,
+        dailyStreakDay: Int,
+        monthlyRewards: List<com.madsam.otora.data.chunithm.remote.model.MonthlyReward>,
+        dailyRewards: List<com.madsam.otora.data.chunithm.remote.model.DailyReward>,
+        weekdayBonuses: List<com.madsam.otora.data.chunithm.remote.model.WeekdayBonus>
+    ) {
         withContext(Dispatchers.IO) {
             try {
-                val areas = getMapAreas(mapName)
-                mapAreaBox.remove(areas)
-                Log.d(TAG, "Cleared ${areas.size} areas for map: $mapName")
+                val currentTime = System.currentTimeMillis()
+                
+                // 保存主实体（只保留一条记录）
+                val mainEntity = loginBonusBox.all.firstOrNull() ?: ChunithmLoginBonusEntity()
+                mainEntity.apply {
+                    this.currentMonthDays = currentMonthDays
+                    this.dailyStreakDay = dailyStreakDay
+                    this.lastUpdated = currentTime
+                }
+                loginBonusBox.put(mainEntity)
+                
+                // 保存月度奖励（先清空再保存）
+                monthlyRewardBox.removeAll()
+                val monthlyEntities = monthlyRewards.map { reward ->
+                    ChunithmMonthlyRewardEntity(
+                        day = reward.day,
+                        imageUrl = reward.imageUrl,
+                        rewardName = reward.rewardName,
+                        isCompleted = reward.isCompleted,
+                        lastUpdated = currentTime
+                    )
+                }
+                monthlyRewardBox.put(monthlyEntities)
+                
+                // 保存每日奖励（先清空再保存）
+                dailyRewardBox.removeAll()
+                val dailyEntities = dailyRewards.map { reward ->
+                    ChunithmDailyRewardEntity(
+                        day = reward.day,
+                        imageUrl = reward.imageUrl,
+                        rewardName = reward.rewardName,
+                        isReceived = reward.isReceived,
+                        isNext = reward.isNext,
+                        lastUpdated = currentTime
+                    )
+                }
+                dailyRewardBox.put(dailyEntities)
+                
+                // 保存每周加成（先清空再保存，不存储isToday）
+                weekdayBonusBox.removeAll()
+                val weekdayEntities = weekdayBonuses.map { bonus ->
+                    ChunithmWeekdayBonusEntity(
+                        weekday = bonus.weekday,
+                        iconUrl = bonus.iconUrl,
+                        description = bonus.description,
+                        lastUpdated = currentTime
+                    )
+                }
+                weekdayBonusBox.put(weekdayEntities)
+                
+                Log.d(TAG, "Saved login bonus data: month=$currentMonthDays, daily=$dailyStreakDay")
             } catch (e: Exception) {
-                Log.e(TAG, "Error clearing map areas", e)
+                Log.e(TAG, "Error saving login bonus data", e)
                 throw e
+            }
+        }
+    }
+    
+    /**
+     * 获取登录奖励主数据
+     */
+    suspend fun getLoginBonusData(): ChunithmLoginBonusEntity? {
+        return withContext(Dispatchers.IO) {
+            try {
+                loginBonusBox.all.firstOrNull()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading login bonus data", e)
+                null
+            }
+        }
+    }
+    
+    /**
+     * 获取月度奖励列表（按天数排序）
+     */
+    suspend fun getMonthlyRewards(): List<ChunithmMonthlyRewardEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                monthlyRewardBox.query()
+                    .order(ChunithmMonthlyRewardEntity_.day)
+                    .build()
+                    .find()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading monthly rewards", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 获取每日奖励列表（按天数排序）
+     */
+    suspend fun getDailyRewards(): List<ChunithmDailyRewardEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                dailyRewardBox.query()
+                    .order(ChunithmDailyRewardEntity_.day)
+                    .build()
+                    .find()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading daily rewards", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 获取每周加成列表
+     */
+    suspend fun getWeekdayBonuses(): List<ChunithmWeekdayBonusEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                weekdayBonusBox.all
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading weekday bonuses", e)
+                emptyList()
             }
         }
     }

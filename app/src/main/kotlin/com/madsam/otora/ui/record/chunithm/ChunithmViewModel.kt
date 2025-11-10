@@ -8,12 +8,17 @@ import androidx.lifecycle.viewModelScope
 import com.madsam.otora.core.utils.CalcUtils.calcChuniRank
 import com.madsam.otora.core.utils.CalcUtils.calcChuniRating
 import com.madsam.otora.core.utils.NumberFormatUtils.bigNumberToInt
+
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmPenguinDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserExtDataStore
 import com.madsam.otora.data.chunithm.local.model.ChunithmRatingEntity
 import com.madsam.otora.data.chunithm.local.objectbox.ChunithmObjectBoxService
 import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
+import com.madsam.otora.data.chunithm.remote.model.ChuniLoginBonusDTO
+import com.madsam.otora.data.chunithm.remote.model.DailyReward
+import com.madsam.otora.data.chunithm.remote.model.MonthlyReward
+import com.madsam.otora.data.chunithm.remote.model.WeekdayBonus
 import com.madsam.otora.data.chunithm.ui.model.ChunithmAvatarUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmCardUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmFriendUiModel
@@ -38,6 +43,10 @@ internal class ChunithmViewModel() : ViewModel() {
     val chuniFriendDataUI = MutableStateFlow(listOf<ChunithmFriendUiModel>())
 
     val chunithmTopRankUiModel = MutableStateFlow(ChunithmTopRankUiModel())
+    
+    // 登录奖励数据
+    private val _chunithmLoginBonus = MutableStateFlow<ChuniLoginBonusDTO?>(null)
+    val chunithmLoginBonus = _chunithmLoginBonus.asStateFlow()
     
     // 地图数据
     val chunithmMapDataUI = MutableStateFlow(listOf<com.madsam.otora.ui.record.chunithm.components.ChunithmMapUiModel>())
@@ -87,6 +96,7 @@ internal class ChunithmViewModel() : ViewModel() {
         loadFriendDataFromLocal()
         loadTopRankDataFromLocal()
         loadMapDataFromLocal()
+        loadLoginBonusFromLocal(context)
         loadCharacters()
         preloadAllScores()
     }
@@ -493,6 +503,67 @@ internal class ChunithmViewModel() : ViewModel() {
                 }
             } catch (e: Exception) {
                 Log.e("ChunithmViewModel", "Error loading map data from ObjectBox", e)
+            }
+        }
+    }
+
+    private fun loadLoginBonusFromLocal(context: Context) {
+        viewModelScope.launch {
+            try {
+                Log.d("ChunithmViewModel", "Loading login bonus data from ObjectBox...")
+                val objectBoxService = ChunithmObjectBoxService()
+                
+                // 获取主数据
+                val mainData = objectBoxService.getLoginBonusData()
+                if (mainData != null) {
+                    // 获取各类奖励列表
+                    val monthlyRewards = objectBoxService.getMonthlyRewards().map { entity ->
+                        MonthlyReward(
+                            day = entity.day,
+                            imageUrl = entity.imageUrl,
+                            rewardName = entity.rewardName,
+                            isCompleted = entity.isCompleted
+                        )
+                    }
+                    
+                    val dailyRewards = objectBoxService.getDailyRewards().map { entity ->
+                        DailyReward(
+                            day = entity.day,
+                            imageUrl = entity.imageUrl,
+                            rewardName = entity.rewardName,
+                            isReceived = entity.isReceived,
+                            isNext = entity.isNext
+                        )
+                    }
+                    
+                    val weekdayBonuses = objectBoxService.getWeekdayBonuses().map { entity ->
+                        WeekdayBonus(
+                            weekday = entity.weekday,
+                            iconUrl = entity.iconUrl,
+                            description = entity.description,
+                            isToday = false  // 不从数据库读取，使用时调用isTodayBonus()动态判断
+                        )
+                    }
+                    
+                    // 组装 DTO
+                    val bonus = ChuniLoginBonusDTO(
+                        currentMonth = mainData.currentMonthDays,
+                        monthlyDays = mainData.currentMonthDays,
+                        totalDays = 0, // 暂时不使用这个字段
+                        monthlyRewards = monthlyRewards,
+                        dailyLoginDay = mainData.dailyStreakDay,
+                        dailyRewards = dailyRewards,
+                        weekdayBonuses = weekdayBonuses
+                    )
+                    
+                    _chunithmLoginBonus.value = bonus
+                    Log.d("ChunithmViewModel", "Login bonus data loaded from ObjectBox: $bonus")
+                } else {
+                    _chunithmLoginBonus.value = null
+                    Log.d("ChunithmViewModel", "No login bonus data found in ObjectBox")
+                }
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Error loading login bonus data: ${e.message}", e)
             }
         }
     }

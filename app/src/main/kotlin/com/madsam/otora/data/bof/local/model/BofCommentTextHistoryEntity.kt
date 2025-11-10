@@ -1,5 +1,6 @@
 package com.madsam.otora.data.bof.local.model
 
+import android.util.Log
 import io.objectbox.annotation.Entity
 import io.objectbox.annotation.Id
 import io.objectbox.annotation.Index
@@ -32,16 +33,6 @@ internal data class BofCommentTextHistoryEntity(
     // 字段值
     var value: String = ""
 ) {
-    constructor() : this(
-        id = 0,
-        username = "",
-        path = "",
-        fieldType = "",
-        timestamp = 0,
-        timeString = "",
-        value = ""
-    )
-    
     companion object {
         const val FIELD_TYPE_USER = "user"
         const val FIELD_TYPE_PATTERN = "pattern"
@@ -55,6 +46,7 @@ internal data class BofCommentTextHistoryEntity(
                 val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
                 format.parse(timeString)?.time ?: 0L
             } catch (e: Exception) {
+                Log.e("BofCommentTextHistory", "Failed to parse timestamp: $timeString", e)
                 0L
             }
         }
