@@ -3,7 +3,6 @@ package com.madsam.otora.ui.record.chunithm.pages
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
@@ -160,32 +159,27 @@ internal fun ChunithmMainPage(
                 }
             }
             item {
+                PlayDataList(
+                    width = contentWidthDp,
+                    chunithmPlayDataUiModel = viewModel.chunithmPlayDataUiModel
+                )
+            }
+            item {
+                AvatarLayout(
+                    chunithmAvatarUiModel = viewModel.chunithmAvatarUiModel,
+                    viewModel = viewModel,
+                    onCategoryClick = { category ->
+                        // 导航到装饰列表页面并预选该分类
+                        viewModel.selectAvatarCategory(category)
+                        // TODO: 添加导航逻辑到 ChunithmAvatarListPage
+                    }
+                )
+            }
+            item {
                 MapCard(
                     mapDataFlow = viewModel.chunithmMapDataUI,
                     width = contentWidthDp
                 )
-            }
-            item {
-                Row(
-                    modifier = Modifier.windowInsetsPadding(
-                        WindowInsets.displayCutout.only(
-                            if (useNavigationRail) {
-                                // 使用 NavigationRail 时，左侧已由 Rail 处理，只处理右侧
-                                WindowInsetsSides.End
-                            } else {
-                                // 使用 BottomNavigation 时，处理左侧和右侧
-                                WindowInsetsSides.Start + WindowInsetsSides.End
-                            }
-                        )
-                    )
-                ) {
-                    AvatarLayout(viewModel.chunithmAvatarUiModel)
-                    val playDataWidth = contentWidthDp - 224.dp
-                    PlayDataList(
-                        width = playDataWidth,
-                        chunithmPlayDataUiModel = viewModel.chunithmPlayDataUiModel
-                    )
-                }
             }
             
             // 底部安全区域，让用户滑动到底部时有额外的空间

@@ -40,10 +40,10 @@ internal data class ChunithmPlayRecordEntity(
     // Difficulty statistics (count, total)
     var rateHardCount: Int = 0,
     var rateHardTotal: Int = 0,
+    var rateBraveCount: Int = 0,
+    var rateBraveTotal: Int = 0,
     var rateAbsCount: Int = 0,
     var rateAbsTotal: Int = 0,
-    var rateAbsPCount: Int = 0,
-    var rateAbsPTotal: Int = 0,
     var rateCatasCount: Int = 0,
     var rateCatasTotal: Int = 0,
     
@@ -78,10 +78,10 @@ internal data class ChunithmPlayRecordEntity(
         rateFChainPTotal = 0,
         rateHardCount = 0,
         rateHardTotal = 0,
+        rateBraveCount = 0,
+        rateBraveTotal = 0,
         rateAbsCount = 0,
         rateAbsTotal = 0,
-        rateAbsPCount = 0,
-        rateAbsPTotal = 0,
         rateCatasCount = 0,
         rateCatasTotal = 0,
         lastUpdated = ""

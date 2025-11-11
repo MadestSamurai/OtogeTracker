@@ -280,7 +280,7 @@
     },
     {
       "id": "10:5859331499130272770",
-      "lastPropertyId": "35:3402213176405306183",
+      "lastPropertyId": "37:8284583792478983352",
       "name": "ChunithmPlayRecordEntity",
       "properties": [
         {
@@ -437,16 +437,6 @@
           "type": 5
         },
         {
-          "id": "31:5860919825901109906",
-          "name": "rateAbsPCount",
-          "type": 5
-        },
-        {
-          "id": "32:6151398168887620591",
-          "name": "rateAbsPTotal",
-          "type": 5
-        },
-        {
           "id": "33:5087661568115002903",
           "name": "rateCatasCount",
           "type": 5
@@ -460,6 +450,16 @@
           "id": "35:3402213176405306183",
           "name": "lastUpdated",
           "type": 9
+        },
+        {
+          "id": "36:2376254842786022570",
+          "name": "rateBraveCount",
+          "type": 5
+        },
+        {
+          "id": "37:8284583792478983352",
+          "name": "rateBraveTotal",
+          "type": 5
         }
       ],
       "relations": []
@@ -2381,10 +2381,65 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "47:3681750712113246390",
+      "lastPropertyId": "8:8942310034631181743",
+      "name": "ChunithmAvatarItemEntity",
+      "properties": [
+        {
+          "id": "1:199036758693959001",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7504492904175471222",
+          "name": "itemId",
+          "indexId": "130:2564905192138364051",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:2813010125884702989",
+          "name": "name",
+          "indexId": "131:5926806406616624272",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:2019873358296868666",
+          "name": "category",
+          "indexId": "132:6589133905993124538",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:8037851489462326310",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "6:2884725704941442088",
+          "name": "isCurrentlyUsed",
+          "type": 1
+        },
+        {
+          "id": "7:7128263652315028990",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "8:8942310034631181743",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "46:4583087702082708126",
-  "lastIndexId": "129:6044301559898436613",
+  "lastEntityId": "47:3681750712113246390",
+  "lastIndexId": "132:6589133905993124538",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
@@ -2731,7 +2786,9 @@
     4351027923781717758,
     8876910718545201237,
     3327608175031019186,
-    6667136809241911251
+    6667136809241911251,
+    5860919825901109906,
+    6151398168887620591
   ],
   "retiredRelationUids": [],
   "version": 1

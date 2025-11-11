@@ -88,6 +88,26 @@ internal class ChunithmViewModel() : ViewModel() {
 
     private val _isCharactersLoading = MutableStateFlow(false)
     val isCharactersLoading: StateFlow<Boolean> = _isCharactersLoading.asStateFlow()
+    
+    // Avatar 部件数据
+    private val _avatarItems = MutableStateFlow<List<com.madsam.otora.data.chunithm.local.model.ChunithmAvatarItemEntity>>(emptyList())
+    val avatarItems: StateFlow<List<com.madsam.otora.data.chunithm.local.model.ChunithmAvatarItemEntity>> = _avatarItems.asStateFlow()
+    
+    private val _selectedAvatarCategory = MutableStateFlow("face")
+    val selectedAvatarCategory: StateFlow<String> = _selectedAvatarCategory.asStateFlow()
+    
+    private val _isAvatarItemsLoading = MutableStateFlow(false)
+    val isAvatarItemsLoading: StateFlow<Boolean> = _isAvatarItemsLoading.asStateFlow()
+    
+    // Avatar 部件统计信息
+    data class AvatarCategoryStats(
+        val category: String,
+        val count: Int,
+        val previewItems: List<com.madsam.otora.data.chunithm.local.model.ChunithmAvatarItemEntity>
+    )
+    
+    private val _avatarCategoryStats = MutableStateFlow<Map<String, AvatarCategoryStats>>(emptyMap())
+    val avatarCategoryStats: StateFlow<Map<String, AvatarCategoryStats>> = _avatarCategoryStats.asStateFlow()
 
     fun loadData(context: Context) {
         loadCardFromLocal(context)
@@ -98,6 +118,7 @@ internal class ChunithmViewModel() : ViewModel() {
         loadMapDataFromLocal()
         loadLoginBonusFromLocal()
         loadCharacters()
+        loadAvatarCategoryStats()
         preloadAllScores()
     }
 
@@ -206,7 +227,7 @@ internal class ChunithmViewModel() : ViewModel() {
                         // 计算总分（所有最高分的和）
                         val totalScore: Long = bestScores.values.sum()
                         
-                        val playData = ChunithmPlayDataUiModel.ChuniPlayDataItemUI().apply {
+                        val playData = ChunithmPlayDataUiModel.ChunithmPlayDataItemUI().apply {
                             this.scoreTotal = totalScore
                             this.totalSongs = playRecordUiModel.totalSongs
                             this.rateSSSp = playRecordUiModel.rateSSSp
@@ -222,8 +243,8 @@ internal class ChunithmViewModel() : ViewModel() {
                             this.rateFChainP = playRecordUiModel.rateFChainP
                             this.rateClear = playRecordUiModel.rateClear
                             this.rateHard = playRecordUiModel.rateHard
+                            this.rateBrave = playRecordUiModel.rateBrave
                             this.rateAbs = playRecordUiModel.rateAbs
-                            this.rateAbsP = playRecordUiModel.rateAbsP
                             this.rateCatas = playRecordUiModel.rateCatas
                         }
                         
@@ -589,6 +610,95 @@ internal class ChunithmViewModel() : ViewModel() {
     // 获取当前使用的角色
     fun getCurrentCharacter(): com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity? {
         return _characters.value.find { it.isCurrentlyUsed }
+    }
+    
+    // ==================== Avatar 部件相关方法 ====================
+    
+    /**
+     * 加载指定类型的 Avatar 部件
+     * @param category 部件类型（face, head, wear, item, back, front）
+     */
+    fun loadAvatarItems(category: String) {
+        viewModelScope.launch {
+            _isAvatarItemsLoading.value = true
+            _selectedAvatarCategory.value = category
+            try {
+                Log.d("ChunithmViewModel", "Loading avatar items for category: $category")
+                val chunithmLocalService = ChunithmObjectBoxService()
+                val items = chunithmLocalService.getAvatarItemsByCategory(category)
+                _avatarItems.value = items
+                Log.d("ChunithmViewModel", "Loaded ${items.size} avatar items for category $category")
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Error loading avatar items", e)
+            } finally {
+                _isAvatarItemsLoading.value = false
+            }
+        }
+    }
+    
+    /**
+     * 切换 Avatar 部件类型
+     */
+    fun selectAvatarCategory(category: String) {
+        if (category != _selectedAvatarCategory.value) {
+            loadAvatarItems(category)
+        }
+    }
+    
+    /**
+     * 获取所有 Avatar 部件
+     */
+    fun loadAllAvatarItems() {
+        viewModelScope.launch {
+            _isAvatarItemsLoading.value = true
+            try {
+                Log.d("ChunithmViewModel", "Loading all avatar items")
+                val chunithmLocalService = ChunithmObjectBoxService()
+                val items = chunithmLocalService.getAllAvatarItems()
+                _avatarItems.value = items
+                Log.d("ChunithmViewModel", "Loaded ${items.size} total avatar items")
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Error loading all avatar items", e)
+            } finally {
+                _isAvatarItemsLoading.value = false
+            }
+        }
+    }
+    
+    /**
+     * 加载 Avatar 部件统计信息（每个类型的数量和预览）
+     */
+    fun loadAvatarCategoryStats() {
+        viewModelScope.launch {
+            try {
+                Log.d("ChunithmViewModel", "Loading avatar category stats")
+                val chunithmLocalService = ChunithmObjectBoxService()
+                val categories = listOf("face", "head", "wear", "item", "back", "front")
+                
+                val statsMap = mutableMapOf<String, AvatarCategoryStats>()
+                categories.forEach { category ->
+                    // 过滤掉名为"ノーマル"的装饰
+                    val items = chunithmLocalService.getAvatarItemsByCategory(category)
+                        .filter { it.name != "ノーマル" }
+                    
+                    // 随机取6个作为预览（优先显示当前使用的）
+                    val currentlyUsed = items.filter { it.isCurrentlyUsed }
+                    val notUsed = items.filter { !it.isCurrentlyUsed }.shuffled()
+                    val previewItems = (currentlyUsed + notUsed).take(6)
+                    
+                    statsMap[category] = AvatarCategoryStats(
+                        category = category,
+                        count = items.size,
+                        previewItems = previewItems
+                    )
+                }
+                
+                _avatarCategoryStats.value = statsMap
+                Log.d("ChunithmViewModel", "Loaded avatar stats for ${statsMap.size} categories")
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Error loading avatar category stats", e)
+            }
+        }
     }
 
     internal fun loadAllSongsData() {

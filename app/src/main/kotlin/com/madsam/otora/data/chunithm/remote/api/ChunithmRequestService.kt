@@ -28,6 +28,7 @@ import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserExtDataStore
 import com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmRatingEntity
 import com.madsam.otora.data.chunithm.local.objectbox.ChunithmObjectBoxService
+import com.madsam.otora.data.chunithm.remote.model.ChunithmAvatarItemDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmCookieDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmFriendDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmFullScoreDTO
@@ -591,13 +592,18 @@ internal class ChunithmRequestService(private val context: Context) {
     }
 
     /**
-     * 解析统计类别图片中的标识符
-     * 例如: "path/to/rank_13.png" -> "rank_13"
+     * 解析统计类别图片中的标识符，统一去掉 icon_ 前缀
+     * 例如: "path/to/icon_rank_13.png" -> "rank_13"
+     *       "path/to/icon_clear.png" -> "clear"
      */
-    private fun extractStatsIdentifier(src: String): String =
-        src.split("/").lastOrNull()
+    private fun extractStatsIdentifier(src: String): String {
+        val filename = src.split("/").lastOrNull()
             ?.split(".")?.firstOrNull()
             ?: ""
+        
+        // 统一去掉 icon_ 前缀
+        return filename.removePrefix("icon_")
+    }
 
     private fun parsePlayRecord(doc: Document, diff: String): ChunithmPlayRecordDTO {
         val chunithmPlayRecordDTO = ChunithmPlayRecordDTO()
@@ -630,18 +636,18 @@ internal class ChunithmRequestService(private val context: Context) {
                 "rank_10" -> chunithmPlayRecordDTO.rateSS = count    // SS
                 "rank_9" -> chunithmPlayRecordDTO.rateSp = count     // S+
                 "rank_8" -> chunithmPlayRecordDTO.rateS = count      // S
-                // 达成统计
-                "icon_clear" -> chunithmPlayRecordDTO.rateClear = count      // Clear
-                "icon_fullcombo" -> chunithmPlayRecordDTO.rateFC = count     // FC
-                "icon_alljustice" -> chunithmPlayRecordDTO.rateAJ = count    // AJ
-                "icon_alljusticecritical" -> chunithmPlayRecordDTO.rateAJC = count  // AJC
-                "icon_fullchain" -> chunithmPlayRecordDTO.rateFChain = count   // FChain
-                "icon_fullchain2" -> chunithmPlayRecordDTO.rateFChainP = count // FChain+
-                // 难度统计
-                "icon_hard" -> chunithmPlayRecordDTO.rateHard = count       // Hard
-                "icon_absolute" -> chunithmPlayRecordDTO.rateAbs = count    // Abs
-                "icon_absolutep" -> chunithmPlayRecordDTO.rateAbsP = count  // Abs+
-                "icon_catastrophy" -> chunithmPlayRecordDTO.rateCatas = count // Catastrophy
+                // 达成统计（已去掉 icon_ 前缀）
+                "clear" -> chunithmPlayRecordDTO.rateClear = count      // Clear
+                "fullcombo" -> chunithmPlayRecordDTO.rateFC = count     // FC
+                "alljustice" -> chunithmPlayRecordDTO.rateAJ = count    // AJ
+                "alljusticecritical" -> chunithmPlayRecordDTO.rateAJC = count  // AJC
+                "fullchain" -> chunithmPlayRecordDTO.rateFChain = count   // FChain
+                "fullchain2" -> chunithmPlayRecordDTO.rateFChainP = count // FChain+
+                // 难度统计（已去掉 icon_ 前缀）
+                "hard" -> chunithmPlayRecordDTO.rateHard = count       // Hard
+                "brave" -> chunithmPlayRecordDTO.rateBrave = count     // Brave
+                "absolute" -> chunithmPlayRecordDTO.rateAbs = count    // Absolute
+                "catastrophy" -> chunithmPlayRecordDTO.rateCatas = count // Catastrophy
             }
         }
 
@@ -1275,13 +1281,13 @@ internal class ChunithmRequestService(private val context: Context) {
             serviceScope.launch {
                 try {
                     // 基础步骤数（不包括好友数据）
-                    val baseSteps = 9
+                    val baseSteps = 10
                     var currentStep = 0
                     
                     // Helper function to update progress for base steps
                     suspend fun updateBaseProgress(message: String) {
                         currentStep++
-                        val progress = (currentStep.toFloat() / (baseSteps + 1)) * 0.9f // 前90%给基础步骤
+                        val progress = (currentStep.toFloat() / (baseSteps + 1)) * 0.85f // 前85%给基础步骤
                         withContext(Dispatchers.Main) {
                             onProgress?.invoke(progress, message)
                         }
@@ -1312,6 +1318,13 @@ internal class ChunithmRequestService(private val context: Context) {
                     updateBaseProgress("获取角色列表...")
                     requestCharacterList()
                     
+                    updateBaseProgress("获取Avatar部件...")
+                    requestAllAvatarItems { avatarProgress, avatarMessage ->
+                        // Avatar部件进度映射到总进度的一小部分
+                        val mappedProgress = 0.85f * ((currentStep - 1 + avatarProgress) / (baseSteps + 1))
+                        onProgress?.invoke(mappedProgress, avatarMessage)
+                    }
+                    
                     updateBaseProgress("获取登录奖励...")
                     requestLoginBonus()
                     
@@ -1319,9 +1332,9 @@ internal class ChunithmRequestService(private val context: Context) {
                     updateBaseProgress("处理成绩记录...")
                     requestPlayRecord()
                     
-                    // 好友数据处理，占用最后的10%进度
+                    // 好友数据处理，占用最后的15%进度
                     requestFriend { friendProgress, friendMessage ->
-                        val totalProgress = 0.9f + (friendProgress * 0.1f) // 90% + 好友进度的10%
+                        val totalProgress = 0.85f + (friendProgress * 0.15f) // 85% + 好友进度的15%
                         onProgress?.invoke(totalProgress, friendMessage)
                     }
 
@@ -1380,6 +1393,191 @@ internal class ChunithmRequestService(private val context: Context) {
                     onError?.invoke("歌曲数据更新正在进行中")
                 }
             }
+        }
+    }
+    
+    // ==================== Avatar 自定义部件相关方法 ====================
+    
+    /**
+     * 解析 Avatar 自定义页面的部件列表
+     * @param doc HTML 文档
+     * @param category 部件类型（face, head, wear, item, back, front）
+     * @return Avatar 部件 DTO 列表
+     */
+    private fun parseAvatarItems(doc: Document, category: String): List<ChunithmAvatarItemDTO> {
+        try {
+            Log.d(TAG, "=== Parsing avatar items for category: $category ===")
+            val items = mutableListOf<ChunithmAvatarItemDTO>()
+            
+            // 解析当前使用的部件（在 box01 w420 中，不在 box01 w420 name="wardId..." 中）
+            val currentItemBlock = doc.select("div.box01.w420").firstOrNull { block ->
+                block.selectFirst("div.box01_title.text_b")?.text()?.contains("设置中的") == true
+            }
+            
+            val currentItem = currentItemBlock?.let { block ->
+                parseAvatarItemBlock(block, category, isCurrentlyUsed = true)
+            }
+            
+            currentItem?.let { items.add(it) }
+            
+            // 解析可用的部件列表
+            val itemBlocks = doc.select("div.box01.w420[name^=wardId]")
+            itemBlocks.forEach { block ->
+                val item = parseAvatarItemBlock(block, category, isCurrentlyUsed = false)
+                item?.let { items.add(it) }
+            }
+            
+            Log.d(TAG, "Parsed ${items.size} avatar items for category $category")
+            return items
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing avatar items for category $category", e)
+            return emptyList()
+        }
+    }
+    
+    /**
+     * 解析单个 Avatar 部件块
+     */
+    private fun parseAvatarItemBlock(
+        block: Element,
+        category: String,
+        isCurrentlyUsed: Boolean
+    ): ChunithmAvatarItemDTO? {
+        try {
+            // 获取图片 URL
+            val imageUrl = block.select("div.avatar_img_side img")
+                .firstOrNull()
+                ?.attr("src") ?: ""
+            
+            // 获取部件名称 - 优先从 avatar_parts_name_block 中查找（可用部件），否则直接查找 avatar_parts_name（使用中的部件）
+            val name = block.select("div.avatar_parts_name_block div.avatar_parts_name")
+                .firstOrNull()
+                ?.text()
+                ?.trim()
+                ?: block.select("div.avatar_parts_name")
+                    .firstOrNull()
+                    ?.text()
+                    ?.trim()
+                ?: ""
+            
+            // 获取 token 和 idx
+            val token = block.select("input[name=token]").attr("value")
+            val itemId = block.select("input[name=idx]").attr("value")
+            
+            // 如果没有名称，则无效
+            if (name.isEmpty()) {
+                Log.w(TAG, "Avatar item has no name, skipping")
+                return null
+            }
+            
+            // 如果不是当前使用的，必须有 ID
+            if (itemId.isEmpty() && !isCurrentlyUsed) {
+                Log.w(TAG, "Avatar item '$name' has no ID and is not currently used, skipping")
+                return null
+            }
+            
+            Log.d(TAG, "Parsed avatar item: name='$name', id='$itemId', isCurrentlyUsed=$isCurrentlyUsed")
+            
+            return ChunithmAvatarItemDTO(
+                itemId = itemId,
+                name = name,
+                category = category,
+                imageUrl = imageUrl,
+                isCurrentlyUsed = isCurrentlyUsed,
+                token = token
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing avatar item block", e)
+            return null
+        }
+    }
+    
+    /**
+     * 请求指定类型的 Avatar 部件数据
+     * @param category 部件类型（face, head, wear, item, back, front）
+     */
+    private suspend fun requestAvatarItems(category: String) {
+        try {
+            val categoryPath = when (category) {
+                "face" -> "customiseFace"
+                "head" -> "customiseHead"
+                "wear" -> "customiseWear"
+                "item" -> "customiseItem"
+                "back" -> "customiseBack"
+                "front" -> "customiseFront"
+                else -> return
+            }
+            
+            Log.d(TAG, "Requesting avatar items for category: $category")
+            val doc = requestDataFromServer("$CHUNITHM_URL/collection/avatarCustom/$categoryPath/") ?: return
+            
+            // 解析部件数据
+            val items = parseAvatarItems(doc, category)
+            
+            if (items.isEmpty()) {
+                Log.w(TAG, "No avatar items found for category: $category")
+                return
+            }
+            
+            // 转换为 Entity
+            val syncedAt = System.currentTimeMillis()
+            val entities = items.map { dto ->
+                com.madsam.otora.data.chunithm.local.model.ChunithmAvatarItemEntity(
+                    id = 0, // ObjectBox auto-generate
+                    itemId = dto.itemId,
+                    name = dto.name,
+                    category = dto.category,
+                    imageUrl = dto.imageUrl,
+                    isCurrentlyUsed = dto.isCurrentlyUsed,
+                    token = dto.token,
+                    syncedAt = syncedAt
+                )
+            }
+            
+            // 保存到 ObjectBox（只替换该类型的数据）
+            chunithmLocalService.saveAvatarItems(entities, category)
+            Log.d(TAG, "Avatar items saved for category $category: ${entities.size} items")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error requesting avatar items for category $category", e)
+        }
+    }
+    
+    /**
+     * 请求所有 Avatar 部件数据
+     */
+    suspend fun requestAllAvatarItems(
+        onProgress: ((Float, String) -> Unit)? = null
+    ) {
+        try {
+            val categories = listOf("face", "head", "wear", "item", "back", "front")
+            val categoryNames = mapOf(
+                "face" to "面孔",
+                "head" to "头部",
+                "wear" to "服装",
+                "item" to "道具",
+                "back" to "背部",
+                "front" to "前部"
+            )
+            
+            categories.forEachIndexed { index, category ->
+                val progress = (index + 1).toFloat() / categories.size
+                val categoryName = categoryNames[category] ?: category
+                withContext(Dispatchers.Main) {
+                    onProgress?.invoke(progress, "获取${categoryName}部件...")
+                }
+                
+                requestAvatarItems(category)
+                delay(500) // 避免请求过快
+            }
+            
+            withContext(Dispatchers.Main) {
+                onProgress?.invoke(1.0f, "完成")
+            }
+            
+            Log.d(TAG, "All avatar items requested successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error requesting all avatar items", e)
+            throw e
         }
     }
 }

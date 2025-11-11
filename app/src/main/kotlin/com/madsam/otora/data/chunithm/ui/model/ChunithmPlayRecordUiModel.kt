@@ -22,8 +22,8 @@ data class ChunithmPlayRecordUiModel(
     
     // Difficulty statistics
     val rateHard: Int = 0,    // Hard Clear 达成数量
+    val rateBrave: Int = 0,   // Brave 达成数量
     val rateAbs: Int = 0,     // Absolute 达成数量
-    val rateAbsP: Int = 0,    // Absolute+ 达成数量
     val rateCatas: Int = 0,   // Catastrophe 达成数量
     
     val lastUpdated: String = "",

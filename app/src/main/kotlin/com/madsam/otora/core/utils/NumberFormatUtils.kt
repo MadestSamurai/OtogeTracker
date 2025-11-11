@@ -20,6 +20,16 @@ object NumberFormatUtils {
     }
 
     /**
+     * 整型格式化成千分位
+     *
+     * @param value 整型
+     * @return 带千分位分隔的字符串
+     */
+    fun formatThousand(value: Int): String {
+        return String.format(Locale.getDefault(), "%,d", value)
+    }
+
+    /**
      * 浮点数格式化成百分比
      *
      * @param value 浮点数

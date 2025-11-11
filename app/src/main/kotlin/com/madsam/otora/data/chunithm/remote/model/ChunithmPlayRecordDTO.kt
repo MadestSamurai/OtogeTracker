@@ -15,8 +15,8 @@ internal data class ChunithmPlayRecordDTO(
     var rateFChainP: Int = 0, // Full Chain Platinum 达成数量
     var rateClear: Int = 0,   // Clear 达成数量
     var rateHard: Int = 0,    // Hard Clear 达成数量
+    var rateBrave: Int = 0,   // Brave 达成数量
     var rateAbs: Int = 0,     // Absolute 达成数量
-    var rateAbsP: Int = 0,    // Absolute+ 达成数量
     var rateCatas: Int = 0,   // Catastrophe 达成数量
     var genreList: List<ChunithmGenreDTO> = listOf()
 )

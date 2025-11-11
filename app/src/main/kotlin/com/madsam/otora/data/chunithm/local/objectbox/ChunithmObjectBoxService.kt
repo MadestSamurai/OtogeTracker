@@ -2,6 +2,8 @@ package com.madsam.otora.data.chunithm.local.objectbox
 
 import android.util.Log
 import com.madsam.otora.core.database.ObjectBoxManager
+import com.madsam.otora.data.chunithm.local.model.ChunithmAvatarItemEntity
+import com.madsam.otora.data.chunithm.local.model.ChunithmAvatarItemEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmDailyRewardEntity
@@ -67,6 +69,7 @@ internal class ChunithmObjectBoxService {
     private val monthlyRewardBox: Box<ChunithmMonthlyRewardEntity> = boxStore.boxFor(ChunithmMonthlyRewardEntity::class.java)
     private val dailyRewardBox: Box<ChunithmDailyRewardEntity> = boxStore.boxFor(ChunithmDailyRewardEntity::class.java)
     private val weekdayBonusBox: Box<ChunithmWeekdayBonusEntity> = boxStore.boxFor(ChunithmWeekdayBonusEntity::class.java)
+    private val avatarItemBox: Box<ChunithmAvatarItemEntity> = boxStore.boxFor(ChunithmAvatarItemEntity::class.java)
     
     /**
      * 获取歌曲的最新成绩
@@ -269,8 +272,8 @@ internal class ChunithmObjectBoxService {
                         rateFChain = record.rateFChainCount,
                         rateFChainP = record.rateFChainPCount,
                         rateHard = record.rateHardCount,
+                        rateBrave = record.rateBraveCount,
                         rateAbs = record.rateAbsCount,
-                        rateAbsP = record.rateAbsPCount,
                         rateCatas = record.rateCatasCount,
                         lastUpdated = record.lastUpdated,
                         scores = scores.map { scoreEntity ->
@@ -523,11 +526,11 @@ internal class ChunithmObjectBoxService {
                     rateHardCount = playRecordData.rateHard
                     rateHardTotal = playRecordData.totalSongs
                     
+                    rateBraveCount = playRecordData.rateBrave
+                    rateBraveTotal = playRecordData.totalSongs
+                    
                     rateAbsCount = playRecordData.rateAbs
                     rateAbsTotal = playRecordData.totalSongs
-                    
-                    rateAbsPCount = playRecordData.rateAbsP
-                    rateAbsPTotal = playRecordData.totalSongs
                     
                     rateCatasCount = playRecordData.rateCatas
                     rateCatasTotal = playRecordData.totalSongs
@@ -1569,6 +1572,107 @@ internal class ChunithmObjectBoxService {
                 weekdayBonusBox.all
             } catch (e: Exception) {
                 Log.e(TAG, "Error loading weekday bonuses", e)
+                emptyList()
+            }
+        }
+    }
+    
+    // ==================== Avatar 自定义部件相关方法 ====================
+    
+    /**
+     * 保存 Avatar 部件数据
+     * @param items Avatar 部件列表
+     * @param category 部件类型（face, head, wear, item, back, front），如果提供则只清空该类型的数据
+     */
+    suspend fun saveAvatarItems(items: List<ChunithmAvatarItemEntity>, category: String? = null) {
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Saving avatar items, count: ${items.size}, category: $category")
+                
+                if (category != null) {
+                    // 只清空指定类型的数据
+                    val oldItems = avatarItemBox.query(
+                        ChunithmAvatarItemEntity_.category.equal(category)
+                    ).build().find()
+                    avatarItemBox.remove(oldItems)
+                } else {
+                    // 清空所有数据
+                    avatarItemBox.removeAll()
+                }
+                
+                // 保存新数据
+                avatarItemBox.put(items)
+                
+                Log.d(TAG, "Avatar items saved successfully")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving avatar items", e)
+                throw e
+            }
+        }
+    }
+    
+    /**
+     * 获取指定类型的所有 Avatar 部件
+     * @param category 部件类型（face, head, wear, item, back, front）
+     * @return Avatar 部件列表
+     */
+    suspend fun getAvatarItemsByCategory(category: String): List<ChunithmAvatarItemEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Loading avatar items for category: $category")
+                val items = avatarItemBox.query(
+                    ChunithmAvatarItemEntity_.category.equal(category)
+                ).build().find()
+                Log.d(TAG, "Loaded ${items.size} avatar items")
+                items
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading avatar items", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 获取所有 Avatar 部件
+     * @return Avatar 部件列表（按类型和名称排序）
+     */
+    suspend fun getAllAvatarItems(): List<ChunithmAvatarItemEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Loading all avatar items")
+                val items = avatarItemBox.all
+                    .sortedWith(compareBy<ChunithmAvatarItemEntity> { it.category }
+                        .thenBy { it.name })
+                Log.d(TAG, "Loaded ${items.size} avatar items")
+                items
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading all avatar items", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 获取当前使用的 Avatar 部件
+     * @param category 部件类型（可选），如果不提供则返回所有正在使用的部件
+     * @return 当前使用的 Avatar 部件列表
+     */
+    suspend fun getCurrentAvatarItems(category: String? = null): List<ChunithmAvatarItemEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val query = if (category != null) {
+                    avatarItemBox.query(
+                        ChunithmAvatarItemEntity_.category.equal(category)
+                            .and(ChunithmAvatarItemEntity_.isCurrentlyUsed.equal(true))
+                    )
+                } else {
+                    avatarItemBox.query(
+                        ChunithmAvatarItemEntity_.isCurrentlyUsed.equal(true)
+                    )
+                }
+                query.build().find()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading current avatar items", e)
                 emptyList()
             }
         }
