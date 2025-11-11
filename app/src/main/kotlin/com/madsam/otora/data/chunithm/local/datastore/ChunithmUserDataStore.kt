@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.madsam.otora.data.chunithm.remote.model.ChuniUserDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmUserDTO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -53,7 +53,7 @@ internal class ChunithmUserDataStore(private val context: Context) {
     /**
      * 保存用户数据
      */
-    suspend fun saveUserData(user: ChuniUserDTO) {
+    suspend fun saveUserData(user: ChunithmUserDTO) {
         context.chunithmUserDataStore.edit { preferences ->
             preferences[NAME_IN] = user.nameIn
             preferences[PROFILE_BACKGROUND] = user.profileBackground
@@ -78,13 +78,13 @@ internal class ChunithmUserDataStore(private val context: Context) {
     /**
      * 获取用户数据 Flow
      */
-    fun getUserDataFlow(): Flow<ChuniUserDTO?> {
+    fun getUserDataFlow(): Flow<ChunithmUserDTO?> {
         return context.chunithmUserDataStore.data.map { preferences ->
             val nameIn = preferences[NAME_IN] ?: ""
             if (nameIn.isEmpty()) {
                 null
             } else {
-                ChuniUserDTO(
+                ChunithmUserDTO(
                     nameIn = nameIn,
                     profileBackground = preferences[PROFILE_BACKGROUND] ?: "",
                     reborn = preferences[REBORN] ?: 0,
@@ -114,16 +114,7 @@ internal class ChunithmUserDataStore(private val context: Context) {
      * 获取用户数据（挂起函数）
      * 获取当前 DataStore 中的第一个值
      */
-    suspend fun getUserData(): ChuniUserDTO? {
+    suspend fun getUserData(): ChunithmUserDTO? {
         return getUserDataFlow().first()
-    }
-    
-    /**
-     * 清除用户数据
-     */
-    suspend fun clearUserData() {
-        context.chunithmUserDataStore.edit { preferences ->
-            preferences.clear()
-        }
     }
 }

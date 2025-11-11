@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.madsam.otora.data.chunithm.remote.model.ChuniUserExtendDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmUserExtendDTO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -30,7 +30,7 @@ internal class ChunithmUserExtDataStore(private val context: Context) {
     /**
      * 保存用户扩展数据
      */
-    suspend fun saveUserExtData(userExt: ChuniUserExtendDTO) {
+    suspend fun saveUserExtData(userExt: ChunithmUserExtendDTO) {
         context.chunithmUserExtDataStore.edit { preferences ->
             preferences[FRIEND_CODE] = userExt.friendCode
             preferences[POINT] = userExt.point
@@ -42,13 +42,13 @@ internal class ChunithmUserExtDataStore(private val context: Context) {
     /**
      * 获取用户扩展数据 Flow
      */
-    fun getUserExtDataFlow(): Flow<ChuniUserExtendDTO?> {
+    fun getUserExtDataFlow(): Flow<ChunithmUserExtendDTO?> {
         return context.chunithmUserExtDataStore.data.map { preferences ->
             val friendCode = preferences[FRIEND_CODE] ?: ""
             if (friendCode.isEmpty()) {
                 null
             } else {
-                ChuniUserExtendDTO(
+                ChunithmUserExtendDTO(
                     friendCode = friendCode,
                     point = preferences[POINT] ?: "",
                     totalPoint = preferences[TOTAL_POINT] ?: "",
@@ -62,16 +62,7 @@ internal class ChunithmUserExtDataStore(private val context: Context) {
      * 获取用户扩展数据（挂起函数）
      * 获取当前 DataStore 中的第一个值
      */
-    suspend fun getUserExtData(): ChuniUserExtendDTO? {
+    suspend fun getUserExtData(): ChunithmUserExtendDTO? {
         return getUserExtDataFlow().first()
-    }
-    
-    /**
-     * 清除用户扩展数据
-     */
-    suspend fun clearUserExtData() {
-        context.chunithmUserExtDataStore.edit { preferences ->
-            preferences.clear()
-        }
     }
 }

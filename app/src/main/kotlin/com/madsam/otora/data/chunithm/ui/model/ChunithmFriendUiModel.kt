@@ -1,6 +1,6 @@
 package com.madsam.otora.data.chunithm.ui.model
 
-import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmFriendDTO
 
 internal data class ChunithmFriendUiModel(
     var friendName: String,
@@ -23,25 +23,25 @@ internal data class ChunithmFriendUiModel(
     var isFavorite: Boolean = false,
     var isScored: Boolean = false,
 ) {
-    constructor(chuniFriendDTO: ChuniFriendDTO): this (
-        friendName = chuniFriendDTO.friendName,
-        profileBackground = chuniFriendDTO.profileBackground,
-        reborn = chuniFriendDTO.reborn,
-        level = chuniFriendDTO.level,
-        rating = chuniFriendDTO.rating,
-        overpower = chuniFriendDTO.overpower,
-        lastPlay = chuniFriendDTO.lastPlay,
-        roleImageUrl = chuniFriendDTO.roleImageUrl,
-        roleBase = chuniFriendDTO.roleBase,
-        classEmblemTop = chuniFriendDTO.classEmblemTop,
-        classEmblemBase = chuniFriendDTO.classEmblemBase,
-        honor1 = chuniFriendDTO.honor1,
-        honor2 = chuniFriendDTO.honor2,
-        honor3 = chuniFriendDTO.honor3,
-        honorBase1 = chuniFriendDTO.honorBase1,
-        honorBase2 = chuniFriendDTO.honorBase2,
-        honorBase3 = chuniFriendDTO.honorBase3,
-        isFavorite = chuniFriendDTO.isFavorite,
-        isScored = chuniFriendDTO.isScored
+    constructor(chunithmFriendDTO: ChunithmFriendDTO): this (
+        friendName = chunithmFriendDTO.friendName,
+        profileBackground = chunithmFriendDTO.profileBackground,
+        reborn = chunithmFriendDTO.reborn,
+        level = chunithmFriendDTO.level,
+        rating = chunithmFriendDTO.rating,
+        overpower = chunithmFriendDTO.overpower,
+        lastPlay = chunithmFriendDTO.lastPlay,
+        roleImageUrl = chunithmFriendDTO.roleImageUrl,
+        roleBase = chunithmFriendDTO.roleBase,
+        classEmblemTop = chunithmFriendDTO.classEmblemTop,
+        classEmblemBase = chunithmFriendDTO.classEmblemBase,
+        honor1 = chunithmFriendDTO.honor1,
+        honor2 = chunithmFriendDTO.honor2,
+        honor3 = chunithmFriendDTO.honor3,
+        honorBase1 = chunithmFriendDTO.honorBase1,
+        honorBase2 = chunithmFriendDTO.honorBase2,
+        honorBase3 = chunithmFriendDTO.honorBase3,
+        isFavorite = chunithmFriendDTO.isFavorite,
+        isScored = chunithmFriendDTO.isScored
     )
 }

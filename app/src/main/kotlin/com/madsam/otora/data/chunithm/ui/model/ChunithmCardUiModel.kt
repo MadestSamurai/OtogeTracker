@@ -1,7 +1,7 @@
 package com.madsam.otora.data.chunithm.ui.model
 
-import com.madsam.otora.data.chunithm.remote.model.ChuniUserDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniUserExtendDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmUserDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmUserExtendDTO
 
 internal data class ChunithmCardUiModel(
     var nameIn: String = "",
@@ -26,24 +26,24 @@ internal data class ChunithmCardUiModel(
     var totalPoint: String = "",
     var playCount: String = ""
 ) {
-    constructor(chuniUserDTO: ChuniUserDTO, chuniUserExt: ChuniUserExtendDTO): this (
-        nameIn = chuniUserDTO.nameIn,
-        profileBackground = chuniUserDTO.profileBackground,
-        reborn = chuniUserDTO.reborn,
-        level = chuniUserDTO.level,
-        rating = chuniUserDTO.rating,
-        overpower = chuniUserDTO.overpower,
-        lastPlay = chuniUserDTO.lastPlay,
-        roleImageUrl = chuniUserDTO.roleImageUrl,
-        roleBase = chuniUserDTO.roleBase,
-        classEmblemBase = chuniUserDTO.classEmblemBase,
-        classEmblemTop = chuniUserDTO.classEmblemTop,
-        honor1 = chuniUserDTO.honor1,
-        honor2 = chuniUserDTO.honor2,
-        honor3 = chuniUserDTO.honor3,
-        honorBase1 = chuniUserDTO.honorBase1,
-        honorBase2 = chuniUserDTO.honorBase2,
-        honorBase3 = chuniUserDTO.honorBase3,
+    constructor(chunithmUserDTO: ChunithmUserDTO, chuniUserExt: ChunithmUserExtendDTO): this (
+        nameIn = chunithmUserDTO.nameIn,
+        profileBackground = chunithmUserDTO.profileBackground,
+        reborn = chunithmUserDTO.reborn,
+        level = chunithmUserDTO.level,
+        rating = chunithmUserDTO.rating,
+        overpower = chunithmUserDTO.overpower,
+        lastPlay = chunithmUserDTO.lastPlay,
+        roleImageUrl = chunithmUserDTO.roleImageUrl,
+        roleBase = chunithmUserDTO.roleBase,
+        classEmblemBase = chunithmUserDTO.classEmblemBase,
+        classEmblemTop = chunithmUserDTO.classEmblemTop,
+        honor1 = chunithmUserDTO.honor1,
+        honor2 = chunithmUserDTO.honor2,
+        honor3 = chunithmUserDTO.honor3,
+        honorBase1 = chunithmUserDTO.honorBase1,
+        honorBase2 = chunithmUserDTO.honorBase2,
+        honorBase3 = chunithmUserDTO.honorBase3,
         friendCode = chuniUserExt.friendCode,
         point = chuniUserExt.point,
         totalPoint = chuniUserExt.totalPoint,

@@ -1,6 +1,6 @@
 package com.madsam.otora.data.chunithm.remote.model
 
-internal data class ChuniFullScoreDTO(
+internal data class ChunithmFullScoreDTO(
     var id : String = "",
     var title : String = "",
     var genre : String = "",

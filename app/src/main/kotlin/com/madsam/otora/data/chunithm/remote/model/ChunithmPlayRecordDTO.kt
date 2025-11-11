@@ -1,6 +1,6 @@
 package com.madsam.otora.data.chunithm.remote.model
 
-internal data class ChuniPlayRecordDTO(
+internal data class ChunithmPlayRecordDTO(
     var totalSongs: Int = 0, // 总曲目数
     var rateSSSp: Int = 0, // SSS+ 达成数量
     var rateSSS: Int = 0,  // SSS 达成数量
@@ -18,5 +18,5 @@ internal data class ChuniPlayRecordDTO(
     var rateAbs: Int = 0,     // Absolute 达成数量
     var rateAbsP: Int = 0,    // Absolute+ 达成数量
     var rateCatas: Int = 0,   // Catastrophe 达成数量
-    var genreList: List<ChuniGenreDTO> = listOf()
+    var genreList: List<ChunithmGenreDTO> = listOf()
 )

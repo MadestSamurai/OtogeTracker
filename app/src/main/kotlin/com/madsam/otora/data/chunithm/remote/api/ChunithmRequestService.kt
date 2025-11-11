@@ -28,19 +28,19 @@ import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserExtDataStore
 import com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmRatingEntity
 import com.madsam.otora.data.chunithm.local.objectbox.ChunithmObjectBoxService
-import com.madsam.otora.data.chunithm.remote.model.ChuniCookieDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniFullScoreDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniGenreDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmCookieDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmFriendDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmFullScoreDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmGenreDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniLoginBonusDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniMapDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniMapDTO.ChuniMapArea
-import com.madsam.otora.data.chunithm.remote.model.ChuniPenguinDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniPlayRecordDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniScoreDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniStatueDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniUserDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniUserExtendDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmMapDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmMapDTO.ChuniMapArea
+import com.madsam.otora.data.chunithm.remote.model.ChunithmPenguinDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmPlayRecordDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmScoreDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmStatueDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmUserDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmUserExtendDTO
 import com.madsam.otora.data.chunithm.remote.model.DailyReward
 import com.madsam.otora.data.chunithm.remote.model.MonthlyReward
 import com.madsam.otora.data.chunithm.remote.model.WeekdayBonus
@@ -101,12 +101,12 @@ internal class ChunithmRequestService(private val context: Context) {
     }
     
     // Cookie 从 DataStore 延迟加载
-    private var cookie: ChuniCookieDTO? = null
+    private var cookie: ChunithmCookieDTO? = null
     
     /**
      * 获取 Cookie，首次调用时从 DataStore 加载
      */
-    private suspend fun getCookie(): ChuniCookieDTO {
+    private suspend fun getCookie(): ChunithmCookieDTO {
         if (cookie == null) {
             cookie = cookieDataStore.getCookie()
         }
@@ -116,7 +116,7 @@ internal class ChunithmRequestService(private val context: Context) {
     /**
      * 更新 Cookie 并保存到 DataStore
      */
-    private suspend fun updateCookie(newCookie: ChuniCookieDTO) {
+    private suspend fun updateCookie(newCookie: ChunithmCookieDTO) {
         cookie = newCookie
         cookieDataStore.saveCookie(newCookie)
     }
@@ -187,7 +187,7 @@ internal class ChunithmRequestService(private val context: Context) {
         }
     }
     
-    private fun buildCookieString(cookie: ChuniCookieDTO): String = buildString {
+    private fun buildCookieString(cookie: ChunithmCookieDTO): String = buildString {
         append("_t=${cookie.token}")
         append("; expires=${cookie.expires}")
         append("; Max-Age=${cookie.maxAge}")
@@ -202,15 +202,15 @@ internal class ChunithmRequestService(private val context: Context) {
         }
     }
 
-    private fun parseChuniUser(doc: Document): ChuniUserDTO {
+    private fun parseChuniUser(doc: Document): ChunithmUserDTO {
         Log.d(TAG, "=== Starting parseChuniUser ===")
-        val chuniUserDTO = ChuniUserDTO()
+        val chunithmUserDTO = ChunithmUserDTO()
         
-        chuniUserDTO.nameIn = doc.selectFirst("div.player_name_in")?.text() ?: ""
-        Log.d(TAG, "nameIn: ${chuniUserDTO.nameIn}")
+        chunithmUserDTO.nameIn = doc.selectFirst("div.player_name_in")?.text() ?: ""
+        Log.d(TAG, "nameIn: ${chunithmUserDTO.nameIn}")
 
         // 更健壮的背景解析，直接从 style 属性中提取
-        chuniUserDTO.profileBackground = doc.selectFirst("div.box_playerprofile")
+        chunithmUserDTO.profileBackground = doc.selectFirst("div.box_playerprofile")
             ?.attr("style")
             ?.let { style ->
                 Log.d(TAG, "Profile background style: $style")
@@ -220,13 +220,13 @@ internal class ChunithmRequestService(private val context: Context) {
                     ?.split(".")?.firstOrNull()
                     ?.removePrefix("profile_")
             } ?: ""
-        Log.d(TAG, "profileBackground: ${chuniUserDTO.profileBackground}")
+        Log.d(TAG, "profileBackground: ${chunithmUserDTO.profileBackground}")
 
-        chuniUserDTO.reborn = doc.selectFirst("div.player_reborn")?.text()?.toIntOrNull() ?: 0
-        Log.d(TAG, "reborn: ${chuniUserDTO.reborn}")
+        chunithmUserDTO.reborn = doc.selectFirst("div.player_reborn")?.text()?.toIntOrNull() ?: 0
+        Log.d(TAG, "reborn: ${chunithmUserDTO.reborn}")
         
-        chuniUserDTO.level = doc.selectFirst("div.player_lv")?.text()?.toIntOrNull() ?: 0
-        Log.d(TAG, "level: ${chuniUserDTO.level}")
+        chunithmUserDTO.level = doc.selectFirst("div.player_lv")?.text()?.toIntOrNull() ?: 0
+        Log.d(TAG, "level: ${chunithmUserDTO.level}")
 
         // 简化 rating 解析逻辑
         val ratingBlock = doc.selectFirst("div.player_rating_num_block")
@@ -235,7 +235,7 @@ internal class ChunithmRequestService(private val context: Context) {
         val ratingImages = ratingBlock?.select("img")
         Log.d(TAG, "Rating images count: ${ratingImages?.size ?: 0}")
         
-        chuniUserDTO.rating = ratingImages
+        chunithmUserDTO.rating = ratingImages
             ?.mapNotNull { img ->
                 val srcFile = img.attr("src").split("/").lastOrNull() ?: return@mapNotNull null
                 Log.d(TAG, "Processing rating image: $srcFile")
@@ -265,19 +265,19 @@ internal class ChunithmRequestService(private val context: Context) {
             ?.also { Log.d(TAG, "Joined rating string: '$it'") }
             ?.takeIf { it.isNotBlank() } // 如果结果为空则返回 null
             ?: "0.00" // 默认值改为 "0.00" 而不是空字符串
-        Log.d(TAG, "Final rating: ${chuniUserDTO.rating}")
+        Log.d(TAG, "Final rating: ${chunithmUserDTO.rating}")
         
-        chuniUserDTO.overpower = doc.selectFirst("div.player_overpower_text")?.text() ?: ""
-        Log.d(TAG, "overpower: ${chuniUserDTO.overpower}")
+        chunithmUserDTO.overpower = doc.selectFirst("div.player_overpower_text")?.text() ?: ""
+        Log.d(TAG, "overpower: ${chunithmUserDTO.overpower}")
         
-        chuniUserDTO.lastPlay = doc.selectFirst("div.player_lastplaydate_text")?.text() ?: ""
-        Log.d(TAG, "lastPlay: ${chuniUserDTO.lastPlay}")
+        chunithmUserDTO.lastPlay = doc.selectFirst("div.player_lastplaydate_text")?.text() ?: ""
+        Log.d(TAG, "lastPlay: ${chunithmUserDTO.lastPlay}")
 
-        chuniUserDTO.roleImageUrl = doc.selectFirst("div.player_chara_info img")?.attr("src") ?: ""
-        Log.d(TAG, "roleImageUrl: ${chuniUserDTO.roleImageUrl}")
+        chunithmUserDTO.roleImageUrl = doc.selectFirst("div.player_chara_info img")?.attr("src") ?: ""
+        Log.d(TAG, "roleImageUrl: ${chunithmUserDTO.roleImageUrl}")
         
         // 使用正则表达式更精确地提取 charaframe 类型
-        chuniUserDTO.roleBase = doc.selectFirst("div.player_chara_info")
+        chunithmUserDTO.roleBase = doc.selectFirst("div.player_chara_info")
             ?.attr("style")
             ?.let { style ->
                 Log.d(TAG, "Role base style: $style")
@@ -286,28 +286,28 @@ internal class ChunithmRequestService(private val context: Context) {
                     ?.split(".")?.firstOrNull()
                     ?.removePrefix("charaframe_")
             } ?: ""
-        Log.d(TAG, "roleBase: ${chuniUserDTO.roleBase}")
+        Log.d(TAG, "roleBase: ${chunithmUserDTO.roleBase}")
 
         val (honor1, honor2, honor3, honorBase1, honorBase2, honorBase3) = extractHonorInfo(doc)
-        chuniUserDTO.honor1 = honor1
-        chuniUserDTO.honor2 = honor2
-        chuniUserDTO.honor3 = honor3
-        chuniUserDTO.honorBase1 = honorBase1
-        chuniUserDTO.honorBase2 = honorBase2
-        chuniUserDTO.honorBase3 = honorBase3
+        chunithmUserDTO.honor1 = honor1
+        chunithmUserDTO.honor2 = honor2
+        chunithmUserDTO.honor3 = honor3
+        chunithmUserDTO.honorBase1 = honorBase1
+        chunithmUserDTO.honorBase2 = honorBase2
+        chunithmUserDTO.honorBase3 = honorBase3
         Log.d(TAG, "Honors: [$honor1, $honor2, $honor3]")
         Log.d(TAG, "Honor bases: [$honorBase1, $honorBase2, $honorBase3]")
 
-        chuniUserDTO.classEmblemBase = doc.selectFirst("div.player_classemblem_base")
+        chunithmUserDTO.classEmblemBase = doc.selectFirst("div.player_classemblem_base")
             ?.selectFirst("img")?.attr("src") ?: ""
-        Log.d(TAG, "classEmblemBase: ${chuniUserDTO.classEmblemBase}")
+        Log.d(TAG, "classEmblemBase: ${chunithmUserDTO.classEmblemBase}")
 
-        chuniUserDTO.classEmblemTop = doc.selectFirst("div.player_classemblem_top")
+        chunithmUserDTO.classEmblemTop = doc.selectFirst("div.player_classemblem_top")
             ?.selectFirst("img")?.attr("src") ?: ""
-        Log.d(TAG, "classEmblemTop: ${chuniUserDTO.classEmblemTop}")
+        Log.d(TAG, "classEmblemTop: ${chunithmUserDTO.classEmblemTop}")
 
         Log.d(TAG, "=== Completed parseChuniUser ===")
-        return chuniUserDTO
+        return chunithmUserDTO
     }
 
     /**
@@ -358,8 +358,8 @@ internal class ChunithmRequestService(private val context: Context) {
         val sixth: F
     )
 
-    private fun parseChuniPenguin(doc: Document): ChuniPenguinDTO {
-        return ChuniPenguinDTO().apply {
+    private fun parseChuniPenguin(doc: Document): ChunithmPenguinDTO {
+        return ChunithmPenguinDTO().apply {
             back = doc.selectFirst("div.avatar_back img")?.attr("src") ?: ""
             skinfootR = doc.selectFirst("div.avatar_skinfoot_r img")?.attr("src") ?: ""
             skinfootL = doc.selectFirst("div.avatar_skinfoot_l img")?.attr("src") ?: ""
@@ -376,14 +376,14 @@ internal class ChunithmRequestService(private val context: Context) {
         }
     }
 
-    private fun parseChuniUserExtend(doc: Document): ChuniUserExtendDTO {
-        val chuniUserExtendDTO = ChuniUserExtendDTO()
-        chuniUserExtendDTO.friendCode = doc.getElementsByClass("user_data_friend_code").firstOrNull()
+    private fun parseChuniUserExtend(doc: Document): ChunithmUserExtendDTO {
+        val chunithmUserExtendDTO = ChunithmUserExtendDTO()
+        chunithmUserExtendDTO.friendCode = doc.getElementsByClass("user_data_friend_code").firstOrNull()
             ?.getElementsByAttributeValue("style", "display:none;")?.text() ?: ""
-        chuniUserExtendDTO.point = doc.getElementsByClass("user_data_point").firstOrNull()?.text() ?: ""
-        chuniUserExtendDTO.totalPoint = doc.getElementsByClass("user_data_total_point").firstOrNull()?.text() ?: ""
-        chuniUserExtendDTO.playCount = doc.getElementsByClass("user_data_play_count").firstOrNull()?.text() ?: ""
-        return chuniUserExtendDTO
+        chunithmUserExtendDTO.point = doc.getElementsByClass("user_data_point").firstOrNull()?.text() ?: ""
+        chunithmUserExtendDTO.totalPoint = doc.getElementsByClass("user_data_total_point").firstOrNull()?.text() ?: ""
+        chunithmUserExtendDTO.playCount = doc.getElementsByClass("user_data_play_count").firstOrNull()?.text() ?: ""
+        return chunithmUserExtendDTO
     }
 
     private suspend fun requestPlayerData() {
@@ -415,16 +415,16 @@ internal class ChunithmRequestService(private val context: Context) {
      * 验证用户数据是否有效
      * 通过检查关键字段是否为空来判断
      */
-    private fun isUserDataValid(user: ChuniUserDTO): Boolean {
+    private fun isUserDataValid(user: ChunithmUserDTO): Boolean {
         // 检查关键字段而不是用反射计数所有空字段
         return user.nameIn.isNotEmpty() && 
                user.rating.isNotEmpty() && 
                user.rating != "0.00"
     }
 
-    private fun parseRatingData(doc: Document): List<ChuniScoreDTO> =
+    private fun parseRatingData(doc: Document): List<ChunithmScoreDTO> =
         doc.getElementsByTag("form").map { rating ->
-            ChuniScoreDTO(
+            ChunithmScoreDTO(
                 id = rating.select("input[name=idx]").attr("value"),
                 title = rating.getElementsByClass("music_title").text(),
                 genre = rating.select("input[name=genre]").attr("value"),
@@ -455,7 +455,7 @@ internal class ChunithmRequestService(private val context: Context) {
     private suspend fun requestRatingNext() = 
         requestRatingData("/home/playerData/ratingDetailNext", ChunithmRatingEntity.TYPE_SUGGEST)
 
-    private fun parseChuniMaps(doc: Document): List<ChuniMapDTO> =
+    private fun parseChuniMaps(doc: Document): List<ChunithmMapDTO> =
         doc.select("div.map_block.w400").map { block ->
             val title = block.select("div.map_title_text.text_l.text_b").text()
             val currentPage = block.select("div.map_title_page_num.font_90").text().toIntOrNull() ?: 0
@@ -498,7 +498,7 @@ internal class ChunithmRequestService(private val context: Context) {
                     }
                 }
             
-            ChuniMapDTO(title, currentPage, totalPages, areas)
+            ChunithmMapDTO(title, currentPage, totalPages, areas)
         }
 
     private suspend fun requestMapRecord() {
@@ -547,7 +547,7 @@ internal class ChunithmRequestService(private val context: Context) {
         return Triple(clear, combo, chain)
     }
 
-    private fun parsePlayLog(doc: Document): List<ChuniFullScoreDTO> =
+    private fun parsePlayLog(doc: Document): List<ChunithmFullScoreDTO> =
         doc.getElementsByClass("frame02 w400").map { log ->
             val title = log.getElementsByClass("play_musicdata_title").text()
             val level = extractIconIdentifier(
@@ -570,7 +570,7 @@ internal class ChunithmRequestService(private val context: Context) {
             val trackNumber = log.getElementsByClass("play_track_text").text()
                 .split(" ").lastOrNull() ?: ""
             
-            ChuniFullScoreDTO(
+            ChunithmFullScoreDTO(
                 title = title,
                 diff = level,
                 score = score,
@@ -599,8 +599,8 @@ internal class ChunithmRequestService(private val context: Context) {
             ?.split(".")?.firstOrNull()
             ?: ""
 
-    private fun parsePlayRecord(doc: Document, diff: String): ChuniPlayRecordDTO {
-        val chuniPlayRecordDTO = ChuniPlayRecordDTO()
+    private fun parsePlayRecord(doc: Document, diff: String): ChunithmPlayRecordDTO {
+        val chunithmPlayRecordDTO = ChunithmPlayRecordDTO()
         var totalSongs = 0
 
         // 解析统计数据
@@ -624,32 +624,32 @@ internal class ChunithmRequestService(private val context: Context) {
             // 使用标识符直接匹配，避免多次字符串搜索
             when (identifier) {
                 // 评级统计
-                "rank_13" -> chuniPlayRecordDTO.rateSSSp = count  // SSS+
-                "rank_12" -> chuniPlayRecordDTO.rateSSS = count   // SSS
-                "rank_11" -> chuniPlayRecordDTO.rateSSp = count   // SS+
-                "rank_10" -> chuniPlayRecordDTO.rateSS = count    // SS
-                "rank_9" -> chuniPlayRecordDTO.rateSp = count     // S+
-                "rank_8" -> chuniPlayRecordDTO.rateS = count      // S
+                "rank_13" -> chunithmPlayRecordDTO.rateSSSp = count  // SSS+
+                "rank_12" -> chunithmPlayRecordDTO.rateSSS = count   // SSS
+                "rank_11" -> chunithmPlayRecordDTO.rateSSp = count   // SS+
+                "rank_10" -> chunithmPlayRecordDTO.rateSS = count    // SS
+                "rank_9" -> chunithmPlayRecordDTO.rateSp = count     // S+
+                "rank_8" -> chunithmPlayRecordDTO.rateS = count      // S
                 // 达成统计
-                "icon_clear" -> chuniPlayRecordDTO.rateClear = count      // Clear
-                "icon_fullcombo" -> chuniPlayRecordDTO.rateFC = count     // FC
-                "icon_alljustice" -> chuniPlayRecordDTO.rateAJ = count    // AJ
-                "icon_alljusticecritical" -> chuniPlayRecordDTO.rateAJC = count  // AJC
-                "icon_fullchain" -> chuniPlayRecordDTO.rateFChain = count   // FChain
-                "icon_fullchain2" -> chuniPlayRecordDTO.rateFChainP = count // FChain+
+                "icon_clear" -> chunithmPlayRecordDTO.rateClear = count      // Clear
+                "icon_fullcombo" -> chunithmPlayRecordDTO.rateFC = count     // FC
+                "icon_alljustice" -> chunithmPlayRecordDTO.rateAJ = count    // AJ
+                "icon_alljusticecritical" -> chunithmPlayRecordDTO.rateAJC = count  // AJC
+                "icon_fullchain" -> chunithmPlayRecordDTO.rateFChain = count   // FChain
+                "icon_fullchain2" -> chunithmPlayRecordDTO.rateFChainP = count // FChain+
                 // 难度统计
-                "icon_hard" -> chuniPlayRecordDTO.rateHard = count       // Hard
-                "icon_absolute" -> chuniPlayRecordDTO.rateAbs = count    // Abs
-                "icon_absolutep" -> chuniPlayRecordDTO.rateAbsP = count  // Abs+
-                "icon_catastrophy" -> chuniPlayRecordDTO.rateCatas = count // Catastrophy
+                "icon_hard" -> chunithmPlayRecordDTO.rateHard = count       // Hard
+                "icon_absolute" -> chunithmPlayRecordDTO.rateAbs = count    // Abs
+                "icon_absolutep" -> chunithmPlayRecordDTO.rateAbsP = count  // Abs+
+                "icon_catastrophy" -> chunithmPlayRecordDTO.rateCatas = count // Catastrophy
             }
         }
 
-        chuniPlayRecordDTO.totalSongs = totalSongs
+        chunithmPlayRecordDTO.totalSongs = totalSongs
 
         // 解析各分类的成绩列表
         val diffLower = diff.toLowerCase(Locale.current)
-        chuniPlayRecordDTO.genreList = doc.getElementsByClass("box05 w400").map { genre ->
+        chunithmPlayRecordDTO.genreList = doc.getElementsByClass("box05 w400").map { genre ->
             val genreName = genre.getElementsByClass("genre scroll_point text_white").text()
             val genreScores = genre.getElementsByClass("w388 musiclist_box bg_$diffLower")
                 .map { score ->
@@ -660,7 +660,7 @@ internal class ChunithmRequestService(private val context: Context) {
                         marks.select("img[src*='rank']").attr("src")
                     ).toIntOrNull() ?: -1
 
-                    ChuniFullScoreDTO(
+                    ChunithmFullScoreDTO(
                         id = score.select("input[name=idx]").attr("value"),
                         title = score.getElementsByClass("music_title").text(),
                         diff = score.select("input[name=diff]").attr("value"),
@@ -674,10 +674,10 @@ internal class ChunithmRequestService(private val context: Context) {
                     )
                 }
             
-            ChuniGenreDTO(genreName, genreScores)
+            ChunithmGenreDTO(genreName, genreScores)
         }
         
-        return chuniPlayRecordDTO
+        return chunithmPlayRecordDTO
     }
 
     private suspend fun requestPlayRecord() {
@@ -700,7 +700,7 @@ internal class ChunithmRequestService(private val context: Context) {
         }
     }
 
-    private fun parseChuniStatue(doc: Document): ChuniStatueDTO {
+    private fun parseChuniStatue(doc: Document): ChunithmStatueDTO {
         val penguinCounts = mutableListOf<Int>()
         val penguinContainer = doc.select("div.box01_title.text_b")
             .firstOrNull { it.text().contains("企鹅雕像") }
@@ -713,7 +713,7 @@ internal class ChunithmRequestService(private val context: Context) {
                 }
         }
 
-        return ChuniStatueDTO(
+        return ChunithmStatueDTO(
             soul = penguinCounts.getOrNull(0) ?: 0,
             sliver = penguinCounts.getOrNull(1) ?: 0,
             gold = penguinCounts.getOrNull(2) ?: 0,
@@ -898,8 +898,8 @@ internal class ChunithmRequestService(private val context: Context) {
         }
     }
 
-    private fun parseFriendList(doc: Document): List<ChuniFriendDTO> {
-        val friendList = mutableListOf<ChuniFriendDTO>()
+    private fun parseFriendList(doc: Document): List<ChunithmFriendDTO> {
+        val friendList = mutableListOf<ChunithmFriendDTO>()
 
         val friendBlocks = doc.select("div.friend_block")
         friendBlocks.forEach { block ->
@@ -959,7 +959,7 @@ internal class ChunithmRequestService(private val context: Context) {
             val isScored = block.selectFirst("div.friend_score_off") != null
 
             friendList.add(
-                ChuniFriendDTO(
+                ChunithmFriendDTO(
                     friendName = friendName,
                     friendCode = friendCode,
                     profileBackground = profileBackground,
@@ -1074,7 +1074,6 @@ internal class ChunithmRequestService(private val context: Context) {
             
             val isReceived = block.hasClass("bonus_block_off")
             val isNext = block.hasClass("bonus_block_next")
-            val isCurrent = block.hasClass("bonus_block_on") && !isNext
             
             if (day > 0) {
                 dailyRewards.add(
@@ -1141,8 +1140,8 @@ internal class ChunithmRequestService(private val context: Context) {
         }
     }
 
-    private fun parseFriendScoreList(doc: Document): List<ChuniFullScoreDTO> {
-        val friendScoreList = mutableListOf<ChuniFullScoreDTO>()
+    private fun parseFriendScoreList(doc: Document): List<ChunithmFullScoreDTO> {
+        val friendScoreList = mutableListOf<ChunithmFullScoreDTO>()
         
         // 选择所有歌曲容器
         val scoreBlocks = doc.select("div.w388.music_box")
@@ -1178,7 +1177,7 @@ internal class ChunithmRequestService(private val context: Context) {
                     // 添加友人的分数记录（只有当友人分数不为空且不为0时）
                     if (friendScore.isNotEmpty() && friendScore != "0") {
                         friendScoreList.add(
-                            ChuniFullScoreDTO(
+                            ChunithmFullScoreDTO(
                                 title = title,
                                 score = friendScore,
                                 combo = friendCombo, // 只设置有意义的字段

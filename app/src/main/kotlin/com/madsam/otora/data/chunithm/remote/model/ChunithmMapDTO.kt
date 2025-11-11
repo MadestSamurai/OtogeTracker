@@ -1,6 +1,6 @@
 package com.madsam.otora.data.chunithm.remote.model
 
-internal data class ChuniMapDTO(
+internal data class ChunithmMapDTO(
     val title: String,
     val currentPage: Int,
     val totalPages: Int,

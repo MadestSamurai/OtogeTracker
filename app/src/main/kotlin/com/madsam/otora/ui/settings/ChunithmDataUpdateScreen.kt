@@ -57,7 +57,7 @@ import com.madsam.otora.core.utils.StringUtils.parseCookie
 import com.madsam.otora.core.utils.UserAgentUtils
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmCookieDataStore
 import com.madsam.otora.data.chunithm.remote.api.ChunithmRequestService
-import com.madsam.otora.data.chunithm.remote.model.ChuniCookieDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmCookieDTO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -428,7 +428,7 @@ fun ChunithmDataUpdateScreen(
                             scope.launch {
                                 try {
                                     // 1. 保存Cookie到DataStore
-                                    val cookieDTO = ChuniCookieDTO(
+                                    val cookieDTO = ChunithmCookieDTO(
                                         token = responseCookieMap["_t"] ?: "",
                                         expires = responseCookieMap["expires"] ?: "",
                                         maxAge = responseCookieMap["Max-Age"] ?: "",

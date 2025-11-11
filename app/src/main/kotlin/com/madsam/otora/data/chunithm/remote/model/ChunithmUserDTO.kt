@@ -1,6 +1,6 @@
 package com.madsam.otora.data.chunithm.remote.model
 
-internal data class ChuniUserDTO(
+internal data class ChunithmUserDTO(
     var nameIn: String = "",
     var profileBackground: String = "",
     var reborn: Int = 0,

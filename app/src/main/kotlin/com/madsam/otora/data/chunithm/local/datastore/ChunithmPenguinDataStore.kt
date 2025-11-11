@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.madsam.otora.data.chunithm.remote.model.ChuniPenguinDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmPenguinDTO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -39,7 +39,7 @@ internal class ChunithmPenguinDataStore(private val context: Context) {
     /**
      * 保存企鹅装扮数据
      */
-    suspend fun savePenguinData(penguin: ChuniPenguinDTO) {
+    suspend fun savePenguinData(penguin: ChunithmPenguinDTO) {
         context.chunithmPenguinDataStore.edit { preferences ->
             preferences[BACK] = penguin.back
             preferences[SKINFOOT_R] = penguin.skinfootR
@@ -60,13 +60,13 @@ internal class ChunithmPenguinDataStore(private val context: Context) {
     /**
      * 获取企鹅装扮数据 Flow
      */
-    fun getPenguinDataFlow(): Flow<ChuniPenguinDTO?> {
+    fun getPenguinDataFlow(): Flow<ChunithmPenguinDTO?> {
         return context.chunithmPenguinDataStore.data.map { preferences ->
             val skin = preferences[SKIN] ?: ""
             if (skin.isEmpty()) {
                 null
             } else {
-                ChuniPenguinDTO(
+                ChunithmPenguinDTO(
                     back = preferences[BACK] ?: "",
                     skinfootR = preferences[SKINFOOT_R] ?: "",
                     skinfootL = preferences[SKINFOOT_L] ?: "",
@@ -89,16 +89,7 @@ internal class ChunithmPenguinDataStore(private val context: Context) {
      * 获取企鹅装扮数据（挂起函数）
      * 获取当前 DataStore 中的第一个值
      */
-    suspend fun getPenguinData(): ChuniPenguinDTO? {
+    suspend fun getPenguinData(): ChunithmPenguinDTO? {
         return getPenguinDataFlow().first()
-    }
-    
-    /**
-     * 清除企鹅装扮数据
-     */
-    suspend fun clearPenguinData() {
-        context.chunithmPenguinDataStore.edit { preferences ->
-            preferences.clear()
-        }
     }
 }

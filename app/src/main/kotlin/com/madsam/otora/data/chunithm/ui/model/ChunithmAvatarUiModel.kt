@@ -1,6 +1,6 @@
 package com.madsam.otora.data.chunithm.ui.model
 
-import com.madsam.otora.data.chunithm.remote.model.ChuniPenguinDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmPenguinDTO
 
 internal data class ChunithmAvatarUiModel(
     var back : String = "",
@@ -16,18 +16,18 @@ internal data class ChunithmAvatarUiModel(
     var itemR : String = "",
     var itemL : String = "",
 ) {
-    constructor(chuniPenguinDTO: ChuniPenguinDTO): this(
-        back = chuniPenguinDTO.back,
-        footR = chuniPenguinDTO.skinfootR,
-        footL = chuniPenguinDTO.skinfootL,
-        skin = chuniPenguinDTO.skin,
-        wear = chuniPenguinDTO.wear,
-        face = chuniPenguinDTO.face,
-        faceCover = chuniPenguinDTO.faceCover,
-        head = chuniPenguinDTO.head,
-        handR = chuniPenguinDTO.handR,
-        handL = chuniPenguinDTO.handL,
-        itemR = chuniPenguinDTO.itemR,
-        itemL = chuniPenguinDTO.itemL
+    constructor(chunithmPenguinDTO: ChunithmPenguinDTO): this(
+        back = chunithmPenguinDTO.back,
+        footR = chunithmPenguinDTO.skinfootR,
+        footL = chunithmPenguinDTO.skinfootL,
+        skin = chunithmPenguinDTO.skin,
+        wear = chunithmPenguinDTO.wear,
+        face = chunithmPenguinDTO.face,
+        faceCover = chunithmPenguinDTO.faceCover,
+        head = chunithmPenguinDTO.head,
+        handR = chunithmPenguinDTO.handR,
+        handL = chunithmPenguinDTO.handL,
+        itemR = chunithmPenguinDTO.itemR,
+        itemL = chunithmPenguinDTO.itemL
     )
 }

@@ -1,6 +1,6 @@
 package com.madsam.otora.data.chunithm.remote.model
 
-internal data class ChuniCookieDTO(
+internal data class ChunithmCookieDTO(
     var token: String,
     var expires: String,
     val maxAge: String,

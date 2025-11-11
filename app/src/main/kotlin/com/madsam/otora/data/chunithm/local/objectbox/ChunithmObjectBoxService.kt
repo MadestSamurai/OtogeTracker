@@ -30,11 +30,11 @@ import com.madsam.otora.data.chunithm.local.model.ChunithmSheetsEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmSongsEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmSongsEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmWeekdayBonusEntity
-import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniFullScoreDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniMapDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniPlayRecordDTO
-import com.madsam.otora.data.chunithm.remote.model.ChuniScoreDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmFriendDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmFullScoreDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmMapDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmPlayRecordDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmScoreDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmDataDTO
 import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayRecordUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
@@ -301,11 +301,11 @@ internal class ChunithmObjectBoxService {
     /**
      * 获取友人列表数据
      */
-    suspend fun getFriendListData(): List<ChuniFriendDTO> {
+    suspend fun getFriendListData(): List<ChunithmFriendDTO> {
         return withContext(Dispatchers.IO) {
             try {
                 friendBox.all.map { entity ->
-                    ChuniFriendDTO(
+                    ChunithmFriendDTO(
                         friendCode = entity.friendCode,
                         friendName = entity.friendName,
                         profileBackground = entity.profileBackground,
@@ -430,7 +430,7 @@ internal class ChunithmObjectBoxService {
     /**
      * 根据友人代码获取特定友人数据
      */
-    suspend fun getFriendData(friendCode: String): ChuniFriendDTO? {
+    suspend fun getFriendData(friendCode: String): ChunithmFriendDTO? {
         return withContext(Dispatchers.IO) {
             try {
                 val entity = friendBox.query(
@@ -438,7 +438,7 @@ internal class ChunithmObjectBoxService {
                 ).build().findFirst()
                 
                 entity?.let {
-                    ChuniFriendDTO(
+                    ChunithmFriendDTO(
                         friendCode = it.friendCode,
                         friendName = it.friendName,
                         profileBackground = it.profileBackground,
@@ -468,7 +468,7 @@ internal class ChunithmObjectBoxService {
         }
     }
 
-    suspend fun savePlayRecordData(playRecordData: ChuniPlayRecordDTO, diff: String) {
+    suspend fun savePlayRecordData(playRecordData: ChunithmPlayRecordDTO, diff: String) {
         withContext(Dispatchers.IO) {
             try {
                 val currentTime = System.currentTimeMillis().toString()
@@ -611,7 +611,7 @@ internal class ChunithmObjectBoxService {
         }
     }
 
-    suspend fun saveFriendListData(friendListData: List<ChuniFriendDTO>) {
+    suspend fun saveFriendListData(friendListData: List<ChunithmFriendDTO>) {
         withContext(Dispatchers.IO) {
             try {
                 friendBox.removeAll()
@@ -651,7 +651,7 @@ internal class ChunithmObjectBoxService {
         }
     }
 
-    suspend fun saveFriendScoreData(friendScoreData: List<ChuniFullScoreDTO>, friendCode: String, diffName: String) {
+    suspend fun saveFriendScoreData(friendScoreData: List<ChunithmFullScoreDTO>, friendCode: String, diffName: String) {
         withContext(Dispatchers.IO) {
             try {
                 // Remove existing scores for this friend and difficulty
@@ -768,7 +768,7 @@ internal class ChunithmObjectBoxService {
      * @param scores Rating 数据列表
      * @param ratingType 类型：best/recent/suggest
      */
-    suspend fun saveRatingData(scores: List<ChuniScoreDTO>, ratingType: String) {
+    suspend fun saveRatingData(scores: List<ChunithmScoreDTO>, ratingType: String) {
         withContext(Dispatchers.IO) {
             try {
                 Log.d(TAG, "Saving $ratingType rating data, count: ${scores.size}")
@@ -809,7 +809,7 @@ internal class ChunithmObjectBoxService {
      * @param ratingType 类型：best/recent/suggest
      * @return Rating 数据列表
      */
-    suspend fun getRatingData(ratingType: String): List<ChuniScoreDTO> {
+    suspend fun getRatingData(ratingType: String): List<ChunithmScoreDTO> {
         return withContext(Dispatchers.IO) {
             try {
                 Log.d(TAG, "Loading $ratingType rating data")
@@ -823,7 +823,7 @@ internal class ChunithmObjectBoxService {
                 Log.d(TAG, "Loaded ${entities.size} $ratingType records")
                 
                 entities.map { entity ->
-                    ChuniScoreDTO(
+                    ChunithmScoreDTO(
                         id = entity.songId,
                         title = entity.title,
                         genre = entity.genre,
@@ -843,7 +843,7 @@ internal class ChunithmObjectBoxService {
      * 获取所有 Rating 数据（包含类型信息）
      * @return Map<类型, 数据列表>
      */
-    suspend fun getAllRatingData(): Map<String, List<ChuniScoreDTO>> {
+    suspend fun getAllRatingData(): Map<String, List<ChunithmScoreDTO>> {
         return withContext(Dispatchers.IO) {
             try {
                 Log.d(TAG, "Loading all rating data")
@@ -857,7 +857,7 @@ internal class ChunithmObjectBoxService {
                     entities
                         .sortedByDescending { it.createdAt }
                         .map { entity ->
-                            ChuniScoreDTO(
+                            ChunithmScoreDTO(
                                 id = entity.songId,
                                 title = entity.title,
                                 genre = entity.genre,
@@ -903,7 +903,7 @@ internal class ChunithmObjectBoxService {
      * 每次刷新时会追加新的记录，不会删除旧记录
      * @param playLogs 游玩历史列表
      */
-    suspend fun savePlayLogs(playLogs: List<ChuniFullScoreDTO>) {
+    suspend fun savePlayLogs(playLogs: List<ChunithmFullScoreDTO>) {
         withContext(Dispatchers.IO) {
             try {
                 Log.d(TAG, "Saving play logs, count: ${playLogs.size}")
@@ -944,7 +944,7 @@ internal class ChunithmObjectBoxService {
      * @param limit 限制返回数量，默认不限制
      * @return 游玩历史列表，按同步时间倒序排序
      */
-    suspend fun getAllPlayLogs(limit: Int? = null): List<ChuniFullScoreDTO> {
+    suspend fun getAllPlayLogs(limit: Int? = null): List<ChunithmFullScoreDTO> {
         return withContext(Dispatchers.IO) {
             try {
                 Log.d(TAG, "Loading play logs${limit?.let { ", limit: $it" } ?: ""}")
@@ -959,7 +959,7 @@ internal class ChunithmObjectBoxService {
                 Log.d(TAG, "Loaded ${entities.size} play log records")
                 
                 entities.map { entity ->
-                    ChuniFullScoreDTO(
+                    ChunithmFullScoreDTO(
                         id = entity.songId,
                         title = entity.title,
                         genre = entity.genre,
@@ -987,7 +987,7 @@ internal class ChunithmObjectBoxService {
      * @param difficulty 难度（可选）
      * @return 该曲目的游玩历史列表
      */
-    suspend fun getPlayLogsByTitle(title: String, difficulty: String? = null): List<ChuniFullScoreDTO> {
+    suspend fun getPlayLogsByTitle(title: String, difficulty: String? = null): List<ChunithmFullScoreDTO> {
         return withContext(Dispatchers.IO) {
             try {
                 Log.d(TAG, "Loading play logs for title: $title${difficulty?.let { ", difficulty: $it" } ?: ""}")
@@ -1009,7 +1009,7 @@ internal class ChunithmObjectBoxService {
                 Log.d(TAG, "Found ${entities.size} play log records")
                 
                 entities.map { entity ->
-                    ChuniFullScoreDTO(
+                    ChunithmFullScoreDTO(
                         id = entity.songId,
                         title = entity.title,
                         genre = entity.genre,
@@ -1072,7 +1072,7 @@ internal class ChunithmObjectBoxService {
      * 会先删除该地图的旧数据，然后保存新数据
      * @param mapDataList 地图数据列表（可能包含同一地图的多页数据）
      */
-    suspend fun saveMapData(mapDataList: List<ChuniMapDTO>) {
+    suspend fun saveMapData(mapDataList: List<ChunithmMapDTO>) {
         withContext(Dispatchers.IO) {
             try {
                 Log.d(TAG, "Saving map data, count: ${mapDataList.size}")

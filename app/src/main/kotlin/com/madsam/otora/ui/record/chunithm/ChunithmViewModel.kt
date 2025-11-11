@@ -14,7 +14,7 @@ import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserDataStore
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmUserExtDataStore
 import com.madsam.otora.data.chunithm.local.model.ChunithmRatingEntity
 import com.madsam.otora.data.chunithm.local.objectbox.ChunithmObjectBoxService
-import com.madsam.otora.data.chunithm.remote.model.ChuniFriendDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmFriendDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniLoginBonusDTO
 import com.madsam.otora.data.chunithm.remote.model.DailyReward
 import com.madsam.otora.data.chunithm.remote.model.MonthlyReward
@@ -96,7 +96,7 @@ internal class ChunithmViewModel() : ViewModel() {
         loadFriendDataFromLocal()
         loadTopRankDataFromLocal()
         loadMapDataFromLocal()
-        loadLoginBonusFromLocal(context)
+        loadLoginBonusFromLocal()
         loadCharacters()
         preloadAllScores()
     }
@@ -263,7 +263,7 @@ internal class ChunithmViewModel() : ViewModel() {
                 
                 val friendListData = chunithmLocalService.getFriendListData()
                 val friendList = friendListData.map { entity ->
-                    ChunithmFriendUiModel(ChuniFriendDTO(
+                    ChunithmFriendUiModel(ChunithmFriendDTO(
                         friendCode = entity.friendCode,
                         friendName = entity.friendName,
                         profileBackground = entity.profileBackground,
@@ -507,7 +507,7 @@ internal class ChunithmViewModel() : ViewModel() {
         }
     }
 
-    private fun loadLoginBonusFromLocal(context: Context) {
+    private fun loadLoginBonusFromLocal() {
         viewModelScope.launch {
             try {
                 Log.d("ChunithmViewModel", "Loading login bonus data from ObjectBox...")

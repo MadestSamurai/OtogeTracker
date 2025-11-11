@@ -1,6 +1,6 @@
 package com.madsam.otora.data.chunithm.remote.model
 
-internal data class ChuniFriendDTO (
+internal data class ChunithmFriendDTO (
     var friendName: String,
     var friendCode: String,
     var profileBackground: String,

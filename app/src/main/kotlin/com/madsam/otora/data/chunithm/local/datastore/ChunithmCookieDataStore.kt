@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.madsam.otora.data.chunithm.remote.model.ChuniCookieDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmCookieDTO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -36,7 +36,7 @@ internal class ChunithmCookieDataStore(private val context: Context) {
     /**
      * 保存 Cookie 数据
      */
-    suspend fun saveCookie(cookie: ChuniCookieDTO) {
+    suspend fun saveCookie(cookie: ChunithmCookieDTO) {
         context.chunithmCookieDataStore.edit { preferences ->
             preferences[TOKEN] = cookie.token
             preferences[EXPIRES] = cookie.expires
@@ -54,9 +54,9 @@ internal class ChunithmCookieDataStore(private val context: Context) {
     /**
      * 获取 Cookie Flow
      */
-    fun getCookieFlow(): Flow<ChuniCookieDTO> {
+    fun getCookieFlow(): Flow<ChunithmCookieDTO> {
         return context.chunithmCookieDataStore.data.map { preferences ->
-            ChuniCookieDTO(
+            ChunithmCookieDTO(
                 token = preferences[TOKEN] ?: "",
                 expires = preferences[EXPIRES] ?: "",
                 maxAge = preferences[MAX_AGE] ?: "",
@@ -74,7 +74,7 @@ internal class ChunithmCookieDataStore(private val context: Context) {
     /**
      * 获取 Cookie（一次性）
      */
-    suspend fun getCookie(): ChuniCookieDTO {
+    suspend fun getCookie(): ChunithmCookieDTO {
         return getCookieFlow().first()
     }
 }

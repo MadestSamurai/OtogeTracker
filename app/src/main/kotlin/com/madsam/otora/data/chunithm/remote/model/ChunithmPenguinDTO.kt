@@ -1,6 +1,6 @@
 package com.madsam.otora.data.chunithm.remote.model
 
-internal data class ChuniPenguinDTO(
+internal data class ChunithmPenguinDTO(
     var back : String = "",
     var skinfootR : String = "",
     var skinfootL : String = "",
