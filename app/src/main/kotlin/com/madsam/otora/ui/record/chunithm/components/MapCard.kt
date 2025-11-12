@@ -108,8 +108,6 @@ fun MapCard(
         currentMapData?.let { mapData ->
             MapTitleBar(
                 mapData = mapData,
-                currentPage = pagerState.currentPage + 1,
-                totalMaps = mapList.size,
                 onDetailClick = {
                     // TODO: 跳转到地图详情页
                 }
@@ -185,14 +183,12 @@ fun MapCard(
 @Composable
 private fun MapTitleBar(
     mapData: ChunithmMapUiModel,
-    currentPage: Int,
-    totalMaps: Int,
     onDetailClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 12.dp)
+            .padding(top = 6.dp, bottom = 12.dp)
     ) {
         // 第一行：地图名称 + 详细按钮
         Row(
