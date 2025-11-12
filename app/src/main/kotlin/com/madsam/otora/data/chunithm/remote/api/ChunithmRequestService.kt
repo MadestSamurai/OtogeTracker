@@ -1327,8 +1327,7 @@ internal class ChunithmRequestService(private val context: Context) {
                     
                     updateBaseProgress("获取登录奖励...")
                     requestLoginBonus()
-                    
-                    // Suspend functions that need to be called separately
+
                     updateBaseProgress("处理成绩记录...")
                     requestPlayRecord()
                     

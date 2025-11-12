@@ -1,10 +1,12 @@
 package com.madsam.otora.ui.record.chunithm.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,12 +14,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.BlackAlpha50
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
@@ -40,7 +44,7 @@ internal fun TopRank(
     val barCount30 = 30
     val barCount20 = 20
     val totalPadding = 48.dp
-    val availableWidth = cardWidthDp - totalPadding - 4.dp// 减去容器间的间距
+    val availableWidth = cardWidthDp - totalPadding - 8.dp // 减去容器间的间距（统一为8.dp）
     
     // 计算理想情况下两个图表需要的最小宽度（保持相同的柱间距比例）
     // 公式：图表宽度 = 柱数量 * 柱宽 + (柱数量-1) * 柱间距
@@ -53,11 +57,32 @@ internal fun TopRank(
     // 按比例分配宽度
     val bestChartWidth = availableWidth * (ratio30 / totalRatio)
     val newChartWidth = availableWidth * (ratio20 / totalRatio)
-    Row(
+    
+    Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(bottom = 12.dp)
     ) {
+        // 标题栏
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Rating 分布",
+                fontSize = 18.sp,
+                fontFamily = sarasaBold,
+                color = Beige500
+            )
+        }
+        
+        // B30 和 N20 图表区域
+        Row(
+            modifier = Modifier.fillMaxSize()
+        ) {
         // Best 30 图表容器
         Box(
             modifier = Modifier
@@ -106,7 +131,7 @@ internal fun TopRank(
         // New 20 图表容器
         Box(
             modifier = Modifier
-                .padding(start = 4.dp)
+                .padding(start = 8.dp)
                 .width(newChartWidth + 24.dp) // 加上内部padding
                 .clip(RoundedCornerShape(
                     topStart = 6.dp, topEnd = 10.dp,
@@ -148,6 +173,7 @@ internal fun TopRank(
                         .width(newChartWidth)
                 )
             }
+        }
         }
     }
 }

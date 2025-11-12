@@ -64,8 +64,8 @@ fun LoginBonusTracker(loginBonus: ChuniLoginBonusDTO?) {
         ) {
             Text(
                 text = "登录奖励",
-                color = Beige400,
-                fontSize = 14.sp,
+                color = Beige500,
+                fontSize = 18.sp,
                 fontFamily = sarasaBold
             )
             

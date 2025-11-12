@@ -36,6 +36,7 @@ import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.theme.Beige400
+import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
@@ -53,24 +54,44 @@ internal fun AvatarLayout(
     val avatarData by chunithmAvatarUiModel.collectAsState()
     val avatarStats by viewModel.avatarCategoryStats.collectAsState()
 
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(bottom = 12.dp)
     ) {
+        // 标题栏
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "角色装扮",
+                fontSize = 18.sp,
+                fontFamily = sarasaBold,
+                color = Beige500
+            )
+        }
+
+        // Avatar 和装饰统计区域
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
         // 左侧：Avatar显示
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .clip(RoundedCornerShape(10.dp))
-                .scaledLayout(0.8f) // width: 224, height: 316
+                .scaledLayout(0.8f) // width: 224, height: 286
                 .width(280.dp)
                 .background(Red700)
         ) {
             Box(
                 modifier = Modifier
-                    .size(width = 272.dp, height = 395.dp)
+                    .size(width = 272.dp, height = 358.dp)
             ) {
                 // Avatar Back
                 Image(
@@ -265,7 +286,7 @@ internal fun AvatarLayout(
         // 右侧：装饰统计区域（三行两列）
         Column(
             modifier = Modifier
-                .height(316.dp)  // 与 Avatar 显示高度一致 (395 * 0.8 = 316)
+                .height(286.dp)  // 三行90dp + 两个8dp间距 = 286dp
                 .weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -292,7 +313,6 @@ internal fun AvatarLayout(
                         val stats = avatarStats[category]
 
                         AvatarCategoryCard(
-                            category = category,
                             label = label,
                             count = stats?.count ?: 0,
                             previewItems = stats?.previewItems ?: emptyList(),
@@ -303,12 +323,12 @@ internal fun AvatarLayout(
                 }
             }
         }
+        }
     }
 }
 
 @Composable
 private fun AvatarCategoryCard(
-    category: String,
     label: String,
     count: Int,
     previewItems: List<com.madsam.otora.data.chunithm.local.model.ChunithmAvatarItemEntity>,
@@ -317,7 +337,7 @@ private fun AvatarCategoryCard(
 ) {
     Box(
         modifier = modifier
-            .height(100.dp)  // 设置固定高度
+            .height(90.dp)  // 设置固定高度为90dp
             .clip(RoundedCornerShape(8.dp))
             .background(Red700)
             .clickable(onClick = onClick)
