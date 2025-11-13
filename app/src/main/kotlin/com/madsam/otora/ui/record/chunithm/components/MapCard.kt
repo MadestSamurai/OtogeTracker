@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -102,7 +104,7 @@ fun MapCard(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 12.dp)
+            .padding(bottom = 12.dp)
     ) {
         // 固定标题栏（不随滑动移动，但内容会渐变）
         currentMapData?.let { mapData ->
@@ -185,42 +187,22 @@ private fun MapTitleBar(
     mapData: ChunithmMapUiModel,
     onDetailClick: () -> Unit
 ) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 6.dp, bottom = 12.dp)
+            .padding(bottom = 12.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // 第一行：地图名称 + 详细按钮
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = mapData.mapName,
-                color = Beige500,
-                fontSize = 18.sp,
-                fontFamily = sarasaBold,
-                modifier = Modifier.weight(1f)
-            )
-            
-            // 详细按钮
-            Text(
-                text = "详细",
-                color = Red500,
-                fontSize = 14.sp,
-                fontFamily = sarasaBold,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(Red700)
-                    .clickable { onDetailClick() }
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
-            )
-        }
+        Text(
+            text = mapData.mapName,
+            color = Beige500,
+            fontSize = 16.sp,
+            fontFamily = sarasaBold
+        )
         
-        // 第二行：页码信息 + 完成进度
+        Spacer(modifier = Modifier.width(12.dp))
+        
+        // 页码信息 + 完成进度
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -245,6 +227,21 @@ private fun MapTitleBar(
                 fontFamily = sarasaRegular
             )
         }
+        
+        Spacer(modifier = Modifier.weight(1f))
+        
+        // 详细按钮
+        Text(
+            text = "详细",
+            color = Red500,
+            fontSize = 14.sp,
+            fontFamily = sarasaBold,
+            modifier = Modifier
+                .clip(RoundedCornerShape(4.dp))
+                .background(Red700)
+                .clickable { onDetailClick() }
+                .padding(horizontal = 12.dp, vertical = 4.dp)
+        )
     }
 }
 

@@ -1,6 +1,7 @@
 package com.madsam.otora.ui.record.chunithm.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.BlackAlpha50
+import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
@@ -73,9 +75,23 @@ internal fun TopRank(
         ) {
             Text(
                 text = "Rating 分布",
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontFamily = sarasaBold,
-                color = Beige500
+                color = Beige500,
+                modifier = Modifier.weight(1f)
+            )
+            
+            // 详细按钮
+            Text(
+                text = "详细",
+                color = Red500,
+                fontSize = 14.sp,
+                fontFamily = sarasaBold,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Red700)
+                    .clickable { /* TODO: 跳转到Rating详情 */ }
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
             )
         }
         

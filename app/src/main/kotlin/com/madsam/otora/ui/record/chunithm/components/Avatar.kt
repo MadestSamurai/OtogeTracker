@@ -69,9 +69,23 @@ internal fun AvatarLayout(
         ) {
             Text(
                 text = "角色装扮",
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontFamily = sarasaBold,
-                color = Beige500
+                color = Beige500,
+                modifier = Modifier.weight(1f)
+            )
+            
+            // 详细按钮
+            Text(
+                text = "详细",
+                color = Red500,
+                fontSize = 14.sp,
+                fontFamily = sarasaBold,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(Red700)
+                    .clickable { /* TODO: 跳转到装扮详情 */ }
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
             )
         }
 
