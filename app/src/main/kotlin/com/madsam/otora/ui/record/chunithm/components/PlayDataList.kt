@@ -164,7 +164,7 @@ internal fun PlayDataList(
         ) {
             Text(
                 text = "游玩数据",
-                fontSize = 18.sp,
+                fontSize = 16.sp,
                 fontFamily = sarasaBold,
                 color = Beige500
             )

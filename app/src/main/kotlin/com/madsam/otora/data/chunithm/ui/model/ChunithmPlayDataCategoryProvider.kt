@@ -5,12 +5,22 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
 import com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
 import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
+import com.madsam.otora.data.chunithm.local.objectbox.ChunithmObjectBoxService
+import kotlinx.coroutines.runBlocking
 
 /**
  * PlayData 分类提供者
  * 提供各种分类方式的分类列表
+ * 
+ * Genre 和 Version 数据从数据库加载，首次访问时缓存
  */
 object ChunithmPlayDataCategoryProvider {
+    
+    // 缓存的 genre 分类列表
+    private var cachedGenreCategories: List<PlayDataCategory>? = null
+    
+    // 缓存的 version 分类列表
+    private var cachedVersionCategories: List<PlayDataCategory>? = null
     
     /**
      * 获取难度分类列表
@@ -52,44 +62,61 @@ object ChunithmPlayDataCategoryProvider {
     
     /**
      * 获取类型（Genre）分类列表
-     * 基于 CHUNITHM 常见曲目类型
+     * 从数据库动态获取所有不重复的 genre，首次加载后缓存
      */
     fun getGenreCategories(): List<PlayDataCategory> {
-        return listOf(
-            PlayDataCategory(PlayDataCategoryType.GENRE, "POPS & ANIME", "POPS & ANIME"),
-            PlayDataCategory(PlayDataCategoryType.GENRE, "niconico", "niconico"),
-            PlayDataCategory(PlayDataCategoryType.GENRE, "東方Project", "東方Project"),
-            PlayDataCategory(PlayDataCategoryType.GENRE, "VARIETY", "VARIETY"),
-            PlayDataCategory(PlayDataCategoryType.GENRE, "イロドリミドリ", "イロドリミドリ"),
-            PlayDataCategory(PlayDataCategoryType.GENRE, "ゲキマイ", "ゲキマイ"),
-            PlayDataCategory(PlayDataCategoryType.GENRE, "ORIGINAL", "ORIGINAL"),
-            PlayDataCategory(PlayDataCategoryType.GENRE, "WORLD'S END", "WORLD'S END")
-        )
+        // 如果已有缓存，直接返回
+        cachedGenreCategories?.let { return it }
+        
+        // 首次加载：从数据库查询
+        return runBlocking {
+            val objectBoxService = ChunithmObjectBoxService()
+            val allSongs = objectBoxService.getAllSongData()
+            
+            // 获取所有不重复的 genre，按字母顺序排序
+            val uniqueGenres = allSongs
+                .map { it.genre }
+                .filter { it.isNotBlank() }
+                .distinct()
+                .sorted()
+            
+            val categories = uniqueGenres.map { genre ->
+                PlayDataCategory(PlayDataCategoryType.GENRE, genre, genre)
+            }
+            
+            // 缓存结果
+            cachedGenreCategories = categories
+            categories
+        }
     }
     
     /**
      * 获取版本分类列表
-     * 基于 CHUNITHM 历代版本
+     * 从数据库动态获取所有不重复的 version，首次加载后缓存
      */
     fun getVersionCategories(): List<PlayDataCategory> {
-        return listOf(
-            PlayDataCategory(PlayDataCategoryType.VERSION, "LUMINOUS", "LUMINOUS"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "SUN PLUS", "SUN PLUS"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "SUN", "SUN"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "NEW PLUS", "NEW PLUS"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "NEW", "NEW"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "PARADISE LOST", "PARADISE LOST"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "PARADISE", "PARADISE"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "CRYSTAL PLUS", "CRYSTAL PLUS"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "CRYSTAL", "CRYSTAL"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "AMAZON PLUS", "AMAZON PLUS"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "AMAZON", "AMAZON"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "STAR PLUS", "STAR PLUS"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "STAR", "STAR"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "AIR PLUS", "AIR PLUS"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "AIR", "AIR"),
-            PlayDataCategory(PlayDataCategoryType.VERSION, "CHUNITHM", "CHUNITHM")
-        )
+        // 如果已有缓存，直接返回
+        cachedVersionCategories?.let { return it }
+        
+        // 首次加载：从数据库查询
+        return runBlocking {
+            val objectBoxService = ChunithmObjectBoxService()
+            val allSongs = objectBoxService.getAllSongData()
+            
+            // 获取所有不重复的 version，保持原有顺序（最新的在前）
+            val uniqueVersions = allSongs
+                .map { it.version }
+                .filter { it.isNotBlank() }
+                .distinct()
+            
+            val categories = uniqueVersions.map { version ->
+                PlayDataCategory(PlayDataCategoryType.VERSION, version, version)
+            }
+            
+            // 缓存结果
+            cachedVersionCategories = categories
+            categories
+        }
     }
     
     /**
@@ -120,5 +147,14 @@ object ChunithmPlayDataCategoryProvider {
             PlayDataCategoryType.VERSION -> getVersionCategories()
             PlayDataCategoryType.LEVEL -> getLevelCategories()
         }
+    }
+    
+    /**
+     * 刷新分类数据缓存
+     * 在数据库更新后调用此方法以重新加载最新的分类数据
+     */
+    fun refreshCategories() {
+        cachedGenreCategories = null
+        cachedVersionCategories = null
     }
 }
