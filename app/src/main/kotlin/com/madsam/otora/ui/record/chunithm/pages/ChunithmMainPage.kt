@@ -161,7 +161,10 @@ internal fun ChunithmMainPage(
             item {
                 PlayDataList(
                     width = contentWidthDp,
-                    chunithmPlayDataUiModel = viewModel.chunithmPlayDataUiModel
+                    difficultyStats = viewModel.difficultyStats,
+                    genreStats = viewModel.genreStats,
+                    versionStats = viewModel.versionStats,
+                    levelStats = viewModel.levelStats
                 )
             }
             item {

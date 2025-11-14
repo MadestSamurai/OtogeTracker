@@ -4,10 +4,12 @@ import android.util.Log
 import com.madsam.otora.core.database.ObjectBoxManager
 import com.madsam.otora.data.chunithm.local.model.ChunithmAvatarItemEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmAvatarItemEntity_
+import com.madsam.otora.data.chunithm.local.model.ChunithmCategoryEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmDailyRewardEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmDailyRewardEntity_
+import com.madsam.otora.data.chunithm.local.model.ChunithmDifficultyEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmFriendEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmFriendEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmFriendScoreEntity
@@ -27,10 +29,13 @@ import com.madsam.otora.data.chunithm.local.model.ChunithmPlayRecordEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmPlayRecordEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmRatingEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmRatingEntity_
+import com.madsam.otora.data.chunithm.local.model.ChunithmRegionEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmSheetsEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmSheetsEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmSongsEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmSongsEntity_
+import com.madsam.otora.data.chunithm.local.model.ChunithmTypeEntity
+import com.madsam.otora.data.chunithm.local.model.ChunithmVersionEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmWeekdayBonusEntity
 import com.madsam.otora.data.chunithm.remote.model.ChunithmFriendDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmFullScoreDTO
@@ -70,6 +75,13 @@ internal class ChunithmObjectBoxService {
     private val dailyRewardBox: Box<ChunithmDailyRewardEntity> = boxStore.boxFor(ChunithmDailyRewardEntity::class.java)
     private val weekdayBonusBox: Box<ChunithmWeekdayBonusEntity> = boxStore.boxFor(ChunithmWeekdayBonusEntity::class.java)
     private val avatarItemBox: Box<ChunithmAvatarItemEntity> = boxStore.boxFor(ChunithmAvatarItemEntity::class.java)
+    
+    // 元数据 Box
+    private val categoryBox: Box<ChunithmCategoryEntity> = boxStore.boxFor(ChunithmCategoryEntity::class.java)
+    private val versionBox: Box<ChunithmVersionEntity> = boxStore.boxFor(ChunithmVersionEntity::class.java)
+    private val typeBox: Box<ChunithmTypeEntity> = boxStore.boxFor(ChunithmTypeEntity::class.java)
+    private val difficultyBox: Box<ChunithmDifficultyEntity> = boxStore.boxFor(ChunithmDifficultyEntity::class.java)
+    private val regionBox: Box<ChunithmRegionEntity> = boxStore.boxFor(ChunithmRegionEntity::class.java)
     
     /**
      * 获取歌曲的最新成绩
@@ -696,6 +708,14 @@ internal class ChunithmObjectBoxService {
     suspend fun saveMergedSongsData(mergedData: ChunithmDataDTO) {
         withContext(Dispatchers.IO) {
             try {
+                // 1. 保存元数据
+                saveCategories(mergedData.categories)
+                saveVersions(mergedData.versions)
+                saveTypes(mergedData.types)
+                saveDifficulties(mergedData.difficulties)
+                saveRegions(mergedData.regions)
+                
+                // 2. 保存歌曲和谱面数据
                 songsBox.removeAll()
                 sheetsBox.removeAll()
 
@@ -1673,6 +1693,229 @@ internal class ChunithmObjectBoxService {
                 query.build().find()
             } catch (e: Exception) {
                 Log.e(TAG, "Error loading current avatar items", e)
+                emptyList()
+            }
+        }
+    }
+    
+    // ==================== 元数据相关方法 ====================
+    
+    /**
+     * 保存 Categories 元数据
+     */
+    suspend fun saveCategories(categories: List<ChunithmDataDTO.Category>) {
+        withContext(Dispatchers.IO) {
+            try {
+                val entities = categories.map { category ->
+                    ChunithmCategoryEntity().apply {
+                        this.category = category.category
+                    }
+                }
+                categoryBox.removeAll()
+                categoryBox.put(entities)
+                Log.d(TAG, "Saved ${entities.size} categories")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving categories", e)
+            }
+        }
+    }
+    
+    /**
+     * 获取所有 Categories
+     */
+    suspend fun getAllCategories(): List<ChunithmCategoryEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                categoryBox.all
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading categories", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 保存 Versions 元数据
+     */
+    suspend fun saveVersions(versions: List<ChunithmDataDTO.Version>) {
+        withContext(Dispatchers.IO) {
+            try {
+                val entities = versions.map { version ->
+                    ChunithmVersionEntity().apply {
+                        this.version = version.version
+                        this.abbr = version.abbr
+                        this.releaseDate = version.releaseDate
+                    }
+                }
+                versionBox.removeAll()
+                versionBox.put(entities)
+                Log.d(TAG, "Saved ${entities.size} versions")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving versions", e)
+            }
+        }
+    }
+    
+    /**
+     * 获取所有 Versions（按发布日期倒序）
+     */
+    suspend fun getAllVersions(): List<ChunithmVersionEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                versionBox.all.sortedBy { it.releaseDate }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading versions", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 保存 Types 元数据
+     */
+    suspend fun saveTypes(types: List<ChunithmDataDTO.Type>) {
+        withContext(Dispatchers.IO) {
+            try {
+                val entities = types.map { type ->
+                    ChunithmTypeEntity().apply {
+                        this.type = type.type
+                        this.name = type.name
+                        this.abbr = type.abbr
+                    }
+                }
+                typeBox.removeAll()
+                typeBox.put(entities)
+                Log.d(TAG, "Saved ${entities.size} types")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving types", e)
+            }
+        }
+    }
+    
+    /**
+     * 获取所有 Types
+     */
+    suspend fun getAllTypes(): List<ChunithmTypeEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                typeBox.all
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading types", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 保存 Difficulties 元数据
+     */
+    suspend fun saveDifficulties(difficulties: List<ChunithmDataDTO.Difficulty>) {
+        withContext(Dispatchers.IO) {
+            try {
+                val entities = difficulties.map { difficulty ->
+                    ChunithmDifficultyEntity().apply {
+                        this.difficulty = difficulty.difficulty
+                        this.name = difficulty.name
+                        this.color = difficulty.color
+                    }
+                }
+                difficultyBox.removeAll()
+                difficultyBox.put(entities)
+                Log.d(TAG, "Saved ${entities.size} difficulties")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving difficulties", e)
+            }
+        }
+    }
+    
+    /**
+     * 获取所有 Difficulties
+     */
+    suspend fun getAllDifficulties(): List<ChunithmDifficultyEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                difficultyBox.all
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading difficulties", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 保存 Regions 元数据
+     */
+    suspend fun saveRegions(regions: List<ChunithmDataDTO.Region>) {
+        withContext(Dispatchers.IO) {
+            try {
+                val entities = regions.map { region ->
+                    ChunithmRegionEntity().apply {
+                        this.region = region.region
+                        this.name = region.name
+                    }
+                }
+                regionBox.removeAll()
+                regionBox.put(entities)
+                Log.d(TAG, "Saved ${entities.size} regions")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving regions", e)
+            }
+        }
+    }
+    
+    /**
+     * 获取所有 Regions
+     */
+    suspend fun getAllRegions(): List<ChunithmRegionEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                regionBox.all
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading regions", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 获取所有个人最佳成绩
+     */
+    suspend fun getAllPersonalBestScores(): List<ChunithmFullScoreEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                scoreBox.query(
+                    ChunithmFullScoreEntity_.isPersonalBest.equal(true)
+                ).build().find()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading personal best scores", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 获取所有歌曲实体
+     */
+    suspend fun getAllSongs(): List<ChunithmSongsEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                songsBox.all
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading songs", e)
+                emptyList()
+            }
+        }
+    }
+    
+    /**
+     * 获取所有谱面实体
+     */
+    suspend fun getAllSheets(): List<ChunithmSheetsEntity> {
+        return withContext(Dispatchers.IO) {
+            try {
+                sheetsBox.all
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading sheets", e)
                 emptyList()
             }
         }

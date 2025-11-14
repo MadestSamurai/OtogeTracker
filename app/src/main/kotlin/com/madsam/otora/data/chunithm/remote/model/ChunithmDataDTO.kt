@@ -17,7 +17,8 @@ internal data class ChunithmDataDTO(
 
     internal data class Version(
         @param:Json(name = "version") var version: String = "",
-        @param:Json(name = "abbr") var abbr: String = ""
+        @param:Json(name = "abbr") var abbr: String = "",
+        @param:Json(name = "releaseDate") var releaseDate: String = ""
     )
 
     internal data class Type(

@@ -49,29 +49,39 @@ import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.utils.NumberFormatUtils.formatThousand
-import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayDataCategoryProvider
-import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayDataUiModel
 import com.madsam.otora.data.chunithm.ui.model.PlayDataCategoryType
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.madsam.otora.data.chunithm.ui.model.PlayDataCategoryStats
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 internal fun PlayDataList(
     width: Dp,
-    chunithmPlayDataUiModel: MutableStateFlow<ChunithmPlayDataUiModel>
+    difficultyStats: StateFlow<List<PlayDataCategoryStats>>,
+    genreStats: StateFlow<List<PlayDataCategoryStats>>,
+    versionStats: StateFlow<List<PlayDataCategoryStats>>,
+    levelStats: StateFlow<List<PlayDataCategoryStats>>
 ) {
-    val playData by chunithmPlayDataUiModel.collectAsState()
+    val difficultyStatsData by difficultyStats.collectAsState()
+    val genreStatsData by genreStats.collectAsState()
+    val versionStatsData by versionStats.collectAsState()
+    val levelStatsData by levelStats.collectAsState()
     
     // 当前选择的分类方式
     val selectedCategoryType = remember { mutableStateOf(PlayDataCategoryType.DIFFICULTY) }
     
-    // 根据分类类型获取页面列表
-    val pages = remember(selectedCategoryType.value) {
+    // 根据分类类型获取实际的统计数据列表
+    val currentStatsData = remember(selectedCategoryType.value, difficultyStatsData, genreStatsData, versionStatsData, levelStatsData) {
         when (selectedCategoryType.value) {
-            PlayDataCategoryType.DIFFICULTY -> listOf("Basic", "Advanced", "Expert", "Master", "Ultima")
-            PlayDataCategoryType.GENRE -> ChunithmPlayDataCategoryProvider.getGenreCategories().map { it.name }
-            PlayDataCategoryType.VERSION -> ChunithmPlayDataCategoryProvider.getVersionCategories().map { it.name }
-            PlayDataCategoryType.LEVEL -> ChunithmPlayDataCategoryProvider.getLevelCategories().map { it.name }
+            PlayDataCategoryType.DIFFICULTY -> difficultyStatsData
+            PlayDataCategoryType.GENRE -> genreStatsData
+            PlayDataCategoryType.VERSION -> versionStatsData
+            PlayDataCategoryType.LEVEL -> levelStatsData
         }
+    }
+    
+    // 根据分类类型获取页面数量
+    val pages = remember(currentStatsData) {
+        currentStatsData
     }
     
     val pagerState = rememberPagerState(pageCount = { pages.size })
@@ -81,9 +91,16 @@ internal fun PlayDataList(
         pagerState.scrollToPage(0)
     }
     
-    // 当前页面信息
-    val currentPage by remember {
-        derivedStateOf { pages[pagerState.currentPage] }
+    // 当前页面信息 - 从实际统计数据中获取
+    val currentPage by remember(pages, pagerState.currentPage) {
+        derivedStateOf { 
+            if (pages.isEmpty()) {
+                ""
+            } else {
+                val currentIndex = pagerState.currentPage.coerceIn(0, pages.size - 1)
+                pages.getOrNull(currentIndex)?.category?.name ?: ""
+            }
+        }
     }
     
     // 计算卡片宽度：总宽度的 85%
@@ -96,19 +113,24 @@ internal fun PlayDataList(
             val centerPadding = maxPadding / 2
             val pageCount = pages.size
             
+            // 防止页面数为 0 的情况
+            if (pageCount == 0) return@derivedStateOf 0.dp
+            
             val padding = when {
                 // 只有1页：保持居中
                 pageCount <= 1 -> centerPadding
                 
                 // 只有2页：第一页贴左，第二页贴右
                 pageCount == 2 -> {
-                    val currentPosition = pagerState.currentPage + pagerState.currentPageOffsetFraction
+                    val safeCurrentPage = pagerState.currentPage.coerceIn(0, pageCount - 1)
+                    val currentPosition = safeCurrentPage + pagerState.currentPageOffsetFraction
                     maxPadding * (currentPosition / 1f)
                 }
                 
                 // 3页及以上：第一页贴左，最后一页贴右，中间居中
                 else -> {
-                    val currentPosition = pagerState.currentPage + pagerState.currentPageOffsetFraction
+                    val safeCurrentPage = pagerState.currentPage.coerceIn(0, pageCount - 1)
+                    val currentPosition = safeCurrentPage + pagerState.currentPageOffsetFraction
                     val lastPageIndex = pageCount - 1
                     
                     when {
@@ -171,29 +193,8 @@ internal fun PlayDataList(
             
             Spacer(modifier = Modifier.width(12.dp))
             
-            // 当前分类方式提示（仅在非难度模式显示）
-            if (selectedCategoryType.value != PlayDataCategoryType.DIFFICULTY) {
-                Text(
-                    text = when (selectedCategoryType.value) {
-                        PlayDataCategoryType.GENRE -> "类型"
-                        PlayDataCategoryType.VERSION -> "版本"
-                        PlayDataCategoryType.LEVEL -> "定数"
-                        else -> ""
-                    },
-                    fontSize = 12.sp,
-                    fontFamily = sarasaBold,
-                    color = Beige500.copy(alpha = 0.7f),
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(4.dp))
-                        .background(Red700.copy(alpha = 0.3f))
-                        .padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-                
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-            
-            // 难度标签（仅在难度模式显示）
-            if (selectedCategoryType.value == PlayDataCategoryType.DIFFICULTY) {
+            // 当前页面的分类名称标签
+            if (currentPage.isNotEmpty()) {
                 Text(
                     text = currentPage.toUpperCase(Locale.current),
                     fontSize = 12.sp,
@@ -202,19 +203,31 @@ internal fun PlayDataList(
                     modifier = Modifier
                         .clip(RoundedCornerShape(4.dp))
                         .background(
-                            when (currentPage) {
-                                "Basic" -> CHUNI_DIFF_BASIC
-                                "Advanced" -> CHUNI_DIFF_ADVANCED
-                                "Expert" -> CHUNI_DIFF_EXPERT
-                                "Master" -> CHUNI_DIFF_MASTER
-                                "Ultima" -> CHUNI_DIFF_ULTIMA_1
-                                else -> Red500
+                            // 只有难度模式使用难度颜色，其他使用统一颜色
+                            if (selectedCategoryType.value == PlayDataCategoryType.DIFFICULTY) {
+                                when (currentPage.lowercase()) {
+                                    "basic" -> CHUNI_DIFF_BASIC
+                                    "advanced" -> CHUNI_DIFF_ADVANCED
+                                    "expert" -> CHUNI_DIFF_EXPERT
+                                    "master" -> CHUNI_DIFF_MASTER
+                                    "ultima" -> CHUNI_DIFF_ULTIMA_1
+                                    else -> Red500
+                                }
+                            } else {
+                                Red500.copy(alpha = 0.8f)
                             }
                         )
-                        .border(
-                            width = if (currentPage == "Ultima") 1.dp else 0.dp,
-                            color = if (currentPage == "Ultima") CHUNI_DIFF_ULTIMA_2 else Color.Transparent,
-                            shape = RoundedCornerShape(4.dp)
+                        .then(
+                            // Ultima 特殊边框
+                            if (selectedCategoryType.value == PlayDataCategoryType.DIFFICULTY && currentPage.lowercase() == "ultima") {
+                                Modifier.border(
+                                    width = 1.dp,
+                                    color = CHUNI_DIFF_ULTIMA_2,
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                            } else {
+                                Modifier
+                            }
                         )
                         .padding(horizontal = 8.dp, vertical = 4.dp)
                 )
@@ -245,46 +258,56 @@ internal fun PlayDataList(
                 .padding(bottom = 8.dp)
         )
         
-        // 横向分页器 - 滑动式布局，显示左右预览
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxWidth(),
-            contentPadding = PaddingValues(
-                start = startPadding,
-                end = endPadding
-            ),
-            pageSpacing = 8.dp
-        ) { page ->
+        // 数据加载状态检查
+        if (pages.isEmpty()) {
+            // 空状态显示
             Box(
                 modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .fillMaxSize()
                     .background(Red700)
-                    .padding(horizontal = 6.dp, vertical = 8.dp)
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
             ) {
-                // 根据分类类型显示不同数据
-                when (selectedCategoryType.value) {
-                    PlayDataCategoryType.DIFFICULTY -> {
-                        when (pages[page]) {
-                            "Basic" -> DifficultyPlayData(playData.basicPlayData)
-                            "Advanced" -> DifficultyPlayData(playData.advancedPlayData)
-                            "Expert" -> DifficultyPlayData(playData.expertPlayData)
-                            "Master" -> DifficultyPlayData(playData.masterPlayData)
-                            "Ultima" -> DifficultyPlayData(playData.ultimaPlayData)
+                Text(
+                    text = "加载中...",
+                    fontSize = 14.sp,
+                    fontFamily = sarasaRegular,
+                    color = Beige500.copy(alpha = 0.6f)
+                )
+            }
+        } else {
+            // 横向分页器 - 滑动式布局，显示左右预览
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(
+                    start = startPadding,
+                    end = endPadding
+                ),
+                pageSpacing = 8.dp
+            ) { page ->
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .fillMaxSize()
+                        .background(Red700)
+                        .padding(horizontal = 6.dp, vertical = 8.dp)
+                ) {
+                    // 直接使用 pages 中的统计数据
+                    pages.getOrNull(page)?.let { stats ->
+                        UnifiedPlayData(stats)
+                    } ?: run {
+                        // 占位符
+                        val categoryTypeName = when (selectedCategoryType.value) {
+                            PlayDataCategoryType.DIFFICULTY -> "难度"
+                            PlayDataCategoryType.GENRE -> "类型"
+                            PlayDataCategoryType.VERSION -> "版本"
+                            PlayDataCategoryType.LEVEL -> "定数"
                         }
-                    }
-                    PlayDataCategoryType.GENRE -> {
-                        // TODO: 显示类型分类数据（需要 ViewModel 提供数据）
-                        PlaceholderPlayData(pages[page], "类型")
-                    }
-                    PlayDataCategoryType.VERSION -> {
-                        // TODO: 显示版本分类数据（需要 ViewModel 提供数据）
-                        PlaceholderPlayData(pages[page], "版本")
-                    }
-                    PlayDataCategoryType.LEVEL -> {
-                        // TODO: 显示定数分类数据（需要 ViewModel 提供数据）
-                        PlaceholderPlayData(pages[page], "定数")
+                        PlaceholderPlayData("", categoryTypeName)
                     }
                 }
             }
@@ -332,40 +355,43 @@ private fun PlaceholderPlayData(categoryName: String, categoryType: String) {
 /**
  * 单个难度页面：显示该难度所有评级
  */
+/**
+ * 统一的游玩数据显示组件（适用于所有分类：难度/类型/版本/定数）
+ */
 @Composable
-private fun DifficultyPlayData(data: ChunithmPlayDataUiModel.ChunithmPlayDataItemUI) {
+private fun UnifiedPlayData(stats: PlayDataCategoryStats) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(3.dp)
     ) {
         // 评级区：S/S+/SS/SS+/SSS/SSS+ 复合条子
         ScoreRankBar(
-            s = data.rateS,
-            sp = data.rateSp,
-            ss = data.rateSS,
-            ssp = data.rateSSp,
-            sss = data.rateSSS,
-            sssp = data.rateSSSp,
-            total = data.totalSongs
+            s = stats.rateS,
+            sp = stats.rateSp,
+            ss = stats.rateSS,
+            ssp = stats.rateSSp,
+            sss = stats.rateSSS,
+            sssp = stats.rateSSSp,
+            total = stats.totalSongs
         )
         
         // 通关类型：CLEAR/HARD/BRAVE/ABSOLUTE/CATASTROPHY 复合条子
         ClearTypeBar(
-            clear = data.rateClear,
-            hard = data.rateHard,
-            brave = data.rateBrave,
-            absolute = data.rateAbs,
-            catastrophy = data.rateCatas,
-            total = data.totalSongs
+            clear = stats.rateClear,
+            hard = stats.rateHard,
+            brave = stats.rateBrave,
+            absolute = stats.rateAbs,
+            catastrophy = stats.rateCatas,
+            total = stats.totalSongs
         )
         
         // 其他评级：一排显示，两行布局
         OtherStatsRow(
-            fc = data.rateFC,
-            aj = data.rateAJ,
-            ajc = data.rateAJC,
-            fchain = data.rateFChain,
-            fchainPlus = data.rateFChainP
+            fc = stats.rateFC,
+            aj = stats.rateAJ,
+            ajc = stats.rateAJC,
+            fchain = stats.rateFChain,
+            fchainPlus = stats.rateFChainP
         )
     }
 }

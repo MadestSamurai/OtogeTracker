@@ -27,6 +27,9 @@ import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayRecordUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmScoreUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
+import com.madsam.otora.data.chunithm.ui.model.PlayDataCategoryStats
+import com.madsam.otora.data.chunithm.ui.model.PlayDataCategoryType
+import com.madsam.otora.data.chunithm.ui.model.PlayDataCategory
 import com.madsam.otora.ui.record.chunithm.components.SheetScoreInfo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +46,19 @@ internal class ChunithmViewModel() : ViewModel() {
     val chuniFriendDataUI = MutableStateFlow(listOf<ChunithmFriendUiModel>())
 
     val chunithmTopRankUiModel = MutableStateFlow(ChunithmTopRankUiModel())
+    
+    // 分类统计数据（统一使用 PlayDataCategoryStats）
+    private val _difficultyStats = MutableStateFlow<List<PlayDataCategoryStats>>(emptyList())
+    val difficultyStats: StateFlow<List<PlayDataCategoryStats>> = _difficultyStats.asStateFlow()
+    
+    private val _genreStats = MutableStateFlow<List<PlayDataCategoryStats>>(emptyList())
+    val genreStats: StateFlow<List<PlayDataCategoryStats>> = _genreStats.asStateFlow()
+    
+    private val _versionStats = MutableStateFlow<List<PlayDataCategoryStats>>(emptyList())
+    val versionStats: StateFlow<List<PlayDataCategoryStats>> = _versionStats.asStateFlow()
+    
+    private val _levelStats = MutableStateFlow<List<PlayDataCategoryStats>>(emptyList())
+    val levelStats: StateFlow<List<PlayDataCategoryStats>> = _levelStats.asStateFlow()
     
     // 登录奖励数据
     private val _chunithmLoginBonus = MutableStateFlow<ChuniLoginBonusDTO?>(null)
@@ -120,6 +136,7 @@ internal class ChunithmViewModel() : ViewModel() {
         loadCharacters()
         loadAvatarCategoryStats()
         preloadAllScores()
+        loadCategoryStats()
     }
 
     fun refreshUserData(context: Context) {
@@ -884,6 +901,309 @@ internal class ChunithmViewModel() : ViewModel() {
             .mapIndexed { index, item ->
                 item.copy(rank = index + 1)
             }
+    }
+    
+    /**
+     * 加载分类统计数据（Difficulty、Genre、Version、Level）
+     */
+    private fun loadCategoryStats() {
+        viewModelScope.launch {
+            try {
+                Log.d("ChunithmViewModel", "Loading category stats...")
+                val chunithmLocalService = ChunithmObjectBoxService()
+                
+                // 加载 Difficulty 统计
+                _difficultyStats.value = calculateDifficultyStats(chunithmLocalService)
+                
+                // 加载 Genre 统计
+                _genreStats.value = calculateGenreStats(chunithmLocalService)
+                
+                // 加载 Version 统计
+                _versionStats.value = calculateVersionStats(chunithmLocalService)
+                
+                // 加载 Level 统计
+                _levelStats.value = calculateLevelStats(chunithmLocalService)
+                
+                Log.d("ChunithmViewModel", "Category stats loaded: ${_difficultyStats.value.size} difficulties, ${_genreStats.value.size} genres, ${_versionStats.value.size} versions, ${_levelStats.value.size} levels")
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Failed to load category stats: ${e.message}", e)
+            }
+        }
+    }
+    
+    private suspend fun calculateDifficultyStats(service: ChunithmObjectBoxService): List<PlayDataCategoryStats> {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val difficulties = service.getAllDifficulties()
+                val allScores = service.getAllPersonalBestScores()
+                val allSheets = service.getAllSheets()
+                
+                // 难度映射：0=basic, 1=advanced, 2=expert, 3=master, 4=ultima
+                val diffMap = mapOf(
+                    "basic" to "0",
+                    "advanced" to "1",
+                    "expert" to "2",
+                    "master" to "3",
+                    "ultima" to "4"
+                )
+                
+                difficulties.map { difficultyEntity ->
+                    val diffKey = difficultyEntity.difficulty
+                    val diffNumber = diffMap[diffKey] ?: "0"
+                    
+                    // 该难度下的所有谱面（只统计国服谱面）
+                    val sheetsInDiff = allSheets.filter { it.difficulty == diffKey && it.cn }
+                    
+                    // 该难度下的所有成绩
+                    val scoresInDiff = allScores.filter { it.diff == diffNumber }
+                    
+                    // 累积计数：>= 该等级的数量（用于UI减法处理）
+                    fun countRankOrAbove(target: Int) = scoresInDiff.count { it.rank >= target }
+                    // Clear 类型也需要累积计数（CATASTROPHY > ABSOLUTE+ > ABSOLUTE > HARD > CLEAR）
+                    val clearLevels = mapOf("clear" to 1, "hard" to 2, "absolute" to 3, "absolute+" to 4, "catastrophy" to 5)
+                    fun countClearOrAbove(clearType: String): Int {
+                        val targetLevel = clearLevels[clearType] ?: 0
+                        return scoresInDiff.count { (clearLevels[it.clear] ?: 0) >= targetLevel }
+                    }
+                    fun countCombo(comboType: String) = scoresInDiff.count { it.combo == comboType }
+                    fun countChain(chainType: String) = scoresInDiff.count { it.chain == chainType }
+                    
+                    PlayDataCategoryStats(
+                        category = PlayDataCategory(
+                            type = PlayDataCategoryType.DIFFICULTY,
+                            name = difficultyEntity.name,
+                            key = diffKey,
+                            color = when (diffKey) {
+                                "basic" -> com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
+                                "advanced" -> com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
+                                "expert" -> com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
+                                "master" -> com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
+                                "ultima" -> com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
+                                else -> com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
+                            }
+                        ),
+                        scoreTotal = scoresInDiff.sumOf { it.score.toLong() },
+                        totalSongs = sheetsInDiff.size,
+                        rateSSSp = countRankOrAbove(13),
+                        rateSSS = countRankOrAbove(12),
+                        rateSSp = countRankOrAbove(11),
+                        rateSS = countRankOrAbove(10),
+                        rateSp = countRankOrAbove(9),
+                        rateS = countRankOrAbove(8),
+                        rateClear = countClearOrAbove("clear"),
+                        rateHard = countClearOrAbove("hard"),
+                        rateBrave = countClearOrAbove("absolute"),
+                        rateAbs = countClearOrAbove("absolute+"),
+                        rateCatas = countClearOrAbove("catastrophy"),
+                        rateFC = countCombo("fullcombo"),
+                        rateAJ = countCombo("alljustice"),
+                        rateAJC = countCombo("alljusticecritical"),
+                        rateFChain = countChain("fullchain"),
+                        rateFChainP = countChain("fullchain2")
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Error calculating difficulty stats: ${e.message}", e)
+                emptyList()
+            }
+        }
+    }
+    
+    private suspend fun calculateGenreStats(service: ChunithmObjectBoxService): List<PlayDataCategoryStats> {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val allSongs = service.getAllSongs()
+                val allSheets = service.getAllSheets()
+                val allScores = service.getAllPersonalBestScores()
+                val categories = service.getAllCategories()
+                
+                categories.map { categoryEntity ->
+                    val genreKey = categoryEntity.category
+                    val songsInGenre = allSongs.filter { it.genre == genreKey }
+                    // 获取该类型下所有歌曲的所有谱面（考虑多个难度，只统计国服谱面）
+                    val songTitles = songsInGenre.map { it.title }.toSet()
+                    val sheetsInGenre = allSheets.filter { it.title in songTitles && it.cn }
+                    val scoresInGenre = allScores.filter { it.title in songTitles }
+                    
+                    // 累积计数：>= 该等级的数量（用于UI减法处理）
+                    fun countRankOrAbove(target: Int) = scoresInGenre.count { it.rank >= target }
+                    // Clear 类型也需要累积计数
+                    val clearLevels = mapOf("clear" to 1, "hard" to 2, "absolute" to 3, "absolute+" to 4, "catastrophy" to 5)
+                    fun countClearOrAbove(clearType: String): Int {
+                        val targetLevel = clearLevels[clearType] ?: 0
+                        return scoresInGenre.count { (clearLevels[it.clear] ?: 0) >= targetLevel }
+                    }
+                    fun countCombo(comboType: String) = scoresInGenre.count { it.combo == comboType }
+                    fun countChain(chainType: String) = scoresInGenre.count { it.chain == chainType }
+                    
+                    PlayDataCategoryStats(
+                        category = PlayDataCategory(
+                            type = PlayDataCategoryType.GENRE,
+                            name = genreKey,
+                            key = genreKey
+                        ),
+                        scoreTotal = scoresInGenre.sumOf { it.score.toLong() },
+                        totalSongs = sheetsInGenre.size,
+                        rateSSSp = countRankOrAbove(13),
+                        rateSSS = countRankOrAbove(12),
+                        rateSSp = countRankOrAbove(11),
+                        rateSS = countRankOrAbove(10),
+                        rateSp = countRankOrAbove(9),
+                        rateS = countRankOrAbove(8),
+                        rateClear = countClearOrAbove("clear"),
+                        rateHard = countClearOrAbove("hard"),
+                        rateBrave = countClearOrAbove("absolute"),
+                        rateAbs = countClearOrAbove("absolute+"),
+                        rateCatas = countClearOrAbove("catastrophy"),
+                        rateFC = countCombo("fullcombo"),
+                        rateAJ = countCombo("alljustice"),
+                        rateAJC = countCombo("alljusticecritical"),
+                        rateFChain = countChain("fullchain"),
+                        rateFChainP = countChain("fullchain2")
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Error calculating genre stats: ${e.message}", e)
+                emptyList()
+            }
+        }
+    }
+    
+    private suspend fun calculateVersionStats(service: ChunithmObjectBoxService): List<PlayDataCategoryStats> {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val allSongs = service.getAllSongs()
+                val allSheets = service.getAllSheets()
+                val allScores = service.getAllPersonalBestScores()
+                val versions = service.getAllVersions()
+                
+                versions.map { versionEntity ->
+                    val versionKey = versionEntity.version
+                    val songsInVersion = allSongs.filter { it.version == versionKey }
+                    // 获取该版本下所有歌曲的所有谱面（考虑多个难度，只统计国服谱面）
+                    val songTitles = songsInVersion.map { it.title }.toSet()
+                    val sheetsInVersion = allSheets.filter { it.title in songTitles && it.cn }
+                    val scoresInVersion = allScores.filter { it.title in songTitles }
+                    
+                    // 累积计数：>= 该等级的数量（用于UI减法处理）
+                    fun countRankOrAbove(target: Int) = scoresInVersion.count { it.rank >= target }
+                    // Clear 类型也需要累积计数
+                    val clearLevels = mapOf("clear" to 1, "hard" to 2, "absolute" to 3, "absolute+" to 4, "catastrophy" to 5)
+                    fun countClearOrAbove(clearType: String): Int {
+                        val targetLevel = clearLevels[clearType] ?: 0
+                        return scoresInVersion.count { (clearLevels[it.clear] ?: 0) >= targetLevel }
+                    }
+                    fun countCombo(comboType: String) = scoresInVersion.count { it.combo == comboType }
+                    fun countChain(chainType: String) = scoresInVersion.count { it.chain == chainType }
+                    
+                    PlayDataCategoryStats(
+                        category = PlayDataCategory(
+                            type = PlayDataCategoryType.VERSION,
+                            name = versionEntity.abbr,
+                            key = versionKey
+                        ),
+                        scoreTotal = scoresInVersion.sumOf { it.score.toLong() },
+                        totalSongs = sheetsInVersion.size,
+                        rateSSSp = countRankOrAbove(13),
+                        rateSSS = countRankOrAbove(12),
+                        rateSSp = countRankOrAbove(11),
+                        rateSS = countRankOrAbove(10),
+                        rateSp = countRankOrAbove(9),
+                        rateS = countRankOrAbove(8),
+                        rateClear = countClearOrAbove("clear"),
+                        rateHard = countClearOrAbove("hard"),
+                        rateBrave = countClearOrAbove("absolute"),
+                        rateAbs = countClearOrAbove("absolute+"),
+                        rateCatas = countClearOrAbove("catastrophy"),
+                        rateFC = countCombo("fullcombo"),
+                        rateAJ = countCombo("alljustice"),
+                        rateAJC = countCombo("alljusticecritical"),
+                        rateFChain = countChain("fullchain"),
+                        rateFChainP = countChain("fullchain2")
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Error calculating version stats: ${e.message}", e)
+                emptyList()
+            }
+        }
+    }
+    
+    private suspend fun calculateLevelStats(service: ChunithmObjectBoxService): List<PlayDataCategoryStats> {
+        return kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val allSheets = service.getAllSheets()
+                val allScores = service.getAllPersonalBestScores()
+                
+                // 定义 Level 范围（分界线为.5，如14.0-14.4是14，14.5-14.9是14+）
+                val levelRanges = listOf(
+                    "1-5" to (1.0 to 5.9),
+                    "6-10" to (6.0 to 10.9),
+                    "11-12" to (11.0 to 12.4),
+                    "12+" to (12.5 to 12.9),
+                    "13" to (13.0 to 13.4),
+                    "13+" to (13.5 to 13.9),
+                    "14" to (14.0 to 14.4),
+                    "14+" to (14.5 to 14.9),
+                    "15" to (15.0 to 15.4),
+                    "15+" to (15.5 to 15.9)
+                )
+                
+                levelRanges.map { (levelName, range) ->
+                    val (minLevel, maxLevel) = range
+                    // 只统计国服谱面
+                    val sheetsInRange = allSheets.filter { 
+                        it.levelValueJp in minLevel..maxLevel && it.cn
+                    }
+                    val sheetKeys = sheetsInRange.map { "${it.title}_${it.difficulty}" }.toSet()
+                    val scoresInRange = allScores.filter { 
+                        val diffMap = mapOf("0" to "basic", "1" to "advanced", "2" to "expert", "3" to "master", "4" to "ultima")
+                        val scoreDiff = diffMap[it.diff] ?: it.diff
+                        "${it.title}_$scoreDiff" in sheetKeys
+                    }
+                    
+                    // 累积计数：>= 该等级的数量（用于UI减法处理）
+                    fun countRankOrAbove(target: Int) = scoresInRange.count { it.rank >= target }
+                    // Clear 类型也需要累积计数
+                    val clearLevels = mapOf("clear" to 1, "hard" to 2, "absolute" to 3, "absolute+" to 4, "catastrophy" to 5)
+                    fun countClearOrAbove(clearType: String): Int {
+                        val targetLevel = clearLevels[clearType] ?: 0
+                        return scoresInRange.count { (clearLevels[it.clear] ?: 0) >= targetLevel }
+                    }
+                    fun countCombo(comboType: String) = scoresInRange.count { it.combo == comboType }
+                    fun countChain(chainType: String) = scoresInRange.count { it.chain == chainType }
+                    
+                    PlayDataCategoryStats(
+                        category = PlayDataCategory(
+                            type = PlayDataCategoryType.LEVEL,
+                            name = levelName,
+                            key = "$minLevel-$maxLevel"
+                        ),
+                        scoreTotal = scoresInRange.sumOf { it.score.toLong() },
+                        totalSongs = sheetsInRange.size,
+                        rateSSSp = countRankOrAbove(13),
+                        rateSSS = countRankOrAbove(12),
+                        rateSSp = countRankOrAbove(11),
+                        rateSS = countRankOrAbove(10),
+                        rateSp = countRankOrAbove(9),
+                        rateS = countRankOrAbove(8),
+                        rateClear = countClearOrAbove("clear"),
+                        rateHard = countClearOrAbove("hard"),
+                        rateBrave = countClearOrAbove("absolute"),
+                        rateAbs = countClearOrAbove("absolute+"),
+                        rateCatas = countClearOrAbove("catastrophy"),
+                        rateFC = countCombo("fullcombo"),
+                        rateAJ = countCombo("alljustice"),
+                        rateAJC = countCombo("alljusticecritical"),
+                        rateFChain = countChain("fullchain"),
+                        rateFChainP = countChain("fullchain2")
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e("ChunithmViewModel", "Error calculating level stats: ${e.message}", e)
+                emptyList()
+            }
+        }
     }
 
     /**
