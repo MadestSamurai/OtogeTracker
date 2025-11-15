@@ -1,18 +1,39 @@
 package com.madsam.otora.ui.record.chunithm.pages
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -23,24 +44,40 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.activity.compose.BackHandler
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.core.icon.Filled
+import androidx.compose.ui.unit.sp
+import com.madsam.otora.core.icon.Fa
+import com.madsam.otora.core.icon.fa.`Arrow-down-wide-short`
+import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.Filter
+import com.madsam.otora.core.icon.fa.`Magnifying-glass`
+import com.madsam.otora.core.icon.fa.Xmark
+import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
+import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red300
+import com.madsam.otora.core.theme.Red500
+import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.ChunithmFilterComponent
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSongCard
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSortComponent
-import com.madsam.otora.ui.record.chunithm.components.SearchBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -259,105 +296,82 @@ internal fun ChunithmSongListPage(
                 )
             },
         ) {
-            // 主内容区域 - 搜索栏和歌曲列表
-            Column(
-                modifier = Modifier.fillMaxHeight()
+            // 主内容区域 - 歌曲列表
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp)
+                    .nestedScroll(object : NestedScrollConnection {
+                        private var totalScroll = 0f
+
+                        override fun onPreScroll(
+                            available: Offset,
+                            source: NestedScrollSource
+                        ): Offset {
+                            totalScroll += available.y
+                            if (totalScroll < -scrollThreshold) {
+                                setIsTabRowVisible(false)
+                                totalScroll = 0f
+                            } else if (totalScroll > scrollThreshold) {
+                                setIsTabRowVisible(true)
+                                totalScroll = 0f
+                            }
+                            return Offset.Zero
+                        }
+                    }),
+                state = lazyListState
             ) {
-                // 搜索栏
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        SearchBar(
-                            searchText = searchText,
-                            onSearchTextChanged = viewModel::updateSearchText,
-                            modifier = Modifier.weight(1f)
+                val duplicateTitles = filteredSongList
+                    .groupBy { it.title }
+                    .filter { it.value.size > 1 }
+                    .keys
+                
+                // 第一个item：顶部间距（考虑状态栏）
+                item {
+                    Spacer(modifier = Modifier
+                        .windowInsetsPadding(
+                            WindowInsets.statusBars.only(WindowInsetsSides.Top)
                         )
-
-                        androidx.compose.material3.IconButton(
-                            onClick = { isFilterExpanded.value = !isFilterExpanded.value },
-                            modifier = Modifier.padding(start = 8.dp)
-                        ) {
-                            androidx.compose.material3.Icon(
-                                imageVector = if (isFilterExpanded.value)
-                                    Filled.ArrowUp
-                                else
-                                    Filled.ArrowDown,
-                                contentDescription = if (isFilterExpanded.value) "收起筛选" else "展开筛选",
-                                tint = Beige500
-                            )
-                        }
-
-                        androidx.compose.material3.IconButton(
-                            onClick = { isSortExpanded.value = !isSortExpanded.value },
-                            modifier = Modifier.padding(start = 4.dp)
-                        ) {
-                            androidx.compose.material3.Icon(
-                                imageVector = if (isSortExpanded.value)
-                                    Filled.ArrowUp
-                                else
-                                    Filled.ArrowDown,
-                                contentDescription = if (isSortExpanded.value) "收起排序" else "展开排序",
-                                tint = Beige500
-                            )
-                        }
-                    }
+                        .height(80.dp)
+                    )
                 }
-
-                // 歌曲列表
-                LazyColumn(
-                    modifier = Modifier
-                        .padding(horizontal = 12.dp)
-                        .nestedScroll(object : NestedScrollConnection {
-                            private var totalScroll = 0f
-
-                            override fun onPreScroll(
-                                available: Offset,
-                                source: NestedScrollSource
-                            ): Offset {
-                                totalScroll += available.y
-                                if (totalScroll < -scrollThreshold) {
-                                    setIsTabRowVisible(false)
-                                    totalScroll = 0f
-                                } else if (totalScroll > scrollThreshold) {
-                                    setIsTabRowVisible(true)
-                                    totalScroll = 0f
-                                }
-                                return Offset.Zero
-                            }
-                        }),
-                    state = lazyListState
-                ) {
-                    val duplicateTitles = filteredSongList
-                        .groupBy { it.title }
-                        .filter { it.value.size > 1 }
-                        .keys
-                    items(filteredSongList.size) { index ->
-                        if (duplicateTitles.contains(filteredSongList[index].title) && filteredSongList[index].genre == "WORLD'S END") {
-                            return@items
+                
+                items(filteredSongList.size) { index ->
+                    if (duplicateTitles.contains(filteredSongList[index].title) && filteredSongList[index].genre == "WORLD'S END") {
+                        return@items
+                    }
+                    ChunithmSongCard(
+                        item = filteredSongList[index],
+                        itemWidth = cardWidthDp,
+                        highlightText = searchText,
+                        viewModel = viewModel,
+                        onClick = { song ->
+                            onNavigateToSongDetail(song.title)
                         }
-                        ChunithmSongCard(
-                            item = filteredSongList[index],
-                            itemWidth = cardWidthDp,
-                            highlightText = searchText,
-                            viewModel = viewModel,
-                            onClick = { song ->
-                                onNavigateToSongDetail(song.title)
-                            }
-                        )
-                        if (index != filteredSongList.size - 1) {
-                            Spacer(modifier = Modifier.height(10.dp))
-                        }
+                    )
+                    if (index != filteredSongList.size - 1) {
+                        Spacer(modifier = Modifier.height(10.dp))
                     }
                 }
             }
+        }
 
-            // 浮动筛选栏
+        // 浮动筛选栏 - 在 Box 顶层
+        AnimatedVisibility(
+            visible = isFilterExpanded.value,
+            enter = expandVertically(),
+            exit = shrinkVertically(),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .windowInsetsPadding(
+                    WindowInsets.statusBars.only(WindowInsetsSides.Top)
+                )
+                .padding(horizontal = 12.dp)
+                .padding(top = 80.dp)
+        ) {
             ChunithmFilterComponent(
-                isFilterExpanded = isFilterExpanded.value,
+                isFilterExpanded = true,
                 genres = songList.map { it.genre }.distinct(),
                 versions = songList.map { it.version }.distinct(),
                 selectedGenres = selectedGenres,
@@ -368,17 +382,191 @@ internal fun ChunithmSongListPage(
                 cnLevelRange = cnLevelRange,
                 filterCnLevelRange = filterCnLevelRange,
                 includeWE = includeWE,
-                modifier = Modifier.padding(top = 64.dp)
+                backgroundColor = Red500,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
             )
+        }
 
-            // 浮动排序栏
+        // 浮动排序栏 - 在 Box 顶层
+        AnimatedVisibility(
+            visible = isSortExpanded.value,
+            enter = expandVertically(),
+            exit = shrinkVertically(),
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .windowInsetsPadding(
+                    WindowInsets.statusBars.only(WindowInsetsSides.Top)
+                )
+                .padding(horizontal = 12.dp)
+                .padding(top = 80.dp)
+        ) {
             ChunithmSortComponent(
-                isSortExpanded = isSortExpanded.value,
+                isSortExpanded = true,
                 selectedSortOption = selectedSortOption,
                 isAscendingOrder = isAscendingOrder,
                 onSortOptionSelected = { isSortExpanded.value = false },
-                modifier = Modifier.padding(top = 64.dp)
+                backgroundColor = Red500,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
             )
+        }
+
+        // 顶部悬浮搜索栏
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .windowInsetsPadding(
+                    WindowInsets.statusBars.union(WindowInsets.ime)
+                        .only(WindowInsetsSides.Top)
+                )
+                .padding(start = 12.dp, end = 12.dp, top = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 左侧圆形返回按钮
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(Red500)
+                    .clickable {
+                        onNavigateBack()
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Fa.`Arrow-left`,
+                    contentDescription = "Back",
+                    tint = Beige400,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+
+            // 右侧搜索栏
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(56.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(Red500)
+                    .padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val focusManager = LocalFocusManager.current
+                val keyboardController = LocalSoftwareKeyboardController.current
+
+                // 搜索框
+                BasicTextField(
+                    value = searchText,
+                    onValueChange = { viewModel.updateSearchText(it) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(48.dp),
+                    textStyle = TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = Beige400,
+                        lineHeight = 20.sp
+                    ),
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                        }
+                    ),
+                    singleLine = true,
+                    cursorBrush = SolidColor(Beige400),
+                    decorationBox = { innerTextField ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Red800, RoundedCornerShape(24.dp))
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Leading icon
+                            Icon(
+                                painter = rememberVectorPainter(image = Fa.`Magnifying-glass`),
+                                contentDescription = "Search",
+                                tint = Beige400,
+                                modifier = Modifier.size(20.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            // Text field with placeholder
+                            Box(
+                                modifier = Modifier.weight(1f),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                if (searchText.isEmpty()) {
+                                    Text(
+                                        text = "搜索...",
+                                        color = Beige600,
+                                        fontSize = 14.sp,
+                                        lineHeight = 20.sp
+                                    )
+                                }
+                                innerTextField()
+                            }
+
+                            // Trailing clear button
+                            if (searchText.isNotEmpty()) {
+                                Spacer(modifier = Modifier.width(8.dp))
+                                IconButton(
+                                    onClick = {
+                                        viewModel.updateSearchText("")
+                                        focusManager.clearFocus()
+                                    },
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Icon(
+                                        painter = rememberVectorPainter(image = Fa.Xmark),
+                                        contentDescription = "Clear",
+                                        tint = Beige400,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                )
+
+                // 筛选按钮
+                Box(modifier = Modifier.padding(start = 8.dp)) {
+                    IconButton(
+                        onClick = { isFilterExpanded.value = !isFilterExpanded.value },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            painter = rememberVectorPainter(image = Fa.Filter),
+                            contentDescription = if (isFilterExpanded.value) "收起筛选" else "展开筛选",
+                            tint = Beige400,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+
+                // 排序按钮
+                Box(modifier = Modifier.padding(start = 4.dp)) {
+                    IconButton(
+                        onClick = { isSortExpanded.value = !isSortExpanded.value },
+                        modifier = Modifier.size(48.dp)
+                    ) {
+                        Icon(
+                            painter = rememberVectorPainter(image = Fa.`Arrow-down-wide-short`),
+                            contentDescription = if (isSortExpanded.value) "收起排序" else "展开排序",
+                            tint = Beige400,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }

@@ -25,9 +25,10 @@ navigation = "2.9.6"
 okhttp = "5.3.0"
 runtime = "1.9.4"
 utilcode = "1.30.7"
-vico = "2.3.1"
+vico = "2.3.4"
 uiAndroid = "1.9.4"
 foundationLayout = "1.9.4"
+animation = "1.9.4"
 
 [libraries]
 accompanist-themeadapter-material3 = { module = "com.google.accompanist:accompanist-themeadapter-material3", version.ref = "accompanistThemeadapterMaterial3" }
@@ -79,6 +80,7 @@ androidx-foundation-android = { group = "androidx.compose.foundation", name = "f
 androidx-foundation-layout-android = { group = "androidx.compose.foundation", name = "foundation-layout-android", version.ref = "foundation" }
 androidx-ui-android = { group = "androidx.compose.ui", name = "ui-android", version.ref = "uiAndroid" }
 androidx-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
+androidx-compose-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "animation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "androidGradle" }

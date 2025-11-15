@@ -31,11 +31,12 @@ import com.madsam.otora.core.theme.sarasaRegular
 
 @Composable
 fun ChunithmSortComponent(
+    modifier: Modifier = Modifier,
     isSortExpanded: Boolean,
     selectedSortOption: MutableState<String>,
     isAscendingOrder: MutableState<Boolean>,
     onSortOptionSelected: () -> Unit,
-    modifier: Modifier = Modifier
+    backgroundColor: androidx.compose.ui.graphics.Color = Red300
 ) {
     AnimatedVisibility(
         visible = isSortExpanded,
@@ -48,7 +49,7 @@ fun ChunithmSortComponent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Red300)
+                .background(backgroundColor)
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
             Text(

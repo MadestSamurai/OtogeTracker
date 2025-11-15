@@ -51,6 +51,7 @@ import com.madsam.otora.core.theme.sarasaBold
 
 @Composable
 internal fun ChunithmFilterComponent(
+    modifier: Modifier = Modifier,
     isFilterExpanded: Boolean,
     genres: List<String>,
     versions: List<String>,
@@ -62,7 +63,7 @@ internal fun ChunithmFilterComponent(
     cnLevelRange: MutableState<IntRange>,
     filterCnLevelRange: MutableState<IntRange>,
     includeWE: MutableState<Boolean>,
-    modifier: Modifier = Modifier
+    backgroundColor: Color = Red300
 ) {
     AnimatedVisibility(
         visible = isFilterExpanded,
@@ -75,7 +76,7 @@ internal fun ChunithmFilterComponent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Red300)
+                .background(backgroundColor)
         ) {
             // Genre 筛选行
             GenreFilterRow(
