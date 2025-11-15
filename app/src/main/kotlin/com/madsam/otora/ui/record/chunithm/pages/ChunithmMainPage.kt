@@ -39,6 +39,7 @@ import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.AvatarLayout
 import com.madsam.otora.ui.record.chunithm.components.Card
+import com.madsam.otora.ui.record.chunithm.components.ChunithmFriendList
 import com.madsam.otora.ui.record.chunithm.components.LoginBonusTracker
 import com.madsam.otora.ui.record.chunithm.components.MapCard
 import com.madsam.otora.ui.record.chunithm.components.PlayDataList
@@ -51,6 +52,7 @@ internal fun ChunithmMainPage(
     scrollThreshold: Float,
     setIsTabRowVisible: (Boolean) -> Unit,
     onNavigateToTopRating: () -> Unit,
+    onShowSongList: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
@@ -159,12 +161,20 @@ internal fun ChunithmMainPage(
                 }
             }
             item {
+                ChunithmFriendList(
+                    chuniFriendListUI = viewModel.chuniFriendDataUI,
+                    cardWidth = contentWidthDp,
+                    showOnlyScored = true
+                )
+            }
+            item {
                 PlayDataList(
                     width = contentWidthDp,
                     difficultyStats = viewModel.difficultyStats,
                     genreStats = viewModel.genreStats,
                     versionStats = viewModel.versionStats,
-                    levelStats = viewModel.levelStats
+                    levelStats = viewModel.levelStats,
+                    onNavigateToSongList = { onShowSongList() }
                 )
             }
             item {

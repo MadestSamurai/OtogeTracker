@@ -64,6 +64,7 @@ import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.madsam.otora.ui.bof.BofScreen
 import com.madsam.otora.ui.home.HomeScreen
 import com.madsam.otora.ui.record.RecordScreen
+import com.madsam.otora.ui.record.chunithm.ChunithmSongListScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -74,40 +75,74 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun MainActivityScreen(navController: NavHostController) {
     val snackbarHostState = remember { SnackbarHostState() }
-    var showBofScreen by remember { mutableStateOf(false) }
-    val bofScreenState = remember { BofScreenState() }
+    val overlayManager = remember { OverlayManager() }
     
     Box(modifier = Modifier.fillMaxSize()) {
         // 主界面（带底部导航）
         MainScreenWithNavigation(
             navController = navController,
             snackbarHostState = snackbarHostState,
-            onShowBofScreen = { showBofScreen = true }
+            overlayManager = overlayManager
         )
         
-        // BOF覆盖层 - 覆盖整个应用（包括导航栏）
-        AnimatedVisibility(
-            visible = showBofScreen,
-            enter = slideInHorizontally(
-                initialOffsetX = { it }
-            ) + fadeIn(),
-            exit = slideOutHorizontally(
-                targetOffsetX = { it }
-            ) + fadeOut()
-        ) {
-            BofScreen(
-                bofScreenState = bofScreenState,
-                onNavigateBack = { showBofScreen = false }
-            )
-        }
+        // 全局覆盖层
+        GlobalOverlays(
+            overlayManager = overlayManager
+        )
+    }
+}
+
+/**
+ * 全局覆盖层组件 - 统一管理所有全屏覆盖层
+ */
+@Composable
+private fun GlobalOverlays(
+    overlayManager: OverlayManager
+) {
+    // BOF覆盖层
+    OverlayWithSlideAnimation(
+        visible = overlayManager.showBofScreen
+    ) {
+        BofScreen(
+            bofScreenState = overlayManager.bofScreenState,
+            onNavigateBack = { overlayManager.showBofScreen = false }
+        )
+    }
+    
+    // 曲目列表覆盖层
+    OverlayWithSlideAnimation(
+        visible = overlayManager.showSongListScreen
+    ) {
+        ChunithmSongListScreen(
+            onNavigateBack = {
+                overlayManager.showSongListScreen = false
+            }
+        )
+    }
+}
+
+/**
+ * 带滑动动画的覆盖层容器
+ */
+@Composable
+private fun OverlayWithSlideAnimation(
+    visible: Boolean,
+    content: @Composable () -> Unit
+) {
+    AnimatedVisibility(
+        visible = visible,
+        enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
+        exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
+    ) {
+        content()
     }
 }
 
 @Composable
-fun MainScreenWithNavigation(
+internal fun MainScreenWithNavigation(
     navController: NavHostController,
     snackbarHostState: SnackbarHostState,
-    onShowBofScreen: () -> Unit
+    overlayManager: OverlayManager
 ) {
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf(Screen.HomeScreen, Screen.RecordScreen, Screen.ReportScreen)
@@ -142,10 +177,10 @@ fun MainScreenWithNavigation(
                     composable(Screen.HomeScreen.route) { 
                         HomeScreen(
                             snackbarHostState = snackbarHostState,
-                            onShowBofScreen = onShowBofScreen
+                            onShowBofScreen = { overlayManager.showBofScreen = true }
                         )
                     }
-                    composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
+                    composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState, overlayManager) }
                     composable(Screen.ReportScreen.route) { Screen2() }
                 }
             }
@@ -215,10 +250,10 @@ fun MainScreenWithNavigation(
                     composable(Screen.HomeScreen.route) { 
                         HomeScreen(
                             snackbarHostState = snackbarHostState,
-                            onShowBofScreen = onShowBofScreen
+                            onShowBofScreen = { overlayManager.showBofScreen = true }
                         )
                     }
-                    composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState) }
+                    composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState, overlayManager) }
                     composable(Screen.ReportScreen.route) { Screen2() }
                 }
             }
@@ -359,4 +394,16 @@ class BofScreenState {
     var selectedCompareDate = MutableStateFlow(compareDateTime.toLocalDate())
     var selectedCompareTime = MutableStateFlow(compareDateTime.format(DateTimeFormatter.ofPattern("HH:mm")))
     var selectedRange = MutableStateFlow<BofRangeResponse?>(null)
+}
+
+/**
+ * 覆盖层管理器 - 统一管理所有全局覆盖层的显示状态
+ */
+class OverlayManager {
+    // BOF覆盖层
+    var showBofScreen by mutableStateOf(false)
+    val bofScreenState = BofScreenState()
+    
+    // 曲目列表覆盖层
+    var showSongListScreen by mutableStateOf(false)
 }

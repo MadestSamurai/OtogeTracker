@@ -41,8 +41,6 @@ import com.madsam.otora.core.theme.GradientBrush.RainbowGradientBg
 import com.madsam.otora.core.theme.GradientBrush.SilverGradientBg
 import com.madsam.otora.core.theme.GradientBrush.WhiteGradientBg
 import com.madsam.otora.core.theme.OSU_LEVEL_GOLD_1
-import com.madsam.otora.core.theme.OSU_LEVEL_PLATINUM_1
-import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.sarasaBold
@@ -55,8 +53,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 internal fun ChunithmFriendList(
     chuniFriendListUI: MutableStateFlow<List<ChunithmFriendUiModel>>,
     cardWidth: Dp,
-    showOnlyScored: Boolean = false,
-    showPinnedLabel: Boolean = false
+    showOnlyScored: Boolean = false
 ) {
     val friendList by chuniFriendListUI.collectAsState()
 
@@ -71,59 +68,46 @@ internal fun ChunithmFriendList(
     Column(
         modifier = Modifier
             .width(cardWidth)
-            .padding(vertical = 12.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(Red700)
-            .padding(vertical = 4.dp)
+            .padding(bottom = 12.dp)
     ) {
-        // 置顶标签
-        if (showPinnedLabel) {
+        // 标题栏（与其他组件保持一致的样式）
+        if (showOnlyScored) {
             Text(
-                text = "已登录分数 (置顶)",
-                color = Beige500,
-                fontSize = 14.sp,
+                text = "置顶好友",
+                fontSize = 16.sp,
                 fontFamily = sarasaBold,
+                color = Beige500,
                 modifier = Modifier
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.End
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
             )
         }
         
+        // 好友卡片列表
         for (chuniFriend in filteredList) {
-            FriendCard(chuniFriend, cardWidth - 12.dp)
+            FriendCard(chuniFriend)
         }
     }
 }
 
 @Composable
 internal fun FriendCard(
-    chuniFriend: ChunithmFriendUiModel,
-    width: Dp
+    chuniFriend: ChunithmFriendUiModel
 ) {
     Surface(
         shape = RoundedCornerShape(10.dp),
         color = Color.Transparent,
         modifier = Modifier
-            .padding(horizontal = 6.dp, vertical = 2.dp)
+            .padding(bottom = 4.dp)
             .fillMaxWidth()
     ) {
         ConstraintLayout(
             modifier = Modifier
-                .background(
-                    when (chuniFriend.profileBackground) {
-                        "silver" -> RANKING_BLUE
-                        "gold" -> OSU_LEVEL_GOLD_1
-                        "platina" -> OSU_LEVEL_PLATINUM_1
-                        else -> Red500
-                    }
-                )
+                .background(Red700)
         ) {
             val (
+                honorColumn,
                 charaImage,
-                honor1,
-                honor2,
-                honor3,
                 reborn,
                 rebornBase,
                 lvText,
@@ -132,9 +116,60 @@ internal fun FriendCard(
                 classEmblemBase,
                 classEmblem,
                 rating,
-                overpower,
-                lastPlay,
+                overpower
             ) = createRefs()
+
+            // 构建 honor 列表
+            val honors = listOfNotNull(
+                if (chuniFriend.honor1.isNotBlank()) 
+                    Pair(chuniFriend.honor1, chuniFriend.honorBase1) 
+                else null,
+                if (chuniFriend.honor2.isNotBlank()) 
+                    Pair(chuniFriend.honor2, chuniFriend.honorBase2) 
+                else null,
+                if (chuniFriend.honor3.isNotBlank()) 
+                    Pair(chuniFriend.honor3, chuniFriend.honorBase3) 
+                else null
+            )
+
+            // 动态渲染 honor 列表
+            Column(
+                modifier = Modifier
+                    .constrainAs(honorColumn) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        bottom.linkTo(charaImage.top)
+                    }
+                    .fillMaxWidth()
+                    .padding(start = 5.dp, top = 5.dp, end = 5.dp, bottom = 5.dp)
+            ) {
+                honors.forEachIndexed { index, (honorText, honorBase) ->
+                    Text(
+                        text = honorText,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = if (index == 0) 0.dp else 2.dp)
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(
+                                when (honorBase) {
+                                    "silver" -> SilverGradientBg
+                                    "gold" -> GoldGradientBg
+                                    "platina" -> PlatinumGradientBg
+                                    "rainbow" -> RainbowGradientBg
+                                    else -> WhiteGradientBg
+                                }
+                            )
+                            .basicMarquee(spacing = MarqueeSpacing(15.dp)),
+                        textAlign = TextAlign.Center,
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                        fontFamily = sarasaBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
 
             Image(
                 painter = rememberAsyncImagePainter(chuniFriend.roleImageUrl),
@@ -142,12 +177,11 @@ internal fun FriendCard(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .constrainAs(charaImage) {
-                        top.linkTo(parent.top)
                         start.linkTo(parent.start)
                         bottom.linkTo(parent.bottom)
                     }
-                    .size(100.dp)
-                    .padding(5.dp)
+                    .size(82.dp)
+                    .padding(start = 5.dp, bottom = 5.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .background(
                         when (chuniFriend.roleBase) {
@@ -160,100 +194,6 @@ internal fun FriendCard(
                     )
             )
 
-            // Honor 1
-            if (chuniFriend.honor1.isNotBlank()) {
-                Text(
-                    text = chuniFriend.honor1,
-                    modifier = Modifier
-                        .constrainAs(honor1) {
-                            top.linkTo(parent.top)
-                            start.linkTo(charaImage.end)
-                        }
-                        .width((width - 100.dp) / 3 - 3.dp)
-                        .padding(start = 0.dp, top = 5.dp, end = 1.5.dp)
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(
-                            when (chuniFriend.honorBase1) {
-                                "silver" -> SilverGradientBg
-                                "gold" -> GoldGradientBg
-                                "platina" -> PlatinumGradientBg
-                                "rainbow" -> RainbowGradientBg
-                                else -> WhiteGradientBg
-                            }
-                        )
-                        .basicMarquee(spacing = MarqueeSpacing(15.dp)),
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = Color.Black,
-                    fontSize = 14.sp,
-                    fontFamily = sarasaBold,
-                )
-            }
-
-            // Honor 2
-            if (chuniFriend.honor2.isNotBlank()) {
-                Text(
-                    text = chuniFriend.honor2,
-                    modifier = Modifier
-                        .constrainAs(honor2) {
-                            top.linkTo(parent.top)
-                            start.linkTo(honor1.end)
-                        }
-                        .width((width - 100.dp) / 3 - 3.dp)
-                        .padding(start = 1.5.dp, top = 5.dp, end = 1.5.dp)
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(
-                            when (chuniFriend.honorBase2) {
-                                "silver" -> SilverGradientBg
-                                "gold" -> GoldGradientBg
-                                "platina" -> PlatinumGradientBg
-                                "rainbow" -> RainbowGradientBg
-                                else -> WhiteGradientBg
-                            }
-                        )
-                        .basicMarquee(spacing = MarqueeSpacing(15.dp)),
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = Color.Black,
-                    fontSize = 14.sp,
-                    fontFamily = sarasaBold,
-                )
-            }
-
-            // Honor 3
-            if (chuniFriend.honor3.isNotBlank()) {
-                Text(
-                    text = chuniFriend.honor3,
-                    modifier = Modifier
-                        .constrainAs(honor3) {
-                            top.linkTo(parent.top)
-                            start.linkTo(honor2.end)
-                            end.linkTo(parent.end)
-                        }
-                        .width((width - 100.dp) / 3 - 3.dp)
-                        .padding(start = 1.5.dp, top = 5.dp, end = 0.dp)
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(
-                            when (chuniFriend.honorBase3) {
-                                "silver" -> SilverGradientBg
-                                "gold" -> GoldGradientBg
-                                "platina" -> PlatinumGradientBg
-                                "rainbow" -> RainbowGradientBg
-                                else -> WhiteGradientBg
-                            }
-                        )
-                        .basicMarquee(spacing = MarqueeSpacing(15.dp)),
-                    textAlign = TextAlign.Center,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = Color.Black,
-                    fontSize = 14.sp,
-                    fontFamily = sarasaBold,
-                )
-            }
-
             if (chuniFriend.reborn > 0) {
                 Image(
                     painter = rememberVectorPainter(image = Filled.Star),
@@ -261,8 +201,8 @@ internal fun FriendCard(
                     contentDescription = "Reborn",
                     modifier = Modifier
                         .constrainAs(rebornBase) {
-                            top.linkTo(honor1.bottom)
-                            start.linkTo(charaImage.end)
+                            start.linkTo(charaImage.end, margin = 5.dp)
+                            top.linkTo(honorColumn.bottom)
                         }
                         .size(16.dp)
                 )
@@ -288,12 +228,11 @@ internal fun FriendCard(
                 fontSize = 12.sp,
                 modifier = Modifier
                     .constrainAs(lvText) {
+                        start.linkTo(charaImage.end, margin = 5.dp)
                         if (chuniFriend.reborn > 0) {
-                            top.linkTo(rebornBase.top, margin = 12.dp)
-                            start.linkTo(rebornBase.start)
+                            top.linkTo(rebornBase.bottom)
                         } else {
-                            top.linkTo(honor1.bottom, margin = 6.dp)
-                            start.linkTo(charaImage.end)
+                            top.linkTo(honorColumn.bottom, margin = 8.dp)
                         }
                     }
             )
@@ -322,8 +261,11 @@ internal fun FriendCard(
                 fontFamily = sarasaBold,
                 modifier = Modifier
                     .constrainAs(username) {
-                        top.linkTo(lv.top)
-                        bottom.linkTo(lv.bottom)
+                        top.linkTo(
+                            if (chuniFriend.reborn > 0) rebornBase.top
+                            else lvText.top
+                        )
+                        bottom.linkTo(lvText.bottom)
                         start.linkTo(lv.end)
                     }
                     .padding(start = 8.dp)
@@ -336,7 +278,7 @@ internal fun FriendCard(
                 modifier = Modifier
                     .padding(horizontal = 5.dp)
                     .constrainAs(classEmblemBase) {
-                        top.linkTo(honor1.bottom)
+                        top.linkTo(honorColumn.bottom)
                         end.linkTo(parent.end)
                     }
                     .width(60.dp)
@@ -385,55 +327,54 @@ internal fun FriendCard(
                         top.linkTo(username.bottom)
                         start.linkTo(charaImage.end)
                     }
+                    .padding(start = 5.dp, top = 2.dp)
             )
 
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        style = SpanStyle(
-                            color = Beige500,
-                            fontSize = 11.sp,
-                            fontFamily = sarasaRegular
-                        )
-                    ) {
-                        append("OVERPOWER ")
-                    }
-                    append(chuniFriend.overpower)
-                },
-                color = Beige400,
-                fontSize = 12.sp,
-                lineHeight = 14.sp,
-                fontFamily = sarasaBold,
+            Column(
                 modifier = Modifier
                     .constrainAs(overpower) {
                         top.linkTo(rating.bottom)
-                        start.linkTo(charaImage.end)
+                        start.linkTo(charaImage.end, margin = 5.dp)
                     }
-            )
+            ) {
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                color = Beige500,
+                                fontSize = 11.sp,
+                                fontFamily = sarasaRegular
+                            )
+                        ) {
+                            append("OVERPOWER ")
+                        }
+                        append(chuniFriend.overpower)
+                    },
+                    color = Beige400,
+                    fontSize = 12.sp,
+                    lineHeight = 14.sp,
+                    fontFamily = sarasaBold,
+                )
 
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        style = SpanStyle(
-                            color = Beige500,
-                            fontSize = 11.sp,
-                            fontFamily = sarasaRegular
-                        )
-                    ) {
-                        append("LAST PLAY ")
-                    }
-                    append(chuniFriend.lastPlay)
-                },
-                color = Beige400,
-                fontSize = 12.sp,
-                lineHeight = 16.sp,
-                fontFamily = sarasaBold,
-                modifier = Modifier
-                    .constrainAs(lastPlay) {
-                        top.linkTo(overpower.bottom)
-                        start.linkTo(charaImage.end)
-                    }
-            )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(
+                            style = SpanStyle(
+                                color = Beige500,
+                                fontSize = 11.sp,
+                                fontFamily = sarasaRegular
+                            )
+                        ) {
+                            append("LAST PLAY ")
+                        }
+                        append(chuniFriend.lastPlay)
+                    },
+                    color = Beige400,
+                    fontSize = 12.sp,
+                    lineHeight = 14.sp,
+                    fontFamily = sarasaBold,
+                )
+            }
         }
     }
 }

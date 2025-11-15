@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.madsam.otora.OverlayManager
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.icon.fa.`Arrow-left`
@@ -73,8 +74,9 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RecordScreen(
-    snackbarHostState: SnackbarHostState
+internal fun RecordScreen(
+    snackbarHostState: SnackbarHostState,
+    overlayManager: OverlayManager
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -85,7 +87,6 @@ fun RecordScreen(
     var showMaimaiDialog by remember { mutableStateOf(false) }
 
     // 移除ViewModel创建，让各个页面自己管理
-    val osuScreenState = OsuScreenState()
     val chunithmNavController = rememberNavController()
     
     // 创建Chunithm ViewModel在外部，以便观察其状态
@@ -244,8 +245,7 @@ fun RecordScreen(
                     Screen.Page1 -> {
                         val osuViewModel: OsuViewModel = viewModel(factory = OsuViewModelFactory())
                         OsuUserPage(
-                            osuViewModel, 
-                            osuScreenState,
+                            osuViewModel,
                             isPageVisible = selectedItem == Screen.Page1
                         )
                     }
@@ -260,7 +260,8 @@ fun RecordScreen(
                             navController = chunithmNavController,
                             viewModel = chunithmViewModel,
                             chunithmScreenState = ChunithmScreenState(),
-                            snackbarHostState = snackbarHostState
+                            snackbarHostState = snackbarHostState,
+                            overlayManager = overlayManager
                         )
                     }
                     Screen.Page4 -> TestPage4()
@@ -285,10 +286,6 @@ sealed class Screen(val route: String) {
     data object Page2 : Screen("Maimai")
     data object Page3 : Screen("Chunithm")
     data object Page4 : Screen("Page4")
-}
-
-class OsuScreenState {
-    var selectedTab = MutableStateFlow(0)
 }
 
 class ChunithmScreenState {

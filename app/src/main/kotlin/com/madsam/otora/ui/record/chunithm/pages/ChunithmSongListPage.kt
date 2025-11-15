@@ -18,12 +18,12 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.activity.compose.BackHandler
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -48,9 +48,14 @@ internal fun ChunithmSongListPage(
     viewModel: ChunithmViewModel,
     scrollThreshold: Float,
     setIsTabRowVisible: (Boolean) -> Unit,
-    selectedSongTitle: MutableState<String?>,
-    onNavigateToSongDetail: (String) -> Unit
+    onNavigateToSongDetail: (String) -> Unit,
+    onNavigateBack: () -> Unit = {}
 ) {
+    // 处理返回按钮
+    BackHandler(enabled = true) {
+        onNavigateBack()
+    }
+    
     val screenWidthDp = with(LocalDensity.current) {
         LocalWindowInfo.current.containerSize.width.toDp()
     }
@@ -340,7 +345,7 @@ internal fun ChunithmSongListPage(
                             highlightText = searchText,
                             viewModel = viewModel,
                             onClick = { song ->
-                                selectedSongTitle.value = song.title
+                                onNavigateToSongDetail(song.title)
                             }
                         )
                         if (index != filteredSongList.size - 1) {

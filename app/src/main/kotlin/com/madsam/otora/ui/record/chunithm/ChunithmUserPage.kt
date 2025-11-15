@@ -49,13 +49,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.madsam.otora.R
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.ui.record.chunithm.components.ChunithmSongDetailOverlay
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.components.CustomScrollableTabRow
 import com.madsam.otora.ui.record.ChunithmScreenState
+import com.madsam.otora.ui.record.chunithm.components.ChunithmSongDetailOverlay
 import com.madsam.otora.ui.record.chunithm.dialogs.TopRankDialog
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmCollectionPage
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmFriendsPage
@@ -71,7 +71,8 @@ internal fun ChunithmUserPage(
     viewModel: ChunithmViewModel,
     chunithmScreenState: ChunithmScreenState,
     snackbarHostState: SnackbarHostState,
-    navController: NavController
+    navController: NavController,
+    onShowSongList: () -> Unit = {}
 ) {
     val selectedTabIndex by chunithmScreenState.selectedTab.collectAsState()
     val scrollThreshold = 50f
@@ -127,7 +128,7 @@ internal fun ChunithmUserPage(
     LaunchedEffect(Unit) {
         viewModel.setOnBackCallback {
             if (selectedSongTitle.value != null) {
-                // 如果覆盖层是打开的，关闭它
+                // 如果歌曲详情覆盖层是打开的，关闭它
                 selectedSongTitle.value = null
             }
         }
@@ -153,14 +154,14 @@ internal fun ChunithmUserPage(
                     viewModel = viewModel,
                     scrollThreshold = scrollThreshold,
                     setIsTabRowVisible = { isTabRowVisible = it },
-                    onNavigateToTopRating = { showTopRankDialog = true }
+                    onNavigateToTopRating = { showTopRankDialog = true },
+                    onShowSongList = onShowSongList
                 )
 
                 1 -> ChunithmSongListPage(
                     viewModel = viewModel,
                     scrollThreshold = scrollThreshold,
                     setIsTabRowVisible = { isTabRowVisible = it },
-                    selectedSongTitle = selectedSongTitle,
                     onNavigateToSongDetail = { songTitle ->
                         // 对歌曲标题进行URL编码以处理特殊字符
                         val encodedTitle = URLEncoder.encode(songTitle, StandardCharsets.UTF_8.toString())

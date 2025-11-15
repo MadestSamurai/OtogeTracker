@@ -109,23 +109,12 @@ internal fun ChunithmFriendsPage(
                     }
                 })
         ) {
-            // 置顶：已登录分数的好友
-            item {
-                ChunithmFriendList(
-                    chuniFriendListUI = viewModel.chuniFriendDataUI,
-                    cardWidth = contentWidthDp,
-                    showOnlyScored = true,
-                    showPinnedLabel = true
-                )
-            }
-
             // 其他好友
             item {
                 ChunithmFriendList(
                     chuniFriendListUI = viewModel.chuniFriendDataUI,
                     cardWidth = contentWidthDp,
-                    showOnlyScored = false,
-                    showPinnedLabel = false
+                    showOnlyScored = false
                 )
             }
 

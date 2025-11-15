@@ -59,7 +59,8 @@ internal fun PlayDataList(
     difficultyStats: StateFlow<List<PlayDataCategoryStats>>,
     genreStats: StateFlow<List<PlayDataCategoryStats>>,
     versionStats: StateFlow<List<PlayDataCategoryStats>>,
-    levelStats: StateFlow<List<PlayDataCategoryStats>>
+    levelStats: StateFlow<List<PlayDataCategoryStats>>,
+    onNavigateToSongList: () -> Unit = {}
 ) {
     val difficultyStatsData by difficultyStats.collectAsState()
     val genreStatsData by genreStats.collectAsState()
@@ -235,16 +236,16 @@ internal fun PlayDataList(
             
             Spacer(modifier = Modifier.weight(1f))
             
-            // 详细按钮
+            // 曲目列表按钮
             Text(
-                text = "详细",
-                color = Red500,
+                text = "曲目列表",
+                color = Beige500,
                 fontSize = 14.sp,
                 fontFamily = sarasaBold,
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Red700)
-                    .clickable { /* TODO: 跳转到游玩数据详情 */ }
+                    .background(Red500)
+                    .clickable { onNavigateToSongList() }
                     .padding(horizontal = 12.dp, vertical = 4.dp)
             )
         }

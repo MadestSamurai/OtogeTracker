@@ -1,7 +1,9 @@
 package com.madsam.otora.ui.record.chunithm.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -74,10 +76,8 @@ internal fun Card(
                 )
         ) {
             val (
+                honorColumn,
                 charaImage,
-                honor1,
-                honor2,
-                honor3,
                 reborn,
                 rebornBase,
                 lvText,
@@ -89,97 +89,56 @@ internal fun Card(
                 playData
             ) = createRefs()
 
-            // Honor 1
-            if (cardData.honor1.isNotBlank()) {
-                Text(
-                    text = cardData.honor1,
-                    modifier = Modifier
-                        .constrainAs(honor1) {
-                            top.linkTo(parent.top)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        }
-                        .fillMaxWidth()
-                        .padding(start = 5.dp, top = 5.dp, end = 5.dp)
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(
-                            when (cardData.honorBase1) {
-                                "silver" -> SilverGradientBg
-                                "gold" -> GoldGradientBg
-                                "platina" -> PlatinumGradientBg
-                                "rainbow" -> RainbowGradientBg
-                                else -> WhiteGradientBg
-                            }
-                        ),
-                    textAlign = TextAlign.Center,
-                    color = Color.Black,
-                    fontSize = 14.sp,
-                    fontFamily = sarasaBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            // 构建 honor 列表
+            val honors = listOfNotNull(
+                if (cardData.honor1.isNotBlank()) 
+                    Pair(cardData.honor1, cardData.honorBase1) 
+                else null,
+                if (cardData.honor2.isNotBlank()) 
+                    Pair(cardData.honor2, cardData.honorBase2) 
+                else null,
+                if (cardData.honor3.isNotBlank()) 
+                    Pair(cardData.honor3, cardData.honorBase3) 
+                else null
+            )
 
-            // Honor 2
-            if (cardData.honor2.isNotBlank()) {
-                Text(
-                    text = cardData.honor2,
-                    modifier = Modifier
-                        .constrainAs(honor2) {
-                            top.linkTo(honor1.bottom)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        }
-                        .fillMaxWidth()
-                        .padding(start = 5.dp, top = 2.dp, end = 5.dp)
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(
-                            when (cardData.honorBase2) {
-                                "silver" -> SilverGradientBg
-                                "gold" -> GoldGradientBg
-                                "platina" -> PlatinumGradientBg
-                                "rainbow" -> RainbowGradientBg
-                                else -> WhiteGradientBg
-                            }
-                        ),
-                    textAlign = TextAlign.Center,
-                    color = Color.Black,
-                    fontSize = 14.sp,
-                    fontFamily = sarasaBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            // Honor 3
-            if (cardData.honor3.isNotBlank()) {
-                Text(
-                    text = cardData.honor3,
-                    modifier = Modifier
-                        .constrainAs(honor3) {
-                            top.linkTo(honor2.bottom)
-                            start.linkTo(parent.start)
-                            end.linkTo(parent.end)
-                        }
-                        .fillMaxWidth()
-                        .padding(start = 5.dp, top = 2.dp, end = 5.dp)
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(
-                            when (cardData.honorBase3) {
-                                "silver" -> SilverGradientBg
-                                "gold" -> GoldGradientBg
-                                "platina" -> PlatinumGradientBg
-                                "rainbow" -> RainbowGradientBg
-                                else -> WhiteGradientBg
-                            }
-                        ),
-                    textAlign = TextAlign.Center,
-                    color = Color.Black,
-                    fontSize = 14.sp,
-                    fontFamily = sarasaBold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+            // 动态渲染 honor 列表
+            Column(
+                modifier = Modifier
+                    .constrainAs(honorColumn) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        bottom.linkTo(charaImage.top)
+                    }
+                    .fillMaxWidth()
+                    .padding(start = 5.dp, top = 4.dp, end = 5.dp, bottom = 4.dp)
+            ) {
+                honors.forEachIndexed { index, (honorText, honorBase) ->
+                    Text(
+                        text = honorText,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = if (index == 0) 0.dp else 2.dp)
+                            .clip(RoundedCornerShape(5.dp))
+                            .background(
+                                when (honorBase) {
+                                    "silver" -> SilverGradientBg
+                                    "gold" -> GoldGradientBg
+                                    "platina" -> PlatinumGradientBg
+                                    "rainbow" -> RainbowGradientBg
+                                    else -> WhiteGradientBg
+                                }
+                            )
+                            .basicMarquee(spacing = MarqueeSpacing(15.dp)),
+                        textAlign = TextAlign.Center,
+                        color = Color.Black,
+                        fontSize = 14.sp,
+                        fontFamily = sarasaBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
 
             Image(
@@ -188,11 +147,10 @@ internal fun Card(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .constrainAs(charaImage) {
-                        top.linkTo(honor3.bottom, margin = 5.dp)
                         start.linkTo(parent.start)
                         bottom.linkTo(parent.bottom)
                     }
-                    .size(110.dp)
+                    .size(111.dp)
                     .padding(start = 5.dp, bottom = 5.dp)
                     .clip(RoundedCornerShape(5.dp))
                     .background(
@@ -206,31 +164,33 @@ internal fun Card(
                     )
             )
 
-            Image(
-                painter = rememberVectorPainter(image = Filled.Star),
-                colorFilter = ColorFilter.tint(OSU_LEVEL_GOLD_1),
-                contentDescription = "Reborn",
-                modifier = Modifier
-                    .constrainAs(rebornBase) {
-                        top.linkTo(honor3.bottom, margin = 5.dp)
-                        start.linkTo(charaImage.end, margin = 5.dp)
-                    }
-                    .size(16.dp)
-            )
+            if (cardData.reborn > 0) {
+                Image(
+                    painter = rememberVectorPainter(image = Filled.Star),
+                    colorFilter = ColorFilter.tint(OSU_LEVEL_GOLD_1),
+                    contentDescription = "Reborn",
+                    modifier = Modifier
+                        .constrainAs(rebornBase) {
+                            top.linkTo(honorColumn.bottom)
+                            start.linkTo(charaImage.end, margin = 5.dp)
+                        }
+                        .size(16.dp)
+                )
 
-            Text(
-                modifier = Modifier
-                    .constrainAs(reborn) {
-                        top.linkTo(rebornBase.top)
-                        start.linkTo(rebornBase.start)
-                        bottom.linkTo(rebornBase.bottom)
-                        end.linkTo(rebornBase.end)
-                    },
-                text = cardData.reborn.toString(),
-                color = Red500,
-                fontSize = 12.sp,
-                fontFamily = sarasaBold
-            )
+                Text(
+                    modifier = Modifier
+                        .constrainAs(reborn) {
+                            top.linkTo(rebornBase.top)
+                            start.linkTo(rebornBase.start)
+                            bottom.linkTo(rebornBase.bottom)
+                            end.linkTo(rebornBase.end)
+                        },
+                    text = cardData.reborn.toString(),
+                    color = Red500,
+                    fontSize = 12.sp,
+                    fontFamily = sarasaBold
+                )
+            }
 
             Text(
                 text = "Lv.",
@@ -238,8 +198,12 @@ internal fun Card(
                 fontSize = 12.sp,
                 modifier = Modifier
                     .constrainAs(lvText) {
-                        top.linkTo(rebornBase.top, margin = 12.dp)
-                        start.linkTo(rebornBase.start)
+                        start.linkTo(charaImage.end, margin = 5.dp)
+                        if (cardData.reborn > 0) {
+                            top.linkTo(rebornBase.bottom)
+                        } else {
+                            top.linkTo(honorColumn.bottom, margin = 8.dp)
+                        }
                     }
             )
 
@@ -250,7 +214,10 @@ internal fun Card(
                 fontFamily = sarasaBold,
                 modifier = Modifier
                     .constrainAs(lv) {
-                        top.linkTo(rebornBase.top)
+                        top.linkTo(
+                            if (cardData.reborn > 0) rebornBase.top
+                            else lvText.top
+                        )
                         bottom.linkTo(lvText.bottom)
                         start.linkTo(lvText.end, margin = 2.dp)
                     }
@@ -264,7 +231,10 @@ internal fun Card(
                 fontFamily = sarasaBold,
                 modifier = Modifier
                     .constrainAs(username) {
-                        top.linkTo(rebornBase.top)
+                        top.linkTo(
+                            if (cardData.reborn > 0) rebornBase.top
+                            else lvText.top
+                        )
                         bottom.linkTo(lvText.bottom)
                         start.linkTo(lv.end)
                     }
@@ -278,7 +248,7 @@ internal fun Card(
                 modifier = Modifier
                     .padding(horizontal = 5.dp)
                     .constrainAs(classEmblemBase) {
-                        top.linkTo(honor3.bottom, margin = 5.dp)
+                        top.linkTo(honorColumn.bottom)
                         end.linkTo(parent.end)
                     }
                     .width(60.dp)

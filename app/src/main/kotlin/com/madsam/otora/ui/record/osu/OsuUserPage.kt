@@ -33,7 +33,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.utils.ScreenUtil
-import com.madsam.otora.ui.record.OsuScreenState
 import com.madsam.otora.ui.record.osu.components.BadgeList
 import com.madsam.otora.ui.record.osu.components.Card
 import com.madsam.otora.ui.record.osu.components.Level
@@ -48,7 +47,6 @@ import com.madsam.otora.ui.record.osu.dialogs.TopRankDialog
 @Composable
 internal fun OsuUserPage(
     viewModel: OsuViewModel,
-    osuScreenState: OsuScreenState,
     isPageVisible: Boolean = true
 ) {
     val context = LocalContext.current

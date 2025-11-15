@@ -13,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.NavType
+import com.madsam.otora.OverlayManager
 import com.madsam.otora.ui.record.ChunithmScreenState
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.ChunithmUserPage
@@ -24,10 +25,6 @@ import com.madsam.otora.ui.record.chunithm.pages.ChunithmSongDetailPage
 object ChunithmRoutes {
     const val CHUNITHM_USER = "chunithm_user"
     const val CHUNITHM_SONG_DETAIL = "chunithm_song_detail/{songTitle}"
-    
-    fun createSongDetailRoute(songTitle: String): String {
-        return "chunithm_song_detail/$songTitle"
-    }
 }
 
 /**
@@ -40,7 +37,8 @@ object ChunithmRoutes {
  *     startDestination = ChunithmRoutes.CHUNITHM_USER,
  *     viewModel = chunithmViewModel,
  *     chuniScreenState = chuniScreenState,
- *     snackbarHostState = snackbarHostState
+ *     snackbarHostState = snackbarHostState,
+ *     overlayManager = overlayManager
  * )
  * ```
  */
@@ -50,7 +48,8 @@ internal fun ChunithmNavHost(
     startDestination: String = ChunithmRoutes.CHUNITHM_USER,
     viewModel: ChunithmViewModel,
     chunithmScreenState: ChunithmScreenState,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    overlayManager: OverlayManager
 ) {
     NavHost(
         navController = navController,
@@ -62,7 +61,10 @@ internal fun ChunithmNavHost(
                 viewModel = viewModel,
                 chunithmScreenState = chunithmScreenState,
                 snackbarHostState = snackbarHostState,
-                navController = navController
+                navController = navController,
+                onShowSongList = {
+                    overlayManager.showSongListScreen = true
+                }
             )
         }
         

@@ -1001,7 +1001,7 @@ internal class ChunithmViewModel() : ViewModel() {
                         rateFChain = countChain("fullchain"),
                         rateFChainP = countChain("fullchain2")
                     )
-                }
+                }.filter { it.totalSongs > 0 }
             } catch (e: Exception) {
                 Log.e("ChunithmViewModel", "Error calculating difficulty stats: ${e.message}", e)
                 emptyList()
@@ -1019,7 +1019,7 @@ internal class ChunithmViewModel() : ViewModel() {
                 
                 categories.map { categoryEntity ->
                     val genreKey = categoryEntity.category
-                    val songsInGenre = allSongs.filter { it.genre == genreKey }
+                    val songsInGenre = allSongs.filter { it.genre == genreKey && it.genre != "WORLD'S END" }
                     // 获取该类型下所有歌曲的所有谱面（考虑多个难度，只统计国服谱面）
                     val songTitles = songsInGenre.map { it.title }.toSet()
                     val sheetsInGenre = allSheets.filter { it.title in songTitles && it.cn }
@@ -1061,7 +1061,7 @@ internal class ChunithmViewModel() : ViewModel() {
                         rateFChain = countChain("fullchain"),
                         rateFChainP = countChain("fullchain2")
                     )
-                }
+                }.filter { it.totalSongs > 0 }
             } catch (e: Exception) {
                 Log.e("ChunithmViewModel", "Error calculating genre stats: ${e.message}", e)
                 emptyList()
@@ -1079,11 +1079,18 @@ internal class ChunithmViewModel() : ViewModel() {
                 
                 versions.map { versionEntity ->
                     val versionKey = versionEntity.version
-                    val songsInVersion = allSongs.filter { it.version == versionKey }
-                    // 获取该版本下所有歌曲的所有谱面（考虑多个难度，只统计国服谱面）
+                    val songsInVersion = allSongs.filter { it.version == versionKey && it.genre != "WORLD'S END" }
+                    // 获取该版本下所有歌曲的所有谱面（只统计国服谱面）
                     val songTitles = songsInVersion.map { it.title }.toSet()
                     val sheetsInVersion = allSheets.filter { it.title in songTitles && it.cn }
-                    val scoresInVersion = allScores.filter { it.title in songTitles }
+                    // 构建谱面唯一标识（歌曲_难度）
+                    val sheetKeys = sheetsInVersion.map { "${it.title}_${it.difficulty}" }.toSet()
+                    // 只统计国服存在的谱面的成绩
+                    val diffMap = mapOf("0" to "basic", "1" to "advanced", "2" to "expert", "3" to "master", "4" to "ultima")
+                    val scoresInVersion = allScores.filter {
+                        val scoreDiff = diffMap[it.diff] ?: it.diff
+                        "${it.title}_$scoreDiff" in sheetKeys
+                    }
                     
                     // 累积计数：>= 该等级的数量（用于UI减法处理）
                     fun countRankOrAbove(target: Int) = scoresInVersion.count { it.rank >= target }
@@ -1121,7 +1128,7 @@ internal class ChunithmViewModel() : ViewModel() {
                         rateFChain = countChain("fullchain"),
                         rateFChainP = countChain("fullchain2")
                     )
-                }
+                }.filter { it.totalSongs > 0 }
             } catch (e: Exception) {
                 Log.e("ChunithmViewModel", "Error calculating version stats: ${e.message}", e)
                 emptyList()
@@ -1151,9 +1158,9 @@ internal class ChunithmViewModel() : ViewModel() {
                 
                 levelRanges.map { (levelName, range) ->
                     val (minLevel, maxLevel) = range
-                    // 只统计国服谱面
+                    // 只统计国服谱面，使用国服定数
                     val sheetsInRange = allSheets.filter { 
-                        it.levelValueJp in minLevel..maxLevel && it.cn
+                        it.levelValueCn in minLevel..maxLevel && it.cn
                     }
                     val sheetKeys = sheetsInRange.map { "${it.title}_${it.difficulty}" }.toSet()
                     val scoresInRange = allScores.filter { 
@@ -1198,7 +1205,7 @@ internal class ChunithmViewModel() : ViewModel() {
                         rateFChain = countChain("fullchain"),
                         rateFChainP = countChain("fullchain2")
                     )
-                }
+                }.filter { it.totalSongs > 0 }
             } catch (e: Exception) {
                 Log.e("ChunithmViewModel", "Error calculating level stats: ${e.message}", e)
                 emptyList()
