@@ -308,7 +308,7 @@ internal fun PlayDataList(
                             PlayDataCategoryType.VERSION -> "版本"
                             PlayDataCategoryType.LEVEL -> "定数"
                         }
-                        PlaceholderPlayData("", categoryTypeName)
+                        PlaceholderPlayData("即将推出", categoryTypeName)
                     }
                 }
             }

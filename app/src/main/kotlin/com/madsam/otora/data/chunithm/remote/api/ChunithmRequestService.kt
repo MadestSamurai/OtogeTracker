@@ -36,10 +36,23 @@ import com.madsam.otora.data.chunithm.remote.model.ChunithmGenreDTO
 import com.madsam.otora.data.chunithm.remote.model.ChuniLoginBonusDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmMapDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmMapDTO.ChuniMapArea
+import com.madsam.otora.data.chunithm.remote.model.ChunithmMissionDTO
+import com.madsam.otora.data.chunithm.remote.model.MissionPattern
 import com.madsam.otora.data.chunithm.remote.model.ChunithmPenguinDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmPlayRecordDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmPointRewardDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmScoreDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmSkillDTO
+import com.madsam.otora.data.chunithm.remote.model.SkillInfo
 import com.madsam.otora.data.chunithm.remote.model.ChunithmStatueDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmTicketDTO
+import com.madsam.otora.data.chunithm.remote.model.TicketInfo
+import com.madsam.otora.data.chunithm.remote.model.ChunithmTrophyDTO
+import com.madsam.otora.data.chunithm.remote.model.TrophyInfo
+import com.madsam.otora.data.chunithm.remote.model.ChunithmNameplateDTO
+import com.madsam.otora.data.chunithm.remote.model.NameplateInfo
+import com.madsam.otora.data.chunithm.remote.model.ChunithmMapIconDTO
+import com.madsam.otora.data.chunithm.remote.model.MapIconInfo
 import com.madsam.otora.data.chunithm.remote.model.ChunithmUserDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmUserExtendDTO
 import com.madsam.otora.data.chunithm.remote.model.DailyReward
@@ -506,6 +519,519 @@ internal class ChunithmRequestService(private val context: Context) {
         requestDataFromServer("$CHUNITHM_URL/record")?.let { doc ->
             val mapData = parseChuniMaps(doc)
             chunithmLocalService.saveMapData(mapData)
+        }
+    }
+
+    /**
+     * 解析任务页面数据
+     */
+    private fun parseCMission(doc: Document): ChunithmMissionDTO {
+        try {
+            // 任务标题和日期
+            val title = doc.selectFirst("div.cmission_title_text")?.text() ?: ""
+            val rewardImageUrl = doc.selectFirst("div.cmission_reward_img img")?.attr("src") ?: ""
+            
+            val dateRange = doc.selectFirst("div.cmission_title_block div.font_x-small")?.text() ?: ""
+            val dates = dateRange.replace("举办期间：", "").split(" ～ ")
+            val startDate = dates.getOrNull(0)?.trim() ?: ""
+            val endDate = dates.getOrNull(1)?.trim() ?: ""
+            
+            // 当前气球数（从图片数字中提取）
+            val balloonImages = doc.select("div.cmission_mypoint_block img")
+            val currentPoints = balloonImages.mapNotNull { img ->
+                val src = img.attr("src")
+                when {
+                    src.contains("num_balloon_0.png") -> 0
+                    src.contains("num_balloon_1.png") -> 1
+                    src.contains("num_balloon_2.png") -> 2
+                    src.contains("num_balloon_3.png") -> 3
+                    src.contains("num_balloon_4.png") -> 4
+                    src.contains("num_balloon_5.png") -> 5
+                    src.contains("num_balloon_6.png") -> 6
+                    src.contains("num_balloon_7.png") -> 7
+                    src.contains("num_balloon_8.png") -> 8
+                    src.contains("num_balloon_9.png") -> 9
+                    else -> null
+                }
+            }.joinToString("").toIntOrNull() ?: 0
+            
+            // 下一个奖励
+            val nextRewardPoints = doc.selectFirst("div.cmission_reward_next_point span")
+                ?.text()?.toIntOrNull() ?: 0
+            val nextRewardName = doc.selectFirst("div.cmission_reward_next_name span")?.text() ?: ""
+            val nextRewardImageUrl = doc.selectFirst("div.cmission_reward_next_img img")?.attr("src") ?: ""
+            
+            // 特别奖励
+            val pickupRewardPoints = doc.selectFirst("div.cmission_reward_pickup_point span.font_x-large")
+                ?.text()?.toIntOrNull() ?: 0
+            val pickupRewardName = doc.selectFirst("div.cmission_reward_pickup_name span")?.text() ?: ""
+            val pickupRewardImageUrl = doc.selectFirst("div.cmission_reward_pickup_img img")?.attr("src") ?: ""
+            
+            // 解析任务进度列表
+            val patterns = doc.select("div.cmission_pattern_info").map { pattern ->
+                // 阶段信息
+                val stageNum = pattern.selectFirst("span.cmission_stage_num")?.text()?.toIntOrNull() ?: 0
+                val stageDen = pattern.selectFirst("span.cmission_stage_den")?.text()?.toIntOrNull() ?: 0
+                
+                // 任务类型图标
+                val iconUrl = pattern.selectFirst("div.cmission_pattern_left img")?.attr("src") ?: ""
+                
+                // 任务描述
+                val description = pattern.selectFirst("div.cmission_pattern_text")?.html()
+                    ?.replace("<br>", " ")?.trim() ?: ""
+                
+                // 进度信息
+                val currentProgress = pattern.selectFirst("div.cmission_pattern_progress_num")
+                    ?.text()?.toIntOrNull() ?: 0
+                val totalProgress = pattern.selectFirst("div.cmission_pattern_progress_den")
+                    ?.text()?.toIntOrNull() ?: 0
+                val progressUnit = pattern.selectFirst("div.cmission_pattern_progress_unit")?.text() ?: ""
+                
+                // 奖励气球数（从图片中提取）
+                val rewardBalloonImages = pattern.select("div.cmission_num_block img")
+                    .filter { !it.attr("src").contains("num_balloon_mark.png") }
+                val rewardPoints = rewardBalloonImages.mapNotNull { img ->
+                    val src = img.attr("src")
+                    when {
+                        src.contains("num_balloon_0.png") -> 0
+                        src.contains("num_balloon_1.png") -> 1
+                        src.contains("num_balloon_2.png") -> 2
+                        src.contains("num_balloon_3.png") -> 3
+                        src.contains("num_balloon_4.png") -> 4
+                        src.contains("num_balloon_5.png") -> 5
+                        src.contains("num_balloon_6.png") -> 6
+                        src.contains("num_balloon_7.png") -> 7
+                        src.contains("num_balloon_8.png") -> 8
+                        src.contains("num_balloon_9.png") -> 9
+                        else -> null
+                    }
+                }.joinToString("").toIntOrNull() ?: 0
+                
+                MissionPattern(
+                    stageNumber = stageNum,
+                    stageDenominator = stageDen,
+                    iconUrl = iconUrl,
+                    description = description,
+                    currentProgress = currentProgress,
+                    totalProgress = totalProgress,
+                    progressUnit = progressUnit,
+                    rewardPoints = rewardPoints
+                )
+            }
+            
+            return ChunithmMissionDTO(
+                title = title,
+                rewardImageUrl = rewardImageUrl,
+                startDate = startDate,
+                endDate = endDate,
+                currentPoints = currentPoints,
+                nextRewardPoints = nextRewardPoints,
+                nextRewardName = nextRewardName,
+                nextRewardImageUrl = nextRewardImageUrl,
+                pickupRewardPoints = pickupRewardPoints,
+                pickupRewardName = pickupRewardName,
+                pickupRewardImageUrl = pickupRewardImageUrl,
+                patterns = patterns
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing CMission: ${e.message}")
+            return ChunithmMissionDTO()
+        }
+    }
+
+    private suspend fun requestCMission() {
+        requestDataFromServer("$CHUNITHM_URL/record/cMission")?.let { doc ->
+            val missionData = parseCMission(doc)
+            chunithmLocalService.saveMissionData(missionData)
+        }
+    }
+
+    /**
+     * 解析虚拟形象积分与奖励页面
+     */
+    private fun parsePointReward(doc: Document): ChunithmPointRewardDTO {
+        try {
+            // 当前积分（从图片数字中提取）
+            val pointImages = doc.select("div.play_reward_mypoint_block img")
+                .filter { !it.attr("src").contains("num_itemuser_pt.png") }
+            val currentPoints = pointImages.mapNotNull { img ->
+                val src = img.attr("src")
+                when {
+                    src.contains("num_itemuser_0.png") -> 0
+                    src.contains("num_itemuser_1.png") -> 1
+                    src.contains("num_itemuser_2.png") -> 2
+                    src.contains("num_itemuser_3.png") -> 3
+                    src.contains("num_itemuser_4.png") -> 4
+                    src.contains("num_itemuser_5.png") -> 5
+                    src.contains("num_itemuser_6.png") -> 6
+                    src.contains("num_itemuser_7.png") -> 7
+                    src.contains("num_itemuser_8.png") -> 8
+                    src.contains("num_itemuser_9.png") -> 9
+                    else -> null
+                }
+            }.joinToString("").toIntOrNull() ?: 0
+            
+            // 下一个奖励
+            val nextRewardPoints = doc.selectFirst("div.play_reward_next_point span.font_large")
+                ?.text()?.toIntOrNull() ?: 0
+            val nextRewardName = doc.selectFirst("div.play_reward_next_name span")?.text() ?: ""
+            val nextRewardImageUrl = doc.selectFirst("div.play_reward_next_img img")?.attr("src") ?: ""
+            
+            // 特别奖励
+            val pickupRewardPoints = doc.selectFirst("div.play_reward_pickup_point span.font_x-large")
+                ?.text()?.toIntOrNull() ?: 0
+            val pickupRewardName = doc.selectFirst("div.play_reward_pickup_name span")?.text() ?: ""
+            val pickupRewardImageUrl = doc.selectFirst("div.play_reward_pickup_img img")?.attr("src") ?: ""
+            
+            // 进度条（从图片宽度计算百分比）
+            val gaugeValue = doc.selectFirst("div.avatar_point_num img")?.attr("width")
+                ?.replace("px", "")?.toDoubleOrNull() ?: 0.0
+            val gaugeProgress = if (gaugeValue > 0) (gaugeValue / 262.5) * 100 else 0.0
+            
+            return ChunithmPointRewardDTO(
+                currentPoints = currentPoints,
+                nextRewardPoints = nextRewardPoints,
+                nextRewardName = nextRewardName,
+                nextRewardImageUrl = nextRewardImageUrl,
+                pickupRewardPoints = pickupRewardPoints,
+                pickupRewardName = pickupRewardName,
+                pickupRewardImageUrl = pickupRewardImageUrl,
+                gaugeProgress = gaugeProgress
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing PointReward: ${e.message}")
+            return ChunithmPointRewardDTO()
+        }
+    }
+
+    private suspend fun requestPointReward() {
+        requestDataFromServer("$CHUNITHM_URL/record/pointReward")?.let { doc ->
+            val rewardData = parsePointReward(doc)
+            chunithmLocalService.savePointRewardData(rewardData)
+        }
+    }
+
+    /**
+     * 解析技能页面数据
+     */
+    private fun parseSkillDetail(doc: Document): ChunithmSkillDTO {
+        try {
+            // 当前使用的技能（在"使用中的技能"区域）
+            val currentSkillBlock = doc.select("div.box01 div.box10.block_skill_list").firstOrNull()
+            val currentSkill = currentSkillBlock?.let { block ->
+                val iconUrl = block.selectFirst("div.skill_icon2 img")?.attr("src") ?: ""
+                val name = block.selectFirst("div.skill_name")?.text() ?: ""
+                val level = block.selectFirst("div.skill_level")?.text()?.toIntOrNull() ?: 0
+                val description = block.selectFirst("div.block_discription")?.html()
+                    ?.replace("<br>", "\n")?.trim() ?: ""
+                
+                SkillInfo(
+                    idx = "",
+                    iconUrl = iconUrl,
+                    versionIconUrl = "",
+                    name = name,
+                    level = level,
+                    description = description,
+                    token = "",
+                    isCurrentlyUsed = true
+                )
+            }
+            
+            // 技能列表（在"技能列表"区域）
+            val skillBlocks = doc.select("div.box01:has(div.box01_title:contains(技能列表)) div.box10.block_skill_list")
+            val skillList = skillBlocks.mapNotNull { block ->
+                try {
+                    val form = block.selectFirst("form")
+                    val iconUrl = block.selectFirst("div.skill_icon2 > img")?.attr("src") ?: ""
+                    val versionIconUrl = block.selectFirst("div.skill_icon2_ver img")?.attr("src") ?: ""
+                    val name = block.selectFirst("div.skill_name")?.text() ?: ""
+                    val level = block.selectFirst("div.skill_level")?.text()?.toIntOrNull() ?: 0
+                    val description = block.selectFirst("div.block_discription")?.html()
+                        ?.replace("<br>", "\n")?.trim() ?: ""
+                    val idx = form?.selectFirst("input[name=idx]")?.attr("value") ?: ""
+                    val token = form?.selectFirst("input[name=token]")?.attr("value") ?: ""
+                    
+                    // 判断是否为当前使用的技能
+                    val isCurrentlyUsed = currentSkill?.name == name && currentSkill.level == level
+                    
+                    SkillInfo(
+                        idx = idx,
+                        iconUrl = iconUrl,
+                        versionIconUrl = versionIconUrl,
+                        name = name,
+                        level = level,
+                        description = description,
+                        token = token,
+                        isCurrentlyUsed = isCurrentlyUsed
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error parsing skill item", e)
+                    null
+                }
+            }
+            
+            return ChunithmSkillDTO(
+                currentSkill = currentSkill,
+                skillList = skillList
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing skill detail: ${e.message}")
+            return ChunithmSkillDTO()
+        }
+    }
+
+    private suspend fun requestSkillDetail() {
+        requestDataFromServer("$CHUNITHM_URL/collection/skillDetail")?.let { doc ->
+            val skillData = parseSkillDetail(doc)
+            chunithmLocalService.saveSkillData(skillData)
+        }
+    }
+
+    /**
+     * 解析功能票页面数据
+     */
+    private fun parseTicket(doc: Document): ChunithmTicketDTO {
+        try {
+            val ticketBlocks = doc.select("div.box01")
+            val tickets = ticketBlocks.mapNotNull { block ->
+                try {
+                    val name = block.selectFirst("div.ticket_box_title span")?.text() ?: return@mapNotNull null
+                    val imageUrl = block.selectFirst("div.ticket_block_img img")?.attr("src") ?: ""
+                    val holdCount = block.selectFirst("span.ticket_hold_font")?.text()?.toIntOrNull() ?: 0
+                    val description = block.selectFirst("div.ticket_block_text")?.html()
+                        ?.replace("<br>", "\n")?.trim() ?: ""
+                    
+                    TicketInfo(
+                        name = name,
+                        imageUrl = imageUrl,
+                        holdCount = holdCount,
+                        description = description
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error parsing ticket item", e)
+                    null
+                }
+            }
+            
+            return ChunithmTicketDTO(tickets = tickets)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing ticket: ${e.message}")
+            return ChunithmTicketDTO()
+        }
+    }
+
+    private suspend fun requestTicket() {
+        requestDataFromServer("$CHUNITHM_URL/collection/ticket")?.let { doc ->
+            val ticketData = parseTicket(doc)
+            chunithmLocalService.saveTicketData(ticketData)
+        }
+    }
+
+    /**
+     * 解析称号页面数据
+     */
+    private fun parseTrophy(doc: Document): ChunithmTrophyDTO {
+        try {
+            // 当前使用的称号
+            val currentTrophyBlock = doc.selectFirst("div.honor_now")
+            val currentTrophy = currentTrophyBlock?.let { block ->
+                val text = block.selectFirst("div.honor_now_text span")?.text() ?: ""
+                val rarityClass = block.attr("style")
+                val rarity = when {
+                    rarityClass.contains("honor_bg_platina") -> "platina"
+                    rarityClass.contains("honor_bg_gold") -> "gold"
+                    rarityClass.contains("honor_bg_silver") -> "silver"
+                    else -> "normal"
+                }
+                
+                TrophyInfo(
+                    idx = "",
+                    text = text,
+                    rarity = rarity,
+                    description = "",
+                    token = "",
+                    isCurrentlyUsed = true
+                )
+            }
+            
+            // 所有称号列表
+            val trophyBlocks = doc.select("div.box01[name^=category]")
+            val trophies = mutableListOf<TrophyInfo>()
+            
+            trophyBlocks.forEach { categoryBlock ->
+                // 每个分类下的称号
+                val honorBlocks = categoryBlock.select("div[class^=honor_block_]")
+                
+                honorBlocks.forEachIndexed { index, honorBlock ->
+                    try {
+                        val text = honorBlock.selectFirst("div.honor_text span")?.text() ?: ""
+                        
+                        // 从class判断稀有度
+                        val rarity = when {
+                            honorBlock.hasClass("honor_block_platina") -> "platina"
+                            honorBlock.hasClass("honor_block_gold") -> "gold"
+                            honorBlock.hasClass("honor_block_silver") -> "silver"
+                            honorBlock.hasClass("honor_block_normal") -> "normal"
+                            else -> "normal"
+                        }
+                        
+                        // 获取对应的form信息（紧跟在honor_block后面）
+                        val getBlock = honorBlock.nextElementSibling()
+                        val form = getBlock?.selectFirst("form")
+                        val description = getBlock?.selectFirst("div.honor_get_text")?.text() ?: ""
+                        val idx = form?.selectFirst("input[name=idx]")?.attr("value") ?: ""
+                        val token = form?.selectFirst("input[name=token]")?.attr("value") ?: ""
+                        
+                        // 判断是否为当前使用的称号
+                        val isCurrentlyUsed = currentTrophy?.text == text && currentTrophy.rarity == rarity
+                        
+                        trophies.add(
+                            TrophyInfo(
+                                idx = idx,
+                                text = text,
+                                rarity = rarity,
+                                description = description,
+                                token = token,
+                                isCurrentlyUsed = isCurrentlyUsed
+                            )
+                        )
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error parsing trophy item at index $index", e)
+                    }
+                }
+            }
+            
+            Log.d(TAG, "Parsed ${trophies.size} trophies, current: ${currentTrophy?.text}")
+            return ChunithmTrophyDTO(
+                currentTrophy = currentTrophy,
+                trophies = trophies
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing trophy: ${e.message}")
+            return ChunithmTrophyDTO()
+        }
+    }
+
+    private suspend fun requestTrophy() {
+        requestDataFromServer("$CHUNITHM_URL/collection/trophy/setMain")?.let { doc ->
+            val trophyData = parseTrophy(doc)
+            chunithmLocalService.saveTrophyData(trophyData)
+        }
+    }
+
+    /**
+     * 解析名牌版页面数据
+     */
+    private fun parseNameplate(doc: Document): ChunithmNameplateDTO {
+        try {
+            // 当前使用的名牌版
+            val currentImageUrl = doc.selectFirst("div.nameplate_now img")?.attr("src") ?: ""
+            
+            // 所有名牌版列表
+            val nameplateBlocks = doc.select("div.nameplate_block")
+            val nameplates = nameplateBlocks.mapNotNull { block ->
+                try {
+                    val form = block.selectFirst("form")
+                    val name = block.selectFirst("div.nameplate_name")?.text() ?: ""
+                    val imageUrl = block.selectFirst("div.nameplate_plate img.lazy")
+                        ?.attr("data-original") ?: ""
+                    val idx = form?.selectFirst("input[name=idx]")?.attr("value") ?: ""
+                    val token = form?.selectFirst("input[name=token]")?.attr("value") ?: ""
+                    
+                    // 判断是否为当前使用的名牌版（通过图片URL匹配）
+                    val isCurrentlyUsed = currentImageUrl.isNotEmpty() && 
+                        imageUrl.isNotEmpty() && 
+                        currentImageUrl.contains(imageUrl.substringAfterLast("/"))
+                    
+                    NameplateInfo(
+                        idx = idx,
+                        name = name,
+                        imageUrl = imageUrl,
+                        token = token,
+                        isCurrentlyUsed = isCurrentlyUsed
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error parsing nameplate item", e)
+                    null
+                }
+            }
+            
+            // 找出当前使用的名牌版
+            val currentNameplate = nameplates.firstOrNull { it.isCurrentlyUsed }
+            
+            Log.d(TAG, "Parsed ${nameplates.size} nameplates, current: ${currentNameplate?.name}")
+            return ChunithmNameplateDTO(
+                currentNameplate = currentNameplate,
+                nameplates = nameplates
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing nameplate: ${e.message}")
+            return ChunithmNameplateDTO()
+        }
+    }
+
+    private suspend fun requestNameplate() {
+        requestDataFromServer("$CHUNITHM_URL/collection/nameplate/")?.let { doc ->
+            val nameplateData = parseNameplate(doc)
+            chunithmLocalService.saveNameplateData(nameplateData)
+        }
+    }
+
+    /**
+     * 解析地图头像页面数据
+     */
+    private fun parseMapIcon(doc: Document): ChunithmMapIconDTO {
+        try {
+            // 当前使用的地图头像
+            val currentImageUrl = doc.selectFirst("div.mapicon_now img")?.attr("src") ?: ""
+            
+            // 所有地图头像列表
+            val mapIconBlocks = doc.select("div.mapicon_block")
+            val mapIcons = mapIconBlocks.mapNotNull { block ->
+                try {
+                    val form = block.selectFirst("form")
+                    val name = block.selectFirst("div.mapicon_name")?.text() ?: ""
+                    val imageUrl = block.selectFirst("div.mapicon_plate img.lazy")
+                        ?.attr("data-original") ?: ""
+                    val idx = form?.selectFirst("input[name=idx]")?.attr("value") ?: ""
+                    val token = form?.selectFirst("input[name=token]")?.attr("value") ?: ""
+                    
+                    // 判断是否为当前使用的地图头像（通过图片URL匹配）
+                    val isCurrentlyUsed = currentImageUrl.isNotEmpty() && 
+                        imageUrl.isNotEmpty() && 
+                        currentImageUrl.contains(imageUrl.substringAfterLast("/"))
+                    
+                    MapIconInfo(
+                        idx = idx,
+                        name = name,
+                        imageUrl = imageUrl,
+                        token = token,
+                        isCurrentlyUsed = isCurrentlyUsed
+                    )
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error parsing map icon item", e)
+                    null
+                }
+            }
+            
+            // 找出当前使用的地图头像
+            val currentMapIcon = mapIcons.firstOrNull { it.isCurrentlyUsed }
+            
+            Log.d(TAG, "Parsed ${mapIcons.size} map icons, current: ${currentMapIcon?.name}")
+            return ChunithmMapIconDTO(
+                currentMapIcon = currentMapIcon,
+                mapIcons = mapIcons
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "Error parsing map icon: ${e.message}")
+            return ChunithmMapIconDTO()
+        }
+    }
+
+    private suspend fun requestMapIcon() {
+        requestDataFromServer("$CHUNITHM_URL/collection/mapIcon/")?.let { doc ->
+            val mapIconData = parseMapIcon(doc)
+            chunithmLocalService.saveMapIconData(mapIconData)
         }
     }
 
@@ -1309,6 +1835,12 @@ internal class ChunithmRequestService(private val context: Context) {
                     updateBaseProgress("获取地图记录...")
                     requestMapRecord()
                     
+                    updateBaseProgress("获取任务数据...")
+                    requestCMission()
+                    
+                    updateBaseProgress("获取积分奖励...")
+                    requestPointReward()
+                    
                     updateBaseProgress("获取游戏记录...")
                     requestPlayLog()
                     
@@ -1317,6 +1849,21 @@ internal class ChunithmRequestService(private val context: Context) {
                     
                     updateBaseProgress("获取角色列表...")
                     requestCharacterList()
+                    
+                    updateBaseProgress("获取技能数据...")
+                    requestSkillDetail()
+                    
+                    updateBaseProgress("获取功能票...")
+                    requestTicket()
+                    
+                    updateBaseProgress("获取称号列表...")
+                    requestTrophy()
+                    
+                    updateBaseProgress("获取名牌版...")
+                    requestNameplate()
+                    
+                    updateBaseProgress("获取地图头像...")
+                    requestMapIcon()
                     
                     updateBaseProgress("获取Avatar部件...")
                     requestAllAvatarItems { avatarProgress, avatarMessage ->

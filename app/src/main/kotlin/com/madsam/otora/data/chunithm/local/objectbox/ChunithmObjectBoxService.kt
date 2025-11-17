@@ -21,27 +21,42 @@ import com.madsam.otora.data.chunithm.local.model.ChunithmMapAreaEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmMapAreaEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmMapEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmMapEntity_
+import com.madsam.otora.data.chunithm.local.model.ChunithmMissionEntity
+import com.madsam.otora.data.chunithm.local.model.ChunithmMissionPatternEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmMonthlyRewardEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmMonthlyRewardEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmPlayLogEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmPlayLogEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmPlayRecordEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmPlayRecordEntity_
+import com.madsam.otora.data.chunithm.local.model.ChunithmPointRewardEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmRatingEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmRatingEntity_
 import com.madsam.otora.data.chunithm.local.model.ChunithmRegionEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmSheetsEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmSheetsEntity_
+import com.madsam.otora.data.chunithm.local.model.ChunithmSkillEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmSongsEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmSongsEntity_
+import com.madsam.otora.data.chunithm.local.model.ChunithmTicketEntity
+import com.madsam.otora.data.chunithm.local.model.ChunithmTrophyEntity
+import com.madsam.otora.data.chunithm.local.model.ChunithmNameplateEntity
+import com.madsam.otora.data.chunithm.local.model.ChunithmMapIconEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmTypeEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmVersionEntity
 import com.madsam.otora.data.chunithm.local.model.ChunithmWeekdayBonusEntity
 import com.madsam.otora.data.chunithm.remote.model.ChunithmFriendDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmFullScoreDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmMapDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmMissionDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmPlayRecordDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmPointRewardDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmScoreDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmSkillDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmTicketDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmTrophyDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmNameplateDTO
+import com.madsam.otora.data.chunithm.remote.model.ChunithmMapIconDTO
 import com.madsam.otora.data.chunithm.remote.model.ChunithmDataDTO
 import com.madsam.otora.data.chunithm.ui.model.ChunithmPlayRecordUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
@@ -69,6 +84,14 @@ internal class ChunithmObjectBoxService {
     private val ratingBox: Box<ChunithmRatingEntity> = boxStore.boxFor(ChunithmRatingEntity::class.java)
     private val mapBox: Box<ChunithmMapEntity> = boxStore.boxFor(ChunithmMapEntity::class.java)
     private val mapAreaBox: Box<ChunithmMapAreaEntity> = boxStore.boxFor(ChunithmMapAreaEntity::class.java)
+    private val missionBox: Box<ChunithmMissionEntity> = boxStore.boxFor(ChunithmMissionEntity::class.java)
+    private val missionPatternBox: Box<ChunithmMissionPatternEntity> = boxStore.boxFor(ChunithmMissionPatternEntity::class.java)
+    private val pointRewardBox: Box<ChunithmPointRewardEntity> = boxStore.boxFor(ChunithmPointRewardEntity::class.java)
+    private val skillBox: Box<ChunithmSkillEntity> = boxStore.boxFor(ChunithmSkillEntity::class.java)
+    private val ticketBox: Box<ChunithmTicketEntity> = boxStore.boxFor(ChunithmTicketEntity::class.java)
+    private val trophyBox: Box<ChunithmTrophyEntity> = boxStore.boxFor(ChunithmTrophyEntity::class.java)
+    private val nameplateBox: Box<ChunithmNameplateEntity> = boxStore.boxFor(ChunithmNameplateEntity::class.java)
+    private val mapIconBox: Box<ChunithmMapIconEntity> = boxStore.boxFor(ChunithmMapIconEntity::class.java)
     private val characterBox: Box<ChunithmCharacterEntity> = boxStore.boxFor(ChunithmCharacterEntity::class.java)
     private val loginBonusBox: Box<ChunithmLoginBonusEntity> = boxStore.boxFor(ChunithmLoginBonusEntity::class.java)
     private val monthlyRewardBox: Box<ChunithmMonthlyRewardEntity> = boxStore.boxFor(ChunithmMonthlyRewardEntity::class.java)
@@ -1145,6 +1168,278 @@ internal class ChunithmObjectBoxService {
                 Log.d(TAG, "Map data saved successfully")
             } catch (e: Exception) {
                 Log.e(TAG, "Error saving map data", e)
+                throw e
+            }
+        }
+    }
+
+    /**
+     * 保存任务数据
+     */
+    suspend fun saveMissionData(missionData: ChunithmMissionDTO) {
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Saving mission data: ${missionData.title}")
+                
+                val currentTime = System.currentTimeMillis()
+                
+                // 删除旧的任务数据
+                missionBox.removeAll()
+                missionPatternBox.removeAll()
+                
+                // 保存任务主体数据
+                val missionEntity = ChunithmMissionEntity().apply {
+                    title = missionData.title
+                    rewardImageUrl = missionData.rewardImageUrl
+                    startDate = missionData.startDate
+                    endDate = missionData.endDate
+                    currentPoints = missionData.currentPoints
+                    nextRewardPoints = missionData.nextRewardPoints
+                    nextRewardName = missionData.nextRewardName
+                    nextRewardImageUrl = missionData.nextRewardImageUrl
+                    pickupRewardPoints = missionData.pickupRewardPoints
+                    pickupRewardName = missionData.pickupRewardName
+                    pickupRewardImageUrl = missionData.pickupRewardImageUrl
+                    syncedAt = currentTime
+                }
+                missionBox.put(missionEntity)
+                
+                // 保存任务进度数据
+                val patternEntities = missionData.patterns.map { pattern ->
+                    ChunithmMissionPatternEntity().apply {
+                        missionTitle = missionData.title
+                        stageNumber = pattern.stageNumber
+                        stageDenominator = pattern.stageDenominator
+                        iconUrl = pattern.iconUrl
+                        description = pattern.description
+                        currentProgress = pattern.currentProgress
+                        totalProgress = pattern.totalProgress
+                        progressUnit = pattern.progressUnit
+                        rewardPoints = pattern.rewardPoints
+                        syncedAt = currentTime
+                    }
+                }
+                missionPatternBox.put(patternEntities)
+                
+                Log.d(TAG, "Mission data saved: ${missionData.title} with ${patternEntities.size} patterns")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving mission data", e)
+                throw e
+            }
+        }
+    }
+
+    /**
+     * 保存积分奖励数据
+     */
+    suspend fun savePointRewardData(rewardData: ChunithmPointRewardDTO) {
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Saving point reward data")
+                
+                val currentTime = System.currentTimeMillis()
+                
+                // 删除旧数据
+                pointRewardBox.removeAll()
+                
+                // 保存新数据
+                val rewardEntity = ChunithmPointRewardEntity().apply {
+                    currentPoints = rewardData.currentPoints
+                    nextRewardPoints = rewardData.nextRewardPoints
+                    nextRewardName = rewardData.nextRewardName
+                    nextRewardImageUrl = rewardData.nextRewardImageUrl
+                    pickupRewardPoints = rewardData.pickupRewardPoints
+                    pickupRewardName = rewardData.pickupRewardName
+                    pickupRewardImageUrl = rewardData.pickupRewardImageUrl
+                    gaugeProgress = rewardData.gaugeProgress
+                    syncedAt = currentTime
+                }
+                pointRewardBox.put(rewardEntity)
+                
+                Log.d(TAG, "Point reward data saved: ${rewardData.currentPoints} points")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving point reward data", e)
+                throw e
+            }
+        }
+    }
+
+    /**
+     * 保存技能数据
+     */
+    suspend fun saveSkillData(skillData: ChunithmSkillDTO) {
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Saving skill data: ${skillData.skillList.size} skills")
+                
+                val currentTime = System.currentTimeMillis()
+                
+                // 删除旧数据
+                skillBox.removeAll()
+                
+                // 保存所有技能（包括当前使用的技能）
+                val skillEntities = skillData.skillList.map { skill ->
+                    ChunithmSkillEntity().apply {
+                        idx = skill.idx
+                        iconUrl = skill.iconUrl
+                        versionIconUrl = skill.versionIconUrl
+                        name = skill.name
+                        level = skill.level
+                        description = skill.description
+                        token = skill.token
+                        isCurrentlyUsed = skill.isCurrentlyUsed
+                        syncedAt = currentTime
+                    }
+                }
+                skillBox.put(skillEntities)
+                
+                Log.d(TAG, "Skill data saved: ${skillEntities.size} skills, current: ${skillEntities.count { it.isCurrentlyUsed }}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving skill data", e)
+                throw e
+            }
+        }
+    }
+
+    /**
+     * 保存功能票数据
+     */
+    suspend fun saveTicketData(ticketData: ChunithmTicketDTO) {
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Saving ticket data: ${ticketData.tickets.size} tickets")
+                
+                val currentTime = System.currentTimeMillis()
+                
+                // 删除旧数据
+                ticketBox.removeAll()
+                
+                // 保存新数据
+                val ticketEntities = ticketData.tickets.map { ticket ->
+                    ChunithmTicketEntity().apply {
+                        name = ticket.name
+                        imageUrl = ticket.imageUrl
+                        holdCount = ticket.holdCount
+                        description = ticket.description
+                        syncedAt = currentTime
+                    }
+                }
+                ticketBox.put(ticketEntities)
+                
+                Log.d(TAG, "Ticket data saved: ${ticketEntities.size} tickets, total hold: ${ticketEntities.sumOf { it.holdCount }}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving ticket data", e)
+                throw e
+            }
+        }
+    }
+
+    /**
+     * 保存称号数据
+     */
+    suspend fun saveTrophyData(trophyData: ChunithmTrophyDTO) {
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Saving trophy data: ${trophyData.trophies.size} trophies")
+                
+                val currentTime = System.currentTimeMillis()
+                
+                // 删除旧数据
+                trophyBox.removeAll()
+                
+                // 保存所有称号
+                val trophyEntities = trophyData.trophies.map { trophy ->
+                    ChunithmTrophyEntity().apply {
+                        idx = trophy.idx
+                        text = trophy.text
+                        rarity = trophy.rarity
+                        description = trophy.description
+                        token = trophy.token
+                        isCurrentlyUsed = trophy.isCurrentlyUsed
+                        syncedAt = currentTime
+                    }
+                }
+                trophyBox.put(trophyEntities)
+                
+                val rarityCount = trophyEntities.groupBy { it.rarity }.mapValues { it.value.size }
+                Log.d(TAG, "Trophy data saved: ${trophyEntities.size} trophies, " +
+                        "normal=${rarityCount["normal"] ?: 0}, " +
+                        "silver=${rarityCount["silver"] ?: 0}, " +
+                        "gold=${rarityCount["gold"] ?: 0}, " +
+                        "platina=${rarityCount["platina"] ?: 0}, " +
+                        "current: ${trophyData.currentTrophy?.text}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving trophy data", e)
+                throw e
+            }
+        }
+    }
+
+    /**
+     * 保存名牌版数据
+     */
+    suspend fun saveNameplateData(nameplateData: ChunithmNameplateDTO) {
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Saving nameplate data: ${nameplateData.nameplates.size} nameplates")
+                
+                val currentTime = System.currentTimeMillis()
+                
+                // 删除旧数据
+                nameplateBox.removeAll()
+                
+                // 保存所有名牌版
+                val nameplateEntities = nameplateData.nameplates.map { nameplate ->
+                    ChunithmNameplateEntity().apply {
+                        idx = nameplate.idx
+                        name = nameplate.name
+                        imageUrl = nameplate.imageUrl
+                        token = nameplate.token
+                        isCurrentlyUsed = nameplate.isCurrentlyUsed
+                        syncedAt = currentTime
+                    }
+                }
+                nameplateBox.put(nameplateEntities)
+                
+                Log.d(TAG, "Nameplate data saved: ${nameplateEntities.size} nameplates, " +
+                        "current: ${nameplateData.currentNameplate?.name}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving nameplate data", e)
+                throw e
+            }
+        }
+    }
+
+    /**
+     * 保存地图头像数据
+     */
+    suspend fun saveMapIconData(mapIconData: ChunithmMapIconDTO) {
+        withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Saving map icon data: ${mapIconData.mapIcons.size} map icons")
+                
+                val currentTime = System.currentTimeMillis()
+                
+                // 删除旧数据
+                mapIconBox.removeAll()
+                
+                // 保存所有地图头像
+                val mapIconEntities = mapIconData.mapIcons.map { mapIcon ->
+                    ChunithmMapIconEntity().apply {
+                        idx = mapIcon.idx
+                        name = mapIcon.name
+                        imageUrl = mapIcon.imageUrl
+                        token = mapIcon.token
+                        isCurrentlyUsed = mapIcon.isCurrentlyUsed
+                        syncedAt = currentTime
+                    }
+                }
+                mapIconBox.put(mapIconEntities)
+                
+                Log.d(TAG, "Map icon data saved: ${mapIconEntities.size} map icons, " +
+                        "current: ${mapIconData.currentMapIcon?.name}")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error saving map icon data", e)
                 throw e
             }
         }

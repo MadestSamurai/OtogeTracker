@@ -2576,10 +2576,448 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "58:4449449620651523174",
+      "lastPropertyId": "7:3669475831584011546",
+      "name": "ChunithmMapIconEntity",
+      "properties": [
+        {
+          "id": "1:2122071414747777559",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8702567673590778747",
+          "name": "idx",
+          "indexId": "143:7717165304561755310",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:2674794354077312761",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:5124823179417440758",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "5:5612417680340818359",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "6:4706439454072773555",
+          "name": "isCurrentlyUsed",
+          "type": 1
+        },
+        {
+          "id": "7:3669475831584011546",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "59:6383341942587342804",
+      "lastPropertyId": "13:2098475098298993075",
+      "name": "ChunithmMissionEntity",
+      "properties": [
+        {
+          "id": "1:811986068791741382",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2316137534031961371",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "3:3534549962055048197",
+          "name": "rewardImageUrl",
+          "type": 9
+        },
+        {
+          "id": "4:4577173828247034645",
+          "name": "startDate",
+          "type": 9
+        },
+        {
+          "id": "5:4921550153137386527",
+          "name": "endDate",
+          "type": 9
+        },
+        {
+          "id": "6:9131103713260029191",
+          "name": "currentPoints",
+          "type": 5
+        },
+        {
+          "id": "7:6394261663484666799",
+          "name": "nextRewardPoints",
+          "type": 5
+        },
+        {
+          "id": "8:5214249527149421445",
+          "name": "nextRewardName",
+          "type": 9
+        },
+        {
+          "id": "9:3872410073984373908",
+          "name": "nextRewardImageUrl",
+          "type": 9
+        },
+        {
+          "id": "10:2623078454522657882",
+          "name": "pickupRewardPoints",
+          "type": 5
+        },
+        {
+          "id": "11:7760149307622188774",
+          "name": "pickupRewardName",
+          "type": 9
+        },
+        {
+          "id": "12:6272651388992861041",
+          "name": "pickupRewardImageUrl",
+          "type": 9
+        },
+        {
+          "id": "13:2098475098298993075",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "60:633364712198784502",
+      "lastPropertyId": "11:5430556882238276383",
+      "name": "ChunithmMissionPatternEntity",
+      "properties": [
+        {
+          "id": "1:5975382876064471439",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1784633310188458831",
+          "name": "missionTitle",
+          "type": 9
+        },
+        {
+          "id": "3:379344656578774341",
+          "name": "stageNumber",
+          "type": 5
+        },
+        {
+          "id": "4:6845532158659411963",
+          "name": "stageDenominator",
+          "type": 5
+        },
+        {
+          "id": "5:7817936693038586913",
+          "name": "iconUrl",
+          "type": 9
+        },
+        {
+          "id": "6:6853290314493589497",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "7:3807781344069837534",
+          "name": "currentProgress",
+          "type": 5
+        },
+        {
+          "id": "8:4150630952888341997",
+          "name": "totalProgress",
+          "type": 5
+        },
+        {
+          "id": "9:3984444577965659075",
+          "name": "progressUnit",
+          "type": 9
+        },
+        {
+          "id": "10:8738438675045218102",
+          "name": "rewardPoints",
+          "type": 5
+        },
+        {
+          "id": "11:5430556882238276383",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "61:5276285207120398990",
+      "lastPropertyId": "7:2256694974406646733",
+      "name": "ChunithmNameplateEntity",
+      "properties": [
+        {
+          "id": "1:1347396700873248140",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1571590698027359930",
+          "name": "idx",
+          "indexId": "144:1054432719836762104",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:5999225528516882562",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:7980689150719214999",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "5:4775581545237588265",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "6:6033506283331609753",
+          "name": "isCurrentlyUsed",
+          "type": 1
+        },
+        {
+          "id": "7:2256694974406646733",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "62:1968015600075962713",
+      "lastPropertyId": "10:3664995308906979962",
+      "name": "ChunithmPointRewardEntity",
+      "properties": [
+        {
+          "id": "1:5597119341009149277",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3371238261933414554",
+          "name": "currentPoints",
+          "type": 5
+        },
+        {
+          "id": "3:3841616535980276224",
+          "name": "nextRewardPoints",
+          "type": 5
+        },
+        {
+          "id": "4:5361923149922031957",
+          "name": "nextRewardName",
+          "type": 9
+        },
+        {
+          "id": "5:5117544889153290648",
+          "name": "nextRewardImageUrl",
+          "type": 9
+        },
+        {
+          "id": "6:5764533306739749153",
+          "name": "pickupRewardPoints",
+          "type": 5
+        },
+        {
+          "id": "7:1857215096306960213",
+          "name": "pickupRewardName",
+          "type": 9
+        },
+        {
+          "id": "8:8063350992774108752",
+          "name": "pickupRewardImageUrl",
+          "type": 9
+        },
+        {
+          "id": "9:5969797904325014147",
+          "name": "gaugeProgress",
+          "type": 8
+        },
+        {
+          "id": "10:3664995308906979962",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "63:150843499660325739",
+      "lastPropertyId": "10:9112439835505460529",
+      "name": "ChunithmSkillEntity",
+      "properties": [
+        {
+          "id": "1:8308516504547225176",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5029251022946141906",
+          "name": "idx",
+          "type": 9
+        },
+        {
+          "id": "3:2402370195923421830",
+          "name": "iconUrl",
+          "type": 9
+        },
+        {
+          "id": "4:4305836278578377447",
+          "name": "versionIconUrl",
+          "type": 9
+        },
+        {
+          "id": "5:2429688827351667459",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "6:7380380878081151631",
+          "name": "level",
+          "type": 5
+        },
+        {
+          "id": "7:3143040648968664958",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "8:2662114020624032236",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "9:3637325451563462373",
+          "name": "isCurrentlyUsed",
+          "type": 1
+        },
+        {
+          "id": "10:9112439835505460529",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "64:5900965764997596423",
+      "lastPropertyId": "6:2164981793557893379",
+      "name": "ChunithmTicketEntity",
+      "properties": [
+        {
+          "id": "1:6262331470487027174",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3853788911216319838",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:363948907198128430",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "4:4527564362122090486",
+          "name": "holdCount",
+          "type": 5
+        },
+        {
+          "id": "5:2259987639009684507",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "6:2164981793557893379",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "65:8938334562636967065",
+      "lastPropertyId": "8:4594302636642175817",
+      "name": "ChunithmTrophyEntity",
+      "properties": [
+        {
+          "id": "1:8035468840526914677",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5758899402018501392",
+          "name": "idx",
+          "indexId": "145:2332791803319793484",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:8727275062233138924",
+          "name": "text",
+          "type": 9
+        },
+        {
+          "id": "4:2855995561114510007",
+          "name": "rarity",
+          "type": 9
+        },
+        {
+          "id": "5:1593349882888899116",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "6:5615679998550415228",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "7:7792484175740377695",
+          "name": "isCurrentlyUsed",
+          "type": 1
+        },
+        {
+          "id": "8:4594302636642175817",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "57:5442226770422139203",
-  "lastIndexId": "142:2798638528408032553",
+  "lastEntityId": "65:8938334562636967065",
+  "lastIndexId": "145:2332791803319793484",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
