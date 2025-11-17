@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -367,7 +368,7 @@ internal fun ChunithmSongListPage(
                 .windowInsetsPadding(
                     WindowInsets.statusBars.only(WindowInsetsSides.Top)
                 )
-                .padding(horizontal = 12.dp)
+                .padding(horizontal = 20.dp)
                 .padding(top = 80.dp)
         ) {
             ChunithmFilterComponent(
@@ -384,7 +385,7 @@ internal fun ChunithmSongListPage(
                 includeWE = includeWE,
                 backgroundColor = Red500,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                    .clip(RoundedCornerShape(28.dp))
             )
         }
 
@@ -399,7 +400,7 @@ internal fun ChunithmSongListPage(
                 .windowInsetsPadding(
                     WindowInsets.statusBars.only(WindowInsetsSides.Top)
                 )
-                .padding(horizontal = 12.dp)
+                .padding(horizontal = 20.dp)
                 .padding(top = 80.dp)
         ) {
             ChunithmSortComponent(
@@ -409,9 +410,29 @@ internal fun ChunithmSongListPage(
                 onSortOptionSelected = { isSortExpanded.value = false },
                 backgroundColor = Red500,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                    .clip(RoundedCornerShape(28.dp))
             )
         }
+
+        // 顶部渐变覆盖层 - 保护通知栏区域
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+                .height(120.dp)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Red300,
+                            Red300.copy(alpha = 0.95f),
+                            Red300.copy(alpha = 0.85f),
+                            Red300.copy(alpha = 0.6f),
+                            Red300.copy(alpha = 0.3f),
+                            Red300.copy(alpha = 0f)
+                        )
+                    )
+                )
+        )
 
         // 顶部悬浮搜索栏
         Row(

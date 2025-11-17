@@ -46,6 +46,7 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
+import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 
@@ -77,6 +78,7 @@ internal fun ChunithmFilterComponent(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(backgroundColor)
+                .padding(bottom = 16.dp)
         ) {
             // Genre 筛选行
             GenreFilterRow(
@@ -128,7 +130,7 @@ private fun GenreFilterRow(
             modifier = Modifier
                 .height(32.dp)
                 .background(
-                    if (allSelected) Red300 else Red500,
+                    if (allSelected) Red800 else Red300,
                     RoundedCornerShape(12.dp)
                 )
                 .clickable {
@@ -157,7 +159,7 @@ private fun GenreFilterRow(
                         .padding(horizontal = 8.dp)
                         .height(32.dp)
                         .background(
-                            if (isSelected) Red500 else Red300,
+                            if (isSelected) Red800 else Red300,
                             RoundedCornerShape(12.dp)
                         )
                         .clickable {
@@ -200,7 +202,7 @@ private fun VersionFilterRow(
             modifier = Modifier
                 .height(32.dp)
                 .background(
-                    if (allSelected) Red300 else Red500,
+                    if (allSelected) Red800 else Red300,
                     RoundedCornerShape(12.dp)
                 )
                 .clickable {
@@ -229,7 +231,7 @@ private fun VersionFilterRow(
                         .padding(horizontal = 8.dp)
                         .height(32.dp)
                         .background(
-                            if (isSelected) Red500 else Red300,
+                            if (isSelected) Red800 else Red300,
                             RoundedCornerShape(12.dp)
                         )
                         .clickable {
@@ -328,8 +330,8 @@ private fun JpValueRangeFilter(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
-            .background(Red300.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-            .padding(8.dp)
+            .background(Red300, RoundedCornerShape(12.dp))
+            .padding(12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -350,7 +352,7 @@ private fun JpValueRangeFilter(
                 Text(
                     text = "WE",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White,
+                    color = Beige500,
                     modifier = Modifier.padding(end = 4.dp)
                 )
                 Switch(
@@ -359,9 +361,9 @@ private fun JpValueRangeFilter(
                     modifier = Modifier.height(20.dp),
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Beige500,
-                        uncheckedThumbColor = Red500,
-                        checkedTrackColor = Beige500.copy(alpha = 0.3f),
-                        uncheckedTrackColor = Red500.copy(alpha = 0.3f)
+                        uncheckedThumbColor = Red800,
+                        checkedTrackColor = Red800,
+                        uncheckedTrackColor = Red800.copy(alpha = 0.5f)
                     )
                 )
             }
@@ -380,8 +382,8 @@ private fun JpValueRangeFilter(
             steps = 147, // 157 - 10 = 147 steps
             colors = SliderDefaults.colors(
                 thumbColor = Beige500,
-                activeTrackColor = Red500,
-                inactiveTrackColor = Red300,
+                activeTrackColor = Red800,
+                inactiveTrackColor = Red800.copy(alpha = 0.3f),
                 activeTickColor = Color.Transparent,
                 inactiveTickColor = Color.Transparent
             ),
@@ -407,8 +409,8 @@ private fun CnValueRangeFilter(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
-            .background(Red300.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-            .padding(8.dp)
+            .background(Red300, RoundedCornerShape(12.dp))
+            .padding(12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -429,9 +431,9 @@ private fun CnValueRangeFilter(
                 },
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Beige500,
-                    checkedTrackColor = Red500,
-                    uncheckedThumbColor = Red300,
-                    uncheckedTrackColor = Beige500.copy(alpha = 0.5f)
+                    checkedTrackColor = Red800,
+                    uncheckedThumbColor = Red800,
+                    uncheckedTrackColor = Red800.copy(alpha = 0.5f)
                 )
             )
         }
@@ -453,11 +455,11 @@ private fun CnValueRangeFilter(
             enabled = isCnFilterEnabled.value,
             colors = SliderDefaults.colors(
                 thumbColor = Beige500,
-                activeTrackColor = Red500,
-                inactiveTrackColor = Red300,
-                disabledThumbColor = Red300,
-                disabledActiveTrackColor = Red300.copy(alpha = 0.5f),
-                disabledInactiveTrackColor = Red300.copy(alpha = 0.3f),
+                activeTrackColor = Red800,
+                inactiveTrackColor = Red800.copy(alpha = 0.3f),
+                disabledThumbColor = Red800.copy(alpha = 0.3f),
+                disabledActiveTrackColor = Red800.copy(alpha = 0.3f),
+                disabledInactiveTrackColor = Red800.copy(alpha = 0.2f),
                 activeTickColor = Color.Transparent,
                 inactiveTickColor = Color.Transparent,
                 disabledActiveTickColor = Color.Transparent,

@@ -26,6 +26,7 @@ import androidx.compose.ui.zIndex
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
+import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 
@@ -50,7 +51,7 @@ fun ChunithmSortComponent(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(backgroundColor)
-                .padding(horizontal = 12.dp, vertical = 8.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp)
         ) {
             Text(
                 text = "排序选项",
@@ -107,7 +108,7 @@ private fun SortOrderRow(
                 .weight(1f)
                 .height(28.dp)
                 .background(
-                    if (isAscendingOrder.value) Red500 else Red300,
+                    if (isAscendingOrder.value) Red800 else Red300,
                     RoundedCornerShape(10.dp)
                 )
                 .clickable {
@@ -130,7 +131,7 @@ private fun SortOrderRow(
                 .weight(1f)
                 .height(28.dp)
                 .background(
-                    if (!isAscendingOrder.value) Red500 else Red300,
+                    if (!isAscendingOrder.value) Red800 else Red300,
                     RoundedCornerShape(10.dp)
                 )
                 .clickable {
@@ -172,7 +173,7 @@ private fun BasicSortOptionsRow(
                     .weight(1f)
                     .height(32.dp)
                     .background(
-                        if (isSelected) Red500 else Red300,
+                        if (isSelected) Red800 else Red300,
                         RoundedCornerShape(12.dp)
                     )
                     .clickable {
@@ -226,7 +227,7 @@ private fun CnValueSortSection(
                     .weight(1f)
                     .height(28.dp)
                     .background(
-                        if (isSelected) Red500 else Red300,
+                        if (isSelected) Red800 else Red300,
                         RoundedCornerShape(8.dp)
                     )
                     .clickable {
@@ -280,7 +281,7 @@ private fun JpValueSortSection(
                     .weight(1f)
                     .height(28.dp)
                     .background(
-                        if (isSelected) Red500 else Red300,
+                        if (isSelected) Red800 else Red300,
                         RoundedCornerShape(8.dp)
                     )
                     .clickable {
