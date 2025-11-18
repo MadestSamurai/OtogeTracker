@@ -121,32 +121,40 @@ private fun GenreFilterRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(start = 12.dp, top = 12.dp, bottom = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         val allSelected = selectedGenres.value.size == genres.size
         val toggleText = if (allSelected) "全不选" else "全选"
         Box(
             modifier = Modifier
-                .height(32.dp)
+                .height(24.dp)
                 .background(
-                    if (allSelected) Red800 else Red300,
-                    RoundedCornerShape(12.dp)
+                    if (allSelected) Red800 else Red500,
+                    RoundedCornerShape(6.dp)
                 )
                 .clickable {
                     selectedGenres.value = if (allSelected) emptySet() else genres.toSet()
                 }
-                .padding(horizontal = 18.dp),
+                .padding(horizontal = 12.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = toggleText,
-                fontSize = 13.sp,
+                fontSize = 12.sp,
                 fontFamily = sarasaBold,
                 color = Beige500,
                 textAlign = TextAlign.Center
             )
         }
+        Spacer(modifier = Modifier.width(8.dp))
+        // 竖线分隔符
+        Box(
+            modifier = Modifier
+                .width(1.dp)
+                .height(20.dp)
+                .background(Beige500.copy(alpha = 0.3f))
+        )
         Spacer(modifier = Modifier.width(8.dp))
         LazyRow(
             modifier = Modifier.weight(1f)
@@ -156,11 +164,11 @@ private fun GenreFilterRow(
                 val isSelected = selectedGenres.value.contains(genre)
                 Box(
                     modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .height(32.dp)
+                        .padding(horizontal = 4.dp)
+                        .height(24.dp)
                         .background(
-                            if (isSelected) Red800 else Red300,
-                            RoundedCornerShape(12.dp)
+                            if (isSelected) Red800 else Red500,
+                            RoundedCornerShape(6.dp)
                         )
                         .clickable {
                             selectedGenres.value = if (isSelected) {
@@ -175,7 +183,7 @@ private fun GenreFilterRow(
                     Text(
                         text = genre,
                         color = Beige500,
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -200,25 +208,33 @@ private fun VersionFilterRow(
         val toggleText = if (allSelected) "全不选" else "全选"
         Box(
             modifier = Modifier
-                .height(32.dp)
+                .height(24.dp)
                 .background(
-                    if (allSelected) Red800 else Red300,
-                    RoundedCornerShape(12.dp)
+                    if (allSelected) Red800 else Red500,
+                    RoundedCornerShape(6.dp)
                 )
                 .clickable {
                     selectedVersions.value = if (allSelected) emptySet() else versions.toSet()
                 }
-                .padding(horizontal = 18.dp),
+                .padding(horizontal = 12.dp),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = toggleText,
-                fontSize = 13.sp,
+                fontSize = 12.sp,
                 fontFamily = sarasaBold,
                 color = Beige500,
                 textAlign = TextAlign.Center
             )
         }
+        Spacer(modifier = Modifier.width(8.dp))
+        // 竖线分隔符
+        Box(
+            modifier = Modifier
+                .width(1.dp)
+                .height(20.dp)
+                .background(Beige500.copy(alpha = 0.3f))
+        )
         Spacer(modifier = Modifier.width(8.dp))
         LazyRow(
             modifier = Modifier.weight(1f)
@@ -228,11 +244,11 @@ private fun VersionFilterRow(
                 val isSelected = selectedVersions.value.contains(version)
                 Box(
                     modifier = Modifier
-                        .padding(horizontal = 8.dp)
-                        .height(32.dp)
+                        .padding(horizontal = 4.dp)
+                        .height(24.dp)
                         .background(
-                            if (isSelected) Red800 else Red300,
-                            RoundedCornerShape(12.dp)
+                            if (isSelected) Red800 else Red500,
+                            RoundedCornerShape(6.dp)
                         )
                         .clickable {
                             selectedVersions.value = if (isSelected) {
@@ -247,7 +263,7 @@ private fun VersionFilterRow(
                     Text(
                         text = version,
                         color = Beige500,
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -339,7 +355,7 @@ private fun JpValueRangeFilter(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "JP Value Filter: ${(internalLevelRange.value.start / 10.0).round(1)} - ${(internalLevelRange.value.endInclusive / 10.0).round(1)}",
+                text = "JP Value Filter: ${(internalLevelRange.value.first / 10.0).round(1)} - ${(internalLevelRange.value.endInclusive / 10.0).round(1)}",
                 color = Beige500,
                 modifier = Modifier.weight(1f)
             )

@@ -385,7 +385,7 @@ internal fun ChunithmSongListPage(
                 includeWE = includeWE,
                 backgroundColor = Red500,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(28.dp))
+                    .clip(RoundedCornerShape(20.dp))
             )
         }
 
@@ -410,7 +410,7 @@ internal fun ChunithmSongListPage(
                 onSortOptionSelected = { isSortExpanded.value = false },
                 backgroundColor = Red500,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(28.dp))
+                    .clip(RoundedCornerShape(20.dp))
             )
         }
 
