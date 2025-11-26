@@ -315,7 +315,8 @@ internal class BofViewModel(
                     // 确保在主线程上更新 UI 状态，避免帧顺序混乱
                     withContext(Dispatchers.Main.immediate) {
                         Log.d(TAG, "Loaded full ranking data with comparison: ${currentResults.size} works")
-                        totalRankingData.update { currentResults }
+                        val normalizedResults = applyTieAwareTotalRanking(currentResults)
+                        totalRankingData.update { normalizedResults }
                         
                         if (currentResults.isNotEmpty()) {
                             isLoading.update { false }
@@ -357,6 +358,12 @@ internal class BofViewModel(
         
         // 按平均分降序排列
         val sortedByAverage = filteredData.sortedByDescending { it.average }
+        val compareAverageRankMap = buildCompareRankMap(
+            totalData = totalData,
+            minImpression = minImpression,
+            valueSelector = { it.compareAverage },
+            impressionSelector = { it.compareImpression }
+        )
         
         // 重新分配排名并计算平均分排名变化（同分同排名）
         var currentRank = 1
@@ -370,18 +377,7 @@ internal class BofViewModel(
             val newRank = currentRank
             
             // 计算平均分排名变化
-            val compareRankInAverage = if (ranking.compareAverage != null && ranking.compareAverage > 0) {
-                // 在对比数据中找到该作品在平均分排行中的位置
-                val compareFilteredData = totalData.filter { 
-                    it.compareAverage != null && it.compareAverage > 0 &&
-                    (ranking.compareImpression ?: 0) >= minImpression 
-                }
-                val compareSortedByAverage = compareFilteredData.sortedByDescending { it.compareAverage!! }
-                val compareIndex = compareSortedByAverage.indexOfFirst { it.workId == ranking.workId }
-                if (compareIndex >= 0) compareIndex + 1 else null
-            } else {
-                null
-            }
+            val compareRankInAverage = compareAverageRankMap[ranking.workId]
             
             // 计算排名变化（正数表示排名提升，负数表示排名下降）
             val rankChange = if (compareRankInAverage != null) {
@@ -410,6 +406,12 @@ internal class BofViewModel(
         
         // 按中位数降序排列
         val sortedByMedian = filteredData.sortedByDescending { it.median }
+        val compareMedianRankMap = buildCompareRankMap(
+            totalData = totalData,
+            minImpression = minImpression,
+            valueSelector = { it.compareMedian },
+            impressionSelector = { it.compareImpression }
+        )
         
         // 重新分配排名并计算中位数排名变化（同分同排名）
         var currentRank = 1
@@ -423,18 +425,7 @@ internal class BofViewModel(
             val newRank = currentRank
             
             // 计算中位数排名变化
-            val compareRankInMedian = if (ranking.compareMedian != null && ranking.compareMedian > 0) {
-                // 在对比数据中找到该作品在中位数排行中的位置
-                val compareFilteredData = totalData.filter { 
-                    it.compareMedian != null && it.compareMedian > 0 &&
-                    (ranking.compareImpression ?: 0) >= minImpression 
-                }
-                val compareSortedByMedian = compareFilteredData.sortedByDescending { it.compareMedian!! }
-                val compareIndex = compareSortedByMedian.indexOfFirst { it.workId == ranking.workId }
-                if (compareIndex >= 0) compareIndex + 1 else null
-            } else {
-                null
-            }
+            val compareRankInMedian = compareMedianRankMap[ranking.workId]
             
             // 计算排名变化（正数表示排名提升，负数表示排名下降）
             val rankChange = if (compareRankInMedian != null) {
@@ -454,6 +445,70 @@ internal class BofViewModel(
     // 更新中位数排行的最低评价数过滤条件
     fun updateMedianMinImpression(minImpression: Int) {
         medianMinImpression.update { minImpression }
+    }
+
+    private fun applyTieAwareTotalRanking(results: List<WorkRanking>): List<WorkRanking> {
+        if (results.isEmpty()) return results
+
+        val rankByWorkId = mutableMapOf<String, Int>()
+        val sortedByScore = results.sortedByDescending { it.score }
+        var currentRank = 1
+        var previousScore: Int? = null
+        sortedByScore.forEachIndexed { index, ranking ->
+            if (previousScore != null && ranking.score != previousScore) {
+                currentRank = index + 1
+            }
+            previousScore = ranking.score
+            rankByWorkId[ranking.workId] = currentRank
+        }
+
+        val compareRankMap = buildCompareRankMap(
+            totalData = results,
+            minImpression = 1,
+            valueSelector = { it.compareScore?.toDouble() },
+            impressionSelector = { it.compareImpression }
+        )
+
+        return results.map { ranking ->
+            val newRank = rankByWorkId[ranking.workId] ?: ranking.rank
+            val compareRank = compareRankMap[ranking.workId]
+            ranking.copy(
+                rank = newRank,
+                compareRank = compareRank,
+                rankChange = compareRank?.let { it - newRank }
+            )
+        }
+    }
+
+    private fun buildCompareRankMap(
+        totalData: List<WorkRanking>,
+        minImpression: Int,
+        valueSelector: (WorkRanking) -> Double?,
+        impressionSelector: (WorkRanking) -> Int?
+    ): Map<String, Int> {
+        val compareCandidates = totalData.filter { data ->
+            val value = valueSelector(data)
+            val impression = impressionSelector(data) ?: 0
+            value != null && value > 0 && impression >= minImpression
+        }
+
+        if (compareCandidates.isEmpty()) return emptyMap()
+
+        val sortedCandidates = compareCandidates.sortedByDescending { valueSelector(it)!! }
+        val rankMap = mutableMapOf<String, Int>()
+        var currentRank = 1
+        var previousValue: Double? = null
+
+        sortedCandidates.forEachIndexed { index, item ->
+            val score = valueSelector(item)!!
+            if (previousValue != null && score != previousValue) {
+                currentRank = index + 1
+            }
+            previousValue = score
+            rankMap[item.workId] = currentRank
+        }
+
+        return rankMap
     }
     
     // 生成综合分数排行榜
@@ -531,9 +586,15 @@ internal class BofViewModel(
                     Triple(ranking.workId, compareCompositeScore, ranking)
                 }.sortedByDescending { it.second }
                 
-                // 创建对比排名和分数映射
+                // 创建对比排名和分数映射（同分同排名）
+                var compareRankCounter = 1
+                var previousCompareScore: Double? = null
                 compareCompositeData.forEachIndexed { index, (workId, score, _) ->
-                    compareCompositeMap[workId] = index + 1
+                    if (previousCompareScore != null && score != previousCompareScore) {
+                        compareRankCounter = index + 1
+                    }
+                    previousCompareScore = score
+                    compareCompositeMap[workId] = compareRankCounter
                     compareCompositeScoreMap[workId] = score
                 }
             }
@@ -667,7 +728,8 @@ internal class BofViewModel(
                     // 确保在主线程上更新 UI 状态，避免帧顺序混乱
                     withContext(Dispatchers.Main.immediate) {
                         Log.d(TAG, "Team ranking loaded: ${currentResults.size} teams")
-                        teamRankingData.update { currentResults }
+                        val normalizedTeams = applyTieAwareTeamRanking(currentResults)
+                        teamRankingData.update { normalizedTeams }
                         
                         if (currentResults.isNotEmpty()) {
                             Log.d(TAG, "Team data loaded, setting isLoading to false")
@@ -692,6 +754,46 @@ internal class BofViewModel(
                     isTeamRankingLoading.update { false }
                 }
             }
+        }
+    }
+
+    private fun applyTieAwareTeamRanking(teamData: List<TeamRankingItem>): List<TeamRankingItem> {
+        if (teamData.isEmpty()) return teamData
+
+        val rankByTeam = mutableMapOf<String, Int>()
+        var currentRank = 1
+        var previousScore: Double? = null
+        teamData.sortedByDescending { it.totalScore }.forEachIndexed { index, team ->
+            if (previousScore != null && team.totalScore != previousScore) {
+                currentRank = index + 1
+            }
+            previousScore = team.totalScore
+            rankByTeam[team.teamName] = currentRank
+        }
+
+        val compareRankByTeam = mutableMapOf<String, Int>()
+        var compareRankCounter = 1
+        var previousCompareScore: Double? = null
+        teamData
+            .filter { (it.compareTotalScore ?: 0.0) > 0.0 }
+            .sortedByDescending { it.compareTotalScore!! }
+            .forEachIndexed { index, team ->
+                val score = team.compareTotalScore!!
+                if (previousCompareScore != null && score != previousCompareScore) {
+                    compareRankCounter = index + 1
+                }
+                previousCompareScore = score
+                compareRankByTeam[team.teamName] = compareRankCounter
+            }
+
+        return teamData.map { team ->
+            val newRank = rankByTeam[team.teamName] ?: team.rank
+            val compareRank = compareRankByTeam[team.teamName]
+            team.copy(
+                rank = newRank,
+                compareRank = compareRank,
+                rankChange = compareRank?.let { it - newRank }
+            )
         }
     }
 }
