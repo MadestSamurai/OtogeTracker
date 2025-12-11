@@ -30,6 +30,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextAlign
@@ -121,7 +123,7 @@ private fun GenreFilterRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 12.dp, top = 12.dp, bottom = 6.dp),
+            .padding(start = 12.dp, end = 12.dp, top = 12.dp, bottom = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         val allSelected = selectedGenres.value.size == genres.size
@@ -157,7 +159,21 @@ private fun GenreFilterRow(
         )
         Spacer(modifier = Modifier.width(8.dp))
         LazyRow(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .drawWithContent {
+                    drawContent()
+                    drawRect(
+                        brush = Brush.horizontalGradient(
+                            0f to Color.Transparent,
+                            0.05f to Red500,
+                            0.95f to Red500,
+                            1f to Color.Transparent
+                        ),
+                        blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
+                    )
+                },
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp)
         ) {
             items(genres.size) { index ->
                 val genre = genres[index]
@@ -237,7 +253,21 @@ private fun VersionFilterRow(
         )
         Spacer(modifier = Modifier.width(8.dp))
         LazyRow(
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .drawWithContent {
+                    drawContent()
+                    drawRect(
+                        brush = Brush.horizontalGradient(
+                            0f to Color.Transparent,
+                            0.05f to Red500,
+                            0.95f to Red500,
+                            1f to Color.Transparent
+                        ),
+                        blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
+                    )
+                },
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp)
         ) {
             items(versions.size) { index ->
                 val version = versions[index]
@@ -439,19 +469,32 @@ private fun CnValueRangeFilter(
                 modifier = Modifier.weight(1f)
             )
 
-            Switch(
-                checked = isCnFilterEnabled.value,
-                onCheckedChange = { enabled ->
-                    isCnFilterEnabled.value = enabled
-                    filterCnLevelRange.value = if (enabled) cnLevelRange.value else 0..1000
-                },
-                colors = SwitchDefaults.colors(
-                    checkedThumbColor = Beige500,
-                    checkedTrackColor = Red800,
-                    uncheckedThumbColor = Red800,
-                    uncheckedTrackColor = Red800.copy(alpha = 0.5f)
+            // CN筛选开关
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(start = 8.dp)
+            ) {
+                Text(
+                    text = "CN",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Beige500,
+                    modifier = Modifier.padding(end = 4.dp)
                 )
-            )
+                Switch(
+                    checked = isCnFilterEnabled.value,
+                    onCheckedChange = { enabled ->
+                        isCnFilterEnabled.value = enabled
+                        filterCnLevelRange.value = if (enabled) cnLevelRange.value else 0..1000
+                    },
+                    modifier = Modifier.height(20.dp),
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Beige500,
+                        uncheckedThumbColor = Red800,
+                        checkedTrackColor = Red800,
+                        uncheckedTrackColor = Red800.copy(alpha = 0.5f)
+                    )
+                )
+            }
         }
 
         RangeSlider(

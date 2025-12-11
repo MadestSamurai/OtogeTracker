@@ -1,5 +1,6 @@
 package com.madsam.otora.ui.navigation
 
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -42,6 +43,7 @@ object ChunithmRoutes {
  * )
  * ```
  */
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun ChunithmNavHost(
     navController: NavHostController,

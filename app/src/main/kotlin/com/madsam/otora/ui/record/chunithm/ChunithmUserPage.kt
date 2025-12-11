@@ -1,6 +1,7 @@
 package com.madsam.otora.ui.record.chunithm
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -66,6 +67,7 @@ import kotlinx.coroutines.launch
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun ChunithmUserPage(
     viewModel: ChunithmViewModel,

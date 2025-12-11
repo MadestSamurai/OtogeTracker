@@ -98,6 +98,13 @@ internal class ChunithmViewModel() : ViewModel() {
     val allScoresCache: StateFlow<Map<String, Map<String, ChunithmPlayRecordUiModel.ChunithmFullScoreUiModel>>> = _allScoresCache.asStateFlow()
     private var scoresCacheLoaded = false
 
+    // Genre 和 Version 列表（从数据库获取,过滤 WORLD'S END）
+    private val _genreList = MutableStateFlow<List<String>>(emptyList())
+    val genreList: StateFlow<List<String>> = _genreList.asStateFlow()
+    
+    private val _versionList = MutableStateFlow<List<String>>(emptyList())
+    val versionList: StateFlow<List<String>> = _versionList.asStateFlow()
+
     // 角色数据
     private val _characters = MutableStateFlow<List<com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity>>(emptyList())
     val characters: StateFlow<List<com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity>> = _characters.asStateFlow()
@@ -724,6 +731,15 @@ internal class ChunithmViewModel() : ViewModel() {
             val allSongs = chunithmLocalService.getAllSongData()
             _chuniSongs.update { allSongs }
             _filteredSongs.value = _chuniSongs.value
+            
+            // 加载 Genre 和 Version 列表（过滤掉 WORLD'S END）
+            val categories = chunithmLocalService.getAllCategories()
+            _genreList.value = categories
+                .map { it.category }
+                .filter { it != "WORLD'S END" }
+            
+            val versions = chunithmLocalService.getAllVersions()
+            _versionList.value = versions.map { it.version }
         }
     }
 

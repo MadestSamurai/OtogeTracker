@@ -1,12 +1,12 @@
 package com.madsam.otora.ui.record.chunithm
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -18,8 +18,9 @@ import com.madsam.otora.ui.record.chunithm.pages.ChunithmSongListPage
 
 /**
  * 曲目列表独立模块 - 包含列表页和详情页覆盖层
- * 完全独立的模块，内部创建自己的 ViewModel
+ * 使用 SharedTransitionLayout 实现共享元素过渡动画
  */
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun ChunithmSongListScreen(
     onNavigateBack: () -> Unit
@@ -40,32 +41,40 @@ fun ChunithmSongListScreen(
         }
     }
     
-    Box(modifier = Modifier.fillMaxSize()) {
-        // 曲目列表页
-        ChunithmSongListPage(
-            viewModel = viewModel,
-            scrollThreshold = 50f,
-            setIsTabRowVisible = { },
-            onNavigateToSongDetail = { songTitle ->
-                selectedSongTitle.value = songTitle
+    SharedTransitionLayout(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        AnimatedContent(
+            targetState = selectedSongTitle.value,
+            transitionSpec = {
+                fadeIn() togetherWith fadeOut()
             },
-            onNavigateBack = onNavigateBack
-        )
-        
-        // 曲目详情覆盖层
-        AnimatedVisibility(
-            visible = selectedSongTitle.value != null,
-            enter = slideInHorizontally(initialOffsetX = { it }) + fadeIn(),
-            exit = slideOutHorizontally(targetOffsetX = { it }) + fadeOut()
-        ) {
-            selectedSongTitle.value?.let { songTitle ->
+            label = "song_detail_transition"
+        ) { songTitle ->
+            if (songTitle == null) {
+                // 曲目列表页
+                ChunithmSongListPage(
+                    viewModel = viewModel,
+                    scrollThreshold = 50f,
+                    setIsTabRowVisible = { },
+                    onNavigateToSongDetail = { title ->
+                        selectedSongTitle.value = title
+                    },
+                    onNavigateBack = onNavigateBack,
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedContentScope = this@AnimatedContent
+                )
+            } else {
+                // 曲目详情页
                 ChunithmSongDetailPage(
                     songTitle = songTitle,
                     viewModel = viewModel,
                     onNavigateBack = {
                         selectedSongTitle.value = null
                         viewModel.resetPageTitle()
-                    }
+                    },
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedContentScope = this@AnimatedContent
                 )
             }
         }

@@ -45,21 +45,46 @@ import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSongUiModel
 import com.madsam.otora.ui.BASE_URL
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.SharedTransitionScope.OverlayClip
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun ChunithmSongCard(
     item: ChunithmSongUiModel,
     itemWidth: Dp,
     highlightText: String = "",
     viewModel: ChunithmViewModel? = null,
-    onClick: ((ChunithmSongUiModel) -> Unit)? = null
+    onClick: ((ChunithmSongUiModel) -> Unit)? = null,
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedContentScope: AnimatedContentScope? = null
 ) {
+    // 封面图片的共享元素key
+    val coverKey = "song_cover_${item.title}"
+    // 歌曲标题的共享元素key
+    val titleKey = "song_title_${item.title}"
+    // 卡片背景的共享元素key
+    val cardKey = "song_card_${item.title}"
+    
     Surface(
         modifier = Modifier
             .width(itemWidth)
             .clickable { 
                 Log.d("ChunithmSongCard", "Card clicked: ${item.title}")
                 onClick?.invoke(item)
+            }
+            .let { modifier ->
+                if (sharedTransitionScope != null && animatedContentScope != null) {
+                    with(sharedTransitionScope) {
+                        modifier.sharedBounds(
+                            sharedContentState = rememberSharedContentState(key = cardKey),
+                            animatedVisibilityScope = animatedContentScope,
+                            resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds()
+                        )
+                    }
+                } else modifier
             },
         shape = RoundedCornerShape(6.dp),
         color = Transparent
@@ -102,7 +127,19 @@ internal fun ChunithmSongCard(
                             bottom.linkTo(parent.bottom)
                         }
                         .width(80.dp)
-                        .height(80.dp),
+                        .height(80.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .let { modifier ->
+                            if (sharedTransitionScope != null && animatedContentScope != null) {
+                                with(sharedTransitionScope) {
+                                    modifier.sharedElement(
+                                        sharedContentState = rememberSharedContentState(key = coverKey),
+                                        animatedVisibilityScope = animatedContentScope,
+                                        clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(6.dp))
+                                    )
+                                }
+                            } else modifier
+                        },
                     RoundedCornerShape(6.dp),
                     Transparent
                 ) {

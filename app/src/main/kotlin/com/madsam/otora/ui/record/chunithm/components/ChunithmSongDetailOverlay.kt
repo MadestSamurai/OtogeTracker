@@ -2,6 +2,7 @@ package com.madsam.otora.ui.record.chunithm.components
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -30,7 +31,7 @@ import kotlinx.coroutines.launch
  * 歌曲详情覆盖层组件
  * 从底部滑入，覆盖在列表页面上
  */
-@OptIn(DelicateCoroutinesApi::class)
+@OptIn(DelicateCoroutinesApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun ChunithmSongDetailOverlay(
     songTitle: String,

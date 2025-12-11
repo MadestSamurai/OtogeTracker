@@ -79,15 +79,20 @@ import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.ChunithmFilterComponent
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSongCard
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSortComponent
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun ChunithmSongListPage(
     viewModel: ChunithmViewModel,
     scrollThreshold: Float,
     setIsTabRowVisible: (Boolean) -> Unit,
     onNavigateToSongDetail: (String) -> Unit,
-    onNavigateBack: () -> Unit = {}
+    onNavigateBack: () -> Unit = {},
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedContentScope: AnimatedContentScope? = null
 ) {
     // 处理返回按钮
     BackHandler(enabled = true) {
@@ -115,6 +120,8 @@ internal fun ChunithmSongListPage(
 
     val searchText by viewModel.searchText.collectAsState()
     val songList by viewModel.chuniSongs.collectAsState()
+    val genreList by viewModel.genreList.collectAsState()
+    val versionList by viewModel.versionList.collectAsState()
 
     val lazyListState = rememberLazyListState()
 
@@ -133,10 +140,10 @@ internal fun ChunithmSongListPage(
     val includeWE = remember(key1 = "includeWE") { mutableStateOf(true) }
 
     // 初始化时将所有选项设为选中状态
-    LaunchedEffect(songList) {
-        if (songList.isNotEmpty()) {
-            selectedGenres.value = songList.map { it.genre }.distinct().toSet()
-            selectedVersions.value = songList.map { it.version }.distinct().toSet()
+    LaunchedEffect(genreList, versionList) {
+        if (genreList.isNotEmpty() && versionList.isNotEmpty()) {
+            selectedGenres.value = genreList.toSet()
+            selectedVersions.value = versionList.toSet()
             selectedDifficulties.value = setOf("basic", "advanced", "expert", "master", "ultima")
         }
     }
@@ -348,7 +355,9 @@ internal fun ChunithmSongListPage(
                         viewModel = viewModel,
                         onClick = { song ->
                             onNavigateToSongDetail(song.title)
-                        }
+                        },
+                        sharedTransitionScope = sharedTransitionScope,
+                        animatedContentScope = animatedContentScope
                     )
                     if (index != filteredSongList.size - 1) {
                         Spacer(modifier = Modifier.height(10.dp))
@@ -373,8 +382,8 @@ internal fun ChunithmSongListPage(
         ) {
             ChunithmFilterComponent(
                 isFilterExpanded = true,
-                genres = songList.map { it.genre }.distinct(),
-                versions = songList.map { it.version }.distinct(),
+                genres = genreList,
+                versions = versionList,
                 selectedGenres = selectedGenres,
                 selectedVersions = selectedVersions,
                 selectedDifficulties = selectedDifficulties,

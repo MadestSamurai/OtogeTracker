@@ -2,7 +2,11 @@ package com.madsam.otora.ui.record.chunithm.pages
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.SharedTransitionScope.OverlayClip
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -10,20 +14,27 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -37,12 +48,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.madsam.otora.core.icon.Fa
+import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
@@ -53,6 +67,7 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.theme.Red500
+import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaSemiBold
@@ -64,14 +79,22 @@ import com.madsam.otora.ui.BASE_URL
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.SheetScoreInfo
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun ChunithmSongDetailPage(
     songTitle: String,
     viewModel: ChunithmViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope? = null,
+    animatedContentScope: AnimatedContentScope? = null
 ) {
     // 对URL编码的标题进行解码
     val decodedTitle = java.net.URLDecoder.decode(songTitle, "UTF-8")
+    
+    // 共享元素key
+    val coverKey = "song_cover_$decodedTitle"
+    val titleKey = "song_title_$decodedTitle"
+    val cardKey = "song_card_$decodedTitle"
     
     val songList by viewModel.chuniSongs.collectAsState()
     val song = songList.find { it.title == decodedTitle }
@@ -107,14 +130,39 @@ internal fun ChunithmSongDetailPage(
         return
     }
 
-    // 页面容器
-    LazyColumn(
+    // 页面容器 - 使用 Box 来叠加标题栏
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Red300)
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .let { modifier ->
+                if (sharedTransitionScope != null && animatedContentScope != null) {
+                    with(sharedTransitionScope) {
+                        modifier.sharedBounds(
+                            sharedContentState = rememberSharedContentState(key = cardKey),
+                            animatedVisibilityScope = animatedContentScope,
+                            resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds()
+                        )
+                    }
+                } else modifier
+            }
     ) {
+        // 主内容区域
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // 顶部间距（为标题栏留出空间）
+            item {
+                Spacer(
+                    modifier = Modifier
+                        .windowInsetsPadding(WindowInsets.statusBars)
+                        .height(56.dp)
+                )
+            }
+            
             // 封面和基本信息
             item {
                 Card(
@@ -131,7 +179,7 @@ internal fun ChunithmSongDetailPage(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.Top
                         ) {
-                            // 封面图片
+                            // 封面图片 - 共享元素
                             Image(
                                 painter = rememberAsyncImagePainter(
                                     model = "$BASE_URL/chuni/img/${song.imageName}",
@@ -143,6 +191,17 @@ internal fun ChunithmSongDetailPage(
                                     .width(100.dp)
                                     .height(100.dp)
                                     .clip(RoundedCornerShape(12.dp))
+                                    .let { modifier ->
+                                        if (sharedTransitionScope != null && animatedContentScope != null) {
+                                            with(sharedTransitionScope) {
+                                                modifier.sharedElement(
+                                                    sharedContentState = rememberSharedContentState(key = coverKey),
+                                                    animatedVisibilityScope = animatedContentScope,
+                                                    clipInOverlayDuringTransition = OverlayClip(RoundedCornerShape(12.dp))
+                                                )
+                                            }
+                                        } else modifier
+                                    }
                             )
 
                             Spacer(modifier = Modifier.width(16.dp))
@@ -184,7 +243,56 @@ internal fun ChunithmSongDetailPage(
                     viewModel = viewModel
                 )
             }
+            
+            // 底部间距
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
+        
+        // 标题栏 - 覆盖在内容上方
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .height(56.dp)
+                .background(Red300.copy(alpha = 0.95f))
+                .padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 返回按钮
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .clickable {
+                        viewModel.resetPageTitle()
+                        onNavigateBack()
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = rememberVectorPainter(image = Fa.`Arrow-left`),
+                    contentDescription = "返回",
+                    tint = Beige400,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            
+            // 标题
+            Text(
+                text = decodedTitle,
+                color = Beige400,
+                fontSize = 18.sp,
+                fontFamily = sarasaBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp)
+            )
+        }
+    }
 }
 
 @Composable
