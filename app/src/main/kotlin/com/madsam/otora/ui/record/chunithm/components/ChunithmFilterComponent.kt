@@ -39,16 +39,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
 import com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
 import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 
@@ -66,8 +62,10 @@ internal fun ChunithmFilterComponent(
     cnLevelRange: MutableState<IntRange>,
     filterCnLevelRange: MutableState<IntRange>,
     includeWE: MutableState<Boolean>,
-    backgroundColor: Color = Red300
+    backgroundColor: Color = Color.Unspecified
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+    val actualBackgroundColor = if (backgroundColor == Color.Unspecified) colorScheme.surface else backgroundColor
     AnimatedVisibility(
         visible = isFilterExpanded,
         enter = expandVertically(),
@@ -79,7 +77,7 @@ internal fun ChunithmFilterComponent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(backgroundColor)
+                .background(actualBackgroundColor)
                 .padding(bottom = 16.dp)
         ) {
             // Genre 筛选行
@@ -120,6 +118,7 @@ private fun GenreFilterRow(
     genres: List<String>,
     selectedGenres: MutableState<Set<String>>
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -132,7 +131,7 @@ private fun GenreFilterRow(
             modifier = Modifier
                 .height(24.dp)
                 .background(
-                    if (allSelected) Red800 else Red500,
+                    if (allSelected) colorScheme.primaryContainer else colorScheme.surfaceContainer,
                     RoundedCornerShape(6.dp)
                 )
                 .clickable {
@@ -145,7 +144,7 @@ private fun GenreFilterRow(
                 text = toggleText,
                 fontSize = 12.sp,
                 fontFamily = sarasaBold,
-                color = Beige500,
+                color = colorScheme.primary,
                 textAlign = TextAlign.Center
             )
         }
@@ -155,7 +154,7 @@ private fun GenreFilterRow(
             modifier = Modifier
                 .width(1.dp)
                 .height(20.dp)
-                .background(Beige500.copy(alpha = 0.3f))
+                .background(colorScheme.primary.copy(alpha = 0.3f))
         )
         Spacer(modifier = Modifier.width(8.dp))
         LazyRow(
@@ -166,8 +165,8 @@ private fun GenreFilterRow(
                     drawRect(
                         brush = Brush.horizontalGradient(
                             0f to Color.Transparent,
-                            0.05f to Red500,
-                            0.95f to Red500,
+                            0.05f to colorScheme.surfaceContainer,
+                            0.95f to colorScheme.surfaceContainer,
                             1f to Color.Transparent
                         ),
                         blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
@@ -183,7 +182,7 @@ private fun GenreFilterRow(
                         .padding(horizontal = 4.dp)
                         .height(24.dp)
                         .background(
-                            if (isSelected) Red800 else Red500,
+                            if (isSelected) colorScheme.primaryContainer else colorScheme.surfaceContainer,
                             RoundedCornerShape(6.dp)
                         )
                         .clickable {
@@ -198,7 +197,7 @@ private fun GenreFilterRow(
                 ) {
                     Text(
                         text = genre,
-                        color = Beige500,
+                        color = colorScheme.primary,
                         fontSize = 12.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -214,6 +213,7 @@ private fun VersionFilterRow(
     versions: List<String>,
     selectedVersions: MutableState<Set<String>>
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -226,7 +226,7 @@ private fun VersionFilterRow(
             modifier = Modifier
                 .height(24.dp)
                 .background(
-                    if (allSelected) Red800 else Red500,
+                    if (allSelected) colorScheme.primaryContainer else colorScheme.surfaceContainer,
                     RoundedCornerShape(6.dp)
                 )
                 .clickable {
@@ -239,7 +239,7 @@ private fun VersionFilterRow(
                 text = toggleText,
                 fontSize = 12.sp,
                 fontFamily = sarasaBold,
-                color = Beige500,
+                color = colorScheme.primary,
                 textAlign = TextAlign.Center
             )
         }
@@ -249,7 +249,7 @@ private fun VersionFilterRow(
             modifier = Modifier
                 .width(1.dp)
                 .height(20.dp)
-                .background(Beige500.copy(alpha = 0.3f))
+                .background(colorScheme.primary.copy(alpha = 0.3f))
         )
         Spacer(modifier = Modifier.width(8.dp))
         LazyRow(
@@ -260,8 +260,8 @@ private fun VersionFilterRow(
                     drawRect(
                         brush = Brush.horizontalGradient(
                             0f to Color.Transparent,
-                            0.05f to Red500,
-                            0.95f to Red500,
+                            0.05f to colorScheme.surfaceContainer,
+                            0.95f to colorScheme.surfaceContainer,
                             1f to Color.Transparent
                         ),
                         blendMode = androidx.compose.ui.graphics.BlendMode.DstIn
@@ -277,7 +277,7 @@ private fun VersionFilterRow(
                         .padding(horizontal = 4.dp)
                         .height(24.dp)
                         .background(
-                            if (isSelected) Red800 else Red500,
+                            if (isSelected) colorScheme.primaryContainer else colorScheme.surfaceContainer,
                             RoundedCornerShape(6.dp)
                         )
                         .clickable {
@@ -292,7 +292,7 @@ private fun VersionFilterRow(
                 ) {
                     Text(
                         text = version,
-                        color = Beige500,
+                        color = colorScheme.primary,
                         fontSize = 12.sp,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -307,6 +307,7 @@ private fun VersionFilterRow(
 private fun DifficultyFilterRow(
     selectedDifficulties: MutableState<Set<String>>
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -330,7 +331,7 @@ private fun DifficultyFilterRow(
                     .weight(1f)
                     .height(24.dp)
                     .background(
-                        if (isSelected) difficultyColors[index] else Red300,
+                        if (isSelected) difficultyColors[index] else colorScheme.surface,
                         RoundedCornerShape(6.dp)
                     )
                     .run {
@@ -353,7 +354,7 @@ private fun DifficultyFilterRow(
             ) {
                 Text(
                     text = difficultyLabels[index],
-                    color = if (isSelected) White1000 else Beige500,
+                    color = if (isSelected) White1000 else colorScheme.primary,
                     fontSize = 12.sp,
                     fontFamily = sarasaBold,
                     textAlign = TextAlign.Center,
@@ -372,11 +373,12 @@ private fun JpValueRangeFilter(
     filterInternalLevelRange: MutableState<IntRange>,
     includeWE: MutableState<Boolean>
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
-            .background(Red300, RoundedCornerShape(12.dp))
+            .background(colorScheme.surface, RoundedCornerShape(12.dp))
             .padding(12.dp)
     ) {
         Row(
@@ -386,7 +388,7 @@ private fun JpValueRangeFilter(
         ) {
             Text(
                 text = "JP Value Filter: ${(internalLevelRange.value.first / 10.0).round(1)} - ${(internalLevelRange.value.endInclusive / 10.0).round(1)}",
-                color = Beige500,
+                color = colorScheme.primary,
                 modifier = Modifier.weight(1f)
             )
 
@@ -398,7 +400,7 @@ private fun JpValueRangeFilter(
                 Text(
                     text = "WE",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Beige500,
+                    color = colorScheme.primary,
                     modifier = Modifier.padding(end = 4.dp)
                 )
                 Switch(
@@ -406,10 +408,10 @@ private fun JpValueRangeFilter(
                     onCheckedChange = { includeWE.value = it },
                     modifier = Modifier.height(20.dp),
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = Beige500,
-                        uncheckedThumbColor = Red800,
-                        checkedTrackColor = Red800,
-                        uncheckedTrackColor = Red800.copy(alpha = 0.5f)
+                        checkedThumbColor = colorScheme.primary,
+                        uncheckedThumbColor = colorScheme.primaryContainer,
+                        checkedTrackColor = colorScheme.primaryContainer,
+                        uncheckedTrackColor = colorScheme.primaryContainer.copy(alpha = 0.5f)
                     )
                 )
             }
@@ -427,9 +429,9 @@ private fun JpValueRangeFilter(
             valueRange = 10f..157f,
             steps = 147, // 157 - 10 = 147 steps
             colors = SliderDefaults.colors(
-                thumbColor = Beige500,
-                activeTrackColor = Red800,
-                inactiveTrackColor = Red800.copy(alpha = 0.3f),
+                thumbColor = colorScheme.primary,
+                activeTrackColor = colorScheme.primaryContainer,
+                inactiveTrackColor = colorScheme.primaryContainer.copy(alpha = 0.3f),
                 activeTickColor = Color.Transparent,
                 inactiveTickColor = Color.Transparent
             ),
@@ -449,13 +451,14 @@ private fun CnValueRangeFilter(
     cnLevelRange: MutableState<IntRange>,
     filterCnLevelRange: MutableState<IntRange>
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val isCnFilterEnabled = remember { mutableStateOf(true) }
     
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 12.dp)
-            .background(Red300, RoundedCornerShape(12.dp))
+            .background(colorScheme.surface, RoundedCornerShape(12.dp))
             .padding(12.dp)
     ) {
         Row(
@@ -465,7 +468,7 @@ private fun CnValueRangeFilter(
         ) {
             Text(
                 text = "CN Value Filter: ${(cnLevelRange.value.start / 10.0).round(1)} - ${(cnLevelRange.value.endInclusive / 10.0).round(1)}",
-                color = Beige500,
+                color = colorScheme.primary,
                 modifier = Modifier.weight(1f)
             )
 
@@ -477,7 +480,7 @@ private fun CnValueRangeFilter(
                 Text(
                     text = "CN",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Beige500,
+                    color = colorScheme.primary,
                     modifier = Modifier.padding(end = 4.dp)
                 )
                 Switch(
@@ -488,10 +491,10 @@ private fun CnValueRangeFilter(
                     },
                     modifier = Modifier.height(20.dp),
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = Beige500,
-                        uncheckedThumbColor = Red800,
-                        checkedTrackColor = Red800,
-                        uncheckedTrackColor = Red800.copy(alpha = 0.5f)
+                        checkedThumbColor = colorScheme.primary,
+                        uncheckedThumbColor = colorScheme.primaryContainer,
+                        checkedTrackColor = colorScheme.primaryContainer,
+                        uncheckedTrackColor = colorScheme.primaryContainer.copy(alpha = 0.5f)
                     )
                 )
             }
@@ -513,12 +516,12 @@ private fun CnValueRangeFilter(
             steps = 144, // 154 - 10 = 144 steps
             enabled = isCnFilterEnabled.value,
             colors = SliderDefaults.colors(
-                thumbColor = Beige500,
-                activeTrackColor = Red800,
-                inactiveTrackColor = Red800.copy(alpha = 0.3f),
-                disabledThumbColor = Red800.copy(alpha = 0.3f),
-                disabledActiveTrackColor = Red800.copy(alpha = 0.3f),
-                disabledInactiveTrackColor = Red800.copy(alpha = 0.2f),
+                thumbColor = colorScheme.primary,
+                activeTrackColor = colorScheme.primaryContainer,
+                inactiveTrackColor = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                disabledThumbColor = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                disabledActiveTrackColor = colorScheme.primaryContainer.copy(alpha = 0.3f),
+                disabledInactiveTrackColor = colorScheme.primaryContainer.copy(alpha = 0.2f),
                 activeTickColor = Color.Transparent,
                 inactiveTickColor = Color.Transparent,
                 disabledActiveTickColor = Color.Transparent,

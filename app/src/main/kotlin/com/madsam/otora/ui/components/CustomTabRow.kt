@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TabPosition
 import androidx.compose.runtime.Composable
@@ -40,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastFold
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastMap
-import com.madsam.otora.core.theme.Red800
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -53,6 +53,7 @@ fun CustomTabRow(
     containerColor: Color = Transparent,
     contentColor: Color = Color.Unspecified,
     indicator: @Composable (tabPositions: List<CustomTabPosition>) -> Unit = @Composable { tabPositions ->
+        val colorScheme = MaterialTheme.colorScheme
         if (tabPositions.isNotEmpty()) {
             val safeIndex = selectedTabIndex.coerceIn(0, tabPositions.lastIndex)
             Box(
@@ -61,7 +62,7 @@ fun CustomTabRow(
                     .padding(4.dp)
                     .clip(RoundedCornerShape(40.dp))
                     .fillMaxHeight()
-                    .background(Red800)
+                    .background(colorScheme.primaryContainer)
             )
         }
     },
@@ -237,6 +238,7 @@ fun CustomScrollableTabRow(
     contentColor: Color = Color.Unspecified,
     containerWidthDp: Dp? = null,
     indicator: @Composable (tabPositions: List<CustomTabPosition>) -> Unit = @Composable { tabPositions ->
+        val colorScheme = MaterialTheme.colorScheme
         if (tabPositions.isNotEmpty()) {
             val safeIndex = selectedTabIndex.coerceIn(0, tabPositions.lastIndex)
             Box(
@@ -245,7 +247,7 @@ fun CustomScrollableTabRow(
                     .padding(4.dp)
                     .clip(RoundedCornerShape(40.dp))
                     .fillMaxHeight()
-                    .background(Red800)
+                    .background(colorScheme.primaryContainer)
             )
         }
     },

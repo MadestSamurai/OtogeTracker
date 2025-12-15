@@ -36,9 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Red700
-import com.madsam.otora.core.theme.Red900
 import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
@@ -49,6 +46,7 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.SharedTransitionScope.OverlayClip
+import androidx.compose.material3.MaterialTheme
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -61,6 +59,7 @@ internal fun ChunithmSongCard(
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedContentScope: AnimatedContentScope? = null
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     // 封面图片的共享元素key
     val coverKey = "song_cover_${item.title}"
     // 歌曲标题的共享元素key
@@ -92,7 +91,7 @@ internal fun ChunithmSongCard(
         Column {
             ConstraintLayout(
                 modifier = Modifier
-                    .background(Red700)
+                    .background(colorScheme.surfaceContainerHigh)
                     .height(80.dp)
             ) {
                 val (
@@ -163,7 +162,7 @@ internal fun ChunithmSongCard(
                     HighlightedText(
                         fullText = item.title,
                         highlightText = highlightText,
-                        color = Beige400,
+                        color = colorScheme.onSurface,
                         fontSize = 16.sp,
                         fontFamily = sarasaBold,
                         maxLines = 1,
@@ -191,7 +190,7 @@ internal fun ChunithmSongCard(
                     Row {
                         Text(
                             text = item.version,
-                            color = Beige400,
+                            color = colorScheme.onSurface,
                             fontSize = 14.sp,
                             lineHeight = 20.sp,
                             fontFamily = sarasaBold,
@@ -201,12 +200,12 @@ internal fun ChunithmSongCard(
                                 .padding(end = 8.dp, top = 3.dp)
                                 .requiredHeight(23.dp)
                                 .clip(RoundedCornerShape(3.dp))
-                                .background(Red900)
+                                .background(colorScheme.surfaceContainerLow)
                                 .padding(vertical = 2.dp, horizontal = 6.dp)
                         )
                         Text(
                             text = item.genre,
-                            color = Beige400,
+                            color = colorScheme.onSurface,
                             fontSize = 14.sp,
                             lineHeight = 20.sp,
                             fontFamily = sarasaBold,
@@ -216,7 +215,7 @@ internal fun ChunithmSongCard(
                                 .padding(top = 3.dp)
                                 .requiredHeight(23.dp)
                                 .clip(RoundedCornerShape(3.dp))
-                                .background(Red900)
+                                .background(colorScheme.surfaceContainerLow)
                                 .padding(vertical = 2.dp, horizontal = 6.dp)
                         )
                     }
@@ -224,7 +223,7 @@ internal fun ChunithmSongCard(
             }
             Column(
                 modifier = Modifier
-                    .background(Red700)
+                    .background(colorScheme.surfaceContainerHigh)
                     .width(itemWidth)
             ) {
                 val scoresMap = remember { mutableStateOf<Map<String, SheetScoreInfo>>(emptyMap()) }

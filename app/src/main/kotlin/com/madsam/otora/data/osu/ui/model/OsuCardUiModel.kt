@@ -14,6 +14,7 @@ internal data class OsuCardUiModel(
     val isBot: Boolean = false,
     val isDeleted: Boolean = false,
     val profileColour: String = "#F5F5F5",
+    val profileHue: Int? = null,
     val isTitle: Boolean = false,
     val title: String = "",
     val currentMode: String = "",

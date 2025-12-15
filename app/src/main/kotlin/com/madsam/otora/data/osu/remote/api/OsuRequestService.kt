@@ -236,7 +236,7 @@ class OsuRequestService {
                 }
 
                 val doc = Ksoup.parse(html)
-                val medals = doc.selectFirst("div.js-react--profile-page.u-contents")
+                val medals = doc.selectFirst("div.js-react.u-contents")
                 val medalsJson = medals?.attr("data-initial-data") ?: ""
                 val osuInfoDTO = moshi.adapter(OsuInfoDTO::class.java).fromJson(medalsJson)
                 if (osuInfoDTO != null) {

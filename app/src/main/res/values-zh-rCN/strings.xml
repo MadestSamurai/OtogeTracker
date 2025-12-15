@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">音游追迹者</string>
+    <string name="record_title">我的记录</string>
     <string name="online_mark">在线标志</string>
     <string name="offline_mark">离线标志</string>
     <string name="online">在线</string>

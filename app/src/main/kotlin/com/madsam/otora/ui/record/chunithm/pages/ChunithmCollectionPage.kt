@@ -35,8 +35,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaSemiBold
@@ -49,6 +48,7 @@ internal fun ChunithmCollectionPage(
     scrollThreshold: Float,
     setIsTabRowVisible: (Boolean) -> Unit,
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val listState = rememberLazyListState()
     var showCharacterList by remember { mutableStateOf(false) }
     val currentCharacter = viewModel.getCurrentCharacter()
@@ -70,7 +70,7 @@ internal fun ChunithmCollectionPage(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Red300)
+            .background(colorScheme.surface)
     ) {
         LazyColumn(
             state = listState,
@@ -160,6 +160,7 @@ private fun CollectionCard(
     characterImageUrl: String? = null,
     onClick: (() -> Unit)? = null
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -170,7 +171,7 @@ private fun CollectionCard(
                     Modifier
                 }
             ),
-        colors = CardDefaults.cardColors(containerColor = Red500),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(

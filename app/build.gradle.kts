@@ -122,6 +122,9 @@ dependencies {
     // Moshi
     implementation(libs.moshi.kotlin)
 
+    // Material Kolor (动态主题生成)
+    implementation(libs.material.kolor)
+
     // Retrofit
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)

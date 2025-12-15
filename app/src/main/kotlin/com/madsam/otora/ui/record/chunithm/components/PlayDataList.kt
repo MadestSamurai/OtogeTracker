@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,15 +37,12 @@ import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
 import com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
 import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
@@ -62,6 +60,7 @@ internal fun PlayDataList(
     levelStats: StateFlow<List<PlayDataCategoryStats>>,
     onNavigateToSongList: () -> Unit = {}
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val difficultyStatsData by difficultyStats.collectAsState()
     val genreStatsData by genreStats.collectAsState()
     val versionStatsData by versionStats.collectAsState()
@@ -189,7 +188,7 @@ internal fun PlayDataList(
                 text = "游玩数据",
                 fontSize = 16.sp,
                 fontFamily = sarasaBold,
-                color = Beige500
+                color = colorScheme.primary
             )
             
             Spacer(modifier = Modifier.width(12.dp))
@@ -212,10 +211,10 @@ internal fun PlayDataList(
                                     "expert" -> CHUNI_DIFF_EXPERT
                                     "master" -> CHUNI_DIFF_MASTER
                                     "ultima" -> CHUNI_DIFF_ULTIMA_1
-                                    else -> Red500
+                                    else -> colorScheme.surfaceContainer
                                 }
                             } else {
-                                Red500.copy(alpha = 0.8f)
+                                colorScheme.surfaceContainer.copy(alpha = 0.8f)
                             }
                         )
                         .then(
@@ -239,12 +238,12 @@ internal fun PlayDataList(
             // 曲目列表按钮
             Text(
                 text = "曲目列表",
-                color = Beige500,
+                color = colorScheme.primary,
                 fontSize = 14.sp,
                 fontFamily = sarasaBold,
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Red500)
+                    .background(colorScheme.surfaceContainer)
                     .clickable { onNavigateToSongList() }
                     .padding(horizontal = 12.dp, vertical = 4.dp)
             )
@@ -267,7 +266,7 @@ internal fun PlayDataList(
                     .fillMaxWidth()
                     .height(200.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(Red700)
+                    .background(colorScheme.surfaceContainerHigh)
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
@@ -275,7 +274,7 @@ internal fun PlayDataList(
                     text = "加载中...",
                     fontSize = 14.sp,
                     fontFamily = sarasaRegular,
-                    color = Beige500.copy(alpha = 0.6f)
+                    color = colorScheme.primary.copy(alpha = 0.6f)
                 )
             }
         } else {
@@ -294,7 +293,7 @@ internal fun PlayDataList(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10.dp))
                         .fillMaxSize()
-                        .background(Red700)
+                        .background(colorScheme.surfaceContainerHigh)
                         .padding(horizontal = 6.dp, vertical = 8.dp)
                 ) {
                     // 直接使用 pages 中的统计数据
@@ -321,6 +320,7 @@ internal fun PlayDataList(
  */
 @Composable
 private fun PlaceholderPlayData(categoryName: String, categoryType: String) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -338,16 +338,16 @@ private fun PlaceholderPlayData(categoryName: String, categoryType: String) {
             text = "按${categoryType}分类的数据统计",
             fontSize = 14.sp,
             fontFamily = sarasaRegular,
-            color = Beige500.copy(alpha = 0.8f)
+            color = colorScheme.primary.copy(alpha = 0.8f)
         )
         Text(
             text = "即将推出",
             fontSize = 12.sp,
             fontFamily = sarasaRegular,
-            color = Beige500.copy(alpha = 0.6f),
+            color = colorScheme.primary.copy(alpha = 0.6f),
             modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
-                .background(Red500.copy(alpha = 0.3f))
+                .background(colorScheme.surfaceContainer.copy(alpha = 0.3f))
                 .padding(horizontal = 12.dp, vertical = 4.dp)
         )
     }
@@ -405,11 +405,12 @@ private fun ScoreRankBar(
     s: Int, sp: Int, ss: Int, ssp: Int, sss: Int, sssp: Int,
     total: Int
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp))
-            .background(Red500.copy(alpha = 0.6f))
+            .background(colorScheme.surfaceContainer.copy(alpha = 0.6f))
             .padding(horizontal = 8.dp, vertical = 6.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -429,7 +430,7 @@ private fun ScoreRankBar(
                 text = "${formatThousand(s)} / ${formatThousand(total)}",
                 fontSize = 10.sp,
                 fontFamily = sarasaRegular,
-                color = Beige500
+                color = colorScheme.primary
             )
         }
         
@@ -439,7 +440,7 @@ private fun ScoreRankBar(
                 .fillMaxWidth()
                 .height(10.dp)
                 .clip(RoundedCornerShape(3.dp))
-                .background(Red700.copy(alpha = 0.3f))
+                .background(colorScheme.surfaceContainerHigh.copy(alpha = 0.3f))
         ) {
             // 计算每段的实际数量（不是累积值，而是各自独立的数量）
             val countS = s - sp  // 只有S的数量
@@ -510,7 +511,7 @@ private fun ScoreRankBar(
                     modifier = Modifier
                         .weight(countBelowS.toFloat())
                         .fillMaxHeight()
-                        .background(Red700.copy(alpha = 0.3f))
+                        .background(colorScheme.surfaceContainerHigh.copy(alpha = 0.3f))
                 )
             }
         }
@@ -538,11 +539,12 @@ private fun ClearTypeBar(
     clear: Int, hard: Int, brave: Int, absolute: Int, catastrophy: Int,
     total: Int
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp))
-            .background(Red500.copy(alpha = 0.6f))
+            .background(colorScheme.surfaceContainer.copy(alpha = 0.6f))
             .padding(horizontal = 8.dp, vertical = 6.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -562,7 +564,7 @@ private fun ClearTypeBar(
                 text = "${formatThousand(clear)} / ${formatThousand(total)}",
                 fontSize = 10.sp,
                 fontFamily = sarasaRegular,
-                color = Beige500
+                color = colorScheme.primary
             )
         }
         
@@ -572,7 +574,7 @@ private fun ClearTypeBar(
                 .fillMaxWidth()
                 .height(10.dp)
                 .clip(RoundedCornerShape(3.dp))
-                .background(Red700.copy(alpha = 0.3f))
+                .background(colorScheme.surfaceContainerHigh.copy(alpha = 0.3f))
         ) {
             // 计算每段的实际数量
             val countClear = clear - hard
@@ -633,7 +635,7 @@ private fun ClearTypeBar(
                     modifier = Modifier
                         .weight(countNoClear.toFloat())
                         .fillMaxHeight()
-                        .background(Red700.copy(alpha = 0.3f))
+                        .background(colorScheme.surfaceContainerHigh.copy(alpha = 0.3f))
                 )
             }
         }
@@ -661,6 +663,7 @@ private fun ClearTypeLabel(
     count: Int,
     color: Color
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -674,7 +677,7 @@ private fun ClearTypeLabel(
             text = formatThousand(count),
             fontSize = 10.sp,
             fontFamily = sarasaRegular,
-            color = Beige500
+            color = colorScheme.primary
         )
     }
 }
@@ -686,11 +689,12 @@ private fun ClearTypeLabel(
 private fun OtherStatsRow(
     fc: Int, aj: Int, ajc: Int, fchain: Int, fchainPlus: Int
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(4.dp))
-            .background(Red500.copy(alpha = 0.6f))
+            .background(colorScheme.surfaceContainer.copy(alpha = 0.6f))
             .padding(horizontal = 8.dp, vertical = 6.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
@@ -750,7 +754,7 @@ private fun OtherStatsRow(
                 text = formatThousand(fc),
                 fontSize = 10.sp,
                 fontFamily = sarasaRegular,
-                color = Beige500,
+                color = colorScheme.primary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
             )
@@ -758,7 +762,7 @@ private fun OtherStatsRow(
                 text = formatThousand(aj),
                 fontSize = 10.sp,
                 fontFamily = sarasaRegular,
-                color = Beige500,
+                color = colorScheme.primary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
             )
@@ -766,7 +770,7 @@ private fun OtherStatsRow(
                 text = formatThousand(ajc),
                 fontSize = 10.sp,
                 fontFamily = sarasaRegular,
-                color = Beige500,
+                color = colorScheme.primary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
             )
@@ -774,7 +778,7 @@ private fun OtherStatsRow(
                 text = formatThousand(fchain),
                 fontSize = 10.sp,
                 fontFamily = sarasaRegular,
-                color = Beige500,
+                color = colorScheme.primary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
             )
@@ -782,7 +786,7 @@ private fun OtherStatsRow(
                 text = formatThousand(fchainPlus),
                 fontSize = 10.sp,
                 fontFamily = sarasaRegular,
-                color = Beige500,
+                color = colorScheme.primary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
             )
@@ -799,6 +803,7 @@ private fun ScoreRankLabel(
     count: Int,
     color: Color
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -812,7 +817,7 @@ private fun ScoreRankLabel(
             text = formatThousand(count),
             fontSize = 10.sp,
             fontFamily = sarasaRegular,
-            color = Beige500
+            color = colorScheme.primary
         )
     }
 }

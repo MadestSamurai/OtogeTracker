@@ -50,10 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.madsam.otora.R
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.Beige600
-import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.utils.ScreenUtil
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.ui.components.CustomScrollableTabRow
 import com.madsam.otora.ui.record.ChunithmScreenState
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSongDetailOverlay
@@ -76,6 +74,7 @@ internal fun ChunithmUserPage(
     navController: NavController,
     onShowSongList: () -> Unit = {}
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val selectedTabIndex by chunithmScreenState.selectedTab.collectAsState()
     val scrollThreshold = 50f
 
@@ -231,7 +230,7 @@ internal fun ChunithmUserPage(
                     ) {
                         CustomScrollableTabRow(
                             selectedTabIndex = selectedTabIndex,
-                            containerColor = Red500,
+                            containerColor = colorScheme.surfaceContainer,
                             containerWidthDp = contentWidthDp - 48.dp, // 传入实际计算的容器宽度
                             tabs = { selectedIndex ->
                                 tabTitles.forEachIndexed { index, title ->
@@ -248,7 +247,7 @@ internal fun ChunithmUserPage(
                                         text = {
                                             Text(
                                                 text = title,
-                                                color = if (selectedTabIndex == index) Beige500 else Beige600,
+                                                color = if (selectedTabIndex == index) colorScheme.primary else colorScheme.onSurfaceVariant,
                                             )
                                         },
                                         modifier = Modifier.height(40.dp)
@@ -264,7 +263,7 @@ internal fun ChunithmUserPage(
                             .size(40.dp)
                             .align(Alignment.CenterEnd)
                             .clip(RoundedCornerShape(50))
-                            .background(Red500)
+                            .background(colorScheme.surfaceContainer)
                             .clickable {
                                 when (selectedTabIndex) {
                                     0 -> {
@@ -323,7 +322,7 @@ internal fun ChunithmUserPage(
                                         else -> R.string.chunithm_cd_refresh
                                     }
                                 ),
-                                tint = Beige500,
+                                tint = colorScheme.primary,
                                 modifier = Modifier.size(16.dp)
                             )
                         }

@@ -46,9 +46,6 @@ import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.Check
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
@@ -96,10 +93,11 @@ fun ChunithmDataUpdateScreen(
         isUserAgentValid.value = UserAgentUtils.isUserAgentValid(context)
     }
 
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Red300)
+            .background(colorScheme.surface)
     ) {
         // 顶栏
         CenterAlignedTopAppBar(
@@ -107,7 +105,7 @@ fun ChunithmDataUpdateScreen(
                 Text(
                     text = "CHUNITHM 数据更新",
                     fontFamily = sarasaBold,
-                    color = Beige400
+                    color = colorScheme.onSurface
                 )
             },
             navigationIcon = {
@@ -115,15 +113,15 @@ fun ChunithmDataUpdateScreen(
                     Icon(
                         imageVector = Fa.`Arrow-left`,
                         contentDescription = "返回",
-                        tint = Beige400,
+                        tint = colorScheme.onSurface,
                         modifier = Modifier.size(24.dp)
                     )
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Red500,
-                scrolledContainerColor = Color.Unspecified, navigationIconContentColor = Beige400,
-                titleContentColor = Beige400,
+                containerColor = colorScheme.surfaceContainer,
+                scrolledContainerColor = Color.Unspecified, navigationIconContentColor = colorScheme.onSurface,
+                titleContentColor = colorScheme.onSurface,
                 actionIconContentColor = Color.Unspecified
             )
         )
@@ -133,7 +131,7 @@ fun ChunithmDataUpdateScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Red500),
+            colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(
@@ -145,7 +143,7 @@ fun ChunithmDataUpdateScreen(
                 if (!isUserAgentValid.value) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = Red300),
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Column(
@@ -169,8 +167,8 @@ fun ChunithmDataUpdateScreen(
                                 Button(
                                     onClick = onNavigateToUserAgent,
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = Beige400,
-                                        contentColor = Red500
+                                        containerColor = colorScheme.onSurface,
+                                        contentColor = colorScheme.surfaceContainer
                                     ),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
@@ -244,13 +242,13 @@ fun ChunithmDataUpdateScreen(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = when (updateState.value.state) {
-                            UpdateState.IDLE -> Beige400
-                            UpdateState.LOADING -> Beige400.copy(alpha = 0.8f)
-                            UpdateState.SUCCESS -> Beige400
+                            UpdateState.IDLE -> colorScheme.onSurface
+                            UpdateState.LOADING -> colorScheme.onSurface.copy(alpha = 0.8f)
+                            UpdateState.SUCCESS -> colorScheme.onSurface
                         },
-                        contentColor = Red500,
-                        disabledContainerColor = Beige400.copy(alpha = 0.6f),
-                        disabledContentColor = Red500.copy(alpha = 0.6f)
+                        contentColor = colorScheme.surfaceContainer,
+                        disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.6f),
+                        disabledContentColor = colorScheme.surfaceContainer.copy(alpha = 0.6f)
                     )
                 ) {
                     // 动画进度值
@@ -275,7 +273,7 @@ fun ChunithmDataUpdateScreen(
                                 CircularProgressIndicator(
                                     progress = { animatedProgress },
                                     modifier = Modifier.size(16.dp),
-                                    color = Red500,
+                                    color = colorScheme.surfaceContainer,
                                     strokeWidth = 2.dp
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -290,7 +288,7 @@ fun ChunithmDataUpdateScreen(
                                     imageVector = Fa.Check,
                                     contentDescription = "完成",
                                     modifier = Modifier.size(16.dp),
-                                    tint = Red500
+                                    tint = colorScheme.surfaceContainer
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
@@ -342,9 +340,9 @@ fun ChunithmDataUpdateScreen(
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = White1000,
                         unfocusedTextColor = White1000,
-                        focusedContainerColor = Red300,
-                        unfocusedContainerColor = Red300,
-                        focusedIndicatorColor = Beige400,
+                        focusedContainerColor = colorScheme.surface,
+                        unfocusedContainerColor = colorScheme.surface,
+                        focusedIndicatorColor = colorScheme.onSurface,
                         unfocusedIndicatorColor = White1000.copy(alpha = 0.5f),
                         errorIndicatorColor = MaterialTheme.colorScheme.error
                     )
@@ -381,9 +379,9 @@ fun ChunithmDataUpdateScreen(
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = White1000,
                         unfocusedTextColor = White1000,
-                        focusedContainerColor = Red300,
-                        unfocusedContainerColor = Red300,
-                        focusedIndicatorColor = Beige400,
+                        focusedContainerColor = colorScheme.surface,
+                        unfocusedContainerColor = colorScheme.surface,
+                        focusedIndicatorColor = colorScheme.onSurface,
                         unfocusedIndicatorColor = White1000.copy(alpha = 0.5f),
                         errorIndicatorColor = MaterialTheme.colorScheme.error
                     )
@@ -486,13 +484,13 @@ fun ChunithmDataUpdateScreen(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = when (cookieState.value.state) {
-                            UpdateState.IDLE -> Beige400
-                            UpdateState.LOADING -> Beige400.copy(alpha = 0.8f)
-                            UpdateState.SUCCESS -> Beige400
+                            UpdateState.IDLE -> colorScheme.onSurface
+                            UpdateState.LOADING -> colorScheme.onSurface.copy(alpha = 0.8f)
+                            UpdateState.SUCCESS -> colorScheme.onSurface
                         },
-                        contentColor = Red500,
-                        disabledContainerColor = Beige400.copy(alpha = 0.6f),
-                        disabledContentColor = Red500.copy(alpha = 0.6f)
+                        contentColor = colorScheme.surfaceContainer,
+                        disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.6f),
+                        disabledContentColor = colorScheme.surfaceContainer.copy(alpha = 0.6f)
                     )
                 ) {
                     // 动画进度值
@@ -517,7 +515,7 @@ fun ChunithmDataUpdateScreen(
                                 CircularProgressIndicator(
                                     progress = { animatedCookieProgress },
                                     modifier = Modifier.size(16.dp),
-                                    color = Red500,
+                                    color = colorScheme.surfaceContainer,
                                     strokeWidth = 2.dp
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
@@ -532,7 +530,7 @@ fun ChunithmDataUpdateScreen(
                                     imageVector = Fa.Check,
                                     contentDescription = "完成",
                                     modifier = Modifier.size(16.dp),
-                                    tint = Red500
+                                    tint = colorScheme.surfaceContainer
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(

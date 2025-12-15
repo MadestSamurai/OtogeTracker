@@ -43,12 +43,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.OSU_ARROW_YELLOW
 import com.madsam.otora.core.theme.OSU_HEART_RED
 import com.madsam.otora.core.theme.OSU_ROTATE_GREEN
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.utils.DateTimeUtils.dateCodeToRecent
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
@@ -61,6 +58,7 @@ internal fun Recent(
     cardWidthDp: Dp,
     onMoreClick: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val activities by recentActivityList.collectAsState()
     if (activities.items.isEmpty()) return
 
@@ -73,7 +71,7 @@ internal fun Recent(
             .width(screenWidthDp)
             .padding(top = 12.dp),
         shape = RoundedCornerShape(20.dp),
-        color = Red700
+        color = colorScheme.surfaceContainerHigh
     ) {
         Column(
             modifier = Modifier.padding(16.dp, 10.dp)
@@ -100,6 +98,7 @@ private fun RecentHeader(
     isComplete: Boolean,
     onMoreClick: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -110,7 +109,7 @@ private fun RecentHeader(
         Text(
             text = "Recent",
             style = MaterialTheme.typography.titleLarge,
-            color = Beige400,
+            color = colorScheme.onSurface,
             modifier = Modifier.padding(vertical = 8.dp)
         )
         
@@ -124,7 +123,7 @@ private fun RecentHeader(
             ) {
                 Text(
                     text = "More",
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -137,12 +136,13 @@ internal fun RecentItem(
     activity: OsuRecentUiModel,
     cardWidthDp: Dp
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val textFormat =
         buildAnnotatedString {
             appendInlineContent("icon", "[${activity.type}]")
             when (activity.type) {
                 "rank" -> {
-                    withStyle(style = SpanStyle(color = Beige400)) {
+                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
                         append("achieved #${activity.rank} on ")
                     }
                     appendInlineContent("mode", "[${activity.mode}]")
@@ -152,7 +152,7 @@ internal fun RecentItem(
                 }
 
                 "rankLost" -> {
-                    withStyle(style = SpanStyle(color = Beige400)) {
+                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
                         append("lost first place on ")
                     }
                     appendInlineContent("mode", "[${activity.mode}]")
@@ -162,7 +162,7 @@ internal fun RecentItem(
                 }
 
                 "beatmapsetUpload" -> {
-                    withStyle(style = SpanStyle(color = Beige400)) {
+                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
                         append("submitted a new beatmap ")
                     }
                     withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.SemiBold)) {
@@ -171,7 +171,7 @@ internal fun RecentItem(
                 }
 
                 "beatmapsetUpdate" -> {
-                    withStyle(style = SpanStyle(color = Beige400)) {
+                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
                         append("updated a beatmap ")
                     }
                     withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.SemiBold)) {
@@ -180,19 +180,19 @@ internal fun RecentItem(
                 }
 
                 "userSupportGift" -> {
-                    withStyle(style = SpanStyle(color = Beige400)) {
+                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
                         append("received the gift of osu!supporter")
                     }
                 }
 
                 "userSupportAgain" -> {
-                    withStyle(style = SpanStyle(color = Beige400)) {
+                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
                         append("support osu! again")
                     }
                 }
 
                 "beatmapsetRevive" -> {
-                    withStyle(style = SpanStyle(color = Beige400)) {
+                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
                         append("revived a beatmap ")
                     }
                     withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.SemiBold)) {
@@ -204,13 +204,13 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.SemiBold)) {
                         append(activity.beatmapSetTitle)
                     }
-                    withStyle(style = SpanStyle(color = Beige400)) {
+                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
                         append(" has been ${activity.approval}")
                     }
                 }
 
                 "achievement" -> {
-                    withStyle(style = SpanStyle(color = Beige400)) {
+                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
                         append("achieved ")
                     }
                     withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.SemiBold)) {
@@ -219,7 +219,7 @@ internal fun RecentItem(
                 }
 
                 else -> {
-                    withStyle(style = SpanStyle(color = Beige400)) {
+                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
                         append("achieved #${activity.rank} on ${activity.beatmapTitle}")
                     }
                 }
@@ -229,7 +229,7 @@ internal fun RecentItem(
         modifier = Modifier
             .width(cardWidthDp)
             .clip(RoundedCornerShape(6.dp))
-            .background(Red500)
+            .background(colorScheme.surfaceContainer)
             .padding(vertical = 2.dp)
     ) {
         val textWidth = cardWidthDp - 8.dp

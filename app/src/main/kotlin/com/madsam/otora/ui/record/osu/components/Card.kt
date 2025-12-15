@@ -46,12 +46,8 @@ import coil.decode.GifDecoder
 import coil.decode.SvgDecoder
 import com.madsam.otora.R
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.core.theme.OSU_BRIGHT_RED
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.data.osu.remote.model.OsuGroupDTO
 import com.madsam.otora.data.osu.ui.model.OsuCardUiModel
 import com.madsam.otora.ui.components.GroupListItem
@@ -64,6 +60,7 @@ internal fun Card(
     osuGroupDTOList: MutableStateFlow<List<OsuGroupDTO>>,
     cardWidthDp: Dp
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val cardData by osuCardData.collectAsState()
     val groupListData = osuGroupDTOList.collectAsState(initial = emptyList()).value
 
@@ -72,7 +69,7 @@ internal fun Card(
             modifier = Modifier
                 .padding(vertical = 12.dp)
                 .clip(RoundedCornerShape(20.dp))
-                .background(Red700)
+                .background(colorScheme.surfaceContainerHigh)
         ) {
             val refs = createRefs()
             val (
@@ -189,7 +186,7 @@ internal fun Card(
                     .width(cardWidthDp)
                     .height(80.dp)
                     .clip(RoundedCornerShape(bottomEnd = 15.dp))
-                    .background(Red500)
+                    .background(colorScheme.surfaceContainer)
             )
 
             Image(
@@ -250,7 +247,7 @@ internal fun Card(
             val formerUsernameShowPopup = remember { MutableTransitionState(false) }
             Text(
                 text = cardData.username,
-                color = Beige400,
+                color = colorScheme.onSurface,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier
                     .constrainAs(nameplateName) {
@@ -277,7 +274,7 @@ internal fun Card(
                         bottom.linkTo(baseBackground.bottom)
                     }
                     .padding(start = 5.dp),
-                color = Beige400,
+                color = colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyLarge
             )
             val supporterShowPopup = remember { MutableTransitionState(false) }
@@ -319,7 +316,7 @@ internal fun Card(
             val modeGlobalRankShowPopup = remember { MutableTransitionState(false) }
             Text(
                 text = cardData.rank,
-                color = Beige400,
+                color = colorScheme.onSurface,
                 style = MaterialTheme.typography.titleLarge,
                 letterSpacing = (-0.5).sp,
                 modifier = Modifier
@@ -350,13 +347,13 @@ internal fun Card(
                         append(cardData.country)
                     },
                     inlineContent = inlineContent,
-                    color = Beige500,
+                    color = colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium,
                     lineHeight = 18.sp,
                 )
                 Text(
                     text = cardData.countryRank,
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     style = MaterialTheme.typography.titleMedium,
                     lineHeight = 20.sp,
                 )
@@ -384,7 +381,7 @@ internal fun Card(
             if (cardData.formerUsernames.isNotEmpty()) {
                 PopupTip(
                     "formerly known as:\n${cardData.formerUsernames}",
-                    Beige400,
+                    colorScheme.onSurface,
                     Modifier.constrainAs(formerUsernamePopup) {
                         top.linkTo(nameplateName.bottom, margin = 4.dp)
                         start.linkTo(nameplateName.start)
@@ -396,7 +393,7 @@ internal fun Card(
             if (cardData.currentMode == "mania") {
                 PopupTip(
                     cardData.maniaModeGlobalRank,
-                    Beige400,
+                    colorScheme.onSurface,
                     Modifier.constrainAs(modeGlobalRankPopup) {
                         top.linkTo(rank.bottom, margin = 4.dp)
                         start.linkTo(rank.start)
@@ -407,7 +404,7 @@ internal fun Card(
                 )
                 PopupTip(
                     cardData.maniaModeCountryRank,
-                    Beige400,
+                    colorScheme.onSurface,
                     Modifier.constrainAs(modeCountryRankPopup) {
                         top.linkTo(country.bottom, margin = 4.dp)
                         start.linkTo(country.start)

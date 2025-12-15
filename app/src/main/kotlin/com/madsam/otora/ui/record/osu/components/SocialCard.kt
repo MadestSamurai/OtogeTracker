@@ -34,12 +34,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.OSU_BRIGHT_RED
 import com.madsam.otora.core.theme.OSU_DISCORD_BG
 import com.madsam.otora.core.theme.OSU_DISCORD_TEXT
 import com.madsam.otora.core.theme.OSU_X_BG
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.utils.DateTimeUtils.dateCodeToRecent
 import com.madsam.otora.core.utils.DateTimeUtils.dateCodeToYMDHMSU
@@ -51,6 +49,7 @@ internal fun SocialCard(
     osuSocialCard: MutableStateFlow<OsuSocialUiModel>,
     cardWidthDp: Dp
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val data by osuSocialCard.collectAsState()
 
     Column(
@@ -64,7 +63,7 @@ internal fun SocialCard(
                     bottomEnd = 20.dp
                 )
             )
-            .background(Red700)
+            .background(colorScheme.surfaceContainerHigh)
             .padding(vertical = 16.dp)
     ) {
         // User Info Section
@@ -115,6 +114,7 @@ private fun InfoText(
     text: String,
     modifier: Modifier = Modifier
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Text(
         text = buildAnnotatedString {
             append(prefix)
@@ -123,7 +123,7 @@ private fun InfoText(
             }
         },
         style = MaterialTheme.typography.bodyLarge,
-        color = Beige400,
+        color = colorScheme.onSurface,
         modifier = modifier
     )
 }

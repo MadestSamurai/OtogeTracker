@@ -90,6 +90,16 @@ internal class OsuViewModel() : ViewModel() {
         if (osuCardListDTO.users.isEmpty()) return
 
         val osuCard = osuCardListDTO.users[0]
+        
+        // Debug: 打印获取的用户数据
+        android.util.Log.d("OsuViewModel", "=== osu! Card Data ===")
+        android.util.Log.d("OsuViewModel", "username: ${osuCard.username}")
+        android.util.Log.d("OsuViewModel", "profileColour (raw): '${osuCard.profileColour}'")
+        android.util.Log.d("OsuViewModel", "profileHue: ${osuCard.profileHue}")
+        android.util.Log.d("OsuViewModel", "country: ${osuCard.country.name}")
+        android.util.Log.d("OsuViewModel", "avatarUrl: ${osuCard.avatarUrl}")
+        android.util.Log.d("OsuViewModel", "======================")
+        
         cardUI.update {
             it.copy(
                 username = osuCard.username,
@@ -102,6 +112,7 @@ internal class OsuViewModel() : ViewModel() {
                 isBot = osuCard.isBot,
                 isDeleted = osuCard.isDeleted,
                 profileColour = osuCard.profileColour.ifEmpty { "#F5F5F5" }
+                // 注意：profileHue 由 fetchMedals 设置，这里不要覆盖
             )
         }
         groupListUI.value = osuCard.groups
@@ -223,6 +234,11 @@ internal class OsuViewModel() : ViewModel() {
     }
 
     private fun fetchMedals(osuInfoDTO: OsuInfoDTO, context: Context) {
+        // Debug: 打印 profile_hue 数据
+        android.util.Log.d("OsuViewModel", "=== fetchMedals: profile_hue ===")
+        android.util.Log.d("OsuViewModel", "profileHue from UserExtend: ${osuInfoDTO.user.profileHue}")
+        android.util.Log.d("OsuViewModel", "================================")
+        
         cardUI.update {
             it.copy(
                 isTitle = osuInfoDTO.user.title.isNotEmpty(),
@@ -241,7 +257,9 @@ internal class OsuViewModel() : ViewModel() {
                     "4K: #${osuInfoDTO.user.statistics.countryRank}\n" +
                             "7K: #${osuInfoDTO.user.statistics.countryRank}"
                 } else "",
-                tournamentBannerImage2x = osuInfoDTO.user.activeTournamentBanner.image2x
+                tournamentBannerImage2x = osuInfoDTO.user.activeTournamentBanner.image2x,
+                // 从 UserExtend 获取 profile_hue（用户自定义色相）
+                profileHue = osuInfoDTO.user.profileHue
             )
         }
 

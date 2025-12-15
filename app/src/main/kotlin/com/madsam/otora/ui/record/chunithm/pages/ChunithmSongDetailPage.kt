@@ -55,19 +55,15 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-left`
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
 import com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
 import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaSemiBold
@@ -88,6 +84,7 @@ internal fun ChunithmSongDetailPage(
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedContentScope: AnimatedContentScope? = null
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     // 对URL编码的标题进行解码
     val decodedTitle = java.net.URLDecoder.decode(songTitle, "UTF-8")
     
@@ -115,14 +112,14 @@ internal fun ChunithmSongDetailPage(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Red300)
+                .background(colorScheme.surface)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = "歌曲未找到",
-                color = Beige500,
+                color = colorScheme.primary,
                 fontSize = 18.sp,
                 fontFamily = sarasaBold
             )
@@ -134,7 +131,7 @@ internal fun ChunithmSongDetailPage(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Red300)
+            .background(colorScheme.surface)
             .let { modifier ->
                 if (sharedTransitionScope != null && animatedContentScope != null) {
                     with(sharedTransitionScope) {
@@ -167,7 +164,7 @@ internal fun ChunithmSongDetailPage(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Red500),
+                    colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(
@@ -256,7 +253,7 @@ internal fun ChunithmSongDetailPage(
                 .fillMaxWidth()
                 .windowInsetsPadding(WindowInsets.statusBars)
                 .height(56.dp)
-                .background(Red300.copy(alpha = 0.95f))
+                .background(colorScheme.surface.copy(alpha = 0.95f))
                 .padding(horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -274,7 +271,7 @@ internal fun ChunithmSongDetailPage(
                 Icon(
                     painter = rememberVectorPainter(image = Fa.`Arrow-left`),
                     contentDescription = "返回",
-                    tint = Beige400,
+                    tint = colorScheme.onSurface,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -282,7 +279,7 @@ internal fun ChunithmSongDetailPage(
             // 标题
             Text(
                 text = decodedTitle,
-                color = Beige400,
+                color = colorScheme.onSurface,
                 fontSize = 18.sp,
                 fontFamily = sarasaBold,
                 maxLines = 1,
@@ -297,6 +294,7 @@ internal fun ChunithmSongDetailPage(
 
 @Composable
 private fun InfoRow(label: String, value: String) {
+    val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -305,7 +303,7 @@ private fun InfoRow(label: String, value: String) {
     ) {
         Text(
             text = "$label:",
-            color = Beige400,
+            color = colorScheme.onSurface,
             fontSize = 14.sp,
             fontFamily = sarasaSemiBold,
             modifier = Modifier.weight(0.4f)
@@ -328,13 +326,14 @@ private fun SongSheetDetailCard(
     songTitle: String,
     viewModel: ChunithmViewModel
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val difficultyColor = when (sheet.difficulty) {
         "basic" -> CHUNI_DIFF_BASIC
         "advanced" -> CHUNI_DIFF_ADVANCED
         "expert" -> CHUNI_DIFF_EXPERT
         "master" -> CHUNI_DIFF_MASTER
         "ultima" -> CHUNI_DIFF_ULTIMA_1
-        else -> Red300
+        else -> colorScheme.surface
     }
 
     Card(

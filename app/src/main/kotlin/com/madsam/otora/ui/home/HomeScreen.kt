@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,10 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 
 @Composable
@@ -43,10 +40,11 @@ fun HomeScreen(
 private fun HomeMainContent(
     onNavigateToBOF: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Red300)
+            .background(colorScheme.surface)
             .padding(16.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -61,7 +59,7 @@ private fun HomeMainContent(
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = sarasaBold,
-                color = Beige500
+                color = colorScheme.primary
             )
             
             Spacer(modifier = Modifier.height(32.dp))
@@ -69,7 +67,7 @@ private fun HomeMainContent(
             // BOF 功能卡片
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Red500),
+                colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(
@@ -82,7 +80,7 @@ private fun HomeMainContent(
                         text = "Best of Friends",
                         fontSize = 24.sp,
                         fontFamily = sarasaBold,
-                        color = White1000
+                        color = colorScheme.onSurface
                     )
                     
                     Spacer(modifier = Modifier.height(8.dp))
@@ -90,7 +88,7 @@ private fun HomeMainContent(
                     Text(
                         text = "查看和管理好友排行榜",
                         fontSize = 14.sp,
-                        color = Beige500
+                        color = colorScheme.onSurfaceVariant
                     )
                     
                     Spacer(modifier = Modifier.height(16.dp))
@@ -98,14 +96,14 @@ private fun HomeMainContent(
                     Button(
                         onClick = onNavigateToBOF,
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Red300
+                            containerColor = colorScheme.primaryContainer
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
                             text = "进入 BOF",
                             fontFamily = sarasaBold,
-                            color = Beige500
+                            color = colorScheme.onPrimaryContainer
                         )
                     }
                 }

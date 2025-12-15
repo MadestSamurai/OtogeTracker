@@ -32,9 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-left`
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaSemiBold
@@ -55,10 +53,11 @@ fun MaimaiDataUpdateScreen(
         isUserAgentValid.value = UserAgentUtils.isUserAgentValid(context)
     }
     
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Red300)
+            .background(colorScheme.surface)
     ) {
         // 顶栏
         CenterAlignedTopAppBar(
@@ -66,7 +65,7 @@ fun MaimaiDataUpdateScreen(
                 Text(
                     text = "maimai DX 数据更新",
                     fontFamily = sarasaBold,
-                    color = Beige400
+                    color = colorScheme.onSurface
                 )
             },
             navigationIcon = {
@@ -74,15 +73,15 @@ fun MaimaiDataUpdateScreen(
                     Icon(
                         imageVector = Fa.`Arrow-left`,
                         contentDescription = "返回",
-                        tint = Beige400,
+                        tint = colorScheme.onSurface,
                         modifier = Modifier.size(24.dp)
                     )
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Red500,
-                scrolledContainerColor = Color.Unspecified, navigationIconContentColor = Beige400,
-                titleContentColor = Beige400,
+                containerColor = colorScheme.surfaceContainer,
+                scrolledContainerColor = Color.Unspecified, navigationIconContentColor = colorScheme.onSurface,
+                titleContentColor = colorScheme.onSurface,
                 actionIconContentColor = Color.Unspecified
             )
         )
@@ -92,7 +91,7 @@ fun MaimaiDataUpdateScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Red500),
+            colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(
@@ -103,7 +102,7 @@ fun MaimaiDataUpdateScreen(
                 if (!isUserAgentValid.value) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = Red300),
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.surface),
                         shape = RoundedCornerShape(8.dp)
                     ) {
                         Column(
@@ -127,8 +126,8 @@ fun MaimaiDataUpdateScreen(
                                 Button(
                                     onClick = onNavigateToUserAgent,
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = Beige400,
-                                        contentColor = Red500
+                                        containerColor = colorScheme.onSurface,
+                                        contentColor = colorScheme.surfaceContainer
                                     ),
                                     modifier = Modifier.fillMaxWidth()
                                 ) {
@@ -170,8 +169,8 @@ fun MaimaiDataUpdateScreen(
                     onClick = { /* TODO: 实现maimai数据更新 */ },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Beige400.copy(alpha = 0.5f),
-                        contentColor = Red500
+                        containerColor = colorScheme.onSurface.copy(alpha = 0.5f),
+                        contentColor = colorScheme.surfaceContainer
                     ),
                     enabled = false
                 ) {

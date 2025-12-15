@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,8 +31,6 @@ import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.icon.fa.Cross
 import com.madsam.otora.core.theme.BG_DARK_GRAY
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Red500
 
 @Composable
 internal fun SearchBar(
@@ -39,6 +38,7 @@ internal fun SearchBar(
     onSearchTextChanged: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val focusRequester = remember { FocusRequester() }
     val interactionSource = remember { MutableInteractionSource() }
 
@@ -54,7 +54,7 @@ internal fun SearchBar(
             Icon(
                 painter = rememberVectorPainter(image = Filled.Magnify),
                 contentDescription = "Search",
-                tint = Beige400,
+                tint = colorScheme.onSurface,
                 modifier = Modifier.padding(start = 4.dp, end = 8.dp)
             )
 
@@ -83,7 +83,7 @@ internal fun SearchBar(
                         color = Color.White
                     ),
                     singleLine = true,
-                    cursorBrush = SolidColor(Red500),
+                    cursorBrush = SolidColor(colorScheme.surfaceContainer),
                     interactionSource = interactionSource,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search)
                 )
@@ -99,7 +99,7 @@ internal fun SearchBar(
                     Icon(
                         painter = rememberVectorPainter(image = Fa.Cross),
                         contentDescription = "Clear",
-                        tint = Beige400
+                        tint = colorScheme.onSurface
                     )
                 }
             }

@@ -31,8 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.core.utils.ScreenUtil
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.ui.record.osu.components.BadgeList
 import com.madsam.otora.ui.record.osu.components.Card
 import com.madsam.otora.ui.record.osu.components.Level
@@ -49,6 +49,7 @@ internal fun OsuUserPage(
     viewModel: OsuViewModel,
     isPageVisible: Boolean = true
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val context = LocalContext.current
     var showFullRecentDialog by remember { mutableStateOf(false) }
     var showTopRankDialog by remember { mutableStateOf("") }
@@ -103,7 +104,7 @@ internal fun OsuUserPage(
     
     LazyColumn(
         modifier = Modifier
-            .background(Red300)
+            .background(colorScheme.surface)
             .padding(horizontal = 12.dp)
             .windowInsetsPadding(
                 WindowInsets.displayCutout.only(

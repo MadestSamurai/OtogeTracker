@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,8 +16,6 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
@@ -32,6 +31,7 @@ internal fun TopRank(
     firstOnMoreClick: () -> Unit,
     cardWidthDp: Dp
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val pinnedData by pinnedMaps.collectAsState()
     val topData by topMaps.collectAsState()
     val firstData by firstMaps.collectAsState()
@@ -45,7 +45,7 @@ internal fun TopRank(
             .width(screenWidthDp)
             .padding(vertical = 12.dp),
         RoundedCornerShape(20.dp),
-        Red700
+        colorScheme.surfaceContainerHigh
     ) {
         Column(
             modifier = Modifier
@@ -54,7 +54,7 @@ internal fun TopRank(
             if (pinnedData.items.isEmpty() && topData.items.isEmpty() && firstData.items.isEmpty()) {
                 Text(
                     text = "No play records",
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     fontSize = 24.sp,
                     fontFamily = sarasaSemiBold,
                     modifier = Modifier.padding(16.dp)

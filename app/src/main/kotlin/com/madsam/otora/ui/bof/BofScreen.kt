@@ -43,6 +43,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -81,11 +82,6 @@ import com.madsam.otora.core.icon.fa.Calendar
 import com.madsam.otora.core.icon.fa.Camera
 import com.madsam.otora.core.icon.fa.`Magnifying-glass`
 import com.madsam.otora.core.icon.fa.Xmark
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.Beige600
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.madsam.otora.ui.bof.components.DateTimeRangePicker
@@ -110,6 +106,7 @@ fun BofScreen(
     bofScreenState: BofScreenState,
     onNavigateBack: () -> Unit = {}
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Log.d(TAG, "BofScreen Compose started")
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -331,7 +328,7 @@ fun BofScreen(
                     modifier = Modifier
                         .size(48.dp)
                         .clip(RoundedCornerShape(50))
-                        .background(Red500)
+                        .background(colorScheme.surfaceContainer)
                         .clickable {
                             onNavigateBack()
                         },
@@ -340,7 +337,7 @@ fun BofScreen(
                     Icon(
                         imageVector = Fa.`Arrow-left`,
                         contentDescription = "Back",
-                        tint = Beige400,
+                        tint = colorScheme.onSurface,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -355,7 +352,7 @@ fun BofScreen(
 
                     CustomScrollableTabRow(
                         selectedTabIndex = selectedTabIndex,
-                        containerColor = Red500,
+                        containerColor = colorScheme.surfaceContainer,
                         containerWidthDp = contentWidthDp,
                         tabs = { _ ->
                             mainTabTitles.forEachIndexed { index, title ->
@@ -371,7 +368,7 @@ fun BofScreen(
                                     text = {
                                         Text(
                                             text = title,
-                                            color = if (selectedTabIndex == index) Beige500 else Beige600
+                                            color = if (selectedTabIndex == index) colorScheme.primary else colorScheme.onSurfaceVariant
                                         )
                                     },
                                     modifier = Modifier.height(48.dp)
@@ -399,20 +396,20 @@ fun BofScreen(
                             text = "活动尚未开始",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Beige400,
+                            color = colorScheme.onSurface,
                             modifier = Modifier.padding(16.dp)
                         )
                         Text(
                             text = selectedRange?.full ?: "请选择一个活动",
                             fontSize = 16.sp,
-                            color = Beige600,
+                            color = colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
                         selectedRange?.start?.let { startTime ->
                             Text(
                                 text = "开始时间: $startTime",
                                 fontSize = 14.sp,
-                                color = Beige600,
+                                color = colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 8.dp)
                             )
                         }
@@ -508,7 +505,7 @@ fun BofScreen(
                         .fillMaxWidth()
                         .height(56.dp)
                         .clip(RoundedCornerShape(28.dp))
-                        .background(Red500)
+                        .background(colorScheme.surfaceContainer)
                         .animateContentSize(animationSpec = tween(250))
                         .padding(horizontal = 4.dp),
                     horizontalArrangement = Arrangement.Start,
@@ -571,7 +568,7 @@ fun BofScreen(
                                 Icon(
                                     imageVector = Fa.Camera,
                                     contentDescription = "Screenshot",
-                                    tint = Beige400,
+                                    tint = colorScheme.onSurface,
                                     modifier = Modifier.height(24.dp)
                                 )
                             }
@@ -627,7 +624,7 @@ fun BofScreen(
                                 Icon(
                                     imageVector = Fa.Calendar,
                                     contentDescription = "Date&Time",
-                                    tint = Beige400,
+                                    tint = colorScheme.onSurface,
                                     modifier = Modifier.height(24.dp)
                                 )
                             }
@@ -664,7 +661,7 @@ fun BofScreen(
                         textStyle = TextStyle(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Normal,
-                            color = Beige400,
+                            color = colorScheme.onSurface,
                             lineHeight = 20.sp
                         ),
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
@@ -675,12 +672,12 @@ fun BofScreen(
                             }
                         ),
                         singleLine = true,
-                        cursorBrush = SolidColor(Beige400),
+                        cursorBrush = SolidColor(colorScheme.onSurface),
                         decorationBox = { innerTextField ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Red800, RoundedCornerShape(24.dp))
+                                    .background(colorScheme.primaryContainer, RoundedCornerShape(24.dp))
                                     .padding(horizontal = 16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -688,7 +685,7 @@ fun BofScreen(
                                 Icon(
                                     painter = rememberVectorPainter(image = Fa.`Magnifying-glass`),
                                     contentDescription = "Search",
-                                    tint = Beige400,
+                                    tint = colorScheme.onSurface,
                                     modifier = Modifier.size(20.dp)
                                 )
                                 
@@ -702,7 +699,7 @@ fun BofScreen(
                                     if (searchText.value.isEmpty()) {
                                         Text(
                                             text = "搜索...",
-                                            color = Beige600,
+                                            color = colorScheme.onSurfaceVariant,
                                             fontSize = 14.sp,
                                             lineHeight = 20.sp
                                         )
@@ -723,7 +720,7 @@ fun BofScreen(
                                         Icon(
                                             painter = rememberVectorPainter(image = Fa.Xmark),
                                             contentDescription = "Clear",
-                                            tint = Beige400,
+                                            tint = colorScheme.onSurface,
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
@@ -786,7 +783,7 @@ fun BofScreen(
                                     Icon(
                                         painter = rememberVectorPainter(image = Filled.ChevronUp),
                                         contentDescription = "上一个",
-                                        tint = Beige400,
+                                        tint = colorScheme.onSurface,
                                         modifier = Modifier.size(16.dp)
                                     )
                                 }
@@ -797,7 +794,7 @@ fun BofScreen(
                                     Icon(
                                         painter = rememberVectorPainter(image = Filled.ChevronDown),
                                         contentDescription = "下一个",
-                                        tint = Beige400,
+                                        tint = colorScheme.onSurface,
                                         modifier = Modifier.size(16.dp)
                                     )
                                 }

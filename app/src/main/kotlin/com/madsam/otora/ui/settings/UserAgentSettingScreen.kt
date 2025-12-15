@@ -34,9 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-left`
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaSemiBold
@@ -61,10 +59,11 @@ fun UserAgentSettingScreen(
         userAgentState.value = savedUserAgent
     }
 
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Red300)
+            .background(colorScheme.surface)
     ) {
         // 顶栏
         CenterAlignedTopAppBar(
@@ -72,7 +71,7 @@ fun UserAgentSettingScreen(
                 Text(
                     text = "User-Agent 设置",
                     fontFamily = sarasaBold,
-                    color = Beige400
+                    color = colorScheme.onSurface
                 )
             },
             navigationIcon = {
@@ -80,15 +79,15 @@ fun UserAgentSettingScreen(
                     Icon(
                         imageVector = Fa.`Arrow-left`,
                         contentDescription = "返回",
-                        tint = Beige400,
+                        tint = colorScheme.onSurface,
                         modifier = Modifier.size(24.dp)
                     )
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Red500,
-                scrolledContainerColor = Color.Unspecified, navigationIconContentColor = Beige400,
-                titleContentColor = Beige400,
+                containerColor = colorScheme.surfaceContainer,
+                scrolledContainerColor = Color.Unspecified, navigationIconContentColor = colorScheme.onSurface,
+                titleContentColor = colorScheme.onSurface,
                 actionIconContentColor = Color.Unspecified
             )
         )
@@ -98,7 +97,7 @@ fun UserAgentSettingScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Red500),
+            colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
             shape = RoundedCornerShape(12.dp)
         ) {
             Column(
@@ -144,9 +143,9 @@ fun UserAgentSettingScreen(
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = White1000,
                         unfocusedTextColor = White1000,
-                        focusedContainerColor = Red300,
-                        unfocusedContainerColor = Red300,
-                        focusedIndicatorColor = Beige400,
+                        focusedContainerColor = colorScheme.surface,
+                        unfocusedContainerColor = colorScheme.surface,
+                        focusedIndicatorColor = colorScheme.onSurface,
                         unfocusedIndicatorColor = White1000.copy(alpha = 0.5f)
                     )
                 )
@@ -194,8 +193,8 @@ fun UserAgentSettingScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Beige400,
-                        contentColor = Red500
+                        containerColor = colorScheme.onSurface,
+                        contentColor = colorScheme.surfaceContainer
                     )
                 ) {
                     Text(

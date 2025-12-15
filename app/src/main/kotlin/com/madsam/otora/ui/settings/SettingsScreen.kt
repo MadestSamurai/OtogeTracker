@@ -45,9 +45,7 @@ import com.madsam.otora.core.icon.fa.Language
 import com.madsam.otora.core.icon.fa.Moon
 import com.madsam.otora.core.icon.fa.Palette
 import com.madsam.otora.core.icon.fa.Sun
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaSemiBold
@@ -124,10 +122,11 @@ fun SettingsScreen(
         }
     } else {
         // 显示主设置页面
+        val colorScheme = MaterialTheme.colorScheme
         Column(
             modifier = modifier
                 .fillMaxSize()
-                .background(Red300)
+                .background(colorScheme.surface)
         ) {
             // 顶栏
             CenterAlignedTopAppBar(
@@ -135,7 +134,7 @@ fun SettingsScreen(
                     Text(
                         text = "设置",
                         fontFamily = sarasaBold,
-                        color = Beige400
+                        color = colorScheme.onSurface
                     )
                 },
                 navigationIcon = {
@@ -143,16 +142,16 @@ fun SettingsScreen(
                         Icon(
                             imageVector = Fa.`Arrow-left`,
                             contentDescription = "返回",
-                            tint = Beige400,
+                            tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Red500,
+                    containerColor = colorScheme.surfaceContainer,
                     scrolledContainerColor = Color.Unspecified,
-                    navigationIconContentColor = Beige400,
-                    titleContentColor = Beige400,
+                    navigationIconContentColor = colorScheme.onSurface,
+                    titleContentColor = colorScheme.onSurface,
                     actionIconContentColor = Color.Unspecified
                 )
             )
@@ -237,11 +236,12 @@ private fun <T> SettingsGroup(
     items: Array<T>,
     content: @Composable (T) -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Column {
         // 组标题
         Text(
             text = title,
-            color = Beige400,
+            color = colorScheme.onSurface,
             fontSize = 14.sp,
             fontFamily = sarasaSemiBold,
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
@@ -250,7 +250,7 @@ private fun <T> SettingsGroup(
         // 组内容卡片
         Card(
             modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Red500),
+            colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
             shape = RoundedCornerShape(12.dp)
         ) {
             Column {
@@ -332,6 +332,7 @@ private fun ToggleSettingItem(
     setting: AppearanceSettings,
     onToggle: (Boolean) -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     var isEnabled by remember { mutableStateOf(setting.defaultValue as? Boolean ?: false) }
     
     Row(
@@ -372,8 +373,8 @@ private fun ToggleSettingItem(
                 onToggle(newValue)
             },
             colors = SwitchDefaults.colors(
-                checkedThumbColor = Beige400,
-                checkedTrackColor = Beige400.copy(alpha = 0.5f),
+                checkedThumbColor = colorScheme.onSurface,
+                checkedTrackColor = colorScheme.onSurface.copy(alpha = 0.5f),
                 uncheckedThumbColor = White1000.copy(alpha = 0.7f),
                 uncheckedTrackColor = White1000.copy(alpha = 0.3f)
             )
@@ -386,6 +387,7 @@ private fun NetworkToggleSettingItem(
     setting: NetworkSettings,
     onToggle: (Boolean) -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     var isEnabled by remember { mutableStateOf(setting.defaultValue as? Boolean ?: false) }
     
     Row(
@@ -426,8 +428,8 @@ private fun NetworkToggleSettingItem(
                 onToggle(newValue)
             },
             colors = SwitchDefaults.colors(
-                checkedThumbColor = Beige400,
-                checkedTrackColor = Beige400.copy(alpha = 0.5f),
+                checkedThumbColor = colorScheme.onSurface,
+                checkedTrackColor = colorScheme.onSurface.copy(alpha = 0.5f),
                 uncheckedThumbColor = White1000.copy(alpha = 0.7f),
                 uncheckedTrackColor = White1000.copy(alpha = 0.3f)
             )
@@ -440,6 +442,7 @@ private fun SelectionSettingItem(
     setting: AppearanceSettings,
     onClick: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -474,7 +477,7 @@ private fun SelectionSettingItem(
             if (setting.currentValue.isNotEmpty()) {
                 Text(
                     text = "当前: ${setting.currentValue}",
-                    color = Beige400.copy(alpha = 0.8f),
+                    color = colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 12.sp,
                     fontFamily = sarasaRegular
                 )
@@ -495,6 +498,7 @@ private fun NetworkSelectionSettingItem(
     setting: NetworkSettings,
     onClick: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -529,7 +533,7 @@ private fun NetworkSelectionSettingItem(
             if (setting.currentValue.isNotEmpty()) {
                 Text(
                     text = "当前: ${setting.currentValue}",
-                    color = Beige400.copy(alpha = 0.8f),
+                    color = colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 12.sp,
                     fontFamily = sarasaRegular
                 )

@@ -37,9 +37,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.data.osu.ui.model.OsuPlayUiModel
 import com.madsam.otora.ui.components.ImageWithText
 import com.madsam.otora.ui.components.TitleText
@@ -50,15 +47,16 @@ internal fun PlayData(
     osuPlayData: MutableStateFlow<OsuPlayUiModel>,
     modifier: Modifier = Modifier
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val playData by osuPlayData.collectAsState()
     
-    val iconTextColor = Beige400
+    val iconTextColor = colorScheme.onSurface
 
     Column(
         modifier = modifier
             .padding(bottom = 4.dp)
             .clip(RoundedCornerShape(6.dp))
-            .background(Red700)
+            .background(colorScheme.surfaceContainerHigh)
             .fillMaxWidth()
     ) {
         // 五个标志图标区域
@@ -67,7 +65,7 @@ internal fun PlayData(
                 .fillMaxWidth()
                 .height(80.dp)
                 .clip(RoundedCornerShape(6.dp))
-                .background(Red500)
+                .background(colorScheme.surfaceContainer)
                 .padding(top = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
@@ -220,7 +218,7 @@ internal fun PlayData(
                 ) {
                     Image(
                         painter = rememberVectorPainter(image = if (shown) Filled.ChevronUp else Filled.ChevronDown),
-                        colorFilter = ColorFilter.tint(Beige400),
+                        colorFilter = ColorFilter.tint(colorScheme.onSurface),
                         contentDescription = "Show More",
                         modifier = Modifier.size(with(density) { placeholderHeight.toDp() })
                     )
@@ -235,11 +233,11 @@ internal fun PlayData(
                         append(if (shown) "Show Less Play Data" else "Show More Play Data")
                     }
                 },
-                color = Beige400,
+                color = colorScheme.onSurface,
                 inlineContent = inlineContent,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
-                    .background(Red500)
+                    .background(colorScheme.surfaceContainer)
                     .clickable {
                         shown = !shown
                     }

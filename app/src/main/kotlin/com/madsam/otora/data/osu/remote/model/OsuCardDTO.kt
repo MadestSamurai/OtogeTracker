@@ -15,6 +15,7 @@ internal data class OsuCardDTO(
     @param:Json(name = "last_visit") var lastVisit: String = "",
     @param:Json(name = "pm_friends_only") var pmFriendsOnly: Boolean = false,
     @param:Json(name = "profile_colour") var profileColour: String = "",
+    @param:Json(name = "profile_hue") var profileHue: Int? = null,
     var username: String = "",
     var country: Country = Country(),
     var cover: Cover = Cover(),

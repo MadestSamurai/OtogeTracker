@@ -27,8 +27,8 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Red300
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.ui.record.chunithm.components.TopRankCaptureDialog
 import com.madsam.otora.ui.record.chunithm.components.TopRating
@@ -40,6 +40,7 @@ internal fun TopRankDialog(
     snackbarHostState: SnackbarHostState,
     onDismiss: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val screenHeightDp = with(LocalDensity.current) {
         LocalWindowInfo.current.containerSize.height.toDp()
     }
@@ -62,7 +63,7 @@ internal fun TopRankDialog(
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(
-                containerColor = Red300
+                containerColor = colorScheme.surface
             ),
             elevation = CardDefaults.cardElevation(
                 defaultElevation = 8.dp
@@ -71,7 +72,7 @@ internal fun TopRankDialog(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Red300)
+                    .background(colorScheme.surface)
             ) {
                 TopRating(
                     chunithmTopRankUiModel = chunithmTopRankUiModel,

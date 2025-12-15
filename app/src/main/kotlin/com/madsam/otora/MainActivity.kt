@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -53,18 +54,17 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.OtogeTrackerTheme
-import com.madsam.otora.core.theme.Red800
-import com.madsam.otora.core.theme.Red900
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.madsam.otora.ui.bof.BofScreen
 import com.madsam.otora.ui.home.HomeScreen
-import com.madsam.otora.ui.record.RecordScreen
+import com.madsam.otora.ui.record.GameListScreen
+import com.madsam.otora.ui.record.chunithm.ChunithmGameScreen
 import com.madsam.otora.ui.record.chunithm.ChunithmSongListScreen
+import com.madsam.otora.ui.record.maimai.MaimaiGameScreen
+import com.madsam.otora.ui.record.osu.OsuGameScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -152,23 +152,38 @@ internal fun MainScreenWithNavigation(
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
+    // 监听当前路由，决定是否显示导航栏
+    var currentRoute by remember { mutableStateOf<String?>(null) }
+    val showNavigation = currentRoute in listOf(
+        Screen.HomeScreen.route,
+        Screen.RecordScreen.route,
+        Screen.ReportScreen.route
+    )
+    
     LaunchedEffect(navController) {
         navController.currentBackStackEntryFlow.collect { backStackEntry ->
+            currentRoute = backStackEntry.destination.route
             selectedItem = when (backStackEntry.destination.route) {
                 Screen.HomeScreen.route -> 0
                 Screen.RecordScreen.route -> 1
                 Screen.ReportScreen.route -> 2
-                else -> 0
+                else -> selectedItem // 保持当前选中状态
             }
         }
     }
 
     if (useNavigationRail) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // 主内容区域 - 添加左边距避免被NavigationRail遮挡，并考虑WindowInsets
+            // 主内容区域 - 根据是否显示导航栏决定左边距
             Box(modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 80.dp) // NavigationRail的宽度
+                .then(
+                    if (showNavigation) {
+                        Modifier.padding(start = 80.dp) // NavigationRail的宽度
+                    } else {
+                        Modifier
+                    }
+                )
                 .windowInsetsPadding(
                     WindowInsets.displayCutout.only(WindowInsetsSides.Start)
                 )
@@ -180,21 +195,49 @@ internal fun MainScreenWithNavigation(
                             onShowBofScreen = { overlayManager.showBofScreen = true }
                         )
                     }
-                    composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState, overlayManager) }
+                    composable(Screen.RecordScreen.route) { 
+                        GameListScreen(
+                            onNavigateToGame = { route -> navController.navigate(route) },
+                            onNavigateToSettings = { 
+                                val intent = android.content.Intent(navController.context, com.madsam.otora.ui.settings.SettingsActivity::class.java)
+                                navController.context.startActivity(intent)
+                            }
+                        )
+                    }
                     composable(Screen.ReportScreen.route) { Screen2() }
+                    
+                    // 游戏详情页面 - 全屏，不显示主导航
+                    composable("game/osu") {
+                        OsuGameScreen(
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable("game/maimai") {
+                        MaimaiGameScreen(
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable("game/chunithm") {
+                        ChunithmGameScreen(
+                            onNavigateBack = { navController.popBackStack() },
+                            overlayManager = overlayManager
+                        )
+                    }
                 }
             }
 
-            // NavigationRail 覆盖在最上层
-            NavigationRail(
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .background(Red900)
-                    .windowInsetsPadding(
-                        WindowInsets.displayCutout.only(WindowInsetsSides.Start)
-                            .union(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
-                    ),
-                containerColor = Red900
+            // NavigationRail 覆盖在最上层 - 只在主页面显示
+            if (showNavigation) {
+                val colorScheme = MaterialTheme.colorScheme
+                NavigationRail(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .background(colorScheme.surfaceContainerLow)
+                        .windowInsetsPadding(
+                            WindowInsets.displayCutout.only(WindowInsetsSides.Start)
+                                .union(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
+                        ),
+                    containerColor = colorScheme.surfaceContainerLow
             ) {
                 items.forEachIndexed { index, screen ->
                     NavigationRailItem(
@@ -211,11 +254,11 @@ internal fun MainScreenWithNavigation(
                             )
                         },
                         colors = NavigationRailItemDefaults.colors(
-                            indicatorColor = Red800,
-                            selectedIconColor = Beige500,
-                            selectedTextColor = Beige500,
-                            unselectedIconColor = Beige600,
-                            unselectedTextColor = Beige600
+                            indicatorColor = colorScheme.primaryContainer,
+                            selectedIconColor = colorScheme.primary,
+                            selectedTextColor = colorScheme.primary,
+                            unselectedIconColor = colorScheme.onSurfaceVariant,
+                            unselectedTextColor = colorScheme.onSurfaceVariant
                         ),
                         alwaysShowLabel = true,
                         selected = selectedItem == index,
@@ -232,6 +275,7 @@ internal fun MainScreenWithNavigation(
                     )
                 }
             }
+            }
 
             SnackbarHost(
                 hostState = snackbarHostState,
@@ -240,10 +284,16 @@ internal fun MainScreenWithNavigation(
         }
     } else {
         Box(modifier = Modifier.fillMaxSize()) {
-            // 主内容区域 - 添加底部 padding 避免被导航栏覆盖
+            // 主内容区域 - 根据是否显示导航栏决定底部边距
             Box(modifier = Modifier
                 .fillMaxSize()
-                .padding(bottom = 64.dp) // 导航栏高度
+                .then(
+                    if (showNavigation) {
+                        Modifier.padding(bottom = 64.dp) // 导航栏高度
+                    } else {
+                        Modifier
+                    }
+                )
                 .windowInsetsPadding(WindowInsets.navigationBars)
             ) {
                 NavHost(navController = navController, startDestination = Screen.HomeScreen.route) {
@@ -253,20 +303,49 @@ internal fun MainScreenWithNavigation(
                             onShowBofScreen = { overlayManager.showBofScreen = true }
                         )
                     }
-                    composable(Screen.RecordScreen.route) { RecordScreen(snackbarHostState, overlayManager) }
+                    composable(Screen.RecordScreen.route) { 
+                        GameListScreen(
+                            onNavigateToGame = { route -> navController.navigate(route) },
+                            onNavigateToSettings = { 
+                                val intent = android.content.Intent(navController.context, com.madsam.otora.ui.settings.SettingsActivity::class.java)
+                                navController.context.startActivity(intent)
+                            }
+                        )
+                    }
                     composable(Screen.ReportScreen.route) { Screen2() }
+                    
+                    // 游戏详情页面 - 全屏，不显示主导航
+                    composable("game/osu") {
+                        OsuGameScreen(
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable("game/maimai") {
+                        MaimaiGameScreen(
+                            onNavigateBack = { navController.popBackStack() }
+                        )
+                    }
+                    composable("game/chunithm") {
+                        ChunithmGameScreen(
+                            onNavigateBack = { navController.popBackStack() },
+                            overlayManager = overlayManager
+                        )
+                    }
                 }
             }
 
-            NavigationBar(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .background(Red900)
-                    .windowInsetsPadding(WindowInsets.navigationBars)
-                    .height(64.dp),
-                tonalElevation = 0.dp,
-                containerColor = Red900
-            ) {
+            // NavigationBar - 只在主页面显示
+            if (showNavigation) {
+                val colorScheme = MaterialTheme.colorScheme
+                NavigationBar(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .background(colorScheme.surfaceContainerLow)
+                        .windowInsetsPadding(WindowInsets.navigationBars)
+                        .height(64.dp),
+                    tonalElevation = 0.dp,
+                    containerColor = colorScheme.surfaceContainerLow
+                ) {
                 items.forEachIndexed { index, screen ->
                     NavigationBarItem(
                         icon = {
@@ -284,11 +363,11 @@ internal fun MainScreenWithNavigation(
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = Red800,
-                            selectedIconColor = Beige500,
-                            selectedTextColor = Beige500,
-                            unselectedIconColor = Beige600,
-                            unselectedTextColor = Beige600
+                            indicatorColor = colorScheme.primaryContainer,
+                            selectedIconColor = colorScheme.primary,
+                            selectedTextColor = colorScheme.primary,
+                            unselectedIconColor = colorScheme.onSurfaceVariant,
+                            unselectedTextColor = colorScheme.onSurfaceVariant
                         ),
                         alwaysShowLabel = true,
                         selected = selectedItem == index,
@@ -303,6 +382,7 @@ internal fun MainScreenWithNavigation(
                             }
                         }
                     )
+                }
                 }
             }
 

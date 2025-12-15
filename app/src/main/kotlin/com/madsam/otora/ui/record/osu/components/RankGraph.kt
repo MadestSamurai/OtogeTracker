@@ -30,9 +30,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.R
-import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW_HALF_TRANS
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.sarasaSemiBold
@@ -77,6 +75,7 @@ internal fun RankGraph(
     osuRankHighestData: MutableStateFlow<OsuTopRankUiModel>,
     cardWidthDp: Dp
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val rankGraphData by osuRankGraphData.collectAsState()
     val highestData by osuRankHighestData.collectAsState()
     Column(
@@ -89,12 +88,12 @@ internal fun RankGraph(
                     bottomStart = 6.dp, bottomEnd = 6.dp
                 )
             )
-            .background(Red700),
+            .background(colorScheme.surfaceContainerHigh),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = stringResource(id = R.string.global_ranking),
-            color = Beige400,
+            color = colorScheme.onSurface,
             style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 10.dp)
@@ -103,14 +102,14 @@ internal fun RankGraph(
         Text(
             text = stringResource(id = R.string.recent_90_days),
             fontFamily = sarasaSemiBold,
-            color = Beige400,
+            color = colorScheme.onSurface,
             style = MaterialTheme.typography.bodyLarge,
         )
 
         if (rankGraphData.isEmpty()) {
             Text(
                 text = "Loading data...",
-                color = Beige400,
+                color = colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier
@@ -266,7 +265,7 @@ internal fun RankGraph(
                     append(" (${highestData.date.split("T")[0]})")
                 }
             },
-            color = Beige400,
+            color = colorScheme.onSurface,
             modifier = Modifier.padding(bottom = 10.dp)
         )
     }

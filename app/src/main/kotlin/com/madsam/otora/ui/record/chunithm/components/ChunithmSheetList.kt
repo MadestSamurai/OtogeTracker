@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.BG_DARK_GRAY
-import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.Black333
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
@@ -25,7 +25,6 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
 import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
-import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.utils.CalcUtils
@@ -45,6 +44,7 @@ internal fun ChunithmSheetList(
     sheets: List<ChunithmSheetUiModel>,
     scoresMap: Map<String, SheetScoreInfo> = emptyMap()
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val stds = sheets.filter { it.type == "std" }
     val wes = sheets.filter { it.type == "we" }
     
@@ -119,11 +119,11 @@ internal fun ChunithmSheetList(
                             text = tag,
                             fontSize = 12.sp,
                             fontFamily = sarasaBold,
-                            color = if (isActive) Beige500 else Black333,
+                            color = if (isActive) colorScheme.primary else Black333,
                             modifier = Modifier
                                 .padding(2.dp)
                                 .clip(RoundedCornerShape(3.dp))
-                                .background(if (isActive) Red500 else BG_DARK_GRAY)
+                                .background(if (isActive) colorScheme.surfaceContainer else BG_DARK_GRAY)
                                 .padding(vertical = 2.dp, horizontal = 6.dp)
                         )
                     }
@@ -136,11 +136,11 @@ internal fun ChunithmSheetList(
                             text = tag,
                             fontSize = 12.sp,
                             fontFamily = sarasaBold,
-                            color = if (isActive) Beige500 else Black333,
+                            color = if (isActive) colorScheme.primary else Black333,
                             modifier = Modifier
                                 .padding(2.dp)
                                 .clip(RoundedCornerShape(3.dp))
-                                .background(if (isActive) Red500 else BG_DARK_GRAY)
+                                .background(if (isActive) colorScheme.surfaceContainer else BG_DARK_GRAY)
                                 .padding(vertical = 2.dp, horizontal = 6.dp)
                         )
                     }

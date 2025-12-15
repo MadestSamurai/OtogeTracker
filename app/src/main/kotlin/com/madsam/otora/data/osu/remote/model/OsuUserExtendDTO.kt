@@ -14,6 +14,7 @@ internal data class OsuUserExtendDTO(
     @param:Json(name = "last_visit") var lastVisit: String = "",
     @param:Json(name = "pm_friends_only") var pmFriendsOnly: Boolean = false,
     @param:Json(name = "profile_colour") var profileColour: String = "",
+    @param:Json(name = "profile_hue") var profileHue: Int? = null,
     var username: String = "",
     @param:Json(name = "cover_url") var coverUrl: String = "",
     var discord: String = "",

@@ -33,8 +33,7 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.Red300
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.AvatarLayout
@@ -54,6 +53,7 @@ internal fun ChunithmMainPage(
     onNavigateToTopRating: () -> Unit,
     onShowSongList: () -> Unit = {},
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val context = LocalContext.current
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
@@ -110,15 +110,15 @@ internal fun ChunithmMainPage(
             Indicator(
                 modifier = Modifier.align(Alignment.TopCenter),
                 isRefreshing = isRefreshing,
-                containerColor = Red300,
-                color = Beige500,
+                containerColor = colorScheme.surface,
+                color = colorScheme.primary,
                 state = state
             )
         },
     ) {
         LazyColumn(
             modifier = Modifier
-                .background(color = Red300)
+                .background(color = colorScheme.surface)
                 .fillMaxSize()
                 .padding(horizontal = 12.dp)
                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))

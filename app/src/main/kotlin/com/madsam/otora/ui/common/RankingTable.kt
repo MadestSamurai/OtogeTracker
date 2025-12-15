@@ -62,7 +62,6 @@ import com.madsam.otora.core.icon.fa.`Arrow-down`
 import com.madsam.otora.core.icon.fa.`Arrow-right`
 import com.madsam.otora.core.icon.fa.`Arrow-up`
 import com.madsam.otora.core.theme.BG_DARK_GRAY
-import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.TEXT_GRAY
@@ -135,6 +134,7 @@ fun RankingTable(
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     val isNarrowScreen = screenWidthDp.value < 600
+    val colorScheme = androidx.compose.material3.MaterialTheme.colorScheme
     
     // 标题区域可见性状态
     var isTitleVisible by remember { mutableStateOf(true) }
@@ -280,7 +280,7 @@ fun RankingTable(
                                 Icon(
                                     painter = rememberVectorPainter(image = Filled.ChevronLeft),
                                     contentDescription = "上一页",
-                                    tint = Beige400,
+                                    tint = colorScheme.onSurface,
                                     modifier = Modifier.size(12.dp)
                                 )
                                 Text(
@@ -318,7 +318,7 @@ fun RankingTable(
                                     Icon(
                                         painter = rememberVectorPainter(image = Filled.ChevronRight),
                                         contentDescription = "下一页",
-                                        tint = Beige400,
+                                        tint = colorScheme.onSurface,
                                         modifier = Modifier.size(12.dp)
                                     )
                                     Text(

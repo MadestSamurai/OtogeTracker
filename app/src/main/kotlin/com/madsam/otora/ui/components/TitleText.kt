@@ -12,7 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.theme.Red500
 
 @Composable
 fun TitleText(
@@ -21,6 +20,7 @@ fun TitleText(
     color: Color,
     modifier: Modifier
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Surface(
         shape = RoundedCornerShape(
             topStart = 6.dp,
@@ -28,7 +28,7 @@ fun TitleText(
             bottomStart = 6.dp,
             bottomEnd = 6.dp
         ),
-        color = Red500,
+        color = colorScheme.surfaceContainer,
         modifier = modifier
     ) {
         Column {

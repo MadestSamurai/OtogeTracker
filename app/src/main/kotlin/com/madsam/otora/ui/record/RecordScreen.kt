@@ -55,12 +55,8 @@ import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.Bars
 import com.madsam.otora.core.icon.fa.Cog
 import com.madsam.otora.core.icon.fa.Trash
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.Beige600
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.sarasaBold
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.ui.navigation.ChunithmNavHost
 import com.madsam.otora.ui.record.chunithm.ChuniViewModelFactory
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
@@ -78,6 +74,7 @@ internal fun RecordScreen(
     snackbarHostState: SnackbarHostState,
     overlayManager: OverlayManager
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val items = listOf(Screen.Page1, Screen.Page2, Screen.Page3, Screen.Page4)
@@ -114,8 +111,8 @@ internal fun RecordScreen(
         drawerContent = {
             ModalDrawerSheet(
                 modifier = Modifier.width(if (useNavigationRail) 280.dp else 300.dp),
-                drawerContainerColor = Red500,
-                drawerContentColor = Beige400
+                drawerContainerColor = colorScheme.surfaceContainer,
+                drawerContentColor = colorScheme.onSurface
             ) {
                 Spacer(modifier = Modifier.height(12.dp))
                 items.forEach { screen ->
@@ -136,12 +133,12 @@ internal fun RecordScreen(
                         },
                         modifier = Modifier.padding(horizontal = 12.dp),
                         colors = NavigationDrawerItemDefaults.colors(
-                            selectedContainerColor = Red800,
-                            unselectedContainerColor = Red500,
-                            selectedIconColor = Beige500,
-                            unselectedIconColor = Beige600,
-                            selectedTextColor = Beige500,
-                            unselectedTextColor = Beige600
+                            selectedContainerColor = colorScheme.primaryContainer,
+                            unselectedContainerColor = colorScheme.surfaceContainer,
+                            selectedIconColor = colorScheme.primary,
+                            unselectedIconColor = colorScheme.onSurfaceVariant,
+                            selectedTextColor = colorScheme.primary,
+                            unselectedTextColor = colorScheme.onSurfaceVariant
                         )
                     )
                 }
@@ -166,12 +163,12 @@ internal fun RecordScreen(
                     },
                     modifier = Modifier.padding(horizontal = 12.dp),
                     colors = NavigationDrawerItemDefaults.colors(
-                        selectedContainerColor = Red800,
-                        unselectedContainerColor = Red500,
-                        selectedIconColor = Beige500,
-                        unselectedIconColor = Beige600,
-                        selectedTextColor = Beige500,
-                        unselectedTextColor = Beige600
+                        selectedContainerColor = colorScheme.primaryContainer,
+                        unselectedContainerColor = colorScheme.surfaceContainer,
+                        selectedIconColor = colorScheme.primary,
+                        unselectedIconColor = colorScheme.onSurfaceVariant,
+                        selectedTextColor = colorScheme.primary,
+                        unselectedTextColor = colorScheme.onSurfaceVariant
                     )
                 )
                 
@@ -225,16 +222,16 @@ internal fun RecordScreen(
                         Icon(
                             imageVector = Fa.Cog,
                             contentDescription = "Settings",
-                            tint = Beige400,
+                            tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Red500,
+                    containerColor = colorScheme.surfaceContainer,
                     scrolledContainerColor = Color.Unspecified,
-                    navigationIconContentColor = Beige400,
-                    titleContentColor = Beige400,
+                    navigationIconContentColor = colorScheme.onSurface,
+                    titleContentColor = colorScheme.onSurface,
                     actionIconContentColor = Color.Unspecified
                 )
             )
@@ -294,6 +291,7 @@ class ChunithmScreenState {
 
 @Composable
 private fun ScrollableTitle(text: String) {
+    val colorScheme = MaterialTheme.colorScheme
     val scrollState = rememberScrollState()
     var shouldAutoScroll by remember(text) { mutableStateOf(false) }
     
@@ -361,8 +359,8 @@ private fun ScrollableTitle(text: String) {
                     .background(
                         androidx.compose.ui.graphics.Brush.horizontalGradient(
                             colors = listOf(
-                                Red500, // TopAppBar的背景色
-                                Red500.copy(alpha = 0f)
+                                colorScheme.surfaceContainer, // TopAppBar的背景色
+                                colorScheme.surfaceContainer.copy(alpha = 0f)
                             )
                         )
                     )
@@ -379,8 +377,8 @@ private fun ScrollableTitle(text: String) {
                     .background(
                         androidx.compose.ui.graphics.Brush.horizontalGradient(
                             colors = listOf(
-                                Red500.copy(alpha = 0f),
-                                Red500 // TopAppBar的背景色
+                                colorScheme.surfaceContainer.copy(alpha = 0f),
+                                colorScheme.surfaceContainer // TopAppBar的背景色
                             )
                         )
                     )

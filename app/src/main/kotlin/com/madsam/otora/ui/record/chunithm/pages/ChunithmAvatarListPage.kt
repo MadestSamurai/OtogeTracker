@@ -51,10 +51,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
@@ -97,6 +95,7 @@ private fun AvatarListContent(
     viewModel: ChunithmViewModel,
     onDismiss: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val avatarItems by viewModel.avatarItems.collectAsState()
     val selectedCategory by viewModel.selectedAvatarCategory.collectAsState()
     val isLoading by viewModel.isAvatarItemsLoading.collectAsState()
@@ -108,7 +107,7 @@ private fun AvatarListContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Red300)
+            .background(colorScheme.surface)
             .windowInsetsPadding(
                 WindowInsets.displayCutout.only(
                     WindowInsetsSides.Horizontal
@@ -120,7 +119,7 @@ private fun AvatarListContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Red500)
+                    .background(colorScheme.surfaceContainer)
                     .padding(horizontal = 8.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -132,13 +131,13 @@ private fun AvatarListContent(
                     Box(
                         modifier = Modifier
                             .size(32.dp)
-                            .background(Red300, CircleShape),
+                            .background(colorScheme.surface, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Filled.ChevronLeft,
                             contentDescription = "返回",
-                            tint = Beige400,
+                            tint = colorScheme.onSurface,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -219,6 +218,7 @@ private fun CategoryFilterRow(
     selectedCategory: String,
     onCategorySelected: (String) -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val categories = listOf(
         "face" to "面孔",
         "head" to "头部",
@@ -231,7 +231,7 @@ private fun CategoryFilterRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Red500)
+            .background(colorScheme.surfaceContainer)
             .padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -247,9 +247,9 @@ private fun CategoryFilterRow(
                     )
                 },
                 colors = FilterChipDefaults.filterChipColors(
-                    containerColor = Red300,
+                    containerColor = colorScheme.surface,
                     labelColor = White1000.copy(alpha = 0.6f),
-                    selectedContainerColor = Beige400,
+                    selectedContainerColor = colorScheme.onSurface,
                     selectedLabelColor = Color.Black
                 )
             )
@@ -279,11 +279,12 @@ private fun AvatarItemGrid(items: List<ChunithmAvatarItemEntity>) {
 
 @Composable
 private fun AvatarItemCard(item: ChunithmAvatarItemEntity) {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(180.dp),
-        colors = CardDefaults.cardColors(containerColor = Red500),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {

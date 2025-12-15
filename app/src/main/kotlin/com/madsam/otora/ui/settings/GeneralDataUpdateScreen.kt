@@ -36,9 +36,7 @@ import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.Clock
 import com.madsam.otora.core.icon.fa.Wifi
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaSemiBold
@@ -52,10 +50,11 @@ fun GeneralDataUpdateScreen(
     var autoUpdateEnabled by remember { mutableStateOf(true) }
     var wifiOnlyEnabled by remember { mutableStateOf(false) }
 
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Red300)
+            .background(colorScheme.surface)
     ) {
         // 顶栏
         CenterAlignedTopAppBar(
@@ -63,7 +62,7 @@ fun GeneralDataUpdateScreen(
                 Text(
                     text = "通用数据设置",
                     fontFamily = sarasaBold,
-                    color = Beige400
+                    color = colorScheme.onSurface
                 )
             },
             navigationIcon = {
@@ -71,15 +70,15 @@ fun GeneralDataUpdateScreen(
                     Icon(
                         imageVector = Fa.`Arrow-left`,
                         contentDescription = "返回",
-                        tint = Beige400,
+                        tint = colorScheme.onSurface,
                         modifier = Modifier.size(24.dp)
                     )
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Red500,
-                scrolledContainerColor = Color.Unspecified, navigationIconContentColor = Beige400,
-                titleContentColor = Beige400,
+                containerColor = colorScheme.surfaceContainer,
+                scrolledContainerColor = Color.Unspecified, navigationIconContentColor = colorScheme.onSurface,
+                titleContentColor = colorScheme.onSurface,
                 actionIconContentColor = Color.Unspecified
             )
         )
@@ -94,7 +93,7 @@ fun GeneralDataUpdateScreen(
             // 自动更新设置
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Red500),
+                colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(
@@ -143,8 +142,8 @@ fun GeneralDataUpdateScreen(
                             checked = autoUpdateEnabled,
                             onCheckedChange = { autoUpdateEnabled = it },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = Beige400,
-                                checkedTrackColor = Beige400.copy(alpha = 0.5f),
+                                checkedThumbColor = colorScheme.onSurface,
+                                checkedTrackColor = colorScheme.onSurface.copy(alpha = 0.5f),
                                 uncheckedThumbColor = White1000.copy(alpha = 0.7f),
                                 uncheckedTrackColor = White1000.copy(alpha = 0.3f)
                             )
@@ -156,7 +155,7 @@ fun GeneralDataUpdateScreen(
             // 网络设置
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Red500),
+                colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Column(
@@ -205,8 +204,8 @@ fun GeneralDataUpdateScreen(
                             checked = wifiOnlyEnabled,
                             onCheckedChange = { wifiOnlyEnabled = it },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = Beige400,
-                                checkedTrackColor = Beige400.copy(alpha = 0.5f),
+                                checkedThumbColor = colorScheme.onSurface,
+                                checkedTrackColor = colorScheme.onSurface.copy(alpha = 0.5f),
                                 uncheckedThumbColor = White1000.copy(alpha = 0.7f),
                                 uncheckedTrackColor = White1000.copy(alpha = 0.3f)
                             )

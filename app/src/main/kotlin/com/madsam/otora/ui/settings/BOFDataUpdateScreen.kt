@@ -41,10 +41,8 @@ import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.`Arrow-rotate-back`
 import com.madsam.otora.core.icon.fa.Info
-import com.madsam.otora.core.theme.Beige400
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.theme.RANKING_GREEN
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
@@ -63,10 +61,11 @@ fun BOFDataUpdateScreen(
         viewModel.getDataStatistics()
     }
 
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Red300)
+            .background(colorScheme.surface)
     ) {
         // 顶栏
         CenterAlignedTopAppBar(
@@ -74,7 +73,7 @@ fun BOFDataUpdateScreen(
                 Text(
                     text = "BOF 数据更新",
                     fontFamily = sarasaBold,
-                    color = Beige400
+                    color = colorScheme.onSurface
                 )
             },
             navigationIcon = {
@@ -82,7 +81,7 @@ fun BOFDataUpdateScreen(
                     Icon(
                         imageVector = Fa.`Arrow-left`,
                         contentDescription = "返回",
-                        tint = Beige400,
+                        tint = colorScheme.onSurface,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -96,22 +95,22 @@ fun BOFDataUpdateScreen(
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
                             strokeWidth = 2.dp,
-                            color = Beige400
+                            color = colorScheme.onSurface
                         )
                     } else {
                         Icon(
                             imageVector = Fa.`Arrow-rotate-back`,
                             contentDescription = "刷新比赛列表",
-                            tint = Beige400,
+                            tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
                         )
                     }
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Red500,
-                scrolledContainerColor = Color.Unspecified, navigationIconContentColor = Beige400,
-                titleContentColor = Beige400,
+                containerColor = colorScheme.surfaceContainer,
+                scrolledContainerColor = Color.Unspecified, navigationIconContentColor = colorScheme.onSurface,
+                titleContentColor = colorScheme.onSurface,
                 actionIconContentColor = Color.Unspecified
             )
         )
@@ -126,7 +125,7 @@ fun BOFDataUpdateScreen(
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = Red500),
+                    colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Column(
@@ -160,7 +159,7 @@ fun BOFDataUpdateScreen(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (uiState.isError) Red300 else RANKING_GREEN.copy(alpha = 0.1f)
+                            containerColor = if (uiState.isError) colorScheme.surface else RANKING_GREEN.copy(alpha = 0.1f)
                         ),
                         shape = RoundedCornerShape(8.dp)
                     ) {
@@ -204,7 +203,7 @@ fun BOFDataUpdateScreen(
                         modifier = Modifier.weight(1f),
                         enabled = !uiState.isLoading,
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Beige400
+                            contentColor = colorScheme.onSurface
                         )
                     ) {
                         Text(
@@ -222,7 +221,7 @@ fun BOFDataUpdateScreen(
                         modifier = Modifier.weight(1f),
                         enabled = !uiState.isLoadingCompetitions,
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Beige400
+                            contentColor = colorScheme.onSurface
                         )
                     ) {
                         Text(
@@ -239,7 +238,7 @@ fun BOFDataUpdateScreen(
                 item {
                     Text(
                         text = "可用比赛 (${uiState.availableCompetitions.size})",
-                        color = Beige400,
+                        color = colorScheme.onSurface,
                         fontSize = 16.sp,
                         fontFamily = sarasaSemiBold,
                         modifier = Modifier.padding(horizontal = 4.dp)
@@ -260,7 +259,7 @@ fun BOFDataUpdateScreen(
                 item {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = Red500),
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Column(
@@ -300,9 +299,10 @@ private fun CompetitionUpdateItem(
     onUpdateClick: () -> Unit,
     isGlobalLoading: Boolean
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = Red500),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(
@@ -355,8 +355,8 @@ private fun CompetitionUpdateItem(
                     onClick = onUpdateClick,
                     enabled = !isGlobalLoading && !competition.isUpdating && competition.isStart,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (competition.isStart) Beige400 else White1000.copy(alpha = 0.3f),
-                        contentColor = if (competition.isStart) Red500 else White1000.copy(alpha = 0.7f),
+                        containerColor = if (competition.isStart) colorScheme.onSurface else White1000.copy(alpha = 0.3f),
+                        contentColor = if (competition.isStart) colorScheme.surfaceContainer else White1000.copy(alpha = 0.7f),
                         disabledContainerColor = White1000.copy(alpha = 0.3f),
                         disabledContentColor = White1000.copy(alpha = 0.5f)
                     ),
@@ -366,7 +366,7 @@ private fun CompetitionUpdateItem(
                         CircularProgressIndicator(
                             modifier = Modifier.size(16.dp),
                             strokeWidth = 2.dp,
-                            color = if (competition.isStart) Red500 else White1000.copy(alpha = 0.7f)
+                            color = if (competition.isStart) colorScheme.surfaceContainer else White1000.copy(alpha = 0.7f)
                         )
                     } else {
                         Text(
@@ -393,7 +393,7 @@ private fun CompetitionUpdateItem(
                     } else {
                         "无数据"
                     },
-                    color = if (competition.hasData) Beige400 else White1000.copy(alpha = 0.5f),
+                    color = if (competition.hasData) colorScheme.onSurface else White1000.copy(alpha = 0.5f),
                     fontSize = 12.sp,
                     fontFamily = sarasaRegular
                 )

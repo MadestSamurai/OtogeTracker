@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -41,16 +42,12 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
 import com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
 import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Transparent
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.Yellow1000
@@ -147,6 +144,7 @@ internal fun TopRankCaptureDialog(
 internal fun TopRankCaptureContent(
     chunithmTopRankUiModel: MutableStateFlow<ChunithmTopRankUiModel>
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val topRank by chunithmTopRankUiModel.collectAsState()
     val cardWidth = 180.dp
     val cardHeight = 54.dp
@@ -154,7 +152,7 @@ internal fun TopRankCaptureContent(
     Column(
         modifier = Modifier
             .width(1000.dp)
-            .background(Red300)
+            .background(colorScheme.surface)
             .padding(16.dp)
     ) {
         // 标题
@@ -254,12 +252,13 @@ internal fun CaptureItemCard(
     cardWidth: Dp,
     cardHeight: Dp
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Surface(
         modifier = Modifier
             .width(cardWidth)
             .height(cardHeight),
         shape = RoundedCornerShape(6.dp),
-        color = Red700
+        color = colorScheme.surfaceContainerHigh
     ) {
         ConstraintLayout(
             modifier = Modifier.fillMaxSize()
@@ -349,14 +348,14 @@ internal fun CaptureItemCard(
                 fontFamily = sarasaBold,
                 fontSize = 8.sp,
                 lineHeight = 10.sp,
-                color = Beige400,
+                color = colorScheme.onSurface,
                 modifier = Modifier
                     .constrainAs(rankText) {
                         bottom.linkTo(cover.bottom, 2.dp)
                         start.linkTo(cover.start, 2.dp)
                     }
                     .background(
-                        color = Red500,
+                        color = colorScheme.surfaceContainer,
                         shape = RoundedCornerShape(2.dp)
                     )
                     .padding(horizontal = 2.dp, vertical = 1.dp)
@@ -379,7 +378,7 @@ internal fun CaptureItemCard(
                     fontFamily = sarasaBold,
                     fontSize = 9.sp,
                     lineHeight = 10.sp,
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -397,7 +396,7 @@ internal fun CaptureItemCard(
                     fontFamily = sarasaBold,
                     fontSize = 8.sp,
                     lineHeight = 9.sp,
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

@@ -69,13 +69,8 @@ import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.Filter
 import com.madsam.otora.core.icon.fa.`Magnifying-glass`
 import com.madsam.otora.core.icon.fa.Xmark
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.Beige600
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.ui.record.chunithm.components.ChunithmFilterComponent
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSongCard
 import com.madsam.otora.ui.record.chunithm.components.ChunithmSortComponent
@@ -94,6 +89,7 @@ internal fun ChunithmSongListPage(
     sharedTransitionScope: SharedTransitionScope? = null,
     animatedContentScope: AnimatedContentScope? = null
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     // 处理返回按钮
     BackHandler(enabled = true) {
         onNavigateBack()
@@ -291,15 +287,15 @@ internal fun ChunithmSongListPage(
             isRefreshing = isRefreshing,
             onRefresh = { viewModel.refreshSongData() },
             modifier = Modifier
-                .background(Red300)
+                .background(colorScheme.surface)
                 .fillMaxHeight(),
             state = state,
             indicator = {
                 Indicator(
                     modifier = Modifier.align(Alignment.TopCenter),
                     isRefreshing = isRefreshing,
-                    containerColor = Red300,
-                    color = Beige500,
+                    containerColor = colorScheme.surface,
+                    color = colorScheme.primary,
                     state = state
                 )
             },
@@ -392,7 +388,7 @@ internal fun ChunithmSongListPage(
                 cnLevelRange = cnLevelRange,
                 filterCnLevelRange = filterCnLevelRange,
                 includeWE = includeWE,
-                backgroundColor = Red500,
+                backgroundColor = colorScheme.surfaceContainer,
                 modifier = Modifier
                     .clip(RoundedCornerShape(20.dp))
             )
@@ -417,7 +413,7 @@ internal fun ChunithmSongListPage(
                 selectedSortOption = selectedSortOption,
                 isAscendingOrder = isAscendingOrder,
                 onSortOptionSelected = { isSortExpanded.value = false },
-                backgroundColor = Red500,
+                backgroundColor = colorScheme.surfaceContainer,
                 modifier = Modifier
                     .clip(RoundedCornerShape(20.dp))
             )
@@ -432,12 +428,12 @@ internal fun ChunithmSongListPage(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Red300,
-                            Red300.copy(alpha = 0.95f),
-                            Red300.copy(alpha = 0.85f),
-                            Red300.copy(alpha = 0.6f),
-                            Red300.copy(alpha = 0.3f),
-                            Red300.copy(alpha = 0f)
+                            colorScheme.surface,
+                            colorScheme.surface.copy(alpha = 0.95f),
+                            colorScheme.surface.copy(alpha = 0.85f),
+                            colorScheme.surface.copy(alpha = 0.6f),
+                            colorScheme.surface.copy(alpha = 0.3f),
+                            colorScheme.surface.copy(alpha = 0f)
                         )
                     )
                 )
@@ -461,7 +457,7 @@ internal fun ChunithmSongListPage(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(RoundedCornerShape(50))
-                    .background(Red500)
+                    .background(colorScheme.surfaceContainer)
                     .clickable {
                         onNavigateBack()
                     },
@@ -470,7 +466,7 @@ internal fun ChunithmSongListPage(
                 Icon(
                     imageVector = Fa.`Arrow-left`,
                     contentDescription = "Back",
-                    tint = Beige400,
+                    tint = colorScheme.onSurface,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -481,7 +477,7 @@ internal fun ChunithmSongListPage(
                     .weight(1f)
                     .height(56.dp)
                     .clip(RoundedCornerShape(28.dp))
-                    .background(Red500)
+                    .background(colorScheme.surfaceContainer)
                     .padding(horizontal = 4.dp),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically
@@ -499,7 +495,7 @@ internal fun ChunithmSongListPage(
                     textStyle = TextStyle(
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
-                        color = Beige400,
+                        color = colorScheme.onSurface,
                         lineHeight = 20.sp
                     ),
                     keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
@@ -510,12 +506,12 @@ internal fun ChunithmSongListPage(
                         }
                     ),
                     singleLine = true,
-                    cursorBrush = SolidColor(Beige400),
+                    cursorBrush = SolidColor(colorScheme.onSurface),
                     decorationBox = { innerTextField ->
                         Row(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Red800, RoundedCornerShape(24.dp))
+                                .background(colorScheme.primaryContainer, RoundedCornerShape(24.dp))
                                 .padding(horizontal = 16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -523,7 +519,7 @@ internal fun ChunithmSongListPage(
                             Icon(
                                 painter = rememberVectorPainter(image = Fa.`Magnifying-glass`),
                                 contentDescription = "Search",
-                                tint = Beige400,
+                                tint = colorScheme.onSurface,
                                 modifier = Modifier.size(20.dp)
                             )
 
@@ -537,7 +533,7 @@ internal fun ChunithmSongListPage(
                                 if (searchText.isEmpty()) {
                                     Text(
                                         text = "搜索...",
-                                        color = Beige600,
+                                        color = colorScheme.onSurfaceVariant,
                                         fontSize = 14.sp,
                                         lineHeight = 20.sp
                                     )
@@ -558,7 +554,7 @@ internal fun ChunithmSongListPage(
                                     Icon(
                                         painter = rememberVectorPainter(image = Fa.Xmark),
                                         contentDescription = "Clear",
-                                        tint = Beige400,
+                                        tint = colorScheme.onSurface,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 }
@@ -576,7 +572,7 @@ internal fun ChunithmSongListPage(
                         Icon(
                             painter = rememberVectorPainter(image = Fa.Filter),
                             contentDescription = if (isFilterExpanded.value) "收起筛选" else "展开筛选",
-                            tint = Beige400,
+                            tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -591,7 +587,7 @@ internal fun ChunithmSongListPage(
                         Icon(
                             painter = rememberVectorPainter(image = Fa.`Arrow-down-wide-short`),
                             contentDescription = if (isSortExpanded.value) "收起排序" else "展开排序",
-                            tint = Beige400,
+                            tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
                         )
                     }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">OtogeTracker</string>
+    <string name="record_title">My Records</string>
     <string name="online_mark">Online Mark</string>
     <string name="offline_mark">Offline Mark</string>
     <string name="online">Online</string>

@@ -36,9 +36,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.Xmark
-import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.BlackAlpha80
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 import com.madsam.otora.ui.record.osu.components.TopRankCard
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,6 +47,7 @@ internal fun TopRankDialog(
     topRankList: MutableStateFlow<List<OsuTopRankUiModel>>,
     onDismiss: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val data by topRankList.collectAsState()
     val density = LocalDensity.current
     val windowInfo = LocalWindowInfo.current
@@ -92,7 +91,7 @@ internal fun TopRankDialog(
                         max = screenHeightDp * 0.8f
                     )
                     .clip(RoundedCornerShape(16.dp))
-                    .background(Red700)
+                    .background(colorScheme.surfaceContainerHigh)
                     .padding(16.dp)
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
@@ -107,13 +106,13 @@ internal fun TopRankDialog(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.headlineSmall,
-                        color = Beige400
+                        color = colorScheme.onSurface
                     )
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Fa.Xmark,
                             contentDescription = "Close",
-                            tint = Beige400,
+                            tint = colorScheme.onSurface,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -121,7 +120,7 @@ internal fun TopRankDialog(
                 if (data.isEmpty()) {
                     Text(
                         text = "No records found",
-                        color = Beige400,
+                        color = colorScheme.onSurface,
                         fontSize = 16.sp,
                         modifier = Modifier.padding(16.dp)
                     )

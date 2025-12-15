@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,16 +34,12 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Beige500
 import com.madsam.otora.core.theme.GradientBrush.GoldGradientBg
 import com.madsam.otora.core.theme.GradientBrush.PlatinumGradientBg
 import com.madsam.otora.core.theme.GradientBrush.RainbowGradientBg
 import com.madsam.otora.core.theme.GradientBrush.SilverGradientBg
 import com.madsam.otora.core.theme.GradientBrush.WhiteGradientBg
 import com.madsam.otora.core.theme.OSU_LEVEL_GOLD_1
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.utils.BrushUtils.getRatingBrush
@@ -55,6 +52,7 @@ internal fun ChunithmFriendList(
     cardWidth: Dp,
     showOnlyScored: Boolean = false
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val friendList by chuniFriendListUI.collectAsState()
 
     val filteredList = if (showOnlyScored) {
@@ -76,7 +74,7 @@ internal fun ChunithmFriendList(
                 text = "置顶好友",
                 fontSize = 16.sp,
                 fontFamily = sarasaBold,
-                color = Beige500,
+                color = colorScheme.primary,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
@@ -85,14 +83,15 @@ internal fun ChunithmFriendList(
         
         // 好友卡片列表
         for (chuniFriend in filteredList) {
-            FriendCard(chuniFriend)
+            FriendCard(chuniFriend, colorScheme)
         }
     }
 }
 
 @Composable
 internal fun FriendCard(
-    chuniFriend: ChunithmFriendUiModel
+    chuniFriend: ChunithmFriendUiModel,
+    colorScheme: androidx.compose.material3.ColorScheme
 ) {
     Surface(
         shape = RoundedCornerShape(10.dp),
@@ -103,7 +102,7 @@ internal fun FriendCard(
     ) {
         ConstraintLayout(
             modifier = Modifier
-                .background(Red700)
+                .background(colorScheme.surfaceContainerHigh)
         ) {
             val (
                 honorColumn,
@@ -216,7 +215,7 @@ internal fun FriendCard(
                             end.linkTo(rebornBase.end)
                         },
                     text = chuniFriend.reborn.toString(),
-                    color = Red500,
+                    color = colorScheme.surfaceContainer,
                     fontSize = 12.sp,
                     fontFamily = sarasaBold
                 )
@@ -224,7 +223,7 @@ internal fun FriendCard(
 
             Text(
                 text = "Lv.",
-                color = Beige400,
+                color = colorScheme.onSurface,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .constrainAs(lvText) {
@@ -239,7 +238,7 @@ internal fun FriendCard(
 
             Text(
                 text = chuniFriend.level.toString(),
-                color = Beige400,
+                color = colorScheme.onSurface,
                 fontSize = 18.sp,
                 fontFamily = sarasaBold,
                 modifier = Modifier
@@ -255,7 +254,7 @@ internal fun FriendCard(
 
             Text(
                 text = chuniFriend.friendName,
-                color = Beige400,
+                color = colorScheme.onSurface,
                 fontSize = 18.sp,
                 lineHeight = 22.sp,
                 fontFamily = sarasaBold,
@@ -303,7 +302,7 @@ internal fun FriendCard(
                 text = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
-                            color = Beige500,
+                            color = colorScheme.primary,
                             fontSize = 14.sp,
                             fontFamily = sarasaRegular
                         )
@@ -320,7 +319,7 @@ internal fun FriendCard(
                         append(chuniFriend.rating)
                     }
                 },
-                color = Beige500,
+                color = colorScheme.primary,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .constrainAs(rating) {
@@ -341,7 +340,7 @@ internal fun FriendCard(
                     text = buildAnnotatedString {
                         withStyle(
                             style = SpanStyle(
-                                color = Beige500,
+                                color = colorScheme.primary,
                                 fontSize = 11.sp,
                                 fontFamily = sarasaRegular
                             )
@@ -350,7 +349,7 @@ internal fun FriendCard(
                         }
                         append(chuniFriend.overpower)
                     },
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
                     fontFamily = sarasaBold,
@@ -360,7 +359,7 @@ internal fun FriendCard(
                     text = buildAnnotatedString {
                         withStyle(
                             style = SpanStyle(
-                                color = Beige500,
+                                color = colorScheme.primary,
                                 fontSize = 11.sp,
                                 fontFamily = sarasaRegular
                             )
@@ -369,7 +368,7 @@ internal fun FriendCard(
                         }
                         append(chuniFriend.lastPlay)
                     },
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
                     fontFamily = sarasaBold,

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,10 +36,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.data.chunithm.ui.model.ChunithmAvatarUiModel
@@ -51,6 +48,7 @@ internal fun AvatarLayout(
     viewModel: ChunithmViewModel,
     onCategoryClick: ((String) -> Unit)? = null
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val avatarData by chunithmAvatarUiModel.collectAsState()
     val avatarStats by viewModel.avatarCategoryStats.collectAsState()
 
@@ -71,19 +69,19 @@ internal fun AvatarLayout(
                 text = "角色装扮",
                 fontSize = 16.sp,
                 fontFamily = sarasaBold,
-                color = Beige500,
+                color = colorScheme.primary,
                 modifier = Modifier.weight(1f)
             )
             
             // 详细按钮
             Text(
                 text = "详细",
-                color = Red500,
+                color = colorScheme.surfaceContainer,
                 fontSize = 14.sp,
                 fontFamily = sarasaBold,
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Red700)
+                    .background(colorScheme.surfaceContainerHigh)
                     .clickable { /* TODO: 跳转到装扮详情 */ }
                     .padding(horizontal = 12.dp, vertical = 4.dp)
             )
@@ -101,7 +99,7 @@ internal fun AvatarLayout(
                 .clip(RoundedCornerShape(10.dp))
                 .scaledLayout(0.8f) // width: 224, height: 286
                 .width(280.dp)
-                .background(Red700)
+                .background(colorScheme.surfaceContainerHigh)
         ) {
             Box(
                 modifier = Modifier
@@ -349,11 +347,12 @@ private fun AvatarCategoryCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Box(
         modifier = modifier
             .height(90.dp)  // 设置固定高度为90dp
             .clip(RoundedCornerShape(8.dp))
-            .background(Red700)
+            .background(colorScheme.surfaceContainerHigh)
             .clickable(onClick = onClick)
             .padding(6.dp)  // 减少内边距
     ) {
@@ -376,7 +375,7 @@ private fun AvatarCategoryCard(
                 
                 Text(
                     text = "$count",
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     fontSize = 11.sp,
                     fontFamily = sarasaBold
                 )
@@ -404,7 +403,7 @@ private fun AvatarCategoryCard(
                                 .clip(RoundedCornerShape(4.dp))
                                 .border(
                                     width = if (item.isCurrentlyUsed) 2.dp else 1.dp,
-                                    color = if (item.isCurrentlyUsed) Beige400 else Red500,
+                                    color = if (item.isCurrentlyUsed) colorScheme.onSurface else colorScheme.surfaceContainer,
                                     shape = RoundedCornerShape(4.dp)
                                 ),
                             contentAlignment = Alignment.Center
@@ -443,7 +442,7 @@ private fun AvatarCategoryCard(
                                 .clip(RoundedCornerShape(4.dp))
                                 .border(
                                     width = if (item.isCurrentlyUsed) 2.dp else 1.dp,
-                                    color = if (item.isCurrentlyUsed) Beige400 else Red500,
+                                    color = if (item.isCurrentlyUsed) colorScheme.onSurface else colorScheme.surfaceContainer,
                                     shape = RoundedCornerShape(4.dp)
                                 ),
                             contentAlignment = Alignment.Center

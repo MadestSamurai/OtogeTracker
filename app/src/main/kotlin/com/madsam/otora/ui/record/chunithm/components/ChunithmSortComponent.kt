@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -23,10 +24,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 
@@ -37,8 +34,10 @@ fun ChunithmSortComponent(
     selectedSortOption: MutableState<String>,
     isAscendingOrder: MutableState<Boolean>,
     onSortOptionSelected: () -> Unit,
-    backgroundColor: androidx.compose.ui.graphics.Color = Red300
+    backgroundColor: androidx.compose.ui.graphics.Color? = null
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+    val actualBackgroundColor = backgroundColor ?: colorScheme.surface
     AnimatedVisibility(
         visible = isSortExpanded,
         enter = expandVertically(),
@@ -50,12 +49,12 @@ fun ChunithmSortComponent(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(backgroundColor)
+                .background(actualBackgroundColor)
                 .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp)
         ) {
             Text(
                 text = "排序选项",
-                color = Beige500,
+                color = colorScheme.primary,
                 fontSize = 16.sp,
                 fontFamily = sarasaBold,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -63,7 +62,8 @@ fun ChunithmSortComponent(
             
             // 正序/倒序切换按钮
             SortOrderRow(
-                isAscendingOrder = isAscendingOrder
+                isAscendingOrder = isAscendingOrder,
+                colorScheme = colorScheme
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -71,7 +71,8 @@ fun ChunithmSortComponent(
             // 基本排序选项
             BasicSortOptionsRow(
                 selectedSortOption = selectedSortOption,
-                onSortOptionSelected = onSortOptionSelected
+                onSortOptionSelected = onSortOptionSelected,
+                colorScheme = colorScheme
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -79,7 +80,8 @@ fun ChunithmSortComponent(
             // CN Value排序选项
             CnValueSortSection(
                 selectedSortOption = selectedSortOption,
-                onSortOptionSelected = onSortOptionSelected
+                onSortOptionSelected = onSortOptionSelected,
+                colorScheme = colorScheme
             )
             
             Spacer(modifier = Modifier.height(8.dp))
@@ -87,7 +89,8 @@ fun ChunithmSortComponent(
             // JP Value排序选项
             JpValueSortSection(
                 selectedSortOption = selectedSortOption,
-                onSortOptionSelected = onSortOptionSelected
+                onSortOptionSelected = onSortOptionSelected,
+                colorScheme = colorScheme
             )
         }
     }
@@ -95,7 +98,8 @@ fun ChunithmSortComponent(
 
 @Composable
 private fun SortOrderRow(
-    isAscendingOrder: MutableState<Boolean>
+    isAscendingOrder: MutableState<Boolean>,
+    colorScheme: androidx.compose.material3.ColorScheme
 ) {
     Row(
         modifier = Modifier
@@ -108,7 +112,7 @@ private fun SortOrderRow(
                 .weight(1f)
                 .height(28.dp)
                 .background(
-                    if (isAscendingOrder.value) Red800 else Red300,
+                    if (isAscendingOrder.value) colorScheme.primaryContainer else colorScheme.surface,
                     RoundedCornerShape(10.dp)
                 )
                 .clickable {
@@ -119,7 +123,7 @@ private fun SortOrderRow(
         ) {
             Text(
                 text = "正序 ↑",
-                color = Beige500,
+                color = colorScheme.primary,
                 fontSize = 12.sp,
                 fontFamily = if (isAscendingOrder.value) sarasaBold else sarasaRegular,
                 textAlign = TextAlign.Center
@@ -131,7 +135,7 @@ private fun SortOrderRow(
                 .weight(1f)
                 .height(28.dp)
                 .background(
-                    if (!isAscendingOrder.value) Red800 else Red300,
+                    if (!isAscendingOrder.value) colorScheme.primaryContainer else colorScheme.surface,
                     RoundedCornerShape(10.dp)
                 )
                 .clickable {
@@ -142,7 +146,7 @@ private fun SortOrderRow(
         ) {
             Text(
                 text = "倒序 ↓",
-                color = Beige500,
+                color = colorScheme.primary,
                 fontSize = 12.sp,
                 fontFamily = if (!isAscendingOrder.value) sarasaBold else sarasaRegular,
                 textAlign = TextAlign.Center
@@ -154,7 +158,8 @@ private fun SortOrderRow(
 @Composable
 private fun BasicSortOptionsRow(
     selectedSortOption: MutableState<String>,
-    onSortOptionSelected: () -> Unit
+    onSortOptionSelected: () -> Unit,
+    colorScheme: androidx.compose.material3.ColorScheme
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -173,7 +178,7 @@ private fun BasicSortOptionsRow(
                     .weight(1f)
                     .height(32.dp)
                     .background(
-                        if (isSelected) Red800 else Red300,
+                        if (isSelected) colorScheme.primaryContainer else colorScheme.surface,
                         RoundedCornerShape(12.dp)
                     )
                     .clickable {
@@ -185,7 +190,7 @@ private fun BasicSortOptionsRow(
             ) {
                 Text(
                     text = label,
-                    color = Beige500,
+                    color = colorScheme.primary,
                     fontSize = 13.sp,
                     fontFamily = if (isSelected) sarasaBold else sarasaRegular,
                     textAlign = TextAlign.Center
@@ -198,11 +203,12 @@ private fun BasicSortOptionsRow(
 @Composable
 private fun CnValueSortSection(
     selectedSortOption: MutableState<String>,
-    onSortOptionSelected: () -> Unit
+    onSortOptionSelected: () -> Unit,
+    colorScheme: androidx.compose.material3.ColorScheme
 ) {
     Text(
         text = "按CN Value排序",
-        color = Beige500,
+        color = colorScheme.primary,
         fontSize = 14.sp,
         fontFamily = sarasaBold,
         modifier = Modifier.padding(bottom = 4.dp)
@@ -227,7 +233,7 @@ private fun CnValueSortSection(
                     .weight(1f)
                     .height(28.dp)
                     .background(
-                        if (isSelected) Red800 else Red300,
+                        if (isSelected) colorScheme.primaryContainer else colorScheme.surface,
                         RoundedCornerShape(8.dp)
                     )
                     .clickable {
@@ -239,7 +245,7 @@ private fun CnValueSortSection(
             ) {
                 Text(
                     text = label,
-                    color = Beige500,
+                    color = colorScheme.primary,
                     fontSize = 11.sp,
                     fontFamily = if (isSelected) sarasaBold else sarasaRegular,
                     textAlign = TextAlign.Center
@@ -252,11 +258,12 @@ private fun CnValueSortSection(
 @Composable
 private fun JpValueSortSection(
     selectedSortOption: MutableState<String>,
-    onSortOptionSelected: () -> Unit
+    onSortOptionSelected: () -> Unit,
+    colorScheme: androidx.compose.material3.ColorScheme
 ) {
     Text(
         text = "按JP Value排序",
-        color = Beige500,
+        color = colorScheme.primary,
         fontSize = 14.sp,
         fontFamily = sarasaBold,
         modifier = Modifier.padding(bottom = 4.dp)
@@ -281,7 +288,7 @@ private fun JpValueSortSection(
                     .weight(1f)
                     .height(28.dp)
                     .background(
-                        if (isSelected) Red800 else Red300,
+                        if (isSelected) colorScheme.primaryContainer else colorScheme.surface,
                         RoundedCornerShape(8.dp)
                     )
                     .clickable {
@@ -293,7 +300,7 @@ private fun JpValueSortSection(
             ) {
                 Text(
                     text = label,
-                    color = Beige500,
+                    color = colorScheme.primary,
                     fontSize = 11.sp,
                     fontFamily = if (isSelected) sarasaBold else sarasaRegular,
                     textAlign = TextAlign.Center

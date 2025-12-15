@@ -23,9 +23,9 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.MaterialTheme
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.data.osu.ui.model.OsuBadgeUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +36,7 @@ internal fun BadgeList(
     osuBadgeList: MutableStateFlow<List<OsuBadgeUiModel>>,
     cardWidthDp: Dp
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val badgeListData by osuBadgeList.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     if (badgeListData.isNotEmpty()) {
@@ -44,7 +45,7 @@ internal fun BadgeList(
                 .padding(bottom = 12.dp)
                 .width(cardWidthDp),
             RoundedCornerShape(20.dp),
-            Red700
+            colorScheme.surfaceContainerHigh
         ) {
             var listWidthDp = cardWidthDp - 16.dp - 40.dp
             val imageCount = (listWidthDp / (68.dp + 12.dp)).toInt()

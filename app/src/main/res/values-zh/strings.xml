@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="record_title">我的记录</string>
     <!-- Chunithm Tab Titles -->
     <string name="highest_rank">最高排名</string>
     <string name="chunithm_tab_home">主页</string>

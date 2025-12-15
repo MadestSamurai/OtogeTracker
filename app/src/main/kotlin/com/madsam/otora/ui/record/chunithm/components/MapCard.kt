@@ -33,13 +33,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.compose.material3.MaterialTheme
 
 /**
  * Chunithm 地图卡片 UI Model
@@ -80,6 +77,7 @@ fun MapCard(
     mapDataFlow: MutableStateFlow<List<ChunithmMapUiModel>>,
     width: Dp
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val mapList by mapDataFlow.collectAsState()
     
     if (mapList.isEmpty()) return
@@ -187,6 +185,7 @@ private fun MapTitleBar(
     mapData: ChunithmMapUiModel,
     onDetailClick: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -195,7 +194,7 @@ private fun MapTitleBar(
     ) {
         Text(
             text = mapData.mapName,
-            color = Beige500,
+            color = colorScheme.primary,
             fontSize = 16.sp,
             fontFamily = sarasaBold
         )
@@ -210,19 +209,19 @@ private fun MapTitleBar(
             if (mapData.totalPages > 1) {
                 Text(
                     text = "第 ${mapData.currentPage}/${mapData.totalPages} 页",
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     fontSize = 14.sp,
                     fontFamily = sarasaRegular
                 )
                 Text(
                     text = "·",
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     fontSize = 14.sp
                 )
             }
             Text(
                 text = "${mapData.completedAreas} / ${mapData.totalAreas}",
-                color = Beige400,
+                color = colorScheme.onSurface,
                 fontSize = 14.sp,
                 fontFamily = sarasaRegular
             )
@@ -233,12 +232,12 @@ private fun MapTitleBar(
         // 详细按钮
         Text(
             text = "详细",
-            color = Red500,
+            color = colorScheme.surfaceContainer,
             fontSize = 14.sp,
             fontFamily = sarasaBold,
             modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
-                .background(Red700)
+                .background(colorScheme.surfaceContainerHigh)
                 .clickable { onDetailClick() }
                 .padding(horizontal = 12.dp, vertical = 4.dp)
         )
@@ -253,6 +252,7 @@ private fun MapGridPage(
     areas: List<MapAreaUiModel>,
     width: Dp
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val cellWidth = (width - 32.dp) / 3 // 每个格子的宽度
     val cellHeight = cellWidth * 1.3f // 格子高度 = 宽度 × 1.3，形成竖长方形
     
@@ -260,7 +260,7 @@ private fun MapGridPage(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
-            .background(Red700)
+            .background(colorScheme.surfaceContainerHigh)
             .padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -295,13 +295,14 @@ private fun MapGridCell(
     width: Dp,
     height: Dp
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Box(
         modifier = Modifier
             .size(width = width, height = height)
             .clip(RoundedCornerShape(8.dp))
             .background(
                 if (area?.isEmpty == true) Color.Transparent
-                else Red500
+                else colorScheme.surfaceContainer
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -323,7 +324,7 @@ private fun MapGridCell(
                     .padding(4.dp)
                     .clip(RoundedCornerShape(4.dp))
                     .background(
-                        if (area.remain > 0) Red700 else Color(0xFF4CAF50)
+                        if (area.remain > 0) colorScheme.surfaceContainerHigh else Color(0xFF4CAF50)
                     )
                     .padding(horizontal = 6.dp, vertical = 4.dp),
                 contentAlignment = Alignment.Center
@@ -331,7 +332,7 @@ private fun MapGridCell(
                 if (area.remain > 0) {
                     Text(
                         text = area.remain.toString(),
-                        color = Beige500,
+                        color = colorScheme.primary,
                         fontSize = 10.sp,
                         fontFamily = sarasaBold,
                         textAlign = TextAlign.Center,
@@ -359,7 +360,7 @@ private fun MapGridCell(
                 ) {
                     Text(
                         text = area.skillSeed,
-                        color = Beige400,
+                        color = colorScheme.onSurface,
                         fontSize = 9.sp,
                         fontFamily = sarasaRegular,
                         maxLines = 1,

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,10 +24,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
@@ -42,6 +39,8 @@ import com.madsam.otora.data.chunithm.remote.model.ChuniLoginBonusDTO
 @Composable
 fun LoginBonusTracker(loginBonus: ChuniLoginBonusDTO?) {
     if (loginBonus == null) return
+    
+    val colorScheme = MaterialTheme.colorScheme
     
     // 找到下一个常驻签到奖励（14天循环）
     val nextDailyReward = loginBonus.dailyRewards.firstOrNull { !it.isReceived }
@@ -66,7 +65,7 @@ fun LoginBonusTracker(loginBonus: ChuniLoginBonusDTO?) {
         ) {
             Text(
                 text = "登录奖励",
-                color = Beige500,
+                color = colorScheme.primary,
                 fontSize = 16.sp,
                 fontFamily = sarasaBold
             )
@@ -88,7 +87,7 @@ fun LoginBonusTracker(loginBonus: ChuniLoginBonusDTO?) {
                 // 月度签到天数
                 Text(
                     text = "本月签到：${loginBonus.currentMonth} 天",
-                    color = Beige500,
+                    color = colorScheme.primary,
                     fontSize = 12.sp,
                     fontFamily = sarasaSemiBold
                 )
@@ -99,12 +98,12 @@ fun LoginBonusTracker(loginBonus: ChuniLoginBonusDTO?) {
             // 详细按钮
             Text(
                 text = "详细",
-                color = Red500,
+                color = colorScheme.surfaceContainer,
                 fontSize = 14.sp,
                 fontFamily = sarasaBold,
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Red700)
+                    .background(colorScheme.surfaceContainerHigh)
                     .clickable { /* TODO: 跳转到登录奖励详情 */ }
                     .padding(horizontal = 12.dp, vertical = 4.dp)
             )
@@ -121,7 +120,8 @@ fun LoginBonusTracker(loginBonus: ChuniLoginBonusDTO?) {
                 title = "下一个版本签到",
                 subtitle = nextDailyReward?.let { "第${it.day}天" } ?: "已完成",
                 imageUrl = nextDailyReward?.imageUrl ?: "",
-                rewardName = nextDailyReward?.rewardName ?: ""
+                rewardName = nextDailyReward?.rewardName ?: "",
+                colorScheme = colorScheme
             )
             
             // 下一个月度签到奖励
@@ -130,7 +130,8 @@ fun LoginBonusTracker(loginBonus: ChuniLoginBonusDTO?) {
                 title = "下一个月度签到",
                 subtitle = nextMonthlyReward?.let { "第${it.day}天" } ?: "已完成",
                 imageUrl = nextMonthlyReward?.imageUrl ?: "",
-                rewardName = nextMonthlyReward?.rewardName ?: ""
+                rewardName = nextMonthlyReward?.rewardName ?: "",
+                colorScheme = colorScheme
             )
             
             // 当天的加成
@@ -139,7 +140,8 @@ fun LoginBonusTracker(loginBonus: ChuniLoginBonusDTO?) {
                 title = "今日加成",
                 subtitle = todayBonus?.weekday ?: "",
                 imageUrl = todayBonus?.iconUrl ?: "",
-                rewardName = todayBonus?.description ?: ""
+                rewardName = todayBonus?.description ?: "",
+                colorScheme = colorScheme
             )
         }
     }
@@ -154,12 +156,13 @@ private fun BonusCard(
     title: String,
     subtitle: String,
     imageUrl: String,
-    rewardName: String
+    rewardName: String,
+    colorScheme: androidx.compose.material3.ColorScheme
 ) {
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(Red700)
+            .background(colorScheme.surfaceContainerHigh)
             .padding(6.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -167,7 +170,7 @@ private fun BonusCard(
         // 标题
         Text(
             text = title,
-            color = Beige400,
+            color = colorScheme.onSurface,
             fontSize = 11.sp,
             fontFamily = sarasaBold,
             textAlign = TextAlign.Center
@@ -190,7 +193,7 @@ private fun BonusCard(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Red500),
+                    .background(colorScheme.surfaceContainer),
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(

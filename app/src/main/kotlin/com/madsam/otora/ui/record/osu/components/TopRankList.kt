@@ -41,10 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.OSU_ARROW_YELLOW
 import com.madsam.otora.core.theme.OSU_HEART_RED
-import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaSemiBold
@@ -61,6 +59,7 @@ internal fun TopRankList(
     cardWidth: Dp,
     onMoreClick: () -> Unit = {}
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val list = items.items
     Column(
         modifier = Modifier
@@ -77,7 +76,7 @@ internal fun TopRankList(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
-                color = Beige400,
+                color = colorScheme.onSurface,
                 modifier = Modifier.padding(vertical = 8.dp)
             )
             if (items.isComplete) return@Row
@@ -90,7 +89,7 @@ internal fun TopRankList(
             ) {
                 Text(
                     text = "More",
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
@@ -110,11 +109,12 @@ internal fun TopRankCard(
     item: OsuTopRankUiModel,
     itemWidth: Dp
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Column(
         modifier = Modifier
             .width(itemWidth)
             .clip(RoundedCornerShape(6.dp))
-            .background(Red500)
+            .background(colorScheme.surfaceContainer)
     ) {
         Box(
             modifier = Modifier.height(100.dp)
@@ -257,9 +257,10 @@ private fun TitleSection(
     subtitle: String,
     itemWidth: Dp
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Text(
         text = title,
-        color = Beige400,
+        color = colorScheme.onSurface,
         fontSize = 16.sp,
         fontFamily = sarasaSemiBold,
         maxLines = 1,
@@ -288,6 +289,7 @@ private fun ScoreSection(
     item: OsuTopRankUiModel,
     modifier: Modifier = Modifier
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val inlineContent = mapOf(
         "rank" to InlineTextContent(
             Placeholder(
@@ -351,7 +353,7 @@ private fun ScoreSection(
                 }
             }
         },
-        color = Beige400,
+        color = colorScheme.onSurface,
         letterSpacing = (-0.5).sp,
         inlineContent = inlineContent,
         maxLines = 1,
@@ -390,6 +392,7 @@ private fun ModsSection(
 private fun PPBottomRow(
     item: OsuTopRankUiModel
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -443,7 +446,7 @@ private fun PPBottomRow(
                         text = "${item.pp.format(2)}pp",
                         fontSize = 14.sp,
                         fontFamily = sarasaBold,
-                        color = Beige400
+                        color = colorScheme.onSurface
                     )
                     if (item.weightPP != 0.0) {
                         Text(

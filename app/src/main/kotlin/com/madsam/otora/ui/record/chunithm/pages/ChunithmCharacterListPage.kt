@@ -50,10 +50,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
@@ -96,6 +94,7 @@ private fun CharacterListContent(
     viewModel: ChunithmViewModel,
     onDismiss: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val characters by viewModel.characters.collectAsState()
     val isLoading by viewModel.isCharactersLoading.collectAsState()
     
@@ -106,7 +105,7 @@ private fun CharacterListContent(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Red300)
+            .background(colorScheme.surface)
             .windowInsetsPadding(
                 WindowInsets.displayCutout.only(
                     WindowInsetsSides.Horizontal
@@ -118,7 +117,7 @@ private fun CharacterListContent(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Red500)
+                    .background(colorScheme.surfaceContainer)
                     .padding(horizontal = 8.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -130,13 +129,13 @@ private fun CharacterListContent(
                     Box(
                         modifier = Modifier
                             .size(32.dp)
-                            .background(Red300, CircleShape),
+                            .background(colorScheme.surface, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Filled.ChevronLeft,
                             contentDescription = "返回",
-                            tint = Beige400,
+                            tint = colorScheme.onSurface,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -228,13 +227,14 @@ private fun CharacterGrid(characters: List<ChunithmCharacterEntity>) {
 
 @Composable
 private fun CharacterCard(character: ChunithmCharacterEntity) {
+    val colorScheme = MaterialTheme.colorScheme
     val frameColor = getFrameColor(character.frameType)
     
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .height(220.dp),
-        colors = CardDefaults.cardColors(containerColor = Red500),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {

@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -36,12 +37,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.Black333
 import com.madsam.otora.core.theme.PurpleTheme
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red800
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.vsnappy1.datepicker.DatePicker
@@ -63,6 +60,7 @@ fun DateTimeRangePicker(
     rangeData: List<BofRangeResponse>,
     onDismissRequest: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val showCompareDatePicker = remember { MutableStateFlow(false) }
     val showCompareDatePickerState = showCompareDatePicker.collectAsState()
     val showCurrentDatePicker = remember { MutableStateFlow(false) }
@@ -334,7 +332,7 @@ fun DateTimeRangePicker(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Red500)
+                        .background(colorScheme.surfaceContainer)
                         .clickable { showRangeDropdown = !showRangeDropdown }
                         .padding(horizontal = 12.dp, vertical = 12.dp)
                 ) {
@@ -345,20 +343,20 @@ fun DateTimeRangePicker(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = selectedRange?.short ?: "Select Competition",
-                                color = Beige400,
+                                color = colorScheme.onSurface,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium
                             )
                             if (selectedRange != null) {
                                 Text(
                                     text = "${selectedRange!!.start} - ${selectedRange!!.current}",
-                                    color = Beige600,
+                                    color = colorScheme.onSurfaceVariant,
                                     fontSize = 11.sp
                                 )
                                 if (!selectedRange!!.isStart) {
                                     Text(
                                         text = "Not Started",
-                                        color = Red800,
+                                        color = colorScheme.primaryContainer,
                                         fontSize = 10.sp
                                     )
                                 }
@@ -367,7 +365,7 @@ fun DateTimeRangePicker(
                         Icon(
                             imageVector = Filled.ChevronDown,
                             contentDescription = "Dropdown",
-                            tint = Beige400,
+                            tint = colorScheme.onSurface,
                             modifier = Modifier.padding(start = 8.dp)
                         )
                     }

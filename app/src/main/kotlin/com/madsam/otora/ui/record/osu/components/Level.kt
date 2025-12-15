@@ -22,10 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.core.theme.OSU_DARK_RED
-import com.madsam.otora.core.theme.Red700
-import com.madsam.otora.core.theme.Red900
 import com.madsam.otora.core.utils.BrushUtils.getLevelBrush
 import com.madsam.otora.data.osu.ui.model.OsuLevelUiModel
 import com.madsam.otora.ui.components.GradientBorderCircle
@@ -36,13 +33,14 @@ internal fun Level(
     osuLevelData: MutableStateFlow<OsuLevelUiModel>,
     modifier: Modifier = Modifier
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val levelData by osuLevelData.collectAsState()
 
     Row(
         modifier = modifier
             .padding(bottom = 4.dp)
             .clip(RoundedCornerShape(6.dp))
-            .background(Red700)
+            .background(colorScheme.surfaceContainerHigh)
             .padding(16.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -62,7 +60,7 @@ internal fun Level(
                 Text(
                     textAlign = TextAlign.Center,
                     text = levelData.level.toString(),
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     style = MaterialTheme.typography.headlineSmall,
                 )
             }
@@ -79,7 +77,7 @@ internal fun Level(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
-                        color = Red900,
+                        color = colorScheme.surfaceContainerLow,
                         shape = RoundedCornerShape(4.dp)
                     )
             )
@@ -100,7 +98,7 @@ internal fun Level(
                 Text(
                     textAlign = TextAlign.Center,
                     text = "${levelData.levelProgress}%",
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier
                         .align(

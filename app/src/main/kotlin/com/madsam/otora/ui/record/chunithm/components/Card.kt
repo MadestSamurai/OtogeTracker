@@ -33,8 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Beige500
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.theme.GradientBrush.GoldGradientBg
 import com.madsam.otora.core.theme.GradientBrush.PlatinumGradientBg
 import com.madsam.otora.core.theme.GradientBrush.RainbowGradientBg
@@ -43,8 +42,6 @@ import com.madsam.otora.core.theme.GradientBrush.WhiteGradientBg
 import com.madsam.otora.core.theme.OSU_LEVEL_GOLD_1
 import com.madsam.otora.core.theme.OSU_LEVEL_PLATINUM_1
 import com.madsam.otora.core.theme.RANKING_BLUE
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.utils.BrushUtils.getRatingBrush
@@ -56,6 +53,7 @@ internal fun Card(
     chunithmCardUiModel: MutableStateFlow<ChunithmCardUiModel>,
     cardWidthDp: Dp
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val cardData by chunithmCardUiModel.collectAsState()
     Surface(
         shape = RoundedCornerShape(10.dp),
@@ -71,7 +69,7 @@ internal fun Card(
                         "silver" -> RANKING_BLUE
                         "gold" -> OSU_LEVEL_GOLD_1
                         "platina" -> OSU_LEVEL_PLATINUM_1
-                        else -> Red700
+                        else -> colorScheme.surfaceContainerHigh
                     }
                 )
         ) {
@@ -186,7 +184,7 @@ internal fun Card(
                             end.linkTo(rebornBase.end)
                         },
                     text = cardData.reborn.toString(),
-                    color = Red500,
+                    color = colorScheme.surfaceContainer,
                     fontSize = 12.sp,
                     fontFamily = sarasaBold
                 )
@@ -194,7 +192,7 @@ internal fun Card(
 
             Text(
                 text = "Lv.",
-                color = Beige400,
+                color = colorScheme.onSurface,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .constrainAs(lvText) {
@@ -209,7 +207,7 @@ internal fun Card(
 
             Text(
                 text = cardData.level.toString(),
-                color = Beige400,
+                color = colorScheme.onSurface,
                 fontSize = 18.sp,
                 fontFamily = sarasaBold,
                 modifier = Modifier
@@ -225,7 +223,7 @@ internal fun Card(
 
             Text(
                 text = cardData.nameIn,
-                color = Beige400,
+                color = colorScheme.onSurface,
                 fontSize = 18.sp,
                 lineHeight = 22.sp,
                 fontFamily = sarasaBold,
@@ -273,7 +271,7 @@ internal fun Card(
                 text = buildAnnotatedString {
                     withStyle(
                         style = SpanStyle(
-                            color = Beige500,
+                            color = colorScheme.primary,
                             fontSize = 14.sp,
                             fontFamily = sarasaRegular
                         )
@@ -290,7 +288,7 @@ internal fun Card(
                         append(cardData.rating)
                     }
                 },
-                color = Beige500,
+                color = colorScheme.primary,
                 fontSize = 12.sp,
                 modifier = Modifier
                     .constrainAs(rating) {
@@ -311,14 +309,14 @@ internal fun Card(
                     text = buildAnnotatedString {
                         withStyle(
                             style = SpanStyle(
-                                color = Beige500,
+                                color = colorScheme.primary,
                                 fontSize = 11.sp,
                                 fontFamily = sarasaRegular
                             )
                         ) { append("OVERPOWER ") }
                         append(cardData.overpower)
                     },
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
                     fontFamily = sarasaBold,
@@ -327,14 +325,14 @@ internal fun Card(
                     text = buildAnnotatedString {
                         withStyle(
                             style = SpanStyle(
-                                color = Beige500,
+                                color = colorScheme.primary,
                                 fontSize = 11.sp,
                                 fontFamily = sarasaRegular
                             )
                         ) { append("LAST PLAY ") }
                         append(cardData.lastPlay)
                     },
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
                     fontFamily = sarasaBold,
@@ -343,14 +341,14 @@ internal fun Card(
                     text = buildAnnotatedString {
                         withStyle(
                             style = SpanStyle(
-                                color = Beige500,
+                                color = colorScheme.primary,
                                 fontSize = 11.sp,
                                 fontFamily = sarasaRegular
                             )
                         ) { append("PLAY COUNT ") }
                         append(cardData.playCount)
                     },
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
                     fontFamily = sarasaBold,
@@ -359,14 +357,14 @@ internal fun Card(
                     text = buildAnnotatedString {
                         withStyle(
                             style = SpanStyle(
-                                color = Beige500,
+                                color = colorScheme.primary,
                                 fontSize = 11.sp,
                                 fontFamily = sarasaRegular
                             )
                         ) { append("POINTS ") }
                         append("${cardData.point}/${cardData.totalPoint}")
                     },
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
                     fontFamily = sarasaBold,

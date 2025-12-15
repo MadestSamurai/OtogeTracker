@@ -22,10 +22,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.theme.Beige500
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.theme.BlackAlpha50
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.utils.BrushUtils.getRatingBrush
@@ -39,6 +37,7 @@ internal fun TopRank(
     topRankUI: MutableStateFlow<ChunithmTopRankUiModel>,
     cardWidthDp: Dp
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val topRank by topRankUI.collectAsState()
     
     // 动态分配两个图表的宽度
@@ -77,19 +76,19 @@ internal fun TopRank(
                 text = "Rating 分布",
                 fontSize = 16.sp,
                 fontFamily = sarasaBold,
-                color = Beige500,
+                color = colorScheme.primary,
                 modifier = Modifier.weight(1f)
             )
             
             // 详细按钮
             Text(
                 text = "详细",
-                color = Red500,
+                color = colorScheme.surfaceContainer,
                 fontSize = 14.sp,
                 fontFamily = sarasaBold,
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
-                    .background(Red700)
+                    .background(colorScheme.surfaceContainerHigh)
                     .clickable { /* TODO: 跳转到Rating详情 */ }
                     .padding(horizontal = 12.dp, vertical = 4.dp)
             )
@@ -107,7 +106,7 @@ internal fun TopRank(
                     topStart = 10.dp, topEnd = 6.dp,
                     bottomStart = 10.dp, bottomEnd = 6.dp
                 ))
-                .background(Red700)
+                .background(colorScheme.surfaceContainerHigh)
         ) {
             Column(
                 modifier = Modifier
@@ -153,7 +152,7 @@ internal fun TopRank(
                     topStart = 6.dp, topEnd = 10.dp,
                     bottomStart = 6.dp, bottomEnd = 10.dp
                 ))
-                .background(Red700)
+                .background(colorScheme.surfaceContainerHigh)
         ) {
             Column(
                 modifier = Modifier

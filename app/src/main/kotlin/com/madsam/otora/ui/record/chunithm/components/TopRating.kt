@@ -17,6 +17,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -40,18 +41,12 @@ import androidx.constraintlayout.compose.Dimension
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-left`
-import com.madsam.otora.core.theme.Beige400
-import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.Beige600
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
 import com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
 import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
-import com.madsam.otora.core.theme.Red300
-import com.madsam.otora.core.theme.Red500
-import com.madsam.otora.core.theme.Red700
 import com.madsam.otora.core.theme.Transparent
 import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.sarasaBold
@@ -68,6 +63,7 @@ internal fun TopRating(
     chunithmTopRankUiModel: MutableStateFlow<ChunithmTopRankUiModel>,
     onBack: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val topRank by chunithmTopRankUiModel.collectAsState()
     val screenWidthDp = with(LocalDensity.current) {
         LocalWindowInfo.current.containerSize.width.toDp()
@@ -79,7 +75,7 @@ internal fun TopRating(
 
     Column(
         modifier = Modifier
-            .background(Red300)
+            .background(colorScheme.surface)
     ) {
         Row(
             modifier = Modifier
@@ -92,12 +88,12 @@ internal fun TopRating(
                 Icon(
                     Fa.`Arrow-left`,
                     contentDescription = "Back",
-                    tint = Beige400
+                    tint = colorScheme.onSurface
                 )
             }
             Text(
                 text = "Top Rating",
-                color = Beige400,
+                color = colorScheme.onSurface,
                 fontSize = 20.sp,
                 fontFamily = sarasaBold
             )
@@ -107,7 +103,7 @@ internal fun TopRating(
         // 标签页
         CustomTabRow(
             selectedTabIndex = pagerState.currentPage,
-            containerColor = Red500,
+            containerColor = colorScheme.surfaceContainer,
             modifier = Modifier.padding(horizontal = 8.dp)
         ) {
             tabTitles.forEachIndexed { index, title ->
@@ -121,7 +117,7 @@ internal fun TopRating(
                     text = {
                         Text(
                             text = title,
-                            color = if (pagerState.currentPage == index) Beige500 else Beige600,
+                            color = if (pagerState.currentPage == index) colorScheme.primary else colorScheme.onSurfaceVariant,
                             fontSize = 16.sp,
                             fontFamily = sarasaBold
                         )
@@ -164,6 +160,7 @@ internal fun ChuniRatingItemCard(
     itemWidth: Dp,
     rank: Int
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Surface(
         Modifier
             .width(itemWidth)
@@ -174,7 +171,7 @@ internal fun ChuniRatingItemCard(
     ) {
         ConstraintLayout(
             modifier = Modifier
-                .background(Red700)
+                .background(colorScheme.surfaceContainerHigh)
                 .height(100.dp)
         ) {
             val (
@@ -188,7 +185,7 @@ internal fun ChuniRatingItemCard(
             // 排名显示
             Text(
                 text = "#$rank",
-                color = Beige400,
+                color = colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontFamily = sarasaBold,
                 modifier = Modifier
@@ -197,7 +194,7 @@ internal fun ChuniRatingItemCard(
                         start.linkTo(parent.start, 8.dp)
                     }
                     .background(
-                        color = Red500,
+                        color = colorScheme.surfaceContainer,
                         shape = RoundedCornerShape(4.dp)
                     )
                     .padding(horizontal = 6.dp, vertical = 2.dp)
@@ -284,7 +281,7 @@ internal fun ChuniRatingItemCard(
             ) {
                 Text(
                     text = item.title,
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     fontSize = 16.sp,
                     fontFamily = sarasaBold,
                     maxLines = 1,
@@ -292,7 +289,7 @@ internal fun ChuniRatingItemCard(
                 )
                 Text(
                     text = item.artist,
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,
@@ -308,7 +305,7 @@ internal fun ChuniRatingItemCard(
                 )
                 Text(
                     text = "${item.levelValue} -> ${String.format(Locale.US, "%.2f", item.rating)}",
-                    color = Beige400,
+                    color = colorScheme.onSurface,
                     fontSize = 14.sp,
                     lineHeight = 22.sp,
                     maxLines = 1,

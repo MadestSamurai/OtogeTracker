@@ -20,11 +20,14 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.madsam.otora.core.theme.Red700
-import com.madsam.otora.core.theme.Beige400
 import com.madsam.otora.glance.data.GlanceWidgetDataStore
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+
+// Glance Widget 专用颜色（不支持 MaterialTheme.colorScheme）
+// 基于 M3E Neutral Tonal Palette (Chroma: 16) - 明显紫罗兰色调
+private val GlanceWidgetBackground = Color(0xFF2B2733)  // Neutral17 - 紫灰
+private val GlanceWidgetText = Color(0xFFE7E1EC)        // Neutral90 - 浅紫灰
 
 class SmallWidget : GlanceAppWidget() {
     override suspend fun provideGlance(context: Context, id: GlanceId) {
@@ -47,7 +50,7 @@ class SmallWidget : GlanceAppWidget() {
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
-                .background(Red700),
+                .background(GlanceWidgetBackground),
             verticalAlignment = Alignment.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -56,7 +59,7 @@ class SmallWidget : GlanceAppWidget() {
                 modifier = GlanceModifier
                     .padding(12.dp),
                 style = TextStyle(
-                    color = MyColorProvider(Beige400),
+                    color = MyColorProvider(GlanceWidgetText),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -66,7 +69,7 @@ class SmallWidget : GlanceAppWidget() {
                 modifier = GlanceModifier
                     .padding(12.dp),
                 style = TextStyle(
-                    color = MyColorProvider(Beige400),
+                    color = MyColorProvider(GlanceWidgetText),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )

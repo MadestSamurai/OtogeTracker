@@ -28,8 +28,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.core.theme.Beige500
-import com.madsam.otora.core.theme.Red300
+import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.components.ChunithmFriendList
@@ -41,6 +40,7 @@ internal fun ChunithmFriendsPage(
     scrollThreshold: Float,
     setIsTabRowVisible: (Boolean) -> Unit,
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     val context = LocalContext.current
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
 
@@ -81,15 +81,15 @@ internal fun ChunithmFriendsPage(
             Indicator(
                 modifier = Modifier.align(Alignment.TopCenter),
                 isRefreshing = isRefreshing,
-                containerColor = Red300,
-                color = Beige500,
+                containerColor = colorScheme.surface,
+                color = colorScheme.primary,
                 state = state
             )
         },
     ) {
         LazyColumn(
             modifier = Modifier
-                .background(color = Red300)
+                .background(color = colorScheme.surface)
                 .fillMaxSize()
                 .padding(horizontal = 12.dp)
                 .windowInsetsPadding(WindowInsets.navigationBars.only(WindowInsetsSides.Bottom))
