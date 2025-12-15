@@ -90,16 +90,6 @@ internal class OsuViewModel() : ViewModel() {
         if (osuCardListDTO.users.isEmpty()) return
 
         val osuCard = osuCardListDTO.users[0]
-        
-        // Debug: 打印获取的用户数据
-        android.util.Log.d("OsuViewModel", "=== osu! Card Data ===")
-        android.util.Log.d("OsuViewModel", "username: ${osuCard.username}")
-        android.util.Log.d("OsuViewModel", "profileColour (raw): '${osuCard.profileColour}'")
-        android.util.Log.d("OsuViewModel", "profileHue: ${osuCard.profileHue}")
-        android.util.Log.d("OsuViewModel", "country: ${osuCard.country.name}")
-        android.util.Log.d("OsuViewModel", "avatarUrl: ${osuCard.avatarUrl}")
-        android.util.Log.d("OsuViewModel", "======================")
-        
         cardUI.update {
             it.copy(
                 username = osuCard.username,
@@ -234,11 +224,6 @@ internal class OsuViewModel() : ViewModel() {
     }
 
     private fun fetchMedals(osuInfoDTO: OsuInfoDTO, context: Context) {
-        // Debug: 打印 profile_hue 数据
-        android.util.Log.d("OsuViewModel", "=== fetchMedals: profile_hue ===")
-        android.util.Log.d("OsuViewModel", "profileHue from UserExtend: ${osuInfoDTO.user.profileHue}")
-        android.util.Log.d("OsuViewModel", "================================")
-        
         cardUI.update {
             it.copy(
                 isTitle = osuInfoDTO.user.title.isNotEmpty(),
