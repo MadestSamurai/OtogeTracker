@@ -1,6 +1,7 @@
 package com.madsam.otora.core.theme
 
 import android.app.Activity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -17,12 +18,10 @@ val OtogeDefaultSourceColor = Color(0xFF7C5CBF)
 @Composable
 fun OtogeTrackerTheme(
     sourceColor: Color = OtogeDefaultSourceColor, // 源颜色，默认紫罗兰
-    style: DynamicColorScheme.Style = DynamicColorScheme.Style.FIDELITY,
+    style: DynamicColorScheme.Style = DynamicColorScheme.Style.TONAL_SPOT,
+    darkTheme: Boolean = isSystemInDarkTheme(), // 跟随系统主题
     content: @Composable () -> Unit
 ) {
-    // 固定使用暗色主题
-    val darkTheme = true
-    
     val colorScheme: ColorScheme = rememberDynamicColorScheme(
         sourceColor = sourceColor,
         isDark = darkTheme,
@@ -36,10 +35,10 @@ fun OtogeTrackerTheme(
             val window = (view.context as Activity).window
             WindowCompat.setDecorFitsSystemWindows(window, false)
             
-            // Update system bars appearance (always dark)
+            // Update system bars appearance based on theme
             WindowCompat.getInsetsController(window, view).apply {
-                isAppearanceLightStatusBars = false
-                isAppearanceLightNavigationBars = false
+                isAppearanceLightStatusBars = !darkTheme
+                isAppearanceLightNavigationBars = !darkTheme
             }
 
             onDispose {}

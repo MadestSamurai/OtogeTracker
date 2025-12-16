@@ -25,5 +25,9 @@ internal data class OsuCardUiModel(
     val formerUsernames: String = "",
     val maniaModeGlobalRank: String = "",
     val maniaModeCountryRank: String = "",
-    val tournamentBannerImage2x: String = ""
+    val tournamentBannerImage2x: String = "",
+    val teamId: Int = 0,
+    val teamName: String = "",
+    val teamShortName: String = "",
+    val teamFlagUrl: String = ""
 )

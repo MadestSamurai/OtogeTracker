@@ -69,9 +69,9 @@ internal fun Recent(
     Surface(
         modifier = Modifier
             .width(screenWidthDp)
-            .padding(top = 12.dp),
-        shape = RoundedCornerShape(20.dp),
-        color = colorScheme.surfaceContainerHigh
+            .padding(top = 16.dp),
+        shape = RoundedCornerShape(16.dp),
+        color = colorScheme.surfaceContainer
     ) {
         Column(
             modifier = Modifier.padding(16.dp, 10.dp)
@@ -108,9 +108,14 @@ private fun RecentHeader(
     ) {
         Text(
             text = "Recent",
-            style = MaterialTheme.typography.titleLarge,
-            color = colorScheme.onSurface,
-            modifier = Modifier.padding(vertical = 8.dp)
+            style = MaterialTheme.typography.titleMedium,
+            color = colorScheme.onPrimary,
+            modifier = Modifier
+                .background(
+                    color = colorScheme.primary,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .padding(horizontal = 12.dp, vertical = 4.dp)
         )
         
         if (!isComplete) {
@@ -137,6 +142,7 @@ internal fun RecentItem(
     cardWidthDp: Dp
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val highlightColor = colorScheme.secondary
     val textFormat =
         buildAnnotatedString {
             appendInlineContent("icon", "[${activity.type}]")
@@ -146,7 +152,7 @@ internal fun RecentItem(
                         append("achieved #${activity.rank} on ")
                     }
                     appendInlineContent("mode", "[${activity.mode}]")
-                    withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.SemiBold)) {
+                    withStyle(style = SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold)) {
                         append(activity.beatmapTitle)
                     }
                 }
@@ -156,7 +162,7 @@ internal fun RecentItem(
                         append("lost first place on ")
                     }
                     appendInlineContent("mode", "[${activity.mode}]")
-                    withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.SemiBold)) {
+                    withStyle(style = SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold)) {
                         append(activity.beatmapTitle)
                     }
                 }
@@ -165,7 +171,7 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
                         append("submitted a new beatmap ")
                     }
-                    withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.SemiBold)) {
+                    withStyle(style = SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold)) {
                         append(activity.beatmapSetTitle)
                     }
                 }
@@ -174,7 +180,7 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
                         append("updated a beatmap ")
                     }
-                    withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.SemiBold)) {
+                    withStyle(style = SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold)) {
                         append(activity.beatmapSetTitle)
                     }
                 }
@@ -195,13 +201,13 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
                         append("revived a beatmap ")
                     }
-                    withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.SemiBold)) {
+                    withStyle(style = SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold)) {
                         append(activity.beatmapSetTitle)
                     }
                 }
 
                 "beatmapsetApprove" -> {
-                    withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.SemiBold)) {
+                    withStyle(style = SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold)) {
                         append(activity.beatmapSetTitle)
                     }
                     withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
@@ -213,7 +219,7 @@ internal fun RecentItem(
                     withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
                         append("achieved ")
                     }
-                    withStyle(style = SpanStyle(color = Yellow1000, fontWeight = FontWeight.SemiBold)) {
+                    withStyle(style = SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold)) {
                         append(activity.achievement)
                     }
                 }

@@ -19,7 +19,8 @@ internal data class OsuCardDTO(
     var username: String = "",
     var country: Country = Country(),
     var cover: Cover = Cover(),
-    var groups: List<OsuGroupDTO> = emptyList()
+    var groups: List<OsuGroupDTO> = emptyList(),
+    var team: Team? = null
 ) {
     internal data class Country(
         var code: String = "",
@@ -30,5 +31,12 @@ internal data class OsuCardDTO(
         @param:Json(name = "custom_url") var customUrl: String = "",
         var url: String = "",
         var id: String = ""
+    )
+    
+    internal data class Team(
+        var id: Int = 0,
+        var name: String = "",
+        @param:Json(name = "short_name") var shortName: String = "",
+        @param:Json(name = "flag_url") var flagUrl: String = ""
     )
 }

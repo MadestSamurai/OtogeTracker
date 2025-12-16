@@ -57,13 +57,13 @@ internal fun SocialCard(
             .width(cardWidthDp)
             .clip(
                 RoundedCornerShape(
-                    topStart = 6.dp,
-                    topEnd = 6.dp,
-                    bottomStart = 20.dp,
-                    bottomEnd = 20.dp
+                    topStart = 8.dp,
+                    topEnd = 8.dp,
+                    bottomStart = 16.dp,
+                    bottomEnd = 16.dp
                 )
             )
-            .background(colorScheme.surfaceContainerHigh)
+            .background(colorScheme.surfaceContainerLow)
             .padding(vertical = 16.dp)
     ) {
         // User Info Section

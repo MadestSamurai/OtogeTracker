@@ -43,9 +43,9 @@ internal fun TopRank(
     Surface(
         Modifier
             .width(screenWidthDp)
-            .padding(vertical = 12.dp),
-        RoundedCornerShape(20.dp),
-        colorScheme.surfaceContainerHigh
+            .padding(vertical = 16.dp),
+        RoundedCornerShape(16.dp),
+        colorScheme.surfaceContainer
     ) {
         Column(
             modifier = Modifier

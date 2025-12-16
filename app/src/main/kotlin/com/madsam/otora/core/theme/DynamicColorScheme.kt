@@ -60,7 +60,7 @@ object DynamicColorScheme {
         sourceColor: Color,
         isDark: Boolean,
         isAmoled: Boolean = false,
-        style: Style = Style.FIDELITY,
+        style: Style = Style.TONAL_SPOT,
         contrastLevel: Double = 0.0
     ): ColorScheme {
         return dynamicColorScheme(
@@ -81,7 +81,7 @@ object DynamicColorScheme {
 fun rememberDynamicColorScheme(
     sourceColor: Color,
     isDark: Boolean,
-    style: DynamicColorScheme.Style = DynamicColorScheme.Style.FIDELITY,
+    style: DynamicColorScheme.Style = DynamicColorScheme.Style.TONAL_SPOT,
     contrastLevel: Double = 0.0,
     @Suppress("UNUSED_PARAMETER") surfaceChroma: Double = 16.0 // 保留参数兼容性，MaterialKolor 内部处理
 ): ColorScheme {

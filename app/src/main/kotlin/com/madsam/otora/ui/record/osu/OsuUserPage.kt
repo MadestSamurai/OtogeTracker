@@ -104,8 +104,8 @@ internal fun OsuUserPage(
     
     LazyColumn(
         modifier = Modifier
-            .background(colorScheme.surface)
-            .padding(horizontal = 12.dp)
+            .background(colorScheme.surfaceContainerLowest)
+            .padding(horizontal = 16.dp)
             .windowInsetsPadding(
                 WindowInsets.displayCutout.only(
                     if (useNavigationRail) {
@@ -144,6 +144,7 @@ internal fun OsuUserPage(
             RankGraph(
                 viewModel.rankGraphUI,
                 viewModel.topRankUI,
+                viewModel.cardUI,
                 contentWidthDp
             )
             Level(

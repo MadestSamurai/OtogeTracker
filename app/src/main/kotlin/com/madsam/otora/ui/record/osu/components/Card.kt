@@ -4,20 +4,27 @@ import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -35,25 +42,32 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.core.graphics.toColorInt
 import coil.ImageLoader
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
 import coil.decode.SvgDecoder
+import coil.request.ImageRequest
 import com.madsam.otora.R
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.BlackAlpha80
-import com.madsam.otora.core.theme.OSU_BRIGHT_RED
+import com.madsam.otora.core.theme.OSU_BRIGHT_RED // TODO: 硬编码颜色 - Supporter标志红色，是否需要改为主题色？
 import com.madsam.otora.data.osu.remote.model.OsuGroupDTO
 import com.madsam.otora.data.osu.ui.model.OsuCardUiModel
 import com.madsam.otora.ui.components.GroupListItem
 import com.madsam.otora.ui.components.PopupTip
 import kotlinx.coroutines.flow.MutableStateFlow
 
+/**
+ * Material 3 重构版本的用户卡片
+ * 拆分为三个独立卡片：
+ * 1. 用户概览卡片 - 头像、姓名、在线状态、Supporter
+ * 2. 排名卡片 - 全球排名和国家排名
+ * 3. 徽章/组别展示通过其他组件完成
+ */
 @Composable
 internal fun Card(
     osuCardData: MutableStateFlow<OsuCardUiModel>,
@@ -64,74 +78,56 @@ internal fun Card(
     val cardData by osuCardData.collectAsState()
     val groupListData = osuGroupDTOList.collectAsState(initial = emptyList()).value
 
-    Column {
-        ConstraintLayout(
-            modifier = Modifier
-                .padding(vertical = 12.dp)
-                .clip(RoundedCornerShape(20.dp))
-                .background(colorScheme.surfaceContainerHigh)
-        ) {
-            val refs = createRefs()
-            val (
-                coverImage,
-                baseBackground,
-                avatarImage,
-                nameplateName,
-                supporterRank,
-                title,
-                groupList,
-                rank,
-                country,
-                online,
-                tournamentBanner,
-            ) = refs
-            val svgLoader = ImageLoader.Builder(LocalContext.current)
-                .components {
-                    add(SvgDecoder.Factory())
-                    add(GifDecoder.Factory())
-                }
-                .build()
-            val gifLoader = ImageLoader.Builder(LocalContext.current)
-                .components {
-                    add(SvgDecoder.Factory())
-                    add(GifDecoder.Factory())
-                }
-                .build()
-            val inlineContent = mapOf(
-                "onlineMark" to InlineTextContent(
-                    Placeholder(
-                        width = 25.sp,
-                        height = 20.sp,
-                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
-                    )
-                ) {
-                    Icon(
-                        painter = rememberVectorPainter(image = Filled.OsuOnline),
-                        tint = if (cardData.isOnline) Color(0xFF8DC63F) else Color(0xFF565656),
-                        contentDescription = stringResource(id = R.string.online_mark),
-                        modifier = Modifier.padding(end = 5.dp)
-                    )
-                },
-                "flag" to InlineTextContent(
-                    Placeholder(
-                        width = 26.sp,
-                        height = 18.sp,
-                        placeholderVerticalAlign = PlaceholderVerticalAlign.TextBottom
-                    )
-                ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(
-                            model = cardData.flagUrl,
-                            imageLoader = svgLoader,
-                            contentScale = ContentScale.Fit
-                        ),
-                        contentDescription = "Flag",
-                        modifier = Modifier.padding(end = 2.dp),
-                        contentScale = ContentScale.Fit,
-                    )
-                }
-            )
-            
+    Column(
+        modifier = Modifier.padding(vertical = 16.dp)
+    ) {
+        // 用户概览卡片（封面 + 头像 + 基本信息）
+        UserProfileCard(
+            cardData = cardData,
+            groupListData = groupListData,
+            cardWidthDp = cardWidthDp,
+            colorScheme = colorScheme
+        )
+    }
+}
+
+/**
+ * 用户概览卡片 - Material 3 Card组件
+ * 包含：封面图、头像、用户名、在线状态、Supporter标志、Title标志、组别列表
+ */
+@Composable
+private fun UserProfileCard(
+    cardData: OsuCardUiModel,
+    groupListData: List<OsuGroupDTO>,
+    cardWidthDp: Dp,
+    colorScheme: androidx.compose.material3.ColorScheme
+) {
+    val gifLoader = ImageLoader.Builder(LocalContext.current)
+        .components {
+            add(SvgDecoder.Factory())
+            add(GifDecoder.Factory())
+        }
+        .build()
+    
+    val svgLoader = ImageLoader.Builder(LocalContext.current)
+        .components {
+            add(SvgDecoder.Factory())
+            add(GifDecoder.Factory())
+        }
+        .build()
+    
+    Card(
+        modifier = Modifier.width(cardWidthDp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = colorScheme.surfaceContainerHighest
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 0.dp // M3扁平化设计
+        )
+    ) {
+        Box {
+            // 封面图
             Image(
                 painter = rememberAsyncImagePainter(
                     model = cardData.coverUrl,
@@ -140,280 +136,246 @@ internal fun Card(
                 contentDescription = "Cover Image",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .width(cardWidthDp)
-                    .height(120.dp)
-                    .constrainAs(coverImage) {
-                        top.linkTo(parent.top)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }
-                    .clip(
-                        RoundedCornerShape(
-                            topStart = 20.dp,
-                            topEnd = 20.dp
-                        )
+                    .fillMaxWidth()
+                    .height(100.dp)
+                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+            )
+            
+            // Tournament Banner（如果有）
+            if (cardData.tournamentBannerImage2x.isNotEmpty()) {
+                Image(
+                    painter = rememberAsyncImagePainter(
+                        model = cardData.tournamentBannerImage2x,
+                        contentScale = ContentScale.Crop
+                    ),
+                    contentDescription = "Tournament Banner",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(cardWidthDp / 50 * 3)
+                        .align(Alignment.TopStart)
+                )
+            }
+            
+            // Title标志
+            if (cardData.isTitle) {
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(12.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    color = colorScheme.primary
+                ) {
+                    Text(
+                        text = cardData.title,
+                        color = colorScheme.onPrimary,
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
-            )
-
-            Image(
-                painter = rememberAsyncImagePainter(
-                    model = cardData.tournamentBannerImage2x,
-                    contentScale = ContentScale.Crop
-                ),
-                contentDescription = "Tournament Banner",
-                contentScale = ContentScale.Crop,
+                }
+            }
+            
+            // 组别列表
+            LazyRow(
+                reverseLayout = true,
                 modifier = Modifier
-                    .width(cardWidthDp)
-                    .height(
-                        if (cardData.tournamentBannerImage2x.isNotEmpty())
-                            cardWidthDp / 50 * 3
-                        else 0.dp
-                    )
-                    .constrainAs(tournamentBanner) {
-                        top.linkTo(coverImage.bottom)
-                        start.linkTo(coverImage.start)
-                        end.linkTo(coverImage.end)
-                    }
-            )
-
-            Spacer(
-                modifier = Modifier
-                    .constrainAs(baseBackground) {
-                        top.linkTo(tournamentBanner.bottom)
-                        start.linkTo(coverImage.start)
-                        end.linkTo(coverImage.end)
-                    }
-                    .width(cardWidthDp)
-                    .height(80.dp)
-                    .clip(RoundedCornerShape(bottomEnd = 15.dp))
-                    .background(colorScheme.surfaceContainer)
-            )
-
+                    .align(Alignment.TopEnd)
+                    .padding(top = 8.dp, end = 12.dp)
+                    .wrapContentHeight()
+                    .width(cardWidthDp - 24.dp)
+            ) {
+                items(groupListData.size) { index ->
+                    GroupListItem(osuGroupDTO = groupListData[index])
+                }
+            }
+        }
+        
+        // 用户信息区域
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 头像
             Image(
                 painter = rememberAsyncImagePainter(
                     model = cardData.avatarUrl,
                     imageLoader = gifLoader,
                     contentScale = ContentScale.Crop
                 ),
-                contentDescription = "Avatar Image",
+                contentDescription = "Avatar",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .constrainAs(avatarImage) {
-                        top.linkTo(tournamentBanner.bottom)
-                        start.linkTo(coverImage.start)
-                    }
-                    .size(130.dp)
-                    .clip(
-                        RoundedCornerShape(
-                            bottomStart = 20.dp,
-                            bottomEnd = 15.dp
-                        )
-                    )
+                    .size(64.dp)
+                    .clip(CircleShape)
             )
-            if (cardData.isTitle) {
-                Text(
-                    text = cardData.title,
-                    color = Color(cardData.profileColour.toColorInt()),
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier
-                        .constrainAs(title) {
-                            top.linkTo(parent.top, margin = 12.dp)
-                            start.linkTo(coverImage.start, margin = 12.dp)
-                        }
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(BlackAlpha80)
-                        .padding(
-                            horizontal = 5.dp,
-                            vertical = 2.dp
-                        )
-                )
-            }
-            LazyRow(
-                reverseLayout = true,
-                modifier = Modifier
-                    .constrainAs(groupList) {
-                        bottom.linkTo(coverImage.bottom, margin = 8.dp)
-                        end.linkTo(coverImage.end, margin = 12.dp)
-                    }
-                    .wrapContentHeight()
-                    .width(cardWidthDp - 12.dp)
-            ) {
-                items(groupListData.size) { index ->
-                    GroupListItem(
-                        osuGroupDTO = groupListData[index],
-                    )
-                }
-            }
-            val formerUsernameShowPopup = remember { MutableTransitionState(false) }
-            Text(
-                text = cardData.username,
-                color = colorScheme.onSurface,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier
-                    .constrainAs(nameplateName) {
-                        top.linkTo(avatarImage.top, margin = 8.dp)
-                        start.linkTo(avatarImage.end, margin = 12.dp)
-                    }
-                    .clickable(
-                        onClick = { formerUsernameShowPopup.targetState = true }
-                    )
-            )
-            Text(
-                text = buildAnnotatedString {
-                    appendInlineContent(
-                        "onlineMark",
-                        "[${stringResource(id = R.string.online_mark)}]"
-                    )
-                    append(stringResource(id = if (cardData.isOnline) R.string.online else R.string.offline))
-                },
-                inlineContent = inlineContent,
-                modifier = Modifier
-                    .constrainAs(online) {
-                        start.linkTo(nameplateName.start)
-                        top.linkTo(nameplateName.bottom)
-                        bottom.linkTo(baseBackground.bottom)
-                    }
-                    .padding(start = 5.dp),
-                color = colorScheme.onSurface,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            val supporterShowPopup = remember { MutableTransitionState(false) }
-            if (cardData.isSupporter) {
-                Box(
-                    modifier = Modifier
-                        .constrainAs(supporterRank) {
-                            top.linkTo(nameplateName.top)
-                            bottom.linkTo(nameplateName.bottom)
-                            start.linkTo(nameplateName.end, margin = 12.dp)
-                        }
-                        .clickable(
-                            onClick = { supporterShowPopup.targetState = true }
-                        )
-                        .height(20.dp)
-                        .clip(RoundedCornerShape(100.dp))
-                        .background(OSU_BRIGHT_RED)
-                ) {
-                    Image(
-                        painter = rememberVectorPainter(
-                            image = when (cardData.supporterRank) {
-                                1 -> Filled.Heart1
-                                2 -> Filled.Heart2
-                                3 -> Filled.Heart3
-                                else -> Filled.Heart1
-                            }
-                        ),
-                        colorFilter = ColorFilter.tint(Color.White),
-                        contentDescription = "Supporter Rank",
-                        modifier = Modifier
-                            .height(20.dp)
-                            .padding(
-                                horizontal = 12.dp,
-                                vertical = 4.dp
-                            ),
-                    )
-                }
-            }
-            val modeGlobalRankShowPopup = remember { MutableTransitionState(false) }
-            Text(
-                text = cardData.rank,
-                color = colorScheme.onSurface,
-                style = MaterialTheme.typography.titleLarge,
-                letterSpacing = (-0.5).sp,
-                modifier = Modifier
-                    .constrainAs(rank) {
-                        top.linkTo(baseBackground.bottom)
-                        bottom.linkTo(avatarImage.bottom)
-                        start.linkTo(avatarImage.end, margin = 12.dp)
-                    }
-                    .clickable(
-                        onClick = { modeGlobalRankShowPopup.targetState = true }
-                    )
-            )
-            val modeCountryRankShowPopup = remember { MutableTransitionState(false) }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            // 用户名和状态
             Column(
-                modifier = Modifier
-                    .constrainAs(country) {
-                        start.linkTo(rank.end, margin = 15.dp)
-                        top.linkTo(baseBackground.bottom)
-                        bottom.linkTo(avatarImage.bottom)
-                    }
-                    .clickable(
-                        onClick = { modeCountryRankShowPopup.targetState = true }
-                    )
+                modifier = Modifier.weight(1f)
             ) {
-                Text(
-                    text = buildAnnotatedString {
-                        appendInlineContent("flag", "[Flag]")
-                        append(cardData.country)
-                    },
-                    inlineContent = inlineContent,
-                    color = colorScheme.primary,
-                    style = MaterialTheme.typography.bodyMedium,
-                    lineHeight = 18.sp,
-                )
-                Text(
-                    text = cardData.countryRank,
-                    color = colorScheme.onSurface,
-                    style = MaterialTheme.typography.titleMedium,
-                    lineHeight = 20.sp,
-                )
-            }
-            // Popups
-            val (
-                supporterPopup,
-                formerUsernamePopup,
-                modeGlobalRankPopup,
-                modeCountryRankPopup,
-            ) = refs
-            if (cardData.isSupporter) {
-                PopupTip(
-                    "Supporter Rank ${cardData.supporterRank}",
-                    OSU_BRIGHT_RED,
-                    Modifier.constrainAs(supporterPopup) {
-                        top.linkTo(supporterRank.bottom, margin = 4.dp)
-                        start.linkTo(supporterRank.start)
-                        end.linkTo(supporterRank.end)
-                    },
-                    supporterShowPopup,
-                    Alignment.TopCenter
-                )
-            }
-            if (cardData.formerUsernames.isNotEmpty()) {
-                PopupTip(
-                    "formerly known as:\n${cardData.formerUsernames}",
-                    colorScheme.onSurface,
-                    Modifier.constrainAs(formerUsernamePopup) {
-                        top.linkTo(nameplateName.bottom, margin = 4.dp)
-                        start.linkTo(nameplateName.start)
-                    },
-                    formerUsernameShowPopup,
-                    Alignment.TopStart
-                )
-            }
-            if (cardData.currentMode == "mania") {
-                PopupTip(
-                    cardData.maniaModeGlobalRank,
-                    colorScheme.onSurface,
-                    Modifier.constrainAs(modeGlobalRankPopup) {
-                        top.linkTo(rank.bottom, margin = 4.dp)
-                        start.linkTo(rank.start)
-                        end.linkTo(rank.end)
-                    },
-                    modeGlobalRankShowPopup,
-                    Alignment.TopCenter
-                )
-                PopupTip(
-                    cardData.maniaModeCountryRank,
-                    colorScheme.onSurface,
-                    Modifier.constrainAs(modeCountryRankPopup) {
-                        top.linkTo(country.bottom, margin = 4.dp)
-                        start.linkTo(country.start)
-                        end.linkTo(country.end)
-                    },
-                    modeCountryRankShowPopup,
-                    Alignment.TopCenter
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val formerUsernameShowPopup = remember { MutableTransitionState(false) }
+                    Text(
+                        text = cardData.username,
+                        color = colorScheme.primary,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable {
+                            formerUsernameShowPopup.targetState = true
+                        }
+                    )
+                    
+                    // Supporter标志
+                    if (cardData.isSupporter) {
+                        val supporterShowPopup = remember { MutableTransitionState(false) }
+                        Surface(
+                            modifier = Modifier
+                                .height(20.dp)
+                                .clickable { supporterShowPopup.targetState = true },
+                            shape = RoundedCornerShape(100.dp),
+                            color = OSU_BRIGHT_RED // TODO: 硬编码颜色 - osu! Supporter 官方红色，是否保留？
+                        ) {
+                            Image(
+                                painter = rememberVectorPainter(
+                                    image = when (cardData.supporterRank) {
+                                        1 -> Filled.Heart1
+                                        2 -> Filled.Heart2
+                                        3 -> Filled.Heart3
+                                        else -> Filled.Heart1
+                                    }
+                                ),
+                                colorFilter = ColorFilter.tint(Color.White),
+                                contentDescription = "Supporter Rank",
+                                modifier = Modifier
+                                    .height(20.dp)
+                                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                            )
+                        }
+                        
+                        // Supporter Popup
+                        PopupTip(
+                            "Supporter Rank ${cardData.supporterRank}",
+                            OSU_BRIGHT_RED, // TODO: 硬编码颜色 - Popup背景色
+                            Modifier,
+                            supporterShowPopup,
+                            Alignment.TopCenter
+                        )
+                    }
+                    
+                    // Former username popup
+                    if (cardData.formerUsernames.isNotEmpty()) {
+                        PopupTip(
+                            "formerly known as:\n${cardData.formerUsernames}",
+                            colorScheme.onSurface,
+                            Modifier,
+                            formerUsernameShowPopup,
+                            Alignment.TopStart
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                // 国家和Team信息
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    // 国旗
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(cardData.flagUrl)
+                            .decoderFactory(SvgDecoder.Factory())
+                            .build(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier.width(20.dp)
+                    )
+                    
+                    // 国家名
+                    Text(
+                        text = cardData.country,
+                        color = colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    
+                    // Team信息（如果存在）
+                    if (cardData.teamId != 0 && cardData.teamShortName.isNotEmpty()) {
+                        Text(
+                            text = "•",
+                            color = colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        
+                        // Team旗帜
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(cardData.teamFlagUrl)
+                                .build(),
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.width(20.dp)
+                        )
+                        
+                        // Team简称
+                        Text(
+                            text = cardData.teamShortName,
+                            color = colorScheme.onSurfaceVariant,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                // 在线状态
+                OnlineStatus(cardData = cardData, colorScheme = colorScheme)
             }
         }
     }
+}
+
+/**
+ * 在线状态指示器
+ */
+@Composable
+private fun OnlineStatus(
+    cardData: OsuCardUiModel,
+    colorScheme: androidx.compose.material3.ColorScheme
+) {
+    val inlineContent = mapOf(
+        "onlineMark" to InlineTextContent(
+            Placeholder(
+                width = 20.sp,
+                height = 16.sp,
+                placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
+            )
+        ) {
+            Icon(
+                painter = rememberVectorPainter(image = Filled.OsuOnline),
+                tint = if (cardData.isOnline) Color(0xFF8DC63F) else colorScheme.onSurface.copy(alpha = 0.38f), // TODO: 硬编码颜色 - 在线绿色指示器，是否改为主题色？
+                contentDescription = stringResource(id = R.string.online_mark),
+                modifier = Modifier
+                    .size(16.dp)
+                    .padding(end = 4.dp)
+            )
+        }
+    )
+    
+    Text(
+        text = buildAnnotatedString {
+            appendInlineContent("onlineMark", "[${stringResource(id = R.string.online_mark)}]")
+            append(stringResource(id = if (cardData.isOnline) R.string.online else R.string.offline))
+        },
+        inlineContent = inlineContent,
+        color = if (cardData.isOnline) colorScheme.secondary else colorScheme.onSurface.copy(alpha = 0.6f),
+        style = MaterialTheme.typography.bodyMedium
+    )
 }

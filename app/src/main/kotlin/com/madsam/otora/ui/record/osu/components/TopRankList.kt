@@ -64,7 +64,7 @@ internal fun TopRankList(
     Column(
         modifier = Modifier
             .padding(bottom = 8.dp)
-            .clip(RoundedCornerShape(6.dp))
+            .clip(RoundedCornerShape(8.dp))
     ) {
         Row(
             modifier = Modifier
@@ -75,9 +75,14 @@ internal fun TopRankList(
         ) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
-                color = colorScheme.onSurface,
-                modifier = Modifier.padding(vertical = 8.dp)
+                style = MaterialTheme.typography.titleMedium,
+                color = colorScheme.onPrimary,
+                modifier = Modifier
+                    .background(
+                        color = colorScheme.primary,
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(horizontal = 12.dp, vertical = 4.dp)
             )
             if (items.isComplete) return@Row
             TextButton(
@@ -275,7 +280,7 @@ private fun TitleSection(
 
     Text(
         text = subtitle,
-        color = Yellow1000,
+        color = colorScheme.secondary,
         fontSize = 14.sp,
         lineHeight = 20.sp,
         overflow = TextOverflow.Ellipsis,
@@ -446,13 +451,13 @@ private fun PPBottomRow(
                         text = "${item.pp.format(2)}pp",
                         fontSize = 14.sp,
                         fontFamily = sarasaBold,
-                        color = colorScheme.onSurface
+                        color = colorScheme.primary
                     )
                     if (item.weightPP != 0.0) {
                         Text(
                             text = "${item.weightPP.format(2)}pp(" +
                                     "${item.weight.format(2)}%)",
-                            color = Yellow1000,
+                            color = colorScheme.secondary,
                             fontSize = 10.sp,
                             maxLines = 1,
                             modifier = Modifier

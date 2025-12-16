@@ -38,9 +38,9 @@ internal fun Level(
 
     Row(
         modifier = modifier
-            .padding(bottom = 4.dp)
-            .clip(RoundedCornerShape(6.dp))
-            .background(colorScheme.surfaceContainerHigh)
+            .padding(bottom = 8.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(colorScheme.surfaceContainerLow)
             .padding(16.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -77,7 +77,7 @@ internal fun Level(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
-                        color = colorScheme.surfaceContainerLow,
+                        color = colorScheme.surface,
                         shape = RoundedCornerShape(4.dp)
                     )
             )
@@ -98,7 +98,7 @@ internal fun Level(
                 Text(
                     textAlign = TextAlign.Center,
                     text = "${levelData.levelProgress}%",
-                    color = colorScheme.onSurface,
+                    color = colorScheme.primary,
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier
                         .align(

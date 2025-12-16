@@ -42,9 +42,9 @@ internal fun BadgeList(
     if (badgeListData.isNotEmpty()) {
         Surface(
             Modifier
-                .padding(bottom = 12.dp)
+                .padding(bottom = 16.dp)
                 .width(cardWidthDp),
-            RoundedCornerShape(20.dp),
+            RoundedCornerShape(16.dp),
             colorScheme.surfaceContainerHigh
         ) {
             var listWidthDp = cardWidthDp - 16.dp - 40.dp

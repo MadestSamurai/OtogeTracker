@@ -3014,10 +3014,760 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "66:1519000653959431637",
+      "lastPropertyId": "9:2573348054125113503",
+      "name": "OsuBadgeEntity",
+      "properties": [
+        {
+          "id": "1:2605699190799546949",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4949171106059816594",
+          "name": "odUserId",
+          "indexId": "146:6024026475439367241",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:7390882511687726160",
+          "name": "uniqueKey",
+          "indexId": "147:9033940376912536094",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "4:511475108334211694",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "5:3124412905278439293",
+          "name": "image2xUrl",
+          "type": 9
+        },
+        {
+          "id": "6:5948242407058828213",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "7:3454197798573556662",
+          "name": "awardedAt",
+          "type": 9
+        },
+        {
+          "id": "8:8656890225823517102",
+          "name": "url",
+          "type": 9
+        },
+        {
+          "id": "9:2573348054125113503",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "67:5717686366608439669",
+      "lastPropertyId": "14:5476612514143499904",
+      "name": "OsuMedalEntity",
+      "properties": [
+        {
+          "id": "1:6059206317486569318",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8953881318757683473",
+          "name": "odUserId",
+          "indexId": "148:2605618046695960852",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:8066799008063049049",
+          "name": "odAchievementId",
+          "type": 6
+        },
+        {
+          "id": "4:3149653850185763037",
+          "name": "uniqueKey",
+          "indexId": "149:7698065460800416924",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "5:6446049633190481084",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "6:5438769587389641682",
+          "name": "slug",
+          "type": 9
+        },
+        {
+          "id": "7:4673246406501598841",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "8:3155197599275943534",
+          "name": "mode",
+          "type": 9
+        },
+        {
+          "id": "9:3690702774643642768",
+          "name": "grouping",
+          "type": 9
+        },
+        {
+          "id": "10:2058328459037661029",
+          "name": "instructions",
+          "type": 9
+        },
+        {
+          "id": "11:6779490704244598030",
+          "name": "ordering",
+          "type": 5
+        },
+        {
+          "id": "12:5794259552774591811",
+          "name": "iconUrl",
+          "type": 9
+        },
+        {
+          "id": "13:315257727602598089",
+          "name": "achievedAt",
+          "type": 9
+        },
+        {
+          "id": "14:5476612514143499904",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "68:6666858898040878668",
+      "lastPropertyId": "6:3841803999016127447",
+      "name": "OsuRankHistoryEntity",
+      "properties": [
+        {
+          "id": "1:2476111994273861714",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5135864948624960431",
+          "name": "odUserId",
+          "indexId": "150:675276538665713810",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:4098796077348910374",
+          "name": "mode",
+          "type": 9
+        },
+        {
+          "id": "4:2850071546084582563",
+          "name": "uniqueKey",
+          "indexId": "151:1297003312218376521",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "5:3543108357507840013",
+          "name": "rankData",
+          "type": 9
+        },
+        {
+          "id": "6:3841803999016127447",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "69:3233472424437041455",
+      "lastPropertyId": "19:3249500679011360863",
+      "name": "OsuRecentActivityEntity",
+      "properties": [
+        {
+          "id": "1:4631603450234323285",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7737682466804137560",
+          "name": "odUserId",
+          "indexId": "152:9142479633020594530",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:1390337959744688025",
+          "name": "odActivityId",
+          "indexId": "153:3210565331948218756",
+          "type": 6,
+          "flags": 40
+        },
+        {
+          "id": "4:8755875246494197565",
+          "name": "type",
+          "type": 9
+        },
+        {
+          "id": "5:2011419664152075239",
+          "name": "rank",
+          "type": 5
+        },
+        {
+          "id": "6:1842852531264697510",
+          "name": "scoreRank",
+          "type": 9
+        },
+        {
+          "id": "7:6312337846045647540",
+          "name": "mode",
+          "type": 9
+        },
+        {
+          "id": "8:136466478829048641",
+          "name": "achievementName",
+          "type": 9
+        },
+        {
+          "id": "9:495687531200633238",
+          "name": "achievementDescription",
+          "type": 9
+        },
+        {
+          "id": "10:7732944379824661361",
+          "name": "achievementIconUrl",
+          "type": 9
+        },
+        {
+          "id": "11:8127452628761929924",
+          "name": "achievementId",
+          "type": 6
+        },
+        {
+          "id": "12:6151663451377943520",
+          "name": "beatmapId",
+          "type": 6
+        },
+        {
+          "id": "13:4357194156762890873",
+          "name": "beatmapTitle",
+          "type": 9
+        },
+        {
+          "id": "14:4517303755773532000",
+          "name": "beatmapUrl",
+          "type": 9
+        },
+        {
+          "id": "15:7139392934648331593",
+          "name": "beatmapsetId",
+          "type": 6
+        },
+        {
+          "id": "16:234320379411287434",
+          "name": "beatmapsetTitle",
+          "type": 9
+        },
+        {
+          "id": "17:8622955746104966865",
+          "name": "beatmapsetUrl",
+          "type": 9
+        },
+        {
+          "id": "18:5946662881334113739",
+          "name": "createdAt",
+          "type": 9
+        },
+        {
+          "id": "19:3249500679011360863",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "70:2310174888058048443",
+      "lastPropertyId": "39:792273065513480129",
+      "name": "OsuScoreEntity",
+      "properties": [
+        {
+          "id": "1:7447800319357890113",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6106678987211546726",
+          "name": "odUserId",
+          "indexId": "154:1117922476812098643",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:843041964388253197",
+          "name": "odScoreId",
+          "indexId": "155:3276994672541188823",
+          "type": 6,
+          "flags": 40
+        },
+        {
+          "id": "4:854159250572892907",
+          "name": "scoreType",
+          "type": 9
+        },
+        {
+          "id": "5:8945612627647615886",
+          "name": "score",
+          "type": 6
+        },
+        {
+          "id": "6:5315703737583090186",
+          "name": "maxCombo",
+          "type": 5
+        },
+        {
+          "id": "7:5276135110037552462",
+          "name": "accuracy",
+          "type": 8
+        },
+        {
+          "id": "8:4683463792548060666",
+          "name": "pp",
+          "type": 8
+        },
+        {
+          "id": "9:5224440406965407446",
+          "name": "ppWeight",
+          "type": 8
+        },
+        {
+          "id": "10:191895937198494072",
+          "name": "rank",
+          "type": 9
+        },
+        {
+          "id": "11:5618828283046863199",
+          "name": "mods",
+          "type": 9
+        },
+        {
+          "id": "12:8148617059438136454",
+          "name": "passed",
+          "type": 1
+        },
+        {
+          "id": "13:4487493380004082452",
+          "name": "perfect",
+          "type": 1
+        },
+        {
+          "id": "14:2111298508088527889",
+          "name": "countGeki",
+          "type": 5
+        },
+        {
+          "id": "15:5988345164602389254",
+          "name": "count300",
+          "type": 5
+        },
+        {
+          "id": "16:4704401515485047178",
+          "name": "countKatu",
+          "type": 5
+        },
+        {
+          "id": "17:8464981853282554031",
+          "name": "count100",
+          "type": 5
+        },
+        {
+          "id": "18:1746158901939706507",
+          "name": "count50",
+          "type": 5
+        },
+        {
+          "id": "19:3138893969779375911",
+          "name": "countMiss",
+          "type": 5
+        },
+        {
+          "id": "20:1865749238783954864",
+          "name": "beatmapId",
+          "type": 6
+        },
+        {
+          "id": "21:3116857035808645542",
+          "name": "beatmapSetId",
+          "type": 6
+        },
+        {
+          "id": "22:2295884600939184124",
+          "name": "beatmapTitle",
+          "type": 9
+        },
+        {
+          "id": "23:5995905253376514544",
+          "name": "beatmapArtist",
+          "type": 9
+        },
+        {
+          "id": "24:2950648936685028860",
+          "name": "beatmapVersion",
+          "type": 9
+        },
+        {
+          "id": "25:7821777345320825656",
+          "name": "beatmapDifficulty",
+          "type": 8
+        },
+        {
+          "id": "26:9020285950923730507",
+          "name": "beatmapBpm",
+          "type": 8
+        },
+        {
+          "id": "27:2231877347915662682",
+          "name": "beatmapCs",
+          "type": 8
+        },
+        {
+          "id": "28:8026154399535220172",
+          "name": "beatmapAr",
+          "type": 8
+        },
+        {
+          "id": "29:3951886963427687873",
+          "name": "beatmapOd",
+          "type": 8
+        },
+        {
+          "id": "30:6574419602644196439",
+          "name": "beatmapHp",
+          "type": 8
+        },
+        {
+          "id": "31:5776599747617960854",
+          "name": "beatmapLength",
+          "type": 5
+        },
+        {
+          "id": "32:8629463470704978038",
+          "name": "beatmapMode",
+          "type": 9
+        },
+        {
+          "id": "33:2219416321319430563",
+          "name": "beatmapStatus",
+          "type": 9
+        },
+        {
+          "id": "34:4279560890285006915",
+          "name": "beatmapCoverUrl",
+          "type": 9
+        },
+        {
+          "id": "35:1493543127434678504",
+          "name": "beatmapCreator",
+          "type": 9
+        },
+        {
+          "id": "36:102748801454308251",
+          "name": "beatmapCreatorId",
+          "type": 6
+        },
+        {
+          "id": "37:6942015165009305549",
+          "name": "position",
+          "type": 5
+        },
+        {
+          "id": "38:5513535031083701193",
+          "name": "playedAt",
+          "type": 9
+        },
+        {
+          "id": "39:792273065513480129",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "71:7101342159203818778",
+      "lastPropertyId": "47:4187972506223250872",
+      "name": "OsuUserEntity",
+      "properties": [
+        {
+          "id": "1:4932305511410428773",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5354046137319407001",
+          "name": "odUserId",
+          "indexId": "156:3714011989117759440",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:7018399563250897503",
+          "name": "dateKey",
+          "indexId": "157:3753107900011459369",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:4165961286896593006",
+          "name": "uniqueKey",
+          "indexId": "158:2021817109029353225",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "5:8332477314442017259",
+          "name": "username",
+          "type": 9
+        },
+        {
+          "id": "6:4674939579822946847",
+          "name": "country",
+          "type": 9
+        },
+        {
+          "id": "7:1114958760785269906",
+          "name": "countryCode",
+          "type": 9
+        },
+        {
+          "id": "8:310735073714036806",
+          "name": "avatarUrl",
+          "type": 9
+        },
+        {
+          "id": "9:2685197842848929673",
+          "name": "coverUrl",
+          "type": 9
+        },
+        {
+          "id": "10:8437536154425469370",
+          "name": "customCoverUrl",
+          "type": 9
+        },
+        {
+          "id": "11:1092594393445894052",
+          "name": "profileHue",
+          "type": 5
+        },
+        {
+          "id": "12:52650843604248834",
+          "name": "profileColour",
+          "type": 9
+        },
+        {
+          "id": "13:6859498352790249073",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "14:9185417630544132448",
+          "name": "isSupporter",
+          "type": 1
+        },
+        {
+          "id": "15:6102860636927642476",
+          "name": "supportLevel",
+          "type": 5
+        },
+        {
+          "id": "16:1323854076170777133",
+          "name": "isOnline",
+          "type": 1
+        },
+        {
+          "id": "17:2421133146847922011",
+          "name": "isBot",
+          "type": 1
+        },
+        {
+          "id": "18:1907698517164259779",
+          "name": "isDeleted",
+          "type": 1
+        },
+        {
+          "id": "19:5044001163653991814",
+          "name": "globalRank",
+          "type": 5
+        },
+        {
+          "id": "20:6819670393130490383",
+          "name": "countryRank",
+          "type": 5
+        },
+        {
+          "id": "21:5483673761331874726",
+          "name": "pp",
+          "type": 8
+        },
+        {
+          "id": "22:6585300537270608373",
+          "name": "playCount",
+          "type": 5
+        },
+        {
+          "id": "23:5457976761833488864",
+          "name": "playTime",
+          "type": 5
+        },
+        {
+          "id": "24:7806799672816375488",
+          "name": "rankedScore",
+          "type": 6
+        },
+        {
+          "id": "25:5137060471803857402",
+          "name": "totalScore",
+          "type": 6
+        },
+        {
+          "id": "26:6264165125758155969",
+          "name": "totalHits",
+          "type": 6
+        },
+        {
+          "id": "27:2764561350803255203",
+          "name": "maxCombo",
+          "type": 5
+        },
+        {
+          "id": "28:1663487674554098998",
+          "name": "accuracy",
+          "type": 8
+        },
+        {
+          "id": "29:1171884274216584559",
+          "name": "levelCurrent",
+          "type": 5
+        },
+        {
+          "id": "30:4836896462674295992",
+          "name": "levelProgress",
+          "type": 5
+        },
+        {
+          "id": "31:7827078412563446823",
+          "name": "gradeSsh",
+          "type": 5
+        },
+        {
+          "id": "32:5703376736893176807",
+          "name": "gradeSs",
+          "type": 5
+        },
+        {
+          "id": "33:8368804914464784331",
+          "name": "gradeSh",
+          "type": 5
+        },
+        {
+          "id": "34:8303452644420679818",
+          "name": "gradeS",
+          "type": 5
+        },
+        {
+          "id": "35:64584913145708229",
+          "name": "gradeA",
+          "type": 5
+        },
+        {
+          "id": "36:2454201164593632324",
+          "name": "followerCount",
+          "type": 5
+        },
+        {
+          "id": "37:5368042230326348522",
+          "name": "formerUsernames",
+          "type": 9
+        },
+        {
+          "id": "38:3468883987456523951",
+          "name": "tournamentBannerUrl",
+          "type": 9
+        },
+        {
+          "id": "39:1546772917883950447",
+          "name": "highestRank",
+          "type": 5
+        },
+        {
+          "id": "40:5040502544669287037",
+          "name": "highestRankDate",
+          "type": 9
+        },
+        {
+          "id": "41:6775466878938918163",
+          "name": "medalCount",
+          "type": 5
+        },
+        {
+          "id": "42:8789914042403668436",
+          "name": "currentMode",
+          "type": 9
+        },
+        {
+          "id": "43:1722724792712814140",
+          "name": "updatedAt",
+          "type": 6
+        },
+        {
+          "id": "44:8517378300758459618",
+          "name": "teamId",
+          "type": 5
+        },
+        {
+          "id": "45:2794801500533156805",
+          "name": "teamName",
+          "type": 9
+        },
+        {
+          "id": "46:6909606105331771559",
+          "name": "teamShortName",
+          "type": 9
+        },
+        {
+          "id": "47:4187972506223250872",
+          "name": "teamFlagUrl",
+          "type": 9
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "65:8938334562636967065",
-  "lastIndexId": "145:2332791803319793484",
+  "lastEntityId": "71:7101342159203818778",
+  "lastIndexId": "158:2021817109029353225",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",
   "modelVersion": 5,

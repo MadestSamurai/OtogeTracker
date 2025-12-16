@@ -1,6 +1,7 @@
 package com.madsam.otora.ui.record.osu
 
 import android.content.Context
+import android.util.Log
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -24,6 +25,7 @@ import com.madsam.otora.data.osu.remote.api.OsuRequestService
 import com.madsam.otora.core.utils.NumberFormatUtils.formatThousand
 import com.madsam.otora.core.utils.NumberFormatUtils.formatPercent
 import com.madsam.otora.data.osu.local.datastore.OsuConfigDataStore
+import com.madsam.otora.data.osu.local.objectbox.OsuObjectBoxService
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.glance.data.GlanceWidgetDataStore
 import com.squareup.moshi.Moshi
@@ -35,6 +37,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal class OsuViewModel() : ViewModel() {
+    
+    companion object {
+        private const val TAG = "OsuViewModel"
+    }
+    
     val cardUI = MutableStateFlow(OsuCardUiModel())
     val badgeUI = MutableStateFlow<List<OsuBadgeUiModel>>(emptyList())
     val groupListUI = MutableStateFlow<List<OsuGroupDTO>>(emptyList())
@@ -55,13 +62,24 @@ internal class OsuViewModel() : ViewModel() {
     private val glanceUI = MutableStateFlow(OsuGlanceUiModel())
 
     private val serviceScope = CoroutineScope(Dispatchers.IO)
+    private val objectBoxService = OsuObjectBoxService()
+    
+    // 保存当前用户ID用于持久化
+    private var currentUserId: Long = 0
+    private var currentMode: String = "osu"
 
     fun loadData(context: Context) {
         serviceScope.launch {
             val osuConfigDataStore = OsuConfigDataStore(context)
             val (userId, mode) = osuConfigDataStore.getConfig()
             val userIdOrDefault = userId.ifBlank { "2" }
+            currentUserId = userIdOrDefault.toLongOrNull() ?: 2L
+            currentMode = mode.ifBlank { "osu" }
             
+            // 先从缓存加载数据
+            loadFromCache()
+            
+            // 然后请求网络数据
             val osuRequestService = OsuRequestService()
             osuRequestService.getOsuMedals(
                 { osuInfoDTO: OsuInfoDTO -> fetchMedals(osuInfoDTO, context) }, userIdOrDefault, mode
@@ -101,7 +119,11 @@ internal class OsuViewModel() : ViewModel() {
                 isOnline = osuCard.isOnline,
                 isBot = osuCard.isBot,
                 isDeleted = osuCard.isDeleted,
-                profileColour = osuCard.profileColour.ifEmpty { "#F5F5F5" }
+                profileColour = osuCard.profileColour.ifEmpty { "#F5F5F5" },
+                teamId = osuCard.team?.id ?: 0,
+                teamName = osuCard.team?.name ?: "",
+                teamShortName = osuCard.team?.shortName ?: "",
+                teamFlagUrl = osuCard.team?.flagUrl ?: ""
                 // 注意：profileHue 由 fetchMedals 设置，这里不要覆盖
             )
         }
@@ -147,6 +169,16 @@ internal class OsuViewModel() : ViewModel() {
                 },
                 isComplete = osuRecentActivityDTOList.size <= 3
             )
+        }
+        
+        // 保存最近活动到 ObjectBox
+        serviceScope.launch {
+            try {
+                objectBoxService.saveRecentActivities(currentUserId, osuRecentActivityDTOList)
+                Log.d(TAG, "Recent activities saved to ObjectBox")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save recent activities: ${e.message}", e)
+            }
         }
     }
 
@@ -220,6 +252,16 @@ internal class OsuViewModel() : ViewModel() {
                 items = osuBestMap.take(2).map { fetchTopRankItem(it) },
                 isComplete = osuBestMap.size <= 2
             )
+        }
+        
+        // 保存 BP 成绩到 ObjectBox
+        serviceScope.launch {
+            try {
+                objectBoxService.saveScores(currentUserId, osuBestMap, "best")
+                Log.d(TAG, "Best scores saved to ObjectBox")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save best scores: ${e.message}", e)
+            }
         }
     }
 
@@ -334,6 +376,182 @@ internal class OsuViewModel() : ViewModel() {
             glanceIds.forEach { glanceId ->
                 widget.update(context, glanceId)
             }
+        }
+        
+        // 保存用户数据到 ObjectBox（按天存储）
+        serviceScope.launch {
+            try {
+                objectBoxService.saveUserData(currentUserId, osuInfoDTO)
+                Log.d(TAG, "User data saved to ObjectBox")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save user data: ${e.message}", e)
+            }
+        }
+    }
+    
+    /**
+     * 从缓存加载数据
+     */
+    private suspend fun loadFromCache() {
+        try {
+            // 加载用户数据
+            val cachedUser = objectBoxService.getLatestUserData(currentUserId)
+            if (cachedUser != null) {
+                Log.d(TAG, "Loading cached user data for userId=$currentUserId")
+                
+                cardUI.update {
+                    it.copy(
+                        username = cachedUser.username,
+                        country = cachedUser.country,
+                        flagUrl = OsuFlagAlphabet.getFlagAlphabet(cachedUser.countryCode),
+                        avatarUrl = cachedUser.avatarUrl,
+                        coverUrl = cachedUser.coverUrl,
+                        customCoverUrl = cachedUser.customCoverUrl,
+                        isOnline = cachedUser.isOnline,
+                        isBot = cachedUser.isBot,
+                        isDeleted = cachedUser.isDeleted,
+                        profileColour = cachedUser.profileColour.ifEmpty { "#F5F5F5" },
+                        profileHue = if (cachedUser.profileHue >= 0) cachedUser.profileHue else null,
+                        isTitle = cachedUser.title.isNotEmpty(),
+                        title = cachedUser.title,
+                        currentMode = cachedUser.currentMode,
+                        isSupporter = cachedUser.isSupporter,
+                        supporterRank = cachedUser.supportLevel,
+                        rank = "#${cachedUser.globalRank}",
+                        countryRank = "#${cachedUser.countryRank}",
+                        formerUsernames = cachedUser.formerUsernames,
+                        tournamentBannerImage2x = cachedUser.tournamentBannerUrl,
+                        teamId = cachedUser.teamId,
+                        teamName = cachedUser.teamName,
+                        teamShortName = cachedUser.teamShortName,
+                        teamFlagUrl = cachedUser.teamFlagUrl
+                    )
+                }
+                
+                topRankUI.value = OsuTopRankUiModel(
+                    rank = cachedUser.highestRank.toString(),
+                    date = cachedUser.highestRankDate
+                )
+                
+                val playTime = if (cachedUser.playTime != 0) {
+                    secondToDHMS(cachedUser.playTime.toLong())
+                } else {
+                    "0,0,0,0"
+                }
+                
+                playUI.update {
+                    it.copy(
+                        sshCount = cachedUser.gradeSsh.toLong(),
+                        ssCount = cachedUser.gradeSs.toLong(),
+                        shCount = cachedUser.gradeSh.toLong(),
+                        sCount = cachedUser.gradeS.toLong(),
+                        aCount = cachedUser.gradeA.toLong(),
+                        medalCount = cachedUser.medalCount,
+                        pp = cachedUser.pp,
+                        playTime = playTime,
+                        rankedScore = formatThousand(cachedUser.rankedScore),
+                        hitAccuracy = formatPercent(cachedUser.accuracy),
+                        playCount = formatThousand(cachedUser.playCount.toLong()),
+                        totalScore = formatThousand(cachedUser.totalScore),
+                        totalHits = formatThousand(cachedUser.totalHits),
+                        maximumCombo = formatThousand(cachedUser.maxCombo.toLong()),
+                        followerCount = formatThousand(cachedUser.followerCount.toLong())
+                    )
+                }
+                
+                levelUI.update {
+                    it.copy(
+                        level = cachedUser.levelCurrent.toLong(),
+                        levelProgress = cachedUser.levelProgress.toLong()
+                    )
+                }
+            }
+            
+            // 加载排名历史
+            val cachedRankHistory = objectBoxService.getRankHistory(currentUserId, currentMode)
+            if (cachedRankHistory != null) {
+                rankGraphUI.value = cachedRankHistory.getRankList()
+            }
+            
+            // 加载徽章
+            val cachedBadges = objectBoxService.getBadges(currentUserId)
+            if (cachedBadges.isNotEmpty()) {
+                badgeUI.update {
+                    cachedBadges.map { badge ->
+                        OsuBadgeUiModel(
+                            awardedAt = badge.awardedAt,
+                            description = badge.description,
+                            image2xUrl = badge.image2xUrl.ifEmpty { badge.imageUrl },
+                            url = badge.url
+                        )
+                    }
+                }
+            }
+            
+            // 加载 BP 成绩
+            val cachedScores = objectBoxService.getScores(currentUserId, "best")
+            if (cachedScores.isNotEmpty()) {
+                val scoreUiModels = cachedScores.map { score ->
+                    OsuTopRankUiModel(
+                        scoreId = score.odScoreId,
+                        cover2x = score.beatmapCoverUrl,
+                        beatmapSetTitle = score.beatmapTitle,
+                        beatmapSubTitle = score.beatmapVersion,
+                        artist = score.beatmapArtist,
+                        mode = score.beatmapMode,
+                        difficultyRating = score.beatmapDifficulty,
+                        pp = score.pp,
+                        accuracy = formatPercent(score.accuracy),
+                        rank = score.rank,
+                        date = score.playedAt,
+                        maxCombo = score.maxCombo.toLong(),
+                        score = score.score,
+                        mods = score.mods.split(",").filter { it.isNotBlank() },
+                        weight = score.ppWeight,
+                        weightPP = score.ppWeight * score.pp / 100.0,
+                        beatmapId = score.beatmapId,
+                        beatmapSetId = score.beatmapSetId,
+                        status = score.beatmapStatus
+                    )
+                }
+                bestUI.update { scoreUiModels }
+                bestBrief.update {
+                    OsuBriefUiModel(
+                        items = scoreUiModels.take(2),
+                        isComplete = scoreUiModels.size <= 2
+                    )
+                }
+            }
+            
+            // 加载最近活动
+            val cachedActivities = objectBoxService.getRecentActivities(currentUserId)
+            if (cachedActivities.isNotEmpty()) {
+                val activityUiModels = cachedActivities.map { activity ->
+                    OsuRecentUiModel(
+                        type = activity.type,
+                        rank = activity.rank.toString(),
+                        scoreRank = activity.scoreRank,
+                        beatmapTitle = activity.beatmapTitle,
+                        beatmapSetTitle = activity.beatmapsetTitle,
+                        createdAt = activity.createdAt,
+                        mode = activity.mode,
+                        achievement = activity.achievementName,
+                        modeAchievement = "",
+                        achievementIcon = activity.achievementIconUrl
+                    )
+                }
+                recentUI.update { activityUiModels }
+                recentBrief.update {
+                    OsuBriefUiModel(
+                        items = activityUiModels.take(3),
+                        isComplete = activityUiModels.size <= 3
+                    )
+                }
+            }
+            
+            Log.d(TAG, "Cache loaded successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to load from cache: ${e.message}", e)
         }
     }
 }

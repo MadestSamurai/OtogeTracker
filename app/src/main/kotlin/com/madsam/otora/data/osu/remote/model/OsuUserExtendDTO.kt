@@ -58,11 +58,19 @@ internal data class OsuUserExtendDTO(
     @param:Json(name = "support_level") var supportLevel: Int = 0,
     @param:Json(name = "user_achievements") var userAchievements: List<UserAchievement> = emptyList(),
     @param:Json(name = "rank_history") var rankHistory: RankHistory = RankHistory(),
-    @param:Json(name = "unranked_beatmapset_count") var unrankedBeatmapsetCount: Int = 0
+    @param:Json(name = "unranked_beatmapset_count") var unrankedBeatmapsetCount: Int = 0,
+    var team: Team? = null
 ) {
     internal data class Country(
         var code: String = "",
         var name: String = ""
+    )
+    
+    internal data class Team(
+        var id: Int = 0,
+        var name: String = "",
+        @param:Json(name = "short_name") var shortName: String = "",
+        @param:Json(name = "flag_url") var flagUrl: String = ""
     )
 
     internal data class Cover(
