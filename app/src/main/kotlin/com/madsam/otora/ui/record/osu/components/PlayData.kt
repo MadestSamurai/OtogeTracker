@@ -55,8 +55,8 @@ internal fun PlayData(
 
     Column(
         modifier = modifier
-            .padding(bottom = 8.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .padding(bottom = 12.dp)
+            .clip(RoundedCornerShape(12.dp))
             .background(colorScheme.surfaceContainerLow)
             .fillMaxWidth()
     ) {
@@ -65,7 +65,7 @@ internal fun PlayData(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(80.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(12.dp))
                 .background(colorScheme.surface)
                 .padding(top = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly

@@ -1,6 +1,7 @@
 package com.madsam.otora.ui.record.osu.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -22,8 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.madsam.otora.core.theme.OSU_DARK_RED
-import com.madsam.otora.core.utils.BrushUtils.getLevelBrush
+import com.madsam.otora.core.utils.BrushUtils
 import com.madsam.otora.data.osu.ui.model.OsuLevelUiModel
 import com.madsam.otora.ui.components.GradientBorderCircle
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,8 +38,8 @@ internal fun Level(
 
     Row(
         modifier = modifier
-            .padding(bottom = 8.dp)
-            .clip(RoundedCornerShape(8.dp))
+            .padding(bottom = 12.dp)
+            .clip(RoundedCornerShape(12.dp))
             .background(colorScheme.surfaceContainerLow)
             .padding(16.dp)
             .fillMaxWidth(),
@@ -51,7 +51,18 @@ internal fun Level(
             contentAlignment = Alignment.Center,
             modifier = Modifier.size(55.dp)
         ) {
-            val levelBrush = getLevelBrush(levelData.level.toInt())
+            // 使用原始颜色但应用 Sweep Gradient 以符合 M3E 设计
+            val isDarkTheme = isSystemInDarkTheme()
+            val levelColors = BrushUtils.getLevelColors(levelData.level.toInt(), isDarkTheme)
+            val levelBrush = androidx.compose.ui.graphics.Brush.sweepGradient(
+                colors = if (levelColors.size >= 2) {
+                    // 创建平滑的环形渐变 (Start -> End -> Start)
+                    listOf(levelColors[0], levelColors[1], levelColors[0])
+                } else {
+                    levelColors
+                }
+            )
+            
             GradientBorderCircle(
                 gradient = levelBrush,
                 borderSize = 3.dp,
@@ -61,7 +72,7 @@ internal fun Level(
                     textAlign = TextAlign.Center,
                     text = levelData.level.toString(),
                     color = colorScheme.onSurface,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                 )
             }
         }
@@ -77,7 +88,7 @@ internal fun Level(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
-                        color = colorScheme.surface,
+                        color = colorScheme.surfaceContainerHighest,
                         shape = RoundedCornerShape(4.dp)
                     )
             )
@@ -89,7 +100,7 @@ internal fun Level(
                         .fillMaxHeight()
                         .fillMaxWidth(levelData.levelProgress / 100f)
                         .background(
-                            color = OSU_DARK_RED,
+                            color = colorScheme.primary,
                             shape = RoundedCornerShape(4.dp)
                         )
                 )
@@ -98,7 +109,7 @@ internal fun Level(
                 Text(
                     textAlign = TextAlign.Center,
                     text = "${levelData.levelProgress}%",
-                    color = colorScheme.primary,
+                    color = if (levelData.levelProgress < 15) colorScheme.onSurface else colorScheme.onPrimary,
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier
                         .align(

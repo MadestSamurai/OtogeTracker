@@ -54,7 +54,6 @@ import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.madsam.otora.R
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.OSU_BRIGHT_RED // TODO: 硬编码颜色 - Supporter标志红色，是否需要改为主题色？
 import com.madsam.otora.data.osu.remote.model.OsuGroupDTO
 import com.madsam.otora.data.osu.ui.model.OsuCardUiModel
 import com.madsam.otora.ui.components.GroupListItem
@@ -79,7 +78,7 @@ internal fun Card(
     val groupListData = osuGroupDTOList.collectAsState(initial = emptyList()).value
 
     Column(
-        modifier = Modifier.padding(vertical = 16.dp)
+        modifier = Modifier.padding(vertical = 12.dp)
     ) {
         // 用户概览卡片（封面 + 头像 + 基本信息）
         UserProfileCard(
@@ -118,7 +117,7 @@ private fun UserProfileCard(
     
     Card(
         modifier = Modifier.width(cardWidthDp),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
             containerColor = colorScheme.surfaceContainerHighest
         ),
@@ -138,24 +137,8 @@ private fun UserProfileCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(100.dp)
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
             )
-            
-            // Tournament Banner（如果有）
-            if (cardData.tournamentBannerImage2x.isNotEmpty()) {
-                Image(
-                    painter = rememberAsyncImagePainter(
-                        model = cardData.tournamentBannerImage2x,
-                        contentScale = ContentScale.Crop
-                    ),
-                    contentDescription = "Tournament Banner",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(cardWidthDp / 50 * 3)
-                        .align(Alignment.TopStart)
-                )
-            }
             
             // Title标志
             if (cardData.isTitle) {
@@ -164,11 +147,11 @@ private fun UserProfileCard(
                         .align(Alignment.TopStart)
                         .padding(12.dp),
                     shape = RoundedCornerShape(8.dp),
-                    color = colorScheme.primary
+                    color = colorScheme.primaryContainer
                 ) {
                     Text(
                         text = cardData.title,
-                        color = colorScheme.onPrimary,
+                        color = colorScheme.onPrimaryContainer,
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
@@ -188,6 +171,21 @@ private fun UserProfileCard(
                     GroupListItem(osuGroupDTO = groupListData[index])
                 }
             }
+        }
+
+        // Tournament Banner（如果有）
+        if (cardData.tournamentBannerImage2x.isNotEmpty()) {
+            Image(
+                painter = rememberAsyncImagePainter(
+                    model = cardData.tournamentBannerImage2x,
+                    contentScale = ContentScale.Crop
+                ),
+                contentDescription = "Tournament Banner",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(cardWidthDp / 50 * 3)
+            )
         }
         
         // 用户信息区域
@@ -240,7 +238,7 @@ private fun UserProfileCard(
                                 .height(20.dp)
                                 .clickable { supporterShowPopup.targetState = true },
                             shape = RoundedCornerShape(100.dp),
-                            color = OSU_BRIGHT_RED // TODO: 硬编码颜色 - osu! Supporter 官方红色，是否保留？
+                            color = MaterialTheme.colorScheme.tertiary
                         ) {
                             Image(
                                 painter = rememberVectorPainter(
@@ -251,7 +249,7 @@ private fun UserProfileCard(
                                         else -> Filled.Heart1
                                     }
                                 ),
-                                colorFilter = ColorFilter.tint(Color.White),
+                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onTertiary),
                                 contentDescription = "Supporter Rank",
                                 modifier = Modifier
                                     .height(20.dp)
@@ -262,7 +260,7 @@ private fun UserProfileCard(
                         // Supporter Popup
                         PopupTip(
                             "Supporter Rank ${cardData.supporterRank}",
-                            OSU_BRIGHT_RED, // TODO: 硬编码颜色 - Popup背景色
+                            MaterialTheme.colorScheme.tertiary,
                             Modifier,
                             supporterShowPopup,
                             Alignment.TopCenter

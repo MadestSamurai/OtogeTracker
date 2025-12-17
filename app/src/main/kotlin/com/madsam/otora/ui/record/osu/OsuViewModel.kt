@@ -229,6 +229,16 @@ internal class OsuViewModel() : ViewModel() {
                 isComplete = osuPinnedMap.size <= 2
             )
         }
+        
+        // 保存 Pinned 成绩到 ObjectBox
+        serviceScope.launch {
+            try {
+                objectBoxService.saveScores(currentUserId, osuPinnedMap, "pinned")
+                Log.d(TAG, "Pinned scores saved to ObjectBox")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save pinned scores: ${e.message}", e)
+            }
+        }
     }
 
     private fun fetchFirstMap(osuFirstMap: List<OsuTopRankItemDTO>) {
@@ -240,6 +250,16 @@ internal class OsuViewModel() : ViewModel() {
                 items = osuFirstMap.take(2).map { fetchTopRankItem(it) },
                 isComplete = osuFirstMap.size <= 2
             )
+        }
+        
+        // 保存 First 成绩到 ObjectBox
+        serviceScope.launch {
+            try {
+                objectBoxService.saveScores(currentUserId, osuFirstMap, "first")
+                Log.d(TAG, "First place scores saved to ObjectBox")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save first place scores: ${e.message}", e)
+            }
         }
     }
 
@@ -276,13 +296,21 @@ internal class OsuViewModel() : ViewModel() {
                 rank = "#${osuInfoDTO.user.statistics.globalRank}",
                 countryRank = "#${osuInfoDTO.user.statistics.countryRank}",
                 formerUsernames = osuInfoDTO.user.previousUsernames.joinToString(", "),
-                maniaModeGlobalRank = if (osuInfoDTO.currentMode == "mania") {
-                    "4K: #${osuInfoDTO.user.statistics.variants[0].globalRank}\n" +
-                            "7K: #${osuInfoDTO.user.statistics.variants[1].globalRank}"
+                mania4kGlobalRank = if (osuInfoDTO.currentMode == "mania") {
+                    val variant = osuInfoDTO.user.statistics.variants.find { it.variant == "4k" }
+                    if (variant != null) "#${variant.globalRank}" else ""
                 } else "",
-                maniaModeCountryRank = if (osuInfoDTO.currentMode == "mania") {
-                    "4K: #${osuInfoDTO.user.statistics.countryRank}\n" +
-                            "7K: #${osuInfoDTO.user.statistics.countryRank}"
+                mania4kCountryRank = if (osuInfoDTO.currentMode == "mania") {
+                    val variant = osuInfoDTO.user.statistics.variants.find { it.variant == "4k" }
+                    if (variant != null) "#${variant.countryRank}" else ""
+                } else "",
+                mania7kGlobalRank = if (osuInfoDTO.currentMode == "mania") {
+                    val variant = osuInfoDTO.user.statistics.variants.find { it.variant == "7k" }
+                    if (variant != null) "#${variant.globalRank}" else ""
+                } else "",
+                mania7kCountryRank = if (osuInfoDTO.currentMode == "mania") {
+                    val variant = osuInfoDTO.user.statistics.variants.find { it.variant == "7k" }
+                    if (variant != null) "#${variant.countryRank}" else ""
                 } else "",
                 tournamentBannerImage2x = osuInfoDTO.user.activeTournamentBanner.image2x,
                 // 从 UserExtend 获取 profile_hue（用户自定义色相）
@@ -424,7 +452,13 @@ internal class OsuViewModel() : ViewModel() {
                         teamId = cachedUser.teamId,
                         teamName = cachedUser.teamName,
                         teamShortName = cachedUser.teamShortName,
-                        teamFlagUrl = cachedUser.teamFlagUrl
+                        teamFlagUrl = cachedUser.teamFlagUrl,
+                        
+                        // Mania Variants
+                        mania4kGlobalRank = if (cachedUser.mania4kGlobalRank > 0) "#${cachedUser.mania4kGlobalRank}" else "",
+                        mania4kCountryRank = if (cachedUser.mania4kCountryRank > 0) "#${cachedUser.mania4kCountryRank}" else "",
+                        mania7kGlobalRank = if (cachedUser.mania7kGlobalRank > 0) "#${cachedUser.mania7kGlobalRank}" else "",
+                        mania7kCountryRank = if (cachedUser.mania7kCountryRank > 0) "#${cachedUser.mania7kCountryRank}" else ""
                     )
                 }
                 
@@ -545,6 +579,76 @@ internal class OsuViewModel() : ViewModel() {
                     OsuBriefUiModel(
                         items = activityUiModels.take(3),
                         isComplete = activityUiModels.size <= 3
+                    )
+                }
+            }
+            
+            // 加载 Pinned 成绩
+            val cachedPinnedScores = objectBoxService.getScores(currentUserId, "pinned")
+            if (cachedPinnedScores.isNotEmpty()) {
+                val pinnedUiModels = cachedPinnedScores.map { score ->
+                    OsuTopRankUiModel(
+                        scoreId = score.odScoreId,
+                        cover2x = score.beatmapCoverUrl,
+                        beatmapSetTitle = score.beatmapTitle,
+                        beatmapSubTitle = score.beatmapVersion,
+                        artist = score.beatmapArtist,
+                        mode = score.beatmapMode,
+                        difficultyRating = score.beatmapDifficulty,
+                        pp = score.pp,
+                        accuracy = formatPercent(score.accuracy),
+                        rank = score.rank,
+                        date = score.playedAt,
+                        maxCombo = score.maxCombo.toLong(),
+                        score = score.score,
+                        mods = score.mods.split(",").filter { it.isNotBlank() },
+                        weight = score.ppWeight,
+                        weightPP = score.ppWeight * score.pp / 100.0,
+                        beatmapId = score.beatmapId,
+                        beatmapSetId = score.beatmapSetId,
+                        status = score.beatmapStatus
+                    )
+                }
+                pinnedUI.update { pinnedUiModels }
+                pinnedBrief.update {
+                    OsuBriefUiModel(
+                        items = pinnedUiModels.take(2),
+                        isComplete = pinnedUiModels.size <= 2
+                    )
+                }
+            }
+            
+            // 加载 First Place 成绩
+            val cachedFirstScores = objectBoxService.getScores(currentUserId, "first")
+            if (cachedFirstScores.isNotEmpty()) {
+                val firstUiModels = cachedFirstScores.map { score ->
+                    OsuTopRankUiModel(
+                        scoreId = score.odScoreId,
+                        cover2x = score.beatmapCoverUrl,
+                        beatmapSetTitle = score.beatmapTitle,
+                        beatmapSubTitle = score.beatmapVersion,
+                        artist = score.beatmapArtist,
+                        mode = score.beatmapMode,
+                        difficultyRating = score.beatmapDifficulty,
+                        pp = score.pp,
+                        accuracy = formatPercent(score.accuracy),
+                        rank = score.rank,
+                        date = score.playedAt,
+                        maxCombo = score.maxCombo.toLong(),
+                        score = score.score,
+                        mods = score.mods.split(",").filter { it.isNotBlank() },
+                        weight = score.ppWeight,
+                        weightPP = score.ppWeight * score.pp / 100.0,
+                        beatmapId = score.beatmapId,
+                        beatmapSetId = score.beatmapSetId,
+                        status = score.beatmapStatus
+                    )
+                }
+                firstUI.update { firstUiModels }
+                firstBrief.update {
+                    OsuBriefUiModel(
+                        items = firstUiModels.take(2),
+                        isComplete = firstUiModels.size <= 2
                     )
                 }
             }

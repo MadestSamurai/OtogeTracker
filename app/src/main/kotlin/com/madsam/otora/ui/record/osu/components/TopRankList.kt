@@ -64,38 +64,30 @@ internal fun TopRankList(
     Column(
         modifier = Modifier
             .padding(bottom = 8.dp)
-            .clip(RoundedCornerShape(8.dp))
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 4.dp),
+                .padding(horizontal = 4.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                color = colorScheme.onPrimary,
-                modifier = Modifier
-                    .background(
-                        color = colorScheme.primary,
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
+                color = colorScheme.onSurface,
+                modifier = Modifier.padding(start = 4.dp)
             )
             if (items.isComplete) return@Row
             TextButton(
                 onClick = onMoreClick,
-                contentPadding = PaddingValues(0.dp),
-                modifier = Modifier
-                    .defaultMinSize(1.dp, 1.dp)
-                    .height(24.dp)
+                contentPadding = PaddingValues(horizontal = 12.dp),
+                modifier = Modifier.height(32.dp)
             ) {
                 Text(
                     text = "More",
-                    color = colorScheme.onSurface,
-                    style = MaterialTheme.typography.bodyLarge
+                    color = colorScheme.primary,
+                    style = MaterialTheme.typography.labelLarge
                 )
             }
         }

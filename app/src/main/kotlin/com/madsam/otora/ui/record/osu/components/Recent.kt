@@ -66,27 +66,28 @@ internal fun Recent(
         LocalWindowInfo.current.containerSize.width.toDp()
     }
 
-    Surface(
+    Column(
         modifier = Modifier
             .width(screenWidthDp)
-            .padding(top = 16.dp),
-        shape = RoundedCornerShape(16.dp),
-        color = colorScheme.surfaceContainer
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 12.dp)
     ) {
+        // Header row
+        RecentHeader(
+            isComplete = activities.isComplete,
+            onMoreClick = onMoreClick
+        )
+        
+        // Items list container
         Column(
-            modifier = Modifier.padding(16.dp, 10.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
         ) {
-            // Header row
-            RecentHeader(
-                isComplete = activities.isComplete,
-                onMoreClick = onMoreClick
-            )
-            
-            // Items list
             activities.items.forEachIndexed { index, item ->
                 RecentItem(item, cardWidthDp)
                 if (index < activities.items.size - 1) {
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(2.dp))
                 }
             }
         }
@@ -102,29 +103,22 @@ private fun RecentHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 4.dp),
+            .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = "Recent",
             style = MaterialTheme.typography.titleMedium,
-            color = colorScheme.onPrimary,
-            modifier = Modifier
-                .background(
-                    color = colorScheme.primary,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .padding(horizontal = 12.dp, vertical = 4.dp)
+            color = colorScheme.onSurface,
+            modifier = Modifier.padding(start = 4.dp)
         )
         
         if (!isComplete) {
             TextButton(
                 onClick = onMoreClick,
-                contentPadding = PaddingValues(0.dp),
-                modifier = Modifier
-                    .defaultMinSize(1.dp, 1.dp)
-                    .height(24.dp)
+                contentPadding = PaddingValues(horizontal = 12.dp),
+                modifier = Modifier.height(32.dp)
             ) {
                 Text(
                     text = "More",
@@ -234,11 +228,10 @@ internal fun RecentItem(
     Column(
         modifier = Modifier
             .width(cardWidthDp)
-            .clip(RoundedCornerShape(6.dp))
             .background(colorScheme.surfaceContainer)
-            .padding(vertical = 2.dp)
+            .padding(vertical = 8.dp, horizontal = 4.dp)
     ) {
-        val textWidth = cardWidthDp - 8.dp
+        val textWidth = cardWidthDp - 16.dp
         val inlineContent = mapOf(
             "mode" to InlineTextContent(
                 Placeholder(

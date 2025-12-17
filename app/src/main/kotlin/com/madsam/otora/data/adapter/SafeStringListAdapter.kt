@@ -13,7 +13,14 @@ internal class SafeStringListAdapter {
             val list = mutableListOf<String>()
             reader.beginArray()
             while (reader.hasNext()) {
-                list.add(reader.nextString())
+                when (reader.peek()) {
+                    JsonReader.Token.STRING -> list.add(reader.nextString())
+                    JsonReader.Token.BEGIN_OBJECT -> {
+                        // Skip objects (e.g., for account_history which returns objects instead of strings)
+                        reader.skipValue()
+                    }
+                    else -> reader.skipValue()
+                }
             }
             reader.endArray()
             list

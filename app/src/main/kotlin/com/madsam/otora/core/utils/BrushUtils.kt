@@ -2,6 +2,8 @@ package com.madsam.otora.core.utils
 
 import android.util.Log
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import com.madsam.otora.core.theme.*
 import com.madsam.otora.core.theme.GradientBrush.BlueGradientBg
 import com.madsam.otora.core.theme.GradientBrush.BronzeGradientBg
 import com.madsam.otora.core.theme.GradientBrush.BronzeGradientText
@@ -49,6 +51,41 @@ object BrushUtils {
             in 100..104 -> GoldGradientBg
             in 105..109 -> PlatinumGradientBg
             else -> RainbowGradientBg
+        }
+    }
+
+    /**
+     * 获取等级对应的颜色列表 (用于自定义渐变)
+     *
+     * @param value 等级值
+     * @param isDarkTheme 是否为暗色主题
+     * @return 对应的颜色列表
+     */
+    fun getLevelColors(value: Int, isDarkTheme: Boolean = true): List<Color> {
+        if (isDarkTheme) {
+            // 使用官方新版 Tier 颜色
+            return when {
+                value >= 110 -> listOf(TIER_LUSTROUS_1, TIER_LUSTROUS_2) // Lustrous
+                value >= 105 -> listOf(TIER_RADIANT_1, TIER_RADIANT_2)   // Radiant
+                value >= 100 -> listOf(TIER_RHODIUM_1, TIER_RHODIUM_2)   // Rhodium
+                value >= 80 -> listOf(TIER_PLATINUM_1, TIER_PLATINUM_2)  // Platinum
+                value >= 60 -> listOf(TIER_GOLD_1, TIER_GOLD_2)          // Gold
+                value >= 40 -> listOf(TIER_SILVER_1, TIER_SILVER_2)      // Silver
+                value >= 20 -> listOf(TIER_BRONZE_1, TIER_BRONZE_2)      // Bronze
+                else -> listOf(TIER_IRON_1, TIER_IRON_2)                 // Iron
+            }
+        } else {
+            // 亮色主题下的深色变体 (基于新版 Tier 逻辑调整)
+            return when {
+                value >= 110 -> listOf(TIER_LUSTROUS_DARK_1, TIER_LUSTROUS_DARK_2) // Lustrous (Darker Yellow -> Pink)
+                value >= 105 -> listOf(TIER_RADIANT_DARK_1, TIER_RADIANT_DARK_2)   // Radiant (Darker Blue -> Purple)
+                value >= 100 -> listOf(TIER_RHODIUM_DARK_1, TIER_RHODIUM_DARK_2)   // Rhodium (Dark Green)
+                value >= 80 -> listOf(TIER_PLATINUM_DARK_1, TIER_PLATINUM_DARK_2)  // Platinum (Dark Cyan)
+                value >= 60 -> listOf(TIER_GOLD_DARK_1, TIER_GOLD_DARK_2)          // Gold (Dark Orange/Gold)
+                value >= 40 -> listOf(TIER_SILVER_DARK_1, TIER_SILVER_DARK_2)      // Silver (Dark Grey)
+                value >= 20 -> listOf(TIER_BRONZE_DARK_1, TIER_BRONZE_DARK_2)      // Bronze (Dark Brown)
+                else -> listOf(TIER_IRON_DARK_1, TIER_IRON_DARK_2)                 // Iron (Grey)
+            }
         }
     }
 

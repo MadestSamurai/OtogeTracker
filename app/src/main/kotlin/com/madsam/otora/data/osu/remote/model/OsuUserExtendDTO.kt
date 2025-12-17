@@ -43,7 +43,7 @@ internal data class OsuUserExtendDTO(
     @param:Json(name = "is_restricted") var isRestricted: Boolean = false,
     @param:Json(name = "is_silenced") var isSilenced: Boolean = false,
     var kudosu: Kudosu = Kudosu(),
-    @param:Json(name = "account_history") var accountHistory: List<String> = emptyList(),
+    @param:Json(name = "account_history") var accountHistory: List<AccountHistory> = emptyList(),
     @param:Json(name = "active_tournament_banner") var activeTournamentBanner: ActiveTournamentBanner = ActiveTournamentBanner(),
     @param:Json(name = "active_tournament_banners") var activeTournamentBanners: List<ActiveTournamentBanner> = emptyList(),
     var badges: List<Badge> = emptyList(),
@@ -82,6 +82,15 @@ internal data class OsuUserExtendDTO(
     internal data class Kudosu(
         var total: Int = 0,
         var available: Int = 0
+    )
+
+    internal data class AccountHistory(
+        var description: String = "",
+        var id: Long = 0,
+        var length: Int = 0,
+        var permanent: Boolean = false,
+        var timestamp: String = "",
+        var type: String = ""
     )
 
     internal data class ActiveTournamentBanner(

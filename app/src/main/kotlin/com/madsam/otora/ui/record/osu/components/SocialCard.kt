@@ -55,14 +55,8 @@ internal fun SocialCard(
     Column(
         modifier = Modifier
             .width(cardWidthDp)
-            .clip(
-                RoundedCornerShape(
-                    topStart = 8.dp,
-                    topEnd = 8.dp,
-                    bottomStart = 16.dp,
-                    bottomEnd = 16.dp
-                )
-            )
+            .padding(bottom = 12.dp)
+            .clip(RoundedCornerShape(12.dp))
             .background(colorScheme.surfaceContainerLow)
             .padding(vertical = 16.dp)
     ) {

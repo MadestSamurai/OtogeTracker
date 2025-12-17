@@ -122,6 +122,22 @@ internal class OsuObjectBoxService {
                 // 模式
                 this.currentMode = info.currentMode
                 
+                // Mania Variants
+                if (info.currentMode == "mania") {
+                    val variant4k = stats.variants.find { it.variant == "4k" }
+                    val variant7k = stats.variants.find { it.variant == "7k" }
+                    
+                    this.mania4kGlobalRank = variant4k?.globalRank ?: 0
+                    this.mania4kCountryRank = variant4k?.countryRank ?: 0
+                    this.mania7kGlobalRank = variant7k?.globalRank ?: 0
+                    this.mania7kCountryRank = variant7k?.countryRank ?: 0
+                } else {
+                    this.mania4kGlobalRank = 0
+                    this.mania4kCountryRank = 0
+                    this.mania7kGlobalRank = 0
+                    this.mania7kCountryRank = 0
+                }
+                
                 this.updatedAt = now
             }
             

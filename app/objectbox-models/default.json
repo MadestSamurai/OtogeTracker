@@ -3517,7 +3517,7 @@
     },
     {
       "id": "71:7101342159203818778",
-      "lastPropertyId": "47:4187972506223250872",
+      "lastPropertyId": "51:3048263678146106434",
       "name": "OsuUserEntity",
       "properties": [
         {
@@ -3761,6 +3761,26 @@
           "id": "47:4187972506223250872",
           "name": "teamFlagUrl",
           "type": 9
+        },
+        {
+          "id": "48:3035368939403684441",
+          "name": "mania4kGlobalRank",
+          "type": 5
+        },
+        {
+          "id": "49:2482358670400889056",
+          "name": "mania4kCountryRank",
+          "type": 5
+        },
+        {
+          "id": "50:2387182054346458775",
+          "name": "mania7kGlobalRank",
+          "type": 5
+        },
+        {
+          "id": "51:3048263678146106434",
+          "name": "mania7kCountryRank",
+          "type": 5
         }
       ],
       "relations": []

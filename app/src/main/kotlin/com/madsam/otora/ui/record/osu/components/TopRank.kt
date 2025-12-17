@@ -40,41 +40,35 @@ internal fun TopRank(
         LocalWindowInfo.current.containerSize.width.toDp()
     }
 
-    Surface(
-        Modifier
+    Column(
+        modifier = Modifier
             .width(screenWidthDp)
-            .padding(vertical = 16.dp),
-        RoundedCornerShape(16.dp),
-        colorScheme.surfaceContainer
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 12.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .padding(start = 16.dp, end = 16.dp, bottom = 10.dp, top = 10.dp)
-        ) {
-            if (pinnedData.items.isEmpty() && topData.items.isEmpty() && firstData.items.isEmpty()) {
-                Text(
-                    text = "No play records",
-                    color = colorScheme.onSurface,
-                    fontSize = 24.sp,
-                    fontFamily = sarasaSemiBold,
-                    modifier = Modifier.padding(16.dp)
-                )
-                return@Column
+        if (pinnedData.items.isEmpty() && topData.items.isEmpty() && firstData.items.isEmpty()) {
+            Text(
+                text = "No play records",
+                color = colorScheme.onSurface,
+                fontSize = 24.sp,
+                fontFamily = sarasaSemiBold,
+                modifier = Modifier.padding(16.dp)
+            )
+            return@Column
+        }
+        if (pinnedData.items.isNotEmpty()) {
+            TopRankList(pinnedData, "Pinned", cardWidthDp) {
+                pinnedOnMoreClick()
             }
-            if (pinnedData.items.isNotEmpty()) {
-                TopRankList(pinnedData, "Pinned", cardWidthDp) {
-                    pinnedOnMoreClick()
-                }
+        }
+        if (topData.items.isNotEmpty()) {
+            TopRankList(topData, "Top", cardWidthDp) {
+                topOnMoreClick()
             }
-            if (topData.items.isNotEmpty()) {
-                TopRankList(topData, "Top", cardWidthDp) {
-                    topOnMoreClick()
-                }
-            }
-            if (firstData.items.isNotEmpty()) {
-                TopRankList(firstData, "First", cardWidthDp) {
-                    firstOnMoreClick()
-                }
+        }
+        if (firstData.items.isNotEmpty()) {
+            TopRankList(firstData, "First", cardWidthDp) {
+                firstOnMoreClick()
             }
         }
     }
