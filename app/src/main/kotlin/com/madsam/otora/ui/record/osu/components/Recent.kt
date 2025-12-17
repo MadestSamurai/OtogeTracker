@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,7 +16,6 @@ import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -30,8 +28,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
@@ -46,7 +42,6 @@ import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.OSU_ARROW_YELLOW
 import com.madsam.otora.core.theme.OSU_HEART_RED
 import com.madsam.otora.core.theme.OSU_ROTATE_GREEN
-import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.utils.DateTimeUtils.dateCodeToRecent
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.data.osu.ui.model.OsuRecentUiModel
@@ -58,18 +53,12 @@ internal fun Recent(
     cardWidthDp: Dp,
     onMoreClick: () -> Unit
 ) {
-    val colorScheme = MaterialTheme.colorScheme
     val activities by recentActivityList.collectAsState()
     if (activities.items.isEmpty()) return
 
-    val screenWidthDp = with(LocalDensity.current) {
-        LocalWindowInfo.current.containerSize.width.toDp()
-    }
-
     Column(
         modifier = Modifier
-            .width(screenWidthDp)
-            .padding(horizontal = 16.dp)
+            .width(cardWidthDp)
             .padding(bottom = 12.dp)
     ) {
         // Header row
@@ -103,7 +92,7 @@ private fun RecentHeader(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(horizontal = 4.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -122,8 +111,8 @@ private fun RecentHeader(
             ) {
                 Text(
                     text = "More",
-                    color = colorScheme.onSurface,
-                    style = MaterialTheme.typography.bodyMedium,
+                    color = colorScheme.primary,
+                    style = MaterialTheme.typography.labelLarge,
                 )
             }
         }

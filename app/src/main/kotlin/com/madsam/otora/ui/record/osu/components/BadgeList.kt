@@ -45,7 +45,7 @@ internal fun BadgeList(
                 .padding(bottom = 16.dp)
                 .width(cardWidthDp),
             RoundedCornerShape(16.dp),
-            colorScheme.surfaceContainerHigh
+            colorScheme.surfaceContainer
         ) {
             var listWidthDp = cardWidthDp - 16.dp - 40.dp
             val imageCount = (listWidthDp / (68.dp + 12.dp)).toInt()

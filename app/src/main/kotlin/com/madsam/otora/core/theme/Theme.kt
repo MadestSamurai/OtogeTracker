@@ -18,7 +18,7 @@ val OtogeDefaultSourceColor = Color(0xFF7C5CBF)
 @Composable
 fun OtogeTrackerTheme(
     sourceColor: Color = OtogeDefaultSourceColor, // 源颜色，默认紫罗兰
-    style: DynamicColorScheme.Style = DynamicColorScheme.Style.TONAL_SPOT,
+    style: DynamicColorScheme.Style = DynamicColorScheme.Style.FIDELITY,
     darkTheme: Boolean = isSystemInDarkTheme(), // 跟随系统主题
     content: @Composable () -> Unit
 ) {

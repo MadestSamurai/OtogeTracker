@@ -15,6 +15,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,10 +34,6 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -48,7 +45,6 @@ import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -58,6 +54,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.animation.doOnEnd
@@ -67,6 +65,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.core.theme.DynamicColorScheme
+import com.madsam.otora.core.theme.OtogeDefaultSourceColor
 import com.madsam.otora.core.theme.OtogeTrackerTheme
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.data.bof.remote.api.BofRequestService
@@ -492,6 +492,96 @@ fun ColorRoleExamplesScreen() {
                 modifier = Modifier.padding(bottom = 24.dp)
             )
         }
+
+        // Background Color Analysis
+        item {
+            Text(
+                text = "Background Color Analysis",
+                style = MaterialTheme.typography.headlineSmall,
+                color = colorScheme.onSurface,
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+            
+            val styles = DynamicColorScheme.Style.entries
+            val isDark = isSystemInDarkTheme()
+            
+            styles.forEach { style ->
+                val scheme = DynamicColorScheme.generateColorScheme(
+                    sourceColor = OtogeDefaultSourceColor,
+                    isDark = isDark,
+                    style = style
+                )
+                
+                val bgHex = "#${Integer.toHexString(scheme.background.toArgb()).uppercase()}"
+                val surfaceHex = "#${Integer.toHexString(scheme.surface.toArgb()).uppercase()}"
+                val surfaceContainerHex = "#${Integer.toHexString(scheme.surfaceContainer.toArgb()).uppercase()}"
+                val primaryContainerHex = "#${Integer.toHexString(scheme.primaryContainer.toArgb()).uppercase()}"
+                
+                // Log to console
+                android.util.Log.d("ColorAnalysis", "Style: ${style.name}, BG: $bgHex, Surface: $surfaceHex, Container: $surfaceContainerHex, PrimaryContainer: $primaryContainerHex")
+                
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                        .background(scheme.background, RoundedCornerShape(8.dp))
+                        .border(1.dp, colorScheme.outline, RoundedCornerShape(8.dp))
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = "Style: ${style.name}",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = scheme.onBackground
+                    )
+                    Text(
+                        text = "Background: $bgHex",
+                        color = scheme.onBackground
+                    )
+                    Text(
+                        text = "Surface: $surfaceHex",
+                        color = scheme.onBackground
+                    )
+                     Text(
+                        text = "Surface Container: $surfaceContainerHex",
+                        color = scheme.onBackground
+                    )
+                    
+                    // Split Pane Simulation
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp)
+                            .border(1.dp, scheme.outlineVariant, RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(8.dp))
+                    ) {
+                        // Left Pane (List)
+                        Box(
+                            modifier = Modifier
+                                .weight(0.4f)
+                                .fillMaxSize()
+                                .background(scheme.surface)
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("List (Surface)", style = MaterialTheme.typography.bodySmall, color = scheme.onSurface)
+                        }
+                        
+                        // Right Pane (Detail/Chat)
+                        Box(
+                            modifier = Modifier
+                                .weight(0.6f)
+                                .fillMaxSize()
+                                .background(scheme.surfaceContainer)
+                                .padding(8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("Chat (Container)", style = MaterialTheme.typography.bodySmall, color = scheme.onSurface)
+                        }
+                    }
+                }
+            }
+        }
         
         // Primary - High-emphasis filled button
         item {
@@ -515,7 +605,7 @@ fun ColorRoleExamplesScreen() {
         
         // Primary Container - FAB
         item {
-            androidx.compose.foundation.layout.Row(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp),
@@ -762,7 +852,7 @@ fun ColorRoleExamplesScreen() {
                     )
                     .padding(16.dp)
             ) {
-                androidx.compose.foundation.layout.Row(
+                Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
@@ -810,8 +900,8 @@ fun ColorRoleExamplesScreen() {
             }
             
             Spacer(modifier = Modifier.height(8.dp))
-            
-            androidx.compose.foundation.layout.Column {
+
+            Column {
                 androidx.compose.material3.HorizontalDivider(
                     color = colorScheme.outlineVariant
                 )
@@ -843,7 +933,7 @@ fun ColorRoleExamplesScreen() {
                     )
                     .padding(16.dp)
             ) {
-                androidx.compose.foundation.layout.Row(
+                Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
@@ -864,169 +954,6 @@ fun ColorRoleExamplesScreen() {
             }
             Spacer(modifier = Modifier.height(24.dp))
         }
-    }
-}
-
-@Composable
-private fun SurfaceContainerExample(
-    name: String,
-    color: androidx.compose.ui.graphics.Color
-) {
-    val colorScheme = MaterialTheme.colorScheme
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(color, androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-            .padding(12.dp)
-    ) {
-        Text(
-            text = name,
-            color = colorScheme.onSurface,
-            style = MaterialTheme.typography.bodyMedium
-        )
-    }
-}
-
-@Composable
-fun Screen2() {
-    val colorScheme = MaterialTheme.colorScheme
-    
-    androidx.compose.foundation.lazy.LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorScheme.surface)
-            .padding(16.dp)
-    ) {
-        item {
-            Text(
-                text = "Material 3 Color Scheme",
-                style = MaterialTheme.typography.headlineMedium,
-                color = colorScheme.onSurface,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-        }
-        
-        // Primary colors
-        item { ColorCategory("Primary Colors") }
-        item { ColorItem("primary", colorScheme.primary, colorScheme.onPrimary) }
-        item { ColorItem("onPrimary", colorScheme.onPrimary, colorScheme.primary) }
-        item { ColorItem("primaryContainer", colorScheme.primaryContainer, colorScheme.onPrimaryContainer) }
-        item { ColorItem("onPrimaryContainer", colorScheme.onPrimaryContainer, colorScheme.primaryContainer) }
-        item { ColorItem("inversePrimary", colorScheme.inversePrimary, colorScheme.surface) }
-        
-        // Secondary colors
-        item { ColorCategory("Secondary Colors") }
-        item { ColorItem("secondary", colorScheme.secondary, colorScheme.onSecondary) }
-        item { ColorItem("onSecondary", colorScheme.onSecondary, colorScheme.secondary) }
-        item { ColorItem("secondaryContainer", colorScheme.secondaryContainer, colorScheme.onSecondaryContainer) }
-        item { ColorItem("onSecondaryContainer", colorScheme.onSecondaryContainer, colorScheme.secondaryContainer) }
-        
-        // Tertiary colors
-        item { ColorCategory("Tertiary Colors") }
-        item { ColorItem("tertiary", colorScheme.tertiary, colorScheme.onTertiary) }
-        item { ColorItem("onTertiary", colorScheme.onTertiary, colorScheme.tertiary) }
-        item { ColorItem("tertiaryContainer", colorScheme.tertiaryContainer, colorScheme.onTertiaryContainer) }
-        item { ColorItem("onTertiaryContainer", colorScheme.onTertiaryContainer, colorScheme.tertiaryContainer) }
-        
-        // Background colors
-        item { ColorCategory("Background Colors") }
-        item { ColorItem("background", colorScheme.background, colorScheme.onBackground) }
-        item { ColorItem("onBackground", colorScheme.onBackground, colorScheme.background) }
-        
-        // Surface colors
-        item { ColorCategory("Surface Colors") }
-        item { ColorItem("surface", colorScheme.surface, colorScheme.onSurface) }
-        item { ColorItem("onSurface", colorScheme.onSurface, colorScheme.surface) }
-        item { ColorItem("surfaceVariant", colorScheme.surfaceVariant, colorScheme.onSurfaceVariant) }
-        item { ColorItem("onSurfaceVariant", colorScheme.onSurfaceVariant, colorScheme.surface) }
-        item { ColorItem("surfaceTint", colorScheme.surfaceTint, colorScheme.onSurface) }
-        item { ColorItem("inverseSurface", colorScheme.inverseSurface, colorScheme.inverseOnSurface) }
-        item { ColorItem("inverseOnSurface", colorScheme.inverseOnSurface, colorScheme.inverseSurface) }
-        item { ColorItem("surfaceBright", colorScheme.surfaceBright, colorScheme.onSurface) }
-        item { ColorItem("surfaceDim", colorScheme.surfaceDim, colorScheme.onSurface) }
-        
-        // Surface container variants
-        item { ColorCategory("Surface Container Variants") }
-        item { ColorItem("surfaceContainer", colorScheme.surfaceContainer, colorScheme.onSurface) }
-        item { ColorItem("surfaceContainerHigh", colorScheme.surfaceContainerHigh, colorScheme.onSurface) }
-        item { ColorItem("surfaceContainerHighest", colorScheme.surfaceContainerHighest, colorScheme.onSurface) }
-        item { ColorItem("surfaceContainerLow", colorScheme.surfaceContainerLow, colorScheme.onSurface) }
-        item { ColorItem("surfaceContainerLowest", colorScheme.surfaceContainerLowest, colorScheme.onSurface) }
-        
-        // Error colors
-        item { ColorCategory("Error Colors") }
-        item { ColorItem("error", colorScheme.error, colorScheme.onError) }
-        item { ColorItem("onError", colorScheme.onError, colorScheme.error) }
-        item { ColorItem("errorContainer", colorScheme.errorContainer, colorScheme.onErrorContainer) }
-        item { ColorItem("onErrorContainer", colorScheme.onErrorContainer, colorScheme.errorContainer) }
-        
-        // Outline colors
-        item { ColorCategory("Outline Colors") }
-        item { ColorItem("outline", colorScheme.outline, colorScheme.surface) }
-        item { ColorItem("outlineVariant", colorScheme.outlineVariant, colorScheme.surface) }
-        
-        // Fixed colors
-        item { ColorCategory("Primary Fixed Colors") }
-        item { ColorItem("primaryFixed", colorScheme.primaryFixed, colorScheme.onPrimaryFixed) }
-        item { ColorItem("primaryFixedDim", colorScheme.primaryFixedDim, colorScheme.onPrimaryFixed) }
-        item { ColorItem("onPrimaryFixed", colorScheme.onPrimaryFixed, colorScheme.primaryFixed) }
-        item { ColorItem("onPrimaryFixedVariant", colorScheme.onPrimaryFixedVariant, colorScheme.primaryFixed) }
-        
-        item { ColorCategory("Secondary Fixed Colors") }
-        item { ColorItem("secondaryFixed", colorScheme.secondaryFixed, colorScheme.onSecondaryFixed) }
-        item { ColorItem("secondaryFixedDim", colorScheme.secondaryFixedDim, colorScheme.onSecondaryFixed) }
-        item { ColorItem("onSecondaryFixed", colorScheme.onSecondaryFixed, colorScheme.secondaryFixed) }
-        item { ColorItem("onSecondaryFixedVariant", colorScheme.onSecondaryFixedVariant, colorScheme.secondaryFixed) }
-        
-        item { ColorCategory("Tertiary Fixed Colors") }
-        item { ColorItem("tertiaryFixed", colorScheme.tertiaryFixed, colorScheme.onTertiaryFixed) }
-        item { ColorItem("tertiaryFixedDim", colorScheme.tertiaryFixedDim, colorScheme.onTertiaryFixed) }
-        item { ColorItem("onTertiaryFixed", colorScheme.onTertiaryFixed, colorScheme.tertiaryFixed) }
-        item { ColorItem("onTertiaryFixedVariant", colorScheme.onTertiaryFixedVariant, colorScheme.tertiaryFixed) }
-        
-        // Scrim
-        item { ColorCategory("Other") }
-        item { ColorItem("scrim", colorScheme.scrim, colorScheme.surface) }
-    }
-}
-
-@Composable
-private fun ColorCategory(title: String) {
-    val colorScheme = MaterialTheme.colorScheme
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleLarge,
-        color = colorScheme.primary,
-        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-    )
-}
-
-@Composable
-private fun ColorItem(
-    name: String,
-    color: androidx.compose.ui.graphics.Color,
-    textColor: androidx.compose.ui.graphics.Color
-) {
-    androidx.compose.foundation.layout.Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .background(color, androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = name,
-            color = textColor,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = String.format("#%08X", color.value.toLong()),
-            color = textColor.copy(alpha = 0.7f),
-            style = MaterialTheme.typography.bodySmall,
-            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
-        )
     }
 }
 

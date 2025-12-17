@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -32,7 +33,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.madsam.otora.core.utils.ScreenUtil
-import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.ui.record.osu.components.BadgeList
 import com.madsam.otora.ui.record.osu.components.Card
 import com.madsam.otora.ui.record.osu.components.Level
@@ -104,7 +104,7 @@ internal fun OsuUserPage(
     
     LazyColumn(
         modifier = Modifier
-            .background(colorScheme.surfaceContainerLowest)
+            .background(colorScheme.surface)
             .padding(horizontal = 16.dp)
             .windowInsetsPadding(
                 WindowInsets.displayCutout.only(

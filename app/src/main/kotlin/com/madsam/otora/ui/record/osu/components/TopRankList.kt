@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -43,7 +42,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.OSU_ARROW_YELLOW
 import com.madsam.otora.core.theme.OSU_HEART_RED
-import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.utils.DateTimeUtils.dateCodeToRecent
@@ -91,7 +89,7 @@ internal fun TopRankList(
                 )
             }
         }
-        val itemWidth = cardWidth - 16.dp
+        val itemWidth = cardWidth
         list.forEach {
             TopRankCard(it, itemWidth)
             if (list.indexOf(it) < list.size - 1) {
@@ -232,7 +230,7 @@ private fun DifficultyBadge(
     Text(
         text = buildAnnotatedString {
             appendInlineContent("star", "[star]")
-            append(difficultyRating.toString())
+            append(difficultyRating.format(2))
         },
         inlineContent = inlineContent,
         fontSize = 14.sp,

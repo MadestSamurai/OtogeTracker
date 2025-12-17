@@ -3,16 +3,12 @@ package com.madsam.otora.ui.record.osu.components
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,14 +32,9 @@ internal fun TopRank(
     val topData by topMaps.collectAsState()
     val firstData by firstMaps.collectAsState()
 
-    val screenWidthDp = with(LocalDensity.current) {
-        LocalWindowInfo.current.containerSize.width.toDp()
-    }
-
     Column(
         modifier = Modifier
-            .width(screenWidthDp)
-            .padding(horizontal = 16.dp)
+            .width(cardWidthDp)
             .padding(bottom = 12.dp)
     ) {
         if (pinnedData.items.isEmpty() && topData.items.isEmpty() && firstData.items.isEmpty()) {

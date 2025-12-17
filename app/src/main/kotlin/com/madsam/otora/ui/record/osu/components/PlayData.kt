@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
@@ -57,17 +60,14 @@ internal fun PlayData(
         modifier = modifier
             .padding(bottom = 12.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(colorScheme.surfaceContainerLow)
+            .background(colorScheme.surfaceContainer)
             .fillMaxWidth()
     ) {
         // 五个标志图标区域
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(80.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(colorScheme.surface)
-                .padding(top = 16.dp),
+                .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             val imageWithTextData = listOf(
@@ -85,17 +85,24 @@ internal fun PlayData(
                     text = text,
                     textColor = iconTextColor,
                     modifier = Modifier,
-                    iconModifier = Modifier.width(64.dp).height(32.dp),
+                    iconModifier = Modifier
+                        .width(64.dp)
+                        .height(32.dp),
                     textModifier = Modifier.padding(top = 4.dp)
                 )
             }
         }
 
+        HorizontalDivider(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            color = colorScheme.outlineVariant
+        )
+
         // 数据卡片区域
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 10.dp)
+                .padding(top = 16.dp, start = 6.dp, end = 16.dp)
         ) {
             var shown by remember { mutableStateOf(false) }
             val rowData = listOf(
@@ -225,26 +232,28 @@ internal fun PlayData(
                     )
                 }
             )
-            Text(
-                text = buildAnnotatedString {
-                    appendInlineContent("icon")
-                    withStyle(
-                        style = MaterialTheme.typography.titleMedium.toSpanStyle()
-                    ) {
-                        append(if (shown) "Show Less Play Data" else "Show More Play Data")
-                    }
-                },
-                color = colorScheme.onSurface,
-                inlineContent = inlineContent,
-                textAlign = TextAlign.Center,
+            
+            Box(
                 modifier = Modifier
-                    .background(colorScheme.surface)
-                    .clickable {
-                        shown = !shown
-                    }
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            )
+                    .clickable { shown = !shown }
+                    .padding(vertical = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = buildAnnotatedString {
+                        appendInlineContent("icon")
+                        withStyle(
+                            style = MaterialTheme.typography.titleMedium.toSpanStyle()
+                        ) {
+                            append(if (shown) "Show Less Play Data" else "Show More Play Data")
+                        }
+                    },
+                    color = colorScheme.onSurface,
+                    inlineContent = inlineContent,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }

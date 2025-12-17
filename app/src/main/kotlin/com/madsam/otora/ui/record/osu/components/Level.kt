@@ -40,7 +40,7 @@ internal fun Level(
         modifier = modifier
             .padding(bottom = 12.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(colorScheme.surfaceContainerLow)
+            .background(colorScheme.surfaceContainer)
             .padding(16.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,

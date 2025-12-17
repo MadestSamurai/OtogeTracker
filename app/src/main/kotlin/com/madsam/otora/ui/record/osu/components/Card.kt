@@ -2,7 +2,6 @@ package com.madsam.otora.ui.record.osu.components
 
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -108,18 +107,11 @@ private fun UserProfileCard(
         }
         .build()
     
-    val svgLoader = ImageLoader.Builder(LocalContext.current)
-        .components {
-            add(SvgDecoder.Factory())
-            add(GifDecoder.Factory())
-        }
-        .build()
-    
     Card(
         modifier = Modifier.width(cardWidthDp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = colorScheme.surfaceContainerHighest
+            containerColor = colorScheme.surfaceContainer
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 0.dp // M3扁平化设计
