@@ -59,10 +59,7 @@ internal fun TopRankList(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val list = items.items
-    Column(
-        modifier = Modifier
-            .padding(bottom = 8.dp)
-    ) {
+    Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()

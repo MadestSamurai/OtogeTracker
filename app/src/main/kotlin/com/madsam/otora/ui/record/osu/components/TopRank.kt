@@ -1,17 +1,26 @@
 package com.madsam.otora.ui.record.osu.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.madsam.otora.core.icon.Fa
+import com.madsam.otora.core.icon.fa.`Chart-bar`
 import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
@@ -38,13 +47,27 @@ internal fun TopRank(
             .padding(bottom = 12.dp)
     ) {
         if (pinnedData.items.isEmpty() && topData.items.isEmpty() && firstData.items.isEmpty()) {
-            Text(
-                text = "No play records",
-                color = colorScheme.onSurface,
-                fontSize = 24.sp,
-                fontFamily = sarasaSemiBold,
-                modifier = Modifier.padding(16.dp)
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Fa.`Chart-bar`,
+                    contentDescription = null,
+                    tint = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    modifier = Modifier.size(48.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "No play records",
+                    color = colorScheme.onSurfaceVariant,
+                    fontSize = 16.sp,
+                    fontFamily = sarasaSemiBold
+                )
+            }
             return@Column
         }
         if (pinnedData.items.isNotEmpty()) {

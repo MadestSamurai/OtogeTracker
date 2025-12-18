@@ -59,7 +59,6 @@ internal fun Recent(
     Column(
         modifier = Modifier
             .width(cardWidthDp)
-            .padding(bottom = 12.dp)
     ) {
         // Header row
         RecentHeader(

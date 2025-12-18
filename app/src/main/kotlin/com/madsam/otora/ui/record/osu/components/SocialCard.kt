@@ -55,10 +55,9 @@ internal fun SocialCard(
     Column(
         modifier = Modifier
             .width(cardWidthDp)
-            .padding(bottom = 12.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(colorScheme.surfaceContainer)
-            .padding(vertical = 16.dp)
+            .padding(vertical = 12.dp)
     ) {
         // User Info Section
         UserInfoSection(data = data)
@@ -72,7 +71,7 @@ internal fun SocialCard(
 private fun UserInfoSection(data: OsuSocialUiModel) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
             .fillMaxWidth()
     ) {
         InfoText(
