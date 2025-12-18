@@ -1,6 +1,7 @@
 package com.madsam.otora.ui.record.osu.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,17 +9,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -28,17 +29,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.data.osu.ui.model.OsuPlayUiModel
 import com.madsam.otora.ui.components.ImageWithText
@@ -174,6 +170,23 @@ internal fun PlayData(
                         .padding(start = 10.dp)
                         .weight(1f)
                 )
+                
+                val rotationState by animateFloatAsState(
+                    targetValue = if (shown) 180f else 0f,
+                    label = "Rotation"
+                )
+                
+                IconButton(
+                    onClick = { shown = !shown },
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                ) {
+                    Icon(
+                        imageVector = Filled.ChevronDown,
+                        contentDescription = if (shown) "Collapse" else "Expand",
+                        modifier = Modifier.rotate(rotationState),
+                        tint = colorScheme.onSurfaceVariant
+                    )
+                }
             }
             rowData.chunked(2).forEach { pair ->
                 AnimatedVisibility(
@@ -213,46 +226,6 @@ internal fun PlayData(
                         }
                     }
                 }
-            }
-            val placeholderHeight = 15.sp
-            val density = LocalDensity.current
-            val inlineContent = mapOf(
-                "icon" to InlineTextContent(
-                    Placeholder(
-                        width = 25.sp,
-                        height = placeholderHeight,
-                        placeholderVerticalAlign = PlaceholderVerticalAlign.Center
-                    )
-                ) {
-                    Image(
-                        painter = rememberVectorPainter(image = if (shown) Filled.ChevronUp else Filled.ChevronDown),
-                        colorFilter = ColorFilter.tint(colorScheme.onSurface),
-                        contentDescription = "Show More",
-                        modifier = Modifier.size(with(density) { placeholderHeight.toDp() })
-                    )
-                }
-            )
-            
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { shown = !shown }
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = buildAnnotatedString {
-                        appendInlineContent("icon")
-                        withStyle(
-                            style = MaterialTheme.typography.titleMedium.toSpanStyle()
-                        ) {
-                            append(if (shown) "Show Less Play Data" else "Show More Play Data")
-                        }
-                    },
-                    color = colorScheme.onSurface,
-                    inlineContent = inlineContent,
-                    textAlign = TextAlign.Center
-                )
             }
         }
     }
