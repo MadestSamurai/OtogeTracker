@@ -4,6 +4,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import com.madsam.otora.core.datastore.ThemeDataStore
 import com.madsam.otora.core.theme.OtogeTrackerTheme
 
 class SettingsActivity : ComponentActivity() {
@@ -11,7 +16,21 @@ class SettingsActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            OtogeTrackerTheme {
+            // 从 DataStore 读取主题设置
+            val themeDataStore = remember { ThemeDataStore(this@SettingsActivity) }
+            val themeSettings by themeDataStore.getThemeSettingsFlow().collectAsState(
+                initial = ThemeDataStore.ThemeSettings()
+            )
+            
+            // 计算实际的深色模式状态
+            val systemDarkTheme = isSystemInDarkTheme()
+            val darkTheme = if (themeSettings.autoDarkMode) {
+                systemDarkTheme
+            } else {
+                themeSettings.darkModeEnabled
+            }
+            
+            OtogeTrackerTheme(sourceColor = themeSettings.themeColor, darkTheme = darkTheme) {
                 SettingsScreen(
                     onNavigateBack = { finish() }
                 )

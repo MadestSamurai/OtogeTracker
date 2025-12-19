@@ -18,6 +18,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -36,11 +37,9 @@ import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.Clock
 import com.madsam.otora.core.icon.fa.Wifi
-import androidx.compose.material3.MaterialTheme
-import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.sarasaSemiBold
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,7 +100,7 @@ fun GeneralDataUpdateScreen(
                 ) {
                     Text(
                         text = "自动更新",
-                        color = White1000,
+                        color = colorScheme.onSurface,
                         fontSize = 16.sp,
                         fontFamily = sarasaBold
                     )
@@ -116,7 +115,7 @@ fun GeneralDataUpdateScreen(
                         Icon(
                             imageVector = Fa.Clock,
                             contentDescription = null,
-                            tint = White1000,
+                            tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
                         )
                         
@@ -125,14 +124,14 @@ fun GeneralDataUpdateScreen(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "启用自动更新",
-                                color = White1000,
+                                color = colorScheme.onSurface,
                                 fontSize = 16.sp,
                                 fontFamily = sarasaSemiBold
                             )
                             
                             Text(
                                 text = "定期自动更新游戏数据",
-                                color = White1000.copy(alpha = 0.7f),
+                                color = colorScheme.onSurfaceVariant,
                                 fontSize = 14.sp,
                                 fontFamily = sarasaRegular
                             )
@@ -144,8 +143,8 @@ fun GeneralDataUpdateScreen(
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = colorScheme.onSurface,
                                 checkedTrackColor = colorScheme.onSurface.copy(alpha = 0.5f),
-                                uncheckedThumbColor = White1000.copy(alpha = 0.7f),
-                                uncheckedTrackColor = White1000.copy(alpha = 0.3f)
+                                uncheckedThumbColor = colorScheme.outline,
+                                uncheckedTrackColor = colorScheme.surfaceContainerHighest
                             )
                         )
                     }
@@ -163,7 +162,7 @@ fun GeneralDataUpdateScreen(
                 ) {
                     Text(
                         text = "网络设置",
-                        color = White1000,
+                        color = colorScheme.onSurface,
                         fontSize = 16.sp,
                         fontFamily = sarasaBold
                     )
@@ -178,7 +177,7 @@ fun GeneralDataUpdateScreen(
                         Icon(
                             imageVector = Fa.Wifi,
                             contentDescription = null,
-                            tint = White1000,
+                            tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
                         )
                         
@@ -187,14 +186,14 @@ fun GeneralDataUpdateScreen(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "仅在WiFi下更新",
-                                color = White1000,
+                                color = colorScheme.onSurface,
                                 fontSize = 16.sp,
                                 fontFamily = sarasaSemiBold
                             )
                             
                             Text(
                                 text = "节省移动数据流量",
-                                color = White1000.copy(alpha = 0.7f),
+                                color = colorScheme.onSurfaceVariant,
                                 fontSize = 14.sp,
                                 fontFamily = sarasaRegular
                             )
@@ -206,8 +205,8 @@ fun GeneralDataUpdateScreen(
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = colorScheme.onSurface,
                                 checkedTrackColor = colorScheme.onSurface.copy(alpha = 0.5f),
-                                uncheckedThumbColor = White1000.copy(alpha = 0.7f),
-                                uncheckedTrackColor = White1000.copy(alpha = 0.3f)
+                                uncheckedThumbColor = colorScheme.outline,
+                                uncheckedTrackColor = colorScheme.surfaceContainerHighest
                             )
                         )
                     }

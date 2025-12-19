@@ -34,7 +34,7 @@ fun TitleText(
         Column {
             Text(
                 text = textTitle,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodySmall,
                 color = color,
                 modifier = Modifier.padding(start = 8.dp, top = 8.dp)
             )

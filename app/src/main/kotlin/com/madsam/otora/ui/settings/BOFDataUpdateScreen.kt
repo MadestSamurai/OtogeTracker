@@ -23,6 +23,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -41,9 +42,7 @@ import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.`Arrow-rotate-back`
 import com.madsam.otora.core.icon.fa.Info
-import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.theme.RANKING_GREEN
-import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.theme.sarasaSemiBold
@@ -134,7 +133,7 @@ fun BOFDataUpdateScreen(
                     ) {
                         Text(
                             text = "BOF 活动数据",
-                            color = White1000,
+                            color = colorScheme.onSurface,
                             fontSize = 18.sp,
                             fontFamily = sarasaBold,
                             textAlign = TextAlign.Center
@@ -144,7 +143,7 @@ fun BOFDataUpdateScreen(
                         
                         Text(
                             text = "BOF (BMS of Fighters) 是音游界的知名活动。\n根据数据库中的比赛信息显示可更新的数据列表。",
-                            color = White1000.copy(alpha = 0.7f),
+                            color = colorScheme.onSurfaceVariant,
                             fontSize = 14.sp,
                             fontFamily = sarasaRegular,
                             textAlign = TextAlign.Center
@@ -172,7 +171,7 @@ fun BOFDataUpdateScreen(
                             Icon(
                                 imageVector = Fa.Info,
                                 contentDescription = null,
-                                tint = if (uiState.isError) White1000 else RANKING_GREEN,
+                                tint = if (uiState.isError) colorScheme.error else RANKING_GREEN,
                                 modifier = Modifier.size(20.dp)
                             )
                             
@@ -180,7 +179,7 @@ fun BOFDataUpdateScreen(
                             
                             Text(
                                 text = message,
-                                color = if (uiState.isError) White1000 else White1000,
+                                color = if (uiState.isError) colorScheme.error else colorScheme.onSurface,
                                 fontSize = 14.sp,
                                 fontFamily = sarasaRegular
                             )
@@ -270,7 +269,7 @@ fun BOFDataUpdateScreen(
                         ) {
                             Text(
                                 text = "暂无可用比赛",
-                                color = White1000.copy(alpha = 0.7f),
+                                color = colorScheme.onSurfaceVariant,
                                 fontSize = 16.sp,
                                 fontFamily = sarasaSemiBold,
                                 textAlign = TextAlign.Center
@@ -280,7 +279,7 @@ fun BOFDataUpdateScreen(
                             
                             Text(
                                 text = "请先确保数据库中有 Range 数据，或者刷新比赛列表",
-                                color = White1000.copy(alpha = 0.5f),
+                                color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                 fontSize = 14.sp,
                                 fontFamily = sarasaRegular,
                                 textAlign = TextAlign.Center
@@ -321,7 +320,7 @@ private fun CompetitionUpdateItem(
                     ) {
                         Text(
                             text = competition.shortName,
-                            color = White1000,
+                            color = colorScheme.onSurface,
                             fontSize = 16.sp,
                             fontFamily = sarasaBold
                         )
@@ -345,7 +344,7 @@ private fun CompetitionUpdateItem(
                     
                     Text(
                         text = competition.fullName,
-                        color = White1000.copy(alpha = 0.7f),
+                        color = colorScheme.onSurfaceVariant,
                         fontSize = 14.sp,
                         fontFamily = sarasaRegular
                     )
@@ -355,10 +354,10 @@ private fun CompetitionUpdateItem(
                     onClick = onUpdateClick,
                     enabled = !isGlobalLoading && !competition.isUpdating && competition.isStart,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (competition.isStart) colorScheme.onSurface else White1000.copy(alpha = 0.3f),
-                        contentColor = if (competition.isStart) colorScheme.surfaceContainer else White1000.copy(alpha = 0.7f),
-                        disabledContainerColor = White1000.copy(alpha = 0.3f),
-                        disabledContentColor = White1000.copy(alpha = 0.5f)
+                        containerColor = if (competition.isStart) colorScheme.onSurface else colorScheme.onSurface.copy(alpha = 0.3f),
+                        contentColor = if (competition.isStart) colorScheme.surfaceContainer else colorScheme.surfaceContainer.copy(alpha = 0.7f),
+                        disabledContainerColor = colorScheme.onSurface.copy(alpha = 0.3f),
+                        disabledContentColor = colorScheme.surfaceContainer.copy(alpha = 0.5f)
                     ),
                     modifier = Modifier.padding(start = 8.dp)
                 ) {
@@ -366,7 +365,7 @@ private fun CompetitionUpdateItem(
                         CircularProgressIndicator(
                             modifier = Modifier.size(16.dp),
                             strokeWidth = 2.dp,
-                            color = if (competition.isStart) colorScheme.surfaceContainer else White1000.copy(alpha = 0.7f)
+                            color = if (competition.isStart) colorScheme.surfaceContainer else colorScheme.surfaceContainer.copy(alpha = 0.7f)
                         )
                     } else {
                         Text(
@@ -393,14 +392,14 @@ private fun CompetitionUpdateItem(
                     } else {
                         "无数据"
                     },
-                    color = if (competition.hasData) colorScheme.onSurface else White1000.copy(alpha = 0.5f),
+                    color = if (competition.hasData) colorScheme.onSurface else colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     fontSize = 12.sp,
                     fontFamily = sarasaRegular
                 )
                 
                 Text(
                     text = "更新: ${competition.lastUpdated}",
-                    color = White1000.copy(alpha = 0.5f),
+                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     fontSize = 12.sp,
                     fontFamily = sarasaRegular
                 )

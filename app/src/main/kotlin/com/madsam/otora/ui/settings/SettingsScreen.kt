@@ -1,5 +1,10 @@
 package com.madsam.otora.ui.settings
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,24 +25,31 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.madsam.otora.core.datastore.ThemeDataStore
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.`Chevron-right`
 import com.madsam.otora.core.icon.fa.Cloud
 import com.madsam.otora.core.icon.fa.Cog
 import com.madsam.otora.core.icon.fa.Font
@@ -45,21 +57,40 @@ import com.madsam.otora.core.icon.fa.Language
 import com.madsam.otora.core.icon.fa.Moon
 import com.madsam.otora.core.icon.fa.Palette
 import com.madsam.otora.core.icon.fa.Sun
-import androidx.compose.material3.MaterialTheme
-import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.sarasaSemiBold
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onThemeChanged: ((autoDarkMode: Boolean, darkModeEnabled: Boolean) -> Unit)? = null
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val themeDataStore = remember { ThemeDataStore(context) }
+    
     var selectedDataUpdateSetting by remember { mutableStateOf<DataUpdateSettings?>(null) }
     var selectedAppearanceSetting by remember { mutableStateOf<AppearanceSettings?>(null) }
     var selectedNetworkSetting by remember { mutableStateOf<NetworkSettings?>(null) }
+    
+    // 从 DataStore 读取主题设置
+    val themeSettings by themeDataStore.getThemeSettingsFlow().collectAsState(
+        initial = ThemeDataStore.ThemeSettings()
+    )
+    
+    // 自动深色模式状态
+    var autoDarkModeEnabled by remember { mutableStateOf(themeSettings.autoDarkMode) }
+    var isDarkModeEnabled by remember { mutableStateOf(themeSettings.darkModeEnabled) }
+    
+    // 当 DataStore 数据更新时，同步状态
+    LaunchedEffect(themeSettings) {
+        autoDarkModeEnabled = themeSettings.autoDarkMode
+        isDarkModeEnabled = themeSettings.darkModeEnabled
+    }
     
     if (selectedDataUpdateSetting != null) {
         // 显示具体游戏的数据更新页面
@@ -104,8 +135,14 @@ fun SettingsScreen(
     } else if (selectedAppearanceSetting != null) {
         // 显示外观设置页面
         when (selectedAppearanceSetting) {
+            AppearanceSettings.ThemeColor -> {
+                ThemeColorSettingScreen(
+                    onNavigateBack = { selectedAppearanceSetting = null }
+                )
+            }
             else -> {
                 // 其他外观设置暂未实现
+                selectedAppearanceSetting = null
             }
         }
     } else if (selectedNetworkSetting != null) {
@@ -178,23 +215,106 @@ fun SettingsScreen(
                 
                 // 外观设置组
                 item {
-                    SettingsGroup(
-                        title = "外观设置",
-                        items = AppearanceSettings.entries.toTypedArray()
-                    ) { setting ->
-                        when (setting.type) {
-                            SettingType.Toggle -> {
+                    Column {
+                        // 组标题
+                        Text(
+                            text = "外观设置",
+                            color = colorScheme.onSurface,
+                            fontSize = 14.sp,
+                            fontFamily = sarasaSemiBold,
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
+                        )
+                        
+                        // 组内容卡片
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Column {
+                                // 1. 跟随系统
                                 ToggleSettingItem(
-                                    setting = setting,
-                                    onToggle = { /* TODO: 实现设置保存 */ }
-                                )
-                            }
-                            SettingType.Selection -> {
-                                SelectionSettingItem(
-                                    setting = setting,
-                                    onClick = { 
-                                        selectedAppearanceSetting = setting
+                                    setting = AppearanceSettings.AutoDarkMode,
+                                    checked = autoDarkModeEnabled,
+                                    onToggle = { enabled ->
+                                        autoDarkModeEnabled = enabled
+                                        scope.launch {
+                                            themeDataStore.saveAutoDarkMode(enabled)
+                                            onThemeChanged?.invoke(enabled, isDarkModeEnabled)
+                                        }
                                     }
+                                )
+                                
+                                // 分割线
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(0.5.dp)
+                                        .background(colorScheme.outlineVariant.copy(alpha = 0.5f))
+                                        .padding(horizontal = 56.dp)
+                                )
+                                
+                                // 2. 深色模式 (带动画)
+                                AnimatedVisibility(
+                                    visible = !autoDarkModeEnabled,
+                                    enter = expandVertically() + fadeIn(),
+                                    exit = shrinkVertically() + fadeOut()
+                                ) {
+                                    Column {
+                                        ToggleSettingItem(
+                                            setting = AppearanceSettings.DarkMode,
+                                            checked = isDarkModeEnabled,
+                                            onToggle = { enabled ->
+                                                isDarkModeEnabled = enabled
+                                                scope.launch {
+                                                    themeDataStore.saveDarkModeEnabled(enabled)
+                                                    onThemeChanged?.invoke(autoDarkModeEnabled, enabled)
+                                                }
+                                            }
+                                        )
+                                        
+                                        Spacer(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(0.5.dp)
+                                                .background(colorScheme.outlineVariant.copy(alpha = 0.5f))
+                                                .padding(horizontal = 56.dp)
+                                        )
+                                    }
+                                }
+                                
+                                // 3. 主题颜色
+                                SelectionSettingItem(
+                                    setting = AppearanceSettings.ThemeColor,
+                                    onClick = { selectedAppearanceSetting = AppearanceSettings.ThemeColor }
+                                )
+                                
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(0.5.dp)
+                                        .background(colorScheme.outlineVariant.copy(alpha = 0.5f))
+                                        .padding(horizontal = 56.dp)
+                                )
+                                
+                                // 4. 语言
+                                SelectionSettingItem(
+                                    setting = AppearanceSettings.Language,
+                                    onClick = { selectedAppearanceSetting = AppearanceSettings.Language }
+                                )
+                                
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(0.5.dp)
+                                        .background(colorScheme.outlineVariant.copy(alpha = 0.5f))
+                                        .padding(horizontal = 56.dp)
+                                )
+                                
+                                // 5. 字体大小
+                                SelectionSettingItem(
+                                    setting = AppearanceSettings.FontSize,
+                                    onClick = { selectedAppearanceSetting = AppearanceSettings.FontSize }
                                 )
                             }
                         }
@@ -262,7 +382,7 @@ private fun <T> SettingsGroup(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(0.5.dp)
-                                .background(White1000.copy(alpha = 0.1f))
+                                .background(colorScheme.outlineVariant.copy(alpha = 0.5f))
                                 .padding(horizontal = 56.dp)
                         )
                     }
@@ -277,6 +397,7 @@ private fun DataUpdateSettingItem(
     setting: DataUpdateSettings,
     onClick: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -287,7 +408,7 @@ private fun DataUpdateSettingItem(
         Icon(
             imageVector = setting.icon,
             contentDescription = null,
-            tint = White1000,
+            tint = colorScheme.onSurface,
             modifier = Modifier.size(24.dp)
         )
         
@@ -296,14 +417,14 @@ private fun DataUpdateSettingItem(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = setting.title,
-                color = White1000,
+                color = colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontFamily = sarasaSemiBold
             )
             
             Text(
                 text = setting.description,
-                color = White1000.copy(alpha = 0.7f),
+                color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
                 fontFamily = sarasaRegular
             )
@@ -311,7 +432,7 @@ private fun DataUpdateSettingItem(
             if (setting.lastUpdate.isNotEmpty()) {
                 Text(
                     text = "上次更新: ${setting.lastUpdate}",
-                    color = White1000.copy(alpha = 0.5f),
+                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     fontSize = 12.sp,
                     fontFamily = sarasaRegular
                 )
@@ -319,9 +440,9 @@ private fun DataUpdateSettingItem(
         }
         
         Icon(
-            imageVector = Fa.`Arrow-left`,
+            imageVector = Fa.`Chevron-right`,
             contentDescription = null,
-            tint = White1000.copy(alpha = 0.5f),
+            tint = colorScheme.onSurfaceVariant,
             modifier = Modifier.size(18.dp)
         )
     }
@@ -330,10 +451,12 @@ private fun DataUpdateSettingItem(
 @Composable
 private fun ToggleSettingItem(
     setting: AppearanceSettings,
+    checked: Boolean? = null,
     onToggle: (Boolean) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    var isEnabled by remember { mutableStateOf(setting.defaultValue as? Boolean ?: false) }
+    var internalState by remember { mutableStateOf(setting.defaultValue as? Boolean ?: false) }
+    val isEnabled = checked ?: internalState
     
     Row(
         modifier = Modifier
@@ -344,7 +467,7 @@ private fun ToggleSettingItem(
         Icon(
             imageVector = setting.icon,
             contentDescription = null,
-            tint = White1000,
+            tint = colorScheme.onSurface,
             modifier = Modifier.size(24.dp)
         )
         
@@ -353,14 +476,14 @@ private fun ToggleSettingItem(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = setting.title,
-                color = White1000,
+                color = colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontFamily = sarasaSemiBold
             )
             
             Text(
                 text = setting.description,
-                color = White1000.copy(alpha = 0.7f),
+                color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
                 fontFamily = sarasaRegular
             )
@@ -369,14 +492,16 @@ private fun ToggleSettingItem(
         Switch(
             checked = isEnabled,
             onCheckedChange = { newValue ->
-                isEnabled = newValue
+                if (checked == null) {
+                    internalState = newValue
+                }
                 onToggle(newValue)
             },
             colors = SwitchDefaults.colors(
                 checkedThumbColor = colorScheme.onSurface,
                 checkedTrackColor = colorScheme.onSurface.copy(alpha = 0.5f),
-                uncheckedThumbColor = White1000.copy(alpha = 0.7f),
-                uncheckedTrackColor = White1000.copy(alpha = 0.3f)
+                uncheckedThumbColor = colorScheme.outline,
+                uncheckedTrackColor = colorScheme.surfaceContainerHighest
             )
         )
     }
@@ -399,7 +524,7 @@ private fun NetworkToggleSettingItem(
         Icon(
             imageVector = setting.icon,
             contentDescription = null,
-            tint = White1000,
+            tint = colorScheme.onSurface,
             modifier = Modifier.size(24.dp)
         )
         
@@ -408,14 +533,14 @@ private fun NetworkToggleSettingItem(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = setting.title,
-                color = White1000,
+                color = colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontFamily = sarasaSemiBold
             )
             
             Text(
                 text = setting.description,
-                color = White1000.copy(alpha = 0.7f),
+                color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
                 fontFamily = sarasaRegular
             )
@@ -430,8 +555,8 @@ private fun NetworkToggleSettingItem(
             colors = SwitchDefaults.colors(
                 checkedThumbColor = colorScheme.onSurface,
                 checkedTrackColor = colorScheme.onSurface.copy(alpha = 0.5f),
-                uncheckedThumbColor = White1000.copy(alpha = 0.7f),
-                uncheckedTrackColor = White1000.copy(alpha = 0.3f)
+                uncheckedThumbColor = colorScheme.outline,
+                uncheckedTrackColor = colorScheme.surfaceContainerHighest
             )
         )
     }
@@ -453,7 +578,7 @@ private fun SelectionSettingItem(
         Icon(
             imageVector = setting.icon,
             contentDescription = null,
-            tint = White1000,
+            tint = colorScheme.onSurface,
             modifier = Modifier.size(24.dp)
         )
         
@@ -462,14 +587,14 @@ private fun SelectionSettingItem(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = setting.title,
-                color = White1000,
+                color = colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontFamily = sarasaSemiBold
             )
             
             Text(
                 text = setting.description,
-                color = White1000.copy(alpha = 0.7f),
+                color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
                 fontFamily = sarasaRegular
             )
@@ -485,9 +610,9 @@ private fun SelectionSettingItem(
         }
         
         Icon(
-            imageVector = Fa.`Arrow-left`,
+            imageVector = Fa.`Chevron-right`,
             contentDescription = null,
-            tint = White1000.copy(alpha = 0.5f),
+            tint = colorScheme.onSurfaceVariant,
             modifier = Modifier.size(18.dp)
         )
     }
@@ -509,7 +634,7 @@ private fun NetworkSelectionSettingItem(
         Icon(
             imageVector = setting.icon,
             contentDescription = null,
-            tint = White1000,
+            tint = colorScheme.onSurface,
             modifier = Modifier.size(24.dp)
         )
         
@@ -518,14 +643,14 @@ private fun NetworkSelectionSettingItem(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = setting.title,
-                color = White1000,
+                color = colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontFamily = sarasaSemiBold
             )
             
             Text(
                 text = setting.description,
-                color = White1000.copy(alpha = 0.7f),
+                color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
                 fontFamily = sarasaRegular
             )
@@ -541,9 +666,9 @@ private fun NetworkSelectionSettingItem(
         }
         
         Icon(
-            imageVector = Fa.`Arrow-left`,
+            imageVector = Fa.`Chevron-right`,
             contentDescription = null,
-            tint = White1000.copy(alpha = 0.5f),
+            tint = colorScheme.onSurfaceVariant,
             modifier = Modifier.size(18.dp)
         )
     }
@@ -599,19 +724,19 @@ enum class AppearanceSettings(
     val defaultValue: Any? = null,
     val currentValue: String = ""
 ) {
-    DarkMode(
-        title = "深色模式",
-        description = "启用深色主题界面",
-        icon = Fa.Moon,
-        type = SettingType.Toggle,
-        defaultValue = false
-    ),
     AutoDarkMode(
         title = "跟随系统",
         description = "根据系统设置自动切换主题",
         icon = Fa.Sun,
         type = SettingType.Toggle,
         defaultValue = true
+    ),
+    DarkMode(
+        title = "深色模式",
+        description = "启用深色主题界面",
+        icon = Fa.Moon,
+        type = SettingType.Toggle,
+        defaultValue = false
     ),
     ThemeColor(
         title = "主题颜色",

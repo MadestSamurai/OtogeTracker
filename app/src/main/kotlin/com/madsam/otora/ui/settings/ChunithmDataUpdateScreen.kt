@@ -46,7 +46,6 @@ import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.Check
-import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.theme.sarasaSemiBold
@@ -151,13 +150,13 @@ fun ChunithmDataUpdateScreen(
                         ) {
                             Text(
                                 text = "⚠️ User-Agent未设置",
-                                color = White1000,
+                                color = colorScheme.onSurface,
                                 fontSize = 14.sp,
                                 fontFamily = sarasaSemiBold
                             )
                             Text(
                                 text = "建议设置User-Agent以确保CHUNITHM数据更新正常工作",
-                                color = White1000.copy(alpha = 0.8f),
+                                color = colorScheme.onSurfaceVariant,
                                 fontSize = 12.sp,
                                 fontFamily = sarasaRegular
                             )
@@ -188,14 +187,14 @@ fun ChunithmDataUpdateScreen(
                 // 歌曲数据更新部分
                 Text(
                     text = "歌曲数据更新",
-                    color = White1000,
+                    color = colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontFamily = sarasaBold
                 )
                 
                 Text(
                     text = "更新CHUNITHM歌曲数据库",
-                    color = White1000.copy(alpha = 0.7f),
+                    color = colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     fontFamily = sarasaRegular
                 )
@@ -305,14 +304,14 @@ fun ChunithmDataUpdateScreen(
                 // 个人信息获取部分
                 Text(
                     text = "个人信息获取",
-                    color = White1000,
+                    color = colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontFamily = sarasaBold
                 )
                 
                 Text(
                     text = "输入从CHUNITHM官方公众号获取的Cookie信息，用于获取和保存您的账号数据",
-                    color = White1000.copy(alpha = 0.7f),
+                    color = colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     fontFamily = sarasaRegular
                 )
@@ -330,7 +329,7 @@ fun ChunithmDataUpdateScreen(
                         Text(
                             "Request Cookies",
                             fontFamily = sarasaRegular,
-                            color = White1000.copy(alpha = 0.7f)
+                            color = colorScheme.onSurfaceVariant
                         )
                     },
                     isError = requestError.value,
@@ -338,12 +337,12 @@ fun ChunithmDataUpdateScreen(
                     maxLines = 4,
                     minLines = 1,
                     colors = TextFieldDefaults.colors(
-                        focusedTextColor = White1000,
-                        unfocusedTextColor = White1000,
+                        focusedTextColor = colorScheme.onSurface,
+                        unfocusedTextColor = colorScheme.onSurface,
                         focusedContainerColor = colorScheme.surface,
                         unfocusedContainerColor = colorScheme.surface,
                         focusedIndicatorColor = colorScheme.onSurface,
-                        unfocusedIndicatorColor = White1000.copy(alpha = 0.5f),
+                        unfocusedIndicatorColor = colorScheme.outline,
                         errorIndicatorColor = MaterialTheme.colorScheme.error
                     )
                 )
@@ -369,7 +368,7 @@ fun ChunithmDataUpdateScreen(
                         Text(
                             "Response Cookies",
                             fontFamily = sarasaRegular,
-                            color = White1000.copy(alpha = 0.7f)
+                            color = colorScheme.onSurfaceVariant
                         )
                     },
                     isError = responseError.value,
@@ -377,12 +376,12 @@ fun ChunithmDataUpdateScreen(
                     maxLines = 4,
                     minLines = 1,
                     colors = TextFieldDefaults.colors(
-                        focusedTextColor = White1000,
-                        unfocusedTextColor = White1000,
+                        focusedTextColor = colorScheme.onSurface,
+                        unfocusedTextColor = colorScheme.onSurface,
                         focusedContainerColor = colorScheme.surface,
                         unfocusedContainerColor = colorScheme.surface,
                         focusedIndicatorColor = colorScheme.onSurface,
-                        unfocusedIndicatorColor = White1000.copy(alpha = 0.5f),
+                        unfocusedIndicatorColor = colorScheme.outline,
                         errorIndicatorColor = MaterialTheme.colorScheme.error
                     )
                 )

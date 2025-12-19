@@ -17,6 +17,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -32,14 +33,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.madsam.otora.core.datastore.UserAgentDataStore
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-left`
-import androidx.compose.material3.MaterialTheme
-import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.datastore.UserAgentDataStore
+import com.madsam.otora.core.theme.sarasaSemiBold
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -105,14 +104,14 @@ fun UserAgentSettingScreen(
             ) {
                 Text(
                     text = "浏览器标识设置",
-                    color = White1000,
+                    color = colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontFamily = sarasaBold
                 )
                 
                 Text(
                     text = "设置用于maimai DX、CHUNITHM等应用更新时的浏览器User-Agent标识，这有助于某些服务正确识别请求",
-                    color = White1000.copy(alpha = 0.7f),
+                    color = colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     fontFamily = sarasaRegular
                 )
@@ -127,26 +126,26 @@ fun UserAgentSettingScreen(
                         Text(
                             "User-Agent",
                             fontFamily = sarasaRegular,
-                            color = White1000.copy(alpha = 0.7f)
+                            color = colorScheme.onSurfaceVariant
                         )
                     },
                     placeholder = {
                         Text(
                             "例如: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
                             fontFamily = sarasaRegular,
-                            color = White1000.copy(alpha = 0.5f),
+                            color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                             fontSize = 12.sp
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 3,
                     colors = TextFieldDefaults.colors(
-                        focusedTextColor = White1000,
-                        unfocusedTextColor = White1000,
+                        focusedTextColor = colorScheme.onSurface,
+                        unfocusedTextColor = colorScheme.onSurface,
                         focusedContainerColor = colorScheme.surface,
                         unfocusedContainerColor = colorScheme.surface,
                         focusedIndicatorColor = colorScheme.onSurface,
-                        unfocusedIndicatorColor = White1000.copy(alpha = 0.5f)
+                        unfocusedIndicatorColor = colorScheme.outline
                     )
                 )
                 
@@ -155,7 +154,7 @@ fun UserAgentSettingScreen(
                 // 常用User-Agent示例
                 Text(
                     text = "常用示例：",
-                    color = White1000.copy(alpha = 0.8f),
+                    color = colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     fontFamily = sarasaSemiBold
                 )
@@ -164,7 +163,7 @@ fun UserAgentSettingScreen(
                 
                 Text(
                     text = "Chrome (Windows): Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                    color = White1000.copy(alpha = 0.6f),
+                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                     fontSize = 12.sp,
                     fontFamily = sarasaRegular
                 )
@@ -173,7 +172,7 @@ fun UserAgentSettingScreen(
                 
                 Text(
                     text = "Safari (macOS): Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
-                    color = White1000.copy(alpha = 0.6f),
+                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                     fontSize = 12.sp,
                     fontFamily = sarasaRegular
                 )
@@ -212,8 +211,8 @@ fun UserAgentSettingScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = White1000.copy(alpha = 0.1f),
-                        contentColor = White1000
+                        containerColor = colorScheme.surfaceContainerHighest,
+                        contentColor = colorScheme.onSurface
                     )
                 ) {
                     Text(

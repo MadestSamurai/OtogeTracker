@@ -2,18 +2,13 @@ package com.madsam.otora.ui.record.osu.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
@@ -130,9 +125,9 @@ internal fun PlayData(
                     textTitle = "Play Time",
                     text = buildAnnotatedString {
                         val styles = listOf(
-                            MaterialTheme.typography.titleLarge to playTimeStr[0],
+                            MaterialTheme.typography.titleMedium to playTimeStr[0],
                             MaterialTheme.typography.bodySmall to "${dayHourLabels[0]} ",
-                            MaterialTheme.typography.titleLarge to playTimeStr[1],
+                            MaterialTheme.typography.titleMedium to playTimeStr[1],
                             MaterialTheme.typography.bodySmall to "${dayHourLabels[1]} ",
                             MaterialTheme.typography.titleSmall to playTimeStr[2],
                             MaterialTheme.typography.bodySmall to "${monthSecondLabels[0]} ",
@@ -151,41 +146,45 @@ internal fun PlayData(
                         .weight(1f)
                 )
                 val ppSplit = (if (playData.pp == 0.0) "0.00" else "%.2f".format(playData.pp)).split(".")
-                TitleText(
-                    textTitle = "PP",
-                    text = buildAnnotatedString {
-                        withStyle(
-                            style = MaterialTheme.typography.titleLarge.toSpanStyle()
-                        ) {
-                            append(ppSplit[0])
-                        }
-                        withStyle(
-                            style = MaterialTheme.typography.bodySmall.toSpanStyle()
-                        ) {
-                            append(".${ppSplit[1]}")
-                        }
-                    },
-                    color = valueHighlightColor,
-                    modifier = Modifier
-                        .padding(start = 10.dp)
-                        .weight(1f)
-                )
-                
-                val rotationState by animateFloatAsState(
-                    targetValue = if (shown) 180f else 0f,
-                    label = "Rotation"
-                )
-                
-                IconButton(
-                    onClick = { shown = !shown },
-                    modifier = Modifier.align(Alignment.CenterVertically)
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Filled.ChevronDown,
-                        contentDescription = if (shown) "Collapse" else "Expand",
-                        modifier = Modifier.rotate(rotationState),
-                        tint = colorScheme.onSurfaceVariant
+                    TitleText(
+                        textTitle = "PP",
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = MaterialTheme.typography.titleMedium.toSpanStyle()
+                            ) {
+                                append(ppSplit[0])
+                            }
+                            withStyle(
+                                style = MaterialTheme.typography.bodySmall.toSpanStyle()
+                            ) {
+                                append(".${ppSplit[1]}")
+                            }
+                        },
+                        color = valueHighlightColor,
+                        modifier = Modifier
+                            .padding(start = 10.dp)
+                            .weight(1f)
                     )
+
+                    val rotationState by animateFloatAsState(
+                        targetValue = if (shown) 180f else 0f,
+                        label = "Rotation"
+                    )
+
+                    IconButton(
+                        onClick = { shown = !shown }
+                    ) {
+                        Icon(
+                            imageVector = Filled.ChevronDown,
+                            contentDescription = if (shown) "Collapse" else "Expand",
+                            modifier = Modifier.rotate(rotationState),
+                            tint = colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
             rowData.chunked(2).forEach { pair ->
@@ -238,7 +237,7 @@ fun bigNumberTextFormat(value: String): AnnotatedString {
         val splitSize = split.size - 2
         val firstPart = split.dropLast(splitSize).joinToString(",")
         buildAnnotatedString {
-            withStyle(style = MaterialTheme.typography.titleLarge.toSpanStyle()) {
+            withStyle(style = MaterialTheme.typography.titleMedium.toSpanStyle()) {
                 append(firstPart)
             }
             withStyle(style = MaterialTheme.typography.bodySmall.toSpanStyle()) {
@@ -247,7 +246,7 @@ fun bigNumberTextFormat(value: String): AnnotatedString {
         }
     } else {
         buildAnnotatedString {
-            withStyle(style = MaterialTheme.typography.titleLarge.toSpanStyle()) {
+            withStyle(style = MaterialTheme.typography.titleMedium.toSpanStyle()) {
                 append(split.joinToString(","))
             }
         }

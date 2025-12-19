@@ -21,6 +21,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -37,8 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-left`
-import androidx.compose.material3.MaterialTheme
-import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.theme.sarasaSemiBold
@@ -111,7 +110,7 @@ fun OsuDataUpdateScreen(
             ) {
                 Text(
                     text = "用户设置",
-                    color = White1000,
+                    color = colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontFamily = sarasaBold
                 )
@@ -126,17 +125,17 @@ fun OsuDataUpdateScreen(
                         Text(
                             "osu! 用户ID",
                             fontFamily = sarasaRegular,
-                            color = White1000.copy(alpha = 0.7f)
+                            color = colorScheme.onSurfaceVariant
                         )
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = TextFieldDefaults.colors(
-                        focusedTextColor = White1000,
-                        unfocusedTextColor = White1000,
+                        focusedTextColor = colorScheme.onSurface,
+                        unfocusedTextColor = colorScheme.onSurface,
                         focusedContainerColor = colorScheme.surface,
                         unfocusedContainerColor = colorScheme.surface,
                         focusedIndicatorColor = colorScheme.onSurface,
-                        unfocusedIndicatorColor = White1000.copy(alpha = 0.5f)
+                        unfocusedIndicatorColor = colorScheme.outline
                     )
                 )
                 
@@ -145,7 +144,7 @@ fun OsuDataUpdateScreen(
                 // 游戏模式选择
                 Text(
                     text = "游戏模式",
-                    color = White1000.copy(alpha = 0.7f),
+                    color = colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     fontFamily = sarasaRegular
                 )
@@ -170,12 +169,12 @@ fun OsuDataUpdateScreen(
                             .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
                             .fillMaxWidth(),
                         colors = TextFieldDefaults.colors(
-                            focusedTextColor = White1000,
-                            unfocusedTextColor = White1000,
+                            focusedTextColor = colorScheme.onSurface,
+                            unfocusedTextColor = colorScheme.onSurface,
                             focusedContainerColor = colorScheme.surface,
                             unfocusedContainerColor = colorScheme.surface,
                             focusedIndicatorColor = colorScheme.onSurface,
-                            unfocusedIndicatorColor = White1000.copy(alpha = 0.5f)
+                            unfocusedIndicatorColor = colorScheme.outline
                         )
                     )
 

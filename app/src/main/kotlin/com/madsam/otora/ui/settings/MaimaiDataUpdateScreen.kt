@@ -17,6 +17,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -32,11 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-left`
-import androidx.compose.material3.MaterialTheme
-import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.utils.UserAgentUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -110,13 +109,13 @@ fun MaimaiDataUpdateScreen(
                         ) {
                             Text(
                                 text = "⚠️ User-Agent未设置",
-                                color = White1000,
+                                color = colorScheme.onSurface,
                                 fontSize = 14.sp,
                                 fontFamily = sarasaSemiBold
                             )
                             Text(
                                 text = "建议设置User-Agent以确保maimai DX数据更新正常工作",
-                                color = White1000.copy(alpha = 0.8f),
+                                color = colorScheme.onSurfaceVariant,
                                 fontSize = 12.sp,
                                 fontFamily = sarasaRegular
                             )
@@ -146,7 +145,7 @@ fun MaimaiDataUpdateScreen(
                 
                 Text(
                     text = "maimai DX 数据更新",
-                    color = White1000,
+                    color = colorScheme.onSurface,
                     fontSize = 18.sp,
                     fontFamily = sarasaBold,
                     textAlign = TextAlign.Center
@@ -156,7 +155,7 @@ fun MaimaiDataUpdateScreen(
                 
                 Text(
                     text = "maimai DX 的数据更新功能即将推出。\n敬请期待！",
-                    color = White1000.copy(alpha = 0.7f),
+                    color = colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
                     fontFamily = sarasaRegular,
                     textAlign = TextAlign.Center

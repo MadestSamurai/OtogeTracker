@@ -47,6 +47,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.animation.doOnEnd
@@ -64,6 +66,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.madsam.otora.core.datastore.ThemeDataStore
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.DynamicColorScheme
 import com.madsam.otora.core.theme.OtogeDefaultSourceColor
@@ -442,7 +445,26 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             navController = rememberNavController()
-            OtogeTrackerTheme {
+            
+            // 从 DataStore 读取主题设置
+            val context = LocalContext.current
+            val themeDataStore = remember { ThemeDataStore(context) }
+            val themeSettings by themeDataStore.getThemeSettingsFlow().collectAsState(
+                initial = ThemeDataStore.ThemeSettings()
+            )
+            
+            // 计算实际的深色模式状态
+            val systemDarkTheme = isSystemInDarkTheme()
+            val darkTheme = if (themeSettings.autoDarkMode) {
+                systemDarkTheme
+            } else {
+                themeSettings.darkModeEnabled
+            }
+            
+            // 应用主题颜色
+            val themeColor = themeSettings.themeColor
+            
+            OtogeTrackerTheme(sourceColor = themeColor, darkTheme = darkTheme) {
                 MainActivityScreen(navController)
             }
         }

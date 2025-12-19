@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.madsam.otora.core.datastore.ThemeDataStore
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-left`
 import com.madsam.otora.core.icon.fa.Cog
@@ -39,6 +40,7 @@ import com.madsam.otora.core.theme.OtogeTrackerTheme
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.settings.SettingsActivity
+import androidx.compose.foundation.isSystemInDarkTheme
 
 // osu! 默认主题色相 (333度，粉色)
 private const val OsuDefaultHue = 333
@@ -62,8 +64,23 @@ private fun colorFromHue(hue: Int, saturation: Float = 0.7f, lightness: Float = 
 fun OsuGameScreen(
     onNavigateBack: () -> Unit
 ) {
+    val context = LocalContext.current
     val viewModel: OsuViewModel = viewModel(factory = OsuViewModelFactory())
     val cardData by viewModel.cardUI.collectAsState()
+    
+    // 从 DataStore 读取主题设置
+    val themeDataStore = remember { ThemeDataStore(context) }
+    val themeSettings by themeDataStore.getThemeSettingsFlow().collectAsState(
+        initial = ThemeDataStore.ThemeSettings()
+    )
+    
+    // 计算实际的深色模式状态
+    val systemDarkTheme = isSystemInDarkTheme()
+    val darkTheme = if (themeSettings.autoDarkMode) {
+        systemDarkTheme
+    } else {
+        themeSettings.darkModeEnabled
+    }
     
     // 从用户 profile_hue (HSL 色相 0-359) 生成主题色
     // 如果用户没有设置自定义色相，则使用 osu! 默认粉色色相 (333度)
@@ -71,7 +88,7 @@ fun OsuGameScreen(
     val userProfileColor = colorFromHue(userHue)
     
     // 使用主题色包装整个 osu! 页面
-    OtogeTrackerTheme(sourceColor = userProfileColor) {
+    OtogeTrackerTheme(sourceColor = userProfileColor, darkTheme = darkTheme) {
         OsuGameScreenContent(
             viewModel = viewModel,
             onNavigateBack = onNavigateBack
