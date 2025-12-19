@@ -51,7 +51,7 @@ import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.OverlayManager
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.Bars
 import com.madsam.otora.core.icon.fa.Cog
 import com.madsam.otora.core.icon.fa.Trash
@@ -194,7 +194,7 @@ internal fun RecordScreen(
                             chunithmViewModel.triggerBack()
                         }) {
                             Icon(
-                                imageVector = Fa.`Arrow-left`,
+                                imageVector = Fa.`Chevron-left`,
                                 contentDescription = "Back",
                                 modifier = Modifier.size(24.dp)
                             )

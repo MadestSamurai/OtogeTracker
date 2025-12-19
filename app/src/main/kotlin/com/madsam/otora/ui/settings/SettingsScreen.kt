@@ -43,12 +43,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.madsam.otora.R
+import com.madsam.otora.core.datastore.AppLanguage
 import com.madsam.otora.core.datastore.ThemeDataStore
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.`Chevron-right`
 import com.madsam.otora.core.icon.fa.Cloud
 import com.madsam.otora.core.icon.fa.Cog
@@ -80,6 +83,11 @@ fun SettingsScreen(
     // 从 DataStore 读取主题设置
     val themeSettings by themeDataStore.getThemeSettingsFlow().collectAsState(
         initial = ThemeDataStore.ThemeSettings()
+    )
+    
+    // 从 DataStore 读取语言设置
+    val currentLanguage by themeDataStore.getLanguageFlow().collectAsState(
+        initial = AppLanguage.FOLLOW_SYSTEM
     )
     
     // 自动深色模式状态
@@ -140,6 +148,11 @@ fun SettingsScreen(
                     onNavigateBack = { selectedAppearanceSetting = null }
                 )
             }
+            AppearanceSettings.Language -> {
+                LanguageSettingScreen(
+                    onNavigateBack = { selectedAppearanceSetting = null }
+                )
+            }
             else -> {
                 // 其他外观设置暂未实现
                 selectedAppearanceSetting = null
@@ -169,7 +182,7 @@ fun SettingsScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "设置",
+                        text = stringResource(R.string.settings_title),
                         fontFamily = sarasaBold,
                         color = colorScheme.onSurface
                     )
@@ -177,8 +190,8 @@ fun SettingsScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Fa.`Arrow-left`,
-                            contentDescription = "返回",
+                            imageVector = Fa.`Chevron-left`,
+                            contentDescription = stringResource(R.string.settings_back),
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
                         )
@@ -203,7 +216,7 @@ fun SettingsScreen(
                 // 数据更新组
                 item {
                     SettingsGroup(
-                        title = "数据更新",
+                        title = stringResource(R.string.settings_group_data_update),
                         items = DataUpdateSettings.entries.toTypedArray()
                     ) { setting ->
                         DataUpdateSettingItem(
@@ -218,7 +231,7 @@ fun SettingsScreen(
                     Column {
                         // 组标题
                         Text(
-                            text = "外观设置",
+                            text = stringResource(R.string.settings_group_appearance),
                             color = colorScheme.onSurface,
                             fontSize = 14.sp,
                             fontFamily = sarasaSemiBold,
@@ -300,6 +313,13 @@ fun SettingsScreen(
                                 // 4. 语言
                                 SelectionSettingItem(
                                     setting = AppearanceSettings.Language,
+                                    currentValue = stringResource(
+                                        when (currentLanguage) {
+                                            AppLanguage.FOLLOW_SYSTEM -> R.string.language_follow_system
+                                            AppLanguage.ENGLISH -> R.string.language_english
+                                            AppLanguage.CHINESE_SIMPLIFIED -> R.string.language_chinese_simplified
+                                        }
+                                    ),
                                     onClick = { selectedAppearanceSetting = AppearanceSettings.Language }
                                 )
                                 
@@ -324,7 +344,7 @@ fun SettingsScreen(
                 // 网络设置组
                 item {
                     SettingsGroup(
-                        title = "网络设置",
+                        title = stringResource(R.string.settings_group_network),
                         items = NetworkSettings.entries.toTypedArray()
                     ) { setting ->
                         when (setting.type) {
@@ -416,14 +436,14 @@ private fun DataUpdateSettingItem(
         
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = setting.title,
+                text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontFamily = sarasaSemiBold
             )
             
             Text(
-                text = setting.description,
+                text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
                 fontFamily = sarasaRegular
@@ -431,7 +451,7 @@ private fun DataUpdateSettingItem(
             
             if (setting.lastUpdate.isNotEmpty()) {
                 Text(
-                    text = "上次更新: ${setting.lastUpdate}",
+                    text = stringResource(R.string.settings_last_update, setting.lastUpdate),
                     color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     fontSize = 12.sp,
                     fontFamily = sarasaRegular
@@ -475,14 +495,14 @@ private fun ToggleSettingItem(
         
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = setting.title,
+                text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontFamily = sarasaSemiBold
             )
             
             Text(
-                text = setting.description,
+                text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
                 fontFamily = sarasaRegular
@@ -532,14 +552,14 @@ private fun NetworkToggleSettingItem(
         
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = setting.title,
+                text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontFamily = sarasaSemiBold
             )
             
             Text(
-                text = setting.description,
+                text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
                 fontFamily = sarasaRegular
@@ -565,6 +585,7 @@ private fun NetworkToggleSettingItem(
 @Composable
 private fun SelectionSettingItem(
     setting: AppearanceSettings,
+    currentValue: String = "",
     onClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -586,22 +607,22 @@ private fun SelectionSettingItem(
         
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = setting.title,
+                text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontFamily = sarasaSemiBold
             )
             
             Text(
-                text = setting.description,
+                text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
                 fontFamily = sarasaRegular
             )
             
-            if (setting.currentValue.isNotEmpty()) {
+            if (currentValue.isNotEmpty()) {
                 Text(
-                    text = "当前: ${setting.currentValue}",
+                    text = stringResource(R.string.settings_current, currentValue),
                     color = colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 12.sp,
                     fontFamily = sarasaRegular
@@ -621,6 +642,7 @@ private fun SelectionSettingItem(
 @Composable
 private fun NetworkSelectionSettingItem(
     setting: NetworkSettings,
+    currentValue: String = "",
     onClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -642,22 +664,22 @@ private fun NetworkSelectionSettingItem(
         
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = setting.title,
+                text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontFamily = sarasaSemiBold
             )
             
             Text(
-                text = setting.description,
+                text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
                 fontFamily = sarasaRegular
             )
             
-            if (setting.currentValue.isNotEmpty()) {
+            if (currentValue.isNotEmpty()) {
                 Text(
-                    text = "当前: ${setting.currentValue}",
+                    text = stringResource(R.string.settings_current, currentValue),
                     color = colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 12.sp,
                     fontFamily = sarasaRegular
@@ -680,100 +702,94 @@ enum class SettingType {
 }
 
 enum class DataUpdateSettings(
-    val title: String,
-    val description: String,
+    val titleResId: Int,
+    val descriptionResId: Int,
     val icon: ImageVector,
     val lastUpdate: String = ""
 ) {
     Osu(
-        title = "osu!",
-        description = "更新osu!谱面和成绩数据",
+        titleResId = R.string.settings_data_osu_title,
+        descriptionResId = R.string.settings_data_osu_desc,
         icon = Filled.OsuIcon,
         lastUpdate = "2024-08-05 14:30"
     ),
     Maimai(
-        title = "maimai DX",
-        description = "更新maimai DX歌曲和成绩数据",
+        titleResId = R.string.settings_data_maimai_title,
+        descriptionResId = R.string.settings_data_maimai_desc,
         icon = Filled.MaimaiIcon,
         lastUpdate = "2024-08-05 12:15"
     ),
     Chunithm(
-        title = "CHUNITHM",
-        description = "更新CHUNITHM歌曲和成绩数据",
+        titleResId = R.string.settings_data_chunithm_title,
+        descriptionResId = R.string.settings_data_chunithm_desc,
         icon = Filled.ChunithmIcon,
         lastUpdate = "2024-08-05 16:45"
     ),
     BOF(
-        title = "BOF数据",
-        description = "更新BOF活动和相关数据",
+        titleResId = R.string.settings_data_bof_title,
+        descriptionResId = R.string.settings_data_bof_desc,
         icon = Fa.Cloud,
         lastUpdate = "2024-08-04 20:00"
     ),
     General(
-        title = "通用设置",
-        description = "自动更新频率和网络设置",
+        titleResId = R.string.settings_data_general_title,
+        descriptionResId = R.string.settings_data_general_desc,
         icon = Fa.Cog
     )
 }
 
 enum class AppearanceSettings(
-    val title: String,
-    val description: String,
+    val titleResId: Int,
+    val descriptionResId: Int,
     val icon: ImageVector,
     val type: SettingType,
-    val defaultValue: Any? = null,
-    val currentValue: String = ""
+    val defaultValue: Any? = null
 ) {
     AutoDarkMode(
-        title = "跟随系统",
-        description = "根据系统设置自动切换主题",
+        titleResId = R.string.settings_auto_dark_title,
+        descriptionResId = R.string.settings_auto_dark_desc,
         icon = Fa.Sun,
         type = SettingType.Toggle,
         defaultValue = true
     ),
     DarkMode(
-        title = "深色模式",
-        description = "启用深色主题界面",
+        titleResId = R.string.settings_dark_mode_title,
+        descriptionResId = R.string.settings_dark_mode_desc,
         icon = Fa.Moon,
         type = SettingType.Toggle,
         defaultValue = false
     ),
     ThemeColor(
-        title = "主题颜色",
-        description = "选择应用的主色调",
+        titleResId = R.string.settings_theme_color_title,
+        descriptionResId = R.string.settings_theme_color_desc,
         icon = Fa.Palette,
-        type = SettingType.Selection,
-        currentValue = "红色"
+        type = SettingType.Selection
     ),
     Language(
-        title = "语言",
-        description = "选择应用显示语言",
+        titleResId = R.string.settings_language_title,
+        descriptionResId = R.string.settings_language_desc,
         icon = Fa.Language,
-        type = SettingType.Selection,
-        currentValue = "简体中文"
+        type = SettingType.Selection
     ),
     FontSize(
-        title = "字体大小",
-        description = "调整界面文字大小",
+        titleResId = R.string.settings_font_size_title,
+        descriptionResId = R.string.settings_font_size_desc,
         icon = Fa.Font,
-        type = SettingType.Selection,
-        currentValue = "标准"
+        type = SettingType.Selection
     )
 }
 
 enum class NetworkSettings(
-    val title: String,
-    val description: String,
+    val titleResId: Int,
+    val descriptionResId: Int,
     val icon: ImageVector,
     val type: SettingType,
-    val defaultValue: Any? = null,
-    val currentValue: String = ""
+    val defaultValue: Any? = null
 ) {
     UserAgent(
-        title = "User-Agent",
-        description = "设置用于maimai DX、CHUNITHM等应用更新的浏览器标识",
+        titleResId = R.string.settings_user_agent_title,
+        descriptionResId = R.string.settings_user_agent_desc,
         icon = Fa.Cog,
-        type = SettingType.Selection,
-        currentValue = "默认"
+        type = SettingType.Selection
     )
 }

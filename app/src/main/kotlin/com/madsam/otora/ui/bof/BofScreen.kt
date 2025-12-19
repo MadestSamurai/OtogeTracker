@@ -77,7 +77,7 @@ import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.Calendar
 import com.madsam.otora.core.icon.fa.Camera
 import com.madsam.otora.core.icon.fa.`Magnifying-glass`
@@ -335,7 +335,7 @@ fun BofScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Fa.`Arrow-left`,
+                        imageVector = Fa.`Chevron-left`,
                         contentDescription = "Back",
                         tint = colorScheme.onSurface,
                         modifier = Modifier.size(20.dp)

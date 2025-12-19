@@ -30,11 +30,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -66,8 +66,16 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Leaderboard
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Leaderboard
+import androidx.compose.material.icons.rounded.SportsEsports
+import androidx.compose.material3.Icon
 import com.madsam.otora.core.datastore.ThemeDataStore
-import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.DynamicColorScheme
 import com.madsam.otora.core.theme.OtogeDefaultSourceColor
 import com.madsam.otora.core.theme.OtogeTrackerTheme
@@ -162,9 +170,8 @@ internal fun MainScreenWithNavigation(
 ) {
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf(Screen.HomeScreen, Screen.RecordScreen, Screen.ReportScreen)
-    val selectedIcons = listOf(Filled.Star, Filled.Star, Filled.Star)
-    val unselectedIcons =
-        listOf(Filled.Star, Filled.Star, Filled.Star)
+    val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.SportsEsports, Icons.Filled.Leaderboard)
+    val unselectedIcons = listOf(Icons.Rounded.Home, Icons.Rounded.SportsEsports, Icons.Rounded.Leaderboard)
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
@@ -260,7 +267,8 @@ internal fun MainScreenWithNavigation(
                         icon = {
                             Icon(
                                 if (selectedItem == index) selectedIcons[index] else unselectedIcons[index],
-                                contentDescription = screen.label
+                                contentDescription = screen.label,
+                                modifier = Modifier.size(24.dp)
                             )
                         },
                         label = {
@@ -368,7 +376,7 @@ internal fun MainScreenWithNavigation(
                             Icon(
                                 if (selectedItem == index) selectedIcons[index] else unselectedIcons[index],
                                 contentDescription = screen.label,
-                                modifier = Modifier.padding(0.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                         },
                         label = {
@@ -380,7 +388,7 @@ internal fun MainScreenWithNavigation(
                         },
                         colors = NavigationBarItemDefaults.colors(
                             indicatorColor = colorScheme.primaryContainer,
-                            selectedIconColor = colorScheme.primary,
+                            selectedIconColor = colorScheme.onPrimaryContainer,
                             selectedTextColor = colorScheme.primary,
                             unselectedIconColor = colorScheme.onSurfaceVariant,
                             unselectedTextColor = colorScheme.onSurfaceVariant
@@ -638,7 +646,7 @@ fun ColorRoleExamplesScreen() {
                     containerColor = colorScheme.primaryContainer,
                     contentColor = colorScheme.onPrimaryContainer
                 ) {
-                    Icon(Filled.Star, "FAB")
+                    Icon(Icons.Filled.Star, "FAB")
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
@@ -878,7 +886,7 @@ fun ColorRoleExamplesScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        Filled.Star,
+                        Icons.Filled.Star,
                         "Error",
                         tint = colorScheme.onErrorContainer
                     )

@@ -1,6 +1,7 @@
 package com.madsam.otora.ui.record.chunithm
 
 import android.content.Intent
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -32,20 +33,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.NavType
 import com.madsam.otora.OverlayManager
 import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.Cog
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.ui.record.ChunithmScreenState
@@ -53,7 +53,6 @@ import com.madsam.otora.ui.record.chunithm.pages.ChunithmSongDetailPage
 import com.madsam.otora.ui.settings.SettingsActivity
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 
 /**
  * Chunithm 游戏全屏页面
@@ -100,7 +99,7 @@ fun ChunithmGameScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = Fa.`Arrow-left`,
+                            imageVector = Fa.`Chevron-left`,
                             contentDescription = "Back",
                             modifier = Modifier.size(24.dp)
                         )

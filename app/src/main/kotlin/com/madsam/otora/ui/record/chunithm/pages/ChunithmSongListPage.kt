@@ -65,7 +65,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Arrow-down-wide-short`
-import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.Filter
 import com.madsam.otora.core.icon.fa.`Magnifying-glass`
 import com.madsam.otora.core.icon.fa.Xmark
@@ -464,7 +464,7 @@ internal fun ChunithmSongListPage(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Fa.`Arrow-left`,
+                    imageVector = Fa.`Chevron-left`,
                     contentDescription = "Back",
                     tint = colorScheme.onSurface,
                     modifier = Modifier.size(20.dp)

@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">音游追迹者</string>
     <string name="record_title">我的记录</string>
-    <!-- Chunithm Tab Titles -->
+    <string name="online_mark">在线标志</string>
+    <string name="offline_mark">离线标志</string>
+    <string name="online">在线</string>
+    <string name="offline">离线</string>
+    <string name="global_ranking">全球排名</string>
+    <string name="recent_90_days">近90天数据</string>
     <string name="highest_rank">最高排名</string>
+
+    <!-- Chunithm Tab Titles -->
     <string name="chunithm_tab_home">主页</string>
     <string name="chunithm_tab_song_list">歌曲列表</string>
     <string name="chunithm_tab_friends">好友</string>
@@ -19,11 +27,74 @@
     <string name="chunithm_cd_scroll_to_top">回到顶部</string>
     <string name="chunithm_cd_refresh_friends">刷新好友数据</string>
     <string name="chunithm_cd_refresh_collection">刷新藏品数据</string>
-    <string name="app_name">音游追迹者</string>
-    <string name="online_mark">在线标志</string>
-    <string name="offline_mark">离线标志</string>
-    <string name="online">在线</string>
-    <string name="offline">离线</string>
-    <string name="global_ranking">全球排名</string>
-    <string name="recent_90_days">近90天数据</string>
+
+    <!-- Settings -->
+    <string name="settings_title">设置</string>
+    <string name="settings_back">返回</string>
+    
+    <!-- Settings - Data Update -->
+    <string name="settings_group_data_update">数据更新</string>
+    <string name="settings_data_osu_title">osu!</string>
+    <string name="settings_data_osu_desc">更新osu!谱面和成绩数据</string>
+    <string name="settings_data_maimai_title">maimai DX</string>
+    <string name="settings_data_maimai_desc">更新maimai DX歌曲和成绩数据</string>
+    <string name="settings_data_chunithm_title">CHUNITHM</string>
+    <string name="settings_data_chunithm_desc">更新CHUNITHM歌曲和成绩数据</string>
+    <string name="settings_data_bof_title">BOF数据</string>
+    <string name="settings_data_bof_desc">更新BOF活动和相关数据</string>
+    <string name="settings_data_general_title">通用设置</string>
+    <string name="settings_data_general_desc">自动更新频率和网络设置</string>
+    <string name="settings_last_update">上次更新: %s</string>
+    
+    <!-- Settings - Appearance -->
+    <string name="settings_group_appearance">外观设置</string>
+    <string name="settings_auto_dark_title">跟随系统</string>
+    <string name="settings_auto_dark_desc">根据系统设置自动切换主题</string>
+    <string name="settings_dark_mode_title">深色模式</string>
+    <string name="settings_dark_mode_desc">启用深色主题界面</string>
+    <string name="settings_theme_color_title">主题颜色</string>
+    <string name="settings_theme_color_desc">选择应用的主色调</string>
+    <string name="settings_language_title">语言</string>
+    <string name="settings_language_desc">选择应用显示语言</string>
+    <string name="settings_font_size_title">字体大小</string>
+    <string name="settings_font_size_desc">调整界面文字大小</string>
+    <string name="settings_current">当前: %s</string>
+    
+    <!-- Settings - Network -->
+    <string name="settings_group_network">网络设置</string>
+    <string name="settings_user_agent_title">User-Agent</string>
+    <string name="settings_user_agent_desc">设置用于maimai DX、CHUNITHM等应用更新的浏览器标识</string>
+    <string name="settings_default">默认</string>
+    
+    <!-- Language Options -->
+    <string name="language_follow_system">跟随系统</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese_simplified">简体中文</string>
+    <string name="language_select_title">选择语言</string>
+    <string name="language_restart_hint">语言更改将立即生效。部分内容可能需要重启应用才能完全更新。</string>
+    
+    <!-- Theme Colors -->
+    <string name="color_violet">紫罗兰</string>
+    <string name="color_blue">蓝色</string>
+    <string name="color_cyan">青色</string>
+    <string name="color_teal">蓝绿</string>
+    <string name="color_green">绿色</string>
+    <string name="color_lime">黄绿</string>
+    <string name="color_yellow">黄色</string>
+    <string name="color_orange">橙色</string>
+    <string name="color_red">红色</string>
+    <string name="color_pink">粉色</string>
+    <string name="color_purple">紫色</string>
+    <string name="color_indigo">靛蓝</string>
+    
+    <!-- Font Sizes -->
+    <string name="font_size_small">小</string>
+    <string name="font_size_standard">标准</string>
+    <string name="font_size_large">大</string>
+    <string name="font_size_extra_large">特大</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">首页</string>
+    <string name="nav_record">记录</string>
+    <string name="nav_report">报告</string>
 </resources>

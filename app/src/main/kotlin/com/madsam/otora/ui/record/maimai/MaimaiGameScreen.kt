@@ -31,7 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.Cog
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.utils.ScreenUtil
@@ -64,7 +64,7 @@ fun MaimaiGameScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Fa.`Arrow-left`,
+                            imageVector = Fa.`Chevron-left`,
                             contentDescription = "Back",
                             modifier = Modifier.size(24.dp)
                         )

@@ -34,7 +34,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.core.datastore.ThemeDataStore
 import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.Cog
 import com.madsam.otora.core.theme.OtogeTrackerTheme
 import com.madsam.otora.core.theme.sarasaBold
@@ -120,7 +120,7 @@ private fun OsuGameScreenContent(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Fa.`Arrow-left`,
+                            imageVector = Fa.`Chevron-left`,
                             contentDescription = "Back",
                             modifier = Modifier.size(24.dp)
                         )

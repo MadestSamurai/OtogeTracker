@@ -6,7 +6,6 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.SharedTransitionScope.OverlayClip
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -35,6 +34,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -55,9 +55,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
 import com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
@@ -66,8 +65,8 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.sarasaSemiBold
 import com.madsam.otora.core.utils.CalcUtils
 import com.madsam.otora.core.utils.CalcUtils.numberToChuniRank
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
@@ -269,7 +268,7 @@ internal fun ChunithmSongDetailPage(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = rememberVectorPainter(image = Fa.`Arrow-left`),
+                    painter = rememberVectorPainter(image = Fa.`Chevron-left`),
                     contentDescription = "返回",
                     tint = colorScheme.onSurface,
                     modifier = Modifier.size(24.dp)

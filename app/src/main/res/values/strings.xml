@@ -27,4 +27,74 @@
     <string name="chunithm_cd_scroll_to_top">Scroll to Top</string>
     <string name="chunithm_cd_refresh_friends">Refresh Friends</string>
     <string name="chunithm_cd_refresh_collection">Refresh Collection</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_back">Back</string>
+    
+    <!-- Settings - Data Update -->
+    <string name="settings_group_data_update">Data Update</string>
+    <string name="settings_data_osu_title">osu!</string>
+    <string name="settings_data_osu_desc">Update osu! beatmaps and scores</string>
+    <string name="settings_data_maimai_title">maimai DX</string>
+    <string name="settings_data_maimai_desc">Update maimai DX songs and scores</string>
+    <string name="settings_data_chunithm_title">CHUNITHM</string>
+    <string name="settings_data_chunithm_desc">Update CHUNITHM songs and scores</string>
+    <string name="settings_data_bof_title">BOF Data</string>
+    <string name="settings_data_bof_desc">Update BOF events and related data</string>
+    <string name="settings_data_general_title">General Settings</string>
+    <string name="settings_data_general_desc">Auto update frequency and network settings</string>
+    <string name="settings_last_update">Last update: %s</string>
+    
+    <!-- Settings - Appearance -->
+    <string name="settings_group_appearance">Appearance</string>
+    <string name="settings_auto_dark_title">Follow System</string>
+    <string name="settings_auto_dark_desc">Automatically switch theme based on system settings</string>
+    <string name="settings_dark_mode_title">Dark Mode</string>
+    <string name="settings_dark_mode_desc">Enable dark theme interface</string>
+    <string name="settings_theme_color_title">Theme Color</string>
+    <string name="settings_theme_color_desc">Select the app\'s primary color</string>
+    <string name="settings_language_title">Language</string>
+    <string name="settings_language_desc">Select app display language</string>
+    <string name="settings_font_size_title">Font Size</string>
+    <string name="settings_font_size_desc">Adjust interface text size</string>
+    <string name="settings_current">Current: %s</string>
+    
+    <!-- Settings - Network -->
+    <string name="settings_group_network">Network Settings</string>
+    <string name="settings_user_agent_title">User-Agent</string>
+    <string name="settings_user_agent_desc">Set browser identifier for maimai DX, CHUNITHM, etc.</string>
+    <string name="settings_default">Default</string>
+    
+    <!-- Language Options -->
+    <string name="language_follow_system">Follow System</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese_simplified">简体中文</string>
+    <string name="language_select_title">Select Language</string>
+    <string name="language_restart_hint">Language changes will take effect immediately. Some content may require app restart to fully update.</string>
+    
+    <!-- Theme Colors -->
+    <string name="color_violet">Violet</string>
+    <string name="color_blue">Blue</string>
+    <string name="color_cyan">Cyan</string>
+    <string name="color_teal">Teal</string>
+    <string name="color_green">Green</string>
+    <string name="color_lime">Lime</string>
+    <string name="color_yellow">Yellow</string>
+    <string name="color_orange">Orange</string>
+    <string name="color_red">Red</string>
+    <string name="color_pink">Pink</string>
+    <string name="color_purple">Purple</string>
+    <string name="color_indigo">Indigo</string>
+    
+    <!-- Font Sizes -->
+    <string name="font_size_small">Small</string>
+    <string name="font_size_standard">Standard</string>
+    <string name="font_size_large">Large</string>
+    <string name="font_size_extra_large">Extra Large</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_record">Records</string>
+    <string name="nav_report">Report</string>
 </resources>

@@ -35,7 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.datastore.UserAgentDataStore
 import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Arrow-left`
+import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.theme.sarasaSemiBold
@@ -76,7 +76,7 @@ fun UserAgentSettingScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        imageVector = Fa.`Arrow-left`,
+                        imageVector = Fa.`Chevron-left`,
                         contentDescription = "返回",
                         tint = colorScheme.onSurface,
                         modifier = Modifier.size(24.dp)
