@@ -67,14 +67,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Leaderboard
-import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.rounded.Home
-import androidx.compose.material.icons.rounded.Leaderboard
-import androidx.compose.material.icons.rounded.SportsEsports
 import androidx.compose.material3.Icon
+import androidx.compose.ui.res.painterResource
 import com.madsam.otora.core.datastore.ThemeDataStore
 import com.madsam.otora.core.theme.DynamicColorScheme
 import com.madsam.otora.core.theme.OtogeDefaultSourceColor
@@ -170,8 +165,8 @@ internal fun MainScreenWithNavigation(
 ) {
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf(Screen.HomeScreen, Screen.RecordScreen, Screen.ReportScreen)
-    val selectedIcons = listOf(Icons.Filled.Home, Icons.Filled.SportsEsports, Icons.Filled.Leaderboard)
-    val unselectedIcons = listOf(Icons.Rounded.Home, Icons.Rounded.SportsEsports, Icons.Rounded.Leaderboard)
+    val selectedIcons = listOf(R.drawable.ic_home_filled_24, R.drawable.ic_assignment_filled_24, R.drawable.ic_leaderboard_filled_24)
+    val unselectedIcons = listOf(R.drawable.ic_home_24, R.drawable.ic_assignment_24, R.drawable.ic_leaderboard_24)
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
@@ -266,7 +261,7 @@ internal fun MainScreenWithNavigation(
                     NavigationRailItem(
                         icon = {
                             Icon(
-                                if (selectedItem == index) selectedIcons[index] else unselectedIcons[index],
+                                painter = painterResource(id = if (selectedItem == index) selectedIcons[index] else unselectedIcons[index]),
                                 contentDescription = screen.label,
                                 modifier = Modifier.size(24.dp)
                             )
@@ -374,7 +369,7 @@ internal fun MainScreenWithNavigation(
                     NavigationBarItem(
                         icon = {
                             Icon(
-                                if (selectedItem == index) selectedIcons[index] else unselectedIcons[index],
+                                painter = painterResource(id = if (selectedItem == index) selectedIcons[index] else unselectedIcons[index]),
                                 contentDescription = screen.label,
                                 modifier = Modifier.size(24.dp)
                             )

@@ -68,9 +68,14 @@
     
     <!-- Language Options -->
     <string name="language_follow_system">Follow System</string>
+    <string name="language_follow_system_desc">Use your device\'s language settings</string>
     <string name="language_english">English</string>
     <string name="language_chinese_simplified">简体中文</string>
     <string name="language_select_title">Select Language</string>
+    <string name="language_priority">Language Priority</string>
+    <string name="language_drag_hint">Tap arrows to reorder. The first language will be used.</string>
+    <string name="language_move_up">Move up</string>
+    <string name="language_move_down">Move down</string>
     <string name="language_restart_hint">Language changes will take effect immediately. Some content may require app restart to fully update.</string>
     
     <!-- Theme Colors -->

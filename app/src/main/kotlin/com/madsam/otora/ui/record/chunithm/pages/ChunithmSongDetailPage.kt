@@ -137,7 +137,7 @@ internal fun ChunithmSongDetailPage(
                         modifier.sharedBounds(
                             sharedContentState = rememberSharedContentState(key = cardKey),
                             animatedVisibilityScope = animatedContentScope,
-                            resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds()
+                            resizeMode = SharedTransitionScope.ResizeMode.scaleToBounds()
                         )
                     }
                 } else modifier

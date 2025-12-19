@@ -68,9 +68,14 @@
     
     <!-- Language Options -->
     <string name="language_follow_system">跟随系统</string>
+    <string name="language_follow_system_desc">使用设备的语言设置</string>
     <string name="language_english">English</string>
     <string name="language_chinese_simplified">简体中文</string>
     <string name="language_select_title">选择语言</string>
+    <string name="language_priority">语言优先级</string>
+    <string name="language_drag_hint">点击箭头调整顺序，排在最前面的语言将被使用。</string>
+    <string name="language_move_up">上移</string>
+    <string name="language_move_down">下移</string>
     <string name="language_restart_hint">语言更改将立即生效。部分内容可能需要重启应用才能完全更新。</string>
     
     <!-- Theme Colors -->

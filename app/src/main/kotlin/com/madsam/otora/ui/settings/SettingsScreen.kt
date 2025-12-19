@@ -47,7 +47,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.R
-import com.madsam.otora.core.datastore.AppLanguage
 import com.madsam.otora.core.datastore.ThemeDataStore
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
@@ -86,9 +85,8 @@ fun SettingsScreen(
     )
     
     // 从 DataStore 读取语言设置
-    val currentLanguage by themeDataStore.getLanguageFlow().collectAsState(
-        initial = AppLanguage.FOLLOW_SYSTEM
-    )
+    val followSystemLanguage by themeDataStore.getFollowSystemLanguageFlow().collectAsState(initial = true)
+    val languageOrder by themeDataStore.getLanguageOrderFlow().collectAsState(initial = ThemeDataStore.DEFAULT_LANGUAGE_ORDER)
     
     // 自动深色模式状态
     var autoDarkModeEnabled by remember { mutableStateOf(themeSettings.autoDarkMode) }
@@ -313,13 +311,15 @@ fun SettingsScreen(
                                 // 4. 语言
                                 SelectionSettingItem(
                                     setting = AppearanceSettings.Language,
-                                    currentValue = stringResource(
-                                        when (currentLanguage) {
-                                            AppLanguage.FOLLOW_SYSTEM -> R.string.language_follow_system
-                                            AppLanguage.ENGLISH -> R.string.language_english
-                                            AppLanguage.CHINESE_SIMPLIFIED -> R.string.language_chinese_simplified
+                                    currentValue = if (followSystemLanguage) {
+                                        stringResource(R.string.language_follow_system)
+                                    } else {
+                                        when (languageOrder.firstOrNull()) {
+                                            "zh-CN" -> stringResource(R.string.language_chinese_simplified)
+                                            "en" -> stringResource(R.string.language_english)
+                                            else -> stringResource(R.string.language_follow_system)
                                         }
-                                    ),
+                                    },
                                     onClick = { selectedAppearanceSetting = AppearanceSettings.Language }
                                 )
                                 

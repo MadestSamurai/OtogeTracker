@@ -45,7 +45,6 @@ import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
-import androidx.compose.animation.SharedTransitionScope.OverlayClip
 import androidx.compose.material3.MaterialTheme
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -80,7 +79,7 @@ internal fun ChunithmSongCard(
                         modifier.sharedBounds(
                             sharedContentState = rememberSharedContentState(key = cardKey),
                             animatedVisibilityScope = animatedContentScope,
-                            resizeMode = SharedTransitionScope.ResizeMode.ScaleToBounds()
+                            resizeMode = SharedTransitionScope.ResizeMode.scaleToBounds()
                         )
                     }
                 } else modifier

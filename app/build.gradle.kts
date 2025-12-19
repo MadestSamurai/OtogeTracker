@@ -111,6 +111,8 @@ dependencies {
     implementation(libs.compose.shimmer)
     implementation(libs.androidx.foundation.layout)
     implementation(libs.androidx.compose.animation)
+    // Reorderable (拖放排序)
+
 
     debugImplementation(libs.androidx.ui.tooling)
 
