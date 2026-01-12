@@ -1,0 +1,35 @@
+{
+    "users": [
+        {
+            "avatar_url": "https:\/\/a.ppy.sh\/10790649?1735461787.png",
+            "country_code": "KR",
+            "default_group": "default",
+            "id": 10790649,
+            "is_active": true,
+            "is_bot": false,
+            "is_deleted": false,
+            "is_online": false,
+            "is_supporter": false,
+            "last_visit": "2025-12-13T14:37:15+00:00",
+            "pm_friends_only": false,
+            "profile_colour": null,
+            "username": "Kalkai",
+            "country": {
+                "code": "KR",
+                "name": "South Korea"
+            },
+            "cover": {
+                "custom_url": "https:\/\/assets.ppy.sh\/user-profile-covers\/10790649\/aba0ec60ec9ea7497f4d17c79421ddc4e77c5e4559222a2465a25f430c0a6322.jpeg",
+                "url": "https:\/\/assets.ppy.sh\/user-profile-covers\/10790649\/aba0ec60ec9ea7497f4d17c79421ddc4e77c5e4559222a2465a25f430c0a6322.jpeg",
+                "id": null
+            },
+            "groups": [],
+            "team": {
+                "flag_url": "https:\/\/assets.ppy.sh\/teams\/flag\/21276\/393a87237f5254e6b1ddfa2ca8094246418d1ad84b0850c821a61780e8905876.png",
+                "id": 21276,
+                "name": "R Skin",
+                "short_name": "RSKN"
+            }
+        }
+    ]
+}

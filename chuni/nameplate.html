@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" id="viewport" content="width=552,user-scalable=yes" />
+	<meta name="format-detection" content="telephone=no">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="Pragma" CONTENT="no-cache">
+	<meta http-equiv="Cache-Control" CONTENT="no-cache">
+	<meta http-equiv="Expires" CONTENT="-1">
+	<meta name="robots" content="INDEX, FOLLOW" />
+	<meta name="auther" content="(C) SEGA">
+	<meta name="copyright" content="&copy;SEGA">
+	<meta name="description" content="【全新音乐游戏】由世嘉旗下舞萌开发团队制作的全新音乐游戏 【中二节奏】。">
+	<meta name="keywords" content="中二节奏,CHUNITHM,舞萌DX,maimai DX,maimai deluxe,sega">
+
+	<title>中二节奏 ■ CHUNITHM-NET</title>
+	<link rel="apple-touch-icon-precomposed" href="https://chunithm.wahlap.com/mobile/apple-touch-icon.png" />
+	<link rel="shortcut icon" type="image/vnd.microsoft.icon" href="https://chunithm.wahlap.com/mobile/favicon.ico" />
+	<link rel="icon" type="image/vnd.microsoft.icon" href="https://chunithm.wahlap.com/mobile/favicon.ico" />
+
+	<link rel="stylesheet" href="https://chunithm.wahlap.com/mobile/css/modaal.min.css" />
+	<link rel="stylesheet" href="https://chunithm.wahlap.com/mobile/css/common.css?ver=1.30" />
+	<link rel="stylesheet" href="https://chunithm.wahlap.com/mobile/css/submenu.css?ver=1.30" />
+	<link rel="stylesheet" href="https://chunithm.wahlap.com/mobile/css/contents.css?ver=1.30" />
+	<link rel="stylesheet" href="https://chunithm.wahlap.com/mobile/css/pc.css" />
+</head>
+<body>
+	<div class="bg1">
+	<div class="bg2">
+
+	<div id="wrap">
+		<!-- ヘッダ -->
+		<h1 id="header"></h1>
+		<!-- コンテンツ -->
+		<div id="inner">
+			<div id="main_menu">
+	<ul>
+		<li class="btn_home" onclick="location.href='https://chunithm.wahlap.com/mobile/home/';"></li>
+		<li class="btn_record" onclick="location.href='https://chunithm.wahlap.com/mobile/record/';"></li>
+		<li class="btn_collection_on" onclick="location.href='https://chunithm.wahlap.com/mobile/collection/';"></li>
+		<li class="btn_friend" onclick="location.href='https://chunithm.wahlap.com/mobile/friend/';"></li>
+		<li class="btn_loginBonus" onclick="location.href='https://chunithm.wahlap.com/mobile/loginBonus/';"></li>
+		<li class="btn_netstore" onclick="location.href='https://chunithm.wahlap.com/mobile/netStore/';"></li>
+	</ul>
+	collection
+</div>
+<div class="clearfix"></div>
+						<div class="frame01 w460">
+		
+<div id="submenu">
+	<ul>
+		<li class="submenu_chara">
+			<a href="https://chunithm.wahlap.com/mobile/collection/">角色</a>		</li>
+		<li class="submenu_title">
+			<a href="https://chunithm.wahlap.com/mobile/collection/skillDetail">技能</a>		</li>
+		<li class="submenu_ticket">
+			<a href="https://chunithm.wahlap.com/mobile/collection/ticket">功能票</a>		</li>
+		<li class="submenu_customise_on">
+			<a href="https://chunithm.wahlap.com/mobile/collection/customise">自定义</a>		</li>
+	</ul>
+</div>	<div class="frame01_inside">
+		<!--●ページタイトル-->
+		<div class="pt_15 pb_10"><h2 id="page_title">名牌版</h2></div>
+		<div class="box01 w420 mb_20">
+			<div class="box01_title text_b">使用中的名牌版</div>
+			<div class="nameplate_now"><img src="https://chunithm.wahlap.com/mobile/img/0e78c676046bb8cf.png"></div>
+		</div>
+		<div class="mt_20 mb_20">
+			<select name="idx" class="narrow01 w420">
+				<option value="-1">请选择名牌版</option>
+				<option value="9999">全部名牌版</option>
+									<option value="0">あ行</option>
+									<option value="1">か行</option>
+									<option value="2">さ行</option>
+									<option value="3">た行</option>
+									<option value="4">な行</option>
+									<option value="5">は行</option>
+									<option value="6">ま行</option>
+									<option value="7">や行</option>
+									<option value="8">ら行</option>
+									<option value="10">A～G</option>
+									<option value="11">H～N</option>
+									<option value="12">O～U</option>
+									<option value="13">V～Z</option>
+							</select>
+		</div>
+		<div class="box01 w420" id="list" style="display: none;">
+			<div class="box01_title text_b">名牌版列表</div>
+											<div class="nameplate_block" name="wordId4" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ノーマル</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/e06c3302466ecc07.png"></div>
+						<input type="hidden" name="idx" value="1" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">チュウニペンギン</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/56ff8f6c131c81d4.png"></div>
+						<input type="hidden" name="idx" value="2" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId0" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">いよわ 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/71e9b2aeb8321acc.png"></div>
+						<input type="hidden" name="idx" value="10214" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId0" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">いよわ 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/1eeb396ede422e9a.png"></div>
+						<input type="hidden" name="idx" value="10215" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId0" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">音楽的同位体プロジェクト 可不・星界 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/fd3fcee32098801f.png"></div>
+						<input type="hidden" name="idx" value="10149" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId0" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">音楽的同位体プロジェクト 可不・星界 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/257dd2c182b8f983.png"></div>
+						<input type="hidden" name="idx" value="10150" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId0" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">音楽的同位体プロジェクト 可不・星界 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/b9920962d2c9a028.png"></div>
+						<input type="hidden" name="idx" value="10151" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">グルーヴコースター 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/f76a4cde72d45cf9.png"></div>
+						<input type="hidden" name="idx" value="342" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">グルーヴコースター 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/1cac92759da70f5b.png"></div>
+						<input type="hidden" name="idx" value="343" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">グルーヴコースター 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/e19e5263f23549e3.png"></div>
+						<input type="hidden" name="idx" value="344" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">#コンパス 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/5909d7441654f056.png"></div>
+						<input type="hidden" name="idx" value="71" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">#コンパス 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/a742d7e2b8dfd380.png"></div>
+						<input type="hidden" name="idx" value="72" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">#コンパス 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/d75d61b3881427d8.png"></div>
+						<input type="hidden" name="idx" value="284" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">#コンパス 【4】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/0dbb7796e8e9c1b1.png"></div>
+						<input type="hidden" name="idx" value="285" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">#コンパス 【5】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/77c831fcc748620c.png"></div>
+						<input type="hidden" name="idx" value="286" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">#コンパス 【6】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/c5bf7bacb524285e.png"></div>
+						<input type="hidden" name="idx" value="287" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">#コンパス 【7】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/05ea8537ea345905.png"></div>
+						<input type="hidden" name="idx" value="10106" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">#コンパス 【8】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/f4836d912aaf5307.png"></div>
+						<input type="hidden" name="idx" value="10107" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">#コンパス 【9】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/f7febcbf57da690f.png"></div>
+						<input type="hidden" name="idx" value="10108" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">さくゆい 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/f908e1c79e7c31e7.png"></div>
+						<input type="hidden" name="idx" value="10175" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">さくゆい 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/09601593c8d1f694.png"></div>
+						<input type="hidden" name="idx" value="10176" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">さなちゃんねる 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/6453d7a0b7ff8e72.png"></div>
+						<input type="hidden" name="idx" value="10110" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">さなちゃんねる 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/6486a6ff0b73f6d1.png"></div>
+						<input type="hidden" name="idx" value="10111" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">さなちゃんねる 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/ab45681f421c7b68.png"></div>
+						<input type="hidden" name="idx" value="10190" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">さんばか 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/2175145ed2c92e95.png"></div>
+						<input type="hidden" name="idx" value="10069" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">さんばか 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/b87fc536154e29d0.png"></div>
+						<input type="hidden" name="idx" value="10070" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">さんばか 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/7103fae29f502eed.png"></div>
+						<input type="hidden" name="idx" value="10071" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">しぐれうい 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/917697c9bea43c39.png"></div>
+						<input type="hidden" name="idx" value="10135" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">しぐれうい 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/2d7bf16b89e8e191.png"></div>
+						<input type="hidden" name="idx" value="10136" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">しぐれうい 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/c95695ae8b1a3f42.png"></div>
+						<input type="hidden" name="idx" value="10137" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">勝利の女神：NIKKE 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/a348bca5c58a9bce.png"></div>
+						<input type="hidden" name="idx" value="10196" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">千恋＊万花 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/d936428e6f793002.png"></div>
+						<input type="hidden" name="idx" value="10166" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">千恋＊万花 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/9bd9f5417a0a7727.png"></div>
+						<input type="hidden" name="idx" value="10167" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">千恋＊万花 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/1e0e57a4db04fe28.png"></div>
+						<input type="hidden" name="idx" value="10168" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">千恋＊万花 【4】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/38afb195dac60a6c.png"></div>
+						<input type="hidden" name="idx" value="10169" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ツユ 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/060c5e2b6da8eeaf.png"></div>
+						<input type="hidden" name="idx" value="10061" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ツユ 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/09917c6046fe1dfa.png"></div>
+						<input type="hidden" name="idx" value="10062" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ツユ 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/f026f47bc690709a.png"></div>
+						<input type="hidden" name="idx" value="10063" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ツユ 【4】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/5ead4ad5538b0d59.png"></div>
+						<input type="hidden" name="idx" value="10064" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">東方妖々夢 STAGE 2 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/b1c78be46eb05cf8.png"></div>
+						<input type="hidden" name="idx" value="10041" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">東方妖々夢 STAGE 2 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/10ad7b9f98931aed.png"></div>
+						<input type="hidden" name="idx" value="10042" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">東方神霊廟 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/3fef31e513155ae2.png"></div>
+						<input type="hidden" name="idx" value="10087" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">東方神霊廟 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/5db49c0a6cd963e7.png"></div>
+						<input type="hidden" name="idx" value="10088" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">東方Extra 4 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/bf84b45cf220c52f.png"></div>
+						<input type="hidden" name="idx" value="10054" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">東方Extra 4 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/c195dd4f5f8b3276.png"></div>
+						<input type="hidden" name="idx" value="10055" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">東方LostWord 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/8ca77750a52ccede.png"></div>
+						<input type="hidden" name="idx" value="10021" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">東方LostWord 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/22dd3d253e46e064.png"></div>
+						<input type="hidden" name="idx" value="10022" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">東北ずん子 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/349fbf981696adca.png"></div>
+						<input type="hidden" name="idx" value="10160" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">東北ずん子 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/aca2941b903712cc.png"></div>
+						<input type="hidden" name="idx" value="10161" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">東北ずん子 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/4145f9e958c99f05.png"></div>
+						<input type="hidden" name="idx" value="10162" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId5" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ヘブンバーンズレッド 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/cc2f15f0fdcebc87.png"></div>
+						<input type="hidden" name="idx" value="10082" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId5" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ヘブンバーンズレッド 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/07c1be7f16dbe01c.png"></div>
+						<input type="hidden" name="idx" value="10083" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId5" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ヘブンバーンズレッド 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/32e8f3c5c826218c.png"></div>
+						<input type="hidden" name="idx" value="10084" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId5" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ヘブンバーンズレッド 【4】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/600c9dc4ce6d2b6b.png"></div>
+						<input type="hidden" name="idx" value="10163" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId5" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ヘブンバーンズレッド 【5】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/3ab6f474280761b8.png"></div>
+						<input type="hidden" name="idx" value="10164" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId5" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ヘブンバーンズレッド 【6】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/58c3b9a23c1fda4b.png"></div>
+						<input type="hidden" name="idx" value="10165" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId7" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">結月ゆかり</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/3bd21c2a01f9806e.png"></div>
+						<input type="hidden" name="idx" value="226" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId7" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">紲星あかり</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/180f3dcdeca3ea16.png"></div>
+						<input type="hidden" name="idx" value="227" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId7" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">琴葉 茜・葵 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/5ec276c192f30ed6.png"></div>
+						<input type="hidden" name="idx" value="228" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId7" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">結月ゆかり・紲星あかり</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/d4acfad0210c96ba.png"></div>
+						<input type="hidden" name="idx" value="10067" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId7" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">琴葉 茜・葵 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/8d70787243cf30d5.png"></div>
+						<input type="hidden" name="idx" value="10068" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">Arcaea 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/5287b4f1f92f68df.png"></div>
+						<input type="hidden" name="idx" value="169" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">Arcaea 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/52aa0d973f53d2b6.png"></div>
+						<input type="hidden" name="idx" value="170" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">Arcaea 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/0abede3c2d61c226.png"></div>
+						<input type="hidden" name="idx" value="271" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">Arcaea 【4】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/9ef046fab9f13f46.png"></div>
+						<input type="hidden" name="idx" value="272" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">Arcaea 【5】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/2d2f2ef277f95960.png"></div>
+						<input type="hidden" name="idx" value="322" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">Arcaea 【6】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/703d0b2903833a90.png"></div>
+						<input type="hidden" name="idx" value="323" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">Arcaea 【7】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/33d5e330c407f9b8.png"></div>
+						<input type="hidden" name="idx" value="10112" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">Arcaea 【8】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/cd725d58c5388239.png"></div>
+						<input type="hidden" name="idx" value="10113" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">Arcaea 【9】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/2e14f77a81b297da.png"></div>
+						<input type="hidden" name="idx" value="10121" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">Arcaea 【10】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/6d07a9dfe30b09bf.png"></div>
+						<input type="hidden" name="idx" value="10122" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">Arcaea 【11】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/14d5f744b0c76c7a.png"></div>
+						<input type="hidden" name="idx" value="10238" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">D4DJ Groovy Mix 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/f83f30b7a986f218.png"></div>
+						<input type="hidden" name="idx" value="10056" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">D4DJ Groovy Mix 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/7d548eb49e64f5bc.png"></div>
+						<input type="hidden" name="idx" value="10057" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">D4DJ Groovy Mix 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/196085a1af7b7235.png"></div>
+						<input type="hidden" name="idx" value="10058" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">D4DJ Groovy Mix 【4】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/bad894884632ea2e.png"></div>
+						<input type="hidden" name="idx" value="10079" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">DECO*27 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/efb18c264b733d5b.png"></div>
+						<input type="hidden" name="idx" value="10101" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">DECO*27 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/19a08b938bd867ed.png"></div>
+						<input type="hidden" name="idx" value="10102" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId11" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">HARDCORE TANO*C 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/408b5845fddceb37.png"></div>
+						<input type="hidden" name="idx" value="10091" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId11" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">HARDCORE TANO*C 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/e8be826b00ec5368.png"></div>
+						<input type="hidden" name="idx" value="10092" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId11" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">NEEDY GIRL OVERDOSE 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/d248e4eed18a2811.png"></div>
+						<input type="hidden" name="idx" value="10129" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId11" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">NEEDY GIRL OVERDOSE 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/621f645ec920fa3b.png"></div>
+						<input type="hidden" name="idx" value="10130" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId11" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">NEEDY GIRL OVERDOSE 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/d097864526ce03a7.png"></div>
+						<input type="hidden" name="idx" value="10131" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId11" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">NEEDY GIRL OVERDOSE 【4】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/e31e37b5e33e6c8e.png"></div>
+						<input type="hidden" name="idx" value="10198" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId12" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">▽▲TRiNITY▲▽ 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/4878878f2c784a82.png"></div>
+						<input type="hidden" name="idx" value="10152" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId12" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">▽▲TRiNITY▲▽ 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/72d5376eb11f654c.png"></div>
+						<input type="hidden" name="idx" value="10153" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId12" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">▽▲TRiNITY▲▽ 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/cfd63c99f3675d14.png"></div>
+						<input type="hidden" name="idx" value="10154" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId12" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">▽▲TRiNITY▲▽ 【4】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/9e91457bc2436eeb.png"></div>
+						<input type="hidden" name="idx" value="10155" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId13" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">WACCA 【1】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/6ca335c7453d1f96.png"></div>
+						<input type="hidden" name="idx" value="10123" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId13" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">WACCA 【2】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/3d16c314dfdf3052.png"></div>
+						<input type="hidden" name="idx" value="10124" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId13" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">WACCA 【3】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/3afd042e4bb93842.png"></div>
+						<input type="hidden" name="idx" value="10125" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId13" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">WACCA 【4】</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/2a26492ce5ddd32e.png"></div>
+						<input type="hidden" name="idx" value="10134" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId8" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ラストバトル</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/8536c33eefd82106.png"></div>
+						<input type="hidden" name="idx" value="56" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId7" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ようこそ！ハッピーアニマリア</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/e1c52739f133e295.png"></div>
+						<input type="hidden" name="idx" value="137" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId0" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">おにまむしけ</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/b9c13eb731fd187d.png"></div>
+						<input type="hidden" name="idx" value="238" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId7" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ようこそ！ハッピーアニマリア2</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/6d527d6189f7fd1f.png"></div>
+						<input type="hidden" name="idx" value="290" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">審判正義の星女神</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/500481c62d50b044.png"></div>
+						<input type="hidden" name="idx" value="308" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId7" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">世にも不思議な物語</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/bdb9e838182cbf0c.png"></div>
+						<input type="hidden" name="idx" value="345" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId5" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">破壊と再生　剣の後継者</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/f7f87e6bd1d6d3fd.png"></div>
+						<input type="hidden" name="idx" value="20003" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">カゲロウリレイション</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/a5cc7b81bf4c0554.png"></div>
+						<input type="hidden" name="idx" value="20004" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId11" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">HaNaMiNa</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/1b28bc5f7ac9bed1.png"></div>
+						<input type="hidden" name="idx" value="20005" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">双炎のラストソング</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/3ef594ad5d2abb22.png"></div>
+						<input type="hidden" name="idx" value="20006" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">世界襲撃♥ハネムーン</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/963cef3d34db8c29.png"></div>
+						<input type="hidden" name="idx" value="20007" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId6" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">舞ヶ原シンセ研究会</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/23c4ed66ba587cd8.png"></div>
+						<input type="hidden" name="idx" value="20008" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">勧善懲悪</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/5bd414ff6b4f1852.png"></div>
+						<input type="hidden" name="idx" value="20009" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId4" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">残されし秩序の守護者</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/ee605f2bc28ba46a.png"></div>
+						<input type="hidden" name="idx" value="20010" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId2" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">最後の審判 ～ abyss of despair</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/f80db2d492265d16.png"></div>
+						<input type="hidden" name="idx" value="20011" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId6" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">未来の燈火</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/710156493dd0ad1c.png"></div>
+						<input type="hidden" name="idx" value="20012" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">大地の後継者たち</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/a0f28a54f948427e.png"></div>
+						<input type="hidden" name="idx" value="20013" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">First story of the SeelischTact</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/ac65f14a37fe5a7f.png"></div>
+						<input type="hidden" name="idx" value="20014" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId5" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">不器用な魔女と優しい錬金術師　～始まりの音色～</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/e654cc40bf8983ad.png"></div>
+						<input type="hidden" name="idx" value="20015" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId10" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">GUMIN LIFE</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/66ec821ffd02ef6e.png"></div>
+						<input type="hidden" name="idx" value="20016" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId4" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">なかよし！？ハッピーアニマリア</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/5507b4599956b705.png"></div>
+						<input type="hidden" name="idx" value="20017" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId0" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">ヴェルゼビュートネメシス</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/0e78c676046bb8cf.png"></div>
+						<input type="hidden" name="idx" value="25009" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId3" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">導師 ミィム・ミクラー</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/f50a47ded4d6633a.png"></div>
+						<input type="hidden" name="idx" value="26001" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId5" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">古き混沌の巨人</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/843ce949e01f91c5.png"></div>
+						<input type="hidden" name="idx" value="26002" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId0" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">鬼蝮 ユリア</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/ecc15b07b44bf8c0.png"></div>
+						<input type="hidden" name="idx" value="26003" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+											<div class="nameplate_block" name="wordId1" style="display: none;">
+					<form action="https://chunithm.wahlap.com/mobile/collection/nameplate/set/" method="post" accept-charset="utf-8">
+						<div class="nameplate_name">不来方 とあ</div>
+						<div class="nameplate_plate"><img class="lazy" data-original="https://chunithm.wahlap.com/mobile/img/14c0bda1b8026041.png"></div>
+						<input type="hidden" name="idx" value="26005" />
+						<input type="hidden" name="token" value="7feb9f81faa30058265f36a1c9ba95ab" />
+						<div class="icon_set"><img src="https://chunithm.wahlap.com/mobile/images/icon_set.png" class="btn_set_now"></div>
+					</form>
+				</div>
+					</div>
+		<!-- 戻る -->
+		<div class="mb_10 mt_20">
+			<div class="btn_back" onclick="JavaScript:window.history.back(-1);"></div>
+		</div>
+	</div>
+</div>
+			<div class="sleep_penguin"><img src="https://chunithm.wahlap.com/mobile/images/pen_sleep_apng.png"></div>
+		</div>
+		<div class="clearfix bg3">
+			<!-- フローティングページ -->
+			<img id="page-top" src="https://chunithm.wahlap.com/mobile/images/btn_page_top.png">
+			<img id="page-bottom" src="https://chunithm.wahlap.com/mobile/images/btn_page_bottom.png">
+		</div>
+		<!-- フッタ -->
+		<div id="footer">
+			<div class="footer_menu font_65">
+				<a href="https://chunithm.wahlap.com/mobile/termsOfService/" target="_blank" rel="noopener"><span class="font_color_y">使用条款</span></a>
+				<span>｜ <a href="https://chunithm.wahlap.com/mobile/sitePolicy/" target="_blank" rel="noopener"><span class="font_color_y">使用须知</span></a></span>
+				<span>｜ <a href="https://www.segafave.co.jp/en/privacy" target="_blank" rel="noopener"><span class="font_color_y">私隐政策</span></a></span>
+			</div>
+			<div class="footer_attention">
+				<div id="footer_copy">
+					<ul style="display:flex; margin:auto">
+						<li style="margin-left: 0px">
+							<a href="https://sega.jp/" target="_blank" rel="noopener">
+								<img src="https://chunithm.wahlap.com/mobile/images/logo_sega.png" /><br>
+							</a>
+							&copy; SEGA
+						</li>
+						<li style="margin-left: 30px">
+							<a href="http://www.wahlap.com/" target="_blank" rel="noopener">
+								<img src="https://chunithm.wahlap.com/mobile/images/logo_wahlap.png" /><br>
+							</a>
+							<div class="font_x-small p_3">
+								<a href="http://www.miitbeian.gov.cn" style="text-decoration:none; color: #fff" target="_blank" rel="noopener">粤ICP备05005783号</a>
+							</div>
+						</li>
+					</ul>
+				</div>
+							</div>
+		</div>
+	</div>
+
+	</div>
+	</div>
+
+	<script src="https://chunithm.wahlap.com/mobile/js/jquery-3.6.0.min.js?ver=1.30"></script>
+	<script src="https://chunithm.wahlap.com/mobile/js/jquery.marquee.js?ver=1.30"></script>
+	<script src="https://chunithm.wahlap.com/mobile/js/common.js?ver=1.30"></script>
+	<script src="https://chunithm.wahlap.com/mobile/js/jquery.lazyload.min.js?ver=1.30"></script>
+	<script src="https://chunithm.wahlap.com/mobile/js/modaal.min.js"></script>
+	<script>
+		var scrollPoint = $('.scroll_point').length;
+		// 上へ
+		$('#page-top').click(function () {
+			if (scrollPoint > 0) {
+				var fromPos = Math.floor($(window).scrollTop());
+				var toPos   = 0;
+				$(".scroll_point").each(function() {
+					var targetPos = Math.floor($(this).offset().top);
+					if (fromPos > targetPos) {
+						toPos = targetPos;
+					} else {
+						return false;
+					}
+				});
+				$('body,html').animate({scrollTop: toPos}, 500);
+			} else {
+				$('body,html').animate({scrollTop: 0}, 500);
+			}
+			return false;
+		});
+		// 下へ
+		$('#page-bottom').click(function () {
+			if (scrollPoint > 0) {
+				var fromPos = Math.floor($(window).scrollTop());
+				var toPos   = Math.floor($(document).height());
+				$(".scroll_point").each(function() {
+					var targetPos = Math.floor($(this).offset().top);
+					if (fromPos < targetPos) {
+						toPos = targetPos;
+						return false;
+					}
+				});
+				$('body,html').animate({scrollTop: toPos}, 500);
+			} else {
+				$('body,html').animate({scrollTop: $(document).height()}, 500);
+			}
+			return false;
+		});
+	</script>
+	<script>
+$('.lazy').lazyload({
+	effect: 'fadeIn',
+	effectspeed: 0
+});
+$('div.icon_set').click(function(){
+	var form = $(this).parent('form');
+	if (form.length > 0) {
+		form.submit();
+		return true;
+	} else {
+		return false;
+	}
+});
+$('select[name=idx]').change(function(){
+	var idx = $('[name=idx]').val();
+	if (idx == -1) {
+		$('#list').hide();
+	} else if (idx == 9999) {
+		$('div[name^="wordId"]').show();
+		$('#list').show();
+	} else {
+		$('div[name^="wordId"]').hide();
+		$('div[name="wordId' + idx + '"]').show();
+		$('#list').show();
+	}
+	$('body,html').animate({scrollTop: 0}, 0);
+	$('.lazy').lazyload();
+});
+</script>
+</body>
+</html>
