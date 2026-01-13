@@ -47,14 +47,21 @@ internal class BofViewModel(
 
     // 新的团队排行数据流
     val teamRankingData = MutableStateFlow(listOf<TeamRankingItem>())
+    val teamDiffRankingData = MutableStateFlow(listOf<TeamRankingItem>()) // 团队差值排行
+    val teamReverseDiffRankingData = MutableStateFlow(listOf<TeamRankingItem>()) // 团队逆差值排行
     val isTeamRankingLoading = MutableStateFlow(false)
     val teamRankingError = MutableStateFlow("")
+    
+    // Comment 差值数据流
+    val commentDiffData = MutableStateFlow(listOf<BofCommentUI>()) // 评价差值排行
+    val commentReverseDiffData = MutableStateFlow(listOf<BofCommentUI>()) // 评价逆差值排行
 
     // 新的排名数据流
     val totalRankingData = MutableStateFlow(listOf<WorkRanking>())
     val avgRankingData = MutableStateFlow(listOf<WorkRanking>())
     val medianRankingData = MutableStateFlow(listOf<WorkRanking>())
     val diffRankingData = MutableStateFlow(listOf<WorkRanking>())
+    val reverseDiffRankingData = MutableStateFlow(listOf<WorkRanking>()) // 逆差值排行数据
     val compositeRankingData = MutableStateFlow(listOf<WorkRanking>())
     
     // 平均分排行的过滤参数
@@ -234,8 +241,31 @@ internal class BofViewModel(
             return
         }
         
+        // 计算当前时间戳
+        val currentTimestamp = if (selectedRange.singleComment) {
+            val dateToFetch = if (selectedRange.commentDate.isNotEmpty()) {
+                selectedRange.commentDate
+            } else {
+                bofScreenState.selectedCurrentDate.value.toString()
+            }
+            DateTimeUtils.ymdToMillis(dateToFetch, "00:00")
+        } else {
+            DateTimeUtils.ymdToMillis(
+                bofScreenState.selectedCurrentDate.value.toString(),
+                DateTimeUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
+            )
+        }
+        
+        // 计算对比时间戳（如果选择了对比时间）
+        val compareTimestamp = if (bofScreenState.selectedCompareTime.value != "-1") {
+            DateTimeUtils.ymdToMillis(
+                bofScreenState.selectedCompareDate.value.toString(),
+                DateTimeUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
+            )
+        } else null
+        
+        // 加载当前时间点的数据
         val data = if (selectedRange.singleComment) {
-            // 使用固定评论数据（旧格式）
             val dateToFetch = if (selectedRange.commentDate.isNotEmpty()) {
                 selectedRange.commentDate
             } else {
@@ -243,12 +273,7 @@ internal class BofViewModel(
             }
             bofLocalService.getCommentByTime(dateToFetch)
         } else {
-            // 使用时序评论数据（新格式）
-            val timestamp = DateTimeUtils.ymdToMillis(
-                bofScreenState.selectedCurrentDate.value.toString(),
-                DateTimeUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
-            )
-            bofLocalService.getCommentTimeSeries(selectedRange.path, timestamp)
+            bofLocalService.getCommentTimeSeries(selectedRange.path, currentTimestamp)
         }
         
         if (data.isEmpty()) {
@@ -257,8 +282,24 @@ internal class BofViewModel(
             return
         }
         
+        // 如果有对比时间，加载对比数据
+        val compareData = if (compareTimestamp != null && !selectedRange.singleComment) {
+            bofLocalService.getCommentTimeSeries(selectedRange.path, compareTimestamp)
+        } else null
+        
+        // 创建对比数据映射
+        val compareMap = compareData?.associateBy { it.user } ?: emptyMap()
+        
+        // 填充对比数据
+        val dataWithCompare = data.map { comment ->
+            val compareComment = compareMap[comment.user]
+            comment.apply {
+                compareTotal = compareComment?.total
+            }
+        }
+        
         // 排序并设置排名
-        val updatedData = data.sortedWith(compareByDescending(BofCommentUI::total)
+        val updatedData = dataWithCompare.sortedWith(compareByDescending(BofCommentUI::total)
                 .thenByDescending(BofCommentUI::long)
                 .thenByDescending(BofCommentUI::short)
                 .thenByDescending(BofCommentUI::vote))
@@ -641,16 +682,18 @@ internal class BofViewModel(
                 MutableStateFlow(1) // 暂时固定最低评价数为1，可以后续添加筛选参数
             ) { totalData: List<WorkRanking>, minImpression: Int ->
                 Log.d(TAG, "Generating difference ranking with ${totalData.size} items")
-                generateDifferenceRankingFromTotal(totalData)
-            }.collect { diffData: List<WorkRanking> ->
+                val (diffData, reverseDiffData) = generateDifferenceRankingFromTotal(totalData)
+                Pair(diffData, reverseDiffData)
+            }.collect { (diffData, reverseDiffData) ->
                 diffRankingData.update { diffData }
+                reverseDiffRankingData.update { reverseDiffData }
             }
         }
     }
     
-    private fun generateDifferenceRankingFromTotal(totalData: List<WorkRanking>): List<WorkRanking> {
+    private fun generateDifferenceRankingFromTotal(totalData: List<WorkRanking>): Pair<List<WorkRanking>, List<WorkRanking>> {
         // 过滤有对比数据的作品，并计算分数差值
-        val diffData = totalData.mapNotNull { ranking ->
+        val diffDataRaw = totalData.mapNotNull { ranking ->
             if (ranking.compareScore != null && ranking.compareScore > 0) {
                 val scoreDiff = ranking.score - ranking.compareScore
                 val avgDiff = if (ranking.compareAverage != null) ranking.average - ranking.compareAverage else null
@@ -672,18 +715,161 @@ internal class BofViewModel(
         }.filter { 
             // 可以根据需要添加更多过滤条件
             abs(it.score) > 0 // 只显示有变化的作品
-        }.sortedByDescending { it.score } // 按分数差值降序排列（正数表示增长）
+        }
+        
+        // 正差值排行（增长）- 只显示正数
+        val diffData = diffDataRaw
+            .filter { it.score > 0 } // 只保留增长的作品
+            .sortedByDescending { it.score } // 按分数差值降序排列
+        
+        // 逆差值排行（减少）- 只显示负数，并转为正数显示
+        val reverseDiffData = diffDataRaw
+            .filter { it.score < 0 } // 只保留减少的作品
+            .sortedBy { it.score } // 按分数差值升序排列（最负的在前）
+            .map { ranking ->
+                // 将负数转换为正数显示
+                ranking.copy(
+                    score = -ranking.score, // 负数变正数
+                    average = -ranking.average, // 负数变正数
+                    median = -ranking.median, // 负数变正数
+                    impression = -ranking.impression // 负数变正数
+                )
+            }
         
         // 重新分配排名（同分同排名）
-        var currentRank = 1
-        var previousScore: Int? = null
-        return diffData.mapIndexed { index, ranking ->
-            // 如果分数差值与前一个不同，更新排名为当前位置+1
-            if (previousScore != null && ranking.score != previousScore) {
-                currentRank = index + 1
+        fun assignRanks(data: List<WorkRanking>): List<WorkRanking> {
+            var currentRank = 1
+            var previousScore: Int? = null
+            return data.mapIndexed { index, ranking ->
+                // 如果分数差值与前一个不同，更新排名为当前位置+1
+                if (previousScore != null && ranking.score != previousScore) {
+                    currentRank = index + 1
+                }
+                previousScore = ranking.score
+                ranking.copy(rank = currentRank)
             }
-            previousScore = ranking.score
-            ranking.copy(rank = currentRank)
+        }
+        
+        return Pair(assignRanks(diffData), assignRanks(reverseDiffData))
+    }
+
+    /**
+     * 生成 Team 差值排行
+     * 基于当前的 teamRankingData，只计算总分变化
+     */
+    fun generateTeamDifferenceRanking() {
+        viewModelScope.launch {
+            val currentTeams = teamRankingData.value
+            
+            if (currentTeams.isEmpty()) {
+                teamDiffRankingData.update { emptyList() }
+                teamReverseDiffRankingData.update { emptyList() }
+                Log.d(TAG, "No team data available for difference ranking")
+                return@launch
+            }
+            
+            // 计算差值数据
+            val diffDataRaw = currentTeams.mapNotNull { team ->
+                val compareScore = team.compareTotalScore
+                if (compareScore != null && compareScore > 0.0) {
+                    val scoreDiff = team.totalScore - compareScore
+                    team.copy(
+                        totalScore = scoreDiff, // 将差值存储为 totalScore
+                        rank = 0 // 稍后分配
+                    )
+                } else null
+            }.filter { 
+                kotlin.math.abs(it.totalScore) > 0 // 只显示有变化的团队
+            }
+            
+            // 正差值排行（增长）- 只保留正数
+            val diffData = diffDataRaw
+                .filter { it.totalScore > 0 }
+                .sortedByDescending { it.totalScore }
+            
+            // 逆差值排行（减少）- 只保留负数，转为正数显示
+            val reverseDiffData = diffDataRaw
+                .filter { it.totalScore < 0 }
+                .sortedBy { it.totalScore } // 按差值升序（最负的在前）
+                .map { it.copy(totalScore = -it.totalScore) } // 转为正数
+            
+            // 重新分配排名
+            fun assignTeamRanks(data: List<TeamRankingItem>): List<TeamRankingItem> {
+                var currentRank = 1
+                var previousScore: Double? = null
+                return data.mapIndexed { index, team ->
+                    if (previousScore != null && kotlin.math.abs(team.totalScore - previousScore!!) > 0.01) {
+                        currentRank = index + 1
+                    }
+                    previousScore = team.totalScore
+                    team.copy(rank = currentRank)
+                }
+            }
+            
+            teamDiffRankingData.update { assignTeamRanks(diffData) }
+            teamReverseDiffRankingData.update { assignTeamRanks(reverseDiffData) }
+            
+            Log.d(TAG, "Team difference ranking generated: ${diffData.size} increases, ${reverseDiffData.size} decreases")
+        }
+    }
+    
+    /**
+     * 生成 Comment 差值排行
+     * 基于当前的 commentData，只计算总分变化
+     */
+    fun generateCommentDifferenceRanking() {
+        viewModelScope.launch {
+            val currentComments = commentData.value
+            
+            if (currentComments.isEmpty()) {
+                commentDiffData.update { emptyList() }
+                commentReverseDiffData.update { emptyList() }
+                Log.d(TAG, "No comment data available for difference ranking")
+                return@launch
+            }
+            
+            // 计算差值数据
+            val diffDataRaw = currentComments.mapNotNull { comment ->
+                val compareTotal = comment.compareTotal
+                if (compareTotal != null && compareTotal > 0) {
+                    val totalDiff = comment.total - compareTotal
+                    comment.copy(
+                        total = totalDiff, // 将差值存储为 total
+                        index = 0 // 稍后分配
+                    )
+                } else null
+            }.filter {
+                kotlin.math.abs(it.total) > 0 // 只显示有变化的评论
+            }
+            
+            // 正差值排行（增长）- 只保留正数
+            val diffData = diffDataRaw
+                .filter { it.total > 0 }
+                .sortedByDescending { it.total }
+            
+            // 逆差值排行（减少）- 只保留负数，转为正数显示
+            val reverseDiffData = diffDataRaw
+                .filter { it.total < 0 }
+                .sortedBy { it.total } // 按差值升序（最负的在前）
+                .map { it.copy(total = -it.total) } // 转为正数
+            
+            // 重新分配排名
+            fun assignCommentIndexes(data: List<BofCommentUI>): List<BofCommentUI> {
+                var currentIndex = 1
+                var previousTotal: Int? = null
+                return data.mapIndexed { index, comment ->
+                    if (previousTotal != null && comment.total != previousTotal) {
+                        currentIndex = index + 1
+                    }
+                    previousTotal = comment.total
+                    comment.copy(index = currentIndex)
+                }
+            }
+            
+            commentDiffData.update { assignCommentIndexes(diffData) }
+            commentReverseDiffData.update { assignCommentIndexes(reverseDiffData) }
+            
+            Log.d(TAG, "Comment difference ranking generated: ${diffData.size} increases, ${reverseDiffData.size} decreases")
         }
     }
 

@@ -65,6 +65,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -75,6 +76,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.BofScreenState
+import com.madsam.otora.R
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.icon.fa.`Chevron-left`
@@ -85,9 +87,11 @@ import com.madsam.otora.core.icon.fa.Xmark
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.madsam.otora.ui.bof.components.DateTimeRangePicker
+import com.madsam.otora.ui.bof.sub.BofCommentPagerScreen
 import com.madsam.otora.ui.bof.sub.BofCommentScreen
 import com.madsam.otora.ui.bof.sub.BofEntryPagerScreen
-import com.madsam.otora.ui.bof.sub.BofTeamRankingScreen
+import com.madsam.otora.ui.bof.sub.BofTeamPagerScreen
+import com.madsam.otora.ui.bof.sub.BofTeamTotalScreen
 import com.madsam.otora.ui.components.CustomScrollableTabRow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -146,6 +150,8 @@ fun BofScreen(
 
     val selectedTabIndex = bofScreenState.selectedTab.asStateFlow().collectAsState().value
     val selectedSubTabIndex = bofScreenState.selectedSubTab.asStateFlow().collectAsState().value
+    val selectedTeamSubTabIndex = bofScreenState.selectedTeamSubTab.asStateFlow().collectAsState().value
+    val selectedCommentSubTabIndex = bofScreenState.selectedCommentSubTab.asStateFlow().collectAsState().value
 
     // 使用 ViewModel 的 searchText
     val searchText = vm.searchText.collectAsState()
@@ -442,19 +448,20 @@ fun BofScreen(
                                     listStateComposite = listStateComposite
                                 )
 
-                                "Team" -> BofTeamRankingScreen(
-                                    bofScreenState = bofScreenState,
+                                "Team" -> BofTeamPagerScreen(
                                     vm = vm,
+                                    bofScreenState = bofScreenState,
                                     snackbarHostState = snackbarHostState,
                                     teamInfoMode = teamInfoMode,
                                     scrollThreshold = scrollThreshold,
                                     setIsTabRowVisible = { },
                                     showCaptureDialog = showTeamCaptureDialog,
-                                    onCaptureDialogDismiss = { showTeamCaptureDialog = false }
+                                    onCaptureDialogDismiss = { showTeamCaptureDialog = false },
+                                    listStateTotal = listStateTeam,
+                                    listStateDiff = rememberLazyListState()
                                 )
 
                                 "Comment" -> {
-                                    val commentData by vm.commentData.collectAsState()
                                     val selectedTimeStrNoComp by vm.selectedTimeStrNoComp.collectAsState()
                                     val selectedRange =
                                         bofScreenState.selectedRange.collectAsState().value
@@ -466,8 +473,9 @@ fun BofScreen(
                                         subtitle = "时间: ${selectedRange.commentDate} (仅单日)"
                                     }
 
-                                    BofCommentScreen(
-                                        commentData = commentData,
+                                    BofCommentPagerScreen(
+                                        vm = vm,
+                                        bofScreenState = bofScreenState,
                                         title = title,
                                         subtitle = subtitle,
                                         commentDisplayMode = commentInfoMode,
@@ -476,7 +484,9 @@ fun BofScreen(
                                         showCaptureDialog = showCommentCaptureDialog,
                                         onCaptureDialogDismiss = {
                                             showCommentCaptureDialog = false
-                                        }
+                                        },
+                                        listStateTotal = listStateComment,
+                                        listStateDiff = rememberLazyListState()
                                     )
                                 }
                             }
@@ -512,6 +522,94 @@ fun BofScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val isSearching = searchText.value.isNotEmpty()
+                    
+                    // Entry 差值切换按钮
+                    val showReverseDiff by bofScreenState.showReverseDiff.collectAsState()
+                    // Team 差值切换按钮
+                    val showTeamReverseDiff by bofScreenState.showTeamReverseDiff.collectAsState()
+                    // Comment 差值切换按钮
+                    val showCommentReverseDiff by bofScreenState.showCommentReverseDiff.collectAsState()
+                    
+                    // 差值切换按钮（在 Entry/Team/Comment 的 Diff 子页面显示）
+                    val showDiffToggle = when (selectedTabIndex) {
+                        0 -> selectedSubTabIndex == 3 // Entry 的 Diff 页面
+                        1 -> selectedTeamSubTabIndex == 1 // Team 的 Diff 页面
+                        2 -> selectedCommentSubTabIndex == 1 // Comment 的 Diff 页面
+                        else -> false
+                    }
+                    
+                    val currentShowReverse = when (selectedTabIndex) {
+                        0 -> showReverseDiff
+                        1 -> showTeamReverseDiff
+                        2 -> showCommentReverseDiff
+                        else -> false
+                    }
+                    
+                    AnimatedVisibility(
+                        visible = !isSearching && showDiffToggle,
+                        enter = fadeIn(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            )
+                        ) + expandHorizontally(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            expandFrom = Alignment.Start
+                        ) + scaleIn(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            initialScale = 0.8f
+                        ),
+                        exit = fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            )
+                        ) + shrinkHorizontally(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            shrinkTowards = Alignment.Start
+                        ) + scaleOut(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            targetScale = 0.8f
+                        )
+                    ) {
+                        Box(modifier = Modifier.padding(end = 8.dp)) {
+                            IconButton(
+                                onClick = { 
+                                    when (selectedTabIndex) {
+                                        0 -> bofScreenState.showReverseDiff.update { !it }
+                                        1 -> bofScreenState.showTeamReverseDiff.update { !it }
+                                        2 -> bofScreenState.showCommentReverseDiff.update { !it }
+                                    }
+                                },
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(
+                                        id = if (currentShowReverse) {
+                                            R.drawable.ic_trending_up_24
+                                        } else {
+                                            R.drawable.ic_trending_down_24
+                                        }
+                                    ),
+                                    contentDescription = if (currentShowReverse) "切换到正差值" else "切换到逆差值",
+                                    tint = colorScheme.onSurface,
+                                    modifier = Modifier.height(24.dp)
+                                )
+                            }
+                        }
+                    }
 
                     // 截图按钮（带动画）
                     // 注意：为了配合搜索框的扩展/收缩动画，按钮的进入和退出都使用 StandardDecelerate

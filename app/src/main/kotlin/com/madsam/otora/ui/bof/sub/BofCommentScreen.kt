@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
@@ -32,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -687,6 +689,267 @@ private fun ScoreBarDisplay(
                         .height(barHeight)
                         .background(color = RANKING_RED)
                 )
+            }
+        }
+    }
+}
+
+/**
+ * BOF 评价差值页面组件
+ * 专门用于显示差值排行，只显示总分差值，不显示副条（投票、短评、长评的分布）
+ * 完全对齐 Entry Diff 的展示模式
+ */
+@Composable
+internal fun BofCommentDiffScreen(
+    commentData: List<BofCommentUI>,
+    title: String,
+    subtitle: String,
+    isReverse: Boolean,
+    scrollThreshold: Float = 50f,
+    setIsTabRowVisible: (Boolean) -> Unit = {},
+    showCaptureDialog: Boolean = false,
+    onCaptureDialogDismiss: () -> Unit = {}
+) {
+    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
+    val maxScore = commentData.maxOfOrNull { it.total.toDouble() } ?: 1.0
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(
+                WindowInsets.displayCutout.only(
+                    if (useNavigationRail) {
+                        WindowInsetsSides.End
+                    } else {
+                        WindowInsetsSides.Start + WindowInsetsSides.End
+                    }
+                )
+            )
+    ) {
+        // 标题和副标题
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.Black)
+                .padding(vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = title,
+                fontFamily = sarasaBold,
+                fontSize = 20.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+            
+            Text(
+                text = subtitle,
+                fontFamily = sarasaRegular,
+                fontSize = 12.sp,
+                color = TEXT_GRAY,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+
+        // 表格头部
+        Row(
+            modifier = Modifier
+                .background(BG_DARK_GRAY)
+                .fillMaxWidth()
+                .padding(vertical = 8.dp, horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "排名",
+                fontFamily = sarasaBold,
+                fontSize = 14.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(50.dp)
+            )
+            
+            Text(
+                text = "评价",
+                fontFamily = sarasaBold,
+                fontSize = 14.sp,
+                color = Color.White,
+                modifier = Modifier.weight(0.6f)
+            )
+            
+            Text(
+                text = if (isReverse) "减少" else "增长",
+                fontFamily = sarasaBold,
+                fontSize = 14.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(0.4f)
+            )
+        }
+
+        // 数据列表
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(object : NestedScrollConnection {
+                    private var totalScroll = 0f
+
+                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                        totalScroll += available.y
+                        if (totalScroll < -scrollThreshold) {
+                            setIsTabRowVisible(false)
+                            totalScroll = 0f
+                        } else if (totalScroll > scrollThreshold) {
+                            setIsTabRowVisible(true)
+                            totalScroll = 0f
+                        }
+                        return Offset.Zero
+                    }
+                })
+        ) {
+            itemsIndexed(commentData) { index, comment ->
+                CommentDiffRow(
+                    comment = comment,
+                    index = index,
+                    maxScore = maxScore
+                )
+            }
+        }
+        
+        // 截图对话框 - 使用 Diff 专用的截图组件
+        if (showCaptureDialog) {
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val snackbarHostState = remember { androidx.compose.material3.SnackbarHostState() }
+            val showDialogState = remember { mutableStateOf(true) }
+            
+            com.madsam.otora.ui.bof.components.BofCommentDiffCaptureDialog(
+                showDialog = showDialogState,
+                context = context,
+                snackbarHostState = snackbarHostState,
+                commentData = commentData,
+                title = title,
+                subtitle = subtitle
+            )
+            
+            // 当对话框被关闭时，通知父组件
+            if (!showDialogState.value) {
+                onCaptureDialogDismiss()
+            }
+        }
+    }
+}
+
+/**
+ * 评价差值行组件
+ * 只显示排名、评价文本和差值分数条，不显示副条
+ */
+@Composable
+private fun CommentDiffRow(
+    comment: BofCommentUI,
+    index: Int,
+    maxScore: Double
+) {
+    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
+    val scoreRatio = if (maxScore > 0) comment.total.toFloat() / maxScore.toFloat() else 0f
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(backgroundColor)
+            .padding(vertical = 8.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // 排名 - 不显示变化
+        Text(
+            text = (index + 1).toString(),
+            fontFamily = sarasaBold,
+            fontSize = 16.sp,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.width(50.dp)
+        )
+
+        // 用户信息列（照搬总榜的设计）
+        Column(
+            modifier = Modifier
+                .weight(0.6f)
+                .padding(horizontal = 8.dp),
+            horizontalAlignment = Alignment.End
+        ) {
+            // 用户名
+            Text(
+                text = comment.user,
+                fontFamily = sarasaBold,
+                fontSize = 14.sp,
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.End,
+                modifier = Modifier.fillMaxWidth()
+            )
+            // 国家和模式
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (comment.pattern.isNotEmpty()) {
+                    Text(
+                        text = "P${comment.pattern}",
+                        fontFamily = sarasaRegular,
+                        fontSize = 11.sp,
+                        color = Color.Yellow,
+                        modifier = Modifier.padding(end = 4.dp)
+                    )
+                }
+                Text(
+                    text = comment.country,
+                    fontFamily = sarasaRegular,
+                    fontSize = 12.sp,
+                    color = TEXT_GRAY,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
+        // 差值分数条（完全对齐 Entry Diff 的样式，包括嵌套 Box）
+        Box(
+            modifier = Modifier
+                .weight(0.4f)
+                .padding(start = 4.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(20.dp)
+                    .padding(horizontal = 2.dp)
+            ) {
+                Box {
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth(scoreRatio.coerceAtMost(1f))
+                            .height(20.dp)
+                            .background(
+                                color = RANKING_RED,
+                                shape = RoundedCornerShape(
+                                    topEnd = 10.dp,
+                                    bottomEnd = 10.dp
+                                )
+                            )
+                    )
+                    Text(
+                        text = comment.total.toString(),
+                        fontFamily = sarasaBold,
+                        fontSize = 14.sp,
+                        color = Color.White,
+                        overflow = TextOverflow.Visible,
+                        maxLines = 1,
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 4.dp)
+                    )
+                }
             }
         }
     }

@@ -20,5 +20,6 @@ internal data class BofCommentUI(
     var longComment: Int = 0,
     var longChartData: List<Int> = listOf(),
     var total: Int = 0,
-    var totalAve: Double = 0.0
+    var totalAve: Double = 0.0,
+    var compareTotal: Int? = null // 对比时间点的总分
 )

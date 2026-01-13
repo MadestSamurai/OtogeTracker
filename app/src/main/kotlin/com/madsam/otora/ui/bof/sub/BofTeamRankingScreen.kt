@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,12 +69,22 @@ import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
 import com.madsam.otora.core.utils.ScreenUtil
+import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.bof.TeamRankingItem
 import com.madsam.otora.ui.bof.components.BofTeamCaptureDialog
+import com.madsam.otora.ui.bof.components.BofTeamDiffCaptureDialog
 
+/**
+ * 团队总榜页面组件
+ * 对齐 Entry 的实现模式，接收稳定的状态值
+ */
 @Composable
-internal fun BofTeamRankingScreen(
+internal fun BofTeamTotalScreen(
+    teamRankingData: List<TeamRankingItem>,
+    isLoading: Boolean,
+    errorMessage: String,
+    selectedRange: BofRangeResponse?,
     bofScreenState: BofScreenState,
     vm: BofViewModel = viewModel(),
     snackbarHostState: SnackbarHostState,
@@ -81,15 +92,10 @@ internal fun BofTeamRankingScreen(
     scrollThreshold: Float = 50f,
     setIsTabRowVisible: (Boolean) -> Unit = {},
     showCaptureDialog: Boolean = false,
-    onCaptureDialogDismiss: () -> Unit = {}
+    onCaptureDialogDismiss: () -> Unit = {},
+    listState: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState()
 ) {
-    val teamRankingData by vm.teamRankingData.collectAsState()
-    val isLoading by vm.isTeamRankingLoading.collectAsState()
-    val errorMessage by vm.teamRankingError.collectAsState()
-    val selectedRange by bofScreenState.selectedRange.collectAsState()
-    
     val context = LocalContext.current
-    val listState = rememberLazyListState()
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
     Column(
@@ -144,8 +150,8 @@ internal fun BofTeamRankingScreen(
                         Button(
                             onClick = { 
                                 // 通过重新设置相同的selectedRange来触发数据重新加载
-                                selectedRange?.let { range ->
-                                    bofScreenState.selectedRange.value = range
+                                if (selectedRange != null) {
+                                    bofScreenState.selectedRange.value = selectedRange
                                 }
                             }
                         ) {
@@ -868,5 +874,359 @@ private fun TeamWorkRow(
             textAlign = TextAlign.End,
             modifier = Modifier.width(70.dp)
         )
+    }
+}
+
+/**
+ * 团队差值页面组件
+ * 完全独立的实现，对齐 Entry Diff 页面的模式
+ * 只处理 Total 差值数据
+ */
+@Composable
+internal fun BofTeamDiffScreen(
+    teamRankingData: List<TeamRankingItem>,
+    isLoading: Boolean,
+    isReverse: Boolean,
+    vm: BofViewModel,
+    snackbarHostState: SnackbarHostState,
+    teamInfoMode: Int = 0,
+    scrollThreshold: Float = 50f,
+    setIsTabRowVisible: (Boolean) -> Unit = {},
+    showCaptureDialog: Boolean = false,
+    onCaptureDialogDismiss: () -> Unit = {},
+    listState: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState()
+) {
+    val context = LocalContext.current
+    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
+    
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .windowInsetsPadding(
+                WindowInsets.displayCutout.only(
+                    if (useNavigationRail) {
+                        WindowInsetsSides.End
+                    } else {
+                        WindowInsetsSides.Start + WindowInsetsSides.End
+                    }
+                )
+            )
+    ) {
+        when {
+            isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = RANKING_RED)
+                }
+            }
+            
+            teamRankingData.isEmpty() -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = if (isReverse) "暂无得分减少的团队" else "暂无得分增长的团队",
+                            fontFamily = sarasaBold,
+                            fontSize = 18.sp,
+                            color = TEXT_GRAY
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "在此时间段内未检测到此类变化",
+                            fontFamily = sarasaRegular,
+                            fontSize = 14.sp,
+                            color = TEXT_GRAY,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+            
+            else -> {
+                // 显示差值数据表格 - 使用专门的 Diff 表格
+                TeamDiffTable(
+                    teams = teamRankingData,
+                    listState = listState,
+                    isReverse = isReverse,
+                    scrollThreshold = scrollThreshold,
+                    setIsTabRowVisible = setIsTabRowVisible,
+                    vm = vm
+                )
+            }
+        }
+        
+        // 截图对话框 - 使用 Diff 专用的截图组件
+        if (showCaptureDialog) {
+            val showDialogState = remember { mutableStateOf(true) }
+            
+            BofTeamDiffCaptureDialog(
+                showDialog = showDialogState,
+                context = context,
+                snackbarHostState = snackbarHostState,
+                teams = teamRankingData,
+                title = if (isReverse) "团队逆差值排行榜（得分减少）" else "团队差值排行榜（得分增加）",
+                subtitle = "时间: ${vm.getSelectedTimeString()}"
+            )
+            
+            // 当对话框被关闭时，通知父组件
+            if (!showDialogState.value) {
+                onCaptureDialogDismiss()
+            }
+        }
+    }
+}
+
+/**
+ * 团队差值表格组件
+ * 专门用于显示差值排行，只显示总分差值，不显示副条（评价数、中位数）和排名变化
+ * 完全对齐 Entry Diff 的展示模式
+ */
+@Composable
+private fun TeamDiffTable(
+    teams: List<TeamRankingItem>,
+    listState: androidx.compose.foundation.lazy.LazyListState,
+    isReverse: Boolean,
+    scrollThreshold: Float = 50f,
+    setIsTabRowVisible: (Boolean) -> Unit = {},
+    vm: BofViewModel
+) {
+    val maxScore = teams.maxOfOrNull { it.totalScore } ?: 1.0
+    
+    Column {
+        // 标题和副标题
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.Black)
+                .padding(vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = if (isReverse) "团队逆差值排行榜（得分减少）" else "团队差值排行榜（得分增加）",
+                fontFamily = sarasaBold,
+                fontSize = 20.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+            
+            Text(
+                text = "时间: ${vm.getSelectedTimeString()}",
+                fontFamily = sarasaRegular,
+                fontSize = 12.sp,
+                color = TEXT_GRAY,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+        
+        // 表格头部
+        Row(
+            modifier = Modifier
+                .background(BG_DARK_GRAY)
+                .fillMaxWidth()
+                .padding(vertical = 8.dp, horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "排名",
+                fontFamily = sarasaBold,
+                fontSize = 14.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(50.dp)
+            )
+            
+            Text(
+                text = "团队",
+                fontFamily = sarasaBold,
+                fontSize = 14.sp,
+                color = Color.White,
+                textAlign = TextAlign.End,
+                modifier = Modifier.weight(0.6f)
+            )
+            
+            Text(
+                text = if (isReverse) "减少" else "增长",
+                fontFamily = sarasaBold,
+                fontSize = 14.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(0.4f)
+            )
+        }
+
+        // 数据列表
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .clip(RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+                .nestedScroll(object : NestedScrollConnection {
+                    private var totalScroll = 0f
+
+                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                        totalScroll += available.y
+                        if (totalScroll < -scrollThreshold) {
+                            setIsTabRowVisible(false)
+                            totalScroll = 0f
+                        } else if (totalScroll > scrollThreshold) {
+                            setIsTabRowVisible(true)
+                            totalScroll = 0f
+                        }
+                        return Offset.Zero
+                    }
+                })
+        ) {
+            itemsIndexed(teams) { index, team ->
+                TeamDiffRow(
+                    team = team,
+                    index = index,
+                    maxScore = maxScore
+                )
+            }
+        }
+    }
+}
+
+/**
+ * 团队差值行组件
+ * 只显示排名、团队名称和差值分数条，不显示排名变化和副条
+ */
+@Composable
+private fun TeamDiffRow(
+    team: TeamRankingItem,
+    index: Int,
+    maxScore: Double
+) {
+    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
+    val scoreRatio = if (maxScore > 0) team.totalScore / maxScore else 0.0
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(backgroundColor)
+    ) {
+        // 团队主要信息行
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(36.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // 排名列 - 只显示排名，不显示变化
+            Text(
+                text = team.rank.toString(),
+                fontFamily = sarasaBold,
+                fontSize = 16.sp,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(50.dp)
+            )
+
+            // 团队名称
+            Text(
+                text = team.teamName,
+                fontFamily = sarasaBold,
+                fontSize = 16.sp,
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .weight(0.6f)
+                    .padding(end = 4.dp)
+            )
+
+            // 差值分数条（完全对齐 Entry Diff 的样式，包括嵌套 Box）
+            Box(
+                modifier = Modifier
+                    .weight(0.4f)
+                    .padding(start = 4.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(20.dp)
+                        .padding(horizontal = 2.dp)
+                ) {
+                    Box {
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
+                                .height(20.dp)
+                                .background(
+                                    color = RANKING_RED,
+                                    shape = RoundedCornerShape(
+                                        topEnd = 10.dp,
+                                        bottomEnd = 10.dp
+                                    )
+                                )
+                        )
+                        Text(
+                            text = String.format("%.2f", team.totalScore),
+                            fontFamily = sarasaBold,
+                            fontSize = 14.sp,
+                            color = Color.White,
+                            overflow = TextOverflow.Visible,
+                            maxLines = 1,
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd)
+                                .padding(end = 4.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        // 团队作品列表 - 使用单行设计，不加灰色底
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 54.dp, end = 4.dp, top = 2.dp)
+        ) {
+            listOf(
+                Triple(team.title1, team.artist1, team.score1 - (team.compareScore1 ?: team.score1)),
+                Triple(team.title2, team.artist2, team.score2 - (team.compareScore2 ?: team.score2)),
+                Triple(team.title3, team.artist3, team.score3 - (team.compareScore3 ?: team.score3)),
+                Triple(team.title4, team.artist4, team.score4 - (team.compareScore4 ?: team.score4))
+            ).filter { it.first.isNotEmpty() }.forEach { (title, artist, scoreDiff) ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp, vertical = 1.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "$title - $artist",
+                        fontFamily = sarasaRegular,
+                        fontSize = 12.sp,
+                        color = TEXT_GRAY,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    
+                    // 显示作品差值
+                    if (scoreDiff != 0.0) {
+                        Text(
+                            text = if (scoreDiff > 0) "+${String.format("%.1f", scoreDiff)}" else String.format("%.1f", scoreDiff),
+                            fontFamily = sarasaBold,
+                            fontSize = 12.sp,
+                            color = if (scoreDiff > 0) Color.Green else Color.Red,
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.width(70.dp)
+                        )
+                    } else {
+                        Spacer(modifier = Modifier.width(70.dp))
+                    }
+                }
+            }
+        }
     }
 }

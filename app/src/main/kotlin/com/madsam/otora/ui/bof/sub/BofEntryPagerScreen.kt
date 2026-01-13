@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -266,8 +267,16 @@ internal fun BofEntryPagerScreen(
                     vm.generateDifferenceRanking()
                 }
                 
+                // 获取逆差值显示状态和数据
+                val showReverseDiff by bofScreenState.showReverseDiff.collectAsStateWithLifecycle()
+                val diffRanking by vm.diffRankingData.collectAsStateWithLifecycle()
+                val reverseDiffRanking by vm.reverseDiffRankingData.collectAsStateWithLifecycle()
+                
+                // 根据状态选择数据
+                val currentRanking = if (showReverseDiff) reverseDiffRanking else diffRanking
+                
                 EntryPageContent(
-                    title = "差值排行榜",
+                    title = if (showReverseDiff) "逆差值排行榜（票数减少）" else "差值排行榜（票数增加）",
                     subtitle = "时间: ${vm.getSelectedTimeString()}",
                     previousPageTitle = previousPageTitle,
                     nextPageTitle = nextPageTitle,
@@ -287,7 +296,7 @@ internal fun BofEntryPagerScreen(
                     medianWidthType = ColumnWidthType.ONE_DECIMAL,
                     enableNarrowToggle = false,
                     maxItems = 600,
-                    ranking = vm.diffRankingData.collectAsStateWithLifecycle().value,
+                    ranking = currentRanking,
                     isLoading = vm.isLoading.collectAsStateWithLifecycle().value,
                     errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
                     narrowMode = narrowMode,

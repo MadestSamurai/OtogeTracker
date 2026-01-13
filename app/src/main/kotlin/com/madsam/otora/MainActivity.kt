@@ -990,12 +990,17 @@ class BofScreenState {
     private val compareDateTime = roundedNow.minusHours(24)
     
     var selectedTab = MutableStateFlow(0)
-    var selectedSubTab = MutableStateFlow(0)
+    var selectedSubTab = MutableStateFlow(0) // Entry 子标签：0=Total, 1=Avg, 2=Median, 3=Diff, 4=Composite
+    var selectedTeamSubTab = MutableStateFlow(0) // Team 子标签：0=Total, 1=Diff
+    var selectedCommentSubTab = MutableStateFlow(0) // Comment 子标签：0=Total, 1=Diff
     var selectedCurrentDate = MutableStateFlow(roundedNow.toLocalDate())
     var selectedCurrentTime = MutableStateFlow(roundedNow.format(DateTimeFormatter.ofPattern("HH:mm")))
     var selectedCompareDate = MutableStateFlow(compareDateTime.toLocalDate())
     var selectedCompareTime = MutableStateFlow(compareDateTime.format(DateTimeFormatter.ofPattern("HH:mm")))
     var selectedRange = MutableStateFlow<BofRangeResponse?>(null)
+    var showReverseDiff = MutableStateFlow(false) // Entry Diff 页面：是否显示逆差值
+    var showTeamReverseDiff = MutableStateFlow(false) // Team Diff 页面：是否显示逆差值
+    var showCommentReverseDiff = MutableStateFlow(false) // Comment Diff 页面：是否显示逆差值
 }
 
 /**
