@@ -67,8 +67,10 @@ fun BofTeamCaptureDialog(
         val batches = filteredTeams.chunked(batchSize)
         val controllers = List(batches.size) { rememberCaptureController() }
 
-        // 计算全局最大分数
-        val globalMaxScore = filteredTeams.maxOfOrNull { it.totalScore } ?: 1.0
+        // 计算全局最大分数：同时考虑当前分数和对比分数，取最大值
+        val globalMaxScore = filteredTeams.maxOfOrNull { team ->
+            maxOf(team.totalScore, team.compareTotalScore ?: 0.0)
+        } ?: 1.0
 
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
@@ -174,7 +176,10 @@ internal fun BofTeamCaptureContent(
     showHeader: Boolean = true,
     globalMaxScore: Double? = null
 ) {
-    val maxScore = globalMaxScore ?: (teams.maxOfOrNull { it.totalScore } ?: 1.0)
+    // 计算最大分数：同时考虑当前分数和对比分数，取最大值
+    val maxScore = globalMaxScore ?: (teams.maxOfOrNull { team ->
+        maxOf(team.totalScore, team.compareTotalScore ?: 0.0)
+    } ?: 1.0)
 
     val density = LocalDensity.current
     var extraWidth by remember { mutableStateOf(50.dp) }

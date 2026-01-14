@@ -245,7 +245,10 @@ private fun TeamRankingTable(
     // 计算分数条宽度（对应中位数+评价数的宽度）
     val scoreBarWidth = medianWidth + extraWidth
     
-    val maxScore = teams.maxOfOrNull { it.totalScore } ?: 1.0
+    // 计算最大分数：同时考虑当前分数和对比分数，取最大值
+    val maxScore = teams.maxOfOrNull { team ->
+        maxOf(team.totalScore, team.compareTotalScore ?: 0.0)
+    } ?: 1.0
     
     Column {
         // 隐藏的测量容器（照搬RankingTable逻辑）

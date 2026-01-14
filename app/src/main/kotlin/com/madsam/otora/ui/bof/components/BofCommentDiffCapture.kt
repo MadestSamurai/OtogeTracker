@@ -303,13 +303,15 @@ private fun CommentDiffCaptureRow(
                 horizontalArrangement = androidx.compose.foundation.layout.Arrangement.End,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "P${comment.pattern}",
-                    fontFamily = sarasaRegular,
-                    fontSize = 11.sp,
-                    color = RANKING_YELLOW,
-                    modifier = Modifier.padding(end = 4.dp)
-                )
+                if (comment.pattern.isNotEmpty()) {
+                    Text(
+                        text = "P${comment.pattern}",
+                        fontFamily = sarasaRegular,
+                        fontSize = 11.sp,
+                        color = RANKING_YELLOW,
+                        modifier = Modifier.padding(end = 4.dp)
+                    )
+                }
                 Text(
                     text = comment.country,
                     fontFamily = sarasaRegular,
