@@ -2,6 +2,7 @@ package com.madsam.otora.ui.record.chunithm.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,7 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.theme.BlackAlpha50
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.utils.BrushUtils.getRatingBrush
+import com.madsam.otora.core.utils.BrushUtils.getRatingTextBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.ui.components.RoundedBarChart
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,6 +40,7 @@ internal fun TopRank(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val topRank by topRankUI.collectAsState()
+    val isDark = isSystemInDarkTheme()
     
     // 动态分配两个图表的宽度
     val idealSpacingRatio = 0.8f // 理想的柱间距与柱宽比例
@@ -125,7 +127,7 @@ internal fun TopRank(
                     fontSize = 14.sp,
                     fontFamily = sarasaBold,
                     style = TextStyle(
-                        brush = getRatingBrush(topRank.best30.toString())
+                        brush = getRatingTextBrush(topRank.best30.toString(), isDark)
                     )
                 )
             }
@@ -171,7 +173,7 @@ internal fun TopRank(
                     fontSize = 14.sp,
                     fontFamily = sarasaBold,
                     style = TextStyle(
-                        brush = getRatingBrush(topRank.new20.toString())
+                        brush = getRatingTextBrush(topRank.new20.toString(), isDark)
                     )
                 )
             }

@@ -1,6 +1,7 @@
 package com.madsam.otora.ui.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -31,6 +32,7 @@ fun RoundedBarChart(
     val sortedValues = values.sorted()
     // 计算最小值的偏移量（比最小值小5%）
     val minValueOffset = minValue - ((maxValue - minValue) * 0.05)
+    val isDark = isSystemInDarkTheme()
     
     Box(
         modifier = modifier
@@ -86,7 +88,7 @@ fun RoundedBarChart(
 
                 
                 drawRoundRect(
-                    brush = getRatingBrush(value.toString()),
+                    brush = getRatingBrush(value.toString(), isDark),
                     topLeft = androidx.compose.ui.geometry.Offset(x, y),
                     size = Size(barWidth, normalizedValue),
                     cornerRadius = CornerRadius(barWidth / 2, barWidth / 2)

@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,15 +35,11 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.GradientBrush.GoldGradientBg
-import com.madsam.otora.core.theme.GradientBrush.PlatinumGradientBg
-import com.madsam.otora.core.theme.GradientBrush.RainbowGradientBg
-import com.madsam.otora.core.theme.GradientBrush.SilverGradientBg
-import com.madsam.otora.core.theme.GradientBrush.WhiteGradientBg
-import com.madsam.otora.core.theme.OSU_LEVEL_GOLD_1
+import com.madsam.otora.core.theme.GradientBrush
+import com.madsam.otora.core.theme.TierColors
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.utils.BrushUtils.getRatingBrush
+import com.madsam.otora.core.utils.BrushUtils.getRatingTextBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmFriendUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -93,6 +90,16 @@ internal fun FriendCard(
     chuniFriend: ChunithmFriendUiModel,
     colorScheme: androidx.compose.material3.ColorScheme
 ) {
+    val isDark = isSystemInDarkTheme()
+
+    fun getHonorBrush(base: String) = when (base) {
+        "silver" -> if (isDark) GradientBrush.TierSilverGradientDark else GradientBrush.TierSilverGradient
+        "gold" -> if (isDark) GradientBrush.TierGoldGradientDark else GradientBrush.TierGoldGradient
+        "platina" -> if (isDark) GradientBrush.TierPlatinumGradientDark else GradientBrush.TierPlatinumGradient
+        "rainbow" -> if (isDark) GradientBrush.TierRainbowGradientDark else GradientBrush.TierRainbowGradient
+        else -> if (isDark) GradientBrush.TierWhiteGradientDark else GradientBrush.TierWhiteGradient
+    }
+
     Surface(
         shape = RoundedCornerShape(10.dp),
         color = Color.Transparent,
@@ -150,18 +157,10 @@ internal fun FriendCard(
                             .fillMaxWidth()
                             .padding(top = if (index == 0) 0.dp else 2.dp)
                             .clip(RoundedCornerShape(5.dp))
-                            .background(
-                                when (honorBase) {
-                                    "silver" -> SilverGradientBg
-                                    "gold" -> GoldGradientBg
-                                    "platina" -> PlatinumGradientBg
-                                    "rainbow" -> RainbowGradientBg
-                                    else -> WhiteGradientBg
-                                }
-                            )
+                            .background(getHonorBrush(honorBase))
                             .basicMarquee(spacing = MarqueeSpacing(15.dp)),
                         textAlign = TextAlign.Center,
-                        color = Color.Black,
+                        color = if (isDark) Color.White else Color.Black,
                         fontSize = 14.sp,
                         fontFamily = sarasaBold,
                         maxLines = 1,
@@ -182,21 +181,15 @@ internal fun FriendCard(
                     .size(82.dp)
                     .padding(start = 5.dp, bottom = 5.dp)
                     .clip(RoundedCornerShape(5.dp))
-                    .background(
-                        when (chuniFriend.roleBase) {
-                            "silver" -> SilverGradientBg
-                            "gold" -> GoldGradientBg
-                            "platina" -> PlatinumGradientBg
-                            "rainbow" -> RainbowGradientBg
-                            else -> WhiteGradientBg
-                        }
-                    )
+                    .background(getHonorBrush(chuniFriend.roleBase))
             )
 
             if (chuniFriend.reborn > 0) {
+                // 星星始终显示为金色（使用金色 Honor 背景的 Container 颜色），文字始终为深色以保持对比度
+                val rebornColor = TierColors.GoldContainerLight
                 Image(
                     painter = rememberVectorPainter(image = Filled.Star),
-                    colorFilter = ColorFilter.tint(OSU_LEVEL_GOLD_1),
+                    colorFilter = ColorFilter.tint(rebornColor),
                     contentDescription = "Reborn",
                     modifier = Modifier
                         .constrainAs(rebornBase) {
@@ -215,7 +208,7 @@ internal fun FriendCard(
                             end.linkTo(rebornBase.end)
                         },
                     text = chuniFriend.reborn.toString(),
-                    color = colorScheme.surfaceContainer,
+                    color = Color.Black,
                     fontSize = 12.sp,
                     fontFamily = sarasaBold
                 )
@@ -311,7 +304,7 @@ internal fun FriendCard(
                     }
                     withStyle(
                         style = SpanStyle(
-                            brush = getRatingBrush(chuniFriend.rating),
+                            brush = getRatingTextBrush(chuniFriend.rating, isDark),
                             fontSize = 16.sp,
                             fontFamily = sarasaBold
                         )

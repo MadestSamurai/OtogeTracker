@@ -1,0 +1,4498 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "7:8103409622015250619",
+      "lastPropertyId": "24:3851439835565674806",
+      "name": "ChunithmFriendEntity",
+      "properties": [
+        {
+          "id": "1:6666952339087418692",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2808481519042388470",
+          "name": "friendCode",
+          "indexId": "17:2867258423984522019",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:7263126670067815485",
+          "name": "friendName",
+          "type": 9
+        },
+        {
+          "id": "4:3092954879189060075",
+          "name": "profileBackground",
+          "type": 9
+        },
+        {
+          "id": "5:4098689602042540967",
+          "name": "reborn",
+          "type": 5
+        },
+        {
+          "id": "6:3527900963079879380",
+          "name": "level",
+          "type": 5
+        },
+        {
+          "id": "7:166654000972230205",
+          "name": "rating",
+          "type": 9
+        },
+        {
+          "id": "8:394917622036170031",
+          "name": "ratingMax",
+          "type": 9
+        },
+        {
+          "id": "9:3838405712195161185",
+          "name": "overpower",
+          "type": 9
+        },
+        {
+          "id": "10:7945859791613090556",
+          "name": "lastPlay",
+          "type": 9
+        },
+        {
+          "id": "11:2995518148938132535",
+          "name": "roleImageUrl",
+          "type": 9
+        },
+        {
+          "id": "12:8669344711721724036",
+          "name": "roleBase",
+          "type": 9
+        },
+        {
+          "id": "15:2112879451251622777",
+          "name": "isFavorite",
+          "type": 1
+        },
+        {
+          "id": "16:4828499069060684568",
+          "name": "isScored",
+          "type": 1
+        },
+        {
+          "id": "17:2353998603801721486",
+          "name": "classEmblemBase",
+          "type": 9
+        },
+        {
+          "id": "18:6924698205375564022",
+          "name": "classEmblemTop",
+          "type": 9
+        },
+        {
+          "id": "19:7086896622298611538",
+          "name": "honor1",
+          "type": 9
+        },
+        {
+          "id": "20:119491603132109946",
+          "name": "honor2",
+          "type": 9
+        },
+        {
+          "id": "21:2146993121072144637",
+          "name": "honor3",
+          "type": 9
+        },
+        {
+          "id": "22:3136940418632808188",
+          "name": "honorBase1",
+          "type": 9
+        },
+        {
+          "id": "23:589746701395639714",
+          "name": "honorBase2",
+          "type": 9
+        },
+        {
+          "id": "24:3851439835565674806",
+          "name": "honorBase3",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "8:7399392031838376203",
+      "lastPropertyId": "8:4331708840617350191",
+      "name": "ChunithmFriendScoreEntity",
+      "properties": [
+        {
+          "id": "1:8993413714070001414",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3900467440159529975",
+          "name": "friendCode",
+          "indexId": "18:5016261378385976734",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:6484478888278085336",
+          "name": "title",
+          "indexId": "19:6698314781809120383",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:8108214729482773109",
+          "name": "score",
+          "type": 5
+        },
+        {
+          "id": "5:8618574379404000582",
+          "name": "combo",
+          "type": 9
+        },
+        {
+          "id": "6:7203599537413055746",
+          "name": "difficulty",
+          "indexId": "20:1221154360673430029",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "7:7706123565759536640",
+          "name": "recordedAt",
+          "type": 9
+        },
+        {
+          "id": "8:4331708840617350191",
+          "name": "uniqueKey",
+          "indexId": "21:8075958644597573888",
+          "type": 9,
+          "flags": 2048
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "9:6371939499756678153",
+      "lastPropertyId": "18:2022209070180420339",
+      "name": "ChunithmFullScoreEntity",
+      "properties": [
+        {
+          "id": "1:1227981535025156514",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2226252171021679996",
+          "name": "songId",
+          "indexId": "22:8256507175087707931",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:3010935533465528836",
+          "name": "title",
+          "indexId": "23:1238542420033019264",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:4528676341400023433",
+          "name": "diff",
+          "indexId": "24:1518756159841255821",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:8361106154025442074",
+          "name": "score",
+          "type": 5
+        },
+        {
+          "id": "6:2673622770146851988",
+          "name": "genre",
+          "type": 9
+        },
+        {
+          "id": "7:1672693467990149399",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "8:1083203328026848877",
+          "name": "clear",
+          "type": 9
+        },
+        {
+          "id": "9:4301084869033926759",
+          "name": "combo",
+          "type": 9
+        },
+        {
+          "id": "10:8498505979032350422",
+          "name": "chain",
+          "type": 9
+        },
+        {
+          "id": "11:5767789676284297104",
+          "name": "rank",
+          "type": 5
+        },
+        {
+          "id": "13:4113351289345360309",
+          "name": "date",
+          "type": 9
+        },
+        {
+          "id": "14:2641249285058372693",
+          "name": "trackNumber",
+          "type": 9
+        },
+        {
+          "id": "15:5437467800116108417",
+          "name": "genreName",
+          "type": 9
+        },
+        {
+          "id": "17:2638816046434046621",
+          "name": "recordedAt",
+          "type": 9
+        },
+        {
+          "id": "18:2022209070180420339",
+          "name": "isPersonalBest",
+          "indexId": "26:6870301905366078935",
+          "type": 1,
+          "flags": 8
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "10:5859331499130272770",
+      "lastPropertyId": "37:8284583792478983352",
+      "name": "ChunithmPlayRecordEntity",
+      "properties": [
+        {
+          "id": "1:5072659503876000073",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7773461211981701142",
+          "name": "difficulty",
+          "indexId": "27:8189229084001627771",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:3750756002584375071",
+          "name": "rateSSSpCount",
+          "type": 5
+        },
+        {
+          "id": "4:5889399436299768685",
+          "name": "rateSSSpTotal",
+          "type": 5
+        },
+        {
+          "id": "5:9183008417118442843",
+          "name": "rateSSSCount",
+          "type": 5
+        },
+        {
+          "id": "6:7647512350811485305",
+          "name": "rateSSSTotal",
+          "type": 5
+        },
+        {
+          "id": "7:6228616951251507157",
+          "name": "rateSSPCount",
+          "type": 5
+        },
+        {
+          "id": "8:366579076474359236",
+          "name": "rateSSPTotal",
+          "type": 5
+        },
+        {
+          "id": "9:1222271798536038481",
+          "name": "rateSSCount",
+          "type": 5
+        },
+        {
+          "id": "10:552864254637047421",
+          "name": "rateSSTotal",
+          "type": 5
+        },
+        {
+          "id": "11:3433540698009683960",
+          "name": "rateSpCount",
+          "type": 5
+        },
+        {
+          "id": "12:8974942717708797611",
+          "name": "rateSpTotal",
+          "type": 5
+        },
+        {
+          "id": "13:4722388234434047313",
+          "name": "rateSCount",
+          "type": 5
+        },
+        {
+          "id": "14:7554688627942086763",
+          "name": "rateSTotal",
+          "type": 5
+        },
+        {
+          "id": "15:5467311456002522711",
+          "name": "rateClearCount",
+          "type": 5
+        },
+        {
+          "id": "16:5444283133325521641",
+          "name": "rateClearTotal",
+          "type": 5
+        },
+        {
+          "id": "17:6804770441804144762",
+          "name": "rateFCCount",
+          "type": 5
+        },
+        {
+          "id": "18:6639574452071070106",
+          "name": "rateFCTotal",
+          "type": 5
+        },
+        {
+          "id": "19:6711386954420667886",
+          "name": "rateAJCount",
+          "type": 5
+        },
+        {
+          "id": "20:6124277857503015091",
+          "name": "rateAJTotal",
+          "type": 5
+        },
+        {
+          "id": "21:7685127559036776871",
+          "name": "rateAJCCount",
+          "type": 5
+        },
+        {
+          "id": "22:4623770393397698971",
+          "name": "rateAJCTotal",
+          "type": 5
+        },
+        {
+          "id": "23:5453500175165470428",
+          "name": "rateFChainCount",
+          "type": 5
+        },
+        {
+          "id": "24:3533415604162545951",
+          "name": "rateFChainTotal",
+          "type": 5
+        },
+        {
+          "id": "25:1289222910529546988",
+          "name": "rateFChainPCount",
+          "type": 5
+        },
+        {
+          "id": "26:5004030003612395649",
+          "name": "rateFChainPTotal",
+          "type": 5
+        },
+        {
+          "id": "27:7404774973348920937",
+          "name": "rateHardCount",
+          "type": 5
+        },
+        {
+          "id": "28:8533129943994739207",
+          "name": "rateHardTotal",
+          "type": 5
+        },
+        {
+          "id": "29:1969257770923653730",
+          "name": "rateAbsCount",
+          "type": 5
+        },
+        {
+          "id": "30:1584383434883250706",
+          "name": "rateAbsTotal",
+          "type": 5
+        },
+        {
+          "id": "33:5087661568115002903",
+          "name": "rateCatasCount",
+          "type": 5
+        },
+        {
+          "id": "34:4087598641196908876",
+          "name": "rateCatasTotal",
+          "type": 5
+        },
+        {
+          "id": "35:3402213176405306183",
+          "name": "lastUpdated",
+          "type": 9
+        },
+        {
+          "id": "36:2376254842786022570",
+          "name": "rateBraveCount",
+          "type": 5
+        },
+        {
+          "id": "37:8284583792478983352",
+          "name": "rateBraveTotal",
+          "type": 5
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "11:1993169172416707699",
+      "lastPropertyId": "21:3279009958948355191",
+      "name": "ChunithmSheetsEntity",
+      "properties": [
+        {
+          "id": "1:6358467351671566390",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1671639080068467539",
+          "name": "title",
+          "indexId": "28:6849706437322913478",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:1415039385853448363",
+          "name": "type",
+          "type": 9
+        },
+        {
+          "id": "4:6662980433185285257",
+          "name": "difficulty",
+          "indexId": "29:9080802951588564497",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:6316007256049718282",
+          "name": "levelJp",
+          "type": 9
+        },
+        {
+          "id": "6:2099527890014663004",
+          "name": "levelValueJp",
+          "type": 8
+        },
+        {
+          "id": "9:3351539948652437573",
+          "name": "levelCn",
+          "type": 9
+        },
+        {
+          "id": "10:7797058979080839031",
+          "name": "levelValueCn",
+          "type": 8
+        },
+        {
+          "id": "11:546063339668136714",
+          "name": "noteDesigner",
+          "type": 9
+        },
+        {
+          "id": "12:5263586956815666980",
+          "name": "tap",
+          "type": 5
+        },
+        {
+          "id": "13:842073007298691646",
+          "name": "hold",
+          "type": 5
+        },
+        {
+          "id": "14:7798930630814284043",
+          "name": "slide",
+          "type": 5
+        },
+        {
+          "id": "15:1199065054135807516",
+          "name": "air",
+          "type": 5
+        },
+        {
+          "id": "16:7619888599466388613",
+          "name": "flick",
+          "type": 5
+        },
+        {
+          "id": "17:6281988022630510113",
+          "name": "total",
+          "type": 5
+        },
+        {
+          "id": "18:3896400985859638892",
+          "name": "jp",
+          "type": 1
+        },
+        {
+          "id": "19:8768057506008501887",
+          "name": "intl",
+          "type": 1
+        },
+        {
+          "id": "20:838030610081284329",
+          "name": "cn",
+          "type": 1
+        },
+        {
+          "id": "21:3279009958948355191",
+          "name": "isSpecial",
+          "type": 1
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "12:3347361730775685322",
+      "lastPropertyId": "15:4985480194001141049",
+      "name": "ChunithmSongsEntity",
+      "properties": [
+        {
+          "id": "1:3691137645205551825",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "3:418873262820451356",
+          "name": "genre",
+          "type": 9
+        },
+        {
+          "id": "4:5085861755346378968",
+          "name": "title",
+          "indexId": "31:3258708728092915871",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:9052950483162920940",
+          "name": "artist",
+          "type": 9
+        },
+        {
+          "id": "6:7162234704273693098",
+          "name": "bpm",
+          "type": 8
+        },
+        {
+          "id": "7:6017398268840790005",
+          "name": "imageName",
+          "type": 9
+        },
+        {
+          "id": "8:4462060811382294374",
+          "name": "version",
+          "type": 9
+        },
+        {
+          "id": "9:5083923600140916273",
+          "name": "releaseDate",
+          "type": 9
+        },
+        {
+          "id": "10:2864563063125700797",
+          "name": "isNew",
+          "type": 1
+        },
+        {
+          "id": "11:4830138055245681199",
+          "name": "isLocked",
+          "type": 1
+        },
+        {
+          "id": "14:6131455746132545613",
+          "name": "map",
+          "type": 9
+        },
+        {
+          "id": "15:4985480194001141049",
+          "name": "aliases",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "13:6846327568725509988",
+      "lastPropertyId": "9:3507423127638186",
+      "name": "BofCommentDetailEntity",
+      "properties": [
+        {
+          "id": "1:7029374740898881903",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5280600281552889667",
+          "name": "detailId",
+          "indexId": "32:5382258582046850029",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:7255157376223287801",
+          "name": "user",
+          "indexId": "33:3697209502869467433",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:5349017896519121073",
+          "name": "score",
+          "type": 5
+        },
+        {
+          "id": "5:7314085168325982327",
+          "name": "code",
+          "type": 9
+        },
+        {
+          "id": "6:728289839478825562",
+          "name": "country",
+          "type": 9
+        },
+        {
+          "id": "7:3809133816658219828",
+          "name": "workNumber",
+          "type": 5
+        },
+        {
+          "id": "8:7155081610898898661",
+          "name": "date",
+          "indexId": "34:7400868779638279951",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "9:3507423127638186",
+          "name": "type",
+          "indexId": "35:1191798281813457146",
+          "type": 9,
+          "flags": 2048
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "14:9132664261929083262",
+      "lastPropertyId": "20:35347051024042324",
+      "name": "BofCommentEntity",
+      "properties": [
+        {
+          "id": "1:5692753860401992291",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2917883564175322998",
+          "name": "commentId",
+          "indexId": "36:7775671824819721235",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:6072240185955913302",
+          "name": "date",
+          "indexId": "37:5703178200044613342",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:687915101732694886",
+          "name": "user",
+          "indexId": "38:4939912239154597450",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:5606033154996051041",
+          "name": "pattern",
+          "type": 9
+        },
+        {
+          "id": "6:3219525835291958821",
+          "name": "country",
+          "type": 9
+        },
+        {
+          "id": "8:8984805947934919567",
+          "name": "voteTotal",
+          "type": 5
+        },
+        {
+          "id": "9:7507103527169512823",
+          "name": "voteAve",
+          "type": 8
+        },
+        {
+          "id": "10:1195956380372291208",
+          "name": "shortTotal",
+          "type": 5
+        },
+        {
+          "id": "11:3058971615664211181",
+          "name": "shortAve",
+          "type": 8
+        },
+        {
+          "id": "12:2717217917415390929",
+          "name": "shortComment",
+          "type": 5
+        },
+        {
+          "id": "13:2934340767184518021",
+          "name": "longTotal",
+          "type": 5
+        },
+        {
+          "id": "14:262248052397152323",
+          "name": "longAve",
+          "type": 8
+        },
+        {
+          "id": "15:2200517224328521385",
+          "name": "longComment",
+          "type": 5
+        },
+        {
+          "id": "16:876473266392835290",
+          "name": "total",
+          "type": 5
+        },
+        {
+          "id": "17:3698256861330358410",
+          "name": "totalAve",
+          "type": 8
+        },
+        {
+          "id": "18:3101074837883881548",
+          "name": "voteCount",
+          "type": 5
+        },
+        {
+          "id": "19:521756552682692236",
+          "name": "shortCount",
+          "type": 5
+        },
+        {
+          "id": "20:35347051024042324",
+          "name": "longCount",
+          "type": 5
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "23:2818741658071394833",
+      "lastPropertyId": "13:2748172345050945522",
+      "name": "BofRangeEntity",
+      "properties": [
+        {
+          "id": "1:903335090682229566",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8308107849727143261",
+          "name": "path",
+          "indexId": "64:654529140440991474",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "3:218782755565846469",
+          "name": "start",
+          "type": 9
+        },
+        {
+          "id": "4:6463082417781500758",
+          "name": "current",
+          "type": 9
+        },
+        {
+          "id": "6:7553082413983048748",
+          "name": "isStart",
+          "type": 1
+        },
+        {
+          "id": "7:539957775648526202",
+          "name": "isEnd",
+          "type": 1
+        },
+        {
+          "id": "8:2172182821393151651",
+          "name": "singleComment",
+          "type": 1
+        },
+        {
+          "id": "9:6896103686470714304",
+          "name": "lastUpdated",
+          "type": 6
+        },
+        {
+          "id": "11:7064415025058511666",
+          "name": "shortName",
+          "type": 9
+        },
+        {
+          "id": "12:7614785213469666875",
+          "name": "fullName",
+          "type": 9
+        },
+        {
+          "id": "13:2748172345050945522",
+          "name": "commentDate",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "24:5180401802266594718",
+      "lastPropertyId": "16:2522089846033979473",
+      "name": "BofWorkEntity",
+      "properties": [
+        {
+          "id": "1:8535240129128277666",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3226752677818699070",
+          "name": "compositeWorkId",
+          "indexId": "67:1342358319990362411",
+          "type": 9,
+          "flags": 34848
+        },
+        {
+          "id": "3:6534148912987423722",
+          "name": "path",
+          "indexId": "68:6970866962363234933",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:1435709835724141119",
+          "name": "originalWorkId",
+          "type": 9
+        },
+        {
+          "id": "5:388276240365272022",
+          "name": "currentTitle",
+          "type": 9
+        },
+        {
+          "id": "6:8974910260992107299",
+          "name": "currentArtist",
+          "type": 9
+        },
+        {
+          "id": "7:8710682982940076062",
+          "name": "team",
+          "type": 9
+        },
+        {
+          "id": "8:7552731497761500943",
+          "name": "genre",
+          "type": 9
+        },
+        {
+          "id": "12:5629727425481323982",
+          "name": "earliestTimestamp",
+          "indexId": "69:594291005706900314",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "13:5683158936601812936",
+          "name": "latestTimestamp",
+          "indexId": "70:5637234912253291968",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "14:3495685977423084181",
+          "name": "latestTotalScore",
+          "indexId": "71:7990975964495486027",
+          "type": 5,
+          "flags": 8
+        },
+        {
+          "id": "15:8839957541911466396",
+          "name": "latestAverage",
+          "type": 8
+        },
+        {
+          "id": "16:2522089846033979473",
+          "name": "lastUpdated",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "26:1084568883645647710",
+      "lastPropertyId": "40:1142677025669925130",
+      "name": "BofTeamEntity",
+      "properties": [
+        {
+          "id": "1:3573311205410057772",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4544032778921850818",
+          "name": "compositeTeamId",
+          "indexId": "76:3242124711522880681",
+          "type": 9,
+          "flags": 34848
+        },
+        {
+          "id": "3:2652790650348624642",
+          "name": "path",
+          "indexId": "77:2068239218716375421",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:6937683365792360701",
+          "name": "teamName",
+          "type": 9
+        },
+        {
+          "id": "18:4032313782184828017",
+          "name": "currentTitle1",
+          "type": 9
+        },
+        {
+          "id": "19:1734859125739468817",
+          "name": "currentTitle2",
+          "type": 9
+        },
+        {
+          "id": "20:6018548379812028130",
+          "name": "currentTitle3",
+          "type": 9
+        },
+        {
+          "id": "21:9026822637574350253",
+          "name": "currentTitle4",
+          "type": 9
+        },
+        {
+          "id": "22:5643383948098160142",
+          "name": "currentArtist1",
+          "type": 9
+        },
+        {
+          "id": "23:7200466032701407476",
+          "name": "currentArtist2",
+          "type": 9
+        },
+        {
+          "id": "24:7459124336320534349",
+          "name": "currentArtist3",
+          "type": 9
+        },
+        {
+          "id": "25:5267182145101433103",
+          "name": "currentArtist4",
+          "type": 9
+        },
+        {
+          "id": "26:6369469721563722247",
+          "name": "currentFinalStriker1",
+          "type": 9
+        },
+        {
+          "id": "27:1082932824999250184",
+          "name": "currentFinalStriker2",
+          "type": 9
+        },
+        {
+          "id": "28:4131367025539618459",
+          "name": "currentFinalStriker3",
+          "type": 9
+        },
+        {
+          "id": "29:2180022912099274814",
+          "name": "currentFinalStriker4",
+          "type": 9
+        },
+        {
+          "id": "30:4381637878477053493",
+          "name": "earliestTimestamp",
+          "indexId": "78:3155192461550007114",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "31:84576465627988654",
+          "name": "latestTimestamp",
+          "indexId": "79:8230755672580599645",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "32:710481494346463742",
+          "name": "latestTotalScore",
+          "type": 8
+        },
+        {
+          "id": "34:7713943725651585750",
+          "name": "latestImpression",
+          "type": 8
+        },
+        {
+          "id": "35:7245751619496048192",
+          "name": "lastUpdated",
+          "type": 6
+        },
+        {
+          "id": "36:5848397042197613265",
+          "name": "latestMedian",
+          "type": 8
+        },
+        {
+          "id": "37:1166589256933620366",
+          "name": "latestScore1",
+          "type": 8
+        },
+        {
+          "id": "38:4002617434112487852",
+          "name": "latestScore2",
+          "type": 8
+        },
+        {
+          "id": "39:5013537913404318815",
+          "name": "latestScore3",
+          "type": 8
+        },
+        {
+          "id": "40:1142677025669925130",
+          "name": "latestScore4",
+          "type": 8
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "27:1530323633895206576",
+      "lastPropertyId": "6:8567165193382390350",
+      "name": "BofWorkArtistHistoryEntity",
+      "properties": [
+        {
+          "id": "1:1257458218776976231",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7818367238675597571",
+          "name": "compositeWorkId",
+          "indexId": "80:8352476208945311744",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:8971797129204649317",
+          "name": "path",
+          "indexId": "81:8755363213042260805",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:6735288358102181022",
+          "name": "timestamp",
+          "indexId": "82:7198431665268920120",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "5:7014562310383885980",
+          "name": "timeString",
+          "type": 9
+        },
+        {
+          "id": "6:8567165193382390350",
+          "name": "artist",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "28:4840407348872320660",
+      "lastPropertyId": "13:5316918926918142564",
+      "name": "BofWorkScoreHistoryEntity",
+      "properties": [
+        {
+          "id": "1:4733354870568733027",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1869259921499271789",
+          "name": "compositeWorkId",
+          "indexId": "83:2157224642580856507",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:1597224236622839583",
+          "name": "path",
+          "indexId": "84:4874074403386964827",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:6129515341555313497",
+          "name": "timestamp",
+          "indexId": "85:7824635040973410379",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "5:8692573643051282779",
+          "name": "year",
+          "type": 5
+        },
+        {
+          "id": "6:8724937668120347873",
+          "name": "month",
+          "type": 5
+        },
+        {
+          "id": "7:1308260690215304659",
+          "name": "day",
+          "type": 5
+        },
+        {
+          "id": "8:3791974215908237254",
+          "name": "hour",
+          "type": 5
+        },
+        {
+          "id": "9:4994859661601920417",
+          "name": "minute",
+          "type": 5
+        },
+        {
+          "id": "10:7354282976751376101",
+          "name": "impression",
+          "type": 5
+        },
+        {
+          "id": "11:6479603577101504147",
+          "name": "total",
+          "type": 5
+        },
+        {
+          "id": "12:1101447990081742359",
+          "name": "median",
+          "type": 8
+        },
+        {
+          "id": "13:5316918926918142564",
+          "name": "average",
+          "type": 8
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "29:3556442719522517534",
+      "lastPropertyId": "6:5486085022071823630",
+      "name": "BofWorkTitleHistoryEntity",
+      "properties": [
+        {
+          "id": "1:7639431014455460681",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3022382584013517020",
+          "name": "compositeWorkId",
+          "indexId": "86:2080244183214145699",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:7206826016933090882",
+          "name": "path",
+          "indexId": "87:6260538536410298948",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:6005242377102817768",
+          "name": "timestamp",
+          "indexId": "88:864520871689919225",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "5:6737089560702761238",
+          "name": "timeString",
+          "type": 9
+        },
+        {
+          "id": "6:5486085022071823630",
+          "name": "title",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "30:5750475322540293678",
+      "lastPropertyId": "7:1098502412519276204",
+      "name": "BofTeamArtistHistoryEntity",
+      "properties": [
+        {
+          "id": "1:8780327498539706220",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2733316872752736196",
+          "name": "compositeTeamId",
+          "indexId": "89:6907291433670057596",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:8829767307877467718",
+          "name": "path",
+          "indexId": "90:480957811613572567",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:4581576536500386277",
+          "name": "workSlot",
+          "indexId": "91:4340542820900158613",
+          "type": 5,
+          "flags": 8
+        },
+        {
+          "id": "5:3537955819315020952",
+          "name": "timestamp",
+          "indexId": "92:8897971071459011270",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "6:4552776290929840648",
+          "name": "timeString",
+          "type": 9
+        },
+        {
+          "id": "7:1098502412519276204",
+          "name": "artist",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "31:3864756625393881559",
+      "lastPropertyId": "7:1292280889209092565",
+      "name": "BofTeamFinalStrikerHistoryEntity",
+      "properties": [
+        {
+          "id": "1:5723953598587546849",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6922836798235591157",
+          "name": "compositeTeamId",
+          "indexId": "93:1575782503657716395",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:5370826050713389629",
+          "name": "path",
+          "indexId": "94:8493302090655551186",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:8696479398950110820",
+          "name": "workSlot",
+          "indexId": "95:3373472898511775612",
+          "type": 5,
+          "flags": 8
+        },
+        {
+          "id": "5:4258873475401717818",
+          "name": "timestamp",
+          "indexId": "96:8979371554826288465",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "6:1486213473584591130",
+          "name": "timeString",
+          "type": 9
+        },
+        {
+          "id": "7:1292280889209092565",
+          "name": "finalStriker",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "32:477834172222591114",
+      "lastPropertyId": "21:6337388558702984693",
+      "name": "BofTeamScoreHistoryEntity",
+      "properties": [
+        {
+          "id": "1:730247919176596832",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1428886893235339819",
+          "name": "compositeTeamId",
+          "indexId": "97:7023977554948542232",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:347547716590879883",
+          "name": "path",
+          "indexId": "98:9112863309585359260",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:2714997434634393631",
+          "name": "timestamp",
+          "indexId": "99:2684041902096080892",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "5:8913317309942374464",
+          "name": "year",
+          "type": 5
+        },
+        {
+          "id": "6:2322626739192375874",
+          "name": "month",
+          "type": 5
+        },
+        {
+          "id": "7:8875180496553934311",
+          "name": "day",
+          "type": 5
+        },
+        {
+          "id": "8:1220152455613748587",
+          "name": "hour",
+          "type": 5
+        },
+        {
+          "id": "9:835263596526033395",
+          "name": "minute",
+          "type": 5
+        },
+        {
+          "id": "10:4223850296418078110",
+          "name": "impression",
+          "type": 8
+        },
+        {
+          "id": "11:8734794276488732877",
+          "name": "total",
+          "type": 8
+        },
+        {
+          "id": "12:172953728950485790",
+          "name": "median",
+          "type": 8
+        },
+        {
+          "id": "13:455467234967469440",
+          "name": "average",
+          "type": 8
+        },
+        {
+          "id": "14:5813431975723100358",
+          "name": "total1",
+          "type": 8
+        },
+        {
+          "id": "15:8799663723924487425",
+          "name": "total2",
+          "type": 8
+        },
+        {
+          "id": "16:104825765793662538",
+          "name": "total3",
+          "type": 8
+        },
+        {
+          "id": "17:618831931020976219",
+          "name": "total4",
+          "type": 8
+        },
+        {
+          "id": "18:8609665196608283020",
+          "name": "median1",
+          "type": 8
+        },
+        {
+          "id": "19:987134681374570844",
+          "name": "median2",
+          "type": 8
+        },
+        {
+          "id": "20:2488216191873236644",
+          "name": "median3",
+          "type": 8
+        },
+        {
+          "id": "21:6337388558702984693",
+          "name": "median4",
+          "type": 8
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "33:7935668960383465870",
+      "lastPropertyId": "7:3243621466084974383",
+      "name": "BofTeamTitleHistoryEntity",
+      "properties": [
+        {
+          "id": "1:8967264777911772202",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6400289914001748421",
+          "name": "compositeTeamId",
+          "indexId": "100:9069530830396316130",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:1575543104506297397",
+          "name": "path",
+          "indexId": "101:876941045004481083",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:8705147948212909042",
+          "name": "workSlot",
+          "indexId": "102:1037441773436938150",
+          "type": 5,
+          "flags": 8
+        },
+        {
+          "id": "5:7157753395003685038",
+          "name": "timestamp",
+          "indexId": "103:5842925147544503379",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "6:6106670657819612135",
+          "name": "timeString",
+          "type": 9
+        },
+        {
+          "id": "7:3243621466084974383",
+          "name": "title",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "34:1445203858491683709",
+      "lastPropertyId": "8:8076195223312135380",
+      "name": "BofCommentDetailTimeSeriesEntity",
+      "properties": [
+        {
+          "id": "1:5245461070545727832",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7212784956917174232",
+          "name": "username",
+          "indexId": "104:1172700865718802947",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:1751168582078694757",
+          "name": "path",
+          "indexId": "105:9093178810870301714",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:1786763202172154153",
+          "name": "type",
+          "indexId": "106:2769403186622629049",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:4818544111302966928",
+          "name": "workId",
+          "indexId": "107:3497796739822970946",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "6:1816789076278580798",
+          "name": "timestamp",
+          "indexId": "108:6608117395603154783",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "7:3352108460582774110",
+          "name": "dateString",
+          "type": 9
+        },
+        {
+          "id": "8:8076195223312135380",
+          "name": "score",
+          "type": 5
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "35:8795785466007921620",
+      "lastPropertyId": "19:2149767522057897567",
+      "name": "BofCommentStatsHistoryEntity",
+      "properties": [
+        {
+          "id": "1:142625219790937270",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6731155520968058364",
+          "name": "username",
+          "indexId": "109:6739877281189088874",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:3260205123428929662",
+          "name": "path",
+          "indexId": "110:4170476610360194832",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:3888886416575717825",
+          "name": "timestamp",
+          "indexId": "111:1804985825671323162",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "5:6378819768285535059",
+          "name": "year",
+          "type": 5
+        },
+        {
+          "id": "6:4664200848315011639",
+          "name": "month",
+          "type": 5
+        },
+        {
+          "id": "7:4361105575075697393",
+          "name": "day",
+          "type": 5
+        },
+        {
+          "id": "8:2317359269330332696",
+          "name": "hour",
+          "type": 5
+        },
+        {
+          "id": "9:2729943953610632399",
+          "name": "minute",
+          "type": 5
+        },
+        {
+          "id": "11:951694669064132192",
+          "name": "voteTotal",
+          "type": 5
+        },
+        {
+          "id": "12:7790989687445373079",
+          "name": "shortTotal",
+          "type": 5
+        },
+        {
+          "id": "13:4384876496111719973",
+          "name": "shortComment",
+          "type": 5
+        },
+        {
+          "id": "14:4798512203139614452",
+          "name": "longTotal",
+          "type": 5
+        },
+        {
+          "id": "15:8575634362537278505",
+          "name": "longComment",
+          "type": 5
+        },
+        {
+          "id": "16:6347555864086013716",
+          "name": "total",
+          "type": 5
+        },
+        {
+          "id": "17:6393109103278455873",
+          "name": "voteCount",
+          "type": 5
+        },
+        {
+          "id": "18:4530892918789563843",
+          "name": "shortCount",
+          "type": 5
+        },
+        {
+          "id": "19:2149767522057897567",
+          "name": "longCount",
+          "type": 5
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "36:2066024985055876769",
+      "lastPropertyId": "7:5848046000280743252",
+      "name": "BofCommentTextHistoryEntity",
+      "properties": [
+        {
+          "id": "1:6068397969660359717",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7392813308408212044",
+          "name": "username",
+          "indexId": "112:5610815381537191078",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:1576337344200320726",
+          "name": "path",
+          "indexId": "113:4308684731080570674",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:5110943811638435260",
+          "name": "fieldType",
+          "indexId": "114:4988614522766573059",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:6707214955416500495",
+          "name": "timestamp",
+          "indexId": "115:8589191655759142320",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "6:5954702432624931219",
+          "name": "timeString",
+          "type": 9
+        },
+        {
+          "id": "7:5848046000280743252",
+          "name": "value",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "37:5042140330721282768",
+      "lastPropertyId": "19:4492926575917476656",
+      "name": "BofCommentTimeSeriesEntity",
+      "properties": [
+        {
+          "id": "1:2225726600600323026",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4567064290500634440",
+          "name": "username",
+          "indexId": "116:1221876607640019963",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:5026700022678505983",
+          "name": "path",
+          "indexId": "117:4309156580114974612",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:1955957098664548297",
+          "name": "currentUser",
+          "type": 9
+        },
+        {
+          "id": "5:7350064668204800504",
+          "name": "currentPattern",
+          "type": 9
+        },
+        {
+          "id": "6:3814759208751705986",
+          "name": "currentCountry",
+          "type": 9
+        },
+        {
+          "id": "7:6562357250628090396",
+          "name": "idCodesJson",
+          "type": 9
+        },
+        {
+          "id": "8:172203429723608667",
+          "name": "latestVote",
+          "type": 5
+        },
+        {
+          "id": "9:3824844452886677411",
+          "name": "latestVoteTotal",
+          "type": 5
+        },
+        {
+          "id": "10:3766276626216834154",
+          "name": "latestShort",
+          "type": 5
+        },
+        {
+          "id": "11:7977391467044131915",
+          "name": "latestShortTotal",
+          "type": 5
+        },
+        {
+          "id": "12:6243275666650104406",
+          "name": "latestShortComment",
+          "type": 5
+        },
+        {
+          "id": "13:3356637683866604707",
+          "name": "latestLong",
+          "type": 5
+        },
+        {
+          "id": "14:2627995776989827638",
+          "name": "latestLongTotal",
+          "type": 5
+        },
+        {
+          "id": "15:2365862637170608219",
+          "name": "latestLongComment",
+          "type": 5
+        },
+        {
+          "id": "16:1224336971502952610",
+          "name": "latestTotal",
+          "type": 5
+        },
+        {
+          "id": "17:8287414308174752545",
+          "name": "earliestTimestamp",
+          "type": 6
+        },
+        {
+          "id": "18:532762185858162062",
+          "name": "latestTimestamp",
+          "type": 6
+        },
+        {
+          "id": "19:4492926575917476656",
+          "name": "lastUpdated",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "38:6369654039158555261",
+      "lastPropertyId": "10:4792154837805788250",
+      "name": "ChunithmRatingEntity",
+      "properties": [
+        {
+          "id": "1:4776033552139488017",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7981244307303212905",
+          "name": "songId",
+          "type": 9
+        },
+        {
+          "id": "3:4450922101786943131",
+          "name": "title",
+          "indexId": "118:6429032523308084853",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:7525308911280320380",
+          "name": "genre",
+          "type": 9
+        },
+        {
+          "id": "5:4778636495744365363",
+          "name": "diff",
+          "type": 9
+        },
+        {
+          "id": "6:8094577661198111916",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "7:167250289930748459",
+          "name": "highScore",
+          "type": 9
+        },
+        {
+          "id": "8:4521044427421865516",
+          "name": "ratingType",
+          "indexId": "119:6146167097318044755",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "9:2328461957956236944",
+          "name": "createdAt",
+          "type": 6
+        },
+        {
+          "id": "10:4792154837805788250",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "39:8022462250134677036",
+      "lastPropertyId": "10:468032089509016064",
+      "name": "ChunithmMapAreaEntity",
+      "properties": [
+        {
+          "id": "1:4838134505472670622",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1414784920116923696",
+          "name": "mapName",
+          "indexId": "120:6729909435668240769",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:4629240630261896161",
+          "name": "pageNumber",
+          "indexId": "121:4504493889265633762",
+          "type": 5,
+          "flags": 8
+        },
+        {
+          "id": "4:6862823254090814130",
+          "name": "position",
+          "indexId": "122:6552928466448898919",
+          "type": 5,
+          "flags": 8
+        },
+        {
+          "id": "5:3649217270489874983",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "6:2349951245381256187",
+          "name": "remain",
+          "type": 5
+        },
+        {
+          "id": "7:1509212746373432890",
+          "name": "skillSeed",
+          "type": 9
+        },
+        {
+          "id": "8:3101579633273521828",
+          "name": "isEmpty",
+          "type": 1
+        },
+        {
+          "id": "9:1206582774270030304",
+          "name": "syncedAt",
+          "type": 6
+        },
+        {
+          "id": "10:468032089509016064",
+          "name": "totalPages",
+          "type": 5
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "40:6214870921577740002",
+      "lastPropertyId": "8:727143979656395948",
+      "name": "ChunithmMapEntity",
+      "properties": [
+        {
+          "id": "1:4271033785936377141",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8807379081137606831",
+          "name": "mapName",
+          "indexId": "123:6703736740964752214",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:3085216042326915249",
+          "name": "totalPages",
+          "type": 5
+        },
+        {
+          "id": "4:2359713053860488202",
+          "name": "completedAreas",
+          "type": 5
+        },
+        {
+          "id": "5:3250910584657400807",
+          "name": "totalAreas",
+          "type": 5
+        },
+        {
+          "id": "6:1118348571417556059",
+          "name": "progressPercentage",
+          "type": 8
+        },
+        {
+          "id": "7:4883690390371730084",
+          "name": "createdAt",
+          "type": 6
+        },
+        {
+          "id": "8:727143979656395948",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "41:171021126756624048",
+      "lastPropertyId": "15:4182295342213149404",
+      "name": "ChunithmPlayLogEntity",
+      "properties": [
+        {
+          "id": "1:2153557790749135735",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8178338443033101967",
+          "name": "songId",
+          "type": 9
+        },
+        {
+          "id": "3:5837746931247818209",
+          "name": "title",
+          "indexId": "124:8913356468475615948",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:1459453264283113437",
+          "name": "genre",
+          "type": 9
+        },
+        {
+          "id": "5:7413246345228992598",
+          "name": "diff",
+          "type": 9
+        },
+        {
+          "id": "6:3836897436437933899",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "7:955791552047934530",
+          "name": "score",
+          "type": 9
+        },
+        {
+          "id": "8:7828008892452814832",
+          "name": "clear",
+          "type": 9
+        },
+        {
+          "id": "9:4461788564083928740",
+          "name": "combo",
+          "type": 9
+        },
+        {
+          "id": "10:4875099386490627584",
+          "name": "chain",
+          "type": 9
+        },
+        {
+          "id": "11:4893780786059740476",
+          "name": "rank",
+          "type": 5
+        },
+        {
+          "id": "12:4871160256796234476",
+          "name": "playDate",
+          "type": 9
+        },
+        {
+          "id": "13:8489087044677337195",
+          "name": "trackNumber",
+          "type": 9
+        },
+        {
+          "id": "14:2290778575639053283",
+          "name": "createdAt",
+          "type": 6
+        },
+        {
+          "id": "15:4182295342213149404",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "42:8885191850255465808",
+      "lastPropertyId": "14:280337685995526063",
+      "name": "ChunithmCharacterEntity",
+      "properties": [
+        {
+          "id": "1:3569464554229851631",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6050132447839700067",
+          "name": "charaId",
+          "indexId": "125:4910642040646251144",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:6642477572476595327",
+          "name": "name",
+          "indexId": "126:6603408938052969342",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:7762628988706609538",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "5:5068397821605154492",
+          "name": "frameType",
+          "type": 9
+        },
+        {
+          "id": "6:6257563399620843724",
+          "name": "level",
+          "type": 5
+        },
+        {
+          "id": "7:7247246113472723875",
+          "name": "expBarWidth",
+          "type": 5
+        },
+        {
+          "id": "8:3478117825075642501",
+          "name": "isMaxLevel",
+          "type": 1
+        },
+        {
+          "id": "9:4753019610529237430",
+          "name": "skillSeedImageUrl",
+          "type": 9
+        },
+        {
+          "id": "10:162151282837946096",
+          "name": "skillSeedText",
+          "type": 9
+        },
+        {
+          "id": "11:7495966421090873125",
+          "name": "skillSeedVersionImageUrl",
+          "type": 9
+        },
+        {
+          "id": "12:6517767223030414662",
+          "name": "isCurrentlyUsed",
+          "type": 1
+        },
+        {
+          "id": "13:4536251529908714749",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "14:280337685995526063",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "43:2198993999732884035",
+      "lastPropertyId": "7:5091847082240943667",
+      "name": "ChunithmDailyRewardEntity",
+      "properties": [
+        {
+          "id": "1:6494767816005425441",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:325078068456959036",
+          "name": "day",
+          "indexId": "127:134589462354452342",
+          "type": 5,
+          "flags": 8
+        },
+        {
+          "id": "3:5040652339676913033",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "4:8049610131188702154",
+          "name": "rewardName",
+          "type": 9
+        },
+        {
+          "id": "5:5699018695667906089",
+          "name": "isReceived",
+          "type": 1
+        },
+        {
+          "id": "6:6185608347844836010",
+          "name": "isNext",
+          "type": 1
+        },
+        {
+          "id": "7:5091847082240943667",
+          "name": "lastUpdated",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "44:6457123980481380594",
+      "lastPropertyId": "4:8355677652347053585",
+      "name": "ChunithmLoginBonusEntity",
+      "properties": [
+        {
+          "id": "1:2429464866793926037",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6707867011277092894",
+          "name": "currentMonthDays",
+          "type": 5
+        },
+        {
+          "id": "3:6468265391286979459",
+          "name": "dailyStreakDay",
+          "type": 5
+        },
+        {
+          "id": "4:8355677652347053585",
+          "name": "lastUpdated",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "45:639974447222658106",
+      "lastPropertyId": "6:3275788103047597546",
+      "name": "ChunithmMonthlyRewardEntity",
+      "properties": [
+        {
+          "id": "1:9154985151285985693",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2295029653255998629",
+          "name": "day",
+          "indexId": "128:2054023523605079486",
+          "type": 5,
+          "flags": 8
+        },
+        {
+          "id": "3:5832182808297614302",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "4:5688241691111045334",
+          "name": "rewardName",
+          "type": 9
+        },
+        {
+          "id": "5:3358213895399054671",
+          "name": "isCompleted",
+          "type": 1
+        },
+        {
+          "id": "6:3275788103047597546",
+          "name": "lastUpdated",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "46:4583087702082708126",
+      "lastPropertyId": "6:5243894013110491383",
+      "name": "ChunithmWeekdayBonusEntity",
+      "properties": [
+        {
+          "id": "1:6532269320901262678",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:191631072889987129",
+          "name": "weekday",
+          "indexId": "129:6044301559898436613",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:4507498549745278943",
+          "name": "iconUrl",
+          "type": 9
+        },
+        {
+          "id": "4:4429946345033906533",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "6:5243894013110491383",
+          "name": "lastUpdated",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "47:3681750712113246390",
+      "lastPropertyId": "8:8942310034631181743",
+      "name": "ChunithmAvatarItemEntity",
+      "properties": [
+        {
+          "id": "1:199036758693959001",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7504492904175471222",
+          "name": "itemId",
+          "indexId": "130:2564905192138364051",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:2813010125884702989",
+          "name": "name",
+          "indexId": "131:5926806406616624272",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:2019873358296868666",
+          "name": "category",
+          "indexId": "132:6589133905993124538",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:8037851489462326310",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "6:2884725704941442088",
+          "name": "isCurrentlyUsed",
+          "type": 1
+        },
+        {
+          "id": "7:7128263652315028990",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "8:8942310034631181743",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "53:146802190509827266",
+      "lastPropertyId": "2:8012336026108250361",
+      "name": "ChunithmCategoryEntity",
+      "properties": [
+        {
+          "id": "1:2287468804479045246",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8012336026108250361",
+          "name": "category",
+          "indexId": "138:4891031655127670134",
+          "type": 9,
+          "flags": 2048
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "54:440022843034364347",
+      "lastPropertyId": "4:2393473488631422128",
+      "name": "ChunithmDifficultyEntity",
+      "properties": [
+        {
+          "id": "1:2174680959734864003",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:141054094927201160",
+          "name": "difficulty",
+          "indexId": "139:910731231893339905",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:6886447164189091288",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:2393473488631422128",
+          "name": "color",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "55:8739076631386548925",
+      "lastPropertyId": "3:4671682043996095145",
+      "name": "ChunithmRegionEntity",
+      "properties": [
+        {
+          "id": "1:5917576581339952859",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2642935528821309995",
+          "name": "region",
+          "indexId": "140:8017335184564630905",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:4671682043996095145",
+          "name": "name",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "56:2889995438405128044",
+      "lastPropertyId": "4:993481074396979217",
+      "name": "ChunithmTypeEntity",
+      "properties": [
+        {
+          "id": "1:7875390841980467159",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7175420839918764300",
+          "name": "type",
+          "indexId": "141:5210046434348817154",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:8008629506393759757",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:993481074396979217",
+          "name": "abbr",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "57:5442226770422139203",
+      "lastPropertyId": "4:2041039588575256123",
+      "name": "ChunithmVersionEntity",
+      "properties": [
+        {
+          "id": "1:2625906465599613673",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8175034716948952441",
+          "name": "version",
+          "indexId": "142:2798638528408032553",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:8783635702759057531",
+          "name": "abbr",
+          "type": 9
+        },
+        {
+          "id": "4:2041039588575256123",
+          "name": "releaseDate",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "58:4449449620651523174",
+      "lastPropertyId": "7:3669475831584011546",
+      "name": "ChunithmMapIconEntity",
+      "properties": [
+        {
+          "id": "1:2122071414747777559",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8702567673590778747",
+          "name": "idx",
+          "indexId": "143:7717165304561755310",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:2674794354077312761",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:5124823179417440758",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "5:5612417680340818359",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "6:4706439454072773555",
+          "name": "isCurrentlyUsed",
+          "type": 1
+        },
+        {
+          "id": "7:3669475831584011546",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "59:6383341942587342804",
+      "lastPropertyId": "13:2098475098298993075",
+      "name": "ChunithmMissionEntity",
+      "properties": [
+        {
+          "id": "1:811986068791741382",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2316137534031961371",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "3:3534549962055048197",
+          "name": "rewardImageUrl",
+          "type": 9
+        },
+        {
+          "id": "4:4577173828247034645",
+          "name": "startDate",
+          "type": 9
+        },
+        {
+          "id": "5:4921550153137386527",
+          "name": "endDate",
+          "type": 9
+        },
+        {
+          "id": "6:9131103713260029191",
+          "name": "currentPoints",
+          "type": 5
+        },
+        {
+          "id": "7:6394261663484666799",
+          "name": "nextRewardPoints",
+          "type": 5
+        },
+        {
+          "id": "8:5214249527149421445",
+          "name": "nextRewardName",
+          "type": 9
+        },
+        {
+          "id": "9:3872410073984373908",
+          "name": "nextRewardImageUrl",
+          "type": 9
+        },
+        {
+          "id": "10:2623078454522657882",
+          "name": "pickupRewardPoints",
+          "type": 5
+        },
+        {
+          "id": "11:7760149307622188774",
+          "name": "pickupRewardName",
+          "type": 9
+        },
+        {
+          "id": "12:6272651388992861041",
+          "name": "pickupRewardImageUrl",
+          "type": 9
+        },
+        {
+          "id": "13:2098475098298993075",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "60:633364712198784502",
+      "lastPropertyId": "11:5430556882238276383",
+      "name": "ChunithmMissionPatternEntity",
+      "properties": [
+        {
+          "id": "1:5975382876064471439",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1784633310188458831",
+          "name": "missionTitle",
+          "type": 9
+        },
+        {
+          "id": "3:379344656578774341",
+          "name": "stageNumber",
+          "type": 5
+        },
+        {
+          "id": "4:6845532158659411963",
+          "name": "stageDenominator",
+          "type": 5
+        },
+        {
+          "id": "5:7817936693038586913",
+          "name": "iconUrl",
+          "type": 9
+        },
+        {
+          "id": "6:6853290314493589497",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "7:3807781344069837534",
+          "name": "currentProgress",
+          "type": 5
+        },
+        {
+          "id": "8:4150630952888341997",
+          "name": "totalProgress",
+          "type": 5
+        },
+        {
+          "id": "9:3984444577965659075",
+          "name": "progressUnit",
+          "type": 9
+        },
+        {
+          "id": "10:8738438675045218102",
+          "name": "rewardPoints",
+          "type": 5
+        },
+        {
+          "id": "11:5430556882238276383",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "61:5276285207120398990",
+      "lastPropertyId": "7:2256694974406646733",
+      "name": "ChunithmNameplateEntity",
+      "properties": [
+        {
+          "id": "1:1347396700873248140",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1571590698027359930",
+          "name": "idx",
+          "indexId": "144:1054432719836762104",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:5999225528516882562",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:7980689150719214999",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "5:4775581545237588265",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "6:6033506283331609753",
+          "name": "isCurrentlyUsed",
+          "type": 1
+        },
+        {
+          "id": "7:2256694974406646733",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "62:1968015600075962713",
+      "lastPropertyId": "10:3664995308906979962",
+      "name": "ChunithmPointRewardEntity",
+      "properties": [
+        {
+          "id": "1:5597119341009149277",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3371238261933414554",
+          "name": "currentPoints",
+          "type": 5
+        },
+        {
+          "id": "3:3841616535980276224",
+          "name": "nextRewardPoints",
+          "type": 5
+        },
+        {
+          "id": "4:5361923149922031957",
+          "name": "nextRewardName",
+          "type": 9
+        },
+        {
+          "id": "5:5117544889153290648",
+          "name": "nextRewardImageUrl",
+          "type": 9
+        },
+        {
+          "id": "6:5764533306739749153",
+          "name": "pickupRewardPoints",
+          "type": 5
+        },
+        {
+          "id": "7:1857215096306960213",
+          "name": "pickupRewardName",
+          "type": 9
+        },
+        {
+          "id": "8:8063350992774108752",
+          "name": "pickupRewardImageUrl",
+          "type": 9
+        },
+        {
+          "id": "9:5969797904325014147",
+          "name": "gaugeProgress",
+          "type": 8
+        },
+        {
+          "id": "10:3664995308906979962",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "63:150843499660325739",
+      "lastPropertyId": "10:9112439835505460529",
+      "name": "ChunithmSkillEntity",
+      "properties": [
+        {
+          "id": "1:8308516504547225176",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5029251022946141906",
+          "name": "idx",
+          "type": 9
+        },
+        {
+          "id": "3:2402370195923421830",
+          "name": "iconUrl",
+          "type": 9
+        },
+        {
+          "id": "4:4305836278578377447",
+          "name": "versionIconUrl",
+          "type": 9
+        },
+        {
+          "id": "5:2429688827351667459",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "6:7380380878081151631",
+          "name": "level",
+          "type": 5
+        },
+        {
+          "id": "7:3143040648968664958",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "8:2662114020624032236",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "9:3637325451563462373",
+          "name": "isCurrentlyUsed",
+          "type": 1
+        },
+        {
+          "id": "10:9112439835505460529",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "64:5900965764997596423",
+      "lastPropertyId": "6:2164981793557893379",
+      "name": "ChunithmTicketEntity",
+      "properties": [
+        {
+          "id": "1:6262331470487027174",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3853788911216319838",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:363948907198128430",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "4:4527564362122090486",
+          "name": "holdCount",
+          "type": 5
+        },
+        {
+          "id": "5:2259987639009684507",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "6:2164981793557893379",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "65:8938334562636967065",
+      "lastPropertyId": "8:4594302636642175817",
+      "name": "ChunithmTrophyEntity",
+      "properties": [
+        {
+          "id": "1:8035468840526914677",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5758899402018501392",
+          "name": "idx",
+          "indexId": "145:2332791803319793484",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:8727275062233138924",
+          "name": "text",
+          "type": 9
+        },
+        {
+          "id": "4:2855995561114510007",
+          "name": "rarity",
+          "type": 9
+        },
+        {
+          "id": "5:1593349882888899116",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "6:5615679998550415228",
+          "name": "token",
+          "type": 9
+        },
+        {
+          "id": "7:7792484175740377695",
+          "name": "isCurrentlyUsed",
+          "type": 1
+        },
+        {
+          "id": "8:4594302636642175817",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "66:1519000653959431637",
+      "lastPropertyId": "9:2573348054125113503",
+      "name": "OsuBadgeEntity",
+      "properties": [
+        {
+          "id": "1:2605699190799546949",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4949171106059816594",
+          "name": "odUserId",
+          "indexId": "146:6024026475439367241",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:7390882511687726160",
+          "name": "uniqueKey",
+          "indexId": "147:9033940376912536094",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "4:511475108334211694",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "5:3124412905278439293",
+          "name": "image2xUrl",
+          "type": 9
+        },
+        {
+          "id": "6:5948242407058828213",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "7:3454197798573556662",
+          "name": "awardedAt",
+          "type": 9
+        },
+        {
+          "id": "8:8656890225823517102",
+          "name": "url",
+          "type": 9
+        },
+        {
+          "id": "9:2573348054125113503",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "67:5717686366608439669",
+      "lastPropertyId": "14:5476612514143499904",
+      "name": "OsuMedalEntity",
+      "properties": [
+        {
+          "id": "1:6059206317486569318",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:8953881318757683473",
+          "name": "odUserId",
+          "indexId": "148:2605618046695960852",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:8066799008063049049",
+          "name": "odAchievementId",
+          "type": 6
+        },
+        {
+          "id": "4:3149653850185763037",
+          "name": "uniqueKey",
+          "indexId": "149:7698065460800416924",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "5:6446049633190481084",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "6:5438769587389641682",
+          "name": "slug",
+          "type": 9
+        },
+        {
+          "id": "7:4673246406501598841",
+          "name": "description",
+          "type": 9
+        },
+        {
+          "id": "8:3155197599275943534",
+          "name": "mode",
+          "type": 9
+        },
+        {
+          "id": "9:3690702774643642768",
+          "name": "grouping",
+          "type": 9
+        },
+        {
+          "id": "10:2058328459037661029",
+          "name": "instructions",
+          "type": 9
+        },
+        {
+          "id": "11:6779490704244598030",
+          "name": "ordering",
+          "type": 5
+        },
+        {
+          "id": "12:5794259552774591811",
+          "name": "iconUrl",
+          "type": 9
+        },
+        {
+          "id": "13:315257727602598089",
+          "name": "achievedAt",
+          "type": 9
+        },
+        {
+          "id": "14:5476612514143499904",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "68:6666858898040878668",
+      "lastPropertyId": "6:3841803999016127447",
+      "name": "OsuRankHistoryEntity",
+      "properties": [
+        {
+          "id": "1:2476111994273861714",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5135864948624960431",
+          "name": "odUserId",
+          "indexId": "150:675276538665713810",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:4098796077348910374",
+          "name": "mode",
+          "type": 9
+        },
+        {
+          "id": "4:2850071546084582563",
+          "name": "uniqueKey",
+          "indexId": "151:1297003312218376521",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "5:3543108357507840013",
+          "name": "rankData",
+          "type": 9
+        },
+        {
+          "id": "6:3841803999016127447",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "69:3233472424437041455",
+      "lastPropertyId": "19:3249500679011360863",
+      "name": "OsuRecentActivityEntity",
+      "properties": [
+        {
+          "id": "1:4631603450234323285",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:7737682466804137560",
+          "name": "odUserId",
+          "indexId": "152:9142479633020594530",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:1390337959744688025",
+          "name": "odActivityId",
+          "indexId": "153:3210565331948218756",
+          "type": 6,
+          "flags": 40
+        },
+        {
+          "id": "4:8755875246494197565",
+          "name": "type",
+          "type": 9
+        },
+        {
+          "id": "5:2011419664152075239",
+          "name": "rank",
+          "type": 5
+        },
+        {
+          "id": "6:1842852531264697510",
+          "name": "scoreRank",
+          "type": 9
+        },
+        {
+          "id": "7:6312337846045647540",
+          "name": "mode",
+          "type": 9
+        },
+        {
+          "id": "8:136466478829048641",
+          "name": "achievementName",
+          "type": 9
+        },
+        {
+          "id": "9:495687531200633238",
+          "name": "achievementDescription",
+          "type": 9
+        },
+        {
+          "id": "10:7732944379824661361",
+          "name": "achievementIconUrl",
+          "type": 9
+        },
+        {
+          "id": "11:8127452628761929924",
+          "name": "achievementId",
+          "type": 6
+        },
+        {
+          "id": "12:6151663451377943520",
+          "name": "beatmapId",
+          "type": 6
+        },
+        {
+          "id": "13:4357194156762890873",
+          "name": "beatmapTitle",
+          "type": 9
+        },
+        {
+          "id": "14:4517303755773532000",
+          "name": "beatmapUrl",
+          "type": 9
+        },
+        {
+          "id": "15:7139392934648331593",
+          "name": "beatmapsetId",
+          "type": 6
+        },
+        {
+          "id": "16:234320379411287434",
+          "name": "beatmapsetTitle",
+          "type": 9
+        },
+        {
+          "id": "17:8622955746104966865",
+          "name": "beatmapsetUrl",
+          "type": 9
+        },
+        {
+          "id": "18:5946662881334113739",
+          "name": "createdAt",
+          "type": 9
+        },
+        {
+          "id": "19:3249500679011360863",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "70:2310174888058048443",
+      "lastPropertyId": "39:792273065513480129",
+      "name": "OsuScoreEntity",
+      "properties": [
+        {
+          "id": "1:7447800319357890113",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:6106678987211546726",
+          "name": "odUserId",
+          "indexId": "154:1117922476812098643",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:843041964388253197",
+          "name": "odScoreId",
+          "indexId": "155:3276994672541188823",
+          "type": 6,
+          "flags": 40
+        },
+        {
+          "id": "4:854159250572892907",
+          "name": "scoreType",
+          "type": 9
+        },
+        {
+          "id": "5:8945612627647615886",
+          "name": "score",
+          "type": 6
+        },
+        {
+          "id": "6:5315703737583090186",
+          "name": "maxCombo",
+          "type": 5
+        },
+        {
+          "id": "7:5276135110037552462",
+          "name": "accuracy",
+          "type": 8
+        },
+        {
+          "id": "8:4683463792548060666",
+          "name": "pp",
+          "type": 8
+        },
+        {
+          "id": "9:5224440406965407446",
+          "name": "ppWeight",
+          "type": 8
+        },
+        {
+          "id": "10:191895937198494072",
+          "name": "rank",
+          "type": 9
+        },
+        {
+          "id": "11:5618828283046863199",
+          "name": "mods",
+          "type": 9
+        },
+        {
+          "id": "12:8148617059438136454",
+          "name": "passed",
+          "type": 1
+        },
+        {
+          "id": "13:4487493380004082452",
+          "name": "perfect",
+          "type": 1
+        },
+        {
+          "id": "14:2111298508088527889",
+          "name": "countGeki",
+          "type": 5
+        },
+        {
+          "id": "15:5988345164602389254",
+          "name": "count300",
+          "type": 5
+        },
+        {
+          "id": "16:4704401515485047178",
+          "name": "countKatu",
+          "type": 5
+        },
+        {
+          "id": "17:8464981853282554031",
+          "name": "count100",
+          "type": 5
+        },
+        {
+          "id": "18:1746158901939706507",
+          "name": "count50",
+          "type": 5
+        },
+        {
+          "id": "19:3138893969779375911",
+          "name": "countMiss",
+          "type": 5
+        },
+        {
+          "id": "20:1865749238783954864",
+          "name": "beatmapId",
+          "type": 6
+        },
+        {
+          "id": "21:3116857035808645542",
+          "name": "beatmapSetId",
+          "type": 6
+        },
+        {
+          "id": "22:2295884600939184124",
+          "name": "beatmapTitle",
+          "type": 9
+        },
+        {
+          "id": "23:5995905253376514544",
+          "name": "beatmapArtist",
+          "type": 9
+        },
+        {
+          "id": "24:2950648936685028860",
+          "name": "beatmapVersion",
+          "type": 9
+        },
+        {
+          "id": "25:7821777345320825656",
+          "name": "beatmapDifficulty",
+          "type": 8
+        },
+        {
+          "id": "26:9020285950923730507",
+          "name": "beatmapBpm",
+          "type": 8
+        },
+        {
+          "id": "27:2231877347915662682",
+          "name": "beatmapCs",
+          "type": 8
+        },
+        {
+          "id": "28:8026154399535220172",
+          "name": "beatmapAr",
+          "type": 8
+        },
+        {
+          "id": "29:3951886963427687873",
+          "name": "beatmapOd",
+          "type": 8
+        },
+        {
+          "id": "30:6574419602644196439",
+          "name": "beatmapHp",
+          "type": 8
+        },
+        {
+          "id": "31:5776599747617960854",
+          "name": "beatmapLength",
+          "type": 5
+        },
+        {
+          "id": "32:8629463470704978038",
+          "name": "beatmapMode",
+          "type": 9
+        },
+        {
+          "id": "33:2219416321319430563",
+          "name": "beatmapStatus",
+          "type": 9
+        },
+        {
+          "id": "34:4279560890285006915",
+          "name": "beatmapCoverUrl",
+          "type": 9
+        },
+        {
+          "id": "35:1493543127434678504",
+          "name": "beatmapCreator",
+          "type": 9
+        },
+        {
+          "id": "36:102748801454308251",
+          "name": "beatmapCreatorId",
+          "type": 6
+        },
+        {
+          "id": "37:6942015165009305549",
+          "name": "position",
+          "type": 5
+        },
+        {
+          "id": "38:5513535031083701193",
+          "name": "playedAt",
+          "type": 9
+        },
+        {
+          "id": "39:792273065513480129",
+          "name": "updatedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "71:7101342159203818778",
+      "lastPropertyId": "51:3048263678146106434",
+      "name": "OsuUserEntity",
+      "properties": [
+        {
+          "id": "1:4932305511410428773",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5354046137319407001",
+          "name": "odUserId",
+          "indexId": "156:3714011989117759440",
+          "type": 6,
+          "flags": 8
+        },
+        {
+          "id": "3:7018399563250897503",
+          "name": "dateKey",
+          "indexId": "157:3753107900011459369",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "4:4165961286896593006",
+          "name": "uniqueKey",
+          "indexId": "158:2021817109029353225",
+          "type": 9,
+          "flags": 2080
+        },
+        {
+          "id": "5:8332477314442017259",
+          "name": "username",
+          "type": 9
+        },
+        {
+          "id": "6:4674939579822946847",
+          "name": "country",
+          "type": 9
+        },
+        {
+          "id": "7:1114958760785269906",
+          "name": "countryCode",
+          "type": 9
+        },
+        {
+          "id": "8:310735073714036806",
+          "name": "avatarUrl",
+          "type": 9
+        },
+        {
+          "id": "9:2685197842848929673",
+          "name": "coverUrl",
+          "type": 9
+        },
+        {
+          "id": "10:8437536154425469370",
+          "name": "customCoverUrl",
+          "type": 9
+        },
+        {
+          "id": "11:1092594393445894052",
+          "name": "profileHue",
+          "type": 5
+        },
+        {
+          "id": "12:52650843604248834",
+          "name": "profileColour",
+          "type": 9
+        },
+        {
+          "id": "13:6859498352790249073",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "14:9185417630544132448",
+          "name": "isSupporter",
+          "type": 1
+        },
+        {
+          "id": "15:6102860636927642476",
+          "name": "supportLevel",
+          "type": 5
+        },
+        {
+          "id": "16:1323854076170777133",
+          "name": "isOnline",
+          "type": 1
+        },
+        {
+          "id": "17:2421133146847922011",
+          "name": "isBot",
+          "type": 1
+        },
+        {
+          "id": "18:1907698517164259779",
+          "name": "isDeleted",
+          "type": 1
+        },
+        {
+          "id": "19:5044001163653991814",
+          "name": "globalRank",
+          "type": 5
+        },
+        {
+          "id": "20:6819670393130490383",
+          "name": "countryRank",
+          "type": 5
+        },
+        {
+          "id": "21:5483673761331874726",
+          "name": "pp",
+          "type": 8
+        },
+        {
+          "id": "22:6585300537270608373",
+          "name": "playCount",
+          "type": 5
+        },
+        {
+          "id": "23:5457976761833488864",
+          "name": "playTime",
+          "type": 5
+        },
+        {
+          "id": "24:7806799672816375488",
+          "name": "rankedScore",
+          "type": 6
+        },
+        {
+          "id": "25:5137060471803857402",
+          "name": "totalScore",
+          "type": 6
+        },
+        {
+          "id": "26:6264165125758155969",
+          "name": "totalHits",
+          "type": 6
+        },
+        {
+          "id": "27:2764561350803255203",
+          "name": "maxCombo",
+          "type": 5
+        },
+        {
+          "id": "28:1663487674554098998",
+          "name": "accuracy",
+          "type": 8
+        },
+        {
+          "id": "29:1171884274216584559",
+          "name": "levelCurrent",
+          "type": 5
+        },
+        {
+          "id": "30:4836896462674295992",
+          "name": "levelProgress",
+          "type": 5
+        },
+        {
+          "id": "31:7827078412563446823",
+          "name": "gradeSsh",
+          "type": 5
+        },
+        {
+          "id": "32:5703376736893176807",
+          "name": "gradeSs",
+          "type": 5
+        },
+        {
+          "id": "33:8368804914464784331",
+          "name": "gradeSh",
+          "type": 5
+        },
+        {
+          "id": "34:8303452644420679818",
+          "name": "gradeS",
+          "type": 5
+        },
+        {
+          "id": "35:64584913145708229",
+          "name": "gradeA",
+          "type": 5
+        },
+        {
+          "id": "36:2454201164593632324",
+          "name": "followerCount",
+          "type": 5
+        },
+        {
+          "id": "37:5368042230326348522",
+          "name": "formerUsernames",
+          "type": 9
+        },
+        {
+          "id": "38:3468883987456523951",
+          "name": "tournamentBannerUrl",
+          "type": 9
+        },
+        {
+          "id": "39:1546772917883950447",
+          "name": "highestRank",
+          "type": 5
+        },
+        {
+          "id": "40:5040502544669287037",
+          "name": "highestRankDate",
+          "type": 9
+        },
+        {
+          "id": "41:6775466878938918163",
+          "name": "medalCount",
+          "type": 5
+        },
+        {
+          "id": "42:8789914042403668436",
+          "name": "currentMode",
+          "type": 9
+        },
+        {
+          "id": "43:1722724792712814140",
+          "name": "updatedAt",
+          "type": 6
+        },
+        {
+          "id": "44:8517378300758459618",
+          "name": "teamId",
+          "type": 5
+        },
+        {
+          "id": "45:2794801500533156805",
+          "name": "teamName",
+          "type": 9
+        },
+        {
+          "id": "46:6909606105331771559",
+          "name": "teamShortName",
+          "type": 9
+        },
+        {
+          "id": "47:4187972506223250872",
+          "name": "teamFlagUrl",
+          "type": 9
+        },
+        {
+          "id": "48:3035368939403684441",
+          "name": "mania4kGlobalRank",
+          "type": 5
+        },
+        {
+          "id": "49:2482358670400889056",
+          "name": "mania4kCountryRank",
+          "type": 5
+        },
+        {
+          "id": "50:2387182054346458775",
+          "name": "mania7kGlobalRank",
+          "type": 5
+        },
+        {
+          "id": "51:3048263678146106434",
+          "name": "mania7kCountryRank",
+          "type": 5
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "72:5470719885150759549",
+      "lastPropertyId": "7:3682941977146357894",
+      "name": "MaimaiCollectionEntity",
+      "properties": [
+        {
+          "id": "1:7816669335962949792",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:5787265632289167783",
+          "name": "itemId",
+          "indexId": "159:3368531777920935219",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:4349124107675217755",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "4:8053083197337119393",
+          "name": "category",
+          "indexId": "160:7624891762983930953",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:3606006807449427460",
+          "name": "imageUrl",
+          "type": 9
+        },
+        {
+          "id": "6:3604003090133431308",
+          "name": "isOwned",
+          "type": 1
+        },
+        {
+          "id": "7:3682941977146357894",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "73:226521349029770516",
+      "lastPropertyId": "21:1013013166416312507",
+      "name": "MaimaiPlayRecordEntity",
+      "properties": [
+        {
+          "id": "1:1412560939779453829",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1163733205313629799",
+          "name": "difficulty",
+          "indexId": "161:7518492436574892109",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:2867485771339928994",
+          "name": "clearCount",
+          "type": 5
+        },
+        {
+          "id": "4:8187153479975435778",
+          "name": "clearTotal",
+          "type": 5
+        },
+        {
+          "id": "5:1187054331798268326",
+          "name": "fcCount",
+          "type": 5
+        },
+        {
+          "id": "6:2264897317493085040",
+          "name": "fcTotal",
+          "type": 5
+        },
+        {
+          "id": "7:3778096952711372379",
+          "name": "fcpCount",
+          "type": 5
+        },
+        {
+          "id": "8:8625489972075230957",
+          "name": "fcpTotal",
+          "type": 5
+        },
+        {
+          "id": "9:6582392786536247218",
+          "name": "apCount",
+          "type": 5
+        },
+        {
+          "id": "10:8440403054950334322",
+          "name": "apTotal",
+          "type": 5
+        },
+        {
+          "id": "11:3953753511879183186",
+          "name": "appCount",
+          "type": 5
+        },
+        {
+          "id": "12:9031143103743655931",
+          "name": "appTotal",
+          "type": 5
+        },
+        {
+          "id": "13:5915613320007294296",
+          "name": "fsCount",
+          "type": 5
+        },
+        {
+          "id": "14:8397333619371705700",
+          "name": "fsTotal",
+          "type": 5
+        },
+        {
+          "id": "15:4271595613251598033",
+          "name": "fspCount",
+          "type": 5
+        },
+        {
+          "id": "16:4762510746036486099",
+          "name": "fspTotal",
+          "type": 5
+        },
+        {
+          "id": "17:3657084567008645714",
+          "name": "fdxCount",
+          "type": 5
+        },
+        {
+          "id": "18:7855188913597528791",
+          "name": "fdxTotal",
+          "type": 5
+        },
+        {
+          "id": "19:2698884751009182",
+          "name": "fdxpCount",
+          "type": 5
+        },
+        {
+          "id": "20:8882434072833210759",
+          "name": "fdxpTotal",
+          "type": 5
+        },
+        {
+          "id": "21:1013013166416312507",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "74:229237881977277395",
+      "lastPropertyId": "14:3159045931379637258",
+      "name": "MaimaiScoreEntity",
+      "properties": [
+        {
+          "id": "1:5298526373092218623",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:30660531602886013",
+          "name": "songId",
+          "indexId": "162:3020491980680500688",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "3:7008607456630177771",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "4:9018223205450119975",
+          "name": "difficulty",
+          "indexId": "163:4587610457973815892",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "5:1320524195669249323",
+          "name": "level",
+          "type": 9
+        },
+        {
+          "id": "6:3366093923216062071",
+          "name": "score",
+          "type": 9
+        },
+        {
+          "id": "7:7105303857158531966",
+          "name": "rank",
+          "type": 9
+        },
+        {
+          "id": "8:597465268090034457",
+          "name": "comboStatus",
+          "type": 9
+        },
+        {
+          "id": "9:1750879446601823672",
+          "name": "syncStatus",
+          "type": 9
+        },
+        {
+          "id": "10:2613379238540818463",
+          "name": "deluxscore",
+          "type": 9
+        },
+        {
+          "id": "11:3436540987351437412",
+          "name": "genre",
+          "type": 9
+        },
+        {
+          "id": "12:8478038489257389195",
+          "name": "coverUrl",
+          "type": 9
+        },
+        {
+          "id": "13:3183792277624528174",
+          "name": "ratingType",
+          "indexId": "164:6693101444978058431",
+          "type": 9,
+          "flags": 2048
+        },
+        {
+          "id": "14:3159045931379637258",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "75:7501255173646108113",
+      "lastPropertyId": "14:3223543249984699420",
+      "name": "MaimaiUserEntity",
+      "properties": [
+        {
+          "id": "1:2434635058936589807",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:2280937174875434889",
+          "name": "userName",
+          "type": 9
+        },
+        {
+          "id": "3:3442825028602666829",
+          "name": "rating",
+          "type": 9
+        },
+        {
+          "id": "4:1179509801843813262",
+          "name": "maxRating",
+          "type": 9
+        },
+        {
+          "id": "5:8251505973718274092",
+          "name": "title",
+          "type": 9
+        },
+        {
+          "id": "6:7521140085670768228",
+          "name": "titlePlate",
+          "type": 9
+        },
+        {
+          "id": "7:2421137241288170233",
+          "name": "trophyName",
+          "type": 9
+        },
+        {
+          "id": "8:5380849301500258755",
+          "name": "iconUrl",
+          "type": 9
+        },
+        {
+          "id": "9:8538835838053797659",
+          "name": "plateUrl",
+          "type": 9
+        },
+        {
+          "id": "10:1693135711285209580",
+          "name": "frameUrl",
+          "type": 9
+        },
+        {
+          "id": "11:7115376760255911127",
+          "name": "playCount",
+          "type": 5
+        },
+        {
+          "id": "12:7789102465282728877",
+          "name": "totalScore",
+          "type": 6
+        },
+        {
+          "id": "13:4125299932713113262",
+          "name": "starCount",
+          "type": 5
+        },
+        {
+          "id": "14:3223543249984699420",
+          "name": "syncedAt",
+          "type": 6
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "75:7501255173646108113",
+  "lastIndexId": "164:6693101444978058431",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [
+    4274352007512205214,
+    4794027199641671665,
+    5559060614660310941,
+    294131595480246028,
+    543183388318073453,
+    6159696930114357624,
+    2100698437318604299,
+    4169831133623470426,
+    8623804386713371347,
+    337200264231769474,
+    5471027681480020899,
+    5376609461417772920,
+    5765063385956550793,
+    4957300264597178673,
+    5662058148471441195,
+    1456168537041760413,
+    5651329592363694547,
+    1981841302951665823,
+    4223246003931128372,
+    7230495366993615692
+  ],
+  "retiredIndexUids": [
+    4230762230548519621,
+    2658535878729650164,
+    1708586769224840775,
+    2300340954418325371,
+    4163836559131364650,
+    4197399415718975051,
+    545417203159228039,
+    3255692547595523828,
+    584199776937154797,
+    9080150157844944396,
+    4275952096025668603,
+    6213838388648953945,
+    2618186934304294543,
+    4597211533544585143,
+    4035216247803871233,
+    4726560487682325907,
+    1852436172681781725,
+    254550870280983484,
+    8744039793008446606,
+    6423109193171395931,
+    4337782222612368089,
+    4308162259332857425,
+    2870633251167240816,
+    7101206489045889412,
+    679119240895779981,
+    676659287886240452,
+    2422164759716684281,
+    684817919407923891,
+    4848134658367121920,
+    94716120395398669,
+    364629013500384923,
+    6223441818402487681,
+    3614394546392802148,
+    511697250024444005,
+    3879067762414027815,
+    3105571937562627875,
+    3767623367726545356,
+    395018152040172622,
+    3369096375661049508,
+    5898158269948944167,
+    1006764716131071155,
+    7051807898631663263,
+    4914812969989103844,
+    223059550462034374,
+    1351364327027893727,
+    8968338910378308246,
+    3183681558190063637,
+    6546612516322521652,
+    1297803278293362319,
+    766341130617926063,
+    2058160516260556019,
+    1231344692827649333,
+    3142873590161129889,
+    2798431129406516872
+  ],
+  "retiredPropertyUids": [
+    4193855100322881576,
+    4887427952238502547,
+    2414606553807780583,
+    6134124942417205364,
+    3192899256573609330,
+    6583762894813643079,
+    7418740005729311234,
+    6004576732376183861,
+    6166765358417795866,
+    1453409913396201278,
+    8632010443295169431,
+    7933612419567456157,
+    7859177637906557980,
+    3274681589677691709,
+    4028336258424043282,
+    2154613875796230941,
+    2663263029149223959,
+    686965362465884865,
+    7142880034243480548,
+    4467089763806888138,
+    8429235984325876925,
+    399706271044474359,
+    4454279754846759585,
+    3963113061941908395,
+    232065752376662328,
+    4126708733442969230,
+    5628639121725454896,
+    7381122927635493093,
+    1556790414729506079,
+    6307565718367009041,
+    2743708889139661876,
+    5242887935596937864,
+    1670579138515367178,
+    5638480090028497470,
+    6478188288222966458,
+    2615115090686894037,
+    7267560209989180024,
+    1491445168113242156,
+    703761213046754135,
+    1500855643570024143,
+    7785498595538279701,
+    6882823891056581348,
+    4042336661803327610,
+    4637624543203004409,
+    1303385005163576032,
+    1765902905984859266,
+    3008859925732330910,
+    4938038139274145681,
+    3110946552534943621,
+    2724957400512406716,
+    6905985748501597733,
+    603724070944177360,
+    8075362145231675453,
+    2110923754602592399,
+    5628878263357974907,
+    2087407439956318188,
+    1679490065971607797,
+    4165645111257348740,
+    8459777208321297186,
+    1425937341523597148,
+    8705406438130710216,
+    990464924918864114,
+    2635139713225700300,
+    4183266166990350426,
+    5727565630032774216,
+    1788224974881922987,
+    7090422359867769489,
+    2491032241499084535,
+    8916686144908684458,
+    511776906202591701,
+    8496709813448383009,
+    3863212327053419598,
+    7768650407916620307,
+    1835300596513174820,
+    2742114619246755286,
+    3727534310205277165,
+    4164014227145344869,
+    8483321268683594224,
+    4387647057858426852,
+    2986115884979745188,
+    2099421624352342360,
+    5538421718339339202,
+    6041429839168216131,
+    774505467847758452,
+    739153453695424108,
+    1309436889574258397,
+    4359224034548573134,
+    4315270260622485103,
+    1545595297680338797,
+    866202161086133089,
+    7026466639923906532,
+    8730172137061948546,
+    485956237552710937,
+    2850353577392757076,
+    386702497050406519,
+    4633558781966490344,
+    5229696198011667411,
+    6491301679550614474,
+    6529458876054404627,
+    3231725224069359874,
+    7153043021294808477,
+    1695517705061908883,
+    2309009346632041355,
+    9206140198136489968,
+    4009894422102516498,
+    1097550292607747636,
+    1521274988104600285,
+    3637576792222102349,
+    6779871757963152,
+    3874566394905783822,
+    2073595154166687518,
+    1055359515000355534,
+    1553048312596701487,
+    3773360781474684957,
+    1408862632812227860,
+    4599774060215009306,
+    8807922339433435460,
+    1587936391965233736,
+    6297495007944720955,
+    4259881379977934863,
+    947951815566566158,
+    7091831670002734681,
+    3637746427949883511,
+    8230679100185382274,
+    1905286537515444556,
+    7945207507309992390,
+    8621371732502921426,
+    1042949111120878562,
+    8499014964041183249,
+    4416884420461111043,
+    184591600634822693,
+    3699956522273700807,
+    1079865247566987250,
+    1906883247186946470,
+    3631717350171937016,
+    6134163847996770318,
+    5346747521975148708,
+    520384468502244334,
+    1296007817944612518,
+    6470134612811715889,
+    8948993915869992980,
+    1994165103161538951,
+    6263919230671476542,
+    2573164607554818840,
+    8163180635215843175,
+    8843593297696324619,
+    309670696500410560,
+    6343922229415092474,
+    5679125909224840211,
+    2831215436491850561,
+    2377150151535684168,
+    2748923431421173250,
+    780579926660110573,
+    5676842946041977721,
+    3320355241077313915,
+    7867719229929280141,
+    5182459699183052039,
+    4826351522315106232,
+    147952344752865345,
+    6921007904460166807,
+    1943892936771220156,
+    6300639444777901539,
+    5833080994923200618,
+    5515233781335552380,
+    6928042816499553721,
+    8367257082147160014,
+    9166445593648741496,
+    2400970917248863583,
+    8460371247118504494,
+    4520784658107598157,
+    4785676928716992847,
+    2298619106574347653,
+    6898891927895274196,
+    1424133066067704514,
+    2523730313601056211,
+    7672788948785320129,
+    1662672871939133603,
+    6242178442181496164,
+    3584739874767122741,
+    3180978802546440658,
+    4241815506608797155,
+    2320391765766141687,
+    980259327627409270,
+    6259999090325185295,
+    739099081834988972,
+    1483090171168443163,
+    756782542644715013,
+    599013617795856660,
+    8133932604122935786,
+    2677143508169010711,
+    7003057416487471661,
+    3493750478010145088,
+    7531939064195033418,
+    7157855054807395618,
+    818659432592195837,
+    6626897566848220649,
+    5790887514481800857,
+    6489490746676449450,
+    9210900142048309909,
+    2158533762158715164,
+    5894707609777473997,
+    3450122162282850370,
+    7093216478616048090,
+    3962112671892033217,
+    2214724014906795027,
+    8768156955392001276,
+    8304193620750070308,
+    8751232800145045585,
+    5888118098999310619,
+    1667166512160284909,
+    954217418077580494,
+    6560172680847886199,
+    3973617936324014739,
+    6883799695871529933,
+    1957121392409270554,
+    2099314051427507943,
+    4719008377863484247,
+    8691411075713631700,
+    2453395196115913390,
+    4223364201285122109,
+    5485723197881303399,
+    2962706388289175587,
+    1570648572489190518,
+    1041950710182654862,
+    3081379909753925568,
+    1296446081232863950,
+    5033994256537777043,
+    2042713471854112749,
+    5932557345075861357,
+    2180262012385453075,
+    7501158501352339455,
+    2606230782105703884,
+    5938332423732017974,
+    6142851081943405324,
+    5967611451546427818,
+    106460198351922282,
+    1502546404308035799,
+    4206642028592448243,
+    6130416183440559187,
+    3298446057248540138,
+    3032724998523587031,
+    439366970962829084,
+    2902299391059104065,
+    6766282374648244821,
+    7625478682850441157,
+    1466677327192478795,
+    2243673979821684535,
+    3682580420395923700,
+    1184559817265626551,
+    2604416873852037481,
+    6418623472878393036,
+    7790647451832855756,
+    3022137245671148440,
+    5423546408946637640,
+    7858095893840491202,
+    2494089275100083307,
+    689164516197545041,
+    5971255530568834273,
+    1778401887890783578,
+    4495804610164814711,
+    6834693989743929542,
+    6059948286818926584,
+    588933266996181502,
+    7682032749846434508,
+    5482865455066748221,
+    4175455202996101236,
+    9081080113442436518,
+    1527912045928776452,
+    8429903539616713169,
+    4169776967989209638,
+    4351027923781717758,
+    8876910718545201237,
+    3327608175031019186,
+    6667136809241911251,
+    5860919825901109906,
+    6151398168887620591,
+    4502428510586151503,
+    2652418662131560275,
+    2992738797340622,
+    5238065742358649984,
+    3288206765295682790,
+    2080782498044411501,
+    175540790073192155,
+    6208712390090878499,
+    5116406693420591571,
+    7749394238683162317,
+    1547106456988029148,
+    291046601923727274,
+    6563554761444075202,
+    301192168566511175,
+    183006395321596464,
+    4300221241871013256,
+    8857987551602629061
+  ],
+  "retiredRelationUids": [],
+  "version": 1
+}

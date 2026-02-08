@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,18 +34,15 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
+import com.madsam.otora.core.theme.GradientBrush
+import com.madsam.otora.core.theme.TierColors
 import androidx.compose.material3.MaterialTheme
-import com.madsam.otora.core.theme.GradientBrush.GoldGradientBg
-import com.madsam.otora.core.theme.GradientBrush.PlatinumGradientBg
-import com.madsam.otora.core.theme.GradientBrush.RainbowGradientBg
-import com.madsam.otora.core.theme.GradientBrush.SilverGradientBg
-import com.madsam.otora.core.theme.GradientBrush.WhiteGradientBg
 import com.madsam.otora.core.theme.OSU_LEVEL_GOLD_1
 import com.madsam.otora.core.theme.OSU_LEVEL_PLATINUM_1
 import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.utils.BrushUtils.getRatingBrush
+import com.madsam.otora.core.utils.BrushUtils.getRatingTextBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmCardUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -55,6 +53,16 @@ internal fun Card(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val cardData by chunithmCardUiModel.collectAsState()
+    val isDark = isSystemInDarkTheme()
+
+    fun getHonorBrush(base: String) = when (base) {
+        "silver" -> if (isDark) GradientBrush.TierSilverGradientDark else GradientBrush.TierSilverGradient
+        "gold" -> if (isDark) GradientBrush.TierGoldGradientDark else GradientBrush.TierGoldGradient
+        "platina" -> if (isDark) GradientBrush.TierPlatinumGradientDark else GradientBrush.TierPlatinumGradient
+        "rainbow" -> if (isDark) GradientBrush.TierRainbowGradientDark else GradientBrush.TierRainbowGradient
+        else -> if (isDark) GradientBrush.TierWhiteGradientDark else GradientBrush.TierWhiteGradient
+    }
+
     Surface(
         shape = RoundedCornerShape(10.dp),
         color = Color.Transparent,
@@ -119,18 +127,10 @@ internal fun Card(
                             .fillMaxWidth()
                             .padding(top = if (index == 0) 0.dp else 2.dp)
                             .clip(RoundedCornerShape(5.dp))
-                            .background(
-                                when (honorBase) {
-                                    "silver" -> SilverGradientBg
-                                    "gold" -> GoldGradientBg
-                                    "platina" -> PlatinumGradientBg
-                                    "rainbow" -> RainbowGradientBg
-                                    else -> WhiteGradientBg
-                                }
-                            )
+                            .background(getHonorBrush(honorBase))
                             .basicMarquee(spacing = MarqueeSpacing(15.dp)),
                         textAlign = TextAlign.Center,
-                        color = Color.Black,
+                        color = if (isDark) Color.White else Color.Black,
                         fontSize = 14.sp,
                         fontFamily = sarasaBold,
                         maxLines = 1,
@@ -151,21 +151,15 @@ internal fun Card(
                     .size(111.dp)
                     .padding(start = 5.dp, bottom = 5.dp)
                     .clip(RoundedCornerShape(5.dp))
-                    .background(
-                        when (cardData.roleBase) {
-                            "silver" -> SilverGradientBg
-                            "gold" -> GoldGradientBg
-                            "platina" -> PlatinumGradientBg
-                            "rainbow" -> RainbowGradientBg
-                            else -> WhiteGradientBg
-                        }
-                    )
+                    .background(getHonorBrush(cardData.roleBase))
             )
 
             if (cardData.reborn > 0) {
+                // 星星始终显示为金色（使用金色 Honor 背景的 Container 颜色），文字始终为深色以保持对比度
+                val rebornColor = TierColors.GoldContainerLight
                 Image(
                     painter = rememberVectorPainter(image = Filled.Star),
-                    colorFilter = ColorFilter.tint(OSU_LEVEL_GOLD_1),
+                    colorFilter = ColorFilter.tint(rebornColor),
                     contentDescription = "Reborn",
                     modifier = Modifier
                         .constrainAs(rebornBase) {
@@ -184,7 +178,7 @@ internal fun Card(
                             end.linkTo(rebornBase.end)
                         },
                     text = cardData.reborn.toString(),
-                    color = colorScheme.surfaceContainer,
+                    color = Color.Black,
                     fontSize = 12.sp,
                     fontFamily = sarasaBold
                 )
@@ -280,7 +274,7 @@ internal fun Card(
                     }
                     withStyle(
                         style = SpanStyle(
-                            brush = getRatingBrush(cardData.rating),
+                            brush = getRatingTextBrush(cardData.rating, isDark),
                             fontSize = 16.sp,
                             fontFamily = sarasaBold
                         )
