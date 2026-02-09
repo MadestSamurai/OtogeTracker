@@ -24,8 +24,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.MaterialTheme
-import com.madsam.otora.core.theme.BlackAlpha50
-import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
 import com.madsam.otora.core.utils.BrushUtils.getRatingTextBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
@@ -108,19 +106,19 @@ internal fun TopRank(
                     topStart = 10.dp, topEnd = 6.dp,
                     bottomStart = 10.dp, bottomEnd = 6.dp
                 ))
-                .background(colorScheme.surfaceContainerHigh)
+                .background(colorScheme.surfaceContainer)
         ) {
             Column(
                 modifier = Modifier
                     .padding(start = 6.dp, top = 6.dp)
                     .clip(RoundedCornerShape(6.dp))
-                    .background(BlackAlpha50)
+                    .background(colorScheme.surfaceContainerHigh)
                     .padding(horizontal = 4.dp, vertical = 2.dp)
             ) {
                 Text(
                     text = "Best 30",
                     fontSize = 11.sp,
-                    color = White1000
+                    color = colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = String.format(Locale.US, "%.2f", topRank.best30),
@@ -154,19 +152,19 @@ internal fun TopRank(
                     topStart = 6.dp, topEnd = 10.dp,
                     bottomStart = 6.dp, bottomEnd = 10.dp
                 ))
-                .background(colorScheme.surfaceContainerHigh)
+                .background(colorScheme.surfaceContainer)
         ) {
             Column(
                 modifier = Modifier
                     .padding(start = 6.dp, top = 6.dp)
                     .clip(RoundedCornerShape(6.dp))
-                    .background(BlackAlpha50)
+                    .background(colorScheme.surfaceContainerHigh)
                     .padding(horizontal = 4.dp, vertical = 2.dp)
             ) {
                 Text(
                     text = "New 20",
                     fontSize = 11.sp,
-                    color = White1000
+                    color = colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = String.format(Locale.US, "%.2f", topRank.new20),

@@ -2,6 +2,7 @@ package com.madsam.otora.core.theme
 
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 
 // ============================================================================
 // Material 3 Expressive Color System - Otoge Tracker Theme
@@ -19,7 +20,6 @@ val Black333 = Color(0xFF333333)
 val White1000: Color = Color(0xFFFFFFFF)
 val White800: Color = Color(0xFFE0E0E0)
 val BlackAlpha80: Color = Color(0xAA000000)
-val BlackAlpha50: Color = Color(0x7F000000)
 val Yellow1000: Color = Color(0xFFFFCC22)
 val Transparent: Color = Color(0x00000000)
 
@@ -27,8 +27,6 @@ val Transparent: Color = Color(0x00000000)
 // osu! 专用颜色
 // ============================================================================
 val OSU_BRIGHT_RED: Color = Color(0xFFDE4C9B)
-val OSU_DARK_RED: Color = Color(0xFF73184D)
-val OSU_BRIGHT_RED_HALF_TRANS: Color = Color(0x80DE4C9B)
 val OSU_BRIGHT_YELLOW_HALF_TRANS: Color = Color(0x80FFCC22)
 
 // osu! 新版等级颜色 (Tier Gradients)
@@ -68,26 +66,8 @@ val TIER_LUSTROUS_DARK_1: Color = Color(0xFFFFD600)
 val TIER_LUSTROUS_DARK_2: Color = Color(0xFFC51162)
 
 // osu! 旧版等级颜色 (保留用于兼容或Light Mode参考)
-val OSU_LEVEL_WHITE_1: Color = Color(0xFFF0F0F0)
-val OSU_LEVEL_WHITE_2: Color = Color(0xFFFDF6FB)
-val OSU_LEVEL_BLUE_1: Color = Color(0xFFA3E7FF)
-val OSU_LEVEL_BLUE_2: Color = Color(0xFF77E1FD)
-val OSU_LEVEL_GREEN_1: Color = Color(0xFFB1FF9D)
-val OSU_LEVEL_GREEN_2: Color = Color(0xFF5DF237)
-val OSU_LEVEL_YELLOW_1: Color = Color(0xFFFFFA7B)
-val OSU_LEVEL_YELLOW_2: Color = Color(0xFFFAF100)
-val OSU_LEVEL_RED_1: Color = Color(0xFFFF9394)
-val OSU_LEVEL_RED_2: Color = Color(0xFFF34143)
-val OSU_LEVEL_PURPLE_1: Color = Color(0xFFD392FF)
-val OSU_LEVEL_PURPLE_2: Color = Color(0xFFB953FE)
-val OSU_LEVEL_BRONZE_1: Color = Color(0xFFFACA9C)
-val OSU_LEVEL_BRONZE_2: Color = Color(0xFFEBAD7B)
-val OSU_LEVEL_SILVER_1: Color = Color(0xFFD5FAFC)
-val OSU_LEVEL_SILVER_2: Color = Color(0xFF95B4CA)
 val OSU_LEVEL_GOLD_1: Color = Color(0xFFF5FB62)
-val OSU_LEVEL_GOLD_2: Color = Color(0xFFD2AC27)
 val OSU_LEVEL_PLATINUM_1: Color = Color(0xFFFFFEB3)
-val OSU_LEVEL_PLATINUM_2: Color = Color(0xFFCFD360)
 
 // osu! 图标颜色
 val OSU_ROTATE_GREEN: Color = Color(0xFF66FF73)
@@ -130,8 +110,8 @@ val CHUNI_DIFF_ULTIMA_2: Color = Color(0xFFFF3A3A)
 
 // Seeds
 private val SeedSilver = Color(0xFFB0C4DE)   // Cool Silver (Blue-tinted for readability)
-private val SeedGold = Color(0xFFFFB300)     // Vivid Gold / Amber
-private val SeedPlatinum = Color(0xFFFFEE58) // Bright Light Yellow (Platinum-like)
+private val SeedGold = Color(0xFFFFCD00)     // Vivid Amber Gold (Orange-tinted)
+private val SeedPlatinum = Color(0xFFF5DD1D) // Platinum (Between Gold and Yellow)
 private val SeedBronze = Color(0xFFCD7F32)   // Bronze
 private val SeedRed = Color(0xFFF44336)      // Red
 private val SeedBlue = Color(0xFF2196F3)     // Blue
@@ -168,45 +148,25 @@ private val SchemePurpleLight = DynamicColorScheme.generateColorScheme(SeedPurpl
 private val SchemePurpleDark = DynamicColorScheme.generateColorScheme(SeedPurple, true, style = DynamicColorScheme.Style.FIDELITY)
 
 private fun schemeToGradient(scheme: androidx.compose.material3.ColorScheme): Brush {
-    return Brush.verticalGradient(
-        listOf(scheme.primaryContainer, scheme.secondaryContainer)
-    )
+    return SolidColor(scheme.primaryContainer)
 }
 
 private fun schemeToGradientDark(scheme: androidx.compose.material3.ColorScheme): Brush {
-    return Brush.verticalGradient(
-        listOf(scheme.secondaryContainer, scheme.primaryContainer)
-    )
+    return SolidColor(scheme.primaryContainer)
 }
 
 private fun schemeToTextGradient(scheme: androidx.compose.material3.ColorScheme): Brush {
-    return Brush.verticalGradient(
-        0.2f to scheme.primaryContainer,
-        0.8f to scheme.secondaryContainer
-    )
+    return SolidColor(scheme.primaryContainer)
 }
 
 private fun schemeToTextGradientDark(scheme: androidx.compose.material3.ColorScheme): Brush {
-    return Brush.verticalGradient(
-        0.2f to scheme.secondaryContainer,
-        0.8f to scheme.primaryContainer
-    )
+    return SolidColor(scheme.primaryContainer)
 }
 
 object GradientBrush {
-    // ... existing gradients ...
-    val WhiteGradientBg: Brush = Brush.verticalGradient(
-        colors = listOf(OSU_LEVEL_WHITE_1, OSU_LEVEL_WHITE_2)
-    )
-    // ... (Keep existing manual gradients if needed, or deprecate)
-
-    // ============================================================================
-    // Modern Tier Gradients (Generated from Material Seeds)
-    // ============================================================================
-    
     // White / Default (Using Neutral variant)
-    private val SchemeWhiteLight = DynamicColorScheme.generateColorScheme(Color(0xFFE0E0E0), false, style = DynamicColorScheme.Style.NEUTRAL)
-    private val SchemeWhiteDark = DynamicColorScheme.generateColorScheme(Color(0xFFE0E0E0), true, style = DynamicColorScheme.Style.NEUTRAL)
+    private val SchemeWhiteLight = DynamicColorScheme.generateColorScheme(Color(0xFFE0E0E0), false, style = DynamicColorScheme.Style.FIDELITY)
+    private val SchemeWhiteDark = DynamicColorScheme.generateColorScheme(Color(0xFFE0E0E0), true, style = DynamicColorScheme.Style.FIDELITY)
     
     val TierWhiteGradient: Brush = schemeToGradient(SchemeWhiteLight)
     val TierWhiteGradientDark: Brush = schemeToGradientDark(SchemeWhiteDark)
@@ -228,8 +188,16 @@ object GradientBrush {
     // Platinum
     val TierPlatinumGradient: Brush = schemeToGradient(SchemePlatinumLight)
     val TierPlatinumGradientDark: Brush = schemeToGradientDark(SchemePlatinumDark)
-    val TierPlatinumTextGradient: Brush = schemeToTextGradient(SchemePlatinumLight)
-    val TierPlatinumTextGradientDark: Brush = schemeToTextGradientDark(SchemePlatinumDark)
+    val TierPlatinumTextGradient: Brush = Brush.verticalGradient(
+        0.0f to SchemeGoldLight.primaryContainer,
+        0.5f to SchemePlatinumLight.primaryContainer,
+        1.0f to SchemeGoldLight.primaryContainer
+    )
+    val TierPlatinumTextGradientDark: Brush = Brush.verticalGradient(
+        0.0f to SchemeGoldDark.primaryContainer,
+        0.5f to SchemePlatinumDark.primaryContainer,
+        1.0f to SchemeGoldDark.primaryContainer
+    )
 
     // Bronze
     val TierBronzeGradient: Brush = schemeToGradient(SchemeBronzeLight)
@@ -269,60 +237,60 @@ object GradientBrush {
 
     // Rainbow
     val TierRainbowGradient: Brush = Brush.verticalGradient(
-        0.0f to SchemeBlueLight.secondaryContainer,
-        0.25f to SchemePurpleLight.secondaryContainer,
-        0.5f to SchemeRedLight.secondaryContainer,
-        0.75f to SchemeYellowLight.secondaryContainer,
-        1.0f to SchemeGreenLight.secondaryContainer
+        0.0f to SchemeBlueLight.primaryContainer,
+        0.25f to SchemePurpleLight.primaryContainer,
+        0.5f to SchemeRedLight.primaryContainer,
+        0.75f to SchemeGoldLight.primaryContainer,
+        1.0f to SchemeGreenLight.primaryContainer
     )
     val TierRainbowGradientDark: Brush = Brush.verticalGradient(
-        0.0f to SchemeBlueDark.secondaryContainer,
-        0.25f to SchemePurpleDark.secondaryContainer,
-        0.5f to SchemeRedDark.secondaryContainer,
-        0.75f to SchemeYellowDark.secondaryContainer,
-        1.0f to SchemeGreenDark.secondaryContainer
+        0.0f to SchemeBlueDark.primaryContainer,
+        0.25f to SchemePurpleDark.primaryContainer,
+        0.5f to SchemeRedDark.primaryContainer,
+        0.75f to SchemeGoldDark.primaryContainer,
+        1.0f to SchemeGreenDark.primaryContainer
     )
 
     val TierRainbowTextGradient: Brush = Brush.verticalGradient(
         0.2f to SchemeBlueLight.primaryContainer,
         0.4f to SchemePurpleLight.primaryContainer,
         0.5f to SchemeRedLight.primaryContainer,
-        0.6f to SchemeYellowLight.primaryContainer,
+        0.6f to SchemeGoldLight.primaryContainer,
         0.8f to SchemeGreenLight.primaryContainer
     )
     val TierRainbowTextGradientDark: Brush = Brush.verticalGradient(
         0.2f to SchemeBlueDark.primaryContainer,
         0.4f to SchemePurpleDark.primaryContainer,
         0.5f to SchemeRedDark.primaryContainer,
-        0.6f to SchemeYellowDark.primaryContainer,
+        0.6f to SchemeGoldDark.primaryContainer,
         0.8f to SchemeGreenDark.primaryContainer
     )
 
     // Rainbow Max
     val TierRainbowMaxGradient: Brush = Brush.verticalGradient(
-        0.0f to SchemeYellowLight.secondaryContainer,
-        0.25f to SchemeRedLight.secondaryContainer,
-        0.5f to SchemeBlueLight.secondaryContainer,
-        0.75f to SchemeGreenLight.secondaryContainer,
-        1.0f to SchemePurpleLight.secondaryContainer
+        0.0f to SchemeGoldLight.primaryContainer,
+        0.25f to SchemeRedLight.primaryContainer,
+        0.5f to SchemeBlueLight.primaryContainer,
+        0.75f to SchemeGreenLight.primaryContainer,
+        1.0f to SchemePurpleLight.primaryContainer
     )
     val TierRainbowMaxGradientDark: Brush = Brush.verticalGradient(
-        0.0f to SchemeYellowDark.secondaryContainer,
-        0.25f to SchemeRedDark.secondaryContainer,
-        0.5f to SchemeBlueDark.secondaryContainer,
-        0.75f to SchemeGreenDark.secondaryContainer,
-        1.0f to SchemePurpleDark.secondaryContainer
+        0.0f to SchemeGoldDark.primaryContainer,
+        0.25f to SchemeRedDark.primaryContainer,
+        0.5f to SchemeBlueDark.primaryContainer,
+        0.75f to SchemeGreenDark.primaryContainer,
+        1.0f to SchemePurpleDark.primaryContainer
     )
 
     val TierRainbowMaxTextGradient: Brush = Brush.verticalGradient(
-        0.2f to SchemeYellowLight.primaryContainer,
+        0.2f to SchemeGoldLight.primaryContainer,
         0.4f to SchemeRedLight.primaryContainer,
         0.5f to SchemeBlueLight.primaryContainer,
         0.6f to SchemeGreenLight.primaryContainer,
         0.8f to SchemePurpleLight.primaryContainer
     )
     val TierRainbowMaxTextGradientDark: Brush = Brush.verticalGradient(
-        0.2f to SchemeYellowDark.primaryContainer,
+        0.2f to SchemeGoldDark.primaryContainer,
         0.4f to SchemeRedDark.primaryContainer,
         0.5f to SchemeBlueDark.primaryContainer,
         0.6f to SchemeGreenDark.primaryContainer,
@@ -331,13 +299,5 @@ object GradientBrush {
 }
 
 object TierColors {
-    val SilverLight = SchemeSilverLight.primary
-    val SilverDark = SchemeSilverDark.primary
-    
-    val GoldLight = SchemeGoldLight.primary
-    val GoldDark = SchemeGoldDark.primary
     val GoldContainerLight = SchemeGoldLight.primaryContainer
-    
-    val PlatinumLight = SchemePlatinumLight.primary
-    val PlatinumDark = SchemePlatinumDark.primary
 }
