@@ -1,6 +1,7 @@
 package com.madsam.otora.ui.record.chunithm.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -79,7 +80,7 @@ fun LoginBonusTracker(loginBonus: ChuniLoginBonusDTO?) {
                 // 版本签到天数
                 Text(
                     text = "版本签到：${loginBonus.dailyLoginDay} 天",
-                    color = White1000,
+                    color = colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
                     fontFamily = sarasaRegular
                 )
@@ -180,7 +181,7 @@ private fun BonusCard(
         if (subtitle.isNotEmpty()) {
             Text(
                 text = subtitle,
-                color = White1000,
+                color = colorScheme.onSurfaceVariant,
                 fontSize = 10.sp,
                 fontFamily = sarasaRegular,
                 textAlign = TextAlign.Center
@@ -209,13 +210,13 @@ private fun BonusCard(
         if (rewardName.isNotEmpty()) {
             Text(
                 text = rewardName,
-                color = White1000.copy(alpha = 0.9f),
+                color = colorScheme.onSurfaceVariant,
                 fontSize = 9.sp,
                 fontFamily = sarasaRegular,
                 textAlign = TextAlign.Center,
-                maxLines = 2,
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                lineHeight = 11.sp
+                modifier = Modifier.basicMarquee()
             )
         }
     }

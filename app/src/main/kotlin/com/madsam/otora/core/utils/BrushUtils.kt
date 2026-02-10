@@ -4,27 +4,6 @@ import android.util.Log
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import com.madsam.otora.core.theme.*
-import com.madsam.otora.core.theme.GradientBrush.BlueGradientBg
-import com.madsam.otora.core.theme.GradientBrush.BronzeGradientBg
-import com.madsam.otora.core.theme.GradientBrush.BronzeGradientText
-import com.madsam.otora.core.theme.GradientBrush.GoldGradientBg
-import com.madsam.otora.core.theme.GradientBrush.GoldGradientText
-import com.madsam.otora.core.theme.GradientBrush.GreenGradientBg
-import com.madsam.otora.core.theme.GradientBrush.GreenGradientText
-import com.madsam.otora.core.theme.GradientBrush.PlatinumGradientBg
-import com.madsam.otora.core.theme.GradientBrush.PlatinumGradientText
-import com.madsam.otora.core.theme.GradientBrush.PurpleGradientBg
-import com.madsam.otora.core.theme.GradientBrush.PurpleGradientText
-import com.madsam.otora.core.theme.GradientBrush.RainbowGradientBg
-import com.madsam.otora.core.theme.GradientBrush.RainbowGradientText
-import com.madsam.otora.core.theme.GradientBrush.RedGradientBg
-import com.madsam.otora.core.theme.GradientBrush.RedGradientText
-import com.madsam.otora.core.theme.GradientBrush.SilverGradientBg
-import com.madsam.otora.core.theme.GradientBrush.SilverGradientText
-import com.madsam.otora.core.theme.GradientBrush.WhiteGradientBg
-import com.madsam.otora.core.theme.GradientBrush.WhiteGradientText
-import com.madsam.otora.core.theme.GradientBrush.YellowGradientBg
-import com.madsam.otora.core.theme.GradientBrush.YellowGradientText
 
 /**
  * Brush 工具类
@@ -32,28 +11,6 @@ import com.madsam.otora.core.theme.GradientBrush.YellowGradientText
  * 提供根据等级、Rating等获取对应渐变色的功能
  */
 object BrushUtils {
-    /**
-     * 获取等级对应的颜色
-     *
-     * @param value 等级值
-     * @return 对应的渐变色 Brush
-     */
-    fun getLevelBrush(value: Int): Brush {
-        return when (value) {
-            in 0..14 -> WhiteGradientBg
-            in 15..29 -> BlueGradientBg
-            in 30..44 -> GreenGradientBg
-            in 45..59 -> YellowGradientBg
-            in 60..69 -> RedGradientBg
-            in 70..79 -> PurpleGradientBg
-            in 80..89 -> BronzeGradientBg
-            in 90..99 -> SilverGradientBg
-            in 100..104 -> GoldGradientBg
-            in 105..109 -> PlatinumGradientBg
-            else -> RainbowGradientBg
-        }
-    }
-
     /**
      * 获取等级对应的颜色列表 (用于自定义渐变)
      *
@@ -90,29 +47,60 @@ object BrushUtils {
     }
 
     /**
-     * 获取 Rating 对应的颜色
+     * 获取 Rating Text 对应的颜色
      *
      * @param value Rating 值字符串
+     * @param isDark 是否深色主题
      * @return 对应的渐变色 Brush
      */
-    fun getRatingBrush(value: String): Brush {
+    fun getRatingTextBrush(value: String, isDark: Boolean): Brush {
         try {
             val valueFloat = value.toFloat()
             return when (valueFloat) {
-                in 0.00..3.999 -> GreenGradientText
-                in 4.00..6.999 -> YellowGradientText
-                in 7.00..9.999 -> RedGradientText
-                in 10.00..11.999 -> PurpleGradientText
-                in 12.00..13.249 -> BronzeGradientText
-                in 13.25..14.499 -> SilverGradientText
-                in 14.50..15.249 -> GoldGradientText
-                in 15.25..15.999 -> PlatinumGradientText
-                in 16.00..18.000 -> RainbowGradientText
-                else -> WhiteGradientText
+                in 0.00..3.999 -> if (isDark) GradientBrush.TierGreenTextGradientDark else GradientBrush.TierGreenTextGradient
+                in 4.00..6.999 -> if (isDark) GradientBrush.TierYellowTextGradientDark else GradientBrush.TierYellowTextGradient
+                in 7.00..9.999 -> if (isDark) GradientBrush.TierRedTextGradientDark else GradientBrush.TierRedTextGradient
+                in 10.00..11.999 -> if (isDark) GradientBrush.TierPurpleTextGradientDark else GradientBrush.TierPurpleTextGradient
+                in 12.00..13.249 -> if (isDark) GradientBrush.TierBronzeTextGradientDark else GradientBrush.TierBronzeTextGradient
+                in 13.25..14.499 -> if (isDark) GradientBrush.TierSilverTextGradientDark else GradientBrush.TierSilverTextGradient
+                in 14.50..15.249 -> if (isDark) GradientBrush.TierGoldTextGradientDark else GradientBrush.TierGoldTextGradient
+                in 15.25..15.999 -> if (isDark) GradientBrush.TierPlatinumTextGradientDark else GradientBrush.TierPlatinumTextGradient
+                in 16.00..16.999 -> if (isDark) GradientBrush.TierRainbowTextGradientDark else GradientBrush.TierRainbowTextGradient
+                in 17.00..18.000 -> if (isDark) GradientBrush.TierRainbowMaxTextGradientDark else GradientBrush.TierRainbowMaxTextGradient
+                else -> if (isDark) GradientBrush.TierWhiteTextGradientDark else GradientBrush.TierWhiteTextGradient
             }
         } catch (nfe: NumberFormatException) {
             Log.e("BrushUtils", "Rating value is not a number: $nfe")
-            return WhiteGradientText
+            return if (isDark) GradientBrush.TierWhiteTextGradientDark else GradientBrush.TierWhiteTextGradient
+        }
+    }
+
+    /**
+     * 获取 Rating 背景对应的颜色
+     *
+     * @param value Rating 值字符串
+     * @param isDark 是否深色主题
+     * @return 对应的渐变色 Brush
+     */
+    fun getRatingBrush(value: String, isDark: Boolean): Brush {
+        try {
+            val valueFloat = value.toFloat()
+            return when (valueFloat) {
+                in 0.00..3.999 -> if (isDark) GradientBrush.TierGreenGradientDark else GradientBrush.TierGreenGradient
+                in 4.00..6.999 -> if (isDark) GradientBrush.TierYellowGradientDark else GradientBrush.TierYellowGradient
+                in 7.00..9.999 -> if (isDark) GradientBrush.TierRedGradientDark else GradientBrush.TierRedGradient
+                in 10.00..11.999 -> if (isDark) GradientBrush.TierPurpleGradientDark else GradientBrush.TierPurpleGradient
+                in 12.00..13.249 -> if (isDark) GradientBrush.TierBronzeGradientDark else GradientBrush.TierBronzeGradient
+                in 13.25..14.499 -> if (isDark) GradientBrush.TierSilverGradientDark else GradientBrush.TierSilverGradient
+                in 14.50..15.249 -> if (isDark) GradientBrush.TierGoldGradientDark else GradientBrush.TierGoldGradient
+                in 15.25..15.999 -> if (isDark) GradientBrush.TierPlatinumGradientDark else GradientBrush.TierPlatinumGradient
+                in 16.00..16.999 -> if (isDark) GradientBrush.TierRainbowGradientDark else GradientBrush.TierRainbowGradient
+                in 17.00..18.000 -> if (isDark) GradientBrush.TierRainbowMaxGradientDark else GradientBrush.TierRainbowMaxGradient
+                else -> if (isDark) GradientBrush.TierWhiteGradientDark else GradientBrush.TierWhiteGradient
+            }
+        } catch (nfe: NumberFormatException) {
+            Log.e("BrushUtils", "Rating value is not a number: $nfe")
+            return if (isDark) GradientBrush.TierWhiteGradientDark else GradientBrush.TierWhiteGradient
         }
     }
 }

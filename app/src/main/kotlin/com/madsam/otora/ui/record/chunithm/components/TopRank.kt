@@ -2,6 +2,7 @@ package com.madsam.otora.ui.record.chunithm.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,10 +24,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.MaterialTheme
-import com.madsam.otora.core.theme.BlackAlpha50
-import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.utils.BrushUtils.getRatingBrush
+import com.madsam.otora.core.utils.BrushUtils.getRatingTextBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.ui.components.RoundedBarChart
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,6 +38,7 @@ internal fun TopRank(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val topRank by topRankUI.collectAsState()
+    val isDark = isSystemInDarkTheme()
     
     // 动态分配两个图表的宽度
     val idealSpacingRatio = 0.8f // 理想的柱间距与柱宽比例
@@ -106,26 +106,26 @@ internal fun TopRank(
                     topStart = 10.dp, topEnd = 6.dp,
                     bottomStart = 10.dp, bottomEnd = 6.dp
                 ))
-                .background(colorScheme.surfaceContainerHigh)
+                .background(colorScheme.surfaceContainer)
         ) {
             Column(
                 modifier = Modifier
                     .padding(start = 6.dp, top = 6.dp)
                     .clip(RoundedCornerShape(6.dp))
-                    .background(BlackAlpha50)
+                    .background(colorScheme.surfaceContainerHigh)
                     .padding(horizontal = 4.dp, vertical = 2.dp)
             ) {
                 Text(
                     text = "Best 30",
                     fontSize = 11.sp,
-                    color = White1000
+                    color = colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = String.format(Locale.US, "%.2f", topRank.best30),
                     fontSize = 14.sp,
                     fontFamily = sarasaBold,
                     style = TextStyle(
-                        brush = getRatingBrush(topRank.best30.toString())
+                        brush = getRatingTextBrush(topRank.best30.toString(), isDark)
                     )
                 )
             }
@@ -152,26 +152,26 @@ internal fun TopRank(
                     topStart = 6.dp, topEnd = 10.dp,
                     bottomStart = 6.dp, bottomEnd = 10.dp
                 ))
-                .background(colorScheme.surfaceContainerHigh)
+                .background(colorScheme.surfaceContainer)
         ) {
             Column(
                 modifier = Modifier
                     .padding(start = 6.dp, top = 6.dp)
                     .clip(RoundedCornerShape(6.dp))
-                    .background(BlackAlpha50)
+                    .background(colorScheme.surfaceContainerHigh)
                     .padding(horizontal = 4.dp, vertical = 2.dp)
             ) {
                 Text(
                     text = "New 20",
                     fontSize = 11.sp,
-                    color = White1000
+                    color = colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = String.format(Locale.US, "%.2f", topRank.new20),
                     fontSize = 14.sp,
                     fontFamily = sarasaBold,
                     style = TextStyle(
-                        brush = getRatingBrush(topRank.new20.toString())
+                        brush = getRatingTextBrush(topRank.new20.toString(), isDark)
                     )
                 )
             }
