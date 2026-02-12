@@ -38,9 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Chevron-left`
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
+import com.madsam.otora.core.theme.plexSemi
 import com.madsam.otora.data.osu.local.datastore.OsuConfigDataStore
 import kotlinx.coroutines.launch
 
@@ -75,7 +75,7 @@ fun OsuDataUpdateScreen(
             title = {
                 Text(
                     text = "osu! 数据更新",
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     color = colorScheme.onSurface
                 )
             },
@@ -112,7 +112,7 @@ fun OsuDataUpdateScreen(
                     text = "用户设置",
                     color = colorScheme.onSurface,
                     fontSize = 18.sp,
-                    fontFamily = sarasaBold
+                    fontFamily = plexBold
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -124,7 +124,7 @@ fun OsuDataUpdateScreen(
                     label = { 
                         Text(
                             "osu! 用户ID",
-                            fontFamily = sarasaRegular,
+                            fontFamily = plexRegular,
                             color = colorScheme.onSurfaceVariant
                         )
                     },
@@ -146,7 +146,7 @@ fun OsuDataUpdateScreen(
                     text = "游戏模式",
                     color = colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -187,7 +187,7 @@ fun OsuDataUpdateScreen(
                                 text = { 
                                     Text(
                                         mode,
-                                        fontFamily = sarasaRegular
+                                        fontFamily = plexRegular
                                     ) 
                                 },
                                 onClick = {
@@ -217,7 +217,7 @@ fun OsuDataUpdateScreen(
                 ) {
                     Text(
                         "保存设置",
-                        fontFamily = sarasaSemiBold
+                        fontFamily = plexSemi
                     )
                 }
             }

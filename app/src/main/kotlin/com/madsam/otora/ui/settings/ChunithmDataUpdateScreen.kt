@@ -46,9 +46,9 @@ import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.Check
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
+import com.madsam.otora.core.theme.plexSemi
 import com.madsam.otora.core.utils.StringUtils.parseCookie
 import com.madsam.otora.core.utils.UserAgentUtils
 import com.madsam.otora.data.chunithm.local.datastore.ChunithmCookieDataStore
@@ -103,7 +103,7 @@ fun ChunithmDataUpdateScreen(
             title = {
                 Text(
                     text = "CHUNITHM 数据更新",
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     color = colorScheme.onSurface
                 )
             },
@@ -152,13 +152,13 @@ fun ChunithmDataUpdateScreen(
                                 text = "⚠️ User-Agent未设置",
                                 color = colorScheme.onSurface,
                                 fontSize = 14.sp,
-                                fontFamily = sarasaSemiBold
+                                fontFamily = plexSemi
                             )
                             Text(
                                 text = "建议设置User-Agent以确保CHUNITHM数据更新正常工作",
                                 color = colorScheme.onSurfaceVariant,
                                 fontSize = 12.sp,
-                                fontFamily = sarasaRegular
+                                fontFamily = plexRegular
                             )
                             
                             if (onNavigateToUserAgent != null) {
@@ -173,7 +173,7 @@ fun ChunithmDataUpdateScreen(
                                 ) {
                                     Text(
                                         "设置User-Agent",
-                                        fontFamily = sarasaRegular,
+                                        fontFamily = plexRegular,
                                         fontSize = 12.sp
                                     )
                                 }
@@ -189,14 +189,14 @@ fun ChunithmDataUpdateScreen(
                     text = "歌曲数据更新",
                     color = colorScheme.onSurface,
                     fontSize = 18.sp,
-                    fontFamily = sarasaBold
+                    fontFamily = plexBold
                 )
                 
                 Text(
                     text = "更新CHUNITHM歌曲数据库",
                     color = colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -265,7 +265,7 @@ fun ChunithmDataUpdateScreen(
                             UpdateState.IDLE -> {
                                 Text(
                                     "更新歌曲数据",
-                                    fontFamily = sarasaSemiBold
+                                    fontFamily = plexSemi
                                 )
                             }
                             UpdateState.LOADING -> {
@@ -278,7 +278,7 @@ fun ChunithmDataUpdateScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     updateState.value.message,
-                                    fontFamily = sarasaSemiBold,
+                                    fontFamily = plexSemi,
                                     fontSize = 12.sp
                                 )
                             }
@@ -292,7 +292,7 @@ fun ChunithmDataUpdateScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     "更新完成",
-                                    fontFamily = sarasaSemiBold
+                                    fontFamily = plexSemi
                                 )
                             }
                         }
@@ -306,14 +306,14 @@ fun ChunithmDataUpdateScreen(
                     text = "个人信息获取",
                     color = colorScheme.onSurface,
                     fontSize = 18.sp,
-                    fontFamily = sarasaBold
+                    fontFamily = plexBold
                 )
                 
                 Text(
                     text = "输入从CHUNITHM官方公众号获取的Cookie信息，用于获取和保存您的账号数据",
                     color = colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -328,7 +328,7 @@ fun ChunithmDataUpdateScreen(
                     label = { 
                         Text(
                             "Request Cookies",
-                            fontFamily = sarasaRegular,
+                            fontFamily = plexRegular,
                             color = colorScheme.onSurfaceVariant
                         )
                     },
@@ -351,7 +351,7 @@ fun ChunithmDataUpdateScreen(
                         "Request Cookies 不能为空",
                         color = MaterialTheme.colorScheme.error,
                         fontSize = 12.sp,
-                        fontFamily = sarasaRegular
+                        fontFamily = plexRegular
                     )
                 }
                 
@@ -367,7 +367,7 @@ fun ChunithmDataUpdateScreen(
                     label = { 
                         Text(
                             "Response Cookies",
-                            fontFamily = sarasaRegular,
+                            fontFamily = plexRegular,
                             color = colorScheme.onSurfaceVariant
                         )
                     },
@@ -390,7 +390,7 @@ fun ChunithmDataUpdateScreen(
                         "Response Cookies 不能为空",
                         color = MaterialTheme.colorScheme.error,
                         fontSize = 12.sp,
-                        fontFamily = sarasaRegular
+                        fontFamily = plexRegular
                     )
                 }
                 
@@ -507,7 +507,7 @@ fun ChunithmDataUpdateScreen(
                             UpdateState.IDLE -> {
                                 Text(
                                     "保存并获取用户数据",
-                                    fontFamily = sarasaSemiBold
+                                    fontFamily = plexSemi
                                 )
                             }
                             UpdateState.LOADING -> {
@@ -520,7 +520,7 @@ fun ChunithmDataUpdateScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     cookieState.value.message,
-                                    fontFamily = sarasaSemiBold,
+                                    fontFamily = plexSemi,
                                     fontSize = 12.sp
                                 )
                             }
@@ -534,7 +534,7 @@ fun ChunithmDataUpdateScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     "获取完成",
-                                    fontFamily = sarasaSemiBold
+                                    fontFamily = plexSemi
                                 )
                             }
                         }

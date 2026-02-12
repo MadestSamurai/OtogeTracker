@@ -25,10 +25,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
+import com.madsam.otora.core.theme.plexSemi
 import com.madsam.otora.data.chunithm.remote.model.ChuniLoginBonusDTO
 
 /**
@@ -68,7 +67,7 @@ fun LoginBonusTracker(loginBonus: ChuniLoginBonusDTO?) {
                 text = "登录奖励",
                 color = colorScheme.primary,
                 fontSize = 16.sp,
-                fontFamily = sarasaBold
+                fontFamily = plexBold
             )
             
             Spacer(modifier = Modifier.width(12.dp))
@@ -82,7 +81,7 @@ fun LoginBonusTracker(loginBonus: ChuniLoginBonusDTO?) {
                     text = "版本签到：${loginBonus.dailyLoginDay} 天",
                     color = colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
                 
                 // 月度签到天数
@@ -90,7 +89,7 @@ fun LoginBonusTracker(loginBonus: ChuniLoginBonusDTO?) {
                     text = "本月签到：${loginBonus.currentMonth} 天",
                     color = colorScheme.primary,
                     fontSize = 12.sp,
-                    fontFamily = sarasaSemiBold
+                    fontFamily = plexSemi
                 )
             }
             
@@ -101,7 +100,7 @@ fun LoginBonusTracker(loginBonus: ChuniLoginBonusDTO?) {
                 text = "详细",
                 color = colorScheme.surfaceContainer,
                 fontSize = 14.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
                     .background(colorScheme.surfaceContainerHigh)
@@ -173,7 +172,7 @@ private fun BonusCard(
             text = title,
             color = colorScheme.onSurface,
             fontSize = 11.sp,
-            fontFamily = sarasaBold,
+            fontFamily = plexBold,
             textAlign = TextAlign.Center
         )
         
@@ -183,7 +182,7 @@ private fun BonusCard(
                 text = subtitle,
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 10.sp,
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 textAlign = TextAlign.Center
             )
         }
@@ -212,7 +211,7 @@ private fun BonusCard(
                 text = rewardName,
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 9.sp,
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 textAlign = TextAlign.Center,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,

@@ -26,7 +26,7 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.utils.CalcUtils
 import com.madsam.otora.core.utils.CalcUtils.numberToChuniRank
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
@@ -118,7 +118,7 @@ internal fun ChunithmSheetList(
                         Text(
                             text = tag,
                             fontSize = 12.sp,
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             color = if (isActive) colorScheme.primary else Black333,
                             modifier = Modifier
                                 .padding(2.dp)
@@ -135,7 +135,7 @@ internal fun ChunithmSheetList(
                         Text(
                             text = tag,
                             fontSize = 12.sp,
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             color = if (isActive) colorScheme.primary else Black333,
                             modifier = Modifier
                                 .padding(2.dp)
@@ -190,7 +190,7 @@ internal fun ChunithmSheetList(
                         Text(
                             text = "${sheet.difficulty} ${sheet.levelJp}",
                             fontSize = 12.sp,
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             color = White1000,
                             modifier = Modifier
                                 .clip(RoundedCornerShape(3.dp))
@@ -240,7 +240,7 @@ private fun SheetDifficultyRow(
                 "${sheet.levelValueJp}(JP)"
             },
             fontSize = 12.sp,
-            fontFamily = sarasaBold,
+            fontFamily = plexBold,
             color = White1000,
             modifier = Modifier
                 .padding(vertical = 2.dp, horizontal = 6.dp)
@@ -257,7 +257,7 @@ private fun ScoreInfoRow(scoreInfo: SheetScoreInfo) {
         Text(
             text = scoreInfo.score.toString(),
             fontSize = 11.sp,
-            fontFamily = sarasaBold,
+            fontFamily = plexBold,
             color = White1000,
             modifier = Modifier
                 .clip(RoundedCornerShape(3.dp))
@@ -269,7 +269,7 @@ private fun ScoreInfoRow(scoreInfo: SheetScoreInfo) {
             Text(
                 text = numberToChuniRank(scoreInfo.rank),
                 fontSize = 11.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = White1000,
                 modifier = Modifier
                     .clip(RoundedCornerShape(2.dp))
@@ -282,7 +282,7 @@ private fun ScoreInfoRow(scoreInfo: SheetScoreInfo) {
             Text(
                 text = CalcUtils.clearToChuniClear(scoreInfo.clear),
                 fontSize = 11.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = White1000,
                 modifier = Modifier
                     .clip(RoundedCornerShape(2.dp))
@@ -295,7 +295,7 @@ private fun ScoreInfoRow(scoreInfo: SheetScoreInfo) {
             Text(
                 text = CalcUtils.comboToChuniCombo(scoreInfo.combo),
                 fontSize = 11.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = White1000,
                 modifier = Modifier
                     .clip(RoundedCornerShape(2.dp))
@@ -308,7 +308,7 @@ private fun ScoreInfoRow(scoreInfo: SheetScoreInfo) {
             Text(
                 text = CalcUtils.chainToChuniChain(scoreInfo.chain),
                 fontSize = 11.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = White1000,
                 modifier = Modifier
                     .clip(RoundedCornerShape(2.dp))

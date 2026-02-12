@@ -36,7 +36,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,7 +43,7 @@ import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.madsam.otora.R
-import com.madsam.otora.core.theme.sarasaFamily
+import com.madsam.otora.core.theme.plexFamily
 import com.madsam.otora.data.osu.ui.model.OsuCardUiModel
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 import com.madsam.otora.ui.components.DoubleCircleIndicator
@@ -308,7 +307,7 @@ private fun RankDataSection(
                 text = cardData.rank,
                 style = TextStyle(
                     color = colorScheme.primary,
-                    fontFamily = sarasaFamily,
+                    fontFamily = plexFamily,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -354,7 +353,7 @@ private fun RankDataSection(
                 text = cardData.countryRank,
                 style = TextStyle(
                     color = colorScheme.secondary,
-                    fontFamily = sarasaFamily,
+                    fontFamily = plexFamily,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
                 )

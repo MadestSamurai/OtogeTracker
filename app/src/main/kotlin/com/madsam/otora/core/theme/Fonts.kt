@@ -6,19 +6,19 @@ import androidx.compose.ui.text.font.FontWeight
 import com.madsam.otora.R
 
 
-val sarasaFamily = FontFamily(
-    Font(R.font.sarasa_light, FontWeight.Light),
-    Font(R.font.sarasa_regular, FontWeight.Normal),
-    Font(R.font.sarasa_semibold, FontWeight.SemiBold),
-    Font(R.font.sarasa_bold, FontWeight.Bold)
+val plexFamily = FontFamily(
+    Font(R.font.plex_light, FontWeight.Light),
+    Font(R.font.plex_regular, FontWeight.Normal),
+    Font(R.font.plex_medium, FontWeight.SemiBold),
+    Font(R.font.plex_bold, FontWeight.Bold)
 )
 
-val sarasaRegular = FontFamily(
-    Font(R.font.sarasa_regular)
+val plexRegular = FontFamily(
+    Font(R.font.plex_regular)
 )
-val sarasaSemiBold = FontFamily(
-    Font(R.font.sarasa_semibold)
+val plexSemi = FontFamily(
+    Font(R.font.plex_medium)
 )
-val sarasaBold = FontFamily(
-    Font(R.font.sarasa_bold)
+val plexBold = FontFamily(
+    Font(R.font.plex_bold)
 )

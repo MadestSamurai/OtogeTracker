@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Chart-bar`
-import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.plexSemi
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +65,7 @@ internal fun TopRank(
                     text = "No play records",
                     color = colorScheme.onSurfaceVariant,
                     fontSize = 16.sp,
-                    fontFamily = sarasaSemiBold
+                    fontFamily = plexSemi
                 )
             }
             return@Column

@@ -44,8 +44,8 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.NumberFormatUtils.formatThousand
 import com.madsam.otora.data.chunithm.ui.model.PlayDataCategoryType
 import com.madsam.otora.data.chunithm.ui.model.PlayDataCategoryStats
@@ -187,7 +187,7 @@ internal fun PlayDataList(
             Text(
                 text = "游玩数据",
                 fontSize = 16.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = colorScheme.primary
             )
             
@@ -198,7 +198,7 @@ internal fun PlayDataList(
                 Text(
                     text = currentPage.toUpperCase(Locale.current),
                     fontSize = 12.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     color = White1000,
                     modifier = Modifier
                         .clip(RoundedCornerShape(4.dp))
@@ -240,7 +240,7 @@ internal fun PlayDataList(
                 text = "曲目列表",
                 color = colorScheme.primary,
                 fontSize = 14.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
                     .background(colorScheme.surfaceContainer)
@@ -273,7 +273,7 @@ internal fun PlayDataList(
                 Text(
                     text = "加载中...",
                     fontSize = 14.sp,
-                    fontFamily = sarasaRegular,
+                    fontFamily = plexRegular,
                     color = colorScheme.primary.copy(alpha = 0.6f)
                 )
             }
@@ -331,19 +331,19 @@ private fun PlaceholderPlayData(categoryName: String, categoryType: String) {
         Text(
             text = categoryName,
             fontSize = 18.sp,
-            fontFamily = sarasaBold,
+            fontFamily = plexBold,
             color = White1000
         )
         Text(
             text = "按${categoryType}分类的数据统计",
             fontSize = 14.sp,
-            fontFamily = sarasaRegular,
+            fontFamily = plexRegular,
             color = colorScheme.primary.copy(alpha = 0.8f)
         )
         Text(
             text = "即将推出",
             fontSize = 12.sp,
-            fontFamily = sarasaRegular,
+            fontFamily = plexRegular,
             color = colorScheme.primary.copy(alpha = 0.6f),
             modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
@@ -423,13 +423,13 @@ private fun ScoreRankBar(
             Text(
                 text = "SCORE RANK",
                 fontSize = 11.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = White1000.copy(alpha = 0.85f)
             )
             Text(
                 text = "${formatThousand(s)} / ${formatThousand(total)}",
                 fontSize = 10.sp,
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 color = colorScheme.primary
             )
         }
@@ -557,13 +557,13 @@ private fun ClearTypeBar(
             Text(
                 text = "CLEAR TYPE",
                 fontSize = 11.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = White1000.copy(alpha = 0.85f)
             )
             Text(
                 text = "${formatThousand(clear)} / ${formatThousand(total)}",
                 fontSize = 10.sp,
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 color = colorScheme.primary
             )
         }
@@ -670,13 +670,13 @@ private fun ClearTypeLabel(
         Text(
             text = label,
             fontSize = 10.sp,
-            fontFamily = sarasaBold,
+            fontFamily = plexBold,
             color = color
         )
         Text(
             text = formatThousand(count),
             fontSize = 10.sp,
-            fontFamily = sarasaRegular,
+            fontFamily = plexRegular,
             color = colorScheme.primary
         )
     }
@@ -706,7 +706,7 @@ private fun OtherStatsRow(
             Text(
                 text = "FC",
                 fontSize = 10.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = White1000.copy(alpha = 0.85f),
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
@@ -714,7 +714,7 @@ private fun OtherStatsRow(
             Text(
                 text = "AJ",
                 fontSize = 10.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = White1000.copy(alpha = 0.85f),
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
@@ -722,7 +722,7 @@ private fun OtherStatsRow(
             Text(
                 text = "AJC",
                 fontSize = 10.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = White1000.copy(alpha = 0.85f),
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
@@ -730,7 +730,7 @@ private fun OtherStatsRow(
             Text(
                 text = "FCHAIN",
                 fontSize = 10.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = White1000.copy(alpha = 0.85f),
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
@@ -738,7 +738,7 @@ private fun OtherStatsRow(
             Text(
                 text = "FCHAIN+",
                 fontSize = 10.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = White1000.copy(alpha = 0.85f),
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
@@ -753,7 +753,7 @@ private fun OtherStatsRow(
             Text(
                 text = formatThousand(fc),
                 fontSize = 10.sp,
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 color = colorScheme.primary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
@@ -761,7 +761,7 @@ private fun OtherStatsRow(
             Text(
                 text = formatThousand(aj),
                 fontSize = 10.sp,
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 color = colorScheme.primary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
@@ -769,7 +769,7 @@ private fun OtherStatsRow(
             Text(
                 text = formatThousand(ajc),
                 fontSize = 10.sp,
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 color = colorScheme.primary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
@@ -777,7 +777,7 @@ private fun OtherStatsRow(
             Text(
                 text = formatThousand(fchain),
                 fontSize = 10.sp,
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 color = colorScheme.primary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
@@ -785,7 +785,7 @@ private fun OtherStatsRow(
             Text(
                 text = formatThousand(fchainPlus),
                 fontSize = 10.sp,
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 color = colorScheme.primary,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
@@ -810,13 +810,13 @@ private fun ScoreRankLabel(
         Text(
             text = rank,
             fontSize = 10.sp,
-            fontFamily = sarasaBold,
+            fontFamily = plexBold,
             color = color
         )
         Text(
             text = formatThousand(count),
             fontSize = 10.sp,
-            fontFamily = sarasaRegular,
+            fontFamily = plexRegular,
             color = colorScheme.primary
         )
     }

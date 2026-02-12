@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,12 +30,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,8 +63,8 @@ import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.RANKING_YELLOW
 import com.madsam.otora.core.theme.TEXT_GRAY
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.madsam.otora.ui.bof.BofViewModel
@@ -134,14 +131,14 @@ internal fun BofTeamTotalScreen(
                     ) {
                         Text(
                             text = "加载失败",
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 18.sp,
                             color = RANKING_RED
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = errorMessage,
-                            fontFamily = sarasaRegular,
+                            fontFamily = plexRegular,
                             fontSize = 14.sp,
                             color = TEXT_GRAY,
                             textAlign = TextAlign.Center
@@ -171,14 +168,14 @@ internal fun BofTeamTotalScreen(
                     ) {
                         Text(
                             text = "暂无团队数据",
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 18.sp,
                             color = TEXT_GRAY
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "请等待数据更新或检查网络连接",
-                            fontFamily = sarasaRegular,
+                            fontFamily = plexRegular,
                             fontSize = 14.sp,
                             color = TEXT_GRAY
                         )
@@ -260,7 +257,7 @@ private fun TeamRankingTable(
             // 测量评价数列宽度（四位整数）
             Text(
                 text = "0000", // 四位整数测量
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 fontSize = 14.sp,
                 modifier = Modifier.onGloballyPositioned { coordinates ->
                     extraWidth = with(density) {
@@ -271,7 +268,7 @@ private fun TeamRankingTable(
             // 测量中位数列宽度（000.00格式）
             Text(
                 text = "000.00", // 带两位小数测量
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 fontSize = 14.sp,
                 modifier = Modifier.onGloballyPositioned { coordinates ->
                     medianWidth = with(density) {
@@ -292,7 +289,7 @@ private fun TeamRankingTable(
             // 主标题
             Text(
                 text = "团队总分排行榜",
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 20.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center
@@ -301,7 +298,7 @@ private fun TeamRankingTable(
             // 副标题
             Text(
                 text = "时间: ${vm.getSelectedTimeString()}",
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 fontSize = 12.sp,
                 color = TEXT_GRAY,
                 textAlign = TextAlign.Center,
@@ -371,7 +368,7 @@ internal fun TeamTableHeader(
     ) {
         Text(
             text = "排名",
-            fontFamily = sarasaBold,
+            fontFamily = plexBold,
             fontSize = 14.sp,
             color = Color.White,
             textAlign = TextAlign.Center,
@@ -380,7 +377,7 @@ internal fun TeamTableHeader(
         
         Text(
             text = "团队",
-            fontFamily = sarasaBold,
+            fontFamily = plexBold,
             fontSize = 14.sp,
             color = Color.White,
             textAlign = TextAlign.End,
@@ -395,7 +392,7 @@ internal fun TeamTableHeader(
                     // 只显示分数条
                     Text(
                         text = "总分",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -406,7 +403,7 @@ internal fun TeamTableHeader(
                     // 显示中位数和评价数
                     Text(
                         text = "中位数",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -414,7 +411,7 @@ internal fun TeamTableHeader(
                     )
                     Text(
                         text = "评价数",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -426,7 +423,7 @@ internal fun TeamTableHeader(
             // 宽屏模式：始终显示所有列
             Text(
                 text = "总分",
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center,
@@ -434,7 +431,7 @@ internal fun TeamTableHeader(
             )
             Text(
                 text = "中位数",
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 textAlign = TextAlign.End,
@@ -442,7 +439,7 @@ internal fun TeamTableHeader(
             )
             Text(
                 text = "评价数",
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 textAlign = TextAlign.End,
@@ -503,7 +500,7 @@ internal fun TeamRankingRow(
                             )
                             Text(
                                 text = change.toString(),
-                                fontFamily = sarasaRegular,
+                                fontFamily = plexRegular,
                                 fontSize = 10.sp,
                                 color = Color.Green
                             )
@@ -517,7 +514,7 @@ internal fun TeamRankingRow(
                             )
                             Text(
                                 text = (-change).toString(),
-                                fontFamily = sarasaRegular,
+                                fontFamily = plexRegular,
                                 fontSize = 10.sp,
                                 color = Color.Red
                             )
@@ -537,7 +534,7 @@ internal fun TeamRankingRow(
                 // 下方：当前排名
                 Text(
                     text = team.rank.toString(),
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     fontSize = 16.sp,
                     color = rankColor,
                     textAlign = TextAlign.Center
@@ -547,7 +544,7 @@ internal fun TeamRankingRow(
             // 团队信息列（照搬RankingTable的作品信息列设计，但只显示团队名称）
             Text(
                 text = team.teamName,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 16.sp,
                 color = Color.White,
                 maxLines = 1,
@@ -591,7 +588,7 @@ internal fun TeamRankingRow(
                                     )
                                     Text(
                                         text = "%.2f".format(team.totalScore),
-                                        fontFamily = sarasaBold,
+                                        fontFamily = plexBold,
                                         fontSize = 14.sp,
                                         color = Color.White,
                                         overflow = TextOverflow.Visible,
@@ -627,7 +624,7 @@ internal fun TeamRankingRow(
                                         )
                                         Text(
                                             text = "%.1f".format(compareScore),
-                                            fontFamily = sarasaRegular,
+                                            fontFamily = plexRegular,
                                             fontSize = 11.sp,
                                             color = Color.White.copy(alpha = 0.8f),
                                             overflow = TextOverflow.Visible,
@@ -658,7 +655,7 @@ internal fun TeamRankingRow(
                         ) {
                             Text(
                                 text = "%.2f".format(team.medianScore),
-                                fontFamily = sarasaBold,
+                                fontFamily = plexBold,
                                 fontSize = 16.sp,
                                 color = Color.White,
                                 textAlign = TextAlign.End
@@ -666,7 +663,7 @@ internal fun TeamRankingRow(
                         }
                         Text(
                             text = team.getFormattedImpressionCount(),
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 16.sp,
                             color = Color.White,
                             textAlign = TextAlign.End,
@@ -706,7 +703,7 @@ internal fun TeamRankingRow(
                             )
                             Text(
                                 text = "%.2f".format(team.totalScore),
-                                fontFamily = sarasaBold,
+                                fontFamily = plexBold,
                                 fontSize = 14.sp,
                                 color = Color.White,
                                 overflow = TextOverflow.Visible,
@@ -742,7 +739,7 @@ internal fun TeamRankingRow(
                                 )
                                 Text(
                                     text = "%.1f".format(compareScore),
-                                    fontFamily = sarasaRegular,
+                                    fontFamily = plexRegular,
                                     fontSize = 11.sp,
                                     color = Color.White.copy(alpha = 0.8f),
                                     overflow = TextOverflow.Visible,
@@ -772,7 +769,7 @@ internal fun TeamRankingRow(
                 ) {
                     Text(
                         text = "%.2f".format(team.medianScore),
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 16.sp,
                         color = Color.White,
                         textAlign = TextAlign.End
@@ -782,7 +779,7 @@ internal fun TeamRankingRow(
                 // 评价数列
                 Text(
                     text = team.getFormattedImpressionCount(),
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     fontSize = 16.sp,
                     color = Color.White,
                     textAlign = TextAlign.End,
@@ -860,7 +857,7 @@ private fun TeamWorkRow(
 
             Text(
                 text = "$title - $artist",
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 fontSize = 12.sp,
                 color = TEXT_GRAY,
                 maxLines = 1,
@@ -871,7 +868,7 @@ private fun TeamWorkRow(
 
         Text(
             text = "%.2f".format(workScore),
-            fontFamily = sarasaBold,
+            fontFamily = plexBold,
             fontSize = 12.sp,
             color = TEXT_GRAY,
             textAlign = TextAlign.End,
@@ -936,14 +933,14 @@ internal fun BofTeamDiffScreen(
                     ) {
                         Text(
                             text = if (isReverse) "暂无得分减少的团队" else "暂无得分增长的团队",
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 18.sp,
                             color = TEXT_GRAY
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "在此时间段内未检测到此类变化",
-                            fontFamily = sarasaRegular,
+                            fontFamily = plexRegular,
                             fontSize = 14.sp,
                             color = TEXT_GRAY,
                             textAlign = TextAlign.Center
@@ -1013,7 +1010,7 @@ private fun TeamDiffTable(
         ) {
             Text(
                 text = if (isReverse) "团队逆差值排行榜（得分减少）" else "团队差值排行榜（得分增加）",
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 20.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center
@@ -1021,7 +1018,7 @@ private fun TeamDiffTable(
             
             Text(
                 text = "时间: ${vm.getSelectedTimeString()}",
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 fontSize = 12.sp,
                 color = TEXT_GRAY,
                 textAlign = TextAlign.Center,
@@ -1039,7 +1036,7 @@ private fun TeamDiffTable(
         ) {
             Text(
                 text = "排名",
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center,
@@ -1048,7 +1045,7 @@ private fun TeamDiffTable(
             
             Text(
                 text = "团队",
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 textAlign = TextAlign.End,
@@ -1057,7 +1054,7 @@ private fun TeamDiffTable(
             
             Text(
                 text = if (isReverse) "减少" else "增长",
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center,
@@ -1125,7 +1122,7 @@ private fun TeamDiffRow(
             // 排名列 - 只显示排名，不显示变化
             Text(
                 text = team.rank.toString(),
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 16.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center,
@@ -1135,7 +1132,7 @@ private fun TeamDiffRow(
             // 团队名称
             Text(
                 text = team.teamName,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 16.sp,
                 color = Color.White,
                 maxLines = 1,
@@ -1173,7 +1170,7 @@ private fun TeamDiffRow(
                         )
                         Text(
                             text = String.format("%.2f", team.totalScore),
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 14.sp,
                             color = Color.White,
                             overflow = TextOverflow.Visible,
@@ -1207,7 +1204,7 @@ private fun TeamDiffRow(
                 ) {
                     Text(
                         text = "$title - $artist",
-                        fontFamily = sarasaRegular,
+                        fontFamily = plexRegular,
                         fontSize = 12.sp,
                         color = TEXT_GRAY,
                         maxLines = 1,
@@ -1219,7 +1216,7 @@ private fun TeamDiffRow(
                     if (scoreDiff != 0.0) {
                         Text(
                             text = if (scoreDiff > 0) "+${String.format("%.1f", scoreDiff)}" else String.format("%.1f", scoreDiff),
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 12.sp,
                             color = if (scoreDiff > 0) Color.Green else Color.Red,
                             textAlign = TextAlign.End,

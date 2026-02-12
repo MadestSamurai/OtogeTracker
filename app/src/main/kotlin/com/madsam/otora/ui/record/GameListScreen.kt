@@ -46,7 +46,7 @@ import com.madsam.otora.R
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.icon.fa.Cog
-import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.utils.ScreenUtil
 
 /**
@@ -115,7 +115,7 @@ fun GameListScreen(
                 title = {
                     Text(
                         text = stringResource(R.string.record_title),
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 20.sp
                     )
                 },
@@ -227,7 +227,7 @@ private fun GameCard(
             // 游戏名称
             Text(
                 text = game.name,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
                 color = if (game.isEnabled) colorScheme.primary else colorScheme.onSurfaceVariant

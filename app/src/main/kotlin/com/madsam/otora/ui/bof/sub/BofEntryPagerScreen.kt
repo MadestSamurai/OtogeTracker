@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -35,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.madsam.otora.BofScreenState
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.bof.components.BofEntryCaptureDialog
@@ -416,13 +415,13 @@ private fun <T> EntryPageContent(
                 ) {
                     Text(
                         text = "加载失败",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.error
                     )
                     Text(
                         text = errorMessage,
-                        fontFamily = sarasaRegular,
+                        fontFamily = plexRegular,
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,

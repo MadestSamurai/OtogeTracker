@@ -23,7 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.plexBold
 
 @Composable
 fun HomeScreen(
@@ -58,7 +58,7 @@ private fun HomeMainContent(
                 text = "OtogeTracker",
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = colorScheme.primary
             )
             
@@ -79,7 +79,7 @@ private fun HomeMainContent(
                     Text(
                         text = "Best of Friends",
                         fontSize = 24.sp,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         color = colorScheme.onSurface
                     )
                     
@@ -102,7 +102,7 @@ private fun HomeMainContent(
                     ) {
                         Text(
                             text = "进入 BOF",
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             color = colorScheme.onPrimaryContainer
                         )
                     }

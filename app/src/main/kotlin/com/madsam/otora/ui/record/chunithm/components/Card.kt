@@ -40,8 +40,8 @@ import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.theme.OSU_LEVEL_GOLD_1
 import com.madsam.otora.core.theme.OSU_LEVEL_PLATINUM_1
 import com.madsam.otora.core.theme.RANKING_BLUE
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.BrushUtils.getRatingTextBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmCardUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -132,7 +132,7 @@ internal fun Card(
                         textAlign = TextAlign.Center,
                         color = if (isDark) Color.White else Color.Black,
                         fontSize = 14.sp,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -180,7 +180,7 @@ internal fun Card(
                     text = cardData.reborn.toString(),
                     color = Color.Black,
                     fontSize = 12.sp,
-                    fontFamily = sarasaBold
+                    fontFamily = plexBold
                 )
             }
 
@@ -203,7 +203,7 @@ internal fun Card(
                 text = cardData.level.toString(),
                 color = colorScheme.onSurface,
                 fontSize = 18.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 modifier = Modifier
                     .constrainAs(lv) {
                         top.linkTo(
@@ -220,7 +220,7 @@ internal fun Card(
                 color = colorScheme.onSurface,
                 fontSize = 18.sp,
                 lineHeight = 22.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 modifier = Modifier
                     .constrainAs(username) {
                         top.linkTo(
@@ -267,7 +267,7 @@ internal fun Card(
                         style = SpanStyle(
                             color = colorScheme.primary,
                             fontSize = 14.sp,
-                            fontFamily = sarasaRegular
+                            fontFamily = plexRegular
                         )
                     ) {
                         append("RATING ")
@@ -276,7 +276,7 @@ internal fun Card(
                         style = SpanStyle(
                             brush = getRatingTextBrush(cardData.rating, isDark),
                             fontSize = 16.sp,
-                            fontFamily = sarasaBold
+                            fontFamily = plexBold
                         )
                     ) {
                         append(cardData.rating)
@@ -305,7 +305,7 @@ internal fun Card(
                             style = SpanStyle(
                                 color = colorScheme.primary,
                                 fontSize = 11.sp,
-                                fontFamily = sarasaRegular
+                                fontFamily = plexRegular
                             )
                         ) { append("OVERPOWER ") }
                         append(cardData.overpower)
@@ -313,7 +313,7 @@ internal fun Card(
                     color = colorScheme.onSurface,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                 )
                 Text(
                     text = buildAnnotatedString {
@@ -321,7 +321,7 @@ internal fun Card(
                             style = SpanStyle(
                                 color = colorScheme.primary,
                                 fontSize = 11.sp,
-                                fontFamily = sarasaRegular
+                                fontFamily = plexRegular
                             )
                         ) { append("LAST PLAY ") }
                         append(cardData.lastPlay)
@@ -329,7 +329,7 @@ internal fun Card(
                     color = colorScheme.onSurface,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                 )
                 Text(
                     text = buildAnnotatedString {
@@ -337,7 +337,7 @@ internal fun Card(
                             style = SpanStyle(
                                 color = colorScheme.primary,
                                 fontSize = 11.sp,
-                                fontFamily = sarasaRegular
+                                fontFamily = plexRegular
                             )
                         ) { append("PLAY COUNT ") }
                         append(cardData.playCount)
@@ -345,7 +345,7 @@ internal fun Card(
                     color = colorScheme.onSurface,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                 )
                 Text(
                     text = buildAnnotatedString {
@@ -353,7 +353,7 @@ internal fun Card(
                             style = SpanStyle(
                                 color = colorScheme.primary,
                                 fontSize = 11.sp,
-                                fontFamily = sarasaRegular
+                                fontFamily = plexRegular
                             )
                         ) { append("POINTS ") }
                         append("${cardData.point}/${cardData.totalPoint}")
@@ -361,7 +361,7 @@ internal fun Card(
                     color = colorScheme.onSurface,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                 )
             }
         }

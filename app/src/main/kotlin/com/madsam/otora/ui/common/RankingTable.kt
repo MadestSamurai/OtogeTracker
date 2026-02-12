@@ -65,8 +65,8 @@ import com.madsam.otora.core.theme.BG_DARK_GRAY
 import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.TEXT_GRAY
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ScreenUtil
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -198,7 +198,7 @@ fun RankingTable(
             if (config.extraColumnName != null) {
                 Text(
                     text = config.extraWidthType.measureText,
-                    fontFamily = sarasaRegular,
+                    fontFamily = plexRegular,
                     fontSize = 14.sp,
                     modifier = Modifier.onGloballyPositioned { coordinates ->
                         extraWidth = with(density) {
@@ -211,7 +211,7 @@ fun RankingTable(
             if (config.avgColumnName != null) {
                 Text(
                     text = config.avgWidthType.measureText,
-                    fontFamily = sarasaRegular,
+                    fontFamily = plexRegular,
                     fontSize = 14.sp,
                     modifier = Modifier.onGloballyPositioned { coordinates ->
                         avgWidth = with(density) {
@@ -224,7 +224,7 @@ fun RankingTable(
             if (config.medianColumnName != null) {
                 Text(
                     text = config.medianWidthType.measureText,
-                    fontFamily = sarasaRegular,
+                    fontFamily = plexRegular,
                     fontSize = 14.sp,
                     modifier = Modifier.onGloballyPositioned { coordinates ->
                         medianWidth = with(density) {
@@ -285,7 +285,7 @@ fun RankingTable(
                                 )
                                 Text(
                                     text = config.previousPageTitle,
-                                    fontFamily = sarasaRegular,
+                                    fontFamily = plexRegular,
                                     fontSize = 12.sp,
                                     color = TEXT_GRAY,
                                     maxLines = 1
@@ -299,7 +299,7 @@ fun RankingTable(
                         // 中间主标题
                         Text(
                             text = config.title,
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 20.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center,
@@ -323,7 +323,7 @@ fun RankingTable(
                                     )
                                     Text(
                                         text = config.nextPageTitle,
-                                        fontFamily = sarasaRegular,
+                                        fontFamily = plexRegular,
                                         fontSize = 12.sp,
                                         color = TEXT_GRAY,
                                         maxLines = 1
@@ -338,7 +338,7 @@ fun RankingTable(
                     // 副标题
                     Text(
                         text = config.subtitle,
-                        fontFamily = sarasaRegular,
+                        fontFamily = plexRegular,
                         fontSize = 12.sp,
                         color = TEXT_GRAY,
                         textAlign = TextAlign.Center,
@@ -363,7 +363,7 @@ fun RankingTable(
         ) {
             Text(
                 text = "排名",
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center,
@@ -379,7 +379,7 @@ fun RankingTable(
                     // 只显示分数条
                     Text(
                         text = config.scoreColumnName,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -390,7 +390,7 @@ fun RankingTable(
                     config.extraColumnName?.let { name ->
                         Text(
                             text = name,
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 14.sp,
                             color = Color.White,
                             textAlign = TextAlign.End,
@@ -400,7 +400,7 @@ fun RankingTable(
                     config.avgColumnName?.let { name ->
                         Text(
                             text = name,
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 14.sp,
                             color = Color.White,
                             textAlign = TextAlign.End,
@@ -410,7 +410,7 @@ fun RankingTable(
                     config.medianColumnName?.let { name ->
                         Text(
                             text = name,
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 14.sp,
                             color = Color.White,
                             textAlign = TextAlign.End,
@@ -422,7 +422,7 @@ fun RankingTable(
                 // 正常模式，显示所有列
                 Text(
                     text = config.scoreColumnName,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     fontSize = 14.sp,
                     color = Color.White,
                     textAlign = TextAlign.Center,
@@ -431,7 +431,7 @@ fun RankingTable(
                 config.extraColumnName?.let { name ->
                     Text(
                         text = name,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -441,7 +441,7 @@ fun RankingTable(
                 config.avgColumnName?.let { name ->
                     Text(
                         text = name,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -451,7 +451,7 @@ fun RankingTable(
                 config.medianColumnName?.let { name ->
                     Text(
                         text = name,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -485,7 +485,7 @@ fun RankingTable(
                     ) {
                         Text(
                             text = "暂无数据",
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 18.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center
@@ -493,7 +493,7 @@ fun RankingTable(
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "当前筛选条件下没有符合的作品",
-                            fontFamily = sarasaRegular,
+                            fontFamily = plexRegular,
                             fontSize = 14.sp,
                             color = TEXT_GRAY,
                             textAlign = TextAlign.Center
@@ -533,7 +533,7 @@ fun RankingTable(
                         ) {
                             Text(
                                 text = "还有 ${items.size - config.maxItems} 个作品..",
-                                fontFamily = sarasaRegular,
+                                fontFamily = plexRegular,
                                 color = TEXT_GRAY,
                                 fontSize = 14.sp
                             )
@@ -663,7 +663,7 @@ private fun RankingTableRow(
                         )
                         Text(
                             text = change.toString(),
-                            fontFamily = sarasaRegular,
+                            fontFamily = plexRegular,
                             fontSize = 10.sp,
                             color = Color.Green
                         )
@@ -677,7 +677,7 @@ private fun RankingTableRow(
                         )
                         Text(
                             text = (-change).toString(),
-                            fontFamily = sarasaRegular,
+                            fontFamily = plexRegular,
                             fontSize = 10.sp,
                             color = Color.Red
                         )
@@ -698,7 +698,7 @@ private fun RankingTableRow(
             // 下方：当前排名
             Text(
                 text = item.rank.toString(),
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 16.sp,
                 color = rankColor,
                 textAlign = TextAlign.Center
@@ -714,7 +714,7 @@ private fun RankingTableRow(
         ) {
             Text(
                 text = buildHighlightedText(item.title, searchText),
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 maxLines = 1,
@@ -724,7 +724,7 @@ private fun RankingTableRow(
             )
             Text(
                 text = buildHighlightedText(item.artist, searchText),
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 fontSize = 12.sp,
                 color = TEXT_GRAY,
                 maxLines = 1,
@@ -763,7 +763,7 @@ private fun RankingTableRow(
                         )
                         Text(
                             text = formatScore(item.score, config.scoreWidthType, config.allowNegativeScore),
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 14.sp,
                             color = Color.White,
                             overflow = TextOverflow.Visible,
@@ -799,7 +799,7 @@ private fun RankingTableRow(
                             )
                             Text(
                                 text = formatScore(compareScore, config.scoreWidthType, config.allowNegativeScore),
-                                fontFamily = sarasaRegular,
+                                fontFamily = plexRegular,
                                 fontSize = 11.sp,
                                 color = Color.White.copy(alpha = 0.8f),
                                 overflow = TextOverflow.Visible,
@@ -843,7 +843,7 @@ private fun RankingTableRow(
                             )
                             Text(
                                 text = formatScore(item.score, config.scoreWidthType, config.allowNegativeScore),
-                                fontFamily = sarasaBold,
+                                fontFamily = plexBold,
                                 fontSize = 14.sp,
                                 color = Color.White,
                                 overflow = TextOverflow.Visible,
@@ -878,7 +878,7 @@ private fun RankingTableRow(
                                 )
                                 Text(
                                     text = formatScore(compareScore, config.scoreWidthType, config.allowNegativeScore),
-                                    fontFamily = sarasaRegular,
+                                    fontFamily = plexRegular,
                                     fontSize = 11.sp,
                                     color = Color.White.copy(alpha = 0.8f),
                                     overflow = TextOverflow.Visible,
@@ -902,7 +902,7 @@ private fun RankingTableRow(
                     } else {
                         "---"
                     },
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     fontSize = 14.sp,
                     color = Color.White,
                     textAlign = TextAlign.End,
@@ -934,7 +934,7 @@ private fun RankingTableRow(
                         } else {
                             "---"
                         },
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.End
@@ -964,7 +964,7 @@ private fun RankingTableRow(
                         } else {
                             "---"
                         },
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.End
@@ -1045,7 +1045,7 @@ fun RankingTableForCapture(
                 // 主标题
                 Text(
                     text = config.title,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     fontSize = 20.sp,
                     color = Color.White,
                     textAlign = TextAlign.Center
@@ -1054,7 +1054,7 @@ fun RankingTableForCapture(
                 // 副标题
                 Text(
                     text = config.subtitle,
-                    fontFamily = sarasaRegular,
+                    fontFamily = plexRegular,
                     fontSize = 12.sp,
                     color = TEXT_GRAY,
                     textAlign = TextAlign.Center,
@@ -1073,7 +1073,7 @@ fun RankingTableForCapture(
             ) {
                 Text(
                     text = "排名",
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     fontSize = 14.sp,
                     color = Color.White,
                     textAlign = TextAlign.Center,
@@ -1087,7 +1087,7 @@ fun RankingTableForCapture(
                 // 正常模式，显示所有列
                 Text(
                     text = config.scoreColumnName,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     fontSize = 14.sp,
                     color = Color.White,
                     textAlign = TextAlign.Center,
@@ -1096,7 +1096,7 @@ fun RankingTableForCapture(
                 config.extraColumnName?.let { name ->
                     Text(
                         text = name,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -1106,7 +1106,7 @@ fun RankingTableForCapture(
                 config.avgColumnName?.let { name ->
                     Text(
                         text = name,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -1116,7 +1116,7 @@ fun RankingTableForCapture(
                 config.medianColumnName?.let { name ->
                     Text(
                         text = name,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -1142,7 +1142,7 @@ fun RankingTableForCapture(
                 ) {
                     Text(
                         text = "暂无数据",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 18.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
@@ -1150,7 +1150,7 @@ fun RankingTableForCapture(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "当前筛选条件下没有符合的作品",
-                        fontFamily = sarasaRegular,
+                        fontFamily = plexRegular,
                         fontSize = 14.sp,
                         color = TEXT_GRAY,
                         textAlign = TextAlign.Center
@@ -1182,7 +1182,7 @@ fun RankingTableForCapture(
                     ) {
                         Text(
                             text = "还有 ${items.size - config.maxItems} 个作品..",
-                            fontFamily = sarasaRegular,
+                            fontFamily = plexRegular,
                             color = TEXT_GRAY,
                             fontSize = 14.sp
                         )

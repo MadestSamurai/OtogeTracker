@@ -64,9 +64,9 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
+import com.madsam.otora.core.theme.plexSemi
 import com.madsam.otora.core.utils.CalcUtils
 import com.madsam.otora.core.utils.CalcUtils.numberToChuniRank
 import com.madsam.otora.data.chunithm.ui.model.ChunithmSheetUiModel
@@ -120,7 +120,7 @@ internal fun ChunithmSongDetailPage(
                 text = "歌曲未找到",
                 color = colorScheme.primary,
                 fontSize = 18.sp,
-                fontFamily = sarasaBold
+                fontFamily = plexBold
             )
         }
         return
@@ -210,7 +210,7 @@ internal fun ChunithmSongDetailPage(
                                     text = song.title,
                                     color = White1000,
                                     fontSize = 18.sp,
-                                    fontFamily = sarasaBold,
+                                    fontFamily = plexBold,
                                     maxLines = 2,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -280,7 +280,7 @@ internal fun ChunithmSongDetailPage(
                 text = decodedTitle,
                 color = colorScheme.onSurface,
                 fontSize = 18.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
@@ -304,7 +304,7 @@ private fun InfoRow(label: String, value: String) {
             text = "$label:",
             color = colorScheme.onSurface,
             fontSize = 14.sp,
-            fontFamily = sarasaSemiBold,
+            fontFamily = plexSemi,
             modifier = Modifier.weight(0.4f)
         )
         Text(
@@ -355,13 +355,13 @@ private fun SongSheetDetailCard(
                     text = sheet.difficulty.uppercase(),
                     color = Color.White,
                     fontSize = 20.sp,
-                    fontFamily = sarasaBold
+                    fontFamily = plexBold
                 )
                 Text(
                     text = "Lv. ${sheet.levelCn}",
                     color = Color.White,
                     fontSize = 20.sp,
-                    fontFamily = sarasaBold
+                    fontFamily = plexBold
                 )
             }
             
@@ -389,7 +389,7 @@ private fun SongSheetDetailCard(
                             text = "CN: ${sheet.levelCn}",
                             color = Color.White,
                             fontSize = 16.sp,
-                            fontFamily = sarasaBold
+                            fontFamily = plexBold
                         )
                         Text(
                             text = "定数: ${sheet.levelValueCn}",
@@ -403,7 +403,7 @@ private fun SongSheetDetailCard(
                             text = "JP: ${sheet.levelJp}",
                             color = Color.White,
                             fontSize = 16.sp,
-                            fontFamily = sarasaBold
+                            fontFamily = plexBold
                         )
                         Text(
                             text = "定数: ${sheet.levelValueJp}",
@@ -418,7 +418,7 @@ private fun SongSheetDetailCard(
                         text = "Total: ${sheet.total}",
                         color = Color.White,
                         fontSize = 16.sp,
-                        fontFamily = sarasaBold
+                        fontFamily = plexBold
                     )
                     if (sheet.noteDesigner.isNotEmpty()) {
                         Text(
@@ -437,7 +437,7 @@ private fun SongSheetDetailCard(
                     text = "成绩信息",
                     color = Color.White,
                     fontSize = 16.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 
@@ -451,7 +451,7 @@ private fun SongSheetDetailCard(
                             text = "分数: ${scoreInfo.score}",
                             color = Color.White,
                             fontSize = 16.sp,
-                            fontFamily = sarasaBold
+                            fontFamily = plexBold
                         )
                         if (scoreInfo.rank >= 0) {
                             Text(
@@ -467,7 +467,7 @@ private fun SongSheetDetailCard(
                             Text(
                                 text = CalcUtils.clearToChuniClear(scoreInfo.clear),
                                 fontSize = 12.sp,
-                                fontFamily = sarasaBold,
+                                fontFamily = plexBold,
                                 color = Color.White,
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(4.dp))
@@ -480,7 +480,7 @@ private fun SongSheetDetailCard(
                             Text(
                                 text = CalcUtils.comboToChuniCombo(scoreInfo.combo),
                                 fontSize = 12.sp,
-                                fontFamily = sarasaBold,
+                                fontFamily = plexBold,
                                 color = Color.White,
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(4.dp))
@@ -493,7 +493,7 @@ private fun SongSheetDetailCard(
                             Text(
                                 text = CalcUtils.chainToChuniChain(scoreInfo.chain),
                                 fontSize = 12.sp,
-                                fontFamily = sarasaBold,
+                                fontFamily = plexBold,
                                 color = Color.White,
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(4.dp))
@@ -512,7 +512,7 @@ private fun SongSheetDetailCard(
                     text = "音符统计",
                     color = Color.White,
                     fontSize = 16.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 Row(
@@ -554,13 +554,13 @@ private fun NoteTypeItem(type: String, count: Int) {
             text = type,
             color = White1000.copy(alpha = 0.7f),
             fontSize = 12.sp,
-            fontFamily = sarasaBold
+            fontFamily = plexBold
         )
         Text(
             text = count.toString(),
             color = White1000,
             fontSize = 16.sp,
-            fontFamily = sarasaBold
+            fontFamily = plexBold
         )
     }
 }
@@ -621,7 +621,7 @@ private fun FriendScoreRanking(
                     text = "友人成绩排行",
                     color = Color.White,
                     fontSize = 16.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     modifier = Modifier.padding(start = 6.dp)
                 )
                 
@@ -752,14 +752,14 @@ private fun FriendScoreRankingItem(item: ChunithmViewModel.FriendScoreRankingIte
                     text = "#${item.rank}",
                     color = Color.White,
                     fontSize = 14.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     modifier = Modifier.width(32.dp)
                 )
                 Text(
                     text = item.friendName,
                     color = if (item.isMyScore) Color.White else Color.White.copy(alpha = 0.8f),
                     fontSize = 14.sp,
-                    fontFamily = if (item.isMyScore) sarasaBold else sarasaRegular,
+                    fontFamily = if (item.isMyScore) plexBold else plexRegular,
                     modifier = Modifier.weight(1f)
                 )
             }
@@ -772,7 +772,7 @@ private fun FriendScoreRankingItem(item: ChunithmViewModel.FriendScoreRankingIte
                     text = item.score.toString(),
                     color = Color.White,
                     fontSize = 14.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     modifier = Modifier.width(90.dp), // 增加分数显示宽度
                     textAlign = TextAlign.End
                 )
@@ -783,7 +783,7 @@ private fun FriendScoreRankingItem(item: ChunithmViewModel.FriendScoreRankingIte
                     Text(
                         text = CalcUtils.comboToChuniCombo(item.combo),
                         fontSize = 10.sp,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         color = Color.White,
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))

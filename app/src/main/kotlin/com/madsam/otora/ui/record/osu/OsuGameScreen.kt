@@ -37,7 +37,7 @@ import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.Cog
 import com.madsam.otora.core.theme.OtogeTrackerTheme
-import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.settings.SettingsActivity
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -113,7 +113,7 @@ private fun OsuGameScreenContent(
                 title = {
                     Text(
                         text = "osu!",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 20.sp
                     )
                 },

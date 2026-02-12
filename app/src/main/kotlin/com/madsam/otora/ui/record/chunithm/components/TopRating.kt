@@ -49,7 +49,7 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.Transparent
 import com.madsam.otora.core.theme.Yellow1000
-import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.data.chunithm.ui.model.ChunithmScoreUiModel
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.ui.BASE_URL
@@ -95,7 +95,7 @@ internal fun TopRating(
                 text = "Top Rating",
                 color = colorScheme.onSurface,
                 fontSize = 20.sp,
-                fontFamily = sarasaBold
+                fontFamily = plexBold
             )
             Box(modifier = Modifier.width(48.dp))
         }
@@ -119,7 +119,7 @@ internal fun TopRating(
                             text = title,
                             color = if (pagerState.currentPage == index) colorScheme.primary else colorScheme.onSurfaceVariant,
                             fontSize = 16.sp,
-                            fontFamily = sarasaBold
+                            fontFamily = plexBold
                         )
                     },
                     modifier = Modifier.height(40.dp)
@@ -187,7 +187,7 @@ internal fun ChuniRatingItemCard(
                 text = "#$rank",
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 modifier = Modifier
                     .constrainAs(rankText) {
                         top.linkTo(parent.top, 8.dp)
@@ -242,7 +242,7 @@ internal fun ChuniRatingItemCard(
             Text(
                 text = item.level,
                 fontSize = 14.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = Color.White,
                 modifier = Modifier
                     .constrainAs(diff) {
@@ -283,7 +283,7 @@ internal fun ChuniRatingItemCard(
                     text = item.title,
                     color = colorScheme.onSurface,
                     fontSize = 16.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

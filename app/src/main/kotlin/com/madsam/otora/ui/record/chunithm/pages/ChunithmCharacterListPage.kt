@@ -54,9 +54,9 @@ import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
+import com.madsam.otora.core.theme.plexSemi
 import com.madsam.otora.data.chunithm.local.model.ChunithmCharacterEntity
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 
@@ -146,7 +146,7 @@ private fun CharacterListContent(
                     text = "角色收集",
                     color = White1000,
                     fontSize = 20.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     modifier = Modifier
                         .weight(1f)
                         .padding(start = 8.dp)
@@ -157,7 +157,7 @@ private fun CharacterListContent(
                     text = "${characters.size} 个角色",
                     color = White1000.copy(alpha = 0.8f),
                     fontSize = 14.sp,
-                    fontFamily = sarasaRegular,
+                    fontFamily = plexRegular,
                     modifier = Modifier.padding(end = 8.dp)
                 )
             }
@@ -185,7 +185,7 @@ private fun CharacterListContent(
                                 text = "暂无角色数据",
                                 color = White1000,
                                 fontSize = 18.sp,
-                                fontFamily = sarasaBold
+                                fontFamily = plexBold
                             )
                             Text(
                                 text = "请先同步游戏数据",
@@ -276,7 +276,7 @@ private fun CharacterCard(character: ChunithmCharacterEntity) {
                             text = "使用中",
                             color = White1000,
                             fontSize = 10.sp,
-                            fontFamily = sarasaBold
+                            fontFamily = plexBold
                         )
                     }
                 }
@@ -297,7 +297,7 @@ private fun CharacterCard(character: ChunithmCharacterEntity) {
                             text = "MAX",
                             color = Color.Black,
                             fontSize = 10.sp,
-                            fontFamily = sarasaBold
+                            fontFamily = plexBold
                         )
                     }
                 }
@@ -310,7 +310,7 @@ private fun CharacterCard(character: ChunithmCharacterEntity) {
                 text = character.name,
                 color = White1000,
                 fontSize = 14.sp,
-                fontFamily = sarasaSemiBold,
+                fontFamily = plexSemi,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.fillMaxWidth()
@@ -327,7 +327,7 @@ private fun CharacterCard(character: ChunithmCharacterEntity) {
                     text = "Lv.${character.level}",
                     color = White1000.copy(alpha = 0.8f),
                     fontSize = 12.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
                 
                 if (!character.isMaxLevel && character.expBarWidth > 0) {

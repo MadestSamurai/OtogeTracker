@@ -37,8 +37,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.GradientBrush
 import com.madsam.otora.core.theme.TierColors
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.BrushUtils.getRatingTextBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmFriendUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,7 +70,7 @@ internal fun ChunithmFriendList(
             Text(
                 text = "置顶好友",
                 fontSize = 16.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = colorScheme.primary,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -162,7 +162,7 @@ internal fun FriendCard(
                         textAlign = TextAlign.Center,
                         color = if (isDark) Color.White else Color.Black,
                         fontSize = 14.sp,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -210,7 +210,7 @@ internal fun FriendCard(
                     text = chuniFriend.reborn.toString(),
                     color = Color.Black,
                     fontSize = 12.sp,
-                    fontFamily = sarasaBold
+                    fontFamily = plexBold
                 )
             }
 
@@ -233,7 +233,7 @@ internal fun FriendCard(
                 text = chuniFriend.level.toString(),
                 color = colorScheme.onSurface,
                 fontSize = 18.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 modifier = Modifier
                     .constrainAs(lv) {
                         top.linkTo(
@@ -250,7 +250,7 @@ internal fun FriendCard(
                 color = colorScheme.onSurface,
                 fontSize = 18.sp,
                 lineHeight = 22.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 modifier = Modifier
                     .constrainAs(username) {
                         top.linkTo(
@@ -297,7 +297,7 @@ internal fun FriendCard(
                         style = SpanStyle(
                             color = colorScheme.primary,
                             fontSize = 14.sp,
-                            fontFamily = sarasaRegular
+                            fontFamily = plexRegular
                         )
                     ) {
                         append("RATING ")
@@ -306,7 +306,7 @@ internal fun FriendCard(
                         style = SpanStyle(
                             brush = getRatingTextBrush(chuniFriend.rating, isDark),
                             fontSize = 16.sp,
-                            fontFamily = sarasaBold
+                            fontFamily = plexBold
                         )
                     ) {
                         append(chuniFriend.rating)
@@ -335,7 +335,7 @@ internal fun FriendCard(
                             style = SpanStyle(
                                 color = colorScheme.primary,
                                 fontSize = 11.sp,
-                                fontFamily = sarasaRegular
+                                fontFamily = plexRegular
                             )
                         ) {
                             append("OVERPOWER ")
@@ -345,7 +345,7 @@ internal fun FriendCard(
                     color = colorScheme.onSurface,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                 )
 
                 Text(
@@ -354,7 +354,7 @@ internal fun FriendCard(
                             style = SpanStyle(
                                 color = colorScheme.primary,
                                 fontSize = 11.sp,
-                                fontFamily = sarasaRegular
+                                fontFamily = plexRegular
                             )
                         ) {
                             append("LAST PLAY ")
@@ -364,7 +364,7 @@ internal fun FriendCard(
                     color = colorScheme.onSurface,
                     fontSize = 12.sp,
                     lineHeight = 14.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                 )
             }
         }

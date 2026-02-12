@@ -46,7 +46,7 @@ import com.madsam.otora.core.theme.CHUNI_DIFF_MASTER
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_1
 import com.madsam.otora.core.theme.CHUNI_DIFF_ULTIMA_2
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.plexBold
 
 @Composable
 internal fun ChunithmFilterComponent(
@@ -143,7 +143,7 @@ private fun GenreFilterRow(
             Text(
                 text = toggleText,
                 fontSize = 12.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = colorScheme.primary,
                 textAlign = TextAlign.Center
             )
@@ -238,7 +238,7 @@ private fun VersionFilterRow(
             Text(
                 text = toggleText,
                 fontSize = 12.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = colorScheme.primary,
                 textAlign = TextAlign.Center
             )
@@ -356,7 +356,7 @@ private fun DifficultyFilterRow(
                     text = difficultyLabels[index],
                     color = if (isSelected) White1000 else colorScheme.primary,
                     fontSize = 12.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     textAlign = TextAlign.Center,
                     letterSpacing = if (difficulty == "advanced") (-0.5).sp else 0.sp,
                     maxLines = 1,

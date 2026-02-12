@@ -37,7 +37,7 @@ import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.data.chunithm.ui.model.ChunithmAvatarUiModel
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,7 +68,7 @@ internal fun AvatarLayout(
             Text(
                 text = "角色装扮",
                 fontSize = 16.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = colorScheme.primary,
                 modifier = Modifier.weight(1f)
             )
@@ -78,7 +78,7 @@ internal fun AvatarLayout(
                 text = "详细",
                 color = colorScheme.surfaceContainer,
                 fontSize = 14.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
                     .background(colorScheme.surfaceContainerHigh)
@@ -370,14 +370,14 @@ private fun AvatarCategoryCard(
                     text = label,
                     color = White1000,
                     fontSize = 12.sp,
-                    fontFamily = sarasaBold
+                    fontFamily = plexBold
                 )
                 
                 Text(
                     text = "$count",
                     color = colorScheme.onSurface,
                     fontSize = 11.sp,
-                    fontFamily = sarasaBold
+                    fontFamily = plexBold
                 )
             }
             

@@ -7,14 +7,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -46,9 +44,9 @@ import com.madsam.otora.core.datastore.ThemeDataStore
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.icon.fa.`Chevron-left`
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
+import com.madsam.otora.core.theme.plexSemi
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,7 +76,7 @@ fun ThemeColorSettingScreen(
             title = {
                 Text(
                     text = "主题颜色",
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     color = colorScheme.onSurface
                 )
             },
@@ -122,7 +120,7 @@ fun ThemeColorSettingScreen(
                         text = "当前主题色",
                         color = colorScheme.onSurfaceVariant,
                         fontSize = 14.sp,
-                        fontFamily = sarasaRegular
+                        fontFamily = plexRegular
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -147,7 +145,7 @@ fun ThemeColorSettingScreen(
                         text = colorName,
                         color = colorScheme.onSurface,
                         fontSize = 16.sp,
-                        fontFamily = sarasaSemiBold
+                        fontFamily = plexSemi
                     )
                 }
             }
@@ -159,7 +157,7 @@ fun ThemeColorSettingScreen(
                 text = "选择颜色",
                 color = colorScheme.onSurface,
                 fontSize = 14.sp,
-                fontFamily = sarasaSemiBold,
+                fontFamily = plexSemi,
                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
             )
             
@@ -198,7 +196,7 @@ fun ThemeColorSettingScreen(
                 text = "选择的颜色将作为应用的主题色，影响整体界面配色",
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 modifier = Modifier.padding(horizontal = 4.dp)
             )
         }
@@ -248,7 +246,7 @@ private fun ColorItem(
             text = name,
             color = if (isSelected) colorScheme.onSurface else colorScheme.onSurfaceVariant,
             fontSize = 10.sp,
-            fontFamily = if (isSelected) sarasaSemiBold else sarasaRegular
+            fontFamily = if (isSelected) plexSemi else plexRegular
         )
     }
 }

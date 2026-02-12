@@ -36,9 +36,9 @@ import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.datastore.UserAgentDataStore
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Chevron-left`
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
+import com.madsam.otora.core.theme.plexSemi
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,7 +69,7 @@ fun UserAgentSettingScreen(
             title = {
                 Text(
                     text = "User-Agent 设置",
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     color = colorScheme.onSurface
                 )
             },
@@ -106,14 +106,14 @@ fun UserAgentSettingScreen(
                     text = "浏览器标识设置",
                     color = colorScheme.onSurface,
                     fontSize = 18.sp,
-                    fontFamily = sarasaBold
+                    fontFamily = plexBold
                 )
                 
                 Text(
                     text = "设置用于maimai DX、CHUNITHM等应用更新时的浏览器User-Agent标识，这有助于某些服务正确识别请求",
                     color = colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -125,14 +125,14 @@ fun UserAgentSettingScreen(
                     label = { 
                         Text(
                             "User-Agent",
-                            fontFamily = sarasaRegular,
+                            fontFamily = plexRegular,
                             color = colorScheme.onSurfaceVariant
                         )
                     },
                     placeholder = {
                         Text(
                             "例如: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                            fontFamily = sarasaRegular,
+                            fontFamily = plexRegular,
                             color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                             fontSize = 12.sp
                         )
@@ -156,7 +156,7 @@ fun UserAgentSettingScreen(
                     text = "常用示例：",
                     color = colorScheme.onSurfaceVariant,
                     fontSize = 14.sp,
-                    fontFamily = sarasaSemiBold
+                    fontFamily = plexSemi
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -165,7 +165,7 @@ fun UserAgentSettingScreen(
                     text = "Chrome (Windows): Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                     color = colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                     fontSize = 12.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
                 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -174,7 +174,7 @@ fun UserAgentSettingScreen(
                     text = "Safari (macOS): Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15",
                     color = colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
                     fontSize = 12.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -198,7 +198,7 @@ fun UserAgentSettingScreen(
                 ) {
                     Text(
                         "保存设置",
-                        fontFamily = sarasaSemiBold
+                        fontFamily = plexSemi
                     )
                 }
                 
@@ -217,7 +217,7 @@ fun UserAgentSettingScreen(
                 ) {
                     Text(
                         "清空设置",
-                        fontFamily = sarasaSemiBold
+                        fontFamily = plexSemi
                     )
                 }
             }

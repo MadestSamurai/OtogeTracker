@@ -33,8 +33,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
 import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.compose.material3.MaterialTheme
 
@@ -77,7 +77,6 @@ fun MapCard(
     mapDataFlow: MutableStateFlow<List<ChunithmMapUiModel>>,
     width: Dp
 ) {
-    val colorScheme = MaterialTheme.colorScheme
     val mapList by mapDataFlow.collectAsState()
     
     if (mapList.isEmpty()) return
@@ -196,7 +195,7 @@ private fun MapTitleBar(
             text = mapData.mapName,
             color = colorScheme.primary,
             fontSize = 16.sp,
-            fontFamily = sarasaBold
+            fontFamily = plexBold
         )
         
         Spacer(modifier = Modifier.width(12.dp))
@@ -211,7 +210,7 @@ private fun MapTitleBar(
                     text = "第 ${mapData.currentPage}/${mapData.totalPages} 页",
                     color = colorScheme.onSurface,
                     fontSize = 14.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
                 Text(
                     text = "·",
@@ -223,7 +222,7 @@ private fun MapTitleBar(
                 text = "${mapData.completedAreas} / ${mapData.totalAreas}",
                 color = colorScheme.onSurface,
                 fontSize = 14.sp,
-                fontFamily = sarasaRegular
+                fontFamily = plexRegular
             )
         }
         
@@ -234,7 +233,7 @@ private fun MapTitleBar(
             text = "详细",
             color = colorScheme.surfaceContainer,
             fontSize = 14.sp,
-            fontFamily = sarasaBold,
+            fontFamily = plexBold,
             modifier = Modifier
                 .clip(RoundedCornerShape(4.dp))
                 .background(colorScheme.surfaceContainerHigh)
@@ -334,7 +333,7 @@ private fun MapGridCell(
                         text = area.remain.toString(),
                         color = colorScheme.primary,
                         fontSize = 10.sp,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         textAlign = TextAlign.Center,
                         maxLines = 1
                     )
@@ -343,7 +342,7 @@ private fun MapGridCell(
                         text = "✓",
                         color = Color.White,
                         fontSize = 12.sp,
-                        fontFamily = sarasaBold
+                        fontFamily = plexBold
                     )
                 }
             }
@@ -362,7 +361,7 @@ private fun MapGridCell(
                         text = area.skillSeed,
                         color = colorScheme.onSurface,
                         fontSize = 9.sp,
-                        fontFamily = sarasaRegular,
+                        fontFamily = plexRegular,
                         maxLines = 1,
                         textAlign = TextAlign.Center
                     )

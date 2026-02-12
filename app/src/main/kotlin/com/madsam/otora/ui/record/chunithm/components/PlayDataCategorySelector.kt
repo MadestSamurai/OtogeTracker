@@ -16,7 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.data.chunithm.ui.model.PlayDataCategoryType
 
 /**
@@ -29,7 +29,6 @@ fun PlayDataCategorySelector(
     onTypeChange: (PlayDataCategoryType) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val colorScheme = MaterialTheme.colorScheme
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -68,7 +67,7 @@ private fun CategoryButton(
     Text(
         text = text,
         fontSize = 12.sp,
-        fontFamily = sarasaBold,
+        fontFamily = plexBold,
         color = if (isSelected) White1000 else colorScheme.onSurface,
         modifier = Modifier
             .clip(RoundedCornerShape(4.dp))

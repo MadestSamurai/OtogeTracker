@@ -43,9 +43,9 @@ import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.`Arrow-rotate-back`
 import com.madsam.otora.core.icon.fa.Info
 import com.madsam.otora.core.theme.RANKING_GREEN
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
+import com.madsam.otora.core.theme.plexSemi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,7 +71,7 @@ fun BOFDataUpdateScreen(
             title = {
                 Text(
                     text = "BOF 数据更新",
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     color = colorScheme.onSurface
                 )
             },
@@ -135,7 +135,7 @@ fun BOFDataUpdateScreen(
                             text = "BOF 活动数据",
                             color = colorScheme.onSurface,
                             fontSize = 18.sp,
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             textAlign = TextAlign.Center
                         )
                         
@@ -145,7 +145,7 @@ fun BOFDataUpdateScreen(
                             text = "BOF (BMS of Fighters) 是音游界的知名活动。\n根据数据库中的比赛信息显示可更新的数据列表。",
                             color = colorScheme.onSurfaceVariant,
                             fontSize = 14.sp,
-                            fontFamily = sarasaRegular,
+                            fontFamily = plexRegular,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -181,7 +181,7 @@ fun BOFDataUpdateScreen(
                                 text = message,
                                 color = if (uiState.isError) colorScheme.error else colorScheme.onSurface,
                                 fontSize = 14.sp,
-                                fontFamily = sarasaRegular
+                                fontFamily = plexRegular
                             )
                         }
                     }
@@ -207,7 +207,7 @@ fun BOFDataUpdateScreen(
                     ) {
                         Text(
                             "查看统计",
-                            fontFamily = sarasaSemiBold,
+                            fontFamily = plexSemi,
                             fontSize = 14.sp
                         )
                     }
@@ -225,7 +225,7 @@ fun BOFDataUpdateScreen(
                     ) {
                         Text(
                             "刷新列表",
-                            fontFamily = sarasaSemiBold,
+                            fontFamily = plexSemi,
                             fontSize = 14.sp
                         )
                     }
@@ -239,7 +239,7 @@ fun BOFDataUpdateScreen(
                         text = "可用比赛 (${uiState.availableCompetitions.size})",
                         color = colorScheme.onSurface,
                         fontSize = 16.sp,
-                        fontFamily = sarasaSemiBold,
+                        fontFamily = plexSemi,
                         modifier = Modifier.padding(horizontal = 4.dp)
                     )
                 }
@@ -271,7 +271,7 @@ fun BOFDataUpdateScreen(
                                 text = "暂无可用比赛",
                                 color = colorScheme.onSurfaceVariant,
                                 fontSize = 16.sp,
-                                fontFamily = sarasaSemiBold,
+                                fontFamily = plexSemi,
                                 textAlign = TextAlign.Center
                             )
                             
@@ -281,7 +281,7 @@ fun BOFDataUpdateScreen(
                                 text = "请先确保数据库中有 Range 数据，或者刷新比赛列表",
                                 color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                                 fontSize = 14.sp,
-                                fontFamily = sarasaRegular,
+                                fontFamily = plexRegular,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -322,7 +322,7 @@ private fun CompetitionUpdateItem(
                             text = competition.shortName,
                             color = colorScheme.onSurface,
                             fontSize = 16.sp,
-                            fontFamily = sarasaBold
+                            fontFamily = plexBold
                         )
                         
                         if (competition.isStart && !competition.isEnd) {
@@ -331,7 +331,7 @@ private fun CompetitionUpdateItem(
                                 text = "进行中",
                                 color = RANKING_GREEN,
                                 fontSize = 12.sp,
-                                fontFamily = sarasaSemiBold,
+                                fontFamily = plexSemi,
                                 modifier = Modifier
                                     .background(
                                         RANKING_GREEN.copy(alpha = 0.2f),
@@ -346,7 +346,7 @@ private fun CompetitionUpdateItem(
                         text = competition.fullName,
                         color = colorScheme.onSurfaceVariant,
                         fontSize = 14.sp,
-                        fontFamily = sarasaRegular
+                        fontFamily = plexRegular
                     )
                 }
                 
@@ -370,7 +370,7 @@ private fun CompetitionUpdateItem(
                     } else {
                         Text(
                             if (competition.isStart) "更新" else "未开始",
-                            fontFamily = sarasaSemiBold,
+                            fontFamily = plexSemi,
                             fontSize = 14.sp
                         )
                     }
@@ -394,14 +394,14 @@ private fun CompetitionUpdateItem(
                     },
                     color = if (competition.hasData) colorScheme.onSurface else colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     fontSize = 12.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
                 
                 Text(
                     text = "更新: ${competition.lastUpdated}",
                     color = colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     fontSize = 12.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
             }
         }

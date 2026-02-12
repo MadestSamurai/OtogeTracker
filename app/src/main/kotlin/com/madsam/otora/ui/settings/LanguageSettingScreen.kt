@@ -56,9 +56,9 @@ import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Chevron-down`
 import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.`Chevron-up`
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
+import com.madsam.otora.core.theme.plexSemi
 import kotlinx.coroutines.launch
 
 /**
@@ -126,7 +126,7 @@ fun LanguageSettingScreen(
             title = {
                 Text(
                     text = stringResource(R.string.language_select_title),
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     color = colorScheme.onSurface
                 )
             },
@@ -173,13 +173,13 @@ fun LanguageSettingScreen(
                                 text = stringResource(R.string.language_follow_system),
                                 color = colorScheme.onSurface,
                                 fontSize = 16.sp,
-                                fontFamily = sarasaSemiBold
+                                fontFamily = plexSemi
                             )
                             Text(
                                 text = stringResource(R.string.language_follow_system_desc),
                                 color = colorScheme.onSurfaceVariant,
                                 fontSize = 14.sp,
-                                fontFamily = sarasaRegular
+                                fontFamily = plexRegular
                             )
                         }
                         
@@ -220,7 +220,7 @@ fun LanguageSettingScreen(
                             text = stringResource(R.string.language_priority),
                             color = colorScheme.onSurface,
                             fontSize = 14.sp,
-                            fontFamily = sarasaSemiBold,
+                            fontFamily = plexSemi,
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
                         )
                         
@@ -287,7 +287,7 @@ fun LanguageSettingScreen(
                             text = stringResource(R.string.language_drag_hint),
                             color = colorScheme.onSurfaceVariant,
                             fontSize = 12.sp,
-                            fontFamily = sarasaRegular,
+                            fontFamily = plexRegular,
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
                         )
                     }
@@ -300,7 +300,7 @@ fun LanguageSettingScreen(
                     text = stringResource(R.string.language_restart_hint),
                     color = colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
-                    fontFamily = sarasaRegular,
+                    fontFamily = plexRegular,
                     modifier = Modifier.padding(horizontal = 4.dp)
                 )
             }
@@ -330,7 +330,7 @@ private fun LanguageOrderItem(
             text = "${index + 1}",
             color = colorScheme.primary,
             fontSize = 18.sp,
-            fontFamily = sarasaBold,
+            fontFamily = plexBold,
             modifier = Modifier.width(28.dp)
         )
         
@@ -342,13 +342,13 @@ private fun LanguageOrderItem(
                 text = stringResource(item.displayNameResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
-                fontFamily = sarasaSemiBold
+                fontFamily = plexSemi
             )
             Text(
                 text = item.nativeName,
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
-                fontFamily = sarasaRegular
+                fontFamily = plexRegular
             )
         }
         

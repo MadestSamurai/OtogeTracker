@@ -24,8 +24,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
 
 @Composable
 fun ChunithmSortComponent(
@@ -56,7 +56,7 @@ fun ChunithmSortComponent(
                 text = "排序选项",
                 color = colorScheme.primary,
                 fontSize = 16.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
             
@@ -125,7 +125,7 @@ private fun SortOrderRow(
                 text = "正序 ↑",
                 color = colorScheme.primary,
                 fontSize = 12.sp,
-                fontFamily = if (isAscendingOrder.value) sarasaBold else sarasaRegular,
+                fontFamily = if (isAscendingOrder.value) plexBold else plexRegular,
                 textAlign = TextAlign.Center
             )
         }
@@ -148,7 +148,7 @@ private fun SortOrderRow(
                 text = "倒序 ↓",
                 color = colorScheme.primary,
                 fontSize = 12.sp,
-                fontFamily = if (!isAscendingOrder.value) sarasaBold else sarasaRegular,
+                fontFamily = if (!isAscendingOrder.value) plexBold else plexRegular,
                 textAlign = TextAlign.Center
             )
         }
@@ -192,7 +192,7 @@ private fun BasicSortOptionsRow(
                     text = label,
                     color = colorScheme.primary,
                     fontSize = 13.sp,
-                    fontFamily = if (isSelected) sarasaBold else sarasaRegular,
+                    fontFamily = if (isSelected) plexBold else plexRegular,
                     textAlign = TextAlign.Center
                 )
             }
@@ -210,7 +210,7 @@ private fun CnValueSortSection(
         text = "按CN Value排序",
         color = colorScheme.primary,
         fontSize = 14.sp,
-        fontFamily = sarasaBold,
+        fontFamily = plexBold,
         modifier = Modifier.padding(bottom = 4.dp)
     )
     
@@ -247,7 +247,7 @@ private fun CnValueSortSection(
                     text = label,
                     color = colorScheme.primary,
                     fontSize = 11.sp,
-                    fontFamily = if (isSelected) sarasaBold else sarasaRegular,
+                    fontFamily = if (isSelected) plexBold else plexRegular,
                     textAlign = TextAlign.Center
                 )
             }
@@ -265,7 +265,7 @@ private fun JpValueSortSection(
         text = "按JP Value排序",
         color = colorScheme.primary,
         fontSize = 14.sp,
-        fontFamily = sarasaBold,
+        fontFamily = plexBold,
         modifier = Modifier.padding(bottom = 4.dp)
     )
     
@@ -302,7 +302,7 @@ private fun JpValueSortSection(
                     text = label,
                     color = colorScheme.primary,
                     fontSize = 11.sp,
-                    fontFamily = if (isSelected) sarasaBold else sarasaRegular,
+                    fontFamily = if (isSelected) plexBold else plexRegular,
                     textAlign = TextAlign.Center
                 )
             }

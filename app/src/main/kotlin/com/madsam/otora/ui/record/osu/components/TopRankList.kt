@@ -42,8 +42,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.OSU_ARROW_YELLOW
 import com.madsam.otora.core.theme.OSU_HEART_RED
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexSemi
 import com.madsam.otora.core.utils.DateTimeUtils.dateCodeToRecent
 import com.madsam.otora.core.utils.NumberFormatUtils.formatThousand
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
@@ -231,7 +231,7 @@ private fun DifficultyBadge(
         },
         inlineContent = inlineContent,
         fontSize = 14.sp,
-        fontFamily = sarasaBold,
+        fontFamily = plexBold,
         color = OsuDifficultyColor.mapValueToTextColor(difficultyRating.toFloat()),
         modifier = modifier
             .background(
@@ -254,7 +254,7 @@ private fun TitleSection(
         text = title,
         color = colorScheme.onSurface,
         fontSize = 16.sp,
-        fontFamily = sarasaSemiBold,
+        fontFamily = plexSemi,
         maxLines = 1,
         lineHeight = 23.sp,
         overflow = TextOverflow.Ellipsis,
@@ -437,7 +437,7 @@ private fun PPBottomRow(
                     Text(
                         text = "${item.pp.format(2)}pp",
                         fontSize = 14.sp,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         color = colorScheme.primary
                     )
                     if (item.weightPP != 0.0) {

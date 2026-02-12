@@ -35,8 +35,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.TEXT_GRAY
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ImageUtils
 import com.madsam.otora.ui.bof.TeamRankingItem
 import com.madsam.otora.ui.bof.sub.TeamRankingRow
@@ -201,7 +201,7 @@ internal fun BofTeamCaptureContent(
             ) {
                 Text(
                     text = "0000",
-                    fontFamily = sarasaRegular,
+                    fontFamily = plexRegular,
                     fontSize = 14.sp,
                     modifier = Modifier.onGloballyPositioned { coordinates ->
                         extraWidth = with(density) {
@@ -211,7 +211,7 @@ internal fun BofTeamCaptureContent(
                 )
                 Text(
                     text = "000.00",
-                    fontFamily = sarasaRegular,
+                    fontFamily = plexRegular,
                     fontSize = 14.sp,
                     modifier = Modifier.onGloballyPositioned { coordinates ->
                         medianWidth = with(density) {
@@ -231,7 +231,7 @@ internal fun BofTeamCaptureContent(
                 ) {
                     Text(
                         text = "团队总分排行榜",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 20.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
@@ -239,7 +239,7 @@ internal fun BofTeamCaptureContent(
 
                     Text(
                         text = subtitle,
-                        fontFamily = sarasaRegular,
+                        fontFamily = plexRegular,
                         fontSize = 12.sp,
                         color = TEXT_GRAY,
                         textAlign = TextAlign.Center,

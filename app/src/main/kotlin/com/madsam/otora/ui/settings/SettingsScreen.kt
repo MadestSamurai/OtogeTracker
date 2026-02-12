@@ -59,9 +59,9 @@ import com.madsam.otora.core.icon.fa.Language
 import com.madsam.otora.core.icon.fa.Moon
 import com.madsam.otora.core.icon.fa.Palette
 import com.madsam.otora.core.icon.fa.Sun
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
+import com.madsam.otora.core.theme.plexSemi
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -181,7 +181,7 @@ fun SettingsScreen(
                 title = {
                     Text(
                         text = stringResource(R.string.settings_title),
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         color = colorScheme.onSurface
                     )
                 },
@@ -232,7 +232,7 @@ fun SettingsScreen(
                             text = stringResource(R.string.settings_group_appearance),
                             color = colorScheme.onSurface,
                             fontSize = 14.sp,
-                            fontFamily = sarasaSemiBold,
+                            fontFamily = plexSemi,
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
                         )
                         
@@ -383,7 +383,7 @@ private fun <T> SettingsGroup(
             text = title,
             color = colorScheme.onSurface,
             fontSize = 14.sp,
-            fontFamily = sarasaSemiBold,
+            fontFamily = plexSemi,
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
         )
         
@@ -439,14 +439,14 @@ private fun DataUpdateSettingItem(
                 text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
-                fontFamily = sarasaSemiBold
+                fontFamily = plexSemi
             )
             
             Text(
                 text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
-                fontFamily = sarasaRegular
+                fontFamily = plexRegular
             )
             
             if (setting.lastUpdate.isNotEmpty()) {
@@ -454,7 +454,7 @@ private fun DataUpdateSettingItem(
                     text = stringResource(R.string.settings_last_update, setting.lastUpdate),
                     color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     fontSize = 12.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
             }
         }
@@ -498,14 +498,14 @@ private fun ToggleSettingItem(
                 text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
-                fontFamily = sarasaSemiBold
+                fontFamily = plexSemi
             )
             
             Text(
                 text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
-                fontFamily = sarasaRegular
+                fontFamily = plexRegular
             )
         }
         
@@ -555,14 +555,14 @@ private fun NetworkToggleSettingItem(
                 text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
-                fontFamily = sarasaSemiBold
+                fontFamily = plexSemi
             )
             
             Text(
                 text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
-                fontFamily = sarasaRegular
+                fontFamily = plexRegular
             )
         }
         
@@ -610,14 +610,14 @@ private fun SelectionSettingItem(
                 text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
-                fontFamily = sarasaSemiBold
+                fontFamily = plexSemi
             )
             
             Text(
                 text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
-                fontFamily = sarasaRegular
+                fontFamily = plexRegular
             )
             
             if (currentValue.isNotEmpty()) {
@@ -625,7 +625,7 @@ private fun SelectionSettingItem(
                     text = stringResource(R.string.settings_current, currentValue),
                     color = colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 12.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
             }
         }
@@ -667,14 +667,14 @@ private fun NetworkSelectionSettingItem(
                 text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
-                fontFamily = sarasaSemiBold
+                fontFamily = plexSemi
             )
             
             Text(
                 text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
-                fontFamily = sarasaRegular
+                fontFamily = plexRegular
             )
             
             if (currentValue.isNotEmpty()) {
@@ -682,7 +682,7 @@ private fun NetworkSelectionSettingItem(
                     text = stringResource(R.string.settings_current, currentValue),
                     color = colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 12.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
             }
         }

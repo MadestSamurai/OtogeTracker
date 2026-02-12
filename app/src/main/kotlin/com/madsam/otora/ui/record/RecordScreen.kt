@@ -55,7 +55,7 @@ import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.Bars
 import com.madsam.otora.core.icon.fa.Cog
 import com.madsam.otora.core.icon.fa.Trash
-import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.plexBold
 import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.ui.navigation.ChunithmNavHost
 import com.madsam.otora.ui.record.chunithm.ChuniViewModelFactory
@@ -273,7 +273,7 @@ fun TestPage4() {
     Text(
         text = "TestPage4",
         modifier = Modifier.fillMaxSize(),
-        fontFamily = sarasaBold,
+        fontFamily = plexBold,
         fontSize = 20.sp
     )
 }
@@ -342,7 +342,7 @@ private fun ScrollableTitle(text: String) {
         ) {
             Text(
                 text = text,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 
                 maxLines = 1,
                 overflow = TextOverflow.Visible,

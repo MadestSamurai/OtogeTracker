@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.MaterialTheme
-import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.utils.BrushUtils.getRatingTextBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.ui.components.RoundedBarChart
@@ -75,7 +75,7 @@ internal fun TopRank(
             Text(
                 text = "Rating 分布",
                 fontSize = 16.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 color = colorScheme.primary,
                 modifier = Modifier.weight(1f)
             )
@@ -85,7 +85,7 @@ internal fun TopRank(
                 text = "详细",
                 color = colorScheme.surfaceContainer,
                 fontSize = 14.sp,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
                     .background(colorScheme.surfaceContainerHigh)
@@ -123,7 +123,7 @@ internal fun TopRank(
                 Text(
                     text = String.format(Locale.US, "%.2f", topRank.best30),
                     fontSize = 14.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     style = TextStyle(
                         brush = getRatingTextBrush(topRank.best30.toString(), isDark)
                     )
@@ -169,7 +169,7 @@ internal fun TopRank(
                 Text(
                     text = String.format(Locale.US, "%.2f", topRank.new20),
                     fontSize = 14.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     style = TextStyle(
                         brush = getRatingTextBrush(topRank.new20.toString(), isDark)
                     )

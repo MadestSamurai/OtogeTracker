@@ -55,9 +55,9 @@ import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.TEXT_GRAY
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
+import com.madsam.otora.core.theme.plexSemi
 import com.madsam.otora.data.chunithm.local.model.ChunithmAvatarItemEntity
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 
@@ -148,7 +148,7 @@ private fun AvatarListContent(
                     text = "Avatar 自定义",
                     color = White1000,
                     fontSize = 20.sp,
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     modifier = Modifier
                         .weight(1f)
                         .padding(start = 8.dp)
@@ -159,7 +159,7 @@ private fun AvatarListContent(
                     text = "${avatarItems.size} 个部件",
                     color = White1000.copy(alpha = 0.8f),
                     fontSize = 14.sp,
-                    fontFamily = sarasaRegular,
+                    fontFamily = plexRegular,
                     modifier = Modifier.padding(end = 8.dp)
                 )
             }
@@ -193,7 +193,7 @@ private fun AvatarListContent(
                                 text = "暂无部件数据",
                                 color = White1000,
                                 fontSize = 18.sp,
-                                fontFamily = sarasaBold
+                                fontFamily = plexBold
                             )
                             Text(
                                 text = "请先同步游戏数据",
@@ -243,7 +243,7 @@ private fun CategoryFilterRow(
                     Text(
                         text = label,
                         fontSize = 12.sp,
-                        fontFamily = sarasaRegular
+                        fontFamily = plexRegular
                     )
                 },
                 colors = FilterChipDefaults.filterChipColors(
@@ -327,7 +327,7 @@ private fun AvatarItemCard(item: ChunithmAvatarItemEntity) {
                             text = "使用中",
                             color = White1000,
                             fontSize = 10.sp,
-                            fontFamily = sarasaBold
+                            fontFamily = plexBold
                         )
                     }
                 }
@@ -340,7 +340,7 @@ private fun AvatarItemCard(item: ChunithmAvatarItemEntity) {
                 text = item.name,
                 color = White1000,
                 fontSize = 13.sp,
-                fontFamily = sarasaSemiBold,
+                fontFamily = plexSemi,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.fillMaxWidth()
@@ -354,7 +354,7 @@ private fun AvatarItemCard(item: ChunithmAvatarItemEntity) {
                     text = "ID: ${item.itemId}",
                     color = TEXT_GRAY,
                     fontSize = 10.sp,
-                    fontFamily = sarasaRegular
+                    fontFamily = plexRegular
                 )
             }
         }

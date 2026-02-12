@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.Cog
-import com.madsam.otora.core.theme.sarasaBold
+import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.settings.SettingsActivity
 
@@ -57,7 +57,7 @@ fun MaimaiGameScreen(
                 title = {
                     Text(
                         text = "maimai",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 20.sp
                     )
                 },

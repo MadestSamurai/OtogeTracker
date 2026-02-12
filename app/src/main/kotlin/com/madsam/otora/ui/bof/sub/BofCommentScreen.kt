@@ -50,8 +50,8 @@ import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.RANKING_GREEN
 import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.TEXT_GRAY
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
 import com.madsam.otora.ui.bof.components.ScoreChart
@@ -150,7 +150,7 @@ internal fun BofCommentScreen(
             // 测量票选平均分宽度 - 使用TWO_DECIMAL标准
             Text(
                 text = ColumnWidthType.TWO_DECIMAL.measureText,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 modifier = Modifier.onGloballyPositioned { coordinates ->
                     voteAvgWidth = with(density) {
@@ -161,7 +161,7 @@ internal fun BofCommentScreen(
             // 测量短评平均分宽度 - 使用TWO_DECIMAL标准
             Text(
                 text = ColumnWidthType.TWO_DECIMAL.measureText,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 modifier = Modifier.onGloballyPositioned { coordinates ->
                     shortAvgWidth = with(density) {
@@ -172,7 +172,7 @@ internal fun BofCommentScreen(
             // 测量长评平均分宽度 - 使用TWO_DECIMAL标准
             Text(
                 text = ColumnWidthType.TWO_DECIMAL.measureText,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 modifier = Modifier.onGloballyPositioned { coordinates ->
                     longAvgWidth = with(density) {
@@ -183,7 +183,7 @@ internal fun BofCommentScreen(
             // 测量总分宽度 - 使用THREE_DIGIT_INT标准
             Text(
                 text = ColumnWidthType.THREE_DIGIT_INT.measureText,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 modifier = Modifier.onGloballyPositioned { coordinates ->
                     totalScoreWidth = with(density) {
@@ -204,7 +204,7 @@ internal fun BofCommentScreen(
             // 主标题
             Text(
                 text = title,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 20.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center
@@ -213,7 +213,7 @@ internal fun BofCommentScreen(
             // 副标题
             Text(
                 text = subtitle,
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 fontSize = 12.sp,
                 color = TEXT_GRAY,
                 textAlign = TextAlign.Center,
@@ -232,7 +232,7 @@ internal fun BofCommentScreen(
             // 排名列标题
             Text(
                 text = "排名",
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center,
@@ -247,7 +247,7 @@ internal fun BofCommentScreen(
             if (isNarrowScreen && commentDisplayMode == 0) {
                     Text(
                         text = "总分",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -257,7 +257,7 @@ internal fun BofCommentScreen(
                     if (!isNarrowScreen) {
                         Text(
                             text = "分数分布",
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 14.sp,
                             color = Color.White,
                             textAlign = TextAlign.Center,
@@ -265,7 +265,7 @@ internal fun BofCommentScreen(
                         )
                         Text(
                             text = "总分",
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 14.sp,
                             color = Color.White,
                             textAlign = TextAlign.End,
@@ -274,7 +274,7 @@ internal fun BofCommentScreen(
                     }
                     Text(
                         text = "票平均",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -282,7 +282,7 @@ internal fun BofCommentScreen(
                     )
                     Text(
                         text = "短平均",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -290,7 +290,7 @@ internal fun BofCommentScreen(
                     )
                     Text(
                         text = "长平均",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -410,7 +410,7 @@ private fun BofCommentRow(
         // 排名列
         Text(
             text = comment.index.toString(),
-            fontFamily = sarasaBold,
+            fontFamily = plexBold,
             fontSize = 16.sp,
             color = rankColor,
             textAlign = TextAlign.Center,
@@ -427,7 +427,7 @@ private fun BofCommentRow(
             // 用户名
             Text(
                 text = comment.user,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 maxLines = 1,
@@ -444,7 +444,7 @@ private fun BofCommentRow(
                 if (comment.pattern.isNotEmpty()) {
                     Text(
                         text = "P${comment.pattern}",
-                        fontFamily = sarasaRegular,
+                        fontFamily = plexRegular,
                         fontSize = 11.sp,
                         color = Color.Yellow,
                         modifier = Modifier.padding(end = 4.dp)
@@ -452,7 +452,7 @@ private fun BofCommentRow(
                 }
                 Text(
                     text = comment.country,
-                    fontFamily = sarasaRegular,
+                    fontFamily = plexRegular,
                     fontSize = 12.sp,
                     color = TEXT_GRAY,
                     maxLines = 1,
@@ -477,7 +477,7 @@ private fun BofCommentRow(
                 )
                 Text(
                     text = formatScore(comment.total, ColumnWidthType.THREE_DIGIT_INT),
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     fontSize = 14.sp,
                     color = Color.White,
                     overflow = TextOverflow.Visible,
@@ -512,7 +512,7 @@ private fun BofCommentRow(
                             text = formatScore(comment.total, ColumnWidthType.THREE_DIGIT_INT),
                             color = Color.White,
                             fontSize = 14.sp,
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             textAlign = TextAlign.End,
                             maxLines = 1
                         )
@@ -536,7 +536,7 @@ private fun BofCommentRow(
             ) {
                 Text(
                     text = formatScore(comment.voteAve, ColumnWidthType.TWO_DECIMAL),
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     fontSize = 14.sp,
                     color = Color.White,
                     textAlign = TextAlign.End,
@@ -560,7 +560,7 @@ private fun BofCommentRow(
             ) {
                 Text(
                     text = formatScore(comment.shortAve, ColumnWidthType.TWO_DECIMAL),
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     fontSize = 14.sp,
                     color = Color.White,
                     textAlign = TextAlign.End,
@@ -584,7 +584,7 @@ private fun BofCommentRow(
             ) {
                 Text(
                     text = formatScore(comment.longAve, ColumnWidthType.TWO_DECIMAL),
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     fontSize = 14.sp,
                     color = Color.White,
                     textAlign = TextAlign.End,
@@ -736,7 +736,7 @@ internal fun BofCommentDiffScreen(
         ) {
             Text(
                 text = title,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 20.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center
@@ -744,7 +744,7 @@ internal fun BofCommentDiffScreen(
             
             Text(
                 text = subtitle,
-                fontFamily = sarasaRegular,
+                fontFamily = plexRegular,
                 fontSize = 12.sp,
                 color = TEXT_GRAY,
                 textAlign = TextAlign.Center,
@@ -762,7 +762,7 @@ internal fun BofCommentDiffScreen(
         ) {
             Text(
                 text = "排名",
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center,
@@ -771,7 +771,7 @@ internal fun BofCommentDiffScreen(
             
             Text(
                 text = "评价",
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 modifier = Modifier.weight(0.6f)
@@ -779,7 +779,7 @@ internal fun BofCommentDiffScreen(
             
             Text(
                 text = if (isReverse) "减少" else "增长",
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center,
@@ -862,7 +862,7 @@ private fun CommentDiffRow(
         // 排名 - 不显示变化
         Text(
             text = (index + 1).toString(),
-            fontFamily = sarasaBold,
+            fontFamily = plexBold,
             fontSize = 16.sp,
             color = Color.White,
             textAlign = TextAlign.Center,
@@ -879,7 +879,7 @@ private fun CommentDiffRow(
             // 用户名
             Text(
                 text = comment.user,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 maxLines = 1,
@@ -896,7 +896,7 @@ private fun CommentDiffRow(
                 if (comment.pattern.isNotEmpty()) {
                     Text(
                         text = "P${comment.pattern}",
-                        fontFamily = sarasaRegular,
+                        fontFamily = plexRegular,
                         fontSize = 11.sp,
                         color = Color.Yellow,
                         modifier = Modifier.padding(end = 4.dp)
@@ -904,7 +904,7 @@ private fun CommentDiffRow(
                 }
                 Text(
                     text = comment.country,
-                    fontFamily = sarasaRegular,
+                    fontFamily = plexRegular,
                     fontSize = 12.sp,
                     color = TEXT_GRAY,
                     maxLines = 1,
@@ -940,7 +940,7 @@ private fun CommentDiffRow(
                     )
                     Text(
                         text = comment.total.toString(),
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         overflow = TextOverflow.Visible,

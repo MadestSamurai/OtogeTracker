@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredWidth
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -34,8 +33,8 @@ import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.theme.BG_DARK_GRAY
 import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.TEXT_GRAY
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ImageUtils
 import com.madsam.otora.ui.bof.TeamRankingItem
 import dev.shreyaspatil.capturable.capturable
@@ -188,7 +187,7 @@ internal fun BofTeamDiffCaptureContent(
                 ) {
                     Text(
                         text = title,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 20.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
@@ -196,7 +195,7 @@ internal fun BofTeamDiffCaptureContent(
 
                     Text(
                         text = subtitle,
-                        fontFamily = sarasaRegular,
+                        fontFamily = plexRegular,
                         fontSize = 12.sp,
                         color = TEXT_GRAY,
                         textAlign = TextAlign.Center,
@@ -216,7 +215,7 @@ internal fun BofTeamDiffCaptureContent(
                 ) {
                     Text(
                         text = "排名",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -225,7 +224,7 @@ internal fun BofTeamDiffCaptureContent(
                     
                     Text(
                         text = "团队",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.End,
@@ -234,7 +233,7 @@ internal fun BofTeamDiffCaptureContent(
                     
                     Text(
                         text = if (title.contains("逆差值") || title.contains("减少")) "减少" else "增长",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -281,7 +280,7 @@ private fun TeamDiffCaptureRow(
             // 排名列 - 只显示排名，不显示变化
             Text(
                 text = team.rank.toString(),
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 16.sp,
                 color = Color.White,
                 textAlign = TextAlign.Center,
@@ -291,7 +290,7 @@ private fun TeamDiffCaptureRow(
             // 团队名称
             Text(
                 text = team.teamName,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 16.sp,
                 color = Color.White,
                 maxLines = 1,
@@ -329,7 +328,7 @@ private fun TeamDiffCaptureRow(
                         )
                         Text(
                             text = String.format("%.2f", team.totalScore),
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 14.sp,
                             color = Color.White,
                             overflow = TextOverflow.Visible,
@@ -363,7 +362,7 @@ private fun TeamDiffCaptureRow(
                 ) {
                     Text(
                         text = "$title - $artist",
-                        fontFamily = sarasaRegular,
+                        fontFamily = plexRegular,
                         fontSize = 12.sp,
                         color = TEXT_GRAY,
                         maxLines = 1,
@@ -374,7 +373,7 @@ private fun TeamDiffCaptureRow(
                     if (scoreDiff != 0.0) {
                         Text(
                             text = if (scoreDiff > 0) "+${String.format("%.1f", scoreDiff)}" else String.format("%.1f", scoreDiff),
-                            fontFamily = sarasaBold,
+                            fontFamily = plexBold,
                             fontSize = 12.sp,
                             color = if (scoreDiff > 0) Color.Green else Color.Red,
                             textAlign = TextAlign.End,

@@ -35,8 +35,8 @@ import com.madsam.otora.core.theme.BG_DARK_GRAY
 import com.madsam.otora.core.theme.RANKING_RED
 import com.madsam.otora.core.theme.RANKING_YELLOW
 import com.madsam.otora.core.theme.TEXT_GRAY
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ImageUtils
 import com.madsam.otora.data.bof.ui.model.BofCommentUI
 import dev.shreyaspatil.capturable.capturable
@@ -189,7 +189,7 @@ internal fun BofCommentDiffCaptureContent(
                 ) {
                     Text(
                         text = title,
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 20.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center
@@ -197,7 +197,7 @@ internal fun BofCommentDiffCaptureContent(
                     
                     Text(
                         text = subtitle,
-                        fontFamily = sarasaRegular,
+                        fontFamily = plexRegular,
                         fontSize = 12.sp,
                         color = TEXT_GRAY,
                         textAlign = TextAlign.Center,
@@ -217,7 +217,7 @@ internal fun BofCommentDiffCaptureContent(
                 ) {
                     Text(
                         text = "排名",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -226,7 +226,7 @@ internal fun BofCommentDiffCaptureContent(
                     
                     Text(
                         text = "评价",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         modifier = Modifier.weight(0.6f)
@@ -234,7 +234,7 @@ internal fun BofCommentDiffCaptureContent(
                     
                     Text(
                         text = if (title.contains("逆差值") || title.contains("减少")) "减少" else "增长",
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         textAlign = TextAlign.Center,
@@ -276,7 +276,7 @@ private fun CommentDiffCaptureRow(
         // 排名列 - 只显示排名，不显示变化
         Text(
             text = (index + 1).toString(),
-            fontFamily = sarasaBold,
+            fontFamily = plexBold,
             fontSize = 16.sp,
             color = Color.White,
             textAlign = TextAlign.Center,
@@ -292,7 +292,7 @@ private fun CommentDiffCaptureRow(
         ) {
             Text(
                 text = comment.user,
-                fontFamily = sarasaBold,
+                fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
@@ -306,7 +306,7 @@ private fun CommentDiffCaptureRow(
                 if (comment.pattern.isNotEmpty()) {
                     Text(
                         text = "P${comment.pattern}",
-                        fontFamily = sarasaRegular,
+                        fontFamily = plexRegular,
                         fontSize = 11.sp,
                         color = RANKING_YELLOW,
                         modifier = Modifier.padding(end = 4.dp)
@@ -314,7 +314,7 @@ private fun CommentDiffCaptureRow(
                 }
                 Text(
                     text = comment.country,
-                    fontFamily = sarasaRegular,
+                    fontFamily = plexRegular,
                     fontSize = 12.sp,
                     color = TEXT_GRAY
                 )
@@ -348,7 +348,7 @@ private fun CommentDiffCaptureRow(
                     )
                     Text(
                         text = comment.total.toString(),
-                        fontFamily = sarasaBold,
+                        fontFamily = plexBold,
                         fontSize = 14.sp,
                         color = Color.White,
                         overflow = TextOverflow.Visible,

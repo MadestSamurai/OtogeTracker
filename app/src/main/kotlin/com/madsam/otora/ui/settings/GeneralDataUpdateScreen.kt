@@ -37,9 +37,9 @@ import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.Clock
 import com.madsam.otora.core.icon.fa.Wifi
-import com.madsam.otora.core.theme.sarasaBold
-import com.madsam.otora.core.theme.sarasaRegular
-import com.madsam.otora.core.theme.sarasaSemiBold
+import com.madsam.otora.core.theme.plexBold
+import com.madsam.otora.core.theme.plexRegular
+import com.madsam.otora.core.theme.plexSemi
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,7 +60,7 @@ fun GeneralDataUpdateScreen(
             title = {
                 Text(
                     text = "通用数据设置",
-                    fontFamily = sarasaBold,
+                    fontFamily = plexBold,
                     color = colorScheme.onSurface
                 )
             },
@@ -102,7 +102,7 @@ fun GeneralDataUpdateScreen(
                         text = "自动更新",
                         color = colorScheme.onSurface,
                         fontSize = 16.sp,
-                        fontFamily = sarasaBold
+                        fontFamily = plexBold
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -126,14 +126,14 @@ fun GeneralDataUpdateScreen(
                                 text = "启用自动更新",
                                 color = colorScheme.onSurface,
                                 fontSize = 16.sp,
-                                fontFamily = sarasaSemiBold
+                                fontFamily = plexSemi
                             )
                             
                             Text(
                                 text = "定期自动更新游戏数据",
                                 color = colorScheme.onSurfaceVariant,
                                 fontSize = 14.sp,
-                                fontFamily = sarasaRegular
+                                fontFamily = plexRegular
                             )
                         }
                         
@@ -164,7 +164,7 @@ fun GeneralDataUpdateScreen(
                         text = "网络设置",
                         color = colorScheme.onSurface,
                         fontSize = 16.sp,
-                        fontFamily = sarasaBold
+                        fontFamily = plexBold
                     )
                     
                     Spacer(modifier = Modifier.height(12.dp))
@@ -188,14 +188,14 @@ fun GeneralDataUpdateScreen(
                                 text = "仅在WiFi下更新",
                                 color = colorScheme.onSurface,
                                 fontSize = 16.sp,
-                                fontFamily = sarasaSemiBold
+                                fontFamily = plexSemi
                             )
                             
                             Text(
                                 text = "节省移动数据流量",
                                 color = colorScheme.onSurfaceVariant,
                                 fontSize = 14.sp,
-                                fontFamily = sarasaRegular
+                                fontFamily = plexRegular
                             )
                         }
                         
