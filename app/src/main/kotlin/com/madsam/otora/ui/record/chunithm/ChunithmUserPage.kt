@@ -59,11 +59,8 @@ import com.madsam.otora.ui.record.chunithm.dialogs.TopRankDialog
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmCollectionPage
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmFriendsPage
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmMainPage
-import com.madsam.otora.ui.record.chunithm.pages.ChunithmSongListPage
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -77,6 +74,13 @@ internal fun ChunithmUserPage(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val selectedTabIndex by chunithmScreenState.selectedTab.collectAsState()
+    val normalizedSelectedTabIndex = when (selectedTabIndex) {
+        0 -> 0
+        1 -> 0
+        2 -> 1
+        3 -> 2
+        else -> 0
+    }
     val scrollThreshold = 50f
 
     var isTabRowVisible by remember { mutableStateOf(true) }
@@ -85,16 +89,14 @@ internal fun ChunithmUserPage(
     val context = LocalContext.current
     val tabTitles = listOf(
         stringResource(R.string.chunithm_tab_home),
-        stringResource(R.string.chunithm_tab_song_list),
         stringResource(R.string.chunithm_tab_friends),
         stringResource(R.string.chunithm_tab_collection)
     )
     val refreshedMessage = stringResource(R.string.chunithm_message_refreshed)
-    val scrolledToTopMessage = stringResource(R.string.chunithm_message_scrolled_to_top)
     val friendsRefreshedMessage = stringResource(R.string.chunithm_message_friends_refreshed)
     val collectionRefreshedMessage = stringResource(R.string.chunithm_message_collection_refreshed)
 
-    val pagerState = rememberPagerState { tabTitles.size }
+    val pagerState = rememberPagerState(initialPage = normalizedSelectedTabIndex) { tabTitles.size }
     val scope = rememberCoroutineScope()
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
@@ -124,8 +126,14 @@ internal fun ChunithmUserPage(
         screenWidthDp - 24.dp - cutoutWidthDp
     }
 
+    LaunchedEffect(selectedTabIndex) {
+        if (selectedTabIndex != normalizedSelectedTabIndex) {
+            chunithmScreenState.selectedTab.update { normalizedSelectedTabIndex }
+        }
+    }
+
     LaunchedEffect(pagerState.currentPage) {
-        if (selectedTabIndex != pagerState.currentPage) {
+        if (normalizedSelectedTabIndex != pagerState.currentPage) {
             chunithmScreenState.selectedTab.update { pagerState.currentPage }
         }
     }
@@ -165,24 +173,13 @@ internal fun ChunithmUserPage(
                     onShowSongList = onShowSongList
                 )
 
-                1 -> ChunithmSongListPage(
-                    viewModel = viewModel,
-                    scrollThreshold = scrollThreshold,
-                    setIsTabRowVisible = { isTabRowVisible = it },
-                    onNavigateToSongDetail = { songTitle ->
-                        // 对歌曲标题进行URL编码以处理特殊字符
-                        val encodedTitle = URLEncoder.encode(songTitle, StandardCharsets.UTF_8.toString())
-                        navController.navigate("chunithm_song_detail/$encodedTitle")
-                    }
-                )
-
-                2 -> ChunithmFriendsPage(
+                1 -> ChunithmFriendsPage(
                     viewModel = viewModel,
                     scrollThreshold = scrollThreshold,
                     setIsTabRowVisible = { isTabRowVisible = it },
                 )
 
-                3 -> ChunithmCollectionPage(
+                2 -> ChunithmCollectionPage(
                     viewModel = viewModel,
                     scrollThreshold = scrollThreshold,
                     setIsTabRowVisible = { isTabRowVisible = it },
@@ -235,15 +232,15 @@ internal fun ChunithmUserPage(
                             .clip(RoundedCornerShape(20.dp))
                     ) {
                         CustomScrollableTabRow(
-                            selectedTabIndex = selectedTabIndex,
+                            selectedTabIndex = normalizedSelectedTabIndex,
                             containerColor = colorScheme.surfaceContainer,
                             containerWidthDp = contentWidthDp - 48.dp, // 传入实际计算的容器宽度
                             tabs = { selectedIndex ->
                                 tabTitles.forEachIndexed { index, title ->
                                     Tab(
-                                        selected = selectedTabIndex == index,
+                                        selected = normalizedSelectedTabIndex == index,
                                         onClick = {
-                                            if (selectedTabIndex != index) {
+                                            if (normalizedSelectedTabIndex != index) {
                                                 chunithmScreenState.selectedTab.update { index }
                                                 scope.launch {
                                                     pagerState.animateScrollToPage(index)
@@ -253,7 +250,7 @@ internal fun ChunithmUserPage(
                                         text = {
                                             Text(
                                                 text = title,
-                                                color = if (selectedTabIndex == index) colorScheme.primary else colorScheme.onSurfaceVariant,
+                                                color = if (normalizedSelectedTabIndex == index) colorScheme.primary else colorScheme.onSurfaceVariant,
                                             )
                                         },
                                         modifier = Modifier.height(40.dp)
@@ -271,7 +268,7 @@ internal fun ChunithmUserPage(
                             .clip(RoundedCornerShape(50))
                             .background(colorScheme.surfaceContainer)
                             .clickable {
-                                when (selectedTabIndex) {
+                                when (normalizedSelectedTabIndex) {
                                     0 -> {
                                         // 主页，刷新
                                         scope.launch {
@@ -280,20 +277,13 @@ internal fun ChunithmUserPage(
                                         }
                                     }
                                     1 -> {
-                                        // 歌曲列表页，回到顶部
-                                        scope.launch {
-                                            viewModel.scrollSongListToTop()
-                                            snackbarHostState.showSnackbar(scrolledToTopMessage)
-                                        }
-                                    }
-                                    2 -> {
                                         // 好友页面，刷新好友数据
                                         scope.launch {
                                             viewModel.refreshUserData(context)
                                             snackbarHostState.showSnackbar(friendsRefreshedMessage)
                                         }
                                     }
-                                    3 -> {
+                                    2 -> {
                                         // 藏品页面，刷新藏品数据
                                         scope.launch {
                                             viewModel.loadData(context)
@@ -305,7 +295,7 @@ internal fun ChunithmUserPage(
                         contentAlignment = Alignment.Center
                     ) {
                         Crossfade(
-                            targetState = selectedTabIndex,
+                            targetState = normalizedSelectedTabIndex,
                             animationSpec = tween(durationMillis = 300),
                             label = "icon_crossfade"
                         ) { tabIndex ->
@@ -313,18 +303,16 @@ internal fun ChunithmUserPage(
                                 painter = rememberVectorPainter(
                                     image = when (tabIndex) {
                                         0 -> Filled.ArrowRotate  // Home: 刷新图标
-                                        1 -> Filled.ArrowUp      // Song List: 向上箭头
-                                        2 -> Filled.ArrowRotate  // Friends: 刷新图标
-                                        3 -> Filled.ArrowRotate  // Collection: 刷新图标
+                                        1 -> Filled.ArrowRotate  // Friends: 刷新图标
+                                        2 -> Filled.ArrowRotate  // Collection: 刷新图标
                                         else -> Filled.ArrowRotate
                                     }
                                 ),
                                 contentDescription = stringResource(
                                     when (tabIndex) {
                                         0 -> R.string.chunithm_cd_refresh
-                                        1 -> R.string.chunithm_cd_scroll_to_top
-                                        2 -> R.string.chunithm_cd_refresh_friends
-                                        3 -> R.string.chunithm_cd_refresh_collection
+                                        1 -> R.string.chunithm_cd_refresh_friends
+                                        2 -> R.string.chunithm_cd_refresh_collection
                                         else -> R.string.chunithm_cd_refresh
                                     }
                                 ),
