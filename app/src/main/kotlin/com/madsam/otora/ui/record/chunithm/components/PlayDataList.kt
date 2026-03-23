@@ -199,7 +199,11 @@ internal fun PlayDataList(
                     text = currentPage.toUpperCase(Locale.current),
                     fontSize = 12.sp,
                     fontFamily = plexBold,
-                    color = White1000,
+                    color = if (selectedCategoryType.value == PlayDataCategoryType.DIFFICULTY) {
+                        White1000
+                    } else {
+                        colorScheme.onSurface
+                    },
                     modifier = Modifier
                         .clip(RoundedCornerShape(4.dp))
                         .background(
@@ -238,7 +242,7 @@ internal fun PlayDataList(
             // 曲目列表按钮
             Text(
                 text = "曲目列表",
-                color = colorScheme.primary,
+                color = colorScheme.onSurface,
                 fontSize = 14.sp,
                 fontFamily = plexBold,
                 modifier = Modifier
@@ -332,7 +336,7 @@ private fun PlaceholderPlayData(categoryName: String, categoryType: String) {
             text = categoryName,
             fontSize = 18.sp,
             fontFamily = plexBold,
-            color = White1000
+            color = colorScheme.onSurface
         )
         Text(
             text = "按${categoryType}分类的数据统计",
@@ -424,7 +428,7 @@ private fun ScoreRankBar(
                 text = "SCORE RANK",
                 fontSize = 11.sp,
                 fontFamily = plexBold,
-                color = White1000.copy(alpha = 0.85f)
+                color = colorScheme.onSurfaceVariant
             )
             Text(
                 text = "${formatThousand(s)} / ${formatThousand(total)}",
@@ -558,7 +562,7 @@ private fun ClearTypeBar(
                 text = "CLEAR TYPE",
                 fontSize = 11.sp,
                 fontFamily = plexBold,
-                color = White1000.copy(alpha = 0.85f)
+                color = colorScheme.onSurfaceVariant
             )
             Text(
                 text = "${formatThousand(clear)} / ${formatThousand(total)}",
@@ -707,7 +711,7 @@ private fun OtherStatsRow(
                 text = "FC",
                 fontSize = 10.sp,
                 fontFamily = plexBold,
-                color = White1000.copy(alpha = 0.85f),
+                color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
             )
@@ -715,7 +719,7 @@ private fun OtherStatsRow(
                 text = "AJ",
                 fontSize = 10.sp,
                 fontFamily = plexBold,
-                color = White1000.copy(alpha = 0.85f),
+                color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
             )
@@ -723,7 +727,7 @@ private fun OtherStatsRow(
                 text = "AJC",
                 fontSize = 10.sp,
                 fontFamily = plexBold,
-                color = White1000.copy(alpha = 0.85f),
+                color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
             )
@@ -731,7 +735,7 @@ private fun OtherStatsRow(
                 text = "FCHAIN",
                 fontSize = 10.sp,
                 fontFamily = plexBold,
-                color = White1000.copy(alpha = 0.85f),
+                color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
             )
@@ -739,7 +743,7 @@ private fun OtherStatsRow(
                 text = "FCHAIN+",
                 fontSize = 10.sp,
                 fontFamily = plexBold,
-                color = White1000.copy(alpha = 0.85f),
+                color = colorScheme.onSurfaceVariant,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center
             )

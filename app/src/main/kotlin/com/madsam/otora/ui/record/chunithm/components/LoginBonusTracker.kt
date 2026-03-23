@@ -98,7 +98,7 @@ fun LoginBonusTracker(loginBonus: ChuniLoginBonusDTO?) {
             // 详细按钮
             Text(
                 text = "详细",
-                color = colorScheme.surfaceContainer,
+                color = colorScheme.onSurface,
                 fontSize = 14.sp,
                 fontFamily = plexBold,
                 modifier = Modifier

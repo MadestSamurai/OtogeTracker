@@ -51,6 +51,7 @@ internal fun ChunithmMainPage(
     scrollThreshold: Float,
     setIsTabRowVisible: (Boolean) -> Unit,
     onNavigateToTopRating: () -> Unit,
+    onOpenRatingPreview: () -> Unit = {},
     onShowSongList: () -> Unit = {},
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -156,7 +157,8 @@ internal fun ChunithmMainPage(
                 ) {
                     TopRank(
                         viewModel.chunithmTopRankUiModel,
-                        contentWidthDp
+                        contentWidthDp,
+                        onOpenRatingPreview = onOpenRatingPreview
                     )
                 }
             }

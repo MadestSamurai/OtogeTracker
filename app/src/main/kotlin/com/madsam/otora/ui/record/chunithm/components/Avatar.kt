@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.data.chunithm.ui.model.ChunithmAvatarUiModel
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
@@ -76,7 +75,7 @@ internal fun AvatarLayout(
             // 详细按钮
             Text(
                 text = "详细",
-                color = colorScheme.surfaceContainer,
+                color = colorScheme.onSurface,
                 fontSize = 14.sp,
                 fontFamily = plexBold,
                 modifier = Modifier
@@ -368,7 +367,7 @@ private fun AvatarCategoryCard(
             ) {
                 Text(
                     text = label,
-                    color = White1000,
+                    color = colorScheme.onSurface,
                     fontSize = 12.sp,
                     fontFamily = plexBold
                 )

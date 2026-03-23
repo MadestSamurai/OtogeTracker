@@ -231,7 +231,7 @@ private fun MapTitleBar(
         // 详细按钮
         Text(
             text = "详细",
-            color = colorScheme.surfaceContainer,
+            color = colorScheme.onSurface,
             fontSize = 14.sp,
             fontFamily = plexBold,
             modifier = Modifier
@@ -359,7 +359,7 @@ private fun MapGridCell(
                 ) {
                     Text(
                         text = area.skillSeed,
-                        color = colorScheme.onSurface,
+                        color = Color.White,
                         fontSize = 9.sp,
                         fontFamily = plexRegular,
                         maxLines = 1,

@@ -50,6 +50,7 @@ import com.madsam.otora.core.icon.fa.Cog
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.ui.record.ChunithmScreenState
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmSongDetailPage
+import com.madsam.otora.ui.record.chunithm.pages.ChunithmRatingPreviewPage
 import com.madsam.otora.ui.settings.SettingsActivity
 import java.net.URLDecoder
 import java.nio.charset.StandardCharsets
@@ -149,6 +150,15 @@ fun ChunithmGameScreen(
                         onShowSongList = {
                             overlayManager.showSongListScreen = true
                         }
+                    )
+                }
+                composable("chunithm_rating_preview") {
+                    chunithmViewModel.setOnBackCallback {
+                        chunithmNavController.popBackStack()
+                    }
+
+                    ChunithmRatingPreviewPage(
+                        viewModel = chunithmViewModel
                     )
                 }
                 composable(

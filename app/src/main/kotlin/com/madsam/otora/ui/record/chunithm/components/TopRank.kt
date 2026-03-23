@@ -2,7 +2,6 @@ package com.madsam.otora.ui.record.chunithm.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,13 +18,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.core.theme.plexBold
-import com.madsam.otora.core.utils.BrushUtils.getRatingTextBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmTopRankUiModel
 import com.madsam.otora.ui.components.RoundedBarChart
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,11 +31,11 @@ import java.util.Locale
 @Composable
 internal fun TopRank(
     topRankUI: MutableStateFlow<ChunithmTopRankUiModel>,
-    cardWidthDp: Dp
+    cardWidthDp: Dp,
+    onOpenRatingPreview: () -> Unit = {},
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val topRank by topRankUI.collectAsState()
-    val isDark = isSystemInDarkTheme()
     
     // 动态分配两个图表的宽度
     val idealSpacingRatio = 0.8f // 理想的柱间距与柱宽比例
@@ -83,13 +80,13 @@ internal fun TopRank(
             // 详细按钮
             Text(
                 text = "详细",
-                color = colorScheme.surfaceContainer,
+                color = colorScheme.onSurface,
                 fontSize = 14.sp,
                 fontFamily = plexBold,
                 modifier = Modifier
                     .clip(RoundedCornerShape(4.dp))
                     .background(colorScheme.surfaceContainerHigh)
-                    .clickable { /* TODO: 跳转到Rating详情 */ }
+                    .clickable { onOpenRatingPreview() }
                     .padding(horizontal = 12.dp, vertical = 4.dp)
             )
         }
@@ -120,13 +117,10 @@ internal fun TopRank(
                     fontSize = 11.sp,
                     color = colorScheme.onSurfaceVariant
                 )
-                Text(
-                    text = String.format(Locale.US, "%.2f", topRank.best30),
+                RatingValueText(
+                    rating = String.format(Locale.US, "%.2f", topRank.best30),
                     fontSize = 14.sp,
-                    fontFamily = plexBold,
-                    style = TextStyle(
-                        brush = getRatingTextBrush(topRank.best30.toString(), isDark)
-                    )
+                    fontFamily = plexBold
                 )
             }
             if (topRank.bestList.isNotEmpty()) {
@@ -166,13 +160,10 @@ internal fun TopRank(
                     fontSize = 11.sp,
                     color = colorScheme.onSurfaceVariant
                 )
-                Text(
-                    text = String.format(Locale.US, "%.2f", topRank.new20),
+                RatingValueText(
+                    rating = String.format(Locale.US, "%.2f", topRank.new20),
                     fontSize = 14.sp,
-                    fontFamily = plexBold,
-                    style = TextStyle(
-                        brush = getRatingTextBrush(topRank.new20.toString(), isDark)
-                    )
+                    fontFamily = plexBold
                 )
             }
             if (topRank.newList.isNotEmpty()) {

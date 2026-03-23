@@ -18,6 +18,7 @@ import com.madsam.otora.OverlayManager
 import com.madsam.otora.ui.record.ChunithmScreenState
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import com.madsam.otora.ui.record.chunithm.ChunithmUserPage
+import com.madsam.otora.ui.record.chunithm.pages.ChunithmRatingPreviewPage
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmSongDetailPage
 
 /**
@@ -26,6 +27,7 @@ import com.madsam.otora.ui.record.chunithm.pages.ChunithmSongDetailPage
 object ChunithmRoutes {
     const val CHUNITHM_USER = "chunithm_user"
     const val CHUNITHM_SONG_DETAIL = "chunithm_song_detail/{songTitle}"
+    const val CHUNITHM_RATING_PREVIEW = "chunithm_rating_preview"
 }
 
 /**
@@ -68,6 +70,14 @@ internal fun ChunithmNavHost(
                     overlayManager.showSongListScreen = true
                 }
             )
+        }
+
+        composable(ChunithmRoutes.CHUNITHM_RATING_PREVIEW) {
+            viewModel.setOnBackCallback {
+                navController.popBackStack()
+            }
+
+            ChunithmRatingPreviewPage(viewModel = viewModel)
         }
         
         // Chunithm 歌曲详情页

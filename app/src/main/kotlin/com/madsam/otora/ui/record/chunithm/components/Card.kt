@@ -5,29 +5,32 @@ import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,12 +40,13 @@ import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.GradientBrush
 import com.madsam.otora.core.theme.TierColors
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import com.madsam.otora.core.theme.OSU_LEVEL_GOLD_1
 import com.madsam.otora.core.theme.OSU_LEVEL_PLATINUM_1
 import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
-import com.madsam.otora.core.utils.BrushUtils.getRatingTextBrush
 import com.madsam.otora.data.chunithm.ui.model.ChunithmCardUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -121,21 +125,37 @@ internal fun Card(
                     .padding(start = 5.dp, top = 4.dp, end = 5.dp, bottom = 4.dp)
             ) {
                 honors.forEachIndexed { index, (honorText, honorBase) ->
-                    Text(
-                        text = honorText,
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = if (index == 0) 0.dp else 2.dp)
-                            .clip(RoundedCornerShape(5.dp))
-                            .background(getHonorBrush(honorBase))
-                            .basicMarquee(spacing = MarqueeSpacing(15.dp)),
-                        textAlign = TextAlign.Center,
-                        color = if (isDark) Color.White else Color.Black,
-                        fontSize = 14.sp,
-                        fontFamily = plexBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                            .height(20.dp)
+                            .background(
+                                brush = getHonorBrush(honorBase),
+                                shape = RoundedCornerShape(5.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = honorText,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentHeight(unbounded = true)
+                                .basicMarquee(spacing = MarqueeSpacing(15.dp)),
+                            textAlign = TextAlign.Center,
+                            color = if (isDark) Color.White else Color.Black,
+                            fontSize = 14.sp,
+                            lineHeight = 16.sp,
+                            fontFamily = plexBold,
+                            style = TextStyle(
+                                platformStyle = PlatformTextStyle(
+                                    includeFontPadding = true
+                                )
+                            ),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
 
@@ -261,29 +281,11 @@ internal fun Card(
                     .height(30.dp)
             )
 
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        style = SpanStyle(
-                            color = colorScheme.primary,
-                            fontSize = 14.sp,
-                            fontFamily = plexRegular
-                        )
-                    ) {
-                        append("RATING ")
-                    }
-                    withStyle(
-                        style = SpanStyle(
-                            brush = getRatingTextBrush(cardData.rating, isDark),
-                            fontSize = 16.sp,
-                            fontFamily = plexBold
-                        )
-                    ) {
-                        append(cardData.rating)
-                    }
-                },
-                color = colorScheme.primary,
-                fontSize = 12.sp,
+            LabeledRatingText(
+                rating = cardData.rating,
+                label = "RATING",
+                labelFontSize = 14.sp,
+                ratingFontSize = 16.sp,
                 modifier = Modifier
                     .constrainAs(rating) {
                         top.linkTo(username.bottom)

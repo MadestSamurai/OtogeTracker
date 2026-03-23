@@ -64,6 +64,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -83,11 +84,15 @@ internal fun ChunithmUserPage(
     val selectedSongTitle = remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val tabTitles = listOf(
-        context.getString(R.string.chunithm_tab_home),
-        context.getString(R.string.chunithm_tab_song_list),
-        context.getString(R.string.chunithm_tab_friends),
-        context.getString(R.string.chunithm_tab_collection)
+        stringResource(R.string.chunithm_tab_home),
+        stringResource(R.string.chunithm_tab_song_list),
+        stringResource(R.string.chunithm_tab_friends),
+        stringResource(R.string.chunithm_tab_collection)
     )
+    val refreshedMessage = stringResource(R.string.chunithm_message_refreshed)
+    val scrolledToTopMessage = stringResource(R.string.chunithm_message_scrolled_to_top)
+    val friendsRefreshedMessage = stringResource(R.string.chunithm_message_friends_refreshed)
+    val collectionRefreshedMessage = stringResource(R.string.chunithm_message_collection_refreshed)
 
     val pagerState = rememberPagerState { tabTitles.size }
     val scope = rememberCoroutineScope()
@@ -156,6 +161,7 @@ internal fun ChunithmUserPage(
                     scrollThreshold = scrollThreshold,
                     setIsTabRowVisible = { isTabRowVisible = it },
                     onNavigateToTopRating = { showTopRankDialog = true },
+                    onOpenRatingPreview = { navController.navigate("chunithm_rating_preview") },
                     onShowSongList = onShowSongList
                 )
 
@@ -270,28 +276,28 @@ internal fun ChunithmUserPage(
                                         // 主页，刷新
                                         scope.launch {
                                             viewModel.loadData(context)
-                                            snackbarHostState.showSnackbar(context.getString(R.string.chunithm_message_refreshed))
+                                            snackbarHostState.showSnackbar(refreshedMessage)
                                         }
                                     }
                                     1 -> {
                                         // 歌曲列表页，回到顶部
                                         scope.launch {
                                             viewModel.scrollSongListToTop()
-                                            snackbarHostState.showSnackbar(context.getString(R.string.chunithm_message_scrolled_to_top))
+                                            snackbarHostState.showSnackbar(scrolledToTopMessage)
                                         }
                                     }
                                     2 -> {
                                         // 好友页面，刷新好友数据
                                         scope.launch {
                                             viewModel.refreshUserData(context)
-                                            snackbarHostState.showSnackbar(context.getString(R.string.chunithm_message_friends_refreshed))
+                                            snackbarHostState.showSnackbar(friendsRefreshedMessage)
                                         }
                                     }
                                     3 -> {
                                         // 藏品页面，刷新藏品数据
                                         scope.launch {
                                             viewModel.loadData(context)
-                                            snackbarHostState.showSnackbar(context.getString(R.string.chunithm_message_collection_refreshed))
+                                            snackbarHostState.showSnackbar(collectionRefreshedMessage)
                                         }
                                     }
                                 }
@@ -313,7 +319,7 @@ internal fun ChunithmUserPage(
                                         else -> Filled.ArrowRotate
                                     }
                                 ),
-                                contentDescription = context.getString(
+                                contentDescription = stringResource(
                                     when (tabIndex) {
                                         0 -> R.string.chunithm_cd_refresh
                                         1 -> R.string.chunithm_cd_scroll_to_top
