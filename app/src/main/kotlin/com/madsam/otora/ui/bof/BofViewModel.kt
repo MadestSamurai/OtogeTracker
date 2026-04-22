@@ -779,7 +779,7 @@ internal class BofViewModel(
                     )
                 } else null
             }.filter { 
-                kotlin.math.abs(it.totalScore) > 0 // 只显示有变化的团队
+                abs(it.totalScore) > 0 // 只显示有变化的团队
             }
             
             // 正差值排行（增长）- 只保留正数
@@ -798,7 +798,7 @@ internal class BofViewModel(
                 var currentRank = 1
                 var previousScore: Double? = null
                 return data.mapIndexed { index, team ->
-                    if (previousScore != null && kotlin.math.abs(team.totalScore - previousScore!!) > 0.01) {
+                    if (previousScore != null && abs(team.totalScore - previousScore) > 0.01) {
                         currentRank = index + 1
                     }
                     previousScore = team.totalScore
@@ -839,7 +839,7 @@ internal class BofViewModel(
                     )
                 } else null
             }.filter {
-                kotlin.math.abs(it.total) > 0 // 只显示有变化的评论
+                abs(it.total) > 0 // 只显示有变化的评论
             }
             
             // 正差值排行（增长）- 只保留正数

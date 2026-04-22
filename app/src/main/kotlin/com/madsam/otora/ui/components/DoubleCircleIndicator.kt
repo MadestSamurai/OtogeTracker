@@ -1,24 +1,25 @@
 package com.madsam.otora.ui.components
 
-import android.graphics.Paint
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.PaintingStyle
 import com.madsam.otora.core.theme.Yellow1000
 import com.madsam.otora.core.theme.OSU_BRIGHT_YELLOW_HALF_TRANS
-import com.patrykandpatrick.vico.core.common.DrawingContext
-import com.patrykandpatrick.vico.core.common.component.Component
+import com.patrykandpatrick.vico.compose.common.DrawingContext
+import com.patrykandpatrick.vico.compose.common.component.Component
 
 class DoubleCircleIndicator(
     outerCircleColor: Color = OSU_BRIGHT_YELLOW_HALF_TRANS,
     innerCircleColor: Color = Yellow1000
 ) : Component {
     private val outerCirclePaint = Paint().apply {
-        color = outerCircleColor.toArgb()
-        style = Paint.Style.FILL
+        color = outerCircleColor
+        style = PaintingStyle.Fill
     }
     private val innerCirclePaint = Paint().apply {
-        color = innerCircleColor.toArgb()
-        style = Paint.Style.FILL
+        color = innerCircleColor
+        style = PaintingStyle.Fill
     }
 
     override fun draw(
@@ -32,7 +33,7 @@ class DoubleCircleIndicator(
         val centerX = left + radius
         val centerY = top + radius
 
-        context.canvas.drawCircle(centerX, centerY, radius, outerCirclePaint)
-        context.canvas.drawCircle(centerX, centerY, radius * 0.6f, innerCirclePaint)
+        context.canvas.drawCircle(Offset(centerX, centerY), radius, outerCirclePaint)
+        context.canvas.drawCircle(Offset(centerX, centerY), radius * 0.6f, innerCirclePaint)
     }
 }

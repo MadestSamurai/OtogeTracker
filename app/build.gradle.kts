@@ -1,19 +1,21 @@
+import com.android.build.api.dsl.ApplicationExtension
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.navigation.safe.args)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.objectbox)
 }
 
-android {
+extensions.configure<ApplicationExtension>("android") {
     namespace = "com.madsam.otora"
     compileSdk = 36
     
     defaultConfig {
         applicationId = "com.madsam.otora"
         minSdk = 27
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -22,6 +24,7 @@ android {
     buildTypes {
         named("release").configure {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -35,11 +38,11 @@ android {
         buildConfig = true
         compose = true
     }
-    
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -88,7 +91,6 @@ dependencies {
     // Vico Graph
     implementation(libs.vico.compose)
     implementation(libs.vico.compose.m3)
-    implementation(libs.vico.core)
     implementation(libs.vico.views)
 
     // DateTimePicker

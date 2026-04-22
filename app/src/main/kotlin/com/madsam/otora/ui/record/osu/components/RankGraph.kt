@@ -1,6 +1,5 @@
 package com.madsam.otora.ui.record.osu.components
 
-import android.text.Layout
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,14 +27,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,34 +48,30 @@ import com.madsam.otora.data.osu.ui.model.OsuCardUiModel
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 import com.madsam.otora.ui.components.DoubleCircleIndicator
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
+import com.patrykandpatrick.vico.compose.cartesian.CartesianDrawingContext
+import com.patrykandpatrick.vico.compose.cartesian.Zoom
+import com.patrykandpatrick.vico.compose.cartesian.axis.HorizontalAxis.Companion.rememberTop
+import com.patrykandpatrick.vico.compose.cartesian.axis.VerticalAxis.Companion.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberAxisGuidelineComponent
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
-import com.patrykandpatrick.vico.compose.cartesian.axis.rememberTop
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.compose.cartesian.data.CartesianLayerRangeProvider
+import com.patrykandpatrick.vico.compose.cartesian.data.lineSeries
+import com.patrykandpatrick.vico.compose.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.CartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.marker.DefaultCartesianMarker
+import com.patrykandpatrick.vico.compose.cartesian.marker.DefaultCartesianMarker.ValueFormatter
+import com.patrykandpatrick.vico.compose.cartesian.marker.LineCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
-import com.patrykandpatrick.vico.compose.common.component.fixed
+import com.patrykandpatrick.vico.compose.common.Fill
+import com.patrykandpatrick.vico.compose.common.Insets
+import com.patrykandpatrick.vico.compose.common.component.TextComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
-import com.patrykandpatrick.vico.compose.common.fill
-import com.patrykandpatrick.vico.core.cartesian.CartesianDrawingContext
-import com.patrykandpatrick.vico.core.cartesian.Zoom
-import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
-import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
-import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
-import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
-import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
-import com.patrykandpatrick.vico.core.cartesian.marker.CartesianMarker
-import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
-import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker.ValueFormatter
-import com.patrykandpatrick.vico.core.cartesian.marker.LineCartesianLayerMarkerTarget
-import com.patrykandpatrick.vico.core.common.Insets
-import com.patrykandpatrick.vico.core.common.component.TextComponent
-import com.patrykandpatrick.vico.core.common.data.ExtraStore
-import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
+import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.text.DecimalFormat
 
@@ -180,12 +176,14 @@ internal fun RankGraph(
                             rememberLineCartesianLayer(
                                 lineProvider = LineCartesianLayer.LineProvider.series(
                                     LineCartesianLayer.rememberLine(
-                                        fill = LineCartesianLayer.LineFill.single(fill(colorScheme.primary)),
+                                        fill = LineCartesianLayer.LineFill.single(Fill(colorScheme.primary)),
                                         areaFill = LineCartesianLayer.AreaFill.single(
-                                            fill(
-                                                ShaderProvider.verticalGradient(
-                                                    Color.Transparent.toArgb(),
-                                                    colorScheme.primary.copy(alpha = 0.3f).toArgb()
+                                            Fill(
+                                                Brush.verticalGradient(
+                                                    colors = listOf(
+                                                        Color.Transparent,
+                                                        colorScheme.primary.copy(alpha = 0.3f)
+                                                    )
                                                 )
                                             )
                                         ),
@@ -208,13 +206,13 @@ internal fun RankGraph(
                                         (osuRankGraphData.value.minOrNull()?.toFloat() ?: 0f) * 0.97
                                 },
                             ),
-                            startAxis = VerticalAxis.rememberStart(
+                            startAxis = rememberStart(
                                 guideline = null,
                                 tick = null,
                                 line = null,
                                 label = null,
                             ),
-                            topAxis = HorizontalAxis.rememberTop(
+                            topAxis = rememberTop(
                                 guideline = null,
                                 tick = null,
                                 line = null,
@@ -222,17 +220,21 @@ internal fun RankGraph(
                             ),
                             marker = rememberDefaultCartesianMarker(
                                 label = rememberTextComponent(
-                                    padding = Insets(4f, 2f),
-                                    textAlignment = Layout.Alignment.ALIGN_CENTER,
+                                    style = TextStyle(
+                                        fontSize = 13.sp,
+                                        color = colorScheme.primary,
+                                        textAlign = TextAlign.Center
+                                    ),
+                                    padding = Insets(4.dp, 2.dp),
                                     minWidth = TextComponent.MinWidth.fixed(40.dp),
-                                    textSize = 13.sp,
-                                    color = colorScheme.primary
                                 ),
                                 labelPosition = DefaultCartesianMarker.LabelPosition.Top,
                                 guideline = rememberAxisGuidelineComponent(
-                                    fill = fill(colorScheme.primary.copy(alpha = 0.3f))
+                                    fill = Fill(colorScheme.primary.copy(alpha = 0.3f))
                                 ),
-                                indicator = remember { { indicatorComponent } },
+                                indicator = remember(indicatorComponent) {
+                                    { _: Color -> indicatorComponent }
+                                },
                                 valueFormatter = object : ValueFormatter {
                                     private val decimalFormatX = DecimalFormat("0")
                                     private val decimalFormatY = DecimalFormat("'#'#,###")
