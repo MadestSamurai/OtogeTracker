@@ -243,9 +243,7 @@ internal class BofViewModel(
         
         // 计算当前时间戳
         val currentTimestamp = if (selectedRange.singleComment) {
-            val dateToFetch = if (selectedRange.commentDate.isNotEmpty()) {
-                selectedRange.commentDate
-            } else {
+            val dateToFetch = selectedRange.commentDate.ifEmpty {
                 bofScreenState.selectedCurrentDate.value.toString()
             }
             DateTimeUtils.ymdToMillis(dateToFetch, "00:00")
@@ -266,9 +264,7 @@ internal class BofViewModel(
         
         // 加载当前时间点的数据
         val data = if (selectedRange.singleComment) {
-            val dateToFetch = if (selectedRange.commentDate.isNotEmpty()) {
-                selectedRange.commentDate
-            } else {
+            val dateToFetch = selectedRange.commentDate.ifEmpty {
                 bofScreenState.selectedCurrentDate.value.toString()
             }
             bofLocalService.getCommentByTime(dateToFetch)
@@ -314,10 +310,8 @@ internal class BofViewModel(
         
         // 更新显示的时间字符串
         if (selectedRange.singleComment) {
-            selectedTimeStrNoComp.update { 
-                if (selectedRange.commentDate.isNotEmpty()) {
-                    selectedRange.commentDate
-                } else {
+            selectedTimeStrNoComp.update {
+                selectedRange.commentDate.ifEmpty {
                     bofScreenState.selectedCurrentDate.value.toString()
                 }
             }

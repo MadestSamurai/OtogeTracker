@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.TextStyle
@@ -88,16 +89,15 @@ internal fun LabeledRatingText(
     labelFontSize: TextUnit,
     ratingFontSize: TextUnit,
     fontFamily: FontFamily = plexBold,
+    labelColor: Color = MaterialTheme.colorScheme.primary,
 ) {
-    val colorScheme = MaterialTheme.colorScheme
-
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
-            color = colorScheme.primary,
+            color = labelColor,
             fontSize = labelFontSize,
             fontFamily = plexRegular
         )
