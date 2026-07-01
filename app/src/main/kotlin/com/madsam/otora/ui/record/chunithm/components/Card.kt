@@ -5,6 +5,7 @@ import androidx.compose.foundation.MarqueeSpacing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -85,6 +86,7 @@ internal fun Card(
         "gold", "platina" -> Color(0xCC1A1A1A)
         else -> colorScheme.primary
     }
+    val userInfoCornerRadius = 5.dp
 
     Surface(
         shape = RoundedCornerShape(10.dp),
@@ -136,14 +138,14 @@ internal fun Card(
                 Box(
                     modifier = Modifier
                         .constrainAs(infoPanel) {
-                            top.linkTo(honorColumn.bottom, margin = 4.dp)
+                            top.linkTo(honorColumn.bottom)
                             bottom.linkTo(parent.bottom, margin = 5.dp)
                             start.linkTo(charaImage.end, margin = 4.dp)
                             end.linkTo(parent.end, margin = 5.dp)
                             width = Dimension.fillToConstraints
                             height = Dimension.fillToConstraints
                         }
-                        .clip(RoundedCornerShape(10.dp))
+                        .clip(RoundedCornerShape(userInfoCornerRadius))
                         .background(infoPanelBrush)
                 )
             }
@@ -206,7 +208,7 @@ internal fun Card(
                     }
                     .size(111.dp)
                     .padding(start = 5.dp, bottom = 5.dp)
-                    .clip(RoundedCornerShape(5.dp))
+                        .clip(RoundedCornerShape(userInfoCornerRadius))
                     .background(getHonorBrush(cardData.roleBase))
             )
 
@@ -335,8 +337,11 @@ internal fun Card(
                 modifier = Modifier
                     .constrainAs(playData) {
                         top.linkTo(rating.bottom)
+                        bottom.linkTo(parent.bottom, 5.dp)
                         start.linkTo(charaImage.end, 5.dp)
-                    }
+                        height = Dimension.fillToConstraints
+                    },
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = buildAnnotatedString {
