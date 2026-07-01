@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,7 +29,7 @@ import com.madsam.otora.core.theme.plexBold
 @Composable
 fun HomeScreen(
     snackbarHostState: SnackbarHostState,
-    onShowBofScreen: () -> Unit
+    onShowBofScreen: (Int) -> Unit
 ) {
     // 主页内容
     HomeMainContent(
@@ -38,7 +39,7 @@ fun HomeScreen(
 
 @Composable
 private fun HomeMainContent(
-    onNavigateToBOF: () -> Unit
+    onNavigateToBOF: (Int) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
     Box(
@@ -93,18 +94,26 @@ private fun HomeMainContent(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    Button(
-                        onClick = onNavigateToBOF,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = colorScheme.primaryContainer
-                        ),
-                        shape = RoundedCornerShape(12.dp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(
-                            text = "进入 BOF",
-                            fontFamily = plexBold,
-                            color = colorScheme.onPrimaryContainer
-                        )
+                        listOf("Entry", "Team", "Comment").forEachIndexed { index, label ->
+                            Button(
+                                onClick = { onNavigateToBOF(index) },
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = colorScheme.primaryContainer
+                                ),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    text = label,
+                                    fontFamily = plexBold,
+                                    color = colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
                     }
                 }
             }

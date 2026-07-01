@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -59,7 +60,8 @@ internal fun BofEntryPagerScreen(
     listStateAvg: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
     listStateMedian: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
     listStateDiff: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
-    listStateComposite: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState()
+    listStateComposite: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
+    providedPagerState: PagerState? = null
 ) {
     val selectedSubTabIndex by bofScreenState.selectedSubTab.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -67,10 +69,11 @@ internal fun BofEntryPagerScreen(
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
     // 创建Pager状态，页面数量为5（Total, Avg, Median, Diff, Composite）
-    val pagerState = rememberPagerState(
+    val internalPagerState = rememberPagerState(
         pageCount = { 5 },
         initialPage = selectedSubTabIndex
     )
+    val pagerState = providedPagerState ?: internalPagerState
     
     // 使用snapshotFlow更安全地处理状态同步
     LaunchedEffect(selectedSubTabIndex) {
@@ -137,8 +140,8 @@ internal fun BofEntryPagerScreen(
         
         // 页面标题列表
         val pageNames = listOf("总分", "平均分", "中位数", "差值", "综合")
-        val previousPageTitle = if (page > 0) pageNames[page - 1] else null
-        val nextPageTitle = if (page < pageNames.size - 1) pageNames[page + 1] else null
+        val previousPageTitle: String? = null
+        val nextPageTitle: String? = null
         
         when (page) {
             0 -> EntryPageContent(
@@ -459,6 +462,7 @@ private fun <T> EntryPageContent(
                     items = rankingItems,
                     config = tableConfig,
                     narrowMode = narrowMode,
+                    showTitle = false,
                     listState = listState,
                     searchText = searchText,
                     onNavigateToPrevious = onNavigateToPrevious,

@@ -210,7 +210,10 @@ internal fun MainScreenWithNavigation(
                     composable(Screen.HomeScreen.route) { 
                         HomeScreen(
                             snackbarHostState = snackbarHostState,
-                            onShowBofScreen = { overlayManager.showBofScreen = true }
+                            onShowBofScreen = { tabIndex ->
+                                overlayManager.bofScreenState.selectedTab.value = tabIndex
+                                overlayManager.showBofScreen = true
+                            }
                         )
                     }
                     composable(Screen.RecordScreen.route) { 
@@ -319,7 +322,10 @@ internal fun MainScreenWithNavigation(
                     composable(Screen.HomeScreen.route) { 
                         HomeScreen(
                             snackbarHostState = snackbarHostState,
-                            onShowBofScreen = { overlayManager.showBofScreen = true }
+                            onShowBofScreen = { tabIndex ->
+                                overlayManager.bofScreenState.selectedTab.value = tabIndex
+                                overlayManager.showBofScreen = true
+                            }
                         )
                     }
                     composable(Screen.RecordScreen.route) { 

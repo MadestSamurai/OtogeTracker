@@ -77,6 +77,16 @@
     <string name="language_move_up">上移</string>
     <string name="language_move_down">下移</string>
     <string name="language_restart_hint">语言更改将立即生效。部分内容可能需要重启应用才能完全更新。</string>
+
+    <!-- BOF -->
+    <string name="bof_section_entry">个人排行</string>
+    <string name="bof_section_team">团队排行</string>
+    <string name="bof_section_comment">评论排行</string>
+    <string name="bof_mode_total">总分</string>
+    <string name="bof_mode_average">平均</string>
+    <string name="bof_mode_median">中位</string>
+    <string name="bof_mode_difference">差值</string>
+    <string name="bof_mode_composite">综合</string>
     
     <!-- Theme Colors -->
     <string name="color_violet">紫罗兰</string>

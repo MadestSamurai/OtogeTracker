@@ -18,6 +18,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,10 +37,14 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -54,21 +59,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -96,6 +106,9 @@ import com.madsam.otora.ui.components.CustomScrollableTabRow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlin.math.absoluteValue
+import kotlin.math.roundToInt
 
 private const val TAG = "BofScreen"
 
@@ -103,6 +116,130 @@ private const val TAG = "BofScreen"
 // https://m3.material.io/styles/motion/easing-and-duration/tokens-specs
 // Standard easing - 更温和，适合小到中等尺寸的UI元素
 private val StandardDecelerate = CubicBezierEasing(0f, 0f, 0f, 1f) // 线性开始，减速结束
+
+@Composable
+private fun BofModeSwitcher(
+    sectionLabel: String,
+    modeLabels: List<String>,
+    pagerState: PagerState,
+    onModeSelected: (Int) -> Unit,
+    onNavigateBack: () -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+    val scope = rememberCoroutineScope()
+    var expanded by remember(sectionLabel) { mutableStateOf(false) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .windowInsetsPadding(WindowInsets.statusBars)
+            .background(Color.Black)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(RoundedCornerShape(50))
+                .background(colorScheme.surfaceContainer)
+                .clickable { onNavigateBack() },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Fa.`Chevron-left`,
+                contentDescription = stringResource(R.string.settings_back),
+                tint = colorScheme.onSurface,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+
+        BoxWithConstraints(
+            modifier = Modifier
+                .weight(1f)
+                .height(64.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            val density = LocalDensity.current
+            val longestLabelLength = modeLabels.maxOfOrNull { it.length } ?: 5
+            val labelBasedWidth = (longestLabelLength * 12 + 40).dp
+            val maxItemWidth = if (maxWidth < 300.dp) 128.dp else 156.dp
+            val carouselItemWidth = when {
+                labelBasedWidth < 96.dp -> 96.dp
+                labelBasedWidth > maxItemWidth -> maxItemWidth
+                else -> labelBasedWidth
+            }
+            val itemStridePx = with(density) { (carouselItemWidth + 4.dp).toPx() }
+            val currentPage = pagerState.currentPage.coerceIn(
+                0,
+                (modeLabels.size - 1).coerceAtLeast(0)
+            )
+            val currentOffset = pagerState.currentPageOffsetFraction
+
+            modeLabels.forEachIndexed { page, label ->
+                val relativePosition = (page - currentPage) - currentOffset
+                if (relativePosition.absoluteValue <= 1.65f) {
+                    val focus = (1f - relativePosition.absoluteValue).coerceIn(0f, 1f)
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .width(carouselItemWidth)
+                            .height(56.dp)
+                            .graphicsLayer {
+                                translationX = relativePosition * itemStridePx
+                                alpha = 0.28f + focus * 0.72f
+                                val scale = 0.76f + focus * 0.24f
+                                scaleX = scale
+                                scaleY = scale
+                            }
+                            .clickable {
+                                if (
+                                    page == pagerState.currentPage &&
+                                    !pagerState.isScrollInProgress &&
+                                    currentOffset.absoluteValue < 0.05f
+                                ) {
+                                    expanded = true
+                                } else {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(page)
+                                        onModeSelected(page)
+                                    }
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = label,
+                            color = Color.White,
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                modeLabels.forEachIndexed { index, label ->
+                    DropdownMenuItem(
+                        text = { Text(label) },
+                        onClick = {
+                            expanded = false
+                            scope.launch {
+                                pagerState.animateScrollToPage(index)
+                                onModeSelected(index)
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -152,6 +289,55 @@ fun BofScreen(
     val selectedSubTabIndex = bofScreenState.selectedSubTab.asStateFlow().collectAsState().value
     val selectedTeamSubTabIndex = bofScreenState.selectedTeamSubTab.asStateFlow().collectAsState().value
     val selectedCommentSubTabIndex = bofScreenState.selectedCommentSubTab.asStateFlow().collectAsState().value
+    val entryModePagerState = rememberPagerState(
+        initialPage = selectedSubTabIndex.coerceIn(0, 4),
+        pageCount = { 5 }
+    )
+    val teamModePagerState = rememberPagerState(
+        initialPage = selectedTeamSubTabIndex.coerceIn(0, 1),
+        pageCount = { 2 }
+    )
+    val commentModePagerState = rememberPagerState(
+        initialPage = selectedCommentSubTabIndex.coerceIn(0, 1),
+        pageCount = { 2 }
+    )
+    val safeSectionIndex = selectedTabIndex.coerceIn(0, 2)
+    val sectionLabel = when (safeSectionIndex) {
+        0 -> stringResource(R.string.bof_section_entry)
+        1 -> stringResource(R.string.bof_section_team)
+        else -> stringResource(R.string.bof_section_comment)
+    }
+    val modeLabels = when (safeSectionIndex) {
+        0 -> listOf(
+            stringResource(R.string.bof_mode_total),
+            stringResource(R.string.bof_mode_average),
+            stringResource(R.string.bof_mode_median),
+            stringResource(R.string.bof_mode_difference),
+            stringResource(R.string.bof_mode_composite)
+        )
+        1 -> listOf(
+            stringResource(R.string.bof_mode_total),
+            stringResource(R.string.bof_mode_difference)
+        )
+        else -> listOf(
+            stringResource(R.string.bof_mode_total),
+            stringResource(R.string.bof_mode_difference)
+        )
+    }
+    val activeModePagerState = when (safeSectionIndex) {
+        0 -> entryModePagerState
+        1 -> teamModePagerState
+        else -> commentModePagerState
+    }
+
+    fun selectBofMode(index: Int) {
+        val safeIndex = index.coerceIn(0, modeLabels.lastIndex)
+        when (safeSectionIndex) {
+            0 -> bofScreenState.selectedSubTab.update { safeIndex }
+            1 -> bofScreenState.selectedTeamSubTab.update { safeIndex }
+            else -> bofScreenState.selectedCommentSubTab.update { safeIndex }
+        }
+    }
 
     // 使用 ViewModel 的 searchText
     val searchText = vm.searchText.collectAsState()
@@ -163,7 +349,9 @@ fun BofScreen(
     val listStateDiff = rememberLazyListState()
     val listStateComposite = rememberLazyListState()
     val listStateTeam = rememberLazyListState()
+    val listStateTeamDiff = rememberLazyListState()
     val listStateComment = rememberLazyListState()
+    val listStateCommentDiff = rememberLazyListState()
 
     // 监听搜索结果，自动滚动到匹配项
     val currentMatchIndex = vm.currentMatchIndex.collectAsState()
@@ -320,7 +508,15 @@ fun BofScreen(
                 .background(Color.Black)
         ) {
             // 顶部导航栏：左侧返回按钮 + 右侧主Tab
-            Row(
+            BofModeSwitcher(
+                sectionLabel = sectionLabel,
+                modeLabels = modeLabels,
+                pagerState = activeModePagerState,
+                onModeSelected = ::selectBofMode,
+                onNavigateBack = onNavigateBack
+            )
+
+            if (false) Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .windowInsetsPadding(WindowInsets.statusBars)
@@ -423,7 +619,75 @@ fun BofScreen(
                 }
             } else {
                 // 活动已开始时显示正常内容
-                NavHost(
+                Box(modifier = Modifier.weight(1f)) {
+                    when (safeSectionIndex) {
+                        0 -> BofEntryPagerScreen(
+                            vm = vm,
+                            bofScreenState = bofScreenState,
+                            snackbarHostState = snackbarHostState,
+                            narrowMode = entryInfoMode,
+                            searchText = searchText.value,
+                            scrollThreshold = scrollThreshold,
+                            setIsTabRowVisible = { },
+                            showCaptureDialog = showEntryCaptureDialog,
+                            onCaptureDialogDismiss = { showEntryCaptureDialog = false },
+                            listStateTotal = listStateTotal,
+                            listStateAvg = listStateAvg,
+                            listStateMedian = listStateMedian,
+                            listStateDiff = listStateDiff,
+                            listStateComposite = listStateComposite,
+                            providedPagerState = entryModePagerState
+                        )
+
+                        1 -> BofTeamPagerScreen(
+                            vm = vm,
+                            bofScreenState = bofScreenState,
+                            snackbarHostState = snackbarHostState,
+                            teamInfoMode = teamInfoMode,
+                            scrollThreshold = scrollThreshold,
+                            setIsTabRowVisible = { },
+                            showCaptureDialog = showTeamCaptureDialog,
+                            onCaptureDialogDismiss = { showTeamCaptureDialog = false },
+                            listStateTotal = listStateTeam,
+                            listStateDiff = listStateTeamDiff,
+                            providedPagerState = teamModePagerState
+                        )
+
+                        else -> {
+                            val selectedTimeStrNoComp by vm.selectedTimeStrNoComp.collectAsState()
+                            val currentRange = bofScreenState.selectedRange.collectAsState().value
+                            val title = if (currentRange?.singleComment == true && currentRange.commentDate.isNotEmpty()) {
+                                "Final Comment Ranking"
+                            } else {
+                                "Comment Ranking"
+                            }
+                            val subtitle = if (currentRange?.singleComment == true && currentRange.commentDate.isNotEmpty()) {
+                                "Time: ${currentRange.commentDate}"
+                            } else {
+                                "Time: $selectedTimeStrNoComp"
+                            }
+
+                            BofCommentPagerScreen(
+                                vm = vm,
+                                bofScreenState = bofScreenState,
+                                title = title,
+                                subtitle = subtitle,
+                                commentDisplayMode = commentInfoMode,
+                                scrollThreshold = scrollThreshold,
+                                setIsTabRowVisible = { },
+                                showCaptureDialog = showCommentCaptureDialog,
+                                onCaptureDialogDismiss = {
+                                    showCommentCaptureDialog = false
+                                },
+                                listStateTotal = listStateComment,
+                                listStateDiff = listStateCommentDiff,
+                                providedPagerState = commentModePagerState
+                            )
+                        }
+                    }
+                }
+
+                if (false) NavHost(
                     navController = navController,
                     startDestination = mainTabTitles[selectedTabIndex],
                     modifier = Modifier.weight(1f)

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -36,17 +37,19 @@ internal fun BofCommentPagerScreen(
     showCaptureDialog: Boolean = false,
     onCaptureDialogDismiss: () -> Unit = {},
     listStateTotal: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
-    listStateDiff: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState()
+    listStateDiff: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
+    providedPagerState: PagerState? = null
 ) {
     val selectedCommentSubTabIndex by bofScreenState.selectedCommentSubTab.collectAsStateWithLifecycle()
     
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
     // 创建Pager状态，页面数量为2（Total, Diff）
-    val pagerState = rememberPagerState(
+    val internalPagerState = rememberPagerState(
         pageCount = { 2 },
         initialPage = selectedCommentSubTabIndex
     )
+    val pagerState = providedPagerState ?: internalPagerState
     
     // 使用snapshotFlow更安全地处理状态同步
     LaunchedEffect(selectedCommentSubTabIndex) {

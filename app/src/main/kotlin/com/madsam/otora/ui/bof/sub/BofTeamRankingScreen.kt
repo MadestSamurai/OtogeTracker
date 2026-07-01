@@ -224,7 +224,8 @@ private fun TeamRankingTable(
     teamInfoMode: Int,
     scrollThreshold: Float = 50f,
     setIsTabRowVisible: (Boolean) -> Unit = {},
-    vm: BofViewModel
+    vm: BofViewModel,
+    showTitle: Boolean = false
 ) {
     // 屏幕宽度检测（参考RankingTable）
     val density = LocalDensity.current
@@ -279,7 +280,7 @@ private fun TeamRankingTable(
         }
         
         // 表格标题和副标题
-        Column(
+        if (showTitle) Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Black)
@@ -995,13 +996,14 @@ private fun TeamDiffTable(
     isReverse: Boolean,
     scrollThreshold: Float = 50f,
     setIsTabRowVisible: (Boolean) -> Unit = {},
-    vm: BofViewModel
+    vm: BofViewModel,
+    showTitle: Boolean = false
 ) {
     val maxScore = teams.maxOfOrNull { it.totalScore } ?: 1.0
     
     Column {
         // 标题和副标题
-        Column(
+        if (showTitle) Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Black)

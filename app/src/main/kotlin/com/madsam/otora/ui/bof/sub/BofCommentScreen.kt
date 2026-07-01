@@ -96,7 +96,8 @@ internal fun BofCommentScreen(
     scrollThreshold: Float = 50f,
     setIsTabRowVisible: (Boolean) -> Unit = {},
     showCaptureDialog: Boolean = false,
-    onCaptureDialogDismiss: () -> Unit = {}
+    onCaptureDialogDismiss: () -> Unit = {},
+    showTitle: Boolean = false
 ) {
     // 计算屏幕宽度和内容宽度
     val density = LocalDensity.current
@@ -194,7 +195,7 @@ internal fun BofCommentScreen(
         }
         
         // 表格标题和副标题
-        Column(
+        if (showTitle) Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Black)
@@ -708,7 +709,8 @@ internal fun BofCommentDiffScreen(
     scrollThreshold: Float = 50f,
     setIsTabRowVisible: (Boolean) -> Unit = {},
     showCaptureDialog: Boolean = false,
-    onCaptureDialogDismiss: () -> Unit = {}
+    onCaptureDialogDismiss: () -> Unit = {},
+    showTitle: Boolean = false
 ) {
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     val maxScore = commentData.maxOfOrNull { it.total.toDouble() } ?: 1.0
@@ -727,7 +729,7 @@ internal fun BofCommentDiffScreen(
             )
     ) {
         // 标题和副标题
-        Column(
+        if (showTitle) Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.Black)

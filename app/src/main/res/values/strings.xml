@@ -77,6 +77,16 @@
     <string name="language_move_up">Move up</string>
     <string name="language_move_down">Move down</string>
     <string name="language_restart_hint">Language changes will take effect immediately. Some content may require app restart to fully update.</string>
+
+    <!-- BOF -->
+    <string name="bof_section_entry">Entry Ranking</string>
+    <string name="bof_section_team">Team Ranking</string>
+    <string name="bof_section_comment">Comment Ranking</string>
+    <string name="bof_mode_total">Total</string>
+    <string name="bof_mode_average">Avg</string>
+    <string name="bof_mode_median">Median</string>
+    <string name="bof_mode_difference">Diff</string>
+    <string name="bof_mode_composite">Composite</string>
     
     <!-- Theme Colors -->
     <string name="color_violet">Violet</string>
