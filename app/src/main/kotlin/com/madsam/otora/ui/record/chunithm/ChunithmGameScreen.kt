@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -44,9 +47,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.madsam.otora.OverlayManager
-import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Chevron-left`
-import com.madsam.otora.core.icon.fa.Cog
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.ui.record.ChunithmScreenState
 import com.madsam.otora.ui.record.chunithm.pages.ChunithmSongDetailPage
@@ -100,7 +100,7 @@ fun ChunithmGameScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = Fa.`Chevron-left`,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
                             modifier = Modifier.size(24.dp)
                         )
@@ -114,7 +114,7 @@ fun ChunithmGameScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = Fa.Cog,
+                            imageVector = Icons.Filled.Settings,
                             contentDescription = "Settings",
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)

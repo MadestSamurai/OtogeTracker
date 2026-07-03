@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -36,8 +38,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.theme.plexSemi
@@ -82,7 +82,7 @@ fun OsuDataUpdateScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        imageVector = Fa.`Chevron-left`,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "返回",
                         tint = colorScheme.onSurface,
                         modifier = Modifier.size(24.dp)

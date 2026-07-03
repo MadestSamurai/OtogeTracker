@@ -19,6 +19,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.NightsStay
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -48,17 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.R
 import com.madsam.otora.core.datastore.ThemeDataStore
-import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.icon.fa.`Chevron-left`
-import com.madsam.otora.core.icon.fa.`Chevron-right`
-import com.madsam.otora.core.icon.fa.Cloud
-import com.madsam.otora.core.icon.fa.Cog
-import com.madsam.otora.core.icon.fa.Font
-import com.madsam.otora.core.icon.fa.Language
-import com.madsam.otora.core.icon.fa.Moon
-import com.madsam.otora.core.icon.fa.Palette
-import com.madsam.otora.core.icon.fa.Sun
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.theme.plexSemi
@@ -188,7 +188,7 @@ fun SettingsScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Fa.`Chevron-left`,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.settings_back),
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
@@ -460,7 +460,7 @@ private fun DataUpdateSettingItem(
         }
         
         Icon(
-            imageVector = Fa.`Chevron-right`,
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             tint = colorScheme.onSurfaceVariant,
             modifier = Modifier.size(18.dp)
@@ -631,7 +631,7 @@ private fun SelectionSettingItem(
         }
         
         Icon(
-            imageVector = Fa.`Chevron-right`,
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             tint = colorScheme.onSurfaceVariant,
             modifier = Modifier.size(18.dp)
@@ -688,7 +688,7 @@ private fun NetworkSelectionSettingItem(
         }
         
         Icon(
-            imageVector = Fa.`Chevron-right`,
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
             tint = colorScheme.onSurfaceVariant,
             modifier = Modifier.size(18.dp)
@@ -728,13 +728,13 @@ enum class DataUpdateSettings(
     BOF(
         titleResId = R.string.settings_data_bof_title,
         descriptionResId = R.string.settings_data_bof_desc,
-        icon = Fa.Cloud,
+        icon = Icons.Filled.Cloud,
         lastUpdate = "2024-08-04 20:00"
     ),
     General(
         titleResId = R.string.settings_data_general_title,
         descriptionResId = R.string.settings_data_general_desc,
-        icon = Fa.Cog
+        icon = Icons.Filled.Settings
     )
 }
 
@@ -748,33 +748,33 @@ enum class AppearanceSettings(
     AutoDarkMode(
         titleResId = R.string.settings_auto_dark_title,
         descriptionResId = R.string.settings_auto_dark_desc,
-        icon = Fa.Sun,
+        icon = Icons.Filled.WbSunny,
         type = SettingType.Toggle,
         defaultValue = true
     ),
     DarkMode(
         titleResId = R.string.settings_dark_mode_title,
         descriptionResId = R.string.settings_dark_mode_desc,
-        icon = Fa.Moon,
+        icon = Icons.Filled.NightsStay,
         type = SettingType.Toggle,
         defaultValue = false
     ),
     ThemeColor(
         titleResId = R.string.settings_theme_color_title,
         descriptionResId = R.string.settings_theme_color_desc,
-        icon = Fa.Palette,
+        icon = Icons.Filled.Palette,
         type = SettingType.Selection
     ),
     Language(
         titleResId = R.string.settings_language_title,
         descriptionResId = R.string.settings_language_desc,
-        icon = Fa.Language,
+        icon = Icons.Filled.Language,
         type = SettingType.Selection
     ),
     FontSize(
         titleResId = R.string.settings_font_size_title,
         descriptionResId = R.string.settings_font_size_desc,
-        icon = Fa.Font,
+        icon = Icons.Filled.TextFields,
         type = SettingType.Selection
     )
 }
@@ -789,7 +789,7 @@ enum class NetworkSettings(
     UserAgent(
         titleResId = R.string.settings_user_agent_title,
         descriptionResId = R.string.settings_user_agent_desc,
-        icon = Fa.Cog,
+        icon = Icons.Filled.Settings,
         type = SettingType.Selection
     )
 }

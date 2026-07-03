@@ -23,6 +23,11 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -53,11 +58,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.BofScreenState
-import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Arrow-down`
-import com.madsam.otora.core.icon.fa.`Arrow-right`
-import com.madsam.otora.core.icon.fa.`Arrow-up`
-import com.madsam.otora.core.icon.fa.Star
 import com.madsam.otora.core.theme.BG_DARK_GRAY
 import com.madsam.otora.core.theme.RANKING_BLUE
 import com.madsam.otora.core.theme.RANKING_RED
@@ -494,7 +494,7 @@ internal fun TeamRankingRow(
                     when {
                         change != null && change > 0 -> {
                             Icon(
-                                imageVector = Fa.`Arrow-up`,
+                                imageVector = Icons.Filled.KeyboardArrowUp,
                                 contentDescription = "Rank Up",
                                 tint = Color.Green,
                                 modifier = Modifier.size(12.dp)
@@ -508,7 +508,7 @@ internal fun TeamRankingRow(
                         }
                         change != null && change < 0 -> {
                             Icon(
-                                imageVector = Fa.`Arrow-down`,
+                                imageVector = Icons.Filled.KeyboardArrowDown,
                                 contentDescription = "Rank Down",
                                 tint = Color.Red,
                                 modifier = Modifier.size(12.dp)
@@ -522,7 +522,7 @@ internal fun TeamRankingRow(
                         }
                         change != null -> {
                             Icon(
-                                imageVector = Fa.`Arrow-right`,
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                                 contentDescription = "Rank Same",
                                 tint = Color.Gray,
                                 modifier = Modifier.size(12.dp)
@@ -845,7 +845,7 @@ private fun TeamWorkRow(
             // Final Striker 星标
             if (finalStriker == "1") {
                 Icon(
-                    imageVector = Fa.Star,
+                    imageVector = Icons.Filled.Star,
                     contentDescription = "Final Striker",
                     tint = RANKING_YELLOW,
                     modifier = Modifier.size(14.dp)

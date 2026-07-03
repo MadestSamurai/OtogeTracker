@@ -22,6 +22,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -43,9 +45,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.R
-import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.icon.fa.Cog
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.utils.ScreenUtil
 
@@ -122,7 +122,7 @@ fun GameListScreen(
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
-                            imageVector = Fa.Cog,
+                            imageVector = Icons.Filled.Settings,
                             contentDescription = "Settings",
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)

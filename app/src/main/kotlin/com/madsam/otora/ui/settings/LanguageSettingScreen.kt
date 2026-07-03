@@ -19,6 +19,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -48,8 +50,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import com.madsam.otora.R
 import com.madsam.otora.core.datastore.ThemeDataStore
-import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.theme.plexSemi
@@ -146,7 +146,7 @@ fun LanguageSettingScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        imageVector = Fa.`Chevron-left`,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.settings_back),
                         tint = colorScheme.onSurface,
                         modifier = Modifier.size(24.dp)

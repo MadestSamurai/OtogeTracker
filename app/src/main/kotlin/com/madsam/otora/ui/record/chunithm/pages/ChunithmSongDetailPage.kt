@@ -30,6 +30,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -55,8 +57,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
 import com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
@@ -268,7 +268,7 @@ internal fun ChunithmSongDetailPage(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    painter = rememberVectorPainter(image = Fa.`Chevron-left`),
+                    painter = rememberVectorPainter(image = Icons.AutoMirrored.Filled.ArrowBack),
                     contentDescription = "返回",
                     tint = colorScheme.onSurface,
                     modifier = Modifier.size(24.dp)

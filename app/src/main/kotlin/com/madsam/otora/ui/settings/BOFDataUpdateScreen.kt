@@ -14,6 +14,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -38,10 +42,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Chevron-left`
-import com.madsam.otora.core.icon.fa.`Arrow-rotate-back`
-import com.madsam.otora.core.icon.fa.Info
 import com.madsam.otora.core.theme.RANKING_GREEN
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
@@ -78,7 +78,7 @@ fun BOFDataUpdateScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        imageVector = Fa.`Chevron-left`,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "返回",
                         tint = colorScheme.onSurface,
                         modifier = Modifier.size(24.dp)
@@ -98,7 +98,7 @@ fun BOFDataUpdateScreen(
                         )
                     } else {
                         Icon(
-                            imageVector = Fa.`Arrow-rotate-back`,
+                            imageVector = Icons.Filled.Refresh,
                             contentDescription = "刷新比赛列表",
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
@@ -169,7 +169,7 @@ fun BOFDataUpdateScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = Fa.Info,
+                                imageVector = Icons.Filled.Info,
                                 contentDescription = null,
                                 tint = if (uiState.isError) colorScheme.error else RANKING_GREEN,
                                 modifier = Modifier.size(20.dp)

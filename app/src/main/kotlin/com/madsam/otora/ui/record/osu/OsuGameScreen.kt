@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,9 +36,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.core.datastore.ThemeDataStore
-import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Chevron-left`
-import com.madsam.otora.core.icon.fa.Cog
 import com.madsam.otora.core.theme.OtogeTrackerTheme
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.utils.ScreenUtil
@@ -120,7 +120,7 @@ private fun OsuGameScreenContent(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            imageVector = Fa.`Chevron-left`,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back",
                             modifier = Modifier.size(24.dp)
                         )
@@ -134,7 +134,7 @@ private fun OsuGameScreenContent(
                         }
                     ) {
                         Icon(
-                            imageVector = Fa.Cog,
+                            imageVector = Icons.Filled.Settings,
                             contentDescription = "Settings",
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)

@@ -16,6 +16,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -49,12 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.OverlayManager
-import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.icon.fa.`Chevron-left`
-import com.madsam.otora.core.icon.fa.Bars
-import com.madsam.otora.core.icon.fa.Cog
-import com.madsam.otora.core.icon.fa.Trash
 import com.madsam.otora.core.theme.plexBold
 import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.ui.navigation.ChunithmNavHost
@@ -122,7 +122,7 @@ internal fun RecordScreen(
                                 Screen.Page1 -> Icon(Filled.OsuIcon, "Osu", Modifier.size(24.dp))
                                 Screen.Page2 -> Icon(Filled.MaimaiIcon, "Maimai", Modifier.size(24.dp))
                                 Screen.Page3 -> Icon(Filled.ChunithmIcon, "Chunithm", Modifier.size(24.dp))
-                                Screen.Page4 -> Icon(Fa.Trash, null, Modifier.size(24.dp))
+                                Screen.Page4 -> Icon(Icons.Filled.Delete, null, Modifier.size(24.dp))
                             }
                         },
                         label = { Text(screen.route) },
@@ -149,7 +149,7 @@ internal fun RecordScreen(
                 NavigationDrawerItem(
                     icon = {
                         Icon(
-                            imageVector = Fa.Cog,
+                            imageVector = Icons.Filled.Settings,
                             contentDescription = "Settings",
                             modifier = Modifier.size(24.dp)
                         )
@@ -194,7 +194,7 @@ internal fun RecordScreen(
                             chunithmViewModel.triggerBack()
                         }) {
                             Icon(
-                                imageVector = Fa.`Chevron-left`,
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
                                 modifier = Modifier.size(24.dp)
                             )
@@ -205,7 +205,7 @@ internal fun RecordScreen(
                             scope.launch { drawerState.open() }
                         }) {
                             Icon(
-                                imageVector = Fa.Bars,
+                                imageVector = Icons.Filled.Menu,
                                 contentDescription = "Menu",
                                 modifier = Modifier.size(24.dp)
                             )
@@ -220,7 +220,7 @@ internal fun RecordScreen(
                         }
                     ) {
                         Icon(
-                            imageVector = Fa.Cog,
+                            imageVector = Icons.Filled.Settings,
                             contentDescription = "Settings",
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)

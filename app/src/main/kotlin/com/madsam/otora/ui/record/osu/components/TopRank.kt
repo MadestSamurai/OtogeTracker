@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,8 +21,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Chart-bar`
 import com.madsam.otora.core.theme.plexSemi
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
@@ -55,7 +55,7 @@ internal fun TopRank(
                 verticalArrangement = Arrangement.Center
             ) {
                 Icon(
-                    imageVector = Fa.`Chart-bar`,
+                    imageVector = Icons.Filled.BarChart,
                     contentDescription = null,
                     tint = colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                     modifier = Modifier.size(48.dp)

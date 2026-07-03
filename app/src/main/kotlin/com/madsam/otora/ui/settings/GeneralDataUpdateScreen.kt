@@ -12,6 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -33,10 +37,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Chevron-left`
-import com.madsam.otora.core.icon.fa.Clock
-import com.madsam.otora.core.icon.fa.Wifi
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.theme.plexSemi
@@ -67,7 +67,7 @@ fun GeneralDataUpdateScreen(
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
-                        imageVector = Fa.`Chevron-left`,
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "返回",
                         tint = colorScheme.onSurface,
                         modifier = Modifier.size(24.dp)
@@ -113,7 +113,7 @@ fun GeneralDataUpdateScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Fa.Clock,
+                            imageVector = Icons.Filled.Schedule,
                             contentDescription = null,
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
@@ -175,7 +175,7 @@ fun GeneralDataUpdateScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            imageVector = Fa.Wifi,
+                            imageVector = Icons.Filled.Wifi,
                             contentDescription = null,
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)

@@ -15,6 +15,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,8 +41,6 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.rememberAsyncImagePainter
-import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.theme.CHUNI_DIFF_ADVANCED
 import com.madsam.otora.core.theme.CHUNI_DIFF_BASIC
 import com.madsam.otora.core.theme.CHUNI_DIFF_EXPERT
@@ -86,7 +86,7 @@ internal fun TopRating(
         ) {
             IconButton(onClick = onBack) {
                 Icon(
-                    Fa.`Chevron-left`,
+                    Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     tint = colorScheme.onSurface
                 )

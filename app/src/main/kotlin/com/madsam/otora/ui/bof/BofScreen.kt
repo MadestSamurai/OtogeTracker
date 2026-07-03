@@ -43,6 +43,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -81,13 +87,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.R
-import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.icon.fa.Calendar
-import com.madsam.otora.core.icon.fa.Camera
-import com.madsam.otora.core.icon.fa.`Chevron-left`
-import com.madsam.otora.core.icon.fa.`Magnifying-glass`
-import com.madsam.otora.core.icon.fa.Xmark
 import com.madsam.otora.core.utils.DateTimeUtils
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
@@ -139,7 +139,7 @@ private fun BofModeSwitcher(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Fa.`Chevron-left`,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = stringResource(R.string.settings_back),
                 tint = colorScheme.onSurface,
                 modifier = Modifier.size(20.dp)
@@ -822,7 +822,7 @@ fun BofScreen(
                                 modifier = Modifier.size(48.dp)
                             ) {
                                 Icon(
-                                    imageVector = Fa.Camera,
+                                    imageVector = Icons.Filled.PhotoCamera,
                                     contentDescription = "Screenshot",
                                     tint = colorScheme.onSurface,
                                     modifier = Modifier.height(24.dp)
@@ -878,7 +878,7 @@ fun BofScreen(
                                 modifier = Modifier.size(48.dp)
                             ) {
                                 Icon(
-                                    imageVector = Fa.Calendar,
+                                    imageVector = Icons.Filled.CalendarToday,
                                     contentDescription = "Date&Time",
                                     tint = colorScheme.onSurface,
                                     modifier = Modifier.height(24.dp)
@@ -939,7 +939,7 @@ fun BofScreen(
                             ) {
                                 // Leading icon
                                 Icon(
-                                    painter = rememberVectorPainter(image = Fa.`Magnifying-glass`),
+                                    painter = rememberVectorPainter(image = Icons.Filled.Search),
                                     contentDescription = "Search",
                                     tint = colorScheme.onSurface,
                                     modifier = Modifier.size(20.dp)
@@ -974,7 +974,7 @@ fun BofScreen(
                                         modifier = Modifier.size(32.dp)
                                     ) {
                                         Icon(
-                                            painter = rememberVectorPainter(image = Fa.Xmark),
+                                            painter = rememberVectorPainter(image = Icons.Filled.Close),
                                             contentDescription = "Clear",
                                             tint = colorScheme.onSurface,
                                             modifier = Modifier.size(20.dp)

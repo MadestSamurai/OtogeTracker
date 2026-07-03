@@ -31,6 +31,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -63,12 +69,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Arrow-down-wide-short`
-import com.madsam.otora.core.icon.fa.`Chevron-left`
-import com.madsam.otora.core.icon.fa.Filter
-import com.madsam.otora.core.icon.fa.`Magnifying-glass`
-import com.madsam.otora.core.icon.fa.Xmark
 import com.madsam.otora.ui.record.chunithm.ChunithmViewModel
 import androidx.compose.material3.MaterialTheme
 import com.madsam.otora.ui.record.chunithm.components.ChunithmFilterComponent
@@ -464,7 +464,7 @@ internal fun ChunithmSongListPage(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Fa.`Chevron-left`,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
                     tint = colorScheme.onSurface,
                     modifier = Modifier.size(20.dp)
@@ -517,7 +517,7 @@ internal fun ChunithmSongListPage(
                         ) {
                             // Leading icon
                             Icon(
-                                painter = rememberVectorPainter(image = Fa.`Magnifying-glass`),
+                                painter = rememberVectorPainter(image = Icons.Filled.Search),
                                 contentDescription = "Search",
                                 tint = colorScheme.onSurface,
                                 modifier = Modifier.size(20.dp)
@@ -552,7 +552,7 @@ internal fun ChunithmSongListPage(
                                     modifier = Modifier.size(32.dp)
                                 ) {
                                     Icon(
-                                        painter = rememberVectorPainter(image = Fa.Xmark),
+                                        painter = rememberVectorPainter(image = Icons.Filled.Close),
                                         contentDescription = "Clear",
                                         tint = colorScheme.onSurface,
                                         modifier = Modifier.size(20.dp)
@@ -570,7 +570,7 @@ internal fun ChunithmSongListPage(
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
-                            painter = rememberVectorPainter(image = Fa.Filter),
+                            painter = rememberVectorPainter(image = Icons.Filled.FilterList),
                             contentDescription = if (isFilterExpanded.value) "收起筛选" else "展开筛选",
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
@@ -585,7 +585,7 @@ internal fun ChunithmSongListPage(
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
-                            painter = rememberVectorPainter(image = Fa.`Arrow-down-wide-short`),
+                            painter = rememberVectorPainter(image = Icons.AutoMirrored.Filled.Sort),
                             contentDescription = if (isSortExpanded.value) "收起排序" else "展开排序",
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
