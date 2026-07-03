@@ -50,7 +50,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,7 +60,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,7 +70,6 @@ import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -82,33 +79,27 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.R
 import com.madsam.otora.core.icon.Fa
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.Calendar
 import com.madsam.otora.core.icon.fa.Camera
+import com.madsam.otora.core.icon.fa.`Chevron-left`
 import com.madsam.otora.core.icon.fa.`Magnifying-glass`
 import com.madsam.otora.core.icon.fa.Xmark
+import com.madsam.otora.core.utils.DateTimeUtils
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.madsam.otora.ui.bof.components.DateTimeRangePicker
 import com.madsam.otora.ui.bof.sub.BofCommentPagerScreen
-import com.madsam.otora.ui.bof.sub.BofCommentScreen
 import com.madsam.otora.ui.bof.sub.BofEntryPagerScreen
 import com.madsam.otora.ui.bof.sub.BofTeamPagerScreen
-import com.madsam.otora.ui.bof.sub.BofTeamTotalScreen
-import com.madsam.otora.ui.components.CustomScrollableTabRow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
-import kotlin.math.roundToInt
 
 private const val TAG = "BofScreen"
 
@@ -120,6 +111,7 @@ private val StandardDecelerate = CubicBezierEasing(0f, 0f, 0f, 1f) // 线性开�
 @Composable
 private fun BofModeSwitcher(
     sectionLabel: String,
+    subtitle: String,
     modeLabels: List<String>,
     pagerState: PagerState,
     onModeSelected: (Int) -> Unit,
@@ -157,7 +149,7 @@ private fun BofModeSwitcher(
         BoxWithConstraints(
             modifier = Modifier
                 .weight(1f)
-                .height(64.dp),
+                .height(72.dp),
             contentAlignment = Alignment.Center
         ) {
             val density = LocalDensity.current
@@ -174,20 +166,26 @@ private fun BofModeSwitcher(
                 0,
                 (modeLabels.size - 1).coerceAtLeast(0)
             )
-            val currentOffset = pagerState.currentPageOffsetFraction
 
             modeLabels.forEachIndexed { page, label ->
-                val relativePosition = (page - currentPage) - currentOffset
-                if (relativePosition.absoluteValue <= 1.65f) {
-                    val focus = (1f - relativePosition.absoluteValue).coerceIn(0f, 1f)
+                if ((page - currentPage).absoluteValue <= 2) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.Center)
                             .width(carouselItemWidth)
-                            .height(56.dp)
+                            .height(48.dp)
                             .graphicsLayer {
+                                val relativePosition =
+                                    (page - pagerState.currentPage) -
+                                        pagerState.currentPageOffsetFraction
+                                val focus = (1f - relativePosition.absoluteValue).coerceIn(0f, 1f)
                                 translationX = relativePosition * itemStridePx
-                                alpha = 0.28f + focus * 0.72f
+                                translationY = -8.dp.toPx()
+                                alpha = if (relativePosition.absoluteValue <= 1.65f) {
+                                    0.28f + focus * 0.72f
+                                } else {
+                                    0f
+                                }
                                 val scale = 0.76f + focus * 0.24f
                                 scaleX = scale
                                 scaleY = scale
@@ -195,8 +193,7 @@ private fun BofModeSwitcher(
                             .clickable {
                                 if (
                                     page == pagerState.currentPage &&
-                                    !pagerState.isScrollInProgress &&
-                                    currentOffset.absoluteValue < 0.05f
+                                    !pagerState.isScrollInProgress
                                 ) {
                                     expanded = true
                                 } else {
@@ -218,6 +215,20 @@ private fun BofModeSwitcher(
                         )
                     }
                 }
+            }
+
+            if (subtitle.isNotBlank()) {
+                Text(
+                    text = subtitle,
+                    color = Color.White.copy(alpha = 0.62f),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(horizontal = 8.dp)
+                )
             }
 
             DropdownMenu(
@@ -257,8 +268,6 @@ fun BofScreen(
         onNavigateBack()
     }
 
-    val navController = rememberNavController()
-
     val bofRequestService = BofRequestService()
     val vm: BofViewModel = viewModel(factory = BofViewModelFactory(bofScreenState))
 
@@ -289,6 +298,11 @@ fun BofScreen(
     val selectedSubTabIndex = bofScreenState.selectedSubTab.asStateFlow().collectAsState().value
     val selectedTeamSubTabIndex = bofScreenState.selectedTeamSubTab.asStateFlow().collectAsState().value
     val selectedCommentSubTabIndex = bofScreenState.selectedCommentSubTab.asStateFlow().collectAsState().value
+    val selectedCurrentDate = bofScreenState.selectedCurrentDate.collectAsState().value
+    val selectedCurrentTime = bofScreenState.selectedCurrentTime.collectAsState().value
+    val selectedCompareDate = bofScreenState.selectedCompareDate.collectAsState().value
+    val selectedCompareTime = bofScreenState.selectedCompareTime.collectAsState().value
+    val selectedTimeStrNoComp by vm.selectedTimeStrNoComp.collectAsState()
     val entryModePagerState = rememberPagerState(
         initialPage = selectedSubTabIndex.coerceIn(0, 4),
         pageCount = { 5 }
@@ -329,6 +343,32 @@ fun BofScreen(
         1 -> teamModePagerState
         else -> commentModePagerState
     }
+    val timeLabel = stringResource(R.string.bof_time_label)
+    val currentTimeLabel = stringResource(R.string.bof_time_current)
+    val compareTimeLabel = stringResource(R.string.bof_time_compare)
+    val singleDayLabel = stringResource(R.string.bof_time_single_day)
+    val roundedCurrentTime = remember(selectedCurrentTime) {
+        DateTimeUtils.roundDownToNearestFiveMinutes(selectedCurrentTime)
+    }
+    val roundedCompareTime = remember(selectedCompareTime) {
+        DateTimeUtils.roundDownToNearestFiveMinutes(selectedCompareTime)
+    }
+    val commentDate = selectedRange?.commentDate.orEmpty()
+    val commentTimeText = selectedTimeStrNoComp.ifEmpty {
+        "$selectedCurrentDate $roundedCurrentTime"
+    }
+    val headerSubtitle = when {
+        selectedRange?.isStart != true -> selectedRange?.full.orEmpty()
+        safeSectionIndex == 2 &&
+            selectedRange?.singleComment == true &&
+            commentDate.isNotEmpty() ->
+            "$timeLabel $commentDate ($singleDayLabel)"
+        safeSectionIndex == 2 ->
+            "$timeLabel $commentTimeText"
+        else ->
+            "$currentTimeLabel $selectedCurrentDate $roundedCurrentTime | " +
+                "$compareTimeLabel $selectedCompareDate $roundedCompareTime"
+    }
 
     fun selectBofMode(index: Int) {
         val safeIndex = index.coerceIn(0, modeLabels.lastIndex)
@@ -362,10 +402,6 @@ fun BofScreen(
     val showDateTimeRangePickerState = showDateTimeRangePicker.collectAsState()
     val scrollThreshold = 50f
 
-    val density = LocalDensity.current
-    val screenWidthDp = with(density) {
-        LocalWindowInfo.current.containerSize.width.toDp()
-    }
     var entryInfoMode by remember { mutableIntStateOf(0) }
     var teamInfoMode by remember { mutableIntStateOf(0) }
     var commentInfoMode by remember { mutableIntStateOf(0) }
@@ -382,10 +418,10 @@ fun BofScreen(
     // 监听 selectedRange 和时间变化，自动加载数据
     LaunchedEffect(
         selectedRange,
-        bofScreenState.selectedCurrentDate.collectAsState().value,
-        bofScreenState.selectedCurrentTime.collectAsState().value,
-        bofScreenState.selectedCompareDate.collectAsState().value,
-        bofScreenState.selectedCompareTime.collectAsState().value
+        selectedCurrentDate,
+        selectedCurrentTime,
+        selectedCompareDate,
+        selectedCompareTime
     ) {
         // 只有当 selectedRange 不为空时才加载数据
         selectedRange?.let { range ->
@@ -491,14 +527,6 @@ fun BofScreen(
         }
     }
 
-    val tabTitles = mapOf(
-        "Entry" to listOf("Total", "Avg", "Median", "Diff", "Composite"),
-        "Team" to emptyList(),
-        "Comment" to emptyList()
-    )
-
-    val mainTabTitles = tabTitles.keys.toList()
-
     Log.d(TAG, "Starting UI render")
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -510,76 +538,12 @@ fun BofScreen(
             // 顶部导航栏：左侧返回按钮 + 右侧主Tab
             BofModeSwitcher(
                 sectionLabel = sectionLabel,
+                subtitle = headerSubtitle,
                 modeLabels = modeLabels,
                 pagerState = activeModePagerState,
                 onModeSelected = ::selectBofMode,
                 onNavigateBack = onNavigateBack
             )
-
-            if (false) Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .windowInsetsPadding(WindowInsets.statusBars)
-                    .background(Color.Black)
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // 左侧圆形返回按钮
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(colorScheme.surfaceContainer)
-                        .clickable {
-                            onNavigateBack()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Fa.`Chevron-left`,
-                        contentDescription = "Back",
-                        tint = colorScheme.onSurface,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-
-                // 右侧主Tab栏
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(24.dp))
-                ) {
-                    val contentWidthDp = screenWidthDp - 24.dp - 48.dp - 12.dp // 减去左侧按钮和间距
-
-                    CustomScrollableTabRow(
-                        selectedTabIndex = selectedTabIndex,
-                        containerColor = colorScheme.surfaceContainer,
-                        containerWidthDp = contentWidthDp,
-                        tabs = { _ ->
-                            mainTabTitles.forEachIndexed { index, title ->
-                                Tab(
-                                    selected = selectedTabIndex == index,
-                                    onClick = {
-                                        if (selectedTabIndex != index) {
-                                            bofScreenState.selectedTab.update { index }
-                                            bofScreenState.selectedSubTab.update { 0 }
-                                            navController.navigate(title)
-                                        }
-                                    },
-                                    text = {
-                                        Text(
-                                            text = title,
-                                            color = if (selectedTabIndex == index) colorScheme.primary else colorScheme.onSurfaceVariant
-                                        )
-                                    },
-                                    modifier = Modifier.height(48.dp)
-                                )
-                            }
-                        }
-                    )
-                }
-            }
 
             // 检查活动是否开始
             if (selectedRange?.isStart != true) {
@@ -687,76 +651,6 @@ fun BofScreen(
                     }
                 }
 
-                if (false) NavHost(
-                    navController = navController,
-                    startDestination = mainTabTitles[selectedTabIndex],
-                    modifier = Modifier.weight(1f)
-                ) {
-                    mainTabTitles.forEach { mainTab ->
-                        composable(mainTab) {
-                            when (mainTab) {
-                                "Entry" -> BofEntryPagerScreen(
-                                    vm = vm,
-                                    bofScreenState = bofScreenState,
-                                    snackbarHostState = snackbarHostState,
-                                    narrowMode = entryInfoMode,
-                                    searchText = searchText.value,
-                                    scrollThreshold = scrollThreshold,
-                                    setIsTabRowVisible = { },
-                                    showCaptureDialog = showEntryCaptureDialog,
-                                    onCaptureDialogDismiss = { showEntryCaptureDialog = false },
-                                    listStateTotal = listStateTotal,
-                                    listStateAvg = listStateAvg,
-                                    listStateMedian = listStateMedian,
-                                    listStateDiff = listStateDiff,
-                                    listStateComposite = listStateComposite
-                                )
-
-                                "Team" -> BofTeamPagerScreen(
-                                    vm = vm,
-                                    bofScreenState = bofScreenState,
-                                    snackbarHostState = snackbarHostState,
-                                    teamInfoMode = teamInfoMode,
-                                    scrollThreshold = scrollThreshold,
-                                    setIsTabRowVisible = { },
-                                    showCaptureDialog = showTeamCaptureDialog,
-                                    onCaptureDialogDismiss = { showTeamCaptureDialog = false },
-                                    listStateTotal = listStateTeam,
-                                    listStateDiff = rememberLazyListState()
-                                )
-
-                                "Comment" -> {
-                                    val selectedTimeStrNoComp by vm.selectedTimeStrNoComp.collectAsState()
-                                    val selectedRange =
-                                        bofScreenState.selectedRange.collectAsState().value
-                                    var title = "评价排行榜"
-                                    var subtitle = "时间: $selectedTimeStrNoComp"
-
-                                    if (selectedRange?.singleComment == true && selectedRange.commentDate.isNotEmpty()) {
-                                        title = "最终评价排行榜"
-                                        subtitle = "时间: ${selectedRange.commentDate} (仅单日)"
-                                    }
-
-                                    BofCommentPagerScreen(
-                                        vm = vm,
-                                        bofScreenState = bofScreenState,
-                                        title = title,
-                                        subtitle = subtitle,
-                                        commentDisplayMode = commentInfoMode,
-                                        scrollThreshold = scrollThreshold,
-                                        setIsTabRowVisible = { },
-                                        showCaptureDialog = showCommentCaptureDialog,
-                                        onCaptureDialogDismiss = {
-                                            showCommentCaptureDialog = false
-                                        },
-                                        listStateTotal = listStateComment,
-                                        listStateDiff = rememberLazyListState()
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
             }
         }
 

@@ -87,6 +87,10 @@
     <string name="bof_mode_median">Median</string>
     <string name="bof_mode_difference">Diff</string>
     <string name="bof_mode_composite">Composite</string>
+    <string name="bof_time_label">Time:</string>
+    <string name="bof_time_current">Current:</string>
+    <string name="bof_time_compare">Compare:</string>
+    <string name="bof_time_single_day">single day</string>
     
     <!-- Theme Colors -->
     <string name="color_violet">Violet</string>

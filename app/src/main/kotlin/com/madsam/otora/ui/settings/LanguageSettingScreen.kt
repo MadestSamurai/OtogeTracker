@@ -5,12 +5,8 @@ import android.content.Context
 import android.os.Build
 import android.os.LocaleList
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,8 +26,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -53,9 +49,7 @@ import androidx.core.os.LocaleListCompat
 import com.madsam.otora.R
 import com.madsam.otora.core.datastore.ThemeDataStore
 import com.madsam.otora.core.icon.Fa
-import com.madsam.otora.core.icon.fa.`Chevron-down`
 import com.madsam.otora.core.icon.fa.`Chevron-left`
-import com.madsam.otora.core.icon.fa.`Chevron-up`
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.theme.plexSemi
@@ -87,7 +81,9 @@ fun LanguageSettingScreen(
     
     // 从 DataStore 读取设置
     val followSystem by themeDataStore.getFollowSystemLanguageFlow().collectAsState(initial = true)
-    val savedLanguageOrder by themeDataStore.getLanguageOrderFlow().collectAsState(initial = listOf("zh-CN", "en"))
+    val savedLanguageOrder by themeDataStore.getLanguageOrderFlow().collectAsState(
+        initial = ThemeDataStore.DEFAULT_LANGUAGE_ORDER
+    )
     
     // 本地状态
     var isFollowSystem by remember { mutableStateOf(followSystem) }
@@ -108,11 +104,28 @@ fun LanguageSettingScreen(
             LanguageItem("en", R.string.language_english, "English")
         )
     }
-    
-    // 根据保存的顺序排序语言列表
-    val sortedLanguages = remember(languageOrder) {
-        languageOrder.mapNotNull { code ->
-            allLanguages.find { it.code == code }
+    val selectedLanguageCode = if (isFollowSystem) null else languageOrder.firstOrNull()
+
+    fun selectFollowSystem() {
+        isFollowSystem = true
+        scope.launch {
+            themeDataStore.saveFollowSystemLanguage(true)
+            applyFollowSystem(context)
+            onLanguageChanged?.invoke()
+        }
+    }
+
+    fun selectLanguage(languageCode: String) {
+        isFollowSystem = false
+        val newOrder = listOf(languageCode) + allLanguages
+            .map { it.code }
+            .filter { it != languageCode }
+        languageOrder = newOrder
+        scope.launch {
+            themeDataStore.saveFollowSystemLanguage(false)
+            themeDataStore.saveLanguageOrder(newOrder)
+            applyLanguageOrder(context, newOrder)
+            onLanguageChanged?.invoke()
         }
     }
     
@@ -155,141 +168,34 @@ fun LanguageSettingScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 跟随系统开关
+            // 语言选项
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.language_follow_system),
-                                color = colorScheme.onSurface,
-                                fontSize = 16.sp,
-                                fontFamily = plexSemi
-                            )
-                            Text(
-                                text = stringResource(R.string.language_follow_system_desc),
-                                color = colorScheme.onSurfaceVariant,
-                                fontSize = 14.sp,
-                                fontFamily = plexRegular
-                            )
-                        }
-                        
-                        Switch(
-                            checked = isFollowSystem,
-                            onCheckedChange = { enabled ->
-                                isFollowSystem = enabled
-                                scope.launch {
-                                    themeDataStore.saveFollowSystemLanguage(enabled)
-                                    if (enabled) {
-                                        applyFollowSystem(context)
-                                    } else {
-                                        applyLanguageOrder(context, languageOrder)
-                                    }
-                                    onLanguageChanged?.invoke()
-                                }
-                            },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = colorScheme.onPrimary,
-                                checkedTrackColor = colorScheme.primary,
-                                uncheckedThumbColor = colorScheme.outline,
-                                uncheckedTrackColor = colorScheme.surfaceContainerHighest
-                            )
-                        )
-                    }
-                }
-            }
-            
-            // 语言优先级列表（仅在不跟随系统时显示）
-            item {
-                AnimatedVisibility(
-                    visible = !isFollowSystem,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut()
-                ) {
                     Column {
-                        Text(
-                            text = stringResource(R.string.language_priority),
-                            color = colorScheme.onSurface,
-                            fontSize = 14.sp,
-                            fontFamily = plexSemi,
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
+                        LanguageOptionItem(
+                            title = stringResource(R.string.language_follow_system),
+                            subtitle = stringResource(R.string.language_follow_system_desc),
+                            selected = isFollowSystem,
+                            onClick = ::selectFollowSystem
                         )
-                        
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Column {
-                                sortedLanguages.forEachIndexed { index, item ->
-                                    LanguageOrderItem(
-                                        item = item,
-                                        index = index,
-                                        isFirst = index == 0,
-                                        isLast = index == sortedLanguages.size - 1,
-                                        onMoveUp = {
-                                            if (index > 0) {
-                                                val newOrder = languageOrder.toMutableList().apply {
-                                                    val temp = this[index]
-                                                    this[index] = this[index - 1]
-                                                    this[index - 1] = temp
-                                                }
-                                                languageOrder = newOrder
-                                                scope.launch {
-                                                    themeDataStore.saveLanguageOrder(newOrder)
-                                                    applyLanguageOrder(context, newOrder)
-                                                    onLanguageChanged?.invoke()
-                                                }
-                                            }
-                                        },
-                                        onMoveDown = {
-                                            if (index < sortedLanguages.size - 1) {
-                                                val newOrder = languageOrder.toMutableList().apply {
-                                                    val temp = this[index]
-                                                    this[index] = this[index + 1]
-                                                    this[index + 1] = temp
-                                                }
-                                                languageOrder = newOrder
-                                                scope.launch {
-                                                    themeDataStore.saveLanguageOrder(newOrder)
-                                                    applyLanguageOrder(context, newOrder)
-                                                    onLanguageChanged?.invoke()
-                                                }
-                                            }
-                                        }
-                                    )
-                                    
-                                    // 分割线
-                                    if (index < sortedLanguages.size - 1) {
-                                        Spacer(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(0.5.dp)
-                                                .background(colorScheme.outlineVariant.copy(alpha = 0.5f))
-                                                .padding(horizontal = 56.dp)
-                                        )
-                                    }
-                                }
+
+                        LanguageDivider()
+
+                        allLanguages.forEachIndexed { index, item ->
+                            LanguageOptionItem(
+                                title = stringResource(item.displayNameResId),
+                                subtitle = item.nativeName,
+                                selected = selectedLanguageCode == item.code,
+                                onClick = { selectLanguage(item.code) }
+                            )
+                            if (index < allLanguages.size - 1) {
+                                LanguageDivider()
                             }
                         }
-                        
-                        // 提示文字
-                        Text(
-                            text = stringResource(R.string.language_drag_hint),
-                            color = colorScheme.onSurfaceVariant,
-                            fontSize = 12.sp,
-                            fontFamily = plexRegular,
-                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
-                        )
                     }
                 }
             }
@@ -309,74 +215,59 @@ fun LanguageSettingScreen(
 }
 
 @Composable
-private fun LanguageOrderItem(
-    item: LanguageItem,
-    index: Int,
-    isFirst: Boolean,
-    isLast: Boolean,
-    onMoveUp: () -> Unit,
-    onMoveDown: () -> Unit
+private fun LanguageOptionItem(
+    title: String,
+    subtitle: String,
+    selected: Boolean,
+    onClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // 序号
-        Text(
-            text = "${index + 1}",
-            color = colorScheme.primary,
-            fontSize = 18.sp,
-            fontFamily = plexBold,
-            modifier = Modifier.width(28.dp)
+        RadioButton(
+            selected = selected,
+            onClick = onClick,
+            colors = RadioButtonDefaults.colors(
+                selectedColor = colorScheme.primary,
+                unselectedColor = colorScheme.onSurfaceVariant
+            )
         )
-        
+
         Spacer(modifier = Modifier.width(12.dp))
-        
-        // 语言名称
+
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = stringResource(item.displayNameResId),
+                text = title,
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
                 fontFamily = plexSemi
             )
             Text(
-                text = item.nativeName,
+                text = subtitle,
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
                 fontFamily = plexRegular
             )
         }
-        
-        // 上下移动按钮
-        IconButton(
-            onClick = onMoveUp,
-            enabled = !isFirst
-        ) {
-            Icon(
-                imageVector = Fa.`Chevron-up`,
-                contentDescription = stringResource(R.string.language_move_up),
-                tint = if (isFirst) colorScheme.outlineVariant else colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-        
-        IconButton(
-            onClick = onMoveDown,
-            enabled = !isLast
-        ) {
-            Icon(
-                imageVector = Fa.`Chevron-down`,
-                contentDescription = stringResource(R.string.language_move_down),
-                tint = if (isLast) colorScheme.outlineVariant else colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
-            )
-        }
     }
+}
+
+@Composable
+private fun LanguageDivider() {
+    val colorScheme = MaterialTheme.colorScheme
+    Spacer(
+        modifier = Modifier
+            .padding(start = 72.dp)
+            .fillMaxWidth()
+            .height(0.5.dp)
+            .background(colorScheme.outlineVariant.copy(alpha = 0.5f))
+    )
 }
 
 /**

@@ -87,6 +87,10 @@
     <string name="bof_mode_median">中位</string>
     <string name="bof_mode_difference">差值</string>
     <string name="bof_mode_composite">综合</string>
+    <string name="bof_time_label">时间:</string>
+    <string name="bof_time_current">当前:</string>
+    <string name="bof_time_compare">对比:</string>
+    <string name="bof_time_single_day">仅单日</string>
     
     <!-- Theme Colors -->
     <string name="color_violet">紫罗兰</string>
