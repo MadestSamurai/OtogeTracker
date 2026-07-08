@@ -197,13 +197,14 @@ internal fun MainScreenWithNavigation(
                 .fillMaxSize()
                 .then(
                     if (showNavigation) {
-                        Modifier.padding(start = 80.dp) // NavigationRail的宽度
+                        Modifier
+                            .padding(start = 80.dp) // NavigationRail的宽度
+                            .windowInsetsPadding(
+                                WindowInsets.displayCutout.only(WindowInsetsSides.Start)
+                            )
                     } else {
                         Modifier
                     }
-                )
-                .windowInsetsPadding(
-                    WindowInsets.displayCutout.only(WindowInsetsSides.Start)
                 )
             ) {
                 NavHost(navController = navController, startDestination = Screen.HomeScreen.route) {

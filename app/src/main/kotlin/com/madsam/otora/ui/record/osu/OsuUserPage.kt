@@ -1,9 +1,14 @@
 package com.madsam.otora.ui.record.osu
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
@@ -25,14 +30,11 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.record.osu.components.BadgeList
 import com.madsam.otora.ui.record.osu.components.Card
 import com.madsam.otora.ui.record.osu.components.Level
@@ -47,41 +49,19 @@ import com.madsam.otora.ui.record.osu.dialogs.TopRankDialog
 @Composable
 internal fun OsuUserPage(
     viewModel: OsuViewModel,
-    isPageVisible: Boolean = true
+    isPageVisible: Boolean = true,
+    includeBottomSystemBarPadding: Boolean = false,
+    avoidStartDisplayCutout: Boolean = true,
+    avoidEndDisplayCutout: Boolean = true
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val context = LocalContext.current
     var showFullRecentDialog by remember { mutableStateOf(false) }
     var showTopRankDialog by remember { mutableStateOf("") }
 
-    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
-    val lifecycleOwner = LocalLifecycleOwner.current
-    
-    // 计算屏幕宽度和内容宽度
-    val density = LocalDensity.current
     val layoutDirection = LocalLayoutDirection.current
-    val windowInfo = LocalWindowInfo.current
-    val screenWidthDp = with(density) {
-        windowInfo.containerSize.width.toDp()
-    }
-    
-    // 计算 Cutout 占用的宽度
-    val cutoutWidthDp = with(density) {
-        val cutoutInsets = WindowInsets.displayCutout
-        // 计算左右两侧的 cutout 总宽度
-        cutoutInsets.getLeft(density, layoutDirection).toDp() +
-        cutoutInsets.getRight(density, layoutDirection).toDp()
-    }
-    
-    // 计算可用内容宽度
-    val contentWidthDp = if (useNavigationRail) {
-        // NavigationRail 宽度 + 水平 padding + cutout 宽度
-        screenWidthDp - 80.dp - 24.dp - cutoutWidthDp
-    } else {
-        // 只减去水平 padding + cutout 宽度
-        screenWidthDp - 24.dp - cutoutWidthDp
-    }
-
+    val displayCutoutPadding = WindowInsets.displayCutout.asPaddingValues()
+    val lifecycleOwner = LocalLifecycleOwner.current
     // 监听Activity的生命周期，从其他Activity返回时重新加载数据
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
@@ -102,21 +82,28 @@ internal fun OsuUserPage(
         }
     }
     
-    LazyColumn(
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val baseHorizontalPadding = 16.dp
+        val startCutoutPadding = if (avoidStartDisplayCutout) {
+            displayCutoutPadding.calculateStartPadding(layoutDirection)
+        } else {
+            0.dp
+        }
+        val endCutoutPadding = if (avoidEndDisplayCutout) {
+            displayCutoutPadding.calculateEndPadding(layoutDirection)
+        } else {
+            0.dp
+        }
+        val startContentPadding = baseHorizontalPadding + startCutoutPadding
+        val endContentPadding = baseHorizontalPadding + endCutoutPadding
+        val contentWidthDp =
+            (maxWidth - startContentPadding - endContentPadding).coerceAtLeast(0.dp)
+
+        LazyColumn(
         modifier = Modifier
+            .fillMaxSize()
             .background(colorScheme.surface)
-            .padding(horizontal = 16.dp)
-            .windowInsetsPadding(
-                WindowInsets.displayCutout.only(
-                    if (useNavigationRail) {
-                        // 使用 NavigationRail 时，左侧已由 Rail 处理，只处理右侧
-                        WindowInsetsSides.End
-                    } else {
-                        // 使用 BottomNavigation 时，底部已由 BottomBar 处理，只处理左侧和右侧
-                        WindowInsetsSides.Start + WindowInsetsSides.End
-                    }
-                )
-            )
+            .padding(start = startContentPadding, end = endContentPadding)
             .nestedScroll(object : NestedScrollConnection {
                 private var totalScroll = 0f
 
@@ -187,7 +174,7 @@ internal fun OsuUserPage(
             Spacer(
                 modifier = Modifier
                     .windowInsetsPadding(
-                        if (useNavigationRail) {
+                        if (includeBottomSystemBarPadding) {
                             WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
                         } else {
                             WindowInsets(0, 0, 0, 0)
@@ -195,6 +182,7 @@ internal fun OsuUserPage(
                     )
             )
         }
+    }
     }
 
     if (showFullRecentDialog) {

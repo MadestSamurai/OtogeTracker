@@ -243,7 +243,10 @@ internal fun RecordScreen(
                         val osuViewModel: OsuViewModel = viewModel(factory = OsuViewModelFactory())
                         OsuUserPage(
                             osuViewModel,
-                            isPageVisible = selectedItem == Screen.Page1
+                            isPageVisible = selectedItem == Screen.Page1,
+                            includeBottomSystemBarPadding = useNavigationRail,
+                            avoidStartDisplayCutout = !useNavigationRail,
+                            avoidEndDisplayCutout = true
                         )
                     }
 

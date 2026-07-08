@@ -4,13 +4,11 @@ import android.content.Intent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Settings
@@ -38,7 +36,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.core.datastore.ThemeDataStore
 import com.madsam.otora.core.theme.OtogeTrackerTheme
 import com.madsam.otora.core.theme.plexBold
-import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.settings.SettingsActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 
@@ -104,7 +101,6 @@ private fun OsuGameScreenContent(
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-    val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     val colorScheme = MaterialTheme.colorScheme
 
     Scaffold(
@@ -150,32 +146,20 @@ private fun OsuGameScreenContent(
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        contentWindowInsets = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom),
         containerColor = colorScheme.surface
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .windowInsetsPadding(
-                    WindowInsets.displayCutout.only(
-                        if (useNavigationRail) {
-                            WindowInsetsSides.End
-                        } else {
-                            WindowInsetsSides.Horizontal
-                        }
-                    )
-                )
-                .windowInsetsPadding(
-                    if (useNavigationRail) {
-                        WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
-                    } else {
-                        WindowInsets(0, 0, 0, 0)
-                    }
-                )
         ) {
             OsuUserPage(
                 viewModel = viewModel,
-                isPageVisible = true
+                isPageVisible = true,
+                includeBottomSystemBarPadding = false,
+                avoidStartDisplayCutout = true,
+                avoidEndDisplayCutout = true
             )
         }
     }
