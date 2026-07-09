@@ -1,14 +1,19 @@
 package com.madsam.otora.ui.home
 
+import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,9 +26,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
@@ -31,13 +38,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.madsam.otora.R
 import com.madsam.otora.core.database.ObjectBoxManager
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.data.bof.local.model.BofCommentTimeSeriesEntity
@@ -58,9 +71,9 @@ private data class BofHomeRankRow(
 )
 
 private data class BofHomeSection(
-    val title: String,
-    val subtitle: String,
-    val emptyText: String,
+    @param:StringRes val titleResId: Int,
+    @param:StringRes val subtitleResId: Int,
+    @param:StringRes val emptyTextResId: Int,
     val tabIndex: Int,
     val rows: List<BofHomeRankRow> = emptyList()
 )
@@ -105,8 +118,9 @@ private fun HomeMainContent(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "OtogeTracker",
+                text = stringResource(R.string.app_name),
                 fontSize = 32.sp,
+                lineHeight = 42.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = plexBold,
                 color = colorScheme.primary
@@ -125,147 +139,134 @@ private fun BofHomeBlock(
     summary: BofHomeSummary,
     onNavigateToBOF: (Int) -> Unit
 ) {
-    val colorScheme = MaterialTheme.colorScheme
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+        verticalArrangement = Arrangement.Top
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Surface(
-                modifier = Modifier.size(52.dp),
-                shape = RoundedCornerShape(8.dp),
-                color = colorScheme.primaryContainer,
-                contentColor = colorScheme.onPrimaryContainer
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Filled.EmojiEvents,
-                        contentDescription = null,
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "BOF",
-                    fontSize = 30.sp,
-                    fontFamily = plexBold,
-                    color = colorScheme.onSurface
-                )
-                Text(
-                    text = "BMS OF FIGHTERS",
-                    fontSize = 13.sp,
-                    fontFamily = plexBold,
-                    color = colorScheme.primary
-                )
-                Text(
-                    text = "BMS 制谱比赛排名追踪",
-                    fontSize = 14.sp,
-                    color = colorScheme.onSurfaceVariant
-                )
-            }
-        }
-
-        summary.sections.forEach { section ->
-            BofEntranceCard(
-                section = section,
-                competitionName = summary.competitionName,
-                isLoading = summary.isLoading,
-                onClick = { onNavigateToBOF(section.tabIndex) }
-            )
-        }
+        BofHomeGroupCard(
+            summary = summary,
+            isExpanded = isExpanded,
+            onHeaderClick = { isExpanded = !isExpanded },
+            onNavigateToBOF = onNavigateToBOF
+        )
     }
 }
 
 @Composable
-private fun BofEntranceCard(
-    section: BofHomeSection,
-    competitionName: String,
-    isLoading: Boolean,
-    onClick: () -> Unit
+private fun BofHomeGroupCard(
+    summary: BofHomeSummary,
+    isExpanded: Boolean,
+    onHeaderClick: () -> Unit,
+    onNavigateToBOF: (Int) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val indicatorRotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        label = "BOF section indicator rotation"
+    )
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+        modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
         shape = RoundedCornerShape(8.dp)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = section.title,
-                    fontSize = 20.sp,
-                    fontFamily = plexBold,
-                    color = colorScheme.onSurface
-                )
-                Text(
-                    text = section.subtitle,
-                    fontSize = 12.sp,
-                    color = colorScheme.onSurfaceVariant
-                )
-            }
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-                verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    .clickable(onClick = onHeaderClick)
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Box(modifier = Modifier.weight(1f)) {
-                    BofEntrancePreview(
-                        rows = section.rows,
-                        emptyText = section.emptyText,
-                        competitionName = competitionName,
-                        isLoading = isLoading
-                    )
-                }
-
                 Surface(
-                    modifier = Modifier
-                        .width(58.dp)
-                        .fillMaxHeight()
-                        .clickable(onClick = onClick),
+                    modifier = Modifier.size(52.dp),
                     shape = RoundedCornerShape(8.dp),
                     color = colorScheme.primaryContainer,
                     contentColor = colorScheme.onPrimaryContainer
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(vertical = 10.dp, horizontal = 6.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
+                    Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            imageVector = Icons.Filled.EmojiEvents,
                             contentDescription = null,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(28.dp)
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "进入",
-                            fontSize = 12.sp,
-                            fontFamily = plexBold,
-                            maxLines = 1
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(
+                        text = "BOF",
+                        fontSize = 30.sp,
+                        lineHeight = 34.sp,
+                        fontFamily = plexBold,
+                        color = colorScheme.onSurface
+                    )
+                    Text(
+                        text = "BMS OF FIGHTERS",
+                        fontSize = 13.sp,
+                        lineHeight = 16.sp,
+                        fontFamily = plexBold,
+                        color = colorScheme.primary
+                    )
+                    Text(
+                        text = stringResource(R.string.bof_home_tagline),
+                        fontSize = 14.sp,
+                        lineHeight = 18.sp,
+                        color = colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        summary.sections.forEach { section ->
+                            Text(
+                                text = stringResource(section.titleResId),
+                                fontSize = 12.sp,
+                                lineHeight = 15.sp,
+                                color = colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+
+                Icon(
+                    imageVector = Icons.Filled.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .graphicsLayer { rotationZ = indicatorRotation }
+                )
+            }
+
+            AnimatedVisibility(
+                visible = isExpanded,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    HorizontalDivider(color = colorScheme.outlineVariant.copy(alpha = 0.45f))
+                    summary.sections.forEachIndexed { index, section ->
+                        BofEntranceRow(
+                            section = section,
+                            isLoading = summary.isLoading,
+                            onClick = { onNavigateToBOF(section.tabIndex) }
                         )
+                        if (index < summary.sections.lastIndex) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(start = 14.dp),
+                                color = colorScheme.outlineVariant.copy(alpha = 0.35f)
+                            )
+                        }
                     }
                 }
             }
@@ -274,10 +275,67 @@ private fun BofEntranceCard(
 }
 
 @Composable
+private fun BofEntranceRow(
+    section: BofHomeSection,
+    isLoading: Boolean,
+    onClick: () -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = stringResource(section.titleResId),
+                    fontSize = 18.sp,
+                    lineHeight = 22.sp,
+                    fontFamily = plexBold,
+                    color = colorScheme.onSurface
+                )
+                Text(
+                    text = stringResource(section.subtitleResId),
+                    fontSize = 12.sp,
+                    lineHeight = 15.sp,
+                    color = colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            BofEntrancePreview(
+                rows = section.rows,
+                emptyText = stringResource(section.emptyTextResId),
+                isLoading = isLoading
+            )
+        }
+
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+            contentDescription = null,
+            tint = colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
+@Composable
 private fun BofEntrancePreview(
     rows: List<BofHomeRankRow>,
     emptyText: String,
-    competitionName: String,
     isLoading: Boolean
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -286,16 +344,19 @@ private fun BofEntrancePreview(
         isLoading -> {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(18.dp),
+                    modifier = Modifier.size(16.dp),
                     strokeWidth = 2.dp
                 )
                 Text(
-                    text = "读取 BOF 本地排行...",
-                    fontSize = 13.sp,
-                    color = colorScheme.onSurfaceVariant
+                    text = stringResource(R.string.bof_home_loading),
+                    fontSize = 12.sp,
+                    lineHeight = 15.sp,
+                    color = colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
@@ -303,20 +364,18 @@ private fun BofEntrancePreview(
         rows.isEmpty() -> {
             Text(
                 text = emptyText,
-                fontSize = 13.sp,
-                color = colorScheme.onSurfaceVariant
+                fontSize = 12.sp,
+                lineHeight = 15.sp,
+                color = colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
 
         else -> {
-            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                Text(
-                    text = "${competitionName.ifBlank { "BOF" }} 总分前三",
-                    fontSize = 12.sp,
-                    color = colorScheme.onSurfaceVariant
-                )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 rows.forEach { row ->
-                    BofRankPreviewRow(row = row)
+                    BofCompactRankPreviewRow(row = row)
                 }
             }
         }
@@ -324,8 +383,9 @@ private fun BofEntrancePreview(
 }
 
 @Composable
-private fun BofRankPreviewRow(row: BofHomeRankRow) {
+private fun BofCompactRankPreviewRow(row: BofHomeRankRow) {
     val colorScheme = MaterialTheme.colorScheme
+    val untitledText = stringResource(R.string.bof_home_untitled)
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -334,31 +394,25 @@ private fun BofRankPreviewRow(row: BofHomeRankRow) {
     ) {
         Text(
             text = "#${row.rank}",
-            modifier = Modifier.width(30.dp),
-            fontSize = 13.sp,
+            modifier = Modifier.width(24.dp),
+            fontSize = 12.sp,
+            lineHeight = 15.sp,
             fontFamily = plexBold,
             color = colorScheme.primary
         )
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = row.title.ifBlank { "Untitled" },
-                fontSize = 14.sp,
-                fontFamily = plexBold,
-                color = colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = row.subtitle.ifBlank { "No detail" },
-                fontSize = 12.sp,
-                color = colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+        Text(
+            text = row.title.ifBlank { untitledText },
+            modifier = Modifier.weight(1f),
+            fontSize = 12.sp,
+            lineHeight = 15.sp,
+            color = colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
         Text(
             text = row.score,
-            fontSize = 13.sp,
+            fontSize = 12.sp,
+            lineHeight = 15.sp,
             fontFamily = plexBold,
             color = colorScheme.onSurface
         )
@@ -367,21 +421,21 @@ private fun BofRankPreviewRow(row: BofHomeRankRow) {
 
 private fun defaultBofHomeSections(): List<BofHomeSection> = listOf(
     BofHomeSection(
-        title = "Entry",
-        subtitle = "作品总分",
-        emptyText = "尚未找到本地 BOF 作品数据",
+        titleResId = R.string.bof_home_title_entry,
+        subtitleResId = R.string.bof_home_entry_subtitle,
+        emptyTextResId = R.string.bof_home_entry_empty,
         tabIndex = 0
     ),
     BofHomeSection(
-        title = "Team",
-        subtitle = "团队总分",
-        emptyText = "尚未找到本地 BOF 团队数据",
+        titleResId = R.string.bof_home_title_team,
+        subtitleResId = R.string.bof_home_team_subtitle,
+        emptyTextResId = R.string.bof_home_team_empty,
         tabIndex = 1
     ),
     BofHomeSection(
-        title = "Comment",
-        subtitle = "评论总分",
-        emptyText = "尚未找到本地 BOF 评论数据",
+        titleResId = R.string.bof_home_title_comment,
+        subtitleResId = R.string.bof_home_comment_subtitle,
+        emptyTextResId = R.string.bof_home_comment_empty,
         tabIndex = 2
     )
 )
@@ -425,9 +479,9 @@ private suspend fun loadBofHomeSummary(): BofHomeSummary = withContext(Dispatche
 
         val sections = listOf(
             BofHomeSection(
-                title = "Entry",
-                subtitle = "作品总分",
-                emptyText = "尚未找到本地 BOF 作品数据",
+                titleResId = R.string.bof_home_title_entry,
+                subtitleResId = R.string.bof_home_entry_subtitle,
+                emptyTextResId = R.string.bof_home_entry_empty,
                 tabIndex = 0,
                 rows = works
                     .filter { it.path == selectedPath }
@@ -443,9 +497,9 @@ private suspend fun loadBofHomeSummary(): BofHomeSummary = withContext(Dispatche
                     }
             ),
             BofHomeSection(
-                title = "Team",
-                subtitle = "团队总分",
-                emptyText = "尚未找到本地 BOF 团队数据",
+                titleResId = R.string.bof_home_title_team,
+                subtitleResId = R.string.bof_home_team_subtitle,
+                emptyTextResId = R.string.bof_home_team_empty,
                 tabIndex = 1,
                 rows = teams
                     .filter { it.path == selectedPath }
@@ -455,15 +509,15 @@ private suspend fun loadBofHomeSummary(): BofHomeSummary = withContext(Dispatche
                         BofHomeRankRow(
                             rank = index + 1,
                             title = team.teamName,
-                            subtitle = team.currentTitle1.ifBlank { "Team ranking" },
+                            subtitle = team.currentTitle1,
                             score = formatDecimalScore(team.latestTotalScore)
                         )
                     }
             ),
             BofHomeSection(
-                title = "Comment",
-                subtitle = "评论总分",
-                emptyText = "尚未找到本地 BOF 评论数据",
+                titleResId = R.string.bof_home_title_comment,
+                subtitleResId = R.string.bof_home_comment_subtitle,
+                emptyTextResId = R.string.bof_home_comment_empty,
                 tabIndex = 2,
                 rows = comments
                     .filter { it.path == selectedPath }
