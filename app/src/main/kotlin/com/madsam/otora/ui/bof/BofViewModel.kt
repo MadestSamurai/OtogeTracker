@@ -22,6 +22,21 @@ import kotlin.math.abs
 
 private const val TAG = "BofViewModel"
 
+internal enum class BofRankingErrorCode {
+    NO_DATA,
+    LOAD_FAILED
+}
+
+internal sealed class BofRankingError(
+    val code: BofRankingErrorCode
+) {
+    data object NoData : BofRankingError(BofRankingErrorCode.NO_DATA)
+
+    data class LoadFailed(
+        val detail: String?
+    ) : BofRankingError(BofRankingErrorCode.LOAD_FAILED)
+}
+
 internal class BofViewModel(
     private val bofScreenState: BofScreenState
 ) : ViewModel() {
@@ -50,7 +65,7 @@ internal class BofViewModel(
     val teamDiffRankingData = MutableStateFlow(listOf<TeamRankingItem>()) // 团队差值排行
     val teamReverseDiffRankingData = MutableStateFlow(listOf<TeamRankingItem>()) // 团队逆差值排行
     val isTeamRankingLoading = MutableStateFlow(false)
-    val teamRankingError = MutableStateFlow("")
+    val teamRankingError = MutableStateFlow<BofRankingError?>(null)
     
     // Comment 差值数据流
     val commentDiffData = MutableStateFlow(listOf<BofCommentUI>()) // 评价差值排行
@@ -74,7 +89,7 @@ internal class BofViewModel(
     val compositeMinImpression = MutableStateFlow(1)
     
     val isLoading = MutableStateFlow(false)
-    val errorMessage = MutableStateFlow("")
+    val rankingError = MutableStateFlow<BofRankingError?>(null)
 
     init {
         Log.d(TAG, "BofViewModel init started")
@@ -327,7 +342,7 @@ internal class BofViewModel(
         viewModelScope.launch {
             try {
                 isLoading.update { true }
-                errorMessage.update { "" }
+                rankingError.update { null }
                 
                 // 计算当前时间戳（主排序时间点）
                 val currentTimestamp = DateTimeUtils.ymdToMillis(
@@ -360,14 +375,14 @@ internal class BofViewModel(
                 }
                 
                 if (totalRankingData.value.isEmpty()) {
-                    errorMessage.update { "该时间点暂无排名数据" }
+                    rankingError.update { BofRankingError.NoData }
                 } else {
                     generateCompositeRanking()
                     generateDifferenceRanking()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to load ranking data with streamed parsing and comparison", e)
-                errorMessage.update { "加载失败: ${e.message}" }
+                rankingError.update { BofRankingError.LoadFailed(e.message) }
                 totalRankingData.update { emptyList() }
             } finally {
                 // 确保加载状态最终被设置为false
@@ -379,11 +394,12 @@ internal class BofViewModel(
     }
     
     // 获取当前选择的时间字符串 - 支持对比时间显示
-    fun getSelectedTimeString(): String {
+    fun getSelectedTimeString(currentLabel: String, compareLabel: String): String {
         val currentTime = DateTimeUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCurrentTime.value)
         val compareTime = DateTimeUtils.roundDownToNearestFiveMinutes(bofScreenState.selectedCompareTime.value)
         
-        return "当前: ${bofScreenState.selectedCurrentDate.value} $currentTime | 对比: ${bofScreenState.selectedCompareDate.value} $compareTime"
+        return "$currentLabel ${bofScreenState.selectedCurrentDate.value} $currentTime\n" +
+            "$compareLabel ${bofScreenState.selectedCompareDate.value} $compareTime"
     }
     
     // 基于总分排行数据生成平均分排行数据
@@ -875,7 +891,7 @@ internal class BofViewModel(
         viewModelScope.launch {
             try {
                 isTeamRankingLoading.update { true }
-                teamRankingError.update { "" }
+                teamRankingError.update { null }
                 
                 // 计算当前时间戳（主排序时间点）
                 val currentTimestamp = if (bofScreenState.selectedCurrentTime.value == "-1") {
@@ -919,14 +935,14 @@ internal class BofViewModel(
                 }
                 
                 if (teamRankingData.value.isEmpty()) {
-                    teamRankingError.update { "该时间点暂无团队排名数据" }
+                    teamRankingError.update { BofRankingError.NoData }
                 }
                 
                 Log.d(TAG, "Team ranking data loading completed successfully")
                 
             } catch (e: Exception) {
                 Log.e(TAG, "Error loading team ranking data: ${e.message}", e)
-                teamRankingError.update { "加载团队排行数据失败: ${e.message}" }
+                teamRankingError.update { BofRankingError.LoadFailed(e.message) }
             } finally {
                 // 确保加载状态最终被设置为false
                 if (isTeamRankingLoading.value) {

@@ -43,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -51,21 +50,20 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.madsam.otora.ui.bof.BofRankingColors
 import com.madsam.otora.BofScreenState
-import com.madsam.otora.core.theme.BG_DARK_GRAY
-import com.madsam.otora.core.theme.RANKING_BLUE
-import com.madsam.otora.core.theme.RANKING_RED
-import com.madsam.otora.core.theme.RANKING_YELLOW
-import com.madsam.otora.core.theme.TEXT_GRAY
+import com.madsam.otora.R
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ScreenUtil
+import com.madsam.otora.ui.bof.BofRankingError
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.bof.TeamRankingItem
@@ -80,7 +78,7 @@ import com.madsam.otora.ui.bof.components.BofTeamDiffCaptureDialog
 internal fun BofTeamTotalScreen(
     teamRankingData: List<TeamRankingItem>,
     isLoading: Boolean,
-    errorMessage: String,
+    error: BofRankingError?,
     selectedRange: BofRangeResponse?,
     bofScreenState: BofScreenState,
     vm: BofViewModel = viewModel(),
@@ -94,11 +92,29 @@ internal fun BofTeamTotalScreen(
 ) {
     val context = LocalContext.current
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
+    val currentTimeLabel = stringResource(R.string.bof_time_current)
+    val compareTimeLabel = stringResource(R.string.bof_time_compare)
+    val timeSubtitle = stringResource(
+        R.string.bof_time_value,
+        vm.getSelectedTimeString(currentTimeLabel, compareTimeLabel)
+    )
+    val loadFailedText = stringResource(R.string.bof_load_failed)
+    val retryText = stringResource(R.string.bof_retry)
+    val noTeamRankingDataText = stringResource(R.string.bof_error_no_team_ranking_data)
+    val loadTeamRankingFailedFormat = stringResource(R.string.bof_error_load_team_ranking_failed)
+    val emptyTeamTitle = stringResource(R.string.bof_team_empty_title)
+    val emptyTeamMessage = stringResource(R.string.bof_team_empty_message)
+    val displayErrorMessage = when (error) {
+        null -> ""
+        BofRankingError.NoData -> noTeamRankingDataText
+        is BofRankingError.LoadFailed ->
+            String.format(loadTeamRankingFailedFormat, error.detail.orEmpty())
+    }
     
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(BofRankingColors.Background)
             .windowInsetsPadding(
                 WindowInsets.displayCutout.only(
                     if (useNavigationRail) {
@@ -117,11 +133,11 @@ internal fun BofTeamTotalScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = RANKING_RED)
+                    CircularProgressIndicator(color = BofRankingColors.Negative)
                 }
             }
             
-            errorMessage.isNotEmpty() -> {
+            error != null -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -130,17 +146,17 @@ internal fun BofTeamTotalScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "加载失败",
+                            text = loadFailedText,
                             fontFamily = plexBold,
                             fontSize = 18.sp,
-                            color = RANKING_RED
+                            color = BofRankingColors.Negative
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = errorMessage,
+                            text = displayErrorMessage,
                             fontFamily = plexRegular,
                             fontSize = 14.sp,
-                            color = TEXT_GRAY,
+                            color = BofRankingColors.TextSecondary,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(16.dp))
@@ -152,7 +168,7 @@ internal fun BofTeamTotalScreen(
                                 }
                             }
                         ) {
-                            Text("重试")
+                            Text(retryText)
                         }
                     }
                 }
@@ -167,17 +183,17 @@ internal fun BofTeamTotalScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "暂无团队数据",
+                            text = emptyTeamTitle,
                             fontFamily = plexBold,
                             fontSize = 18.sp,
-                            color = TEXT_GRAY
+                            color = BofRankingColors.TextSecondary
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "请等待数据更新或检查网络连接",
+                            text = emptyTeamMessage,
                             fontFamily = plexRegular,
                             fontSize = 14.sp,
-                            color = TEXT_GRAY
+                            color = BofRankingColors.TextSecondary
                         )
                     }
                 }
@@ -210,7 +226,7 @@ internal fun BofTeamTotalScreen(
                     context = context,
                     snackbarHostState = snackbarHostState,
                     teams = teamRankingData,
-                    subtitle = "时间: ${vm.getSelectedTimeString()}"
+                    subtitle = timeSubtitle
                 )
             }
         }
@@ -230,6 +246,13 @@ private fun TeamRankingTable(
     // 屏幕宽度检测（参考RankingTable）
     val density = LocalDensity.current
     val windowInfo = LocalWindowInfo.current
+    val currentTimeLabel = stringResource(R.string.bof_time_current)
+    val compareTimeLabel = stringResource(R.string.bof_time_compare)
+    val timeSubtitle = stringResource(
+        R.string.bof_time_value,
+        vm.getSelectedTimeString(currentTimeLabel, compareTimeLabel)
+    )
+    val teamTotalTitle = stringResource(R.string.bof_team_total_title)
     val screenWidthDp = with(density) {
         windowInfo.containerSize.width.toDp()
     }
@@ -283,25 +306,25 @@ private fun TeamRankingTable(
         if (showTitle) Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.Black)
+                .background(BofRankingColors.Background)
                 .padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // 主标题
             Text(
-                text = "团队总分排行榜",
+                text = teamTotalTitle,
                 fontFamily = plexBold,
                 fontSize = 20.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 textAlign = TextAlign.Center
             )
             
             // 副标题
             Text(
-                text = "时间: ${vm.getSelectedTimeString()}",
+                text = timeSubtitle,
                 fontFamily = plexRegular,
                 fontSize = 12.sp,
-                color = TEXT_GRAY,
+                color = BofRankingColors.TextSecondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -360,27 +383,33 @@ internal fun TeamTableHeader(
     extraWidth: Dp,
     medianWidth: Dp
 ) {
+    val rankColumn = stringResource(R.string.bof_column_rank)
+    val teamColumn = stringResource(R.string.bof_column_team)
+    val totalColumn = stringResource(R.string.bof_column_total)
+    val medianColumn = stringResource(R.string.bof_column_median)
+    val impressionCountColumn = stringResource(R.string.bof_column_impression_count)
+
     Row(
         modifier = Modifier
-            .background(BG_DARK_GRAY)
+            .background(BofRankingColors.Header)
             .fillMaxWidth()
             .padding(vertical = 8.dp, horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "排名",
+            text = rankColumn,
             fontFamily = plexBold,
             fontSize = 14.sp,
-            color = Color.White,
+            color = BofRankingColors.Text,
             textAlign = TextAlign.Center,
             modifier = Modifier.width(50.dp) // 照搬RankingTable的排名列宽度
         )
         
         Text(
-            text = "团队",
+            text = teamColumn,
             fontFamily = plexBold,
             fontSize = 14.sp,
-            color = Color.White,
+            color = BofRankingColors.Text,
             textAlign = TextAlign.End,
             modifier = Modifier.weight(0.6f) // 照搬RankingTable的作品信息列权重
         )
@@ -392,10 +421,10 @@ internal fun TeamTableHeader(
                 0 -> {
                     // 只显示分数条
                     Text(
-                        text = "总分",
+                        text = totalColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.width(medianWidth + extraWidth)
                     )
@@ -403,18 +432,18 @@ internal fun TeamTableHeader(
                 1 -> {
                     // 显示中位数和评价数
                     Text(
-                        text = "中位数",
+                        text = medianColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.End,
                         modifier = Modifier.width(medianWidth)
                     )
                     Text(
-                        text = "评价数",
+                        text = impressionCountColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.End,
                         modifier = Modifier.width(extraWidth)
                     )
@@ -423,26 +452,26 @@ internal fun TeamTableHeader(
         } else {
             // 宽屏模式：始终显示所有列
             Text(
-                text = "总分",
+                text = totalColumn,
                 fontFamily = plexBold,
                 fontSize = 14.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(0.4f)
             )
             Text(
-                text = "中位数",
+                text = medianColumn,
                 fontFamily = plexBold,
                 fontSize = 14.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 textAlign = TextAlign.End,
                 modifier = Modifier.width(medianWidth)
             )
             Text(
-                text = "评价数",
+                text = impressionCountColumn,
                 fontFamily = plexBold,
                 fontSize = 14.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 textAlign = TextAlign.End,
                 modifier = Modifier.width(extraWidth)
             )
@@ -461,9 +490,9 @@ internal fun TeamRankingRow(
     medianWidth: Dp,
     scoreBarWidth: Dp
 ) {
-    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
+    val backgroundColor = if (index % 2 == 0) BofRankingColors.RowAlt else BofRankingColors.Background
     val scoreRatio = if (maxScore > 0) team.totalScore / maxScore else 0.0
-    val rankColor = Color.White
+    val rankColor = BofRankingColors.Text
 
     Column(
         modifier = Modifier
@@ -496,35 +525,35 @@ internal fun TeamRankingRow(
                             Icon(
                                 imageVector = Icons.Filled.KeyboardArrowUp,
                                 contentDescription = "Rank Up",
-                                tint = Color.Green,
+                                tint = BofRankingColors.Positive,
                                 modifier = Modifier.size(12.dp)
                             )
                             Text(
                                 text = change.toString(),
                                 fontFamily = plexRegular,
                                 fontSize = 10.sp,
-                                color = Color.Green
+                                color = BofRankingColors.Positive
                             )
                         }
                         change != null && change < 0 -> {
                             Icon(
                                 imageVector = Icons.Filled.KeyboardArrowDown,
                                 contentDescription = "Rank Down",
-                                tint = Color.Red,
+                                tint = BofRankingColors.Negative,
                                 modifier = Modifier.size(12.dp)
                             )
                             Text(
                                 text = (-change).toString(),
                                 fontFamily = plexRegular,
                                 fontSize = 10.sp,
-                                color = Color.Red
+                                color = BofRankingColors.Negative
                             )
                         }
                         change != null -> {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                                 contentDescription = "Rank Same",
-                                tint = Color.Gray,
+                                tint = BofRankingColors.Neutral,
                                 modifier = Modifier.size(12.dp)
                             )
                         }
@@ -547,7 +576,7 @@ internal fun TeamRankingRow(
                 text = team.teamName,
                 fontFamily = plexBold,
                 fontSize = 16.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.End,
@@ -580,7 +609,7 @@ internal fun TeamRankingRow(
                                             .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
                                             .height(20.dp)
                                             .background(
-                                                color = RANKING_RED,
+                                                color = BofRankingColors.Negative,
                                                 shape = RoundedCornerShape(
                                                     topEnd = 10.dp,
                                                     bottomEnd = 10.dp
@@ -591,7 +620,7 @@ internal fun TeamRankingRow(
                                         text = "%.2f".format(team.totalScore),
                                         fontFamily = plexBold,
                                         fontSize = 14.sp,
-                                        color = Color.White,
+                                        color = BofRankingColors.Text,
                                         overflow = TextOverflow.Visible,
                                         maxLines = 1,
                                         modifier = Modifier
@@ -616,7 +645,7 @@ internal fun TeamRankingRow(
                                                 .fillMaxWidth(compareRatio.toFloat().coerceAtMost(1f))
                                                 .height(13.dp)
                                                 .background(
-                                                    color = RANKING_BLUE,
+                                                    color = BofRankingColors.Blue,
                                                     shape = RoundedCornerShape(
                                                         topEnd = 7.dp,
                                                         bottomEnd = 7.dp
@@ -627,7 +656,7 @@ internal fun TeamRankingRow(
                                             text = "%.1f".format(compareScore),
                                             fontFamily = plexRegular,
                                             fontSize = 11.sp,
-                                            color = Color.White.copy(alpha = 0.8f),
+                                            color = BofRankingColors.Text.copy(alpha = 0.8f),
                                             overflow = TextOverflow.Visible,
                                             maxLines = 1,
                                             modifier = Modifier
@@ -645,12 +674,7 @@ internal fun TeamRankingRow(
                             modifier = Modifier
                                 .width(medianWidth)
                                 .fillMaxHeight()
-                                .background(
-                                    if (team.medianScore > 0)
-                                        Color(red = (team.medianScore / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
-                                    else
-                                        Color.Transparent
-                                )
+                                .background(BofRankingColors.scoreHeat(team.medianScore))
                                 .padding(horizontal = 4.dp),
                             contentAlignment = Alignment.CenterEnd
                         ) {
@@ -658,7 +682,7 @@ internal fun TeamRankingRow(
                                 text = "%.2f".format(team.medianScore),
                                 fontFamily = plexBold,
                                 fontSize = 16.sp,
-                                color = Color.White,
+                                color = BofRankingColors.Text,
                                 textAlign = TextAlign.End
                             )
                         }
@@ -666,7 +690,7 @@ internal fun TeamRankingRow(
                             text = team.getFormattedImpressionCount(),
                             fontFamily = plexBold,
                             fontSize = 16.sp,
-                            color = Color.White,
+                            color = BofRankingColors.Text,
                             textAlign = TextAlign.End,
                             modifier = Modifier
                                 .width(extraWidth)
@@ -695,7 +719,7 @@ internal fun TeamRankingRow(
                                     .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
                                     .height(20.dp)
                                     .background(
-                                        color = RANKING_RED,
+                                        color = BofRankingColors.Negative,
                                         shape = RoundedCornerShape(
                                             topEnd = 10.dp,
                                             bottomEnd = 10.dp
@@ -706,7 +730,7 @@ internal fun TeamRankingRow(
                                 text = "%.2f".format(team.totalScore),
                                 fontFamily = plexBold,
                                 fontSize = 14.sp,
-                                color = Color.White,
+                                color = BofRankingColors.Text,
                                 overflow = TextOverflow.Visible,
                                 maxLines = 1,
                                 modifier = Modifier
@@ -731,7 +755,7 @@ internal fun TeamRankingRow(
                                         .fillMaxWidth(compareRatio.toFloat().coerceAtMost(1f))
                                         .height(13.dp)
                                         .background(
-                                            color = RANKING_BLUE,
+                                            color = BofRankingColors.Blue,
                                             shape = RoundedCornerShape(
                                                 topEnd = 7.dp,
                                                 bottomEnd = 7.dp
@@ -742,7 +766,7 @@ internal fun TeamRankingRow(
                                     text = "%.1f".format(compareScore),
                                     fontFamily = plexRegular,
                                     fontSize = 11.sp,
-                                    color = Color.White.copy(alpha = 0.8f),
+                                    color = BofRankingColors.Text.copy(alpha = 0.8f),
                                     overflow = TextOverflow.Visible,
                                     maxLines = 1,
                                     modifier = Modifier
@@ -759,12 +783,7 @@ internal fun TeamRankingRow(
                     modifier = Modifier
                         .width(medianWidth)
                         .fillMaxHeight()
-                        .background(
-                            if (team.medianScore > 0)
-                                Color(red = (team.medianScore / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
-                            else
-                                Color.Transparent
-                        )
+                        .background(BofRankingColors.scoreHeat(team.medianScore))
                         .padding(horizontal = 4.dp),
                     contentAlignment = Alignment.CenterEnd
                 ) {
@@ -772,7 +791,7 @@ internal fun TeamRankingRow(
                         text = "%.2f".format(team.medianScore),
                         fontFamily = plexBold,
                         fontSize = 16.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.End
                     )
                 }
@@ -782,7 +801,7 @@ internal fun TeamRankingRow(
                     text = team.getFormattedImpressionCount(),
                     fontFamily = plexBold,
                     fontSize = 16.sp,
-                    color = Color.White,
+                    color = BofRankingColors.Text,
                     textAlign = TextAlign.End,
                     modifier = Modifier
                         .width(extraWidth)
@@ -847,7 +866,7 @@ private fun TeamWorkRow(
                 Icon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = "Final Striker",
-                    tint = RANKING_YELLOW,
+                    tint = BofRankingColors.Accent,
                     modifier = Modifier.size(14.dp)
                 )
             } else {
@@ -860,7 +879,7 @@ private fun TeamWorkRow(
                 text = "$title - $artist",
                 fontFamily = plexRegular,
                 fontSize = 12.sp,
-                color = TEXT_GRAY,
+                color = BofRankingColors.TextSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
@@ -871,7 +890,7 @@ private fun TeamWorkRow(
             text = "%.2f".format(workScore),
             fontFamily = plexBold,
             fontSize = 12.sp,
-            color = TEXT_GRAY,
+            color = BofRankingColors.TextSecondary,
             textAlign = TextAlign.End,
             modifier = Modifier.width(70.dp)
         )
@@ -899,11 +918,22 @@ internal fun BofTeamDiffScreen(
 ) {
     val context = LocalContext.current
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
+    val currentTimeLabel = stringResource(R.string.bof_time_current)
+    val compareTimeLabel = stringResource(R.string.bof_time_compare)
+    val timeSubtitle = stringResource(
+        R.string.bof_time_value,
+        vm.getSelectedTimeString(currentTimeLabel, compareTimeLabel)
+    )
+    val diffIncreaseTitle = stringResource(R.string.bof_team_diff_increase_title)
+    val diffDecreaseTitle = stringResource(R.string.bof_team_diff_decrease_title)
+    val diffEmptyIncrease = stringResource(R.string.bof_team_diff_empty_increase)
+    val diffEmptyDecrease = stringResource(R.string.bof_team_diff_empty_decrease)
+    val diffEmptyMessage = stringResource(R.string.bof_diff_empty_message)
     
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(BofRankingColors.Background)
             .windowInsetsPadding(
                 WindowInsets.displayCutout.only(
                     if (useNavigationRail) {
@@ -920,7 +950,7 @@ internal fun BofTeamDiffScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = RANKING_RED)
+                    CircularProgressIndicator(color = BofRankingColors.Negative)
                 }
             }
             
@@ -933,17 +963,17 @@ internal fun BofTeamDiffScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = if (isReverse) "暂无得分减少的团队" else "暂无得分增长的团队",
+                            text = if (isReverse) diffEmptyDecrease else diffEmptyIncrease,
                             fontFamily = plexBold,
                             fontSize = 18.sp,
-                            color = TEXT_GRAY
+                            color = BofRankingColors.TextSecondary
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "在此时间段内未检测到此类变化",
+                            text = diffEmptyMessage,
                             fontFamily = plexRegular,
                             fontSize = 14.sp,
-                            color = TEXT_GRAY,
+                            color = BofRankingColors.TextSecondary,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -972,8 +1002,8 @@ internal fun BofTeamDiffScreen(
                 context = context,
                 snackbarHostState = snackbarHostState,
                 teams = teamRankingData,
-                title = if (isReverse) "团队逆差值排行榜（得分减少）" else "团队差值排行榜（得分增加）",
-                subtitle = "时间: ${vm.getSelectedTimeString()}"
+                title = if (isReverse) diffDecreaseTitle else diffIncreaseTitle,
+                subtitle = timeSubtitle
             )
             
             // 当对话框被关闭时，通知父组件
@@ -1000,29 +1030,41 @@ private fun TeamDiffTable(
     showTitle: Boolean = false
 ) {
     val maxScore = teams.maxOfOrNull { it.totalScore } ?: 1.0
+    val currentTimeLabel = stringResource(R.string.bof_time_current)
+    val compareTimeLabel = stringResource(R.string.bof_time_compare)
+    val timeSubtitle = stringResource(
+        R.string.bof_time_value,
+        vm.getSelectedTimeString(currentTimeLabel, compareTimeLabel)
+    )
+    val diffIncreaseTitle = stringResource(R.string.bof_team_diff_increase_title)
+    val diffDecreaseTitle = stringResource(R.string.bof_team_diff_decrease_title)
+    val rankColumn = stringResource(R.string.bof_column_rank)
+    val teamColumn = stringResource(R.string.bof_column_team)
+    val increaseColumn = stringResource(R.string.bof_column_increase)
+    val decreaseColumn = stringResource(R.string.bof_column_decrease)
     
     Column {
         // 标题和副标题
         if (showTitle) Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.Black)
+                .background(BofRankingColors.Background)
                 .padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = if (isReverse) "团队逆差值排行榜（得分减少）" else "团队差值排行榜（得分增加）",
+                text = if (isReverse) diffDecreaseTitle else diffIncreaseTitle,
                 fontFamily = plexBold,
                 fontSize = 20.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 textAlign = TextAlign.Center
             )
             
             Text(
-                text = "时间: ${vm.getSelectedTimeString()}",
+                text = timeSubtitle,
                 fontFamily = plexRegular,
                 fontSize = 12.sp,
-                color = TEXT_GRAY,
+                color = BofRankingColors.TextSecondary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(top = 4.dp)
             )
@@ -1031,34 +1073,34 @@ private fun TeamDiffTable(
         // 表格头部
         Row(
             modifier = Modifier
-                .background(BG_DARK_GRAY)
+                .background(BofRankingColors.Header)
                 .fillMaxWidth()
                 .padding(vertical = 8.dp, horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "排名",
+                text = rankColumn,
                 fontFamily = plexBold,
                 fontSize = 14.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.width(50.dp)
             )
             
             Text(
-                text = "团队",
+                text = teamColumn,
                 fontFamily = plexBold,
                 fontSize = 14.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 textAlign = TextAlign.End,
                 modifier = Modifier.weight(0.6f)
             )
             
             Text(
-                text = if (isReverse) "减少" else "增长",
+                text = if (isReverse) decreaseColumn else increaseColumn,
                 fontFamily = plexBold,
                 fontSize = 14.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(0.4f)
             )
@@ -1106,7 +1148,7 @@ private fun TeamDiffRow(
     index: Int,
     maxScore: Double
 ) {
-    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
+    val backgroundColor = if (index % 2 == 0) BofRankingColors.RowAlt else BofRankingColors.Background
     val scoreRatio = if (maxScore > 0) team.totalScore / maxScore else 0.0
 
     Column(
@@ -1126,7 +1168,7 @@ private fun TeamDiffRow(
                 text = team.rank.toString(),
                 fontFamily = plexBold,
                 fontSize = 16.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.width(50.dp)
             )
@@ -1136,7 +1178,7 @@ private fun TeamDiffRow(
                 text = team.teamName,
                 fontFamily = plexBold,
                 fontSize = 16.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.End,
@@ -1163,7 +1205,7 @@ private fun TeamDiffRow(
                                 .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
                                 .height(20.dp)
                                 .background(
-                                    color = RANKING_RED,
+                                    color = BofRankingColors.Negative,
                                     shape = RoundedCornerShape(
                                         topEnd = 10.dp,
                                         bottomEnd = 10.dp
@@ -1174,7 +1216,7 @@ private fun TeamDiffRow(
                             text = String.format("%.2f", team.totalScore),
                             fontFamily = plexBold,
                             fontSize = 14.sp,
-                            color = Color.White,
+                            color = BofRankingColors.Text,
                             overflow = TextOverflow.Visible,
                             maxLines = 1,
                             modifier = Modifier
@@ -1208,7 +1250,7 @@ private fun TeamDiffRow(
                         text = "$title - $artist",
                         fontFamily = plexRegular,
                         fontSize = 12.sp,
-                        color = TEXT_GRAY,
+                        color = BofRankingColors.TextSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
@@ -1220,7 +1262,7 @@ private fun TeamDiffRow(
                             text = if (scoreDiff > 0) "+${String.format("%.1f", scoreDiff)}" else String.format("%.1f", scoreDiff),
                             fontFamily = plexBold,
                             fontSize = 12.sp,
-                            color = if (scoreDiff > 0) Color.Green else Color.Red,
+                            color = if (scoreDiff > 0) BofRankingColors.Positive else BofRankingColors.Negative,
                             textAlign = TextAlign.End,
                             modifier = Modifier.width(70.dp)
                         )

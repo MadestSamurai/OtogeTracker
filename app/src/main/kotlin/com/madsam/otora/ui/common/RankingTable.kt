@@ -95,10 +95,32 @@ interface RankingItem {
 }
 
 // 排行榜表格配置
+data class RankingTableColors(
+    val background: Color = Color.Black,
+    val rowAlt: Color = BG_DARK_GRAY,
+    val header: Color = BG_DARK_GRAY,
+    val text: Color = Color.White,
+    val textSecondary: Color = TEXT_GRAY,
+    val positive: Color = Color.Green,
+    val negative: Color = Color.Red,
+    val neutral: Color = Color.Gray,
+    val scoreBar: Color = RANKING_RED,
+    val compareBar: Color = RANKING_BLUE,
+    val searchHighlight: Color = Color(0xFFCC0000),
+    val scoreHeat: (Number) -> Color = { score ->
+        val value = score.toDouble()
+        if (value > 0) {
+            Color(red = (value / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
+        } else {
+            Color.Transparent
+        }
+    }
+)
+
 data class RankingTableConfig(
     val title: String,
     val subtitle: String,
-    val scoreColumnName: String = "分数条",
+    val scoreColumnName: String = "Score",
     val extraColumnName: String? = null,  // 额外列名称，null表示不显示
     val avgColumnName: String? = null,     // 平均分列名称
     val medianColumnName: String? = null,  // 中位数列名称
@@ -109,6 +131,13 @@ data class RankingTableConfig(
     val enableNarrowToggle: Boolean = false, // 是否启用窄屏切换
     val maxItems: Int = 50,
     val allowNegativeScore: Boolean = false, // 是否允许显示负数分数
+    val colors: RankingTableColors = RankingTableColors(),
+    val rankColumnName: String = "Rank",
+    val emptyTitle: String = "No data",
+    val emptyMessage: String = "No entries match the current filters",
+    val moreItemsText: (Int) -> String = { count -> "$count more entries." },
+    val previousPageContentDescription: String = "Previous page",
+    val nextPageContentDescription: String = "Next page",
     val previousPageTitle: String? = null,  // 上一页标题，null表示没有上一页
     val nextPageTitle: String? = null       // 下一页标题，null表示没有下一页
 )
@@ -251,7 +280,7 @@ fun RankingTable(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.Black)
+                        .background(config.colors.background)
                         .windowInsetsPadding(
                             WindowInsets.displayCutout.only(
                                 WindowInsetsSides.Horizontal
@@ -279,7 +308,7 @@ fun RankingTable(
                             ) {
                                 Icon(
                                     painter = rememberVectorPainter(image = Filled.ChevronLeft),
-                                    contentDescription = "上一页",
+                                    contentDescription = config.previousPageContentDescription,
                                     tint = colorScheme.onSurface,
                                     modifier = Modifier.size(12.dp)
                                 )
@@ -287,7 +316,7 @@ fun RankingTable(
                                     text = config.previousPageTitle,
                                     fontFamily = plexRegular,
                                     fontSize = 12.sp,
-                                    color = TEXT_GRAY,
+                                    color = config.colors.textSecondary,
                                     maxLines = 1
                                 )
                             }
@@ -301,7 +330,7 @@ fun RankingTable(
                             text = config.title,
                             fontFamily = plexBold,
                             fontSize = 20.sp,
-                            color = Color.White,
+                            color = config.colors.text,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.weight(1f)
                         )
@@ -317,7 +346,7 @@ fun RankingTable(
                                 ) {
                                     Icon(
                                         painter = rememberVectorPainter(image = Filled.ChevronRight),
-                                        contentDescription = "下一页",
+                                        contentDescription = config.nextPageContentDescription,
                                         tint = colorScheme.onSurface,
                                         modifier = Modifier.size(12.dp)
                                     )
@@ -325,7 +354,7 @@ fun RankingTable(
                                         text = config.nextPageTitle,
                                         fontFamily = plexRegular,
                                         fontSize = 12.sp,
-                                        color = TEXT_GRAY,
+                                        color = config.colors.textSecondary,
                                         maxLines = 1
                                     )
                                 }
@@ -340,7 +369,7 @@ fun RankingTable(
                         text = config.subtitle,
                         fontFamily = plexRegular,
                         fontSize = 12.sp,
-                        color = TEXT_GRAY,
+                        color = config.colors.textSecondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = 4.dp)
                     )
@@ -352,7 +381,7 @@ fun RankingTable(
         if (showHeader) {
             Row(
             modifier = Modifier
-                .background(BG_DARK_GRAY)
+                .background(config.colors.header)
                 .fillMaxWidth()
                 .windowInsetsPadding(
                     WindowInsets.displayCutout.only(
@@ -362,10 +391,10 @@ fun RankingTable(
                 .padding(vertical = 8.dp, horizontal = 2.dp)
         ) {
             Text(
-                text = "排名",
+                text = config.rankColumnName,
                 fontFamily = plexBold,
                 fontSize = 14.sp,
-                color = Color.White,
+                color = config.colors.text,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.width(50.dp)
             )
@@ -381,7 +410,7 @@ fun RankingTable(
                         text = config.scoreColumnName,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = config.colors.text,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.width(narrowScoreBarWidth)
                     )
@@ -392,7 +421,7 @@ fun RankingTable(
                             text = name,
                             fontFamily = plexBold,
                             fontSize = 14.sp,
-                            color = Color.White,
+                            color = config.colors.text,
                             textAlign = TextAlign.End,
                             modifier = Modifier.width(extraWidth)
                         )
@@ -402,7 +431,7 @@ fun RankingTable(
                             text = name,
                             fontFamily = plexBold,
                             fontSize = 14.sp,
-                            color = Color.White,
+                            color = config.colors.text,
                             textAlign = TextAlign.End,
                             modifier = Modifier.width(avgWidth)
                         )
@@ -412,7 +441,7 @@ fun RankingTable(
                             text = name,
                             fontFamily = plexBold,
                             fontSize = 14.sp,
-                            color = Color.White,
+                            color = config.colors.text,
                             textAlign = TextAlign.End,
                             modifier = Modifier.width(medianWidth)
                         )
@@ -424,7 +453,7 @@ fun RankingTable(
                     text = config.scoreColumnName,
                     fontFamily = plexBold,
                     fontSize = 14.sp,
-                    color = Color.White,
+                    color = config.colors.text,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(0.6f)
                 )
@@ -433,7 +462,7 @@ fun RankingTable(
                         text = name,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = config.colors.text,
                         textAlign = TextAlign.End,
                         modifier = Modifier.width(extraWidth)
                     )
@@ -443,7 +472,7 @@ fun RankingTable(
                         text = name,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = config.colors.text,
                         textAlign = TextAlign.End,
                         modifier = Modifier.width(avgWidth)
                     )
@@ -453,7 +482,7 @@ fun RankingTable(
                         text = name,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = config.colors.text,
                         textAlign = TextAlign.End,
                         modifier = Modifier.width(medianWidth)
                     )
@@ -473,7 +502,7 @@ fun RankingTable(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(Color.Black)
+                            .background(config.colors.background)
                             .windowInsetsPadding(
                                 WindowInsets.displayCutout.only(
                                     WindowInsetsSides.Horizontal
@@ -484,18 +513,18 @@ fun RankingTable(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "暂无数据",
+                            text = config.emptyTitle,
                             fontFamily = plexBold,
                             fontSize = 18.sp,
-                            color = Color.White,
+                            color = config.colors.text,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "当前筛选条件下没有符合的作品",
+                            text = config.emptyMessage,
                             fontFamily = plexRegular,
                             fontSize = 14.sp,
-                            color = TEXT_GRAY,
+                            color = config.colors.textSecondary,
                             textAlign = TextAlign.Center
                         )
                     }
@@ -522,7 +551,7 @@ fun RankingTable(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(if (config.maxItems % 2 == 0) BG_DARK_GRAY else Color.Black)
+                                .background(if (config.maxItems % 2 == 0) config.colors.rowAlt else config.colors.background)
                                 .windowInsetsPadding(
                                     WindowInsets.displayCutout.only(
                                         WindowInsetsSides.Horizontal
@@ -532,9 +561,9 @@ fun RankingTable(
                             horizontalArrangement = Arrangement.Center
                         ) {
                             Text(
-                                text = "还有 ${items.size - config.maxItems} 个作品..",
+                                text = config.moreItemsText(items.size - config.maxItems),
                                 fontFamily = plexRegular,
-                                color = TEXT_GRAY,
+                                color = config.colors.textSecondary,
                                 fontSize = 14.sp
                             )
                         }
@@ -569,7 +598,8 @@ fun RankingTable(
 private fun buildHighlightedText(
     text: String,
     searchText: String,
-    highlightColor: Color = Color(0xFFCC0000)
+    highlightColor: Color = Color(0xFFCC0000),
+    highlightTextColor: Color = Color.White
 ): AnnotatedString {
     if (searchText.isEmpty()) {
         return AnnotatedString(text)
@@ -598,7 +628,7 @@ private fun buildHighlightedText(
             withStyle(
                 style = SpanStyle(
                     background = highlightColor,
-                    color = Color.White
+                    color = highlightTextColor
                 )
             ) {
                 append(text.substring(matchIndex, matchIndex + searchText.length))
@@ -623,9 +653,9 @@ private fun RankingTableRow(
     narrowScoreBarWidth: Dp,
     searchText: String = ""
 ) {
-    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
+    val backgroundColor = if (index % 2 == 0) config.colors.rowAlt else config.colors.background
     val scoreRatio = if (maxScore > 0) item.score.toDouble() / maxScore else 0.0
-    val rankColor = Color.White
+    val rankColor = config.colors.text
 
     Row(
         modifier = Modifier
@@ -658,35 +688,35 @@ private fun RankingTableRow(
                         Icon(
                             imageVector = Icons.Filled.KeyboardArrowUp,
                             contentDescription = "Rank Up",
-                            tint = Color.Green,
+                            tint = config.colors.positive,
                             modifier = Modifier.size(12.dp)
                         )
                         Text(
                             text = change.toString(),
                             fontFamily = plexRegular,
                             fontSize = 10.sp,
-                            color = Color.Green
+                            color = config.colors.positive
                         )
                     }
                     change != null && change < 0 -> {
                         Icon(
                             imageVector = Icons.Filled.KeyboardArrowDown,
                             contentDescription = "Rank Down",
-                            tint = Color.Red,
+                            tint = config.colors.negative,
                             modifier = Modifier.size(12.dp)
                         )
                         Text(
                             text = (-change).toString(),
                             fontFamily = plexRegular,
                             fontSize = 10.sp,
-                            color = Color.Red
+                            color = config.colors.negative
                         )
                     }
                     change != null -> {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                             contentDescription = "Rank Same",
-                            tint = Color.Gray,
+                            tint = config.colors.neutral,
                             modifier = Modifier.size(12.dp)
                         )
                         // 持平时不显示变化量
@@ -713,20 +743,20 @@ private fun RankingTableRow(
             horizontalAlignment = Alignment.End
         ) {
             Text(
-                text = buildHighlightedText(item.title, searchText),
+                text = buildHighlightedText(item.title, searchText, config.colors.searchHighlight, config.colors.text),
                 fontFamily = plexBold,
                 fontSize = 14.sp,
-                color = Color.White,
+                color = config.colors.text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.End,
                 modifier = Modifier.fillMaxWidth()
             )
             Text(
-                text = buildHighlightedText(item.artist, searchText),
+                text = buildHighlightedText(item.artist, searchText, config.colors.searchHighlight, config.colors.text),
                 fontFamily = plexRegular,
                 fontSize = 12.sp,
-                color = TEXT_GRAY,
+                color = config.colors.textSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.End,
@@ -754,7 +784,7 @@ private fun RankingTableRow(
                                 .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
                                 .height(20.dp)
                                 .background(
-                                    color = RANKING_RED,
+                                    color = config.colors.scoreBar,
                                     shape = RoundedCornerShape(
                                         topEnd = 10.dp,
                                         bottomEnd = 10.dp
@@ -765,7 +795,7 @@ private fun RankingTableRow(
                             text = formatScore(item.score, config.scoreWidthType, config.allowNegativeScore),
                             fontFamily = plexBold,
                             fontSize = 14.sp,
-                            color = Color.White,
+                            color = config.colors.text,
                             overflow = TextOverflow.Visible,
                             maxLines = 1,
                             modifier = Modifier
@@ -790,7 +820,7 @@ private fun RankingTableRow(
                                     .fillMaxWidth(compareRatio.toFloat().coerceAtMost(1f))
                                     .height(13.dp)
                                     .background(
-                                        color = RANKING_BLUE,
+                                        color = config.colors.compareBar,
                                         shape = RoundedCornerShape(
                                             topEnd = 7.dp,
                                             bottomEnd = 7.dp
@@ -801,7 +831,7 @@ private fun RankingTableRow(
                                 text = formatScore(compareScore, config.scoreWidthType, config.allowNegativeScore),
                                 fontFamily = plexRegular,
                                 fontSize = 11.sp,
-                                color = Color.White.copy(alpha = 0.8f),
+                                color = config.colors.text.copy(alpha = 0.8f),
                                 overflow = TextOverflow.Visible,
                                 maxLines = 1,
                                 modifier = Modifier
@@ -834,7 +864,7 @@ private fun RankingTableRow(
                                     .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
                                     .height(20.dp)
                                     .background(
-                                        color = RANKING_RED,
+                                        color = config.colors.scoreBar,
                                         shape = RoundedCornerShape(
                                             topEnd = 10.dp,
                                             bottomEnd = 10.dp
@@ -845,7 +875,7 @@ private fun RankingTableRow(
                                 text = formatScore(item.score, config.scoreWidthType, config.allowNegativeScore),
                                 fontFamily = plexBold,
                                 fontSize = 14.sp,
-                                color = Color.White,
+                                color = config.colors.text,
                                 overflow = TextOverflow.Visible,
                                 maxLines = 1,
                                 modifier = Modifier
@@ -869,7 +899,7 @@ private fun RankingTableRow(
                                         .fillMaxWidth(compareRatio.toFloat().coerceAtMost(1f))
                                         .height(13.dp)
                                         .background(
-                                            color = RANKING_BLUE,
+                                            color = config.colors.compareBar,
                                             shape = RoundedCornerShape(
                                                 topEnd = 7.dp,
                                                 bottomEnd = 7.dp
@@ -880,7 +910,7 @@ private fun RankingTableRow(
                                     text = formatScore(compareScore, config.scoreWidthType, config.allowNegativeScore),
                                     fontFamily = plexRegular,
                                     fontSize = 11.sp,
-                                    color = Color.White.copy(alpha = 0.8f),
+                                    color = config.colors.text.copy(alpha = 0.8f),
                                     overflow = TextOverflow.Visible,
                                     maxLines = 1,
                                     modifier = Modifier
@@ -904,7 +934,7 @@ private fun RankingTableRow(
                     },
                     fontFamily = plexBold,
                     fontSize = 14.sp,
-                    color = Color.White,
+                    color = config.colors.text,
                     textAlign = TextAlign.End,
                     modifier = Modifier
                         .width(extraWidth)
@@ -919,12 +949,7 @@ private fun RankingTableRow(
                     modifier = Modifier
                         .width(avgWidth)
                         .fillMaxHeight()
-                        .background(
-                            if (avgValue != null && avgValue > 0)
-                                Color(red = (avgValue / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
-                            else
-                                Color.Transparent
-                        )
+                        .background(config.colors.scoreHeat(avgValue ?: 0))
                         .padding(horizontal = 2.dp),
                     contentAlignment = Alignment.CenterEnd
                 ) {
@@ -936,7 +961,7 @@ private fun RankingTableRow(
                         },
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = config.colors.text,
                         textAlign = TextAlign.End
                     )
                 }
@@ -949,12 +974,7 @@ private fun RankingTableRow(
                     modifier = Modifier
                         .width(medianWidth)
                         .fillMaxHeight()
-                        .background(
-                            if (medianValue != null && medianValue > 0)
-                                Color(red = (medianValue / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
-                            else
-                                Color.Transparent
-                        )
+                        .background(config.colors.scoreHeat(medianValue ?: 0))
                         .padding(horizontal = 2.dp),
                     contentAlignment = Alignment.CenterEnd
                 ) {
@@ -966,7 +986,7 @@ private fun RankingTableRow(
                         },
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = config.colors.text,
                         textAlign = TextAlign.End
                     )
                 }
@@ -1038,7 +1058,7 @@ fun RankingTableForCapture(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.Black)
+                    .background(config.colors.background)
                     .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -1047,7 +1067,7 @@ fun RankingTableForCapture(
                     text = config.title,
                     fontFamily = plexBold,
                     fontSize = 20.sp,
-                    color = Color.White,
+                    color = config.colors.text,
                     textAlign = TextAlign.Center
                 )
                 
@@ -1056,7 +1076,7 @@ fun RankingTableForCapture(
                     text = config.subtitle,
                     fontFamily = plexRegular,
                     fontSize = 12.sp,
-                    color = TEXT_GRAY,
+                    color = config.colors.textSecondary,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(top = 4.dp)
                 )
@@ -1067,15 +1087,15 @@ fun RankingTableForCapture(
         if (showHeader) {
             Row(
                 modifier = Modifier
-                    .background(BG_DARK_GRAY)
+                    .background(config.colors.header)
                     .fillMaxWidth()
                     .padding(vertical = 8.dp, horizontal = 2.dp)
             ) {
                 Text(
-                    text = "排名",
+                    text = config.rankColumnName,
                     fontFamily = plexBold,
                     fontSize = 14.sp,
-                    color = Color.White,
+                    color = config.colors.text,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.width(50.dp)
                 )
@@ -1089,7 +1109,7 @@ fun RankingTableForCapture(
                     text = config.scoreColumnName,
                     fontFamily = plexBold,
                     fontSize = 14.sp,
-                    color = Color.White,
+                    color = config.colors.text,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(0.6f)
                 )
@@ -1098,7 +1118,7 @@ fun RankingTableForCapture(
                         text = name,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = config.colors.text,
                         textAlign = TextAlign.End,
                         modifier = Modifier.width(extraWidth)
                     )
@@ -1108,7 +1128,7 @@ fun RankingTableForCapture(
                         text = name,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = config.colors.text,
                         textAlign = TextAlign.End,
                         modifier = Modifier.width(avgWidth)
                     )
@@ -1118,7 +1138,7 @@ fun RankingTableForCapture(
                         text = name,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = config.colors.text,
                         textAlign = TextAlign.End,
                         modifier = Modifier.width(medianWidth)
                     )
@@ -1135,24 +1155,24 @@ fun RankingTableForCapture(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.Black)
+                        .background(config.colors.background)
                         .padding(vertical = 48.dp, horizontal = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "暂无数据",
+                        text = config.emptyTitle,
                         fontFamily = plexBold,
                         fontSize = 18.sp,
-                        color = Color.White,
+                        color = config.colors.text,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "当前筛选条件下没有符合的作品",
+                        text = config.emptyMessage,
                         fontFamily = plexRegular,
                         fontSize = 14.sp,
-                        color = TEXT_GRAY,
+                        color = config.colors.textSecondary,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -1176,14 +1196,14 @@ fun RankingTableForCapture(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(if (config.maxItems % 2 == 0) BG_DARK_GRAY else Color.Black)
+                            .background(if (config.maxItems % 2 == 0) config.colors.rowAlt else config.colors.background)
                             .padding(16.dp),
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "还有 ${items.size - config.maxItems} 个作品..",
+                            text = config.moreItemsText(items.size - config.maxItems),
                             fontFamily = plexRegular,
-                            color = TEXT_GRAY,
+                            color = config.colors.textSecondary,
                             fontSize = 14.sp
                         )
                     }

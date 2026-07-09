@@ -44,11 +44,16 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.TrendingDown
+import androidx.compose.material.icons.automirrored.rounded.TrendingUp
+import androidx.compose.material.icons.rounded.CalendarToday
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
+import androidx.compose.material.icons.rounded.PhotoCamera
+import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.SwapHoriz
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -69,25 +74,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.R
-import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.utils.DateTimeUtils
 import com.madsam.otora.data.bof.remote.api.BofRequestService
 import com.madsam.otora.data.bof.remote.model.BofRangeResponse
@@ -125,7 +127,7 @@ private fun BofModeSwitcher(
         modifier = Modifier
             .fillMaxWidth()
             .windowInsetsPadding(WindowInsets.statusBars)
-            .background(Color.Black)
+            .background(BofRankingColors.Background)
             .padding(horizontal = 12.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -139,7 +141,7 @@ private fun BofModeSwitcher(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = stringResource(R.string.settings_back),
                 tint = colorScheme.onSurface,
                 modifier = Modifier.size(20.dp)
@@ -149,7 +151,7 @@ private fun BofModeSwitcher(
         BoxWithConstraints(
             modifier = Modifier
                 .weight(1f)
-                .height(72.dp),
+                .height(84.dp),
             contentAlignment = Alignment.Center
         ) {
             val density = LocalDensity.current
@@ -180,7 +182,7 @@ private fun BofModeSwitcher(
                                         pagerState.currentPageOffsetFraction
                                 val focus = (1f - relativePosition.absoluteValue).coerceIn(0f, 1f)
                                 translationX = relativePosition * itemStridePx
-                                translationY = -8.dp.toPx()
+                                translationY = if (subtitle.isBlank()) 0f else -12.dp.toPx()
                                 alpha = if (relativePosition.absoluteValue <= 1.65f) {
                                     0.28f + focus * 0.72f
                                 } else {
@@ -207,7 +209,7 @@ private fun BofModeSwitcher(
                     ) {
                         Text(
                             text = label,
-                            color = Color.White,
+                            color = BofRankingColors.Text,
                             fontSize = 28.sp,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
@@ -220,10 +222,12 @@ private fun BofModeSwitcher(
             if (subtitle.isNotBlank()) {
                 Text(
                     text = subtitle,
-                    color = Color.White.copy(alpha = 0.62f),
-                    fontSize = 12.sp,
+                    color = BofRankingColors.Text.copy(alpha = 0.62f),
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    maxLines = 1,
+                    maxLines = 2,
+                    textAlign = TextAlign.Center,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -347,6 +351,19 @@ fun BofScreen(
     val currentTimeLabel = stringResource(R.string.bof_time_current)
     val compareTimeLabel = stringResource(R.string.bof_time_compare)
     val singleDayLabel = stringResource(R.string.bof_time_single_day)
+    val notStartedTitle = stringResource(R.string.bof_not_started_title)
+    val selectEventLabel = stringResource(R.string.bof_select_event)
+    val switchPositiveDiffDescription = stringResource(R.string.bof_action_switch_positive_diff)
+    val switchReverseDiffDescription = stringResource(R.string.bof_action_switch_reverse_diff)
+    val switchToDetailDescription = stringResource(R.string.bof_action_switch_to_detail)
+    val switchToScoreDescription = stringResource(R.string.bof_action_switch_to_score)
+    val screenshotDescription = stringResource(R.string.bof_action_screenshot)
+    val dateTimeDescription = stringResource(R.string.bof_action_date_time)
+    val searchDescription = stringResource(R.string.bof_action_search)
+    val clearSearchDescription = stringResource(R.string.bof_action_clear)
+    val previousMatchDescription = stringResource(R.string.bof_action_previous_match)
+    val nextMatchDescription = stringResource(R.string.bof_action_next_match)
+    val searchPlaceholder = stringResource(R.string.bof_search_placeholder)
     val roundedCurrentTime = remember(selectedCurrentTime) {
         DateTimeUtils.roundDownToNearestFiveMinutes(selectedCurrentTime)
     }
@@ -366,7 +383,7 @@ fun BofScreen(
         safeSectionIndex == 2 ->
             "$timeLabel $commentTimeText"
         else ->
-            "$currentTimeLabel $selectedCurrentDate $roundedCurrentTime | " +
+            "$currentTimeLabel $selectedCurrentDate $roundedCurrentTime\n" +
                 "$compareTimeLabel $selectedCompareDate $roundedCompareTime"
     }
 
@@ -533,7 +550,7 @@ fun BofScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black)
+                .background(BofRankingColors.Background)
         ) {
             // 顶部导航栏：左侧返回按钮 + 右侧主Tab
             BofModeSwitcher(
@@ -559,21 +576,21 @@ fun BofScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "活动尚未开始",
+                            text = notStartedTitle,
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             color = colorScheme.onSurface,
                             modifier = Modifier.padding(16.dp)
                         )
                         Text(
-                            text = selectedRange?.full ?: "请选择一个活动",
+                            text = selectedRange?.full ?: selectEventLabel,
                             fontSize = 16.sp,
                             color = colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
                         selectedRange?.start?.let { startTime ->
                             Text(
-                                text = "开始时间: $startTime",
+                                text = stringResource(R.string.bof_start_time_format, startTime),
                                 fontSize = 14.sp,
                                 color = colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 8.dp)
@@ -621,14 +638,14 @@ fun BofScreen(
                             val selectedTimeStrNoComp by vm.selectedTimeStrNoComp.collectAsState()
                             val currentRange = bofScreenState.selectedRange.collectAsState().value
                             val title = if (currentRange?.singleComment == true && currentRange.commentDate.isNotEmpty()) {
-                                "Final Comment Ranking"
+                                stringResource(R.string.bof_comment_title_final)
                             } else {
-                                "Comment Ranking"
+                                stringResource(R.string.bof_comment_title)
                             }
                             val subtitle = if (currentRange?.singleComment == true && currentRange.commentDate.isNotEmpty()) {
-                                "Time: ${currentRange.commentDate}"
+                                stringResource(R.string.bof_time_value, currentRange.commentDate)
                             } else {
-                                "Time: $selectedTimeStrNoComp"
+                                stringResource(R.string.bof_time_value, selectedTimeStrNoComp)
                             }
 
                             BofCommentPagerScreen(
@@ -680,6 +697,18 @@ fun BofScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     val isSearching = searchText.value.isNotEmpty()
+                    val showInfoToggle = when (selectedTabIndex) {
+                        0 -> selectedSubTabIndex == 0
+                        1 -> selectedTeamSubTabIndex == 0
+                        2 -> selectedCommentSubTabIndex == 0
+                        else -> false
+                    }
+                    val currentInfoMode = when (selectedTabIndex) {
+                        0 -> entryInfoMode
+                        1 -> teamInfoMode
+                        2 -> commentInfoMode
+                        else -> 0
+                    }
                     
                     // Entry 差值切换按钮
                     val showReverseDiff by bofScreenState.showReverseDiff.collectAsState()
@@ -754,16 +783,84 @@ fun BofScreen(
                                 modifier = Modifier.size(48.dp)
                             ) {
                                 Icon(
-                                    painter = painterResource(
-                                        id = if (currentShowReverse) {
-                                            R.drawable.ic_trending_up_24
-                                        } else {
-                                            R.drawable.ic_trending_down_24
-                                        }
-                                    ),
-                                    contentDescription = if (currentShowReverse) "切换到正差值" else "切换到逆差值",
+                                    imageVector = if (currentShowReverse) {
+                                        Icons.AutoMirrored.Rounded.TrendingUp
+                                    } else {
+                                        Icons.AutoMirrored.Rounded.TrendingDown
+                                    },
+                                    contentDescription = if (currentShowReverse) {
+                                        switchPositiveDiffDescription
+                                    } else {
+                                        switchReverseDiffDescription
+                                    },
                                     tint = colorScheme.onSurface,
-                                    modifier = Modifier.height(24.dp)
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    // 显示模式切换按钮（带动画）
+                    // 注意：为了配合搜索框的扩展/收缩动画，按钮的进入和退出都使用 StandardDecelerate
+                    AnimatedVisibility(
+                        visible = !isSearching && showInfoToggle,
+                        enter = fadeIn(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            )
+                        ) + expandHorizontally(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            expandFrom = Alignment.Start
+                        ) + scaleIn(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            initialScale = 0.8f
+                        ),
+                        exit = fadeOut(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            )
+                        ) + shrinkHorizontally(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            shrinkTowards = Alignment.Start
+                        ) + scaleOut(
+                            animationSpec = tween(
+                                durationMillis = 300,
+                                easing = StandardDecelerate
+                            ),
+                            targetScale = 0.8f
+                        )
+                    ) {
+                        Box(modifier = Modifier.padding(end = 8.dp)) {
+                            IconButton(
+                                onClick = {
+                                    when (selectedTabIndex) {
+                                        0 -> entryInfoMode = (entryInfoMode + 1) % 2
+                                        1 -> teamInfoMode = (teamInfoMode + 1) % 2
+                                        2 -> commentInfoMode = (commentInfoMode + 1) % 2
+                                    }
+                                },
+                                modifier = Modifier.size(48.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.SwapHoriz,
+                                    contentDescription = if (currentInfoMode == 0) {
+                                        switchToDetailDescription
+                                    } else {
+                                        switchToScoreDescription
+                                    },
+                                    tint = colorScheme.onSurface,
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
                         }
@@ -822,10 +919,10 @@ fun BofScreen(
                                 modifier = Modifier.size(48.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.PhotoCamera,
-                                    contentDescription = "Screenshot",
+                                    imageVector = Icons.Rounded.PhotoCamera,
+                                    contentDescription = screenshotDescription,
                                     tint = colorScheme.onSurface,
-                                    modifier = Modifier.height(24.dp)
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
                         }
@@ -878,10 +975,10 @@ fun BofScreen(
                                 modifier = Modifier.size(48.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.CalendarToday,
-                                    contentDescription = "Date&Time",
+                                    imageVector = Icons.Rounded.CalendarToday,
+                                    contentDescription = dateTimeDescription,
                                     tint = colorScheme.onSurface,
-                                    modifier = Modifier.height(24.dp)
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
                         }
@@ -939,8 +1036,8 @@ fun BofScreen(
                             ) {
                                 // Leading icon
                                 Icon(
-                                    painter = rememberVectorPainter(image = Icons.Filled.Search),
-                                    contentDescription = "Search",
+                                    imageVector = Icons.Rounded.Search,
+                                    contentDescription = searchDescription,
                                     tint = colorScheme.onSurface,
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -954,7 +1051,7 @@ fun BofScreen(
                                 ) {
                                     if (searchText.value.isEmpty()) {
                                         Text(
-                                            text = "搜索...",
+                                            text = searchPlaceholder,
                                             color = colorScheme.onSurfaceVariant,
                                             fontSize = 14.sp,
                                             lineHeight = 20.sp
@@ -974,8 +1071,8 @@ fun BofScreen(
                                         modifier = Modifier.size(32.dp)
                                     ) {
                                         Icon(
-                                            painter = rememberVectorPainter(image = Icons.Filled.Close),
-                                            contentDescription = "Clear",
+                                            imageVector = Icons.Rounded.Close,
+                                            contentDescription = clearSearchDescription,
                                             tint = colorScheme.onSurface,
                                             modifier = Modifier.size(20.dp)
                                         )
@@ -1037,10 +1134,10 @@ fun BofScreen(
                                     modifier = Modifier.size(24.dp)
                                 ) {
                                     Icon(
-                                        painter = rememberVectorPainter(image = Filled.ChevronUp),
-                                        contentDescription = "上一个",
+                                        imageVector = Icons.Rounded.KeyboardArrowUp,
+                                        contentDescription = previousMatchDescription,
                                         tint = colorScheme.onSurface,
-                                        modifier = Modifier.size(16.dp)
+                                        modifier = Modifier.size(24.dp)
                                     )
                                 }
                                 IconButton(
@@ -1048,10 +1145,10 @@ fun BofScreen(
                                     modifier = Modifier.size(24.dp)
                                 ) {
                                     Icon(
-                                        painter = rememberVectorPainter(image = Filled.ChevronDown),
-                                        contentDescription = "下一个",
+                                        imageVector = Icons.Rounded.KeyboardArrowDown,
+                                        contentDescription = nextMatchDescription,
                                         tint = colorScheme.onSurface,
-                                        modifier = Modifier.size(16.dp)
+                                        modifier = Modifier.size(24.dp)
                                     )
                                 }
                             }

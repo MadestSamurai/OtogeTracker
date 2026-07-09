@@ -21,10 +21,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.madsam.otora.R
+import com.madsam.otora.ui.bof.BofRankingColors
 import com.madsam.otora.core.utils.ImageUtils
 import com.madsam.otora.ui.common.RankingItem
 import com.madsam.otora.ui.common.RankingTableConfig
@@ -45,6 +47,16 @@ fun BofEntryCaptureDialog(
     config: RankingTableConfig
 ) {
     val scope = rememberCoroutineScope()
+    val captureTitle = stringResource(R.string.bof_capture_title)
+    val captureMessage = stringResource(R.string.bof_capture_entry_message, config.title)
+    val captureAction = stringResource(R.string.bof_capture_action)
+    val cancelAction = stringResource(R.string.bof_action_cancel)
+    val totalTitle = stringResource(R.string.bof_entry_total_title)
+    val averageTitle = stringResource(R.string.bof_entry_average_title)
+    val medianTitle = stringResource(R.string.bof_entry_median_title)
+    val diffIncreaseTitle = stringResource(R.string.bof_entry_diff_increase_title)
+    val diffDecreaseTitle = stringResource(R.string.bof_entry_diff_decrease_title)
+    val compositeTitle = stringResource(R.string.bof_entry_composite_title)
 
     if (showDialog.value) {
         // 过滤掉总分小于等于0的数据
@@ -63,11 +75,11 @@ fun BofEntryCaptureDialog(
 
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
-            title = { Text(text = "截图功能") },
+            title = { Text(text = captureTitle) },
             text = {
                 Column {
                     Text(
-                        text = "将保存${config.title}内容到相册，分批截图后自动拼接（每批100行，最大高度30000像素）",
+                        text = captureMessage,
                         modifier = Modifier.padding(8.dp)
                     )
 
@@ -98,9 +110,9 @@ fun BofEntryCaptureDialog(
 
                     if (batches.size > 1) {
                         Text(
-                            text = "共${batches.size}批，截图时会自动拼接全部内容",
+                            text = stringResource(R.string.bof_capture_batches_format, batches.size),
                             fontSize = 13.sp,
-                            color = Color.Gray,
+                            color = BofRankingColors.Neutral,
                             modifier = Modifier.padding(top = 8.dp)
                         )
                     }
@@ -133,11 +145,11 @@ fun BofEntryCaptureDialog(
                             val formatter = DateTimeFormatter.ofPattern("MMddHHmm")
                             val timeStr = current.format(formatter)
                             val filePrefix = when {
-                                config.title.contains("总分") -> "BOF_Total"
-                                config.title.contains("平均") -> "BOF_Avg"
-                                config.title.contains("中位") -> "BOF_Median"
-                                config.title.contains("差值") -> "BOF_Diff"
-                                config.title.contains("综合") -> "BOF_Composite"
+                                config.title == totalTitle -> "BOF_Total"
+                                config.title == averageTitle -> "BOF_Avg"
+                                config.title == medianTitle -> "BOF_Median"
+                                config.title == diffIncreaseTitle || config.title == diffDecreaseTitle -> "BOF_Diff"
+                                config.title == compositeTitle -> "BOF_Composite"
                                 else -> "BOF_Ranking"
                             }
                             ImageUtils.saveBitmapToGallery(
@@ -146,12 +158,14 @@ fun BofEntryCaptureDialog(
                                 title = "${filePrefix}_$timeStr",
                                 description = "BOF ${config.title} Capture"
                             )
-                            snackbarHostState.showSnackbar("图片已保存到相册（${batches.size}批，最大高度30000像素）")
+                            snackbarHostState.showSnackbar(
+                                context.getString(R.string.bof_capture_saved_format, batches.size)
+                            )
                         }
                         showDialog.value = false
                     }
                 ) {
-                    Text(text = "截图")
+                    Text(text = captureAction)
                 }
             },
             dismissButton = {
@@ -160,7 +174,7 @@ fun BofEntryCaptureDialog(
                         showDialog.value = false
                     }
                 ) {
-                    Text(text = "取消")
+                    Text(text = cancelAction)
                 }
             }
         )
@@ -179,7 +193,7 @@ internal fun BofEntryCaptureContent(
     Box(
         modifier = Modifier
             .width(900.dp)
-            .background(Color.Black)
+            .background(BofRankingColors.Background)
     ) {
         RankingTableForCapture(
             items = items,

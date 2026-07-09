@@ -19,8 +19,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.madsam.otora.BofScreenState
+import com.madsam.otora.R
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.bof.BofViewModel
 import kotlinx.coroutines.flow.update
@@ -41,6 +43,8 @@ internal fun BofCommentPagerScreen(
     providedPagerState: PagerState? = null
 ) {
     val selectedCommentSubTabIndex by bofScreenState.selectedCommentSubTab.collectAsStateWithLifecycle()
+    val diffIncreaseTitle = stringResource(R.string.bof_comment_diff_increase_title)
+    val diffDecreaseTitle = stringResource(R.string.bof_comment_diff_decrease_title)
     
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
@@ -106,11 +110,6 @@ internal fun BofCommentPagerScreen(
     ) { page ->
         val shouldShowCaptureDialog = showCaptureDialog && page == pagerState.currentPage
         
-        // 页面标题列表（参考 Entry 的设计）
-        val pageNames = listOf("总榜", "差值")
-        val previousPageTitle = if (page > 0) pageNames[page - 1] else null
-        val nextPageTitle = if (page < pageNames.size - 1) pageNames[page + 1] else null
-        
         when (page) {
             0 -> {
                 // 总榜页面 - 在分支内收集数据
@@ -142,7 +141,7 @@ internal fun BofCommentPagerScreen(
                 val currentCommentData = if (showCommentReverseDiff) commentReverseDiffData else commentDiffData
                 
                 // 修改标题显示差值信息（与 Entry 保持一致的文案）
-                val diffTitle = if (showCommentReverseDiff) "逆差值排行榜（票数减少）" else "差值排行榜（票数增加）"
+                val diffTitle = if (showCommentReverseDiff) diffDecreaseTitle else diffIncreaseTitle
                 
                 BofCommentDiffScreen(
                     commentData = currentCommentData,

@@ -27,14 +27,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.theme.TEXT_GRAY
+import com.madsam.otora.R
+import com.madsam.otora.ui.bof.BofRankingColors
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ImageUtils
@@ -57,6 +58,10 @@ fun BofTeamCaptureDialog(
     subtitle: String
 ) {
     val scope = rememberCoroutineScope()
+    val captureTitle = stringResource(R.string.bof_capture_title)
+    val captureMessage = stringResource(R.string.bof_capture_team_message)
+    val captureAction = stringResource(R.string.bof_capture_action)
+    val cancelAction = stringResource(R.string.bof_action_cancel)
 
     if (showDialog.value) {
         // 过滤掉总分小于等于0的数据
@@ -74,11 +79,11 @@ fun BofTeamCaptureDialog(
 
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
-            title = { Text(text = "截图功能") },
+            title = { Text(text = captureTitle) },
             text = {
                 Column {
                     Text(
-                        text = "将保存团队排行榜内容到相册，分批截图后自动拼接（每批50个团队，最大高度30000像素）",
+                        text = captureMessage,
                         modifier = Modifier.padding(8.dp)
                     )
 
@@ -107,9 +112,9 @@ fun BofTeamCaptureDialog(
 
                     if (batches.size > 1) {
                         Text(
-                            text = "共${batches.size}批，截图时会自动拼接全部内容",
+                            text = stringResource(R.string.bof_capture_batches_format, batches.size),
                             fontSize = 13.sp,
-                            color = Color.Gray,
+                            color = BofRankingColors.Neutral,
                             modifier = Modifier.padding(top = 8.dp)
                         )
                     }
@@ -147,12 +152,14 @@ fun BofTeamCaptureDialog(
                                 title = "BOF_Team_$timeStr",
                                 description = "BOF Team Ranking Capture"
                             )
-                            snackbarHostState.showSnackbar("图片已保存到相册（${batches.size}批，最大高度30000像素）")
+                            snackbarHostState.showSnackbar(
+                                context.getString(R.string.bof_capture_saved_format, batches.size)
+                            )
                         }
                         showDialog.value = false
                     }
                 ) {
-                    Text(text = "截图")
+                    Text(text = captureAction)
                 }
             },
             dismissButton = {
@@ -161,7 +168,7 @@ fun BofTeamCaptureDialog(
                         showDialog.value = false
                     }
                 ) {
-                    Text(text = "取消")
+                    Text(text = cancelAction)
                 }
             }
         )
@@ -176,6 +183,8 @@ internal fun BofTeamCaptureContent(
     showHeader: Boolean = true,
     globalMaxScore: Double? = null
 ) {
+    val teamTotalTitle = stringResource(R.string.bof_team_total_title)
+
     // 计算最大分数：同时考虑当前分数和对比分数，取最大值
     val maxScore = globalMaxScore ?: (teams.maxOfOrNull { team ->
         maxOf(team.totalScore, team.compareTotalScore ?: 0.0)
@@ -189,7 +198,7 @@ internal fun BofTeamCaptureContent(
     Box(
         modifier = Modifier
             .width(900.dp)
-            .background(Color.Black)
+            .background(BofRankingColors.Background)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             // 隐藏的测量容器（复用原有逻辑）
@@ -225,15 +234,15 @@ internal fun BofTeamCaptureContent(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.Black)
+                        .background(BofRankingColors.Background)
                         .padding(vertical = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "团队总分排行榜",
+                        text = teamTotalTitle,
                         fontFamily = plexBold,
                         fontSize = 20.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.Center
                     )
 
@@ -241,7 +250,7 @@ internal fun BofTeamCaptureContent(
                         text = subtitle,
                         fontFamily = plexRegular,
                         fontSize = 12.sp,
-                        color = TEXT_GRAY,
+                        color = BofRankingColors.TextSecondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = 4.dp)
                     )

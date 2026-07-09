@@ -29,12 +29,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
+import com.madsam.otora.R
+import com.madsam.otora.ui.bof.BofRankingColors
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.Black333
@@ -61,6 +63,17 @@ fun DateTimeRangePicker(
     onDismissRequest: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val cancelLabel = stringResource(R.string.bof_action_cancel)
+    val okLabel = stringResource(R.string.bof_action_ok)
+    val confirmLabel = stringResource(R.string.bof_action_confirm)
+    val dateTimeTitle = stringResource(R.string.bof_datetime_title)
+    val competitionLabel = stringResource(R.string.bof_datetime_competition)
+    val selectCompetitionLabel = stringResource(R.string.bof_datetime_select_competition)
+    val notStartedLabel = stringResource(R.string.bof_datetime_not_started)
+    val selectCurrentDateTimeLabel = stringResource(R.string.bof_datetime_select_current)
+    val selectCompareDateTimeLabel = stringResource(R.string.bof_datetime_select_compare)
+    val timeLabel = stringResource(R.string.bof_datetime_time)
+    val dropdownDescription = stringResource(R.string.bof_dropdown)
     val showCompareDatePicker = remember { MutableStateFlow(false) }
     val showCompareDatePickerState = showCompareDatePicker.collectAsState()
     val showCurrentDatePicker = remember { MutableStateFlow(false) }
@@ -154,7 +167,7 @@ fun DateTimeRangePicker(
             onDismissRequest = { showCurrentDatePicker.update { false } },
             dismissButton = {
                 TextButton(onClick = { showCurrentDatePicker.update { false } }) {
-                    Text("Cancel")
+                    Text(cancelLabel)
                 }
             },
             confirmButton = {
@@ -170,7 +183,7 @@ fun DateTimeRangePicker(
                     )
                     showCurrentDatePicker.update { false }
                 }) {
-                    Text("OK")
+                    Text(okLabel)
                 }
             },
             properties = DialogProperties(
@@ -213,7 +226,7 @@ fun DateTimeRangePicker(
                                 .align(Alignment.CenterHorizontally)
                         ){
                             Text(
-                                text = "Time",
+                                text = timeLabel,
                                 style = TextStyle.Default.copy(fontSize = 20.sp),
                                 modifier = Modifier.align(Alignment.CenterVertically)
                             )
@@ -237,7 +250,7 @@ fun DateTimeRangePicker(
             onDismissRequest = { showCompareDatePicker.update { false } },
             dismissButton = {
                 TextButton(onClick = { showCompareDatePicker.update { false } }) {
-                    Text("Cancel")
+                    Text(cancelLabel)
                 }
             },
             confirmButton = {
@@ -253,7 +266,7 @@ fun DateTimeRangePicker(
                     )
                     showCompareDatePicker.update { false }
                 }) {
-                    Text("OK")
+                    Text(okLabel)
                 }
             },
             properties = DialogProperties(
@@ -296,7 +309,7 @@ fun DateTimeRangePicker(
                                 .align(Alignment.CenterHorizontally)
                         ){
                             Text(
-                                text = "Time",
+                                text = timeLabel,
                                 style = TextStyle.Default.copy(fontSize = 20.sp),
                                 modifier = Modifier.align(Alignment.CenterVertically)
                             )
@@ -317,12 +330,12 @@ fun DateTimeRangePicker(
 
     AlertDialog(
         onDismissRequest = onDismissRequest,
-        title = { Text(text = "Select Date&Time") },
+        title = { Text(text = dateTimeTitle) },
         text = {
             Column {
                 // 竞赛选择下拉框
                 Text(
-                    text = "Competition:",
+                    text = competitionLabel,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = Black333,
@@ -342,7 +355,7 @@ fun DateTimeRangePicker(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = selectedRange?.short ?: "Select Competition",
+                                text = selectedRange?.short ?: selectCompetitionLabel,
                                 color = colorScheme.onSurface,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.Medium
@@ -355,7 +368,7 @@ fun DateTimeRangePicker(
                                 )
                                 if (!selectedRange!!.isStart) {
                                     Text(
-                                        text = "Not Started",
+                                        text = notStartedLabel,
                                         color = colorScheme.primaryContainer,
                                         fontSize = 10.sp
                                     )
@@ -364,7 +377,7 @@ fun DateTimeRangePicker(
                         }
                         Icon(
                             imageVector = Filled.ChevronDown,
-                            contentDescription = "Dropdown",
+                            contentDescription = dropdownDescription,
                             tint = colorScheme.onSurface,
                             modifier = Modifier.padding(start = 8.dp)
                         )
@@ -387,13 +400,13 @@ fun DateTimeRangePicker(
                                         Text(
                                             text = "${range.start} - ${range.current}",
                                             fontSize = 11.sp,
-                                            color = Color.Gray
+                                            color = BofRankingColors.Neutral
                                         )
                                         if (!range.isStart) {
                                             Text(
-                                                text = "Not Started",
+                                                text = notStartedLabel,
                                                 fontSize = 10.sp,
-                                                color = Color.Red
+                                                color = BofRankingColors.Negative
                                             )
                                         }
                                     }
@@ -410,16 +423,28 @@ fun DateTimeRangePicker(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Row {
-                    Text("Current: $currentDateText - $currentTimeText")
+                    Text(
+                        stringResource(
+                            R.string.bof_datetime_current_format,
+                            currentDateText,
+                            currentTimeText
+                        )
+                    )
                 }
                 Button(onClick = { showCurrentDatePicker.update { true } }) {
-                    Text(text = "Select Date&Time")
+                    Text(text = selectCurrentDateTimeLabel)
                 }
                 Row {
-                    Text("Compare: $compareDateText - $compareTimeText")
+                    Text(
+                        stringResource(
+                            R.string.bof_datetime_compare_format,
+                            compareDateText,
+                            compareTimeText
+                        )
+                    )
                 }
                 Button(onClick = { showCompareDatePicker.update { true } }) {
-                    Text(text = "Select Compare Date&Time")
+                    Text(text = selectCompareDateTimeLabel)
                 }
             }
         },
@@ -431,12 +456,12 @@ fun DateTimeRangePicker(
                 bofScreenState.selectedCompareTime.update { compareTimeText }
                 onDismissRequest()
             }) {
-                Text(text = "Confirm")
+                Text(text = confirmLabel)
             }
         },
         dismissButton = {
             Button(onClick = onDismissRequest) {
-                Text(text = "Cancel")
+                Text(text = cancelLabel)
             }
         }
     )

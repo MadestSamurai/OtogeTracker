@@ -24,17 +24,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.theme.BG_DARK_GRAY
-import com.madsam.otora.core.theme.RANKING_RED
-import com.madsam.otora.core.theme.RANKING_YELLOW
-import com.madsam.otora.core.theme.TEXT_GRAY
+import com.madsam.otora.R
+import com.madsam.otora.ui.bof.BofRankingColors
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ImageUtils
@@ -56,6 +54,10 @@ internal fun BofCommentDiffCaptureDialog(
     subtitle: String
 ) {
     val scope = rememberCoroutineScope()
+    val captureTitle = stringResource(R.string.bof_capture_title)
+    val captureMessage = stringResource(R.string.bof_capture_comment_diff_message)
+    val captureAction = stringResource(R.string.bof_capture_action)
+    val cancelAction = stringResource(R.string.bof_action_cancel)
     
     if (showDialog.value) {
         // 过滤掉总分小于等于0的数据
@@ -71,11 +73,11 @@ internal fun BofCommentDiffCaptureDialog(
 
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
-            title = { Text(text = "截图功能") },
+            title = { Text(text = captureTitle) },
             text = {
                 Column {
                     Text(
-                        text = "将保存评论差值排行榜内容到相册，分批截图后自动拼接（每批100行，最大高度30000像素）",
+                        text = captureMessage,
                         modifier = Modifier.padding(8.dp)
                     )
                     
@@ -105,9 +107,9 @@ internal fun BofCommentDiffCaptureDialog(
                     
                     if (batches.size > 1) {
                         Text(
-                            text = "共${batches.size}批，截图时会自动拼接全部内容",
+                            text = stringResource(R.string.bof_capture_batches_format, batches.size),
                             fontSize = 13.sp,
-                            color = Color.Gray,
+                            color = BofRankingColors.Neutral,
                             modifier = Modifier.padding(top = 8.dp)
                         )
                     }
@@ -141,12 +143,14 @@ internal fun BofCommentDiffCaptureDialog(
                                 title = "BOF_Comment_Diff_$timeStr",
                                 description = "BOF Comment Diff Ranking Capture"
                             )
-                            snackbarHostState.showSnackbar("图片已保存到相册（${batches.size}批，最大高度30000像素）")
+                            snackbarHostState.showSnackbar(
+                                context.getString(R.string.bof_capture_saved_format, batches.size)
+                            )
                         }
                         showDialog.value = false
                     }
                 ) {
-                    Text(text = "截图")
+                    Text(text = captureAction)
                 }
             },
             dismissButton = {
@@ -155,7 +159,7 @@ internal fun BofCommentDiffCaptureDialog(
                         showDialog.value = false
                     }
                 ) {
-                    Text(text = "取消")
+                    Text(text = cancelAction)
                 }
             }
         )
@@ -172,18 +176,24 @@ internal fun BofCommentDiffCaptureContent(
     globalMaxScore: Double? = null
 ) {
     val maxScore = globalMaxScore ?: (commentData.maxOfOrNull { it.total.toDouble() } ?: 1.0)
+    val rankColumn = stringResource(R.string.bof_column_rank)
+    val commentColumn = stringResource(R.string.bof_column_comment)
+    val increaseColumn = stringResource(R.string.bof_column_increase)
+    val decreaseColumn = stringResource(R.string.bof_column_decrease)
+    val diffDecreaseTitle = stringResource(R.string.bof_comment_diff_decrease_title)
+    val changeColumn = if (title == diffDecreaseTitle) decreaseColumn else increaseColumn
 
     Box(
         modifier = Modifier
             .width(900.dp)
-            .background(Color.Black)
+            .background(BofRankingColors.Background)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             if (showTitle) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.Black)
+                        .background(BofRankingColors.Background)
                         .padding(vertical = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -191,7 +201,7 @@ internal fun BofCommentDiffCaptureContent(
                         text = title,
                         fontFamily = plexBold,
                         fontSize = 20.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.Center
                     )
                     
@@ -199,7 +209,7 @@ internal fun BofCommentDiffCaptureContent(
                         text = subtitle,
                         fontFamily = plexRegular,
                         fontSize = 12.sp,
-                        color = TEXT_GRAY,
+                        color = BofRankingColors.TextSecondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = 4.dp)
                     )
@@ -210,33 +220,33 @@ internal fun BofCommentDiffCaptureContent(
                 // Diff表头 - 只有三列：排名、评价、增长/减少
                 Row(
                     modifier = Modifier
-                        .background(BG_DARK_GRAY)
+                        .background(BofRankingColors.Header)
                         .fillMaxWidth()
                         .padding(vertical = 8.dp, horizontal = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "排名",
+                        text = rankColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.width(50.dp)
                     )
                     
                     Text(
-                        text = "评价",
+                        text = commentColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         modifier = Modifier.weight(0.6f)
                     )
                     
                     Text(
-                        text = if (title.contains("逆差值") || title.contains("减少")) "减少" else "增长",
+                        text = changeColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.weight(0.4f)
                     )
@@ -263,7 +273,7 @@ private fun CommentDiffCaptureRow(
     index: Int,
     maxScore: Double
 ) {
-    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
+    val backgroundColor = if (index % 2 == 0) BofRankingColors.RowAlt else BofRankingColors.Background
     val scoreRatio = if (maxScore > 0) comment.total.toDouble() / maxScore else 0.0
 
     Row(
@@ -278,7 +288,7 @@ private fun CommentDiffCaptureRow(
             text = (index + 1).toString(),
             fontFamily = plexBold,
             fontSize = 16.sp,
-            color = Color.White,
+            color = BofRankingColors.Text,
             textAlign = TextAlign.Center,
             modifier = Modifier.width(50.dp)
         )
@@ -294,7 +304,7 @@ private fun CommentDiffCaptureRow(
                 text = comment.user,
                 fontFamily = plexBold,
                 fontSize = 14.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
@@ -308,7 +318,7 @@ private fun CommentDiffCaptureRow(
                         text = "P${comment.pattern}",
                         fontFamily = plexRegular,
                         fontSize = 11.sp,
-                        color = RANKING_YELLOW,
+                        color = BofRankingColors.Accent,
                         modifier = Modifier.padding(end = 4.dp)
                     )
                 }
@@ -316,7 +326,7 @@ private fun CommentDiffCaptureRow(
                     text = comment.country,
                     fontFamily = plexRegular,
                     fontSize = 12.sp,
-                    color = TEXT_GRAY
+                    color = BofRankingColors.TextSecondary
                 )
             }
         }
@@ -339,7 +349,7 @@ private fun CommentDiffCaptureRow(
                             .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
                             .height(20.dp)
                             .background(
-                                color = RANKING_RED,
+                                color = BofRankingColors.Negative,
                                 shape = RoundedCornerShape(
                                     topEnd = 10.dp,
                                     bottomEnd = 10.dp
@@ -350,7 +360,7 @@ private fun CommentDiffCaptureRow(
                         text = comment.total.toString(),
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         overflow = TextOverflow.Visible,
                         maxLines = 1,
                         modifier = Modifier

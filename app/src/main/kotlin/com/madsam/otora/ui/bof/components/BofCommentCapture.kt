@@ -30,20 +30,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.theme.BG_DARK_GRAY
-import com.madsam.otora.core.theme.RANKING_BLUE
-import com.madsam.otora.core.theme.RANKING_GREEN
-import com.madsam.otora.core.theme.RANKING_RED
-import com.madsam.otora.core.theme.TEXT_GRAY
+import com.madsam.otora.R
+import com.madsam.otora.ui.bof.BofRankingColors
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ImageUtils
@@ -93,6 +90,10 @@ internal fun BofCommentCaptureDialog(
     subtitle: String
 ) {
     val scope = rememberCoroutineScope()
+    val captureTitle = stringResource(R.string.bof_capture_title)
+    val captureMessage = stringResource(R.string.bof_capture_comment_message)
+    val captureAction = stringResource(R.string.bof_capture_action)
+    val cancelAction = stringResource(R.string.bof_action_cancel)
     
     if (showDialog.value) {
         // 过滤掉总分小于等于0的数据
@@ -108,11 +109,11 @@ internal fun BofCommentCaptureDialog(
 
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
-            title = { Text(text = "截图功能") },
+            title = { Text(text = captureTitle) },
             text = {
                 Column {
                     Text(
-                        text = "将保存评论排行榜内容到相册，分批截图后自动拼接（每批100行，最大高度30000像素）",
+                        text = captureMessage,
                         modifier = Modifier.padding(8.dp)
                     )
                     
@@ -142,9 +143,9 @@ internal fun BofCommentCaptureDialog(
                     
                     if (batches.size > 1) {
                         Text(
-                            text = "共${batches.size}批，截图时会自动拼接全部内容",
+                            text = stringResource(R.string.bof_capture_batches_format, batches.size),
                             fontSize = 13.sp,
-                            color = Color.Gray,
+                            color = BofRankingColors.Neutral,
                             modifier = Modifier.padding(top = 8.dp)
                         )
                     }
@@ -181,12 +182,14 @@ internal fun BofCommentCaptureDialog(
                                 title = "BOF_Comment_$timeStr",
                                 description = "BOF Comment Ranking Capture"
                             )
-                            snackbarHostState.showSnackbar("图片已保存到相册（${batches.size}批，最大高度30000像素）")
+                            snackbarHostState.showSnackbar(
+                                context.getString(R.string.bof_capture_saved_format, batches.size)
+                            )
                         }
                         showDialog.value = false
                     }
                 ) {
-                    Text(text = "截图")
+                    Text(text = captureAction)
                 }
             },
             dismissButton = {
@@ -195,7 +198,7 @@ internal fun BofCommentCaptureDialog(
                         showDialog.value = false
                     }
                 ) {
-                    Text(text = "取消")
+                    Text(text = cancelAction)
                 }
             }
         )
@@ -211,6 +214,13 @@ internal fun BofCommentCaptureContent(
     showHeader: Boolean = true,
     globalMaxScore: Double? = null
 ) {
+    val rankColumn = stringResource(R.string.bof_column_rank)
+    val totalColumn = stringResource(R.string.bof_column_total)
+    val scoreDistributionColumn = stringResource(R.string.bof_column_score_distribution)
+    val voteAverageColumn = stringResource(R.string.bof_column_vote_average)
+    val shortAverageColumn = stringResource(R.string.bof_column_short_average)
+    val longAverageColumn = stringResource(R.string.bof_column_long_average)
+
     // 如果提供了全局最大值则使用，否则计算当前commentData的最大值
     val maxScore = globalMaxScore ?: (commentData.maxOfOrNull { it.total.toDouble() } ?: 1.0)
     
@@ -227,7 +237,7 @@ internal fun BofCommentCaptureContent(
     Box(
         modifier = Modifier
             .width(900.dp)
-            .background(Color.Black)
+            .background(BofRankingColors.Background)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             // 隐藏的测量容器
@@ -283,7 +293,7 @@ internal fun BofCommentCaptureContent(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.Black)
+                        .background(BofRankingColors.Background)
                         .padding(vertical = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -291,7 +301,7 @@ internal fun BofCommentCaptureContent(
                         text = title,
                         fontFamily = plexBold,
                         fontSize = 20.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.Center
                     )
                     
@@ -299,7 +309,7 @@ internal fun BofCommentCaptureContent(
                         text = subtitle,
                         fontFamily = plexRegular,
                         fontSize = 12.sp,
-                        color = TEXT_GRAY,
+                        color = BofRankingColors.TextSecondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = 4.dp)
                     )
@@ -310,16 +320,16 @@ internal fun BofCommentCaptureContent(
             if (showHeader) {
                 Row(
                     modifier = Modifier
-                        .background(BG_DARK_GRAY)
+                        .background(BofRankingColors.Header)
                         .fillMaxWidth()
                         .padding(vertical = 8.dp, horizontal = 2.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "排名",
+                        text = rankColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.width(50.dp)
                     )
@@ -330,42 +340,42 @@ internal fun BofCommentCaptureContent(
                     )
                     
                     Text(
-                        text = "分数分布",
+                        text = scoreDistributionColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.width(barWidth.dp)
                     )
                     Text(
-                        text = "总分",
+                        text = totalColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.End,
                         modifier = Modifier.width(totalScoreWidth)
                     )
                     Text(
-                        text = "票平均",
+                        text = voteAverageColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.End,
                         modifier = Modifier.width(voteAvgWidth)
                     )
                     Text(
-                        text = "短平均",
+                        text = shortAverageColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.End,
                         modifier = Modifier.width(shortAvgWidth)
                     )
                     Text(
-                        text = "长平均",
+                        text = longAverageColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.End,
                         modifier = Modifier.width(longAvgWidth)
                     )
@@ -402,8 +412,8 @@ private fun BofCommentCaptureRow(
     longAvgWidth: Dp,
     totalScoreWidth: Dp
 ) {
-    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
-    val rankColor = Color.White
+    val backgroundColor = if (index % 2 == 0) BofRankingColors.RowAlt else BofRankingColors.Background
+    val rankColor = BofRankingColors.Text
 
     // 检查是否有有效的分数分布数据
     val hasValidChartData = (comment.voteChartData.isNotEmpty() && comment.voteChartData.any { it > 0 }) ||
@@ -439,7 +449,7 @@ private fun BofCommentCaptureRow(
                 text = comment.user,
                 fontFamily = plexBold,
                 fontSize = 14.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.End,
@@ -456,7 +466,7 @@ private fun BofCommentCaptureRow(
                         text = "P${comment.pattern}",
                         fontFamily = plexRegular,
                         fontSize = 11.sp,
-                        color = Color.Yellow,
+                        color = BofRankingColors.Accent,
                         modifier = Modifier.padding(end = 4.dp)
                     )
                 }
@@ -464,7 +474,7 @@ private fun BofCommentCaptureRow(
                     text = comment.country,
                     fontFamily = plexRegular,
                     fontSize = 12.sp,
-                    color = TEXT_GRAY,
+                    color = BofRankingColors.TextSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -497,7 +507,7 @@ private fun BofCommentCaptureRow(
                                     dataList = comment.voteChartData,
                                     height = 34.dp,
                                     width = barWidth.dp * voteRatio,
-                                    color = RANKING_GREEN
+                                    color = BofRankingColors.Positive
                                 )
                             }
                         }
@@ -513,7 +523,7 @@ private fun BofCommentCaptureRow(
                                     dataList = comment.shortChartData,
                                     height = 34.dp,
                                     width = barWidth.dp * shortRatio,
-                                    color = RANKING_BLUE
+                                    color = BofRankingColors.Blue
                                 )
                             }
                         }
@@ -529,7 +539,7 @@ private fun BofCommentCaptureRow(
                                     dataList = comment.longChartData,
                                     height = 34.dp,
                                     width = barWidth.dp * longRatio,
-                                    color = RANKING_RED
+                                    color = BofRankingColors.Negative
                                 )
                             }
                         }
@@ -545,19 +555,19 @@ private fun BofCommentCaptureRow(
                             modifier = Modifier
                                 .width(barWidth.dp * voteRatio)
                                 .height(34.dp)
-                                .background(color = RANKING_GREEN)
+                                .background(color = BofRankingColors.Positive)
                         )
                         Box(
                             modifier = Modifier
                                 .width(barWidth.dp * shortRatio)
                                 .height(34.dp)
-                                .background(color = RANKING_BLUE)
+                                .background(color = BofRankingColors.Blue)
                         )
                         Box(
                             modifier = Modifier
                                 .width(barWidth.dp * longRatio)
                                 .height(34.dp)
-                                .background(color = RANKING_RED)
+                                .background(color = BofRankingColors.Negative)
                         )
                     }
                 }
@@ -573,7 +583,7 @@ private fun BofCommentCaptureRow(
             ) {
                 Text(
                     text = formatScore(comment.total, ColumnWidthType.THREE_DIGIT_INT),
-                    color = Color.White,
+                    color = BofRankingColors.Text,
                     fontSize = 14.sp,
                     fontFamily = plexBold,
                     textAlign = TextAlign.End,
@@ -587,12 +597,7 @@ private fun BofCommentCaptureRow(
             modifier = Modifier
                 .width(voteAvgWidth)
                 .fillMaxHeight()
-                .background(
-                    if (comment.voteAve > 0)
-                        Color(red = (comment.voteAve / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
-                    else
-                        Color.Transparent
-                )
+                .background(BofRankingColors.scoreHeat(comment.voteAve))
                 .padding(horizontal = 2.dp),
             contentAlignment = Alignment.CenterEnd
         ) {
@@ -600,7 +605,7 @@ private fun BofCommentCaptureRow(
                 text = formatScore(comment.voteAve, ColumnWidthType.TWO_DECIMAL),
                 fontFamily = plexBold,
                 fontSize = 14.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 textAlign = TextAlign.End,
                 maxLines = 1
             )
@@ -611,12 +616,7 @@ private fun BofCommentCaptureRow(
             modifier = Modifier
                 .width(shortAvgWidth)
                 .fillMaxHeight()
-                .background(
-                    if (comment.shortAve > 0)
-                        Color(red = (comment.shortAve / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
-                    else
-                        Color.Transparent
-                )
+                .background(BofRankingColors.scoreHeat(comment.shortAve))
                 .padding(horizontal = 2.dp),
             contentAlignment = Alignment.CenterEnd
         ) {
@@ -624,7 +624,7 @@ private fun BofCommentCaptureRow(
                 text = formatScore(comment.shortAve, ColumnWidthType.TWO_DECIMAL),
                 fontFamily = plexBold,
                 fontSize = 14.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 textAlign = TextAlign.End,
                 maxLines = 1
             )
@@ -635,12 +635,7 @@ private fun BofCommentCaptureRow(
             modifier = Modifier
                 .width(longAvgWidth)
                 .fillMaxHeight()
-                .background(
-                    if (comment.longAve > 0)
-                        Color(red = (comment.longAve / 1000.0).toFloat().coerceIn(0f, 1f), green = 0f, blue = 0f)
-                    else
-                        Color.Transparent
-                )
+                .background(BofRankingColors.scoreHeat(comment.longAve))
                 .padding(horizontal = 2.dp),
             contentAlignment = Alignment.CenterEnd
         ) {
@@ -648,7 +643,7 @@ private fun BofCommentCaptureRow(
                 text = formatScore(comment.longAve, ColumnWidthType.TWO_DECIMAL),
                 fontFamily = plexBold,
                 fontSize = 14.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 textAlign = TextAlign.End,
                 maxLines = 1
             )

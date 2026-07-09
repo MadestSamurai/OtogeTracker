@@ -24,15 +24,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.madsam.otora.core.theme.BG_DARK_GRAY
-import com.madsam.otora.core.theme.RANKING_RED
-import com.madsam.otora.core.theme.TEXT_GRAY
+import com.madsam.otora.R
+import com.madsam.otora.ui.bof.BofRankingColors
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ImageUtils
@@ -54,6 +53,10 @@ fun BofTeamDiffCaptureDialog(
     subtitle: String
 ) {
     val scope = rememberCoroutineScope()
+    val captureTitle = stringResource(R.string.bof_capture_title)
+    val captureMessage = stringResource(R.string.bof_capture_team_diff_message)
+    val captureAction = stringResource(R.string.bof_capture_action)
+    val cancelAction = stringResource(R.string.bof_action_cancel)
 
     if (showDialog.value) {
         // 过滤掉总分小于等于0的数据
@@ -69,11 +72,11 @@ fun BofTeamDiffCaptureDialog(
 
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
-            title = { Text(text = "截图功能") },
+            title = { Text(text = captureTitle) },
             text = {
                 Column {
                     Text(
-                        text = "将保存团队差值排行榜内容到相册，分批截图后自动拼接（每批50个团队，最大高度30000像素）",
+                        text = captureMessage,
                         modifier = Modifier.padding(8.dp)
                     )
 
@@ -103,9 +106,9 @@ fun BofTeamDiffCaptureDialog(
 
                     if (batches.size > 1) {
                         Text(
-                            text = "共${batches.size}批，截图时会自动拼接全部内容",
+                            text = stringResource(R.string.bof_capture_batches_format, batches.size),
                             fontSize = 13.sp,
-                            color = Color.Gray,
+                            color = BofRankingColors.Neutral,
                             modifier = Modifier.padding(top = 8.dp)
                         )
                     }
@@ -139,12 +142,14 @@ fun BofTeamDiffCaptureDialog(
                                 title = "BOF_Team_Diff_$timeStr",
                                 description = "BOF Team Diff Ranking Capture"
                             )
-                            snackbarHostState.showSnackbar("图片已保存到相册（${batches.size}批，最大高度30000像素）")
+                            snackbarHostState.showSnackbar(
+                                context.getString(R.string.bof_capture_saved_format, batches.size)
+                            )
                         }
                         showDialog.value = false
                     }
                 ) {
-                    Text(text = "截图")
+                    Text(text = captureAction)
                 }
             },
             dismissButton = {
@@ -153,7 +158,7 @@ fun BofTeamDiffCaptureDialog(
                         showDialog.value = false
                     }
                 ) {
-                    Text(text = "取消")
+                    Text(text = cancelAction)
                 }
             }
         )
@@ -170,18 +175,24 @@ internal fun BofTeamDiffCaptureContent(
     globalMaxScore: Double? = null
 ) {
     val maxScore = globalMaxScore ?: (teams.maxOfOrNull { it.totalScore } ?: 1.0)
+    val rankColumn = stringResource(R.string.bof_column_rank)
+    val teamColumn = stringResource(R.string.bof_column_team)
+    val increaseColumn = stringResource(R.string.bof_column_increase)
+    val decreaseColumn = stringResource(R.string.bof_column_decrease)
+    val diffDecreaseTitle = stringResource(R.string.bof_team_diff_decrease_title)
+    val changeColumn = if (title == diffDecreaseTitle) decreaseColumn else increaseColumn
 
     Box(
         modifier = Modifier
             .width(900.dp)
-            .background(Color.Black)
+            .background(BofRankingColors.Background)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             if (showTitle) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color.Black)
+                        .background(BofRankingColors.Background)
                         .padding(vertical = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -189,7 +200,7 @@ internal fun BofTeamDiffCaptureContent(
                         text = title,
                         fontFamily = plexBold,
                         fontSize = 20.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.Center
                     )
 
@@ -197,7 +208,7 @@ internal fun BofTeamDiffCaptureContent(
                         text = subtitle,
                         fontFamily = plexRegular,
                         fontSize = 12.sp,
-                        color = TEXT_GRAY,
+                        color = BofRankingColors.TextSecondary,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(top = 4.dp)
                     )
@@ -208,34 +219,34 @@ internal fun BofTeamDiffCaptureContent(
                 // Diff表头 - 只有三列：排名、团队、增长/减少
                 Row(
                     modifier = Modifier
-                        .background(BG_DARK_GRAY)
+                        .background(BofRankingColors.Header)
                         .fillMaxWidth()
                         .padding(vertical = 8.dp, horizontal = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "排名",
+                        text = rankColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.width(50.dp)
                     )
                     
                     Text(
-                        text = "团队",
+                        text = teamColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.End,
                         modifier = Modifier.weight(0.6f)
                     )
                     
                     Text(
-                        text = if (title.contains("逆差值") || title.contains("减少")) "减少" else "增长",
+                        text = changeColumn,
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = Color.White,
+                        color = BofRankingColors.Text,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.weight(0.4f)
                     )
@@ -262,7 +273,7 @@ private fun TeamDiffCaptureRow(
     index: Int,
     maxScore: Double
 ) {
-    val backgroundColor = if (index % 2 == 0) BG_DARK_GRAY else Color.Black
+    val backgroundColor = if (index % 2 == 0) BofRankingColors.RowAlt else BofRankingColors.Background
     val scoreRatio = if (maxScore > 0) team.totalScore / maxScore else 0.0
 
     Column(
@@ -282,7 +293,7 @@ private fun TeamDiffCaptureRow(
                 text = team.rank.toString(),
                 fontFamily = plexBold,
                 fontSize = 16.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.width(50.dp)
             )
@@ -292,7 +303,7 @@ private fun TeamDiffCaptureRow(
                 text = team.teamName,
                 fontFamily = plexBold,
                 fontSize = 16.sp,
-                color = Color.White,
+                color = BofRankingColors.Text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.End,
@@ -319,7 +330,7 @@ private fun TeamDiffCaptureRow(
                                 .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
                                 .height(20.dp)
                                 .background(
-                                    color = RANKING_RED,
+                                    color = BofRankingColors.Negative,
                                     shape = RoundedCornerShape(
                                         topEnd = 10.dp,
                                         bottomEnd = 10.dp
@@ -330,7 +341,7 @@ private fun TeamDiffCaptureRow(
                             text = String.format("%.2f", team.totalScore),
                             fontFamily = plexBold,
                             fontSize = 14.sp,
-                            color = Color.White,
+                            color = BofRankingColors.Text,
                             overflow = TextOverflow.Visible,
                             maxLines = 1,
                             modifier = Modifier
@@ -364,7 +375,7 @@ private fun TeamDiffCaptureRow(
                         text = "$title - $artist",
                         fontFamily = plexRegular,
                         fontSize = 12.sp,
-                        color = TEXT_GRAY,
+                        color = BofRankingColors.TextSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
@@ -375,7 +386,7 @@ private fun TeamDiffCaptureRow(
                             text = if (scoreDiff > 0) "+${String.format("%.1f", scoreDiff)}" else String.format("%.1f", scoreDiff),
                             fontFamily = plexBold,
                             fontSize = 12.sp,
-                            color = if (scoreDiff > 0) Color.Green else Color.Red,
+                            color = if (scoreDiff > 0) BofRankingColors.Positive else BofRankingColors.Negative,
                             textAlign = TextAlign.End,
                             modifier = Modifier.width(70.dp)
                         )

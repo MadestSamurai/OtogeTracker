@@ -105,23 +105,18 @@ internal fun BofTeamPagerScreen(
     ) { page ->
         val shouldShowCaptureDialog = showCaptureDialog && page == pagerState.currentPage
         
-        // 页面标题列表（参考 Entry 的设计）
-        val pageNames = listOf("总榜", "差值")
-        val previousPageTitle = if (page > 0) pageNames[page - 1] else null
-        val nextPageTitle = if (page < pageNames.size - 1) pageNames[page + 1] else null
-        
         when (page) {
             0 -> {
                 // 总榜页面 - 在 when 分支内收集状态（完全对齐 Entry）
                 val teamRankingData by vm.teamRankingData.collectAsStateWithLifecycle()
                 val isLoading by vm.isTeamRankingLoading.collectAsStateWithLifecycle()
-                val errorMessage by vm.teamRankingError.collectAsStateWithLifecycle()
+                val error by vm.teamRankingError.collectAsStateWithLifecycle()
                 val selectedRange by bofScreenState.selectedRange.collectAsStateWithLifecycle()
                 
                 BofTeamTotalScreen(
                     teamRankingData = teamRankingData,
                     isLoading = isLoading,
-                    errorMessage = errorMessage,
+                    error = error,
                     selectedRange = selectedRange,
                     bofScreenState = bofScreenState,
                     vm = vm,

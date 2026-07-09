@@ -30,14 +30,18 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.madsam.otora.BofScreenState
+import com.madsam.otora.R
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ScreenUtil
+import com.madsam.otora.ui.bof.BofRankingColors
+import com.madsam.otora.ui.bof.BofRankingError
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.bof.components.BofEntryCaptureDialog
 import com.madsam.otora.ui.common.ColumnWidthType
@@ -65,6 +69,24 @@ internal fun BofEntryPagerScreen(
 ) {
     val selectedSubTabIndex by bofScreenState.selectedSubTab.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val currentTimeLabel = stringResource(R.string.bof_time_current)
+    val compareTimeLabel = stringResource(R.string.bof_time_compare)
+    val timeSubtitle = stringResource(
+        R.string.bof_time_value,
+        vm.getSelectedTimeString(currentTimeLabel, compareTimeLabel)
+    )
+    val totalTitle = stringResource(R.string.bof_entry_total_title)
+    val averageTitle = stringResource(R.string.bof_entry_average_title)
+    val medianTitle = stringResource(R.string.bof_entry_median_title)
+    val diffIncreaseTitle = stringResource(R.string.bof_entry_diff_increase_title)
+    val diffDecreaseTitle = stringResource(R.string.bof_entry_diff_decrease_title)
+    val compositeTitle = stringResource(R.string.bof_entry_composite_title)
+    val scoreBarColumn = stringResource(R.string.bof_column_score_bar)
+    val impressionColumn = stringResource(R.string.bof_column_impressions)
+    val averageColumn = stringResource(R.string.bof_column_average)
+    val medianColumn = stringResource(R.string.bof_column_median)
+    val differenceColumn = stringResource(R.string.bof_column_difference)
+    val compositeColumn = stringResource(R.string.bof_column_composite)
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
@@ -138,15 +160,13 @@ internal fun BofEntryPagerScreen(
         // 只有当前页面才响应截图对话框
         val shouldShowCaptureDialog = showCaptureDialog && page == pagerState.currentPage
         
-        // 页面标题列表
-        val pageNames = listOf("总分", "平均分", "中位数", "差值", "综合")
         val previousPageTitle: String? = null
         val nextPageTitle: String? = null
         
         when (page) {
             0 -> EntryPageContent(
-                title = "总分排行榜",
-                subtitle = "时间: ${vm.getSelectedTimeString()}",
+                title = totalTitle,
+                subtitle = timeSubtitle,
                 previousPageTitle = previousPageTitle,
                 nextPageTitle = nextPageTitle,
                 onNavigateToPrevious = { 
@@ -155,10 +175,10 @@ internal fun BofEntryPagerScreen(
                 onNavigateToNext = { 
                     bofScreenState.selectedSubTab.update { page + 1 }
                 },
-                scoreColumnName = "分数条",
-                extraColumnName = "评价",
-                avgColumnName = "均分",
-                medianColumnName = "中位",
+                scoreColumnName = scoreBarColumn,
+                extraColumnName = impressionColumn,
+                avgColumnName = averageColumn,
+                medianColumnName = medianColumn,
                 scoreWidthType = ColumnWidthType.THREE_DIGIT_INT,
                 extraWidthType = ColumnWidthType.THREE_DIGIT_INT,
                 avgWidthType = ColumnWidthType.TWO_DECIMAL,
@@ -167,7 +187,7 @@ internal fun BofEntryPagerScreen(
                 maxItems = 600,
                 ranking = vm.totalRankingData.collectAsStateWithLifecycle().value,
                 isLoading = vm.isLoading.collectAsStateWithLifecycle().value,
-                errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
+                error = vm.rankingError.collectAsStateWithLifecycle().value,
                 narrowMode = narrowMode,
                 vm = vm,
                 context = context,
@@ -186,8 +206,8 @@ internal fun BofEntryPagerScreen(
                 }
                 
                 EntryPageContent(
-                    title = "平均分排行榜",
-                    subtitle = "时间: ${vm.getSelectedTimeString()}",
+                    title = averageTitle,
+                    subtitle = timeSubtitle,
                     previousPageTitle = previousPageTitle,
                     nextPageTitle = nextPageTitle,
                     onNavigateToPrevious = { 
@@ -196,8 +216,8 @@ internal fun BofEntryPagerScreen(
                     onNavigateToNext = { 
                         bofScreenState.selectedSubTab.update { page + 1 }
                     },
-                    scoreColumnName = "均分",
-                    extraColumnName = "评价",
+                    scoreColumnName = averageColumn,
+                    extraColumnName = impressionColumn,
                     avgColumnName = null,
                     medianColumnName = null,
                     scoreWidthType = ColumnWidthType.TWO_DECIMAL,
@@ -208,7 +228,7 @@ internal fun BofEntryPagerScreen(
                     maxItems = 600,
                     ranking = vm.avgRankingData.collectAsStateWithLifecycle().value,
                     isLoading = vm.isLoading.collectAsStateWithLifecycle().value,
-                    errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
+                    error = vm.rankingError.collectAsStateWithLifecycle().value,
                     narrowMode = narrowMode,
                     vm = vm,
                     context = context,
@@ -228,8 +248,8 @@ internal fun BofEntryPagerScreen(
                 }
                 
                 EntryPageContent(
-                    title = "中位数排行榜",
-                    subtitle = "时间: ${vm.getSelectedTimeString()}",
+                    title = medianTitle,
+                    subtitle = timeSubtitle,
                     previousPageTitle = previousPageTitle,
                     nextPageTitle = nextPageTitle,
                     onNavigateToPrevious = { 
@@ -238,8 +258,8 @@ internal fun BofEntryPagerScreen(
                     onNavigateToNext = { 
                         bofScreenState.selectedSubTab.update { page + 1 }
                     },
-                    scoreColumnName = "中位",
-                    extraColumnName = "评价",
+                    scoreColumnName = medianColumn,
+                    extraColumnName = impressionColumn,
                     avgColumnName = null,
                     medianColumnName = null,
                     scoreWidthType = ColumnWidthType.ONE_DECIMAL,
@@ -250,7 +270,7 @@ internal fun BofEntryPagerScreen(
                     maxItems = 600,
                     ranking = vm.medianRankingData.collectAsStateWithLifecycle().value,
                     isLoading = vm.isLoading.collectAsStateWithLifecycle().value,
-                    errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
+                    error = vm.rankingError.collectAsStateWithLifecycle().value,
                     narrowMode = narrowMode,
                     vm = vm,
                     context = context,
@@ -278,8 +298,8 @@ internal fun BofEntryPagerScreen(
                 val currentRanking = if (showReverseDiff) reverseDiffRanking else diffRanking
                 
                 EntryPageContent(
-                    title = if (showReverseDiff) "逆差值排行榜（票数减少）" else "差值排行榜（票数增加）",
-                    subtitle = "时间: ${vm.getSelectedTimeString()}",
+                    title = if (showReverseDiff) diffDecreaseTitle else diffIncreaseTitle,
+                    subtitle = timeSubtitle,
                     previousPageTitle = previousPageTitle,
                     nextPageTitle = nextPageTitle,
                     onNavigateToPrevious = { 
@@ -288,8 +308,8 @@ internal fun BofEntryPagerScreen(
                     onNavigateToNext = { 
                         bofScreenState.selectedSubTab.update { page + 1 }
                     },
-                    scoreColumnName = "差值",
-                    extraColumnName = "评价",
+                    scoreColumnName = differenceColumn,
+                    extraColumnName = impressionColumn,
                     avgColumnName = null,
                     medianColumnName = null,
                     scoreWidthType = ColumnWidthType.TWO_DECIMAL,
@@ -300,7 +320,7 @@ internal fun BofEntryPagerScreen(
                     maxItems = 600,
                     ranking = currentRanking,
                     isLoading = vm.isLoading.collectAsStateWithLifecycle().value,
-                    errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
+                    error = vm.rankingError.collectAsStateWithLifecycle().value,
                     narrowMode = narrowMode,
                     vm = vm,
                     context = context,
@@ -322,14 +342,15 @@ internal fun BofEntryPagerScreen(
                 }
                 
                 EntryPageContent(
-                    title = "综合分数排行榜",
-                    subtitle = "时间: ${vm.getSelectedTimeString()} | 评价≥${minImpression}",
+                    title = compositeTitle,
+                    subtitle = timeSubtitle + "\n" +
+                        stringResource(R.string.bof_filter_impression_min, minImpression),
                     previousPageTitle = previousPageTitle,
                     nextPageTitle = nextPageTitle,
                     onNavigateToPrevious = { bofScreenState.selectedSubTab.update { page - 1 } },
                     onNavigateToNext = { bofScreenState.selectedSubTab.update { page + 1 } },
-                    scoreColumnName = "综合",
-                    extraColumnName = "评价",
+                    scoreColumnName = compositeColumn,
+                    extraColumnName = impressionColumn,
                     avgColumnName = null,
                     medianColumnName = null,
                     scoreWidthType = ColumnWidthType.TWO_DECIMAL,
@@ -340,7 +361,7 @@ internal fun BofEntryPagerScreen(
                     maxItems = 600,
                     ranking = vm.compositeRankingData.collectAsStateWithLifecycle().value,
                     isLoading = vm.isLoading.collectAsStateWithLifecycle().value,
-                    errorMessage = vm.errorMessage.collectAsStateWithLifecycle().value,
+                    error = vm.rankingError.collectAsStateWithLifecycle().value,
                     narrowMode = narrowMode,
                     vm = vm,
                     context = context,
@@ -372,7 +393,7 @@ private fun <T> EntryPageContent(
     maxItems: Int,
     ranking: List<T>,
     isLoading: Boolean,
-    errorMessage: String,
+    error: BofRankingError?,
     narrowMode: Int,
     vm: BofViewModel,
     context: android.content.Context,
@@ -388,6 +409,22 @@ private fun <T> EntryPageContent(
     onNavigateToNext: () -> Unit = {}
 ) {
     val showDialogState = remember { mutableStateOf(false) }
+    val loadFailedText = stringResource(R.string.bof_load_failed)
+    val retryText = stringResource(R.string.bof_retry)
+    val noRankingDataText = stringResource(R.string.bof_error_no_ranking_data)
+    val loadRankingFailedFormat = stringResource(R.string.bof_error_load_ranking_failed)
+    val rankColumnName = stringResource(R.string.bof_column_rank)
+    val emptyTitle = stringResource(R.string.bof_empty_title)
+    val emptyMessage = stringResource(R.string.bof_empty_message)
+    val moreEntriesFormat = stringResource(R.string.bof_more_entries)
+    val previousPageDescription = stringResource(R.string.bof_action_previous_page)
+    val nextPageDescription = stringResource(R.string.bof_action_next_page)
+    val displayErrorMessage = when (error) {
+        null -> ""
+        BofRankingError.NoData -> noRankingDataText
+        is BofRankingError.LoadFailed ->
+            String.format(loadRankingFailedFormat, error.detail.orEmpty())
+    }
     
     // 只有当 showCaptureDialog 从 false 变为 true 时才打开对话框
     LaunchedEffect(showCaptureDialog) {
@@ -411,19 +448,19 @@ private fun <T> EntryPageContent(
                 )
             }
             
-            errorMessage.isNotEmpty() -> {
+            error != null -> {
                 Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "加载失败",
+                        text = loadFailedText,
                         fontFamily = plexBold,
                         fontSize = 16.sp,
                         color = MaterialTheme.colorScheme.error
                     )
                     Text(
-                        text = errorMessage,
+                        text = displayErrorMessage,
                         fontFamily = plexRegular,
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -434,7 +471,7 @@ private fun <T> EntryPageContent(
                         onClick = { vm.loadRankingData() },
                         modifier = Modifier.padding(top = 16.dp)
                     ) {
-                        Text("重试")
+                        Text(retryText)
                     }
                 }
             }
@@ -454,6 +491,13 @@ private fun <T> EntryPageContent(
                     medianWidthType = medianWidthType,
                     enableNarrowToggle = enableNarrowToggle,
                     maxItems = maxItems,
+                    colors = BofRankingColors.Table,
+                    rankColumnName = rankColumnName,
+                    emptyTitle = emptyTitle,
+                    emptyMessage = emptyMessage,
+                    moreItemsText = { count -> String.format(moreEntriesFormat, count) },
+                    previousPageContentDescription = previousPageDescription,
+                    nextPageContentDescription = nextPageDescription,
                     previousPageTitle = previousPageTitle,
                     nextPageTitle = nextPageTitle
                 )
