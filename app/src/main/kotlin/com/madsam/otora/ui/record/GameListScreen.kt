@@ -1,28 +1,29 @@
 package com.madsam.otora.ui.record
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.R
@@ -55,9 +57,9 @@ import com.madsam.otora.core.utils.ScreenUtil
 data class GameInfo(
     val id: String,
     val name: String,
+    @param:StringRes val descriptionResId: Int,
     val icon: ImageVector,
     val primaryColor: Color,
-    val secondaryColor: Color,
     val route: String,
     val isEnabled: Boolean = true
 )
@@ -70,27 +72,27 @@ object GameRegistry {
         GameInfo(
             id = "osu",
             name = "osu!",
+            descriptionResId = R.string.record_game_osu_desc,
             icon = Filled.OsuIcon,
             primaryColor = Color(0xFFFF66AB),
-            secondaryColor = Color(0xFFCC5289),
             route = "game/osu",
             isEnabled = true
         ),
         GameInfo(
             id = "maimai",
             name = "maimai",
+            descriptionResId = R.string.record_game_maimai_desc,
             icon = Filled.MaimaiIcon,
             primaryColor = Color(0xFF4FC3F7),
-            secondaryColor = Color(0xFF0288D1),
             route = "game/maimai",
             isEnabled = true
         ),
         GameInfo(
             id = "chunithm",
             name = "CHUNITHM",
+            descriptionResId = R.string.record_game_chunithm_desc,
             icon = Filled.ChunithmIcon,
             primaryColor = Color(0xFFFFD54F),
-            secondaryColor = Color(0xFFFFA000),
             route = "game/chunithm",
             isEnabled = true
         )
@@ -98,7 +100,7 @@ object GameRegistry {
 }
 
 /**
- * 游戏列表页面 - 显示所有可用游戏的卡片网格
+ * 游戏列表页面 - 显示所有可用游戏的卡片列表
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -123,7 +125,7 @@ fun GameListScreen(
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Filled.Settings,
-                            contentDescription = "Settings",
+                            contentDescription = stringResource(R.string.settings_title),
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
                         )
@@ -138,10 +140,8 @@ fun GameListScreen(
         },
         containerColor = colorScheme.surface
     ) { paddingValues ->
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 160.dp),
+        LazyColumn(
             contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .fillMaxSize()
@@ -189,28 +189,28 @@ private fun GameCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp)
-            .clip(RoundedCornerShape(16.dp))
+            .heightIn(min = 104.dp)
+            .clip(RoundedCornerShape(8.dp))
             .clickable(enabled = game.isEnabled, onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = if (game.isEnabled) colorScheme.surfaceContainerHigh else colorScheme.surfaceContainerHighest.copy(alpha = 0.5f)
         ),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 4.dp
+            defaultElevation = 1.dp
         )
     ) {
-        Column(
+        Row(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxWidth()
+                .heightIn(min = 104.dp)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // 游戏图标
             Box(
                 modifier = Modifier
-                    .size(72.dp)
-                    .clip(RoundedCornerShape(16.dp))
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(8.dp))
                     .background(game.primaryColor.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
@@ -218,28 +218,48 @@ private fun GameCard(
                     imageVector = game.icon,
                     contentDescription = game.name,
                     tint = if (game.isEnabled) game.primaryColor else colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(48.dp)
+                    modifier = Modifier.size(34.dp)
                 )
             }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // 游戏名称
-            Text(
-                text = game.name,
-                fontFamily = plexBold,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = if (game.isEnabled) colorScheme.primary else colorScheme.onSurfaceVariant
-            )
-            
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            // 状态提示
-            Text(
-                text = if (game.isEnabled) "点击查看" else "即将推出",
-                fontSize = 12.sp,
-                color = if (game.isEnabled) colorScheme.onSurfaceVariant else colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = game.name,
+                    fontFamily = plexBold,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (game.isEnabled) colorScheme.onSurface else colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = stringResource(game.descriptionResId),
+                    fontSize = 13.sp,
+                    lineHeight = 17.sp,
+                    color = if (game.isEnabled) colorScheme.onSurfaceVariant else colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = if (game.isEnabled) {
+                        stringResource(R.string.record_game_open)
+                    } else {
+                        stringResource(R.string.record_game_coming_soon)
+                    },
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = if (game.isEnabled) game.primaryColor else colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = if (game.isEnabled) colorScheme.onSurfaceVariant else colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+                modifier = Modifier.size(22.dp)
             )
         }
     }
