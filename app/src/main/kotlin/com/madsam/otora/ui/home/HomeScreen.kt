@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
@@ -253,8 +252,12 @@ private fun BofHomeGroupCard(
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    HorizontalDivider(color = colorScheme.outlineVariant.copy(alpha = 0.45f))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(colorScheme.surface)
+                ) {
+                    Spacer(modifier = Modifier.height(2.dp))
                     summary.sections.forEachIndexed { index, section ->
                         BofEntranceRow(
                             section = section,
@@ -262,10 +265,7 @@ private fun BofHomeGroupCard(
                             onClick = { onNavigateToBOF(section.tabIndex) }
                         )
                         if (index < summary.sections.lastIndex) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(start = 14.dp),
-                                color = colorScheme.outlineVariant.copy(alpha = 0.35f)
-                            )
+                            Spacer(modifier = Modifier.height(2.dp))
                         }
                     }
                 }
@@ -285,7 +285,7 @@ private fun BofEntranceRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(colorScheme.surfaceContainerHigh.copy(alpha = 0.45f))
+            .background(colorScheme.surfaceContainer)
             .clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
