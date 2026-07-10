@@ -21,14 +21,21 @@ import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipAnchorPosition
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,6 +65,7 @@ import com.madsam.otora.data.osu.ui.model.OsuCardUiModel
 import com.madsam.otora.ui.components.GroupListItem
 import com.madsam.otora.ui.components.PopupTip
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 
 /**
  * Material 3 重构版本的用户卡片
@@ -94,6 +102,7 @@ internal fun Card(
  * 包含：封面图、头像、用户名、在线状态、Supporter标志、Title标志、组别列表
  */
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun UserProfileCard(
     cardData: OsuCardUiModel,
     groupListData: List<OsuGroupDTO>,
@@ -224,45 +233,70 @@ private fun UserProfileCard(
                     
                     // Supporter标志
                     if (cardData.isSupporter) {
-                        val supporterShowPopup = remember { MutableTransitionState(false) }
-                        Surface(
-                            modifier = Modifier
-                                .height(20.dp)
-                                .clickable { supporterShowPopup.targetState = true },
-                            shape = RoundedCornerShape(100.dp),
-                            color = MaterialTheme.colorScheme.tertiary
+                        val supporterTooltipState = rememberTooltipState()
+                        val supporterTooltipScope = rememberCoroutineScope()
+
+                        TooltipBox(
+                            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(
+                                positioning = TooltipAnchorPosition.Above,
+                                spacingBetweenTooltipAndAnchor = 4.dp
+                            ),
+                            tooltip = {
+                                PlainTooltip(
+                                    shadowElevation = 2.dp
+                                ) {
+                                    Text(
+                                        text = stringResource(
+                                            R.string.osu_supporter_rank_format,
+                                            cardData.supporterRank
+                                        ),
+                                        style = MaterialTheme.typography.labelMedium,
+                                        lineHeight = 16.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            },
+                            state = supporterTooltipState,
+                            focusable = false,
+                            enableUserInput = false
                         ) {
-                            Image(
-                                painter = rememberVectorPainter(
-                                    image = when (cardData.supporterRank) {
-                                        1 -> Filled.Heart1
-                                        2 -> Filled.Heart2
-                                        3 -> Filled.Heart3
-                                        else -> Filled.Heart1
-                                    }
-                                ),
-                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onTertiary),
-                                contentDescription = "Supporter Rank",
+                            Surface(
                                 modifier = Modifier
                                     .height(20.dp)
-                                    .padding(horizontal = 12.dp, vertical = 4.dp)
-                            )
+                                    .clickable {
+                                        supporterTooltipScope.launch {
+                                            supporterTooltipState.show()
+                                        }
+                                    },
+                                shape = RoundedCornerShape(100.dp),
+                                color = MaterialTheme.colorScheme.tertiary
+                            ) {
+                                Image(
+                                    painter = rememberVectorPainter(
+                                        image = when (cardData.supporterRank) {
+                                            1 -> Filled.Heart1
+                                            2 -> Filled.Heart2
+                                            3 -> Filled.Heart3
+                                            else -> Filled.Heart1
+                                        }
+                                    ),
+                                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onTertiary),
+                                    contentDescription = stringResource(R.string.osu_cd_supporter_rank),
+                                    modifier = Modifier
+                                        .height(20.dp)
+                                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                                )
+                            }
                         }
-                        
-                        // Supporter Popup
-                        PopupTip(
-                            "Supporter Rank ${cardData.supporterRank}",
-                            MaterialTheme.colorScheme.tertiary,
-                            Modifier,
-                            supporterShowPopup,
-                            Alignment.TopCenter
-                        )
                     }
                     
                     // Former username popup
                     if (cardData.formerUsernames.isNotEmpty()) {
                         PopupTip(
-                            "formerly known as:\n${cardData.formerUsernames}",
+                            stringResource(
+                                R.string.osu_former_usernames_format,
+                                cardData.formerUsernames
+                            ),
                             colorScheme.onSurface,
                             Modifier,
                             formerUsernameShowPopup,

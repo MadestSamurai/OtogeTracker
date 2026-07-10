@@ -221,6 +221,8 @@ internal fun RankGraph(
                             marker = rememberDefaultCartesianMarker(
                                 label = rememberTextComponent(
                                     style = TextStyle(
+                                        fontFamily = plexFamily,
+                                        fontWeight = FontWeight.Normal,
                                         fontSize = 13.sp,
                                         color = colorScheme.primary,
                                         textAlign = TextAlign.Center
@@ -285,23 +287,25 @@ private fun RankDataSection(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Highest Rank (MAX) - Top
-            if (highestData.rank.isNotEmpty()) {
-                Surface(
-                    color = colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(4.dp),
-                    modifier = Modifier.padding(bottom = 4.dp)
-                ) {
-                    Text(
-                        text = "MAX #${highestData.rank}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = colorScheme.onPrimaryContainer,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
+            // Fixed-height slot keeps both ranking values on the same baseline.
+            Box(
+                modifier = Modifier.height(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (highestData.rank.isNotEmpty()) {
+                    Surface(
+                        color = colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            text = "MAX #${highestData.rank}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colorScheme.onPrimaryContainer,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
+                    }
                 }
-            } else {
-                Spacer(modifier = Modifier.height(24.dp))
             }
 
             // Main Rank
@@ -311,14 +315,18 @@ private fun RankDataSection(
                     color = colorScheme.primary,
                     fontFamily = plexFamily,
                     fontSize = 24.sp,
+                    lineHeight = 30.sp,
                     fontWeight = FontWeight.Bold
                 )
             )
+
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Label
             Text(
                 text = stringResource(id = R.string.global_ranking),
                 style = MaterialTheme.typography.bodySmall,
+                lineHeight = 16.sp,
                 color = colorScheme.onSurfaceVariant
             )
 
@@ -347,7 +355,7 @@ private fun RankDataSection(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Spacer to align with Global column's MAX badge
+            // Same fixed-height slot as the global MAX badge.
             Spacer(modifier = Modifier.height(24.dp))
 
             // Main Rank
@@ -357,11 +365,14 @@ private fun RankDataSection(
                     color = colorScheme.secondary,
                     fontFamily = plexFamily,
                     fontSize = 24.sp,
+                    lineHeight = 30.sp,
                     fontWeight = FontWeight.Bold
                 )
             )
 
             // Label (Flag + Name)
+            Spacer(modifier = Modifier.height(4.dp))
+
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -381,6 +392,7 @@ private fun RankDataSection(
                 Text(
                     text = cardData.country,
                     style = MaterialTheme.typography.bodySmall,
+                    lineHeight = 16.sp,
                     color = colorScheme.onSurfaceVariant
                 )
             }

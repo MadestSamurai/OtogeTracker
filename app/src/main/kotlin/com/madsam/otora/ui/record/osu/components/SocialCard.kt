@@ -33,6 +33,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.OSU_BRIGHT_RED
 import com.madsam.otora.core.theme.OSU_DISCORD_BG
@@ -72,7 +73,8 @@ private fun UserInfoSection(data: OsuSocialUiModel) {
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 4.dp)
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         InfoText(
             prefix = "Joined ",
@@ -116,6 +118,7 @@ private fun InfoText(
             }
         },
         style = MaterialTheme.typography.bodyLarge,
+        lineHeight = 24.sp,
         color = colorScheme.onSurface,
         modifier = modifier
     )

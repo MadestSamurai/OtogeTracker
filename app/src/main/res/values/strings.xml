@@ -13,6 +13,9 @@
     <string name="global_ranking">Global Ranking</string>
     <string name="recent_90_days">Recent 90 Days</string>
     <string name="highest_rank">Highest Rank</string>
+    <string name="osu_supporter_rank_format">Supporter Rank %1$d</string>
+    <string name="osu_former_usernames_format">formerly known as:\n%1$s</string>
+    <string name="osu_cd_supporter_rank">Supporter rank</string>
 
     <!-- Chunithm Tab Titles -->
     <string name="chunithm_tab_home">Home</string>

@@ -13,6 +13,9 @@
     <string name="global_ranking">全球排名</string>
     <string name="recent_90_days">近90天数据</string>
     <string name="highest_rank">最高排名</string>
+    <string name="osu_supporter_rank_format">????? %1$d</string>
+    <string name="osu_former_usernames_format">????\n%1$s</string>
+    <string name="osu_cd_supporter_rank">?????</string>
 
     <!-- Chunithm Tab Titles -->
     <string name="chunithm_tab_home">主页</string>

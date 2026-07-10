@@ -39,7 +39,7 @@ internal fun GroupListItem(
 ) {
     var showPopup by remember { mutableStateOf(false) }
     val density = LocalDensity.current
-    val iconHeight = with(density) { 18.sp.toDp() }
+    val iconHeight = with(density) { 16.sp.toDp() }
     
     Row(
         modifier = Modifier
@@ -65,6 +65,8 @@ internal fun GroupListItem(
             Text(
                 text = osuGroupDTO.shortName,
                 fontFamily = plexBold,
+                fontSize = 14.sp,
+                lineHeight = 18.sp,
                 color = Color(osuGroupDTO.colour.ifEmpty { "#FFFFFF" }.toColorInt()),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )
@@ -75,6 +77,8 @@ internal fun GroupListItem(
             Text(
                 text = osuGroupDTO.name,
                 fontFamily = plexSemi,
+                fontSize = 14.sp,
+                lineHeight = 18.sp,
                 color = Color(osuGroupDTO.colour.ifEmpty { "#FFFFFF" }.toColorInt()),
                 modifier = Modifier.align(Alignment.CenterVertically)
             )

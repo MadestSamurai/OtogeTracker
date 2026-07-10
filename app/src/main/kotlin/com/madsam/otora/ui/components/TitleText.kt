@@ -1,5 +1,6 @@
 package com.madsam.otora.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,16 +32,20 @@ fun TitleText(
         color = colorScheme.surfaceContainer,
         modifier = modifier
     ) {
-        Column {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
             Text(
                 text = textTitle,
                 style = MaterialTheme.typography.bodySmall,
+                lineHeight = 16.sp,
                 color = color,
                 modifier = Modifier.padding(start = 8.dp, top = 8.dp)
             )
             Text(
                 text = text,
                 style = MaterialTheme.typography.titleLarge,
+                lineHeight = 28.sp,
                 color = color,
                 letterSpacing = (-0.5).sp,
                 modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
