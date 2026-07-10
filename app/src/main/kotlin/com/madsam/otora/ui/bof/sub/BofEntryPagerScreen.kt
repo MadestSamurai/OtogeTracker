@@ -41,6 +41,7 @@ import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ScreenUtil
 import com.madsam.otora.ui.bof.BofRankingColors
+import com.madsam.otora.ui.bof.BofBottomToolbarClearance
 import com.madsam.otora.ui.bof.BofRankingError
 import com.madsam.otora.ui.bof.BofViewModel
 import com.madsam.otora.ui.bof.components.BofEntryCaptureDialog
@@ -499,7 +500,8 @@ private fun <T> EntryPageContent(
                     previousPageContentDescription = previousPageDescription,
                     nextPageContentDescription = nextPageDescription,
                     previousPageTitle = previousPageTitle,
-                    nextPageTitle = nextPageTitle
+                    nextPageTitle = nextPageTitle,
+                    bottomContentPadding = BofBottomToolbarClearance
                 )
                 
                 RankingTable(

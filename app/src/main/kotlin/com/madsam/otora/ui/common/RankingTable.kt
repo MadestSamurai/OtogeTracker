@@ -145,7 +145,8 @@ data class RankingTableConfig(
     val previousPageContentDescription: String = "Previous page",
     val nextPageContentDescription: String = "Next page",
     val previousPageTitle: String? = null,  // 上一页标题，null表示没有上一页
-    val nextPageTitle: String? = null       // 下一页标题，null表示没有下一页
+    val nextPageTitle: String? = null,      // 下一页标题，null表示没有下一页
+    val bottomContentPadding: Dp = 0.dp
 )
 
 @Composable
@@ -582,12 +583,13 @@ fun RankingTable(
                 Spacer(
                     modifier = Modifier
                         .windowInsetsPadding(
-                            if (useNavigationRail) {
+                            if (useNavigationRail || config.bottomContentPadding > 0.dp) {
                                 WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
                             } else {
                                 WindowInsets(0, 0, 0, 0)
                             }
                         )
+                        .height(config.bottomContentPadding)
                 )
             }
         }

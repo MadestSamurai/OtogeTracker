@@ -61,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madsam.otora.ui.bof.BofRankingColors
+import com.madsam.otora.ui.bof.BofBottomToolbarSpacer
 import com.madsam.otora.BofScreenState
 import com.madsam.otora.R
 import com.madsam.otora.core.theme.plexBold
@@ -374,6 +375,9 @@ private fun TeamRankingTable(
                     medianWidth = medianWidth,
                     scoreBarWidth = scoreBarWidth
                 )
+            }
+            item(key = "bottom_toolbar_spacer") {
+                BofBottomToolbarSpacer()
             }
         }
     }
@@ -1145,6 +1149,9 @@ private fun TeamDiffTable(
                     index = index,
                     maxScore = maxScore
                 )
+            }
+            item(key = "bottom_toolbar_spacer") {
+                BofBottomToolbarSpacer()
             }
         }
     }

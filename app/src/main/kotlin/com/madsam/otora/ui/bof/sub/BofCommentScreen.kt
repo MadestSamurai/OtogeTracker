@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
@@ -50,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madsam.otora.R
 import com.madsam.otora.ui.bof.BofRankingColors
+import com.madsam.otora.ui.bof.BofBottomToolbarSpacer
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.utils.ScreenUtil
@@ -343,18 +343,8 @@ internal fun BofCommentScreen(
                     narrowScoreBarWidth = narrowScoreBarWidth
                 )
             }
-            // 底部安全区域，让用户滑动到底部时有额外的空间
-            item(key = "bottom_spacer") {
-                androidx.compose.foundation.layout.Spacer(
-                    modifier = Modifier
-                        .windowInsetsPadding(
-                            if (useNavigationRail) {
-                                WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
-                            } else {
-                                WindowInsets(0, 0, 0, 0)
-                            }
-                        )
-                )
+            item(key = "bottom_toolbar_spacer") {
+                BofBottomToolbarSpacer()
             }
         }
     }
@@ -820,6 +810,9 @@ internal fun BofCommentDiffScreen(
                     index = index,
                     maxScore = maxScore
                 )
+            }
+            item(key = "bottom_toolbar_spacer") {
+                BofBottomToolbarSpacer()
             }
         }
         
