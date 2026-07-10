@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
@@ -20,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -142,7 +143,6 @@ fun GameListScreen(
     ) { paddingValues ->
         LazyColumn(
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -163,15 +163,8 @@ fun GameListScreen(
                     }
                 )
         ) {
-            items(GameRegistry.games) { game ->
-                GameCard(
-                    game = game,
-                    onClick = { 
-                        if (game.isEnabled) {
-                            onNavigateToGame(game.route)
-                        }
-                    }
-                )
+            item {
+                GameEntranceGroup(onNavigateToGame = onNavigateToGame)
             }
         }
     }
@@ -181,86 +174,120 @@ fun GameListScreen(
  * 游戏卡片组件
  */
 @Composable
-private fun GameCard(
+internal fun GameEntranceGroup(
+    onNavigateToGame: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val colorScheme = MaterialTheme.colorScheme
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(colorScheme.surface)
+        ) {
+            GameRegistry.games.forEachIndexed { index, game ->
+                GameEntranceRow(
+                    game = game,
+                    onClick = { onNavigateToGame(game.route) }
+                )
+                if (index < GameRegistry.games.lastIndex) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GameEntranceRow(
     game: GameInfo,
     onClick: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
-    Card(
+
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 104.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .clickable(enabled = game.isEnabled, onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = if (game.isEnabled) colorScheme.surfaceContainerHigh else colorScheme.surfaceContainerHighest.copy(alpha = 0.5f)
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 1.dp
-        )
+            .heightIn(min = 92.dp)
+            .background(
+                if (game.isEnabled) {
+                    colorScheme.surfaceContainer
+                } else {
+                    colorScheme.surfaceContainer.copy(alpha = 0.6f)
+                }
+            )
+            .clickable(enabled = game.isEnabled, onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 104.dp)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .size(48.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(game.primaryColor.copy(alpha = 0.2f)),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(game.primaryColor.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = game.icon,
-                    contentDescription = game.name,
-                    tint = if (game.isEnabled) game.primaryColor else colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(34.dp)
-                )
-            }
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = game.name,
-                    fontFamily = plexBold,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (game.isEnabled) colorScheme.onSurface else colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = stringResource(game.descriptionResId),
-                    fontSize = 13.sp,
-                    lineHeight = 17.sp,
-                    color = if (game.isEnabled) colorScheme.onSurfaceVariant else colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = if (game.isEnabled) {
-                        stringResource(R.string.record_game_open)
-                    } else {
-                        stringResource(R.string.record_game_coming_soon)
-                    },
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = if (game.isEnabled) game.primaryColor else colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-            }
-
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = null,
-                tint = if (game.isEnabled) colorScheme.onSurfaceVariant else colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
-                modifier = Modifier.size(22.dp)
+                imageVector = game.icon,
+                contentDescription = game.name,
+                tint = if (game.isEnabled) game.primaryColor else colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(30.dp)
             )
         }
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            Text(
+                text = game.name,
+                fontFamily = plexBold,
+                fontSize = 18.sp,
+                lineHeight = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (game.isEnabled) colorScheme.onSurface else colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = stringResource(game.descriptionResId),
+                fontSize = 12.sp,
+                lineHeight = 16.sp,
+                color = if (game.isEnabled) {
+                    colorScheme.onSurfaceVariant
+                } else {
+                    colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (!game.isEnabled) {
+                Text(
+                    text = stringResource(R.string.record_game_coming_soon),
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
+        }
+
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+            contentDescription = null,
+            tint = if (game.isEnabled) {
+                colorScheme.primary
+            } else {
+                colorScheme.onSurfaceVariant.copy(alpha = 0.38f)
+            },
+            modifier = Modifier.size(20.dp)
+        )
     }
 }

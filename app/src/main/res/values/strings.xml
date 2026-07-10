@@ -5,7 +5,6 @@
     <string name="record_game_osu_desc">Track osu! profiles, scores, and rank history</string>
     <string name="record_game_maimai_desc">Track maimai DX songs, scores, and rating</string>
     <string name="record_game_chunithm_desc">Track CHUNITHM songs, scores, and rating</string>
-    <string name="record_game_open">Open</string>
     <string name="record_game_coming_soon">Coming soon</string>
     <string name="online_mark">Online Mark</string>
     <string name="offline_mark">Offline Mark</string>
@@ -178,9 +177,6 @@
     <string name="bof_home_title_entry">Entry</string>
     <string name="bof_home_title_team">Team</string>
     <string name="bof_home_title_comment">Comment</string>
-    <string name="bof_home_entry_subtitle">Entry total score</string>
-    <string name="bof_home_team_subtitle">Team total score</string>
-    <string name="bof_home_comment_subtitle">Comment total score</string>
     <string name="bof_home_entry_empty">No local BOF entry data found</string>
     <string name="bof_home_team_empty">No local BOF team data found</string>
     <string name="bof_home_comment_empty">No local BOF comment data found</string>

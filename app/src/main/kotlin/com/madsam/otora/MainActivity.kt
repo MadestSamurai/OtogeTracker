@@ -164,9 +164,9 @@ internal fun MainScreenWithNavigation(
     overlayManager: OverlayManager
 ) {
     var selectedItem by remember { mutableIntStateOf(0) }
-    val items = listOf(Screen.HomeScreen, Screen.RecordScreen, Screen.ReportScreen)
-    val selectedIcons = listOf(R.drawable.ic_home_filled_24, R.drawable.ic_assignment_filled_24, R.drawable.ic_leaderboard_filled_24)
-    val unselectedIcons = listOf(R.drawable.ic_home_24, R.drawable.ic_assignment_24, R.drawable.ic_leaderboard_24)
+    val items = listOf(Screen.HomeScreen, Screen.ReportScreen)
+    val selectedIcons = listOf(R.drawable.ic_home_filled_24, R.drawable.ic_leaderboard_filled_24)
+    val unselectedIcons = listOf(R.drawable.ic_home_24, R.drawable.ic_leaderboard_24)
 
     val useNavigationRail = ScreenUtil.shouldUseNavigationRail()
     
@@ -174,7 +174,6 @@ internal fun MainScreenWithNavigation(
     var currentRoute by remember { mutableStateOf<String?>(null) }
     val showNavigation = currentRoute in listOf(
         Screen.HomeScreen.route,
-        Screen.RecordScreen.route,
         Screen.ReportScreen.route
     )
     
@@ -183,8 +182,7 @@ internal fun MainScreenWithNavigation(
             currentRoute = backStackEntry.destination.route
             selectedItem = when (backStackEntry.destination.route) {
                 Screen.HomeScreen.route -> 0
-                Screen.RecordScreen.route -> 1
-                Screen.ReportScreen.route -> 2
+                Screen.ReportScreen.route -> 1
                 else -> selectedItem // 保持当前选中状态
             }
         }
@@ -214,6 +212,11 @@ internal fun MainScreenWithNavigation(
                             onShowBofScreen = { tabIndex ->
                                 overlayManager.bofScreenState.selectedTab.value = tabIndex
                                 overlayManager.showBofScreen = true
+                            },
+                            onNavigateToGame = { route -> navController.navigate(route) },
+                            onNavigateToSettings = {
+                                val intent = android.content.Intent(navController.context, com.madsam.otora.ui.settings.SettingsActivity::class.java)
+                                navController.context.startActivity(intent)
                             }
                         )
                     }
@@ -326,6 +329,11 @@ internal fun MainScreenWithNavigation(
                             onShowBofScreen = { tabIndex ->
                                 overlayManager.bofScreenState.selectedTab.value = tabIndex
                                 overlayManager.showBofScreen = true
+                            },
+                            onNavigateToGame = { route -> navController.navigate(route) },
+                            onNavigateToSettings = {
+                                val intent = android.content.Intent(navController.context, com.madsam.otora.ui.settings.SettingsActivity::class.java)
+                                navController.context.startActivity(intent)
                             }
                         )
                     }

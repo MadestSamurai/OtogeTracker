@@ -5,7 +5,6 @@
     <string name="record_game_osu_desc">管理 osu! 档案、成绩与排名历史</string>
     <string name="record_game_maimai_desc">管理 maimai DX 歌曲、成绩与评级</string>
     <string name="record_game_chunithm_desc">管理 CHUNITHM 歌曲、成绩与评级</string>
-    <string name="record_game_open">进入</string>
     <string name="record_game_coming_soon">即将推出</string>
     <string name="online_mark">在线标志</string>
     <string name="offline_mark">离线标志</string>
@@ -178,9 +177,6 @@
     <string name="bof_home_title_entry">作品</string>
     <string name="bof_home_title_team">团队</string>
     <string name="bof_home_title_comment">评论</string>
-    <string name="bof_home_entry_subtitle">作品总分</string>
-    <string name="bof_home_team_subtitle">团队总分</string>
-    <string name="bof_home_comment_subtitle">评论总分</string>
     <string name="bof_home_entry_empty">尚未找到本地 BOF 作品数据</string>
     <string name="bof_home_team_empty">尚未找到本地 BOF 团队数据</string>
     <string name="bof_home_comment_empty">尚未找到本地 BOF 评论数据</string>

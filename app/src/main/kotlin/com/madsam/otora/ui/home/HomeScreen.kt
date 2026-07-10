@@ -14,12 +14,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -27,10 +31,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -53,10 +59,9 @@ import com.madsam.otora.R
 import com.madsam.otora.core.database.ObjectBoxManager
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.data.bof.local.model.BofCommentTimeSeriesEntity
-import com.madsam.otora.data.bof.local.model.BofRangeEntity
-import com.madsam.otora.data.bof.local.model.BofRangeEntity_
 import com.madsam.otora.data.bof.local.model.BofTeamEntity
 import com.madsam.otora.data.bof.local.model.BofWorkEntity
+import com.madsam.otora.ui.record.GameEntranceGroup
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.text.NumberFormat
@@ -65,20 +70,17 @@ import java.util.Locale
 private data class BofHomeRankRow(
     val rank: Int,
     val title: String,
-    val subtitle: String,
     val score: String
 )
 
 private data class BofHomeSection(
     @param:StringRes val titleResId: Int,
-    @param:StringRes val subtitleResId: Int,
     @param:StringRes val emptyTextResId: Int,
     val tabIndex: Int,
     val rows: List<BofHomeRankRow> = emptyList()
 )
 
 private data class BofHomeSummary(
-    val competitionName: String = "",
     val sections: List<BofHomeSection> = defaultBofHomeSections(),
     val isLoading: Boolean = true
 )
@@ -86,16 +88,22 @@ private data class BofHomeSummary(
 @Composable
 fun HomeScreen(
     snackbarHostState: SnackbarHostState,
-    onShowBofScreen: (Int) -> Unit
+    onShowBofScreen: (Int) -> Unit,
+    onNavigateToGame: (String) -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     HomeMainContent(
-        onNavigateToBOF = onShowBofScreen
+        onNavigateToBOF = onShowBofScreen,
+        onNavigateToGame = onNavigateToGame,
+        onNavigateToSettings = onNavigateToSettings
     )
 }
 
 @Composable
 private fun HomeMainContent(
-    onNavigateToBOF: (Int) -> Unit
+    onNavigateToBOF: (Int) -> Unit,
+    onNavigateToGame: (String) -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val bofSummary by produceState(initialValue = BofHomeSummary()) {
@@ -106,31 +114,68 @@ private fun HomeMainContent(
         modifier = Modifier
             .fillMaxSize()
             .background(colorScheme.surface)
-            .padding(16.dp),
+            .windowInsetsPadding(WindowInsets.statusBars),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.Top
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = stringResource(R.string.app_name),
-                fontSize = 32.sp,
-                lineHeight = 42.sp,
-                fontWeight = FontWeight.Bold,
-                fontFamily = plexBold,
-                color = colorScheme.primary
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 24.dp, bottom = 24.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.app_name),
+                    modifier = Modifier.weight(1f),
+                    fontSize = 32.sp,
+                    lineHeight = 42.sp,
+                    fontWeight = FontWeight.Bold,
+                    fontFamily = plexBold,
+                    color = colorScheme.primary
+                )
+                IconButton(onClick = onNavigateToSettings) {
+                    Icon(
+                        imageVector = Icons.Filled.Settings,
+                        contentDescription = stringResource(R.string.settings_title),
+                        tint = colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+
+            HomeSectionTitle(text = stringResource(R.string.record_title))
+
+            GameEntranceGroup(onNavigateToGame = onNavigateToGame)
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             BofHomeBlock(
                 summary = bofSummary,
                 onNavigateToBOF = onNavigateToBOF
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
+}
+
+@Composable
+private fun HomeSectionTitle(text: String) {
+    Text(
+        text = text,
+        modifier = Modifier.padding(bottom = 12.dp),
+        fontSize = 20.sp,
+        lineHeight = 26.sp,
+        fontFamily = plexBold,
+        color = MaterialTheme.colorScheme.onSurface
+    )
 }
 
 @Composable
@@ -144,6 +189,8 @@ private fun BofHomeBlock(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.Top
     ) {
+        HomeSectionTitle(text = "BOF")
+
         BofHomeGroupCard(
             summary = summary,
             isExpanded = isExpanded,
@@ -177,13 +224,14 @@ private fun BofHomeGroupCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .heightIn(min = 92.dp)
                     .clickable(onClick = onHeaderClick)
-                    .padding(14.dp),
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 Surface(
-                    modifier = Modifier.size(52.dp),
+                    modifier = Modifier.size(48.dp),
                     shape = RoundedCornerShape(8.dp),
                     color = colorScheme.primaryContainer,
                     contentColor = colorScheme.onPrimaryContainer
@@ -192,57 +240,39 @@ private fun BofHomeGroupCard(
                         Icon(
                             imageVector = Icons.Filled.EmojiEvents,
                             contentDescription = null,
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(30.dp)
                         )
                     }
                 }
 
                 Column(
                     modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                    verticalArrangement = Arrangement.spacedBy(3.dp)
                 ) {
                     Text(
-                        text = "BOF",
-                        fontSize = 30.sp,
-                        lineHeight = 34.sp,
+                        text = "BMS OF FIGHTERS",
+                        fontSize = 18.sp,
+                        lineHeight = 22.sp,
                         fontFamily = plexBold,
+                        fontWeight = FontWeight.Bold,
                         color = colorScheme.onSurface
                     )
                     Text(
-                        text = "BMS OF FIGHTERS",
-                        fontSize = 13.sp,
-                        lineHeight = 16.sp,
-                        fontFamily = plexBold,
-                        color = colorScheme.primary
-                    )
-                    Text(
                         text = stringResource(R.string.bof_home_tagline),
-                        fontSize = 14.sp,
-                        lineHeight = 18.sp,
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp,
                         color = colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        summary.sections.forEach { section ->
-                            Text(
-                                text = stringResource(section.titleResId),
-                                fontSize = 12.sp,
-                                lineHeight = 15.sp,
-                                color = colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
                 }
 
                 Icon(
                     imageVector = Icons.Filled.KeyboardArrowDown,
                     contentDescription = null,
-                    tint = colorScheme.onSurfaceVariant,
+                    tint = colorScheme.primary,
                     modifier = Modifier
-                        .size(24.dp)
+                        .size(20.dp)
                         .graphicsLayer { rotationZ = indicatorRotation }
                 )
             }
@@ -287,34 +317,21 @@ private fun BofEntranceRow(
             .fillMaxWidth()
             .background(colorScheme.surfaceContainer)
             .clickable(onClick = onClick)
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = stringResource(section.titleResId),
-                    fontSize = 18.sp,
-                    lineHeight = 22.sp,
-                    fontFamily = plexBold,
-                    color = colorScheme.onSurface
-                )
-                Text(
-                    text = stringResource(section.subtitleResId),
-                    fontSize = 12.sp,
-                    lineHeight = 15.sp,
-                    color = colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Text(
+                text = stringResource(section.titleResId),
+                fontSize = 18.sp,
+                lineHeight = 22.sp,
+                fontFamily = plexBold,
+                color = colorScheme.onSurface
+            )
 
             BofEntrancePreview(
                 rows = section.rows,
@@ -326,7 +343,7 @@ private fun BofEntranceRow(
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
             contentDescription = null,
-            tint = colorScheme.onSurfaceVariant,
+            tint = colorScheme.primary,
             modifier = Modifier.size(20.dp)
         )
     }
@@ -373,7 +390,7 @@ private fun BofEntrancePreview(
         }
 
         else -> {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 rows.forEach { row ->
                     BofCompactRankPreviewRow(row = row)
                 }
@@ -405,7 +422,7 @@ private fun BofCompactRankPreviewRow(row: BofHomeRankRow) {
             modifier = Modifier.weight(1f),
             fontSize = 12.sp,
             lineHeight = 15.sp,
-            color = colorScheme.onSurfaceVariant,
+            color = colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -422,19 +439,16 @@ private fun BofCompactRankPreviewRow(row: BofHomeRankRow) {
 private fun defaultBofHomeSections(): List<BofHomeSection> = listOf(
     BofHomeSection(
         titleResId = R.string.bof_home_title_entry,
-        subtitleResId = R.string.bof_home_entry_subtitle,
         emptyTextResId = R.string.bof_home_entry_empty,
         tabIndex = 0
     ),
     BofHomeSection(
         titleResId = R.string.bof_home_title_team,
-        subtitleResId = R.string.bof_home_team_subtitle,
         emptyTextResId = R.string.bof_home_team_empty,
         tabIndex = 1
     ),
     BofHomeSection(
         titleResId = R.string.bof_home_title_comment,
-        subtitleResId = R.string.bof_home_comment_subtitle,
         emptyTextResId = R.string.bof_home_comment_empty,
         tabIndex = 2
     )
@@ -468,19 +482,9 @@ private suspend fun loadBofHomeSummary(): BofHomeSummary = withContext(Dispatche
             isLoading = false
         )
 
-        val range = boxStore.boxFor(BofRangeEntity::class.java)
-            .query(BofRangeEntity_.path.equal(selectedPath))
-            .build()
-            .findFirst()
-        val competitionName = range?.shortName
-            ?.takeIf { it.isNotBlank() }
-            ?: range?.fullName?.takeIf { it.isNotBlank() }
-            ?: selectedPath.uppercase()
-
         val sections = listOf(
             BofHomeSection(
                 titleResId = R.string.bof_home_title_entry,
-                subtitleResId = R.string.bof_home_entry_subtitle,
                 emptyTextResId = R.string.bof_home_entry_empty,
                 tabIndex = 0,
                 rows = works
@@ -491,14 +495,12 @@ private suspend fun loadBofHomeSummary(): BofHomeSummary = withContext(Dispatche
                         BofHomeRankRow(
                             rank = index + 1,
                             title = work.currentTitle,
-                            subtitle = work.currentArtist,
                             score = formatIntScore(work.latestTotalScore)
                         )
                     }
             ),
             BofHomeSection(
                 titleResId = R.string.bof_home_title_team,
-                subtitleResId = R.string.bof_home_team_subtitle,
                 emptyTextResId = R.string.bof_home_team_empty,
                 tabIndex = 1,
                 rows = teams
@@ -509,14 +511,12 @@ private suspend fun loadBofHomeSummary(): BofHomeSummary = withContext(Dispatche
                         BofHomeRankRow(
                             rank = index + 1,
                             title = team.teamName,
-                            subtitle = team.currentTitle1,
                             score = formatDecimalScore(team.latestTotalScore)
                         )
                     }
             ),
             BofHomeSection(
                 titleResId = R.string.bof_home_title_comment,
-                subtitleResId = R.string.bof_home_comment_subtitle,
                 emptyTextResId = R.string.bof_home_comment_empty,
                 tabIndex = 2,
                 rows = comments
@@ -527,7 +527,6 @@ private suspend fun loadBofHomeSummary(): BofHomeSummary = withContext(Dispatche
                         BofHomeRankRow(
                             rank = index + 1,
                             title = comment.currentUser.ifBlank { comment.username },
-                            subtitle = comment.currentPattern,
                             score = formatIntScore(comment.latestTotal)
                         )
                     }
@@ -535,7 +534,6 @@ private suspend fun loadBofHomeSummary(): BofHomeSummary = withContext(Dispatche
         )
 
         BofHomeSummary(
-            competitionName = competitionName,
             sections = sections,
             isLoading = false
         )
