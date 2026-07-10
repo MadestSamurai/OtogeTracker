@@ -330,7 +330,7 @@ private fun TeamDiffCaptureRow(
                                 .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
                                 .height(20.dp)
                                 .background(
-                                    color = BofRankingColors.Negative,
+                                    color = BofRankingColors.Score,
                                     shape = RoundedCornerShape(
                                         topEnd = 10.dp,
                                         bottomEnd = 10.dp
@@ -341,7 +341,7 @@ private fun TeamDiffCaptureRow(
                             text = String.format("%.2f", team.totalScore),
                             fontFamily = plexBold,
                             fontSize = 14.sp,
-                            color = BofRankingColors.Text,
+                            color = BofRankingColors.OnScore,
                             overflow = TextOverflow.Visible,
                             maxLines = 1,
                             modifier = Modifier

@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -59,7 +60,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -105,6 +105,13 @@ import kotlin.math.absoluteValue
 
 private const val TAG = "BofScreen"
 
+// Material icons use different internal path bounds, so toolbar sizes are optically balanced.
+private val BofToolbarIconSize = 22.dp
+private val BofToolbarWideIconSize = 26.dp
+private val BofToolbarCameraIconSize = 24.dp
+private val BofToolbarCalendarOpticalOffset = (-1).dp
+private val BofToolbarSecondaryIconSize = 18.dp
+
 // Material 3 Motion 规范的缓动曲线
 // https://m3.material.io/styles/motion/easing-and-duration/tokens-specs
 // Standard easing - 更温和，适合小到中等尺寸的UI元素
@@ -119,7 +126,6 @@ private fun BofModeSwitcher(
     onModeSelected: (Int) -> Unit,
     onNavigateBack: () -> Unit
 ) {
-    val colorScheme = MaterialTheme.colorScheme
     val scope = rememberCoroutineScope()
     var expanded by remember(sectionLabel) { mutableStateOf(false) }
 
@@ -136,14 +142,14 @@ private fun BofModeSwitcher(
             modifier = Modifier
                 .size(48.dp)
                 .clip(RoundedCornerShape(50))
-                .background(colorScheme.surfaceContainer)
+                .background(BofRankingColors.BackContainer)
                 .clickable { onNavigateBack() },
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = stringResource(R.string.settings_back),
-                tint = colorScheme.onSurface,
+                tint = BofRankingColors.OnBackContainer,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -237,11 +243,12 @@ private fun BofModeSwitcher(
 
             DropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                containerColor = BofRankingColors.Header
             ) {
                 modeLabels.forEachIndexed { index, label ->
                     DropdownMenuItem(
-                        text = { Text(label) },
+                        text = { Text(text = label, color = BofRankingColors.Text) },
                         onClick = {
                             expanded = false
                             scope.launch {
@@ -262,7 +269,6 @@ fun BofScreen(
     bofScreenState: BofScreenState,
     onNavigateBack: () -> Unit = {}
 ) {
-    val colorScheme = MaterialTheme.colorScheme
     Log.d(TAG, "BofScreen Compose started")
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -579,20 +585,20 @@ fun BofScreen(
                             text = notStartedTitle,
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
-                            color = colorScheme.onSurface,
+                            color = BofRankingColors.Text,
                             modifier = Modifier.padding(16.dp)
                         )
                         Text(
                             text = selectedRange?.full ?: selectEventLabel,
                             fontSize = 16.sp,
-                            color = colorScheme.onSurfaceVariant,
+                            color = BofRankingColors.TextSecondary,
                             modifier = Modifier.padding(horizontal = 16.dp)
                         )
                         selectedRange?.start?.let { startTime ->
                             Text(
                                 text = stringResource(R.string.bof_start_time_format, startTime),
                                 fontSize = 14.sp,
-                                color = colorScheme.onSurfaceVariant,
+                                color = BofRankingColors.TextSecondary,
                                 modifier = Modifier.padding(top = 8.dp)
                             )
                         }
@@ -690,7 +696,7 @@ fun BofScreen(
                         .fillMaxWidth()
                         .height(56.dp)
                         .clip(RoundedCornerShape(28.dp))
-                        .background(colorScheme.surfaceContainer)
+                        .background(BofRankingColors.ToolbarContainer)
                         .animateContentSize(animationSpec = tween(250))
                         .padding(horizontal = 4.dp),
                     horizontalArrangement = Arrangement.Start,
@@ -793,8 +799,8 @@ fun BofScreen(
                                     } else {
                                         switchReverseDiffDescription
                                     },
-                                    tint = colorScheme.onSurface,
-                                    modifier = Modifier.size(24.dp)
+                                    tint = BofRankingColors.Text,
+                                    modifier = Modifier.size(BofToolbarIconSize)
                                 )
                             }
                         }
@@ -859,8 +865,8 @@ fun BofScreen(
                                     } else {
                                         switchToScoreDescription
                                     },
-                                    tint = colorScheme.onSurface,
-                                    modifier = Modifier.size(24.dp)
+                                    tint = BofRankingColors.Text,
+                                    modifier = Modifier.size(BofToolbarWideIconSize)
                                 )
                             }
                         }
@@ -921,8 +927,8 @@ fun BofScreen(
                                 Icon(
                                     imageVector = Icons.Rounded.PhotoCamera,
                                     contentDescription = screenshotDescription,
-                                    tint = colorScheme.onSurface,
-                                    modifier = Modifier.size(24.dp)
+                                    tint = BofRankingColors.Text,
+                                    modifier = Modifier.size(BofToolbarCameraIconSize)
                                 )
                             }
                         }
@@ -977,8 +983,10 @@ fun BofScreen(
                                 Icon(
                                     imageVector = Icons.Rounded.CalendarToday,
                                     contentDescription = dateTimeDescription,
-                                    tint = colorScheme.onSurface,
-                                    modifier = Modifier.size(24.dp)
+                                    tint = BofRankingColors.Text,
+                                    modifier = Modifier
+                                        .size(BofToolbarIconSize)
+                                        .offset(y = BofToolbarCalendarOpticalOffset)
                                 )
                             }
                         }
@@ -1014,7 +1022,7 @@ fun BofScreen(
                         textStyle = TextStyle(
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Normal,
-                            color = colorScheme.onSurface,
+                            color = BofRankingColors.OnPrimaryContainer,
                             lineHeight = 20.sp
                         ),
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
@@ -1025,12 +1033,12 @@ fun BofScreen(
                             }
                         ),
                         singleLine = true,
-                        cursorBrush = SolidColor(colorScheme.onSurface),
+                        cursorBrush = SolidColor(BofRankingColors.OnPrimaryContainer),
                         decorationBox = { innerTextField ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(colorScheme.primaryContainer, RoundedCornerShape(24.dp))
+                                    .background(BofRankingColors.PrimaryContainer, RoundedCornerShape(24.dp))
                                     .padding(horizontal = 16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -1038,8 +1046,8 @@ fun BofScreen(
                                 Icon(
                                     imageVector = Icons.Rounded.Search,
                                     contentDescription = searchDescription,
-                                    tint = colorScheme.onSurface,
-                                    modifier = Modifier.size(20.dp)
+                                    tint = BofRankingColors.OnPrimaryContainer,
+                                    modifier = Modifier.size(BofToolbarIconSize)
                                 )
                                 
                                 Spacer(modifier = Modifier.width(12.dp))
@@ -1052,7 +1060,7 @@ fun BofScreen(
                                     if (searchText.value.isEmpty()) {
                                         Text(
                                             text = searchPlaceholder,
-                                            color = colorScheme.onSurfaceVariant,
+                                            color = BofRankingColors.OnPrimaryContainer.copy(alpha = 0.72f),
                                             fontSize = 14.sp,
                                             lineHeight = 20.sp
                                         )
@@ -1073,8 +1081,8 @@ fun BofScreen(
                                         Icon(
                                             imageVector = Icons.Rounded.Close,
                                             contentDescription = clearSearchDescription,
-                                            tint = colorScheme.onSurface,
-                                            modifier = Modifier.size(20.dp)
+                                            tint = BofRankingColors.OnPrimaryContainer,
+                                            modifier = Modifier.size(BofToolbarSecondaryIconSize)
                                         )
                                     }
                                 }
@@ -1136,8 +1144,8 @@ fun BofScreen(
                                     Icon(
                                         imageVector = Icons.Rounded.KeyboardArrowUp,
                                         contentDescription = previousMatchDescription,
-                                        tint = colorScheme.onSurface,
-                                        modifier = Modifier.size(24.dp)
+                                        tint = BofRankingColors.Text,
+                                        modifier = Modifier.size(BofToolbarSecondaryIconSize)
                                     )
                                 }
                                 IconButton(
@@ -1147,8 +1155,8 @@ fun BofScreen(
                                     Icon(
                                         imageVector = Icons.Rounded.KeyboardArrowDown,
                                         contentDescription = nextMatchDescription,
-                                        tint = colorScheme.onSurface,
-                                        modifier = Modifier.size(24.dp)
+                                        tint = BofRankingColors.Text,
+                                        modifier = Modifier.size(BofToolbarSecondaryIconSize)
                                     )
                                 }
                             }

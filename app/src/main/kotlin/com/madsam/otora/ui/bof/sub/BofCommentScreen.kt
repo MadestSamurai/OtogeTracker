@@ -617,7 +617,7 @@ private fun ScoreBarDisplay(
                             dataList = comment.voteChartData,
                             height = barHeight,
                             width = barWidth * voteRatio,
-                            color = BofRankingColors.Positive
+                            color = BofRankingColors.Primary
                         )
                     }
                 }
@@ -649,7 +649,7 @@ private fun ScoreBarDisplay(
                             dataList = comment.longChartData,
                             height = barHeight,
                             width = barWidth * longRatio,
-                            color = BofRankingColors.Negative
+                            color = BofRankingColors.Tertiary
                         )
                     }
                 }
@@ -665,7 +665,7 @@ private fun ScoreBarDisplay(
                     modifier = Modifier
                         .width(barWidth * voteRatio)
                         .height(barHeight)
-                        .background(color = BofRankingColors.Positive)
+                        .background(color = BofRankingColors.Primary)
                 )
                 Box(
                     modifier = Modifier
@@ -677,7 +677,7 @@ private fun ScoreBarDisplay(
                     modifier = Modifier
                         .width(barWidth * longRatio)
                         .height(barHeight)
-                        .background(color = BofRankingColors.Negative)
+                        .background(color = BofRankingColors.Tertiary)
                 )
             }
         }
@@ -926,7 +926,7 @@ private fun CommentDiffRow(
                             .fillMaxWidth(scoreRatio.coerceAtMost(1f))
                             .height(20.dp)
                             .background(
-                                color = BofRankingColors.Negative,
+                                color = BofRankingColors.Score,
                                 shape = RoundedCornerShape(
                                     topEnd = 10.dp,
                                     bottomEnd = 10.dp
@@ -937,7 +937,7 @@ private fun CommentDiffRow(
                         text = comment.total.toString(),
                         fontFamily = plexBold,
                         fontSize = 14.sp,
-                        color = BofRankingColors.Text,
+                        color = BofRankingColors.OnScore,
                         overflow = TextOverflow.Visible,
                         maxLines = 1,
                         modifier = Modifier

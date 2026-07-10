@@ -507,7 +507,7 @@ private fun BofCommentCaptureRow(
                                     dataList = comment.voteChartData,
                                     height = 34.dp,
                                     width = barWidth.dp * voteRatio,
-                                    color = BofRankingColors.Positive
+                                    color = BofRankingColors.Primary
                                 )
                             }
                         }
@@ -539,7 +539,7 @@ private fun BofCommentCaptureRow(
                                     dataList = comment.longChartData,
                                     height = 34.dp,
                                     width = barWidth.dp * longRatio,
-                                    color = BofRankingColors.Negative
+                                    color = BofRankingColors.Tertiary
                                 )
                             }
                         }
@@ -555,7 +555,7 @@ private fun BofCommentCaptureRow(
                             modifier = Modifier
                                 .width(barWidth.dp * voteRatio)
                                 .height(34.dp)
-                                .background(color = BofRankingColors.Positive)
+                                .background(color = BofRankingColors.Primary)
                         )
                         Box(
                             modifier = Modifier
@@ -567,7 +567,7 @@ private fun BofCommentCaptureRow(
                             modifier = Modifier
                                 .width(barWidth.dp * longRatio)
                                 .height(34.dp)
-                                .background(color = BofRankingColors.Negative)
+                                .background(color = BofRankingColors.Tertiary)
                         )
                     }
                 }

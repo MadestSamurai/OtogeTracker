@@ -133,7 +133,7 @@ internal fun BofTeamTotalScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = BofRankingColors.Negative)
+                    CircularProgressIndicator(color = BofRankingColors.Primary)
                 }
             }
             
@@ -609,7 +609,7 @@ internal fun TeamRankingRow(
                                             .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
                                             .height(20.dp)
                                             .background(
-                                                color = BofRankingColors.Negative,
+                                                color = BofRankingColors.Score,
                                                 shape = RoundedCornerShape(
                                                     topEnd = 10.dp,
                                                     bottomEnd = 10.dp
@@ -620,7 +620,7 @@ internal fun TeamRankingRow(
                                         text = "%.2f".format(team.totalScore),
                                         fontFamily = plexBold,
                                         fontSize = 14.sp,
-                                        color = BofRankingColors.Text,
+                                        color = BofRankingColors.OnScore,
                                         overflow = TextOverflow.Visible,
                                         maxLines = 1,
                                         modifier = Modifier
@@ -645,7 +645,7 @@ internal fun TeamRankingRow(
                                                 .fillMaxWidth(compareRatio.toFloat().coerceAtMost(1f))
                                                 .height(13.dp)
                                                 .background(
-                                                    color = BofRankingColors.Blue,
+                                                    color = BofRankingColors.Compare,
                                                     shape = RoundedCornerShape(
                                                         topEnd = 7.dp,
                                                         bottomEnd = 7.dp
@@ -656,7 +656,7 @@ internal fun TeamRankingRow(
                                             text = "%.1f".format(compareScore),
                                             fontFamily = plexRegular,
                                             fontSize = 11.sp,
-                                            color = BofRankingColors.Text.copy(alpha = 0.8f),
+                                            color = BofRankingColors.OnCompare,
                                             overflow = TextOverflow.Visible,
                                             maxLines = 1,
                                             modifier = Modifier
@@ -719,7 +719,7 @@ internal fun TeamRankingRow(
                                     .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
                                     .height(20.dp)
                                     .background(
-                                        color = BofRankingColors.Negative,
+                                        color = BofRankingColors.Score,
                                         shape = RoundedCornerShape(
                                             topEnd = 10.dp,
                                             bottomEnd = 10.dp
@@ -730,7 +730,7 @@ internal fun TeamRankingRow(
                                 text = "%.2f".format(team.totalScore),
                                 fontFamily = plexBold,
                                 fontSize = 14.sp,
-                                color = BofRankingColors.Text,
+                                color = BofRankingColors.OnScore,
                                 overflow = TextOverflow.Visible,
                                 maxLines = 1,
                                 modifier = Modifier
@@ -755,7 +755,7 @@ internal fun TeamRankingRow(
                                         .fillMaxWidth(compareRatio.toFloat().coerceAtMost(1f))
                                         .height(13.dp)
                                         .background(
-                                            color = BofRankingColors.Blue,
+                                            color = BofRankingColors.Compare,
                                             shape = RoundedCornerShape(
                                                 topEnd = 7.dp,
                                                 bottomEnd = 7.dp
@@ -766,7 +766,7 @@ internal fun TeamRankingRow(
                                     text = "%.1f".format(compareScore),
                                     fontFamily = plexRegular,
                                     fontSize = 11.sp,
-                                    color = BofRankingColors.Text.copy(alpha = 0.8f),
+                                    color = BofRankingColors.OnCompare,
                                     overflow = TextOverflow.Visible,
                                     maxLines = 1,
                                     modifier = Modifier
@@ -950,7 +950,7 @@ internal fun BofTeamDiffScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = BofRankingColors.Negative)
+                    CircularProgressIndicator(color = BofRankingColors.Primary)
                 }
             }
             
@@ -1205,7 +1205,7 @@ private fun TeamDiffRow(
                                 .fillMaxWidth(scoreRatio.toFloat().coerceAtMost(1f))
                                 .height(20.dp)
                                 .background(
-                                    color = BofRankingColors.Negative,
+                                    color = BofRankingColors.Score,
                                     shape = RoundedCornerShape(
                                         topEnd = 10.dp,
                                         bottomEnd = 10.dp
@@ -1216,7 +1216,7 @@ private fun TeamDiffRow(
                             text = String.format("%.2f", team.totalScore),
                             fontFamily = plexBold,
                             fontSize = 14.sp,
-                            color = BofRankingColors.Text,
+                            color = BofRankingColors.OnScore,
                             overflow = TextOverflow.Visible,
                             maxLines = 1,
                             modifier = Modifier

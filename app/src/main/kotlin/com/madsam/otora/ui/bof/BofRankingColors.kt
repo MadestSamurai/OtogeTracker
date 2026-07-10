@@ -1,40 +1,166 @@
 package com.madsam.otora.ui.bof
 
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import com.madsam.otora.ui.common.RankingTableColors
 
 internal object BofRankingColors {
-    val Background = Color(0xFF080A0D)
-    val RowAlt = Color(0xFF151A20)
-    val Header = Color(0xFF1C242C)
-    val Text = Color(0xFFE8EAED)
-    val TextSecondary = Color(0xFFA6AFBA)
-    val Positive = Color(0xFF62C986)
-    val Negative = Color(0xFFE75A66)
-    val Blue = Color(0xFF6F9FE8)
-    val Accent = Color(0xFFFFCF66)
-    val Neutral = Color(0xFF858E99)
-    val Table = RankingTableColors(
-        background = Background,
-        rowAlt = RowAlt,
-        header = Header,
-        text = Text,
-        textSecondary = TextSecondary,
-        positive = Positive,
-        negative = Negative,
-        neutral = Neutral,
-        scoreBar = Negative,
-        compareBar = Blue,
-        searchHighlight = Negative.copy(alpha = 0.72f),
-        scoreHeat = ::scoreHeat
-    )
+    val Background: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.surfaceContainerLowest
 
-    fun scoreHeat(score: Number): Color {
-        val intensity = (score.toDouble() / 1000.0).toFloat().coerceIn(0f, 1f)
-        return if (intensity <= 0f) {
-            Color.Transparent
-        } else {
-            Negative.copy(alpha = 0.2f + intensity * 0.55f)
+    val RowAlt: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.surfaceContainerLow
+
+    val Header: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.surfaceContainerHigh
+
+    val ToolbarContainer: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.surfaceContainerHigh
+
+    val BackContainer: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.secondaryContainer
+
+    val OnBackContainer: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.onSecondaryContainer
+
+    val PrimaryContainer: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.primaryContainer
+
+    val OnPrimaryContainer: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.onPrimaryContainer
+
+    val Text: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.onSurface
+
+    val TextSecondary: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.onSurfaceVariant
+
+    val Primary: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.primary
+
+    val Positive: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.tertiary
+
+    val Negative: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.error
+
+    val Blue: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.secondary
+
+    val Tertiary: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.tertiary
+
+    val Accent: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.tertiary
+
+    val Neutral: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.outline
+
+    val Score: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.primary
+
+    val OnScore: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.onPrimary
+
+    val OnBlue: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.onSecondary
+
+    val Compare: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.tertiary
+
+    val OnCompare: Color
+        @Composable
+        @ReadOnlyComposable
+        get() = MaterialTheme.colorScheme.onTertiary
+
+    val Table: RankingTableColors
+        @Composable
+        @ReadOnlyComposable
+        get() {
+            val scheme = MaterialTheme.colorScheme
+            return RankingTableColors(
+                background = scheme.surfaceContainerLowest,
+                rowAlt = scheme.surfaceContainerLow,
+                header = scheme.surfaceContainerHigh,
+                text = scheme.onSurface,
+                textSecondary = scheme.onSurfaceVariant,
+                positive = scheme.tertiary,
+                negative = scheme.error,
+                neutral = scheme.outline,
+                scoreBar = scheme.primary,
+                scoreBarText = scheme.onPrimary,
+                compareBar = scheme.tertiary,
+                compareBarText = scheme.onTertiary,
+                searchHighlight = scheme.tertiaryContainer,
+                searchHighlightText = scheme.onTertiaryContainer,
+                scoreHeat = { score ->
+                    scoreHeat(
+                        score = score,
+                        lowColor = scheme.surfaceContainerLowest,
+                        highColor = scheme.primaryContainer
+                    )
+                }
+            )
         }
+
+    @Composable
+    @ReadOnlyComposable
+    fun scoreHeat(score: Number): Color {
+        val scheme = MaterialTheme.colorScheme
+        return scoreHeat(
+            score = score,
+            lowColor = scheme.surfaceContainerLowest,
+            highColor = scheme.primaryContainer
+        )
+    }
+
+    private fun scoreHeat(score: Number, lowColor: Color, highColor: Color): Color {
+        val intensity = (score.toDouble() / 1000.0).toFloat().coerceIn(0f, 1f)
+        return lerp(lowColor, highColor, intensity)
     }
 }

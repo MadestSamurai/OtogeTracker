@@ -105,8 +105,11 @@ data class RankingTableColors(
     val negative: Color = Color.Red,
     val neutral: Color = Color.Gray,
     val scoreBar: Color = RANKING_RED,
+    val scoreBarText: Color = text,
     val compareBar: Color = RANKING_BLUE,
+    val compareBarText: Color = text,
     val searchHighlight: Color = Color(0xFFCC0000),
+    val searchHighlightText: Color = text,
     val scoreHeat: (Number) -> Color = { score ->
         val value = score.toDouble()
         if (value > 0) {
@@ -795,7 +798,7 @@ private fun RankingTableRow(
                             text = formatScore(item.score, config.scoreWidthType, config.allowNegativeScore),
                             fontFamily = plexBold,
                             fontSize = 14.sp,
-                            color = config.colors.text,
+                            color = config.colors.scoreBarText,
                             overflow = TextOverflow.Visible,
                             maxLines = 1,
                             modifier = Modifier
@@ -831,7 +834,7 @@ private fun RankingTableRow(
                                 text = formatScore(compareScore, config.scoreWidthType, config.allowNegativeScore),
                                 fontFamily = plexRegular,
                                 fontSize = 11.sp,
-                                color = config.colors.text.copy(alpha = 0.8f),
+                                color = config.colors.compareBarText,
                                 overflow = TextOverflow.Visible,
                                 maxLines = 1,
                                 modifier = Modifier
@@ -875,7 +878,7 @@ private fun RankingTableRow(
                                 text = formatScore(item.score, config.scoreWidthType, config.allowNegativeScore),
                                 fontFamily = plexBold,
                                 fontSize = 14.sp,
-                                color = config.colors.text,
+                                color = config.colors.scoreBarText,
                                 overflow = TextOverflow.Visible,
                                 maxLines = 1,
                                 modifier = Modifier
@@ -910,7 +913,7 @@ private fun RankingTableRow(
                                     text = formatScore(compareScore, config.scoreWidthType, config.allowNegativeScore),
                                     fontFamily = plexRegular,
                                     fontSize = 11.sp,
-                                    color = config.colors.text.copy(alpha = 0.8f),
+                                    color = config.colors.compareBarText,
                                     overflow = TextOverflow.Visible,
                                     maxLines = 1,
                                     modifier = Modifier
