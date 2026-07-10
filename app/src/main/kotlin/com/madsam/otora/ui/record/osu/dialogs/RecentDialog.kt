@@ -32,9 +32,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.madsam.otora.R
 import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.data.osu.ui.model.OsuRecentUiModel
 import com.madsam.otora.ui.record.osu.components.RecentItem
@@ -102,14 +104,14 @@ internal fun RecentDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Recent Activities",
+                        text = stringResource(R.string.osu_dialog_recent_activities),
                         style = MaterialTheme.typography.headlineSmall,
                         color = colorScheme.onSurface
                     )
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Close",
+                            contentDescription = stringResource(R.string.osu_action_close),
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(20.dp)
                         )

@@ -29,18 +29,19 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.madsam.otora.R
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.OSU_BRIGHT_RED
 import com.madsam.otora.core.theme.OSU_DISCORD_BG
 import com.madsam.otora.core.theme.OSU_DISCORD_TEXT
 import com.madsam.otora.core.theme.OSU_X_BG
 import com.madsam.otora.core.theme.White1000
-import com.madsam.otora.core.utils.DateTimeUtils.dateCodeToRecent
 import com.madsam.otora.core.utils.DateTimeUtils.dateCodeToYMDHMSU
 import com.madsam.otora.data.osu.ui.model.OsuSocialUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -77,26 +78,26 @@ private fun UserInfoSection(data: OsuSocialUiModel) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         InfoText(
-            prefix = "Joined ",
+            prefix = stringResource(R.string.osu_joined_prefix),
             text = dateCodeToYMDHMSU(data.joinDate)
         )
         
         InfoText(
-            prefix = "Last seen ",
-            text = dateCodeToRecent(data.lastVisit)
+            prefix = stringResource(R.string.osu_last_seen_prefix),
+            text = localizedRelativeTime(data.lastVisit)
         )
         
         if (data.location.isNotEmpty()) {
             InfoText(
-                prefix = "From ",
+                prefix = stringResource(R.string.osu_from_prefix),
                 text = data.location
             )
         }
         
         if (data.playStyle.isNotEmpty()) {
             InfoText(
-                prefix = "Plays with ",
-                text = data.playStyle,
+                prefix = stringResource(R.string.osu_plays_with_prefix),
+                text = localizedPlayStyle(data.playStyle),
                 modifier = Modifier.padding(bottom = 4.dp)
             )
         }
@@ -186,7 +187,7 @@ private fun SocialLinksSection(data: OsuSocialUiModel) {
                             // 显示错误提示
                             Toast.makeText(
                                 context,
-                                "无法打开链接: $url",
+                                context.getString(R.string.osu_link_open_failed, url),
                                 Toast.LENGTH_SHORT
                             ).show()
                         }

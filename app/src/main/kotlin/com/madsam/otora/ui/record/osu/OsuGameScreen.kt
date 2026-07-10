@@ -29,10 +29,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.ColorUtils
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.madsam.otora.R
 import com.madsam.otora.core.datastore.ThemeDataStore
 import com.madsam.otora.core.theme.OtogeTrackerTheme
 import com.madsam.otora.core.theme.plexBold
@@ -117,7 +119,7 @@ private fun OsuGameScreenContent(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.osu_navigation_back),
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -131,7 +133,7 @@ private fun OsuGameScreenContent(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Settings,
-                            contentDescription = "Settings",
+                            contentDescription = stringResource(R.string.osu_navigation_settings),
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(24.dp)
                         )

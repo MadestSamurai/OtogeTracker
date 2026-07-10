@@ -112,6 +112,7 @@ internal class OsuViewModel() : ViewModel() {
             it.copy(
                 username = osuCard.username,
                 country = osuCard.country.name,
+                countryCode = osuCard.country.code,
                 flagUrl = OsuFlagAlphabet.getFlagAlphabet(osuCard.country.code),
                 avatarUrl = osuCard.avatarUrl,
                 coverUrl = osuCard.cover.url,
@@ -431,6 +432,7 @@ internal class OsuViewModel() : ViewModel() {
                     it.copy(
                         username = cachedUser.username,
                         country = cachedUser.country,
+                        countryCode = cachedUser.countryCode,
                         flagUrl = OsuFlagAlphabet.getFlagAlphabet(cachedUser.countryCode),
                         avatarUrl = cachedUser.avatarUrl,
                         coverUrl = cachedUser.coverUrl,

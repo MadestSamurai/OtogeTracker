@@ -74,6 +74,7 @@ import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.compose.common.data.ExtraStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.text.DecimalFormat
+import kotlin.math.roundToInt
 
 /**
  * Material 3 重构版本 - 全球排名趋势卡片
@@ -87,6 +88,7 @@ internal fun RankGraph(
     cardWidthDp: Dp
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    val resources = LocalContext.current.resources
     val rankGraphData by osuRankGraphData.collectAsState()
     val highestData by osuRankHighestData.collectAsState()
     val cardData by osuCardData.collectAsState()
@@ -132,7 +134,7 @@ internal fun RankGraph(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Loading data...",
+                            text = stringResource(R.string.osu_loading_data),
                             color = colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodyMedium
                         )
@@ -238,7 +240,6 @@ internal fun RankGraph(
                                     { _: Color -> indicatorComponent }
                                 },
                                 valueFormatter = object : ValueFormatter {
-                                    private val decimalFormatX = DecimalFormat("0")
                                     private val decimalFormatY = DecimalFormat("'#'#,###")
 
                                     override fun format(
@@ -247,6 +248,7 @@ internal fun RankGraph(
                                     ): CharSequence {
                                         return targets.joinToString { target ->
                                             val xValue = 90 - target.x
+                                            val days = xValue.roundToInt().coerceAtLeast(0)
                                             val yValue =
                                                 if (target is LineCartesianLayerMarkerTarget) {
                                                     target.points.sumOf { it.entry.y }
@@ -254,8 +256,12 @@ internal fun RankGraph(
                                                     throw IllegalArgumentException("Unexpected `CartesianMarker.Target` implementation.")
                                                 }
                                             "${decimalFormatY.format(yValue)} - ${
-                                                decimalFormatX.format(xValue)
-                                            } days ago"
+                                                resources.getQuantityString(
+                                                    R.plurals.osu_time_days_ago,
+                                                    days,
+                                                    days
+                                                )
+                                            }"
                                         }
                                     }
                                 }
@@ -298,7 +304,10 @@ private fun RankDataSection(
                         shape = RoundedCornerShape(4.dp)
                     ) {
                         Text(
-                            text = "MAX #${highestData.rank}",
+                            text = stringResource(
+                                R.string.osu_highest_rank_format,
+                                highestData.rank
+                            ),
                             style = MaterialTheme.typography.labelSmall,
                             color = colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.Bold,
@@ -370,9 +379,9 @@ private fun RankDataSection(
                 )
             )
 
-            // Label (Flag + Name)
             Spacer(modifier = Modifier.height(4.dp))
 
+            // Label (Flag + Name)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -390,7 +399,7 @@ private fun RankDataSection(
                     contentScale = ContentScale.Fit
                 )
                 Text(
-                    text = cardData.country,
+                    text = localizedCountryName(cardData.countryCode, cardData.country),
                     style = MaterialTheme.typography.bodySmall,
                     lineHeight = 16.sp,
                     color = colorScheme.onSurfaceVariant

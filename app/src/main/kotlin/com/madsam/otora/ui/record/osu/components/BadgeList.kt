@@ -21,10 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
 import coil.compose.rememberAsyncImagePainter
+import com.madsam.otora.R
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.data.osu.ui.model.OsuBadgeUiModel
@@ -61,7 +63,7 @@ internal fun BadgeList(
                 if (badgeListData.size > imageCount) {
                     Icon(
                         painter = rememberVectorPainter(image = Filled.ChevronLeft),
-                        contentDescription = "Previous",
+                        contentDescription = stringResource(R.string.osu_action_previous),
                         tint = White1000,
                         modifier = Modifier
                             .padding(start = 13.dp, end = 5.dp)
@@ -101,7 +103,7 @@ internal fun BadgeList(
                 if (badgeListData.size > imageCount) {
                     Icon(
                         painter = rememberVectorPainter(image = Filled.ChevronRight),
-                        contentDescription = "Next",
+                        contentDescription = stringResource(R.string.osu_action_next),
                         tint = White1000,
                         modifier = Modifier
                             .padding(start = 5.dp, end = 13.dp)

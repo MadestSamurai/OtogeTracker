@@ -26,10 +26,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.madsam.otora.R
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.data.osu.ui.model.OsuPlayUiModel
 import com.madsam.otora.ui.components.ImageWithText
@@ -97,18 +99,18 @@ internal fun PlayData(
         ) {
             var shown by remember { mutableStateOf(false) }
             val rowData = listOf(
-                "Ranked Score" to "rankedScore",
-                "Total Score" to "totalScore",
-                "Play Count" to "playCount",
-                "Total Hits" to "totalHits",
-                "Hit Accuracy" to "hitAccuracy",
-                "Max Combo" to "maximumCombo",
-                "Medals" to "medalCount",
-                "Replays Watched" to "replaysWatchedByOthers",
-                "Followers" to "followerCount",
-                "Mapping Followers" to "mappingFollowerCount",
-                "Posts" to "postCount",
-                "Comments" to "commentsCount"
+                stringResource(R.string.osu_stat_ranked_score) to "rankedScore",
+                stringResource(R.string.osu_stat_total_score) to "totalScore",
+                stringResource(R.string.osu_stat_play_count) to "playCount",
+                stringResource(R.string.osu_stat_total_hits) to "totalHits",
+                stringResource(R.string.osu_stat_hit_accuracy) to "hitAccuracy",
+                stringResource(R.string.osu_stat_max_combo) to "maximumCombo",
+                stringResource(R.string.osu_stat_medals) to "medalCount",
+                stringResource(R.string.osu_stat_replays_watched) to "replaysWatchedByOthers",
+                stringResource(R.string.osu_stat_followers) to "followerCount",
+                stringResource(R.string.osu_stat_mapping_followers) to "mappingFollowerCount",
+                stringResource(R.string.osu_stat_posts) to "postCount",
+                stringResource(R.string.osu_stat_comments) to "commentsCount"
             )
 
             Row(
@@ -119,10 +121,16 @@ internal fun PlayData(
                 val playTimeStr = playData.playTime.split(",").let {
                     if (it.size < 4) List(4) { "0" } else it
                 }
-                val dayHourLabels = listOf("D", "H")
-                val monthSecondLabels = listOf("M", "S")
+                val dayHourLabels = listOf(
+                    stringResource(R.string.osu_time_unit_day),
+                    stringResource(R.string.osu_time_unit_hour)
+                )
+                val monthSecondLabels = listOf(
+                    stringResource(R.string.osu_time_unit_minute),
+                    stringResource(R.string.osu_time_unit_second)
+                )
                 TitleText(
-                    textTitle = "Play Time",
+                    textTitle = stringResource(R.string.osu_stat_play_time),
                     text = buildAnnotatedString {
                         val styles = listOf(
                             MaterialTheme.typography.titleMedium to playTimeStr[0],
@@ -180,7 +188,9 @@ internal fun PlayData(
                     ) {
                         Icon(
                             imageVector = Filled.ChevronDown,
-                            contentDescription = if (shown) "Collapse" else "Expand",
+                            contentDescription = stringResource(
+                                if (shown) R.string.osu_action_collapse else R.string.osu_action_expand
+                            ),
                             modifier = Modifier.rotate(rotationState),
                             tint = colorScheme.onSurfaceVariant
                         )

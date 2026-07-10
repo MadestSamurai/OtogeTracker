@@ -133,7 +133,7 @@ private fun UserProfileCard(
                     model = cardData.coverUrl,
                     contentScale = ContentScale.Crop
                 ),
-                contentDescription = "Cover Image",
+                contentDescription = stringResource(R.string.osu_cd_cover_image),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -181,7 +181,7 @@ private fun UserProfileCard(
                     model = cardData.tournamentBannerImage2x,
                     contentScale = ContentScale.Crop
                 ),
-                contentDescription = "Tournament Banner",
+                contentDescription = stringResource(R.string.osu_cd_tournament_banner),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -203,7 +203,7 @@ private fun UserProfileCard(
                     imageLoader = gifLoader,
                     contentScale = ContentScale.Crop
                 ),
-                contentDescription = "Avatar",
+                contentDescription = stringResource(R.string.osu_cd_avatar),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(64.dp)
@@ -325,7 +325,7 @@ private fun UserProfileCard(
                     
                     // 国家名
                     Text(
-                        text = cardData.country,
+                        text = localizedCountryName(cardData.countryCode, cardData.country),
                         color = colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodySmall
                     )

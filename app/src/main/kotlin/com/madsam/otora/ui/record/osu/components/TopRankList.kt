@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.buildAnnotatedString
@@ -39,12 +40,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.madsam.otora.R
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.OSU_ARROW_YELLOW
 import com.madsam.otora.core.theme.OSU_HEART_RED
 import com.madsam.otora.core.theme.plexBold
 import com.madsam.otora.core.theme.plexSemi
-import com.madsam.otora.core.utils.DateTimeUtils.dateCodeToRecent
 import com.madsam.otora.core.utils.NumberFormatUtils.formatThousand
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
@@ -80,7 +81,7 @@ internal fun TopRankList(
                 modifier = Modifier.height(32.dp)
             ) {
                 Text(
-                    text = "More",
+                    text = stringResource(R.string.osu_action_more),
                     color = colorScheme.primary,
                     style = MaterialTheme.typography.labelLarge
                 )
@@ -116,7 +117,7 @@ internal fun TopRankCard(
                     model = item.bg2x,
                     contentScale = ContentScale.Crop
                 ),
-                contentDescription = "Background",
+                contentDescription = stringResource(R.string.osu_cd_background),
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -135,7 +136,7 @@ internal fun TopRankCard(
                             model = item.cover2x,
                             contentScale = ContentScale.Crop
                         ),
-                        contentDescription = "Cover",
+                        contentDescription = stringResource(R.string.osu_cd_cover),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .width(100.dp)
@@ -186,7 +187,7 @@ internal fun TopRankCard(
                         )
 
                         Text(
-                            text = dateCodeToRecent(item.date),
+                            text = localizedRelativeTime(item.date),
                             fontSize = 10.sp,
                             color = Color.Gray
                         )
@@ -217,7 +218,7 @@ private fun DifficultyBadge(
         ) {
             Icon(
                 painter = rememberVectorPainter(image = Filled.Star),
-                contentDescription = "Star",
+                contentDescription = stringResource(R.string.osu_cd_star),
                 tint = OsuDifficultyColor.mapValueToTextColor(difficultyRating.toFloat()),
                 modifier = Modifier.padding(end = 2.dp)
             )
@@ -304,7 +305,7 @@ private fun ScoreSection(
                         else -> Filled.OsuF
                     }
                 ),
-                contentDescription = "Rank",
+                contentDescription = stringResource(R.string.osu_cd_rank),
                 modifier = Modifier.padding(horizontal = 2.dp)
             )
         }
@@ -395,17 +396,18 @@ private fun PPBottomRow(
         // PP信息
         when (item.status) {
             "qualified", "approved" -> {
+                val statusLabel = localizedBeatmapStatus(item.status)
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         painter = rememberVectorPainter(image = Filled.Tick),
-                        contentDescription = "Qualified",
+                        contentDescription = statusLabel,
                         tint = OSU_ARROW_YELLOW,
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = "Qualified",
+                        text = statusLabel,
                         fontSize = 12.sp,
                         color = OSU_ARROW_YELLOW,
                         modifier = Modifier.padding(start = 4.dp)
@@ -414,17 +416,18 @@ private fun PPBottomRow(
             }
 
             "loved" -> {
+                val statusLabel = localizedBeatmapStatus(item.status)
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         painter = rememberVectorPainter(image = Filled.Heart1),
-                        contentDescription = "Loved",
+                        contentDescription = statusLabel,
                         tint = OSU_HEART_RED,
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = "Loved",
+                        text = statusLabel,
                         fontSize = 12.sp,
                         color = OSU_HEART_RED,
                         modifier = Modifier.padding(start = 4.dp)

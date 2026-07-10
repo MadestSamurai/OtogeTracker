@@ -28,6 +28,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
@@ -38,11 +40,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.madsam.otora.R
 import com.madsam.otora.core.icon.Filled
 import com.madsam.otora.core.theme.OSU_ARROW_YELLOW
 import com.madsam.otora.core.theme.OSU_HEART_RED
 import com.madsam.otora.core.theme.OSU_ROTATE_GREEN
-import com.madsam.otora.core.utils.DateTimeUtils.dateCodeToRecent
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.data.osu.ui.model.OsuRecentUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -96,7 +98,7 @@ private fun RecentHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Recent",
+            text = stringResource(R.string.osu_section_recent),
             style = MaterialTheme.typography.titleMedium,
             color = colorScheme.onSurface,
             modifier = Modifier.padding(start = 4.dp)
@@ -109,7 +111,7 @@ private fun RecentHeader(
                 modifier = Modifier.height(32.dp)
             ) {
                 Text(
-                    text = "More",
+                    text = stringResource(R.string.osu_action_more),
                     color = colorScheme.primary,
                     style = MaterialTheme.typography.labelLarge,
                 )
@@ -125,94 +127,80 @@ internal fun RecentItem(
 ) {
     val colorScheme = MaterialTheme.colorScheme
     val highlightColor = colorScheme.secondary
-    val textFormat =
-        buildAnnotatedString {
-            appendInlineContent("icon", "[${activity.type}]")
-            when (activity.type) {
-                "rank" -> {
-                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
-                        append("achieved #${activity.rank} on ")
-                    }
-                    appendInlineContent("mode", "[${activity.mode}]")
-                    withStyle(style = SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold)) {
-                        append(activity.beatmapTitle)
-                    }
-                }
-
-                "rankLost" -> {
-                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
-                        append("lost first place on ")
-                    }
-                    appendInlineContent("mode", "[${activity.mode}]")
-                    withStyle(style = SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold)) {
-                        append(activity.beatmapTitle)
-                    }
-                }
-
-                "beatmapsetUpload" -> {
-                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
-                        append("submitted a new beatmap ")
-                    }
-                    withStyle(style = SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold)) {
-                        append(activity.beatmapSetTitle)
-                    }
-                }
-
-                "beatmapsetUpdate" -> {
-                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
-                        append("updated a beatmap ")
-                    }
-                    withStyle(style = SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold)) {
-                        append(activity.beatmapSetTitle)
-                    }
-                }
-
-                "userSupportGift" -> {
-                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
-                        append("received the gift of osu!supporter")
-                    }
-                }
-
-                "userSupportAgain" -> {
-                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
-                        append("support osu! again")
-                    }
-                }
-
-                "beatmapsetRevive" -> {
-                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
-                        append("revived a beatmap ")
-                    }
-                    withStyle(style = SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold)) {
-                        append(activity.beatmapSetTitle)
+    val activityTemplate = when (activity.type) {
+        "rank" -> stringResource(
+            R.string.osu_activity_rank,
+            activity.rank,
+            ActivityModeMarker,
+            ActivityTitleMarker
+        )
+        "rankLost" -> stringResource(
+            R.string.osu_activity_rank_lost,
+            ActivityModeMarker,
+            ActivityTitleMarker
+        )
+        "beatmapsetUpload" -> stringResource(
+            R.string.osu_activity_beatmap_upload,
+            ActivityTitleMarker
+        )
+        "beatmapsetUpdate" -> stringResource(
+            R.string.osu_activity_beatmap_update,
+            ActivityTitleMarker
+        )
+        "userSupportGift" -> stringResource(R.string.osu_activity_support_gift)
+        "userSupportAgain" -> stringResource(R.string.osu_activity_support_again)
+        "beatmapsetRevive" -> stringResource(
+            R.string.osu_activity_beatmap_revive,
+            ActivityTitleMarker
+        )
+        "beatmapsetApprove" -> stringResource(
+            R.string.osu_activity_beatmap_approve,
+            ActivityTitleMarker,
+            localizedBeatmapStatus(activity.approval)
+        )
+        "achievement" -> stringResource(
+            R.string.osu_activity_achievement,
+            ActivityTitleMarker
+        )
+        else -> stringResource(
+            R.string.osu_activity_fallback,
+            activity.rank,
+            ActivityTitleMarker
+        )
+    }
+    val highlightedValue = when (activity.type) {
+        "rank", "rankLost" -> activity.beatmapTitle
+        "beatmapsetUpload", "beatmapsetUpdate", "beatmapsetRevive", "beatmapsetApprove" ->
+            activity.beatmapSetTitle
+        "achievement" -> activity.achievement
+        else -> activity.beatmapTitle
+    }
+    val textFormat = buildAnnotatedString {
+        appendInlineContent("icon", "[${activity.type}]")
+        appendLocalizedActivityTemplate(
+            template = activityTemplate,
+            normalStyle = SpanStyle(color = colorScheme.onSurface),
+            replacements = buildMap {
+                if (ActivityModeMarker in activityTemplate) {
+                    put(ActivityModeMarker) {
+                        appendInlineContent("mode", "[${activity.mode}]")
                     }
                 }
-
-                "beatmapsetApprove" -> {
-                    withStyle(style = SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold)) {
-                        append(activity.beatmapSetTitle)
-                    }
-                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
-                        append(" has been ${activity.approval}")
-                    }
-                }
-
-                "achievement" -> {
-                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
-                        append("achieved ")
-                    }
-                    withStyle(style = SpanStyle(color = highlightColor, fontWeight = FontWeight.SemiBold)) {
-                        append(activity.achievement)
-                    }
-                }
-
-                else -> {
-                    withStyle(style = SpanStyle(color = colorScheme.onSurface)) {
-                        append("achieved #${activity.rank} on ${activity.beatmapTitle}")
+                if (ActivityTitleMarker in activityTemplate) {
+                    put(ActivityTitleMarker) {
+                        withStyle(
+                            SpanStyle(
+                                color = highlightColor,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        ) {
+                            append(highlightedValue)
+                        }
                     }
                 }
             }
-        }
+        )
+    }
     Column(
         modifier = Modifier
             .width(cardWidthDp)
@@ -238,7 +226,7 @@ internal fun RecentItem(
                             else -> Filled.OsumodeStd
                         }
                     ),
-                    contentDescription = "Osu Mode",
+                    contentDescription = stringResource(R.string.osu_cd_game_mode),
                     tint = Color.White,
                     modifier = Modifier.padding(end = 2.dp)
                 )
@@ -276,7 +264,7 @@ internal fun RecentItem(
                                     else -> Filled.OsuF
                                 }
                             ),
-                            contentDescription = "Rank",
+                            contentDescription = stringResource(R.string.osu_cd_rank),
                             modifier = Modifier.padding(end = 4.dp)
                         )
                     }
@@ -284,7 +272,7 @@ internal fun RecentItem(
                     "rankLost" -> {
                         Icon(
                             painter = rememberVectorPainter(image = Filled.DoubleDown),
-                            contentDescription = "Osu Mode",
+                            contentDescription = stringResource(R.string.osu_cd_beatmap_activity),
                             tint = Color.White,
                             modifier = Modifier.padding(end = 4.dp)
                         )
@@ -299,7 +287,7 @@ internal fun RecentItem(
                                     else -> Filled.ArrowUp
                                 }
                             ),
-                            contentDescription = "Beatmap Upload",
+                            contentDescription = stringResource(R.string.osu_cd_beatmap_activity),
                             tint = when (activity.type) {
                                 "beatmapsetUpload" -> OSU_ARROW_YELLOW
                                 "beatmapsetUpdate" -> OSU_ROTATE_GREEN
@@ -312,7 +300,7 @@ internal fun RecentItem(
                     "userSupportGift" -> {
                         Icon(
                             painter = rememberVectorPainter(image = Filled.Gift),
-                            contentDescription = "Osu Mode",
+                            contentDescription = stringResource(R.string.osu_cd_supporter_activity),
                             tint = OSU_HEART_RED,
                             modifier = Modifier.padding(end = 4.dp)
                         )
@@ -321,7 +309,7 @@ internal fun RecentItem(
                     "userSupportAgain" -> {
                         Icon(
                             painter = rememberVectorPainter(image = Filled.Heart1),
-                            contentDescription = "Osu Mode",
+                            contentDescription = stringResource(R.string.osu_cd_supporter_activity),
                             tint = OSU_HEART_RED,
                             modifier = Modifier.padding(end = 4.dp)
                         )
@@ -330,7 +318,7 @@ internal fun RecentItem(
                     "beatmapsetApprove" -> {
                         Icon(
                             painter = rememberVectorPainter(image = Filled.Tick),
-                            contentDescription = "Osu Mode",
+                            contentDescription = stringResource(R.string.osu_cd_beatmap_activity),
                             tint = when (activity.approval) {
                                 "qualified" -> OSU_ARROW_YELLOW
                                 "approved" -> OSU_ROTATE_GREEN
@@ -344,7 +332,7 @@ internal fun RecentItem(
                     "beatmapsetRevive" -> {
                         Icon(
                             painter = rememberVectorPainter(image = Filled.TrashArrowUp),
-                            contentDescription = "Osu Mode",
+                            contentDescription = stringResource(R.string.osu_cd_beatmap_activity),
                             tint = Color.White,
                             modifier = Modifier.padding(end = 4.dp)
                         )
@@ -357,7 +345,7 @@ internal fun RecentItem(
                                 contentScale = ContentScale.Fit
                             ),
                             contentScale = ContentScale.Fit,
-                            contentDescription = "Achievement Icon",
+                            contentDescription = stringResource(R.string.osu_cd_achievement),
                             modifier = Modifier.padding(end = 4.dp)
                         )
                     }
@@ -375,7 +363,7 @@ internal fun RecentItem(
                 .padding(start = 8.dp, top = 4.dp, end = 8.dp)
         )
         Text(
-            text = dateCodeToRecent(activity.createdAt),
+            text = localizedRelativeTime(activity.createdAt),
             fontSize = 12.sp,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Light,
@@ -384,5 +372,39 @@ internal fun RecentItem(
                 .padding(end = 8.dp, bottom = 4.dp)
                 .align(End)
         )
+    }
+}
+
+private const val ActivityModeMarker = "{mode}"
+private const val ActivityTitleMarker = "{title}"
+
+private fun AnnotatedString.Builder.appendLocalizedActivityTemplate(
+    template: String,
+    normalStyle: SpanStyle,
+    replacements: Map<String, AnnotatedString.Builder.() -> Unit>
+) {
+    var startIndex = 0
+    while (startIndex < template.length) {
+        val nextMarker = replacements.keys
+            .mapNotNull { marker ->
+                template.indexOf(marker, startIndex)
+                    .takeIf { it >= 0 }
+                    ?.let { marker to it }
+            }
+            .minByOrNull { (_, index) -> index }
+
+        if (nextMarker == null) {
+            withStyle(normalStyle) { append(template.substring(startIndex)) }
+            break
+        }
+
+        val (marker, markerIndex) = nextMarker
+        if (markerIndex > startIndex) {
+            withStyle(normalStyle) {
+                append(template.substring(startIndex, markerIndex))
+            }
+        }
+        replacements.getValue(marker).invoke(this)
+        startIndex = markerIndex + marker.length
     }
 }

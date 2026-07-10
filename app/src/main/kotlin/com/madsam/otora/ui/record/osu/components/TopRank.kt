@@ -18,9 +18,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.madsam.otora.R
 import com.madsam.otora.core.theme.plexSemi
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
@@ -62,7 +64,7 @@ internal fun TopRank(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "No play records",
+                    text = stringResource(R.string.osu_no_play_records),
                     color = colorScheme.onSurfaceVariant,
                     fontSize = 16.sp,
                     fontFamily = plexSemi
@@ -71,17 +73,17 @@ internal fun TopRank(
             return@Column
         }
         if (pinnedData.items.isNotEmpty()) {
-            TopRankList(pinnedData, "Pinned", cardWidthDp) {
+            TopRankList(pinnedData, stringResource(R.string.osu_section_pinned), cardWidthDp) {
                 pinnedOnMoreClick()
             }
         }
         if (topData.items.isNotEmpty()) {
-            TopRankList(topData, "Top", cardWidthDp) {
+            TopRankList(topData, stringResource(R.string.osu_section_best), cardWidthDp) {
                 topOnMoreClick()
             }
         }
         if (firstData.items.isNotEmpty()) {
-            TopRankList(firstData, "First", cardWidthDp) {
+            TopRankList(firstData, stringResource(R.string.osu_section_first), cardWidthDp) {
                 firstOnMoreClick()
             }
         }

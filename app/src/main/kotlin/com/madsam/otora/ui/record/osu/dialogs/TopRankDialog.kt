@@ -32,10 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.madsam.otora.R
 import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.data.osu.ui.model.OsuTopRankUiModel
 import com.madsam.otora.ui.record.osu.components.TopRankCard
@@ -111,7 +113,7 @@ internal fun TopRankDialog(
                     IconButton(onClick = onDismiss) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Close",
+                            contentDescription = stringResource(R.string.osu_action_close),
                             tint = colorScheme.onSurface,
                             modifier = Modifier.size(20.dp)
                         )
@@ -119,7 +121,7 @@ internal fun TopRankDialog(
                 }
                 if (data.isEmpty()) {
                     Text(
-                        text = "No records found",
+                        text = stringResource(R.string.osu_no_records_found),
                         color = colorScheme.onSurface,
                         fontSize = 16.sp,
                         modifier = Modifier.padding(16.dp)

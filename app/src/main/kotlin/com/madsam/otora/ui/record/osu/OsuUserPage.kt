@@ -31,10 +31,12 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.madsam.otora.R
 import com.madsam.otora.ui.record.osu.components.BadgeList
 import com.madsam.otora.ui.record.osu.components.Card
 import com.madsam.otora.ui.record.osu.components.Level
@@ -194,7 +196,7 @@ internal fun OsuUserPage(
     when (showTopRankDialog) {
         "pinned" -> {
             TopRankDialog(
-                title = "Pinned",
+                title = stringResource(R.string.osu_section_pinned),
                 topRankList = viewModel.pinnedUI,
                 onDismiss = { showTopRankDialog = "" }
             )
@@ -202,7 +204,7 @@ internal fun OsuUserPage(
 
         "best" -> {
             TopRankDialog(
-                title = "Best",
+                title = stringResource(R.string.osu_section_best),
                 topRankList = viewModel.bestUI,
                 onDismiss = { showTopRankDialog = "" }
             )
@@ -210,7 +212,7 @@ internal fun OsuUserPage(
 
         "first" -> {
             TopRankDialog(
-                title = "First",
+                title = stringResource(R.string.osu_section_first),
                 topRankList = viewModel.firstUI,
                 onDismiss = { showTopRankDialog = "" }
             )

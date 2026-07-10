@@ -13,9 +13,115 @@
     <string name="global_ranking">Global Ranking</string>
     <string name="recent_90_days">Recent 90 Days</string>
     <string name="highest_rank">Highest Rank</string>
+
+    <!-- osu! user page -->
+    <string name="osu_navigation_back">Back</string>
+    <string name="osu_navigation_settings">Settings</string>
+    <string name="osu_action_close">Close</string>
+    <string name="osu_action_more">More</string>
+    <string name="osu_action_previous">Previous</string>
+    <string name="osu_action_next">Next</string>
+    <string name="osu_action_expand">Expand</string>
+    <string name="osu_action_collapse">Collapse</string>
+    <string name="osu_loading_data">Loading data…</string>
+    <string name="osu_highest_rank_format">MAX #%1$s</string>
     <string name="osu_supporter_rank_format">Supporter Rank %1$d</string>
     <string name="osu_former_usernames_format">formerly known as:\n%1$s</string>
+    <string name="osu_section_recent">Recent</string>
+    <string name="osu_dialog_recent_activities">Recent Activities</string>
+    <string name="osu_section_pinned">Pinned</string>
+    <string name="osu_section_best">Best</string>
+    <string name="osu_section_first">First Places</string>
+    <string name="osu_no_play_records">No play records</string>
+    <string name="osu_no_records_found">No records found</string>
+    <string name="osu_status_qualified">Qualified</string>
+    <string name="osu_status_approved">Approved</string>
+    <string name="osu_status_loved">Loved</string>
+
+    <string name="osu_joined_prefix">Joined\u0020</string>
+    <string name="osu_last_seen_prefix">Last seen\u0020</string>
+    <string name="osu_from_prefix">From\u0020</string>
+    <string name="osu_plays_with_prefix">Plays with\u0020</string>
+    <string name="osu_play_style_mouse">mouse</string>
+    <string name="osu_play_style_keyboard">keyboard</string>
+    <string name="osu_play_style_tablet">tablet</string>
+    <string name="osu_play_style_touch">touch</string>
+    <string name="osu_list_separator">,\u0020</string>
+
+    <string name="osu_stat_play_time">Play Time</string>
+    <string name="osu_stat_ranked_score">Ranked Score</string>
+    <string name="osu_stat_total_score">Total Score</string>
+    <string name="osu_stat_play_count">Play Count</string>
+    <string name="osu_stat_total_hits">Total Hits</string>
+    <string name="osu_stat_hit_accuracy">Hit Accuracy</string>
+    <string name="osu_stat_max_combo">Max Combo</string>
+    <string name="osu_stat_medals">Medals</string>
+    <string name="osu_stat_replays_watched">Replays Watched</string>
+    <string name="osu_stat_followers">Followers</string>
+    <string name="osu_stat_mapping_followers">Mapping Followers</string>
+    <string name="osu_stat_posts">Posts</string>
+    <string name="osu_stat_comments">Comments</string>
+    <string name="osu_time_unit_day">D</string>
+    <string name="osu_time_unit_hour">H</string>
+    <string name="osu_time_unit_minute">M</string>
+    <string name="osu_time_unit_second">S</string>
+
+    <string name="osu_time_just_now">just now</string>
+    <string name="osu_time_long_ago">a long time ago</string>
+    <string name="osu_time_unknown">unknown</string>
+    <plurals name="osu_time_seconds_ago">
+        <item quantity="one">%1$d second ago</item>
+        <item quantity="other">%1$d seconds ago</item>
+    </plurals>
+    <plurals name="osu_time_minutes_ago">
+        <item quantity="one">%1$d minute ago</item>
+        <item quantity="other">%1$d minutes ago</item>
+    </plurals>
+    <plurals name="osu_time_hours_ago">
+        <item quantity="one">%1$d hour ago</item>
+        <item quantity="other">%1$d hours ago</item>
+    </plurals>
+    <plurals name="osu_time_days_ago">
+        <item quantity="one">%1$d day ago</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
+    <plurals name="osu_time_weeks_ago">
+        <item quantity="one">%1$d week ago</item>
+        <item quantity="other">%1$d weeks ago</item>
+    </plurals>
+    <plurals name="osu_time_months_ago">
+        <item quantity="one">%1$d month ago</item>
+        <item quantity="other">%1$d months ago</item>
+    </plurals>
+    <plurals name="osu_time_years_ago">
+        <item quantity="one">%1$d year ago</item>
+        <item quantity="other">%1$d years ago</item>
+    </plurals>
+
+    <string name="osu_activity_rank">achieved #%1$s on %2$s%3$s</string>
+    <string name="osu_activity_rank_lost">lost first place on %1$s%2$s</string>
+    <string name="osu_activity_beatmap_upload">submitted a new beatmap %1$s</string>
+    <string name="osu_activity_beatmap_update">updated a beatmap %1$s</string>
+    <string name="osu_activity_support_gift">received the gift of osu!supporter</string>
+    <string name="osu_activity_support_again">supported osu! again</string>
+    <string name="osu_activity_beatmap_revive">revived a beatmap %1$s</string>
+    <string name="osu_activity_beatmap_approve">%1$s has been %2$s</string>
+    <string name="osu_activity_achievement">achieved %1$s</string>
+    <string name="osu_activity_fallback">achieved #%1$s on %2$s</string>
+    <string name="osu_link_open_failed">Unable to open link: %1$s</string>
+
+    <string name="osu_cd_cover_image">Cover image</string>
+    <string name="osu_cd_tournament_banner">Tournament banner</string>
+    <string name="osu_cd_avatar">Avatar</string>
     <string name="osu_cd_supporter_rank">Supporter rank</string>
+    <string name="osu_cd_background">Background</string>
+    <string name="osu_cd_cover">Cover</string>
+    <string name="osu_cd_star">Difficulty star</string>
+    <string name="osu_cd_rank">Rank</string>
+    <string name="osu_cd_game_mode">osu! mode</string>
+    <string name="osu_cd_beatmap_activity">Beatmap activity</string>
+    <string name="osu_cd_supporter_activity">Supporter activity</string>
+    <string name="osu_cd_achievement">Achievement</string>
 
     <!-- Chunithm Tab Titles -->
     <string name="chunithm_tab_home">Home</string>

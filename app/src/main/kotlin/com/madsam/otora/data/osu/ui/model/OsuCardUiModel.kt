@@ -6,6 +6,7 @@ package com.madsam.otora.data.osu.ui.model
 internal data class OsuCardUiModel(
     val username: String = "",
     val country: String = "",
+    val countryCode: String = "",
     val flagUrl: String = "",
     val avatarUrl: String = "",
     val coverUrl: String = "",

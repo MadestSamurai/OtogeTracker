@@ -13,9 +13,94 @@
     <string name="global_ranking">全球排名</string>
     <string name="recent_90_days">近90天数据</string>
     <string name="highest_rank">最高排名</string>
-    <string name="osu_supporter_rank_format">????? %1$d</string>
-    <string name="osu_former_usernames_format">????\n%1$s</string>
-    <string name="osu_cd_supporter_rank">?????</string>
+
+    <!-- osu! 用户页 -->
+    <string name="osu_navigation_back">返回</string>
+    <string name="osu_navigation_settings">设置</string>
+    <string name="osu_action_close">关闭</string>
+    <string name="osu_action_more">更多</string>
+    <string name="osu_action_previous">上一个</string>
+    <string name="osu_action_next">下一个</string>
+    <string name="osu_action_expand">展开</string>
+    <string name="osu_action_collapse">收起</string>
+    <string name="osu_loading_data">正在加载数据…</string>
+    <string name="osu_highest_rank_format">最高 #%1$s</string>
+    <string name="osu_supporter_rank_format">支持者等级 %1$d</string>
+    <string name="osu_former_usernames_format">曾用名：\n%1$s</string>
+    <string name="osu_section_recent">近期动态</string>
+    <string name="osu_dialog_recent_activities">近期动态</string>
+    <string name="osu_section_pinned">置顶成绩</string>
+    <string name="osu_section_best">最佳成绩</string>
+    <string name="osu_section_first">第一名成绩</string>
+    <string name="osu_no_play_records">暂无游玩成绩</string>
+    <string name="osu_no_records_found">未找到成绩</string>
+    <string name="osu_status_qualified">过审</string>
+    <string name="osu_status_approved">已批准</string>
+    <string name="osu_status_loved">社区喜爱</string>
+
+    <string name="osu_joined_prefix">加入时间\u0020</string>
+    <string name="osu_last_seen_prefix">最后活跃\u0020</string>
+    <string name="osu_from_prefix">来自\u0020</string>
+    <string name="osu_plays_with_prefix">游玩设备\u0020</string>
+    <string name="osu_play_style_mouse">鼠标</string>
+    <string name="osu_play_style_keyboard">键盘</string>
+    <string name="osu_play_style_tablet">数位板</string>
+    <string name="osu_play_style_touch">触屏</string>
+    <string name="osu_list_separator">、</string>
+
+    <string name="osu_stat_play_time">游玩时长</string>
+    <string name="osu_stat_ranked_score">排名谱面得分</string>
+    <string name="osu_stat_total_score">总得分</string>
+    <string name="osu_stat_play_count">游玩次数</string>
+    <string name="osu_stat_total_hits">总命中数</string>
+    <string name="osu_stat_hit_accuracy">命中率</string>
+    <string name="osu_stat_max_combo">最大连击</string>
+    <string name="osu_stat_medals">奖牌</string>
+    <string name="osu_stat_replays_watched">回放观看次数</string>
+    <string name="osu_stat_followers">关注者</string>
+    <string name="osu_stat_mapping_followers">谱面关注者</string>
+    <string name="osu_stat_posts">帖子</string>
+    <string name="osu_stat_comments">评论</string>
+    <string name="osu_time_unit_day">天</string>
+    <string name="osu_time_unit_hour">时</string>
+    <string name="osu_time_unit_minute">分</string>
+    <string name="osu_time_unit_second">秒</string>
+
+    <string name="osu_time_just_now">刚刚</string>
+    <string name="osu_time_long_ago">很久以前</string>
+    <string name="osu_time_unknown">未知</string>
+    <plurals name="osu_time_seconds_ago"><item quantity="other">%1$d 秒前</item></plurals>
+    <plurals name="osu_time_minutes_ago"><item quantity="other">%1$d 分钟前</item></plurals>
+    <plurals name="osu_time_hours_ago"><item quantity="other">%1$d 小时前</item></plurals>
+    <plurals name="osu_time_days_ago"><item quantity="other">%1$d 天前</item></plurals>
+    <plurals name="osu_time_weeks_ago"><item quantity="other">%1$d 周前</item></plurals>
+    <plurals name="osu_time_months_ago"><item quantity="other">%1$d 个月前</item></plurals>
+    <plurals name="osu_time_years_ago"><item quantity="other">%1$d 年前</item></plurals>
+
+    <string name="osu_activity_rank">在%2$s%3$s上达成 #%1$s</string>
+    <string name="osu_activity_rank_lost">失去了%1$s%2$s的第一名</string>
+    <string name="osu_activity_beatmap_upload">提交了新谱面 %1$s</string>
+    <string name="osu_activity_beatmap_update">更新了谱面 %1$s</string>
+    <string name="osu_activity_support_gift">收到了 osu!supporter 赠礼</string>
+    <string name="osu_activity_support_again">再次支持了 osu!</string>
+    <string name="osu_activity_beatmap_revive">复活了谱面 %1$s</string>
+    <string name="osu_activity_beatmap_approve">%1$s已被设为%2$s</string>
+    <string name="osu_activity_achievement">解锁了成就 %1$s</string>
+    <string name="osu_activity_fallback">在%2$s上达成 #%1$s</string>
+    <string name="osu_link_open_failed">无法打开链接：%1$s</string>
+
+    <string name="osu_cd_cover_image">封面图片</string>
+    <string name="osu_cd_tournament_banner">赛事横幅</string>
+    <string name="osu_cd_avatar">头像</string>
+    <string name="osu_cd_supporter_rank">支持者等级</string>
+    <string name="osu_cd_background">背景</string>
+    <string name="osu_cd_cover">封面</string>
+    <string name="osu_cd_star">难度星级</string>
+    <string name="osu_cd_rank">评级</string>
+    <string name="osu_cd_game_mode">osu! 模式</string>
+    <string name="osu_cd_beatmap_activity">谱面动态</string>
+    <string name="osu_cd_supporter_activity">支持者动态</string>
+    <string name="osu_cd_achievement">成就</string>
 
     <!-- Chunithm Tab Titles -->
     <string name="chunithm_tab_home">主页</string>
