@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -52,7 +53,9 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -746,24 +749,44 @@ private fun RankingTableRow(
             horizontalAlignment = Alignment.End
         ) {
             Text(
-                text = buildHighlightedText(item.title, searchText, config.colors.searchHighlight, config.colors.text),
+                text = buildHighlightedText(
+                    item.title,
+                    searchText,
+                    config.colors.searchHighlight,
+                    config.colors.searchHighlightText
+                ),
                 fontFamily = plexBold,
                 fontSize = 14.sp,
                 color = config.colors.text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                style = TextStyle(
+                    platformStyle = PlatformTextStyle(includeFontPadding = true)
+                ),
                 textAlign = TextAlign.End,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(unbounded = true)
             )
             Text(
-                text = buildHighlightedText(item.artist, searchText, config.colors.searchHighlight, config.colors.text),
+                text = buildHighlightedText(
+                    item.artist,
+                    searchText,
+                    config.colors.searchHighlight,
+                    config.colors.searchHighlightText
+                ),
                 fontFamily = plexRegular,
                 fontSize = 12.sp,
                 color = config.colors.textSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                style = TextStyle(
+                    platformStyle = PlatformTextStyle(includeFontPadding = true)
+                ),
                 textAlign = TextAlign.End,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(unbounded = true)
             )
         }
 

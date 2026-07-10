@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,6 +52,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -579,10 +582,14 @@ internal fun TeamRankingRow(
                 color = BofRankingColors.Text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                style = TextStyle(
+                    platformStyle = PlatformTextStyle(includeFontPadding = true)
+                ),
                 textAlign = TextAlign.End,
                 modifier = Modifier
                     .weight(0.6f)
                     .padding(horizontal = 8.dp)
+                    .wrapContentHeight(unbounded = true)
             )
 
             // 根据屏幕宽度决定显示内容
@@ -882,7 +889,12 @@ private fun TeamWorkRow(
                 color = BofRankingColors.TextSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.weight(1f)
+                style = TextStyle(
+                    platformStyle = PlatformTextStyle(includeFontPadding = true)
+                ),
+                modifier = Modifier
+                    .weight(1f)
+                    .wrapContentHeight(unbounded = true)
             )
         }
 
@@ -1181,10 +1193,14 @@ private fun TeamDiffRow(
                 color = BofRankingColors.Text,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
+                style = TextStyle(
+                    platformStyle = PlatformTextStyle(includeFontPadding = true)
+                ),
                 textAlign = TextAlign.End,
                 modifier = Modifier
                     .weight(0.6f)
                     .padding(end = 4.dp)
+                    .wrapContentHeight(unbounded = true)
             )
 
             // 差值分数条（完全对齐 Entry Diff 的样式，包括嵌套 Box）
@@ -1253,7 +1269,12 @@ private fun TeamDiffRow(
                         color = BofRankingColors.TextSecondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f)
+                        style = TextStyle(
+                            platformStyle = PlatformTextStyle(includeFontPadding = true)
+                        ),
+                        modifier = Modifier
+                            .weight(1f)
+                            .wrapContentHeight(unbounded = true)
                     )
                     
                     // 显示作品差值
