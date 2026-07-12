@@ -34,6 +34,9 @@
     <string name="osu_section_first">第一名成绩</string>
     <string name="osu_no_play_records">暂无游玩成绩</string>
     <string name="osu_no_records_found">未找到成绩</string>
+    <string name="osu_badge_details">徽章详情</string>
+    <string name="osu_badge_awarded">授予时间</string>
+    <string name="osu_badge_view_official">在 osu! 查看</string>
     <string name="osu_status_qualified">过审</string>
     <string name="osu_status_approved">已批准</string>
     <string name="osu_status_loved">社区喜爱</string>
@@ -101,6 +104,7 @@
     <string name="osu_cd_beatmap_activity">谱面动态</string>
     <string name="osu_cd_supporter_activity">支持者动态</string>
     <string name="osu_cd_achievement">成就</string>
+    <string name="osu_cd_badge">徽章</string>
 
     <!-- Chunithm Tab Titles -->
     <string name="chunithm_tab_home">主页</string>

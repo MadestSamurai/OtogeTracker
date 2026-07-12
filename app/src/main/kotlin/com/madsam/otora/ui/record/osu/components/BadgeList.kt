@@ -15,7 +15,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,8 +31,8 @@ import androidx.compose.material3.MaterialTheme
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.R
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.White1000
 import com.madsam.otora.data.osu.ui.model.OsuBadgeUiModel
+import com.madsam.otora.ui.record.osu.dialogs.BadgeDetailSheet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -41,6 +44,7 @@ internal fun BadgeList(
     val colorScheme = MaterialTheme.colorScheme
     val badgeListData by osuBadgeList.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    var selectedBadge by remember { mutableStateOf<OsuBadgeUiModel?>(null) }
     if (badgeListData.isNotEmpty()) {
         Surface(
             Modifier
@@ -64,7 +68,7 @@ internal fun BadgeList(
                     Icon(
                         painter = rememberVectorPainter(image = Filled.ChevronLeft),
                         contentDescription = stringResource(R.string.osu_action_previous),
-                        tint = White1000,
+                        tint = colorScheme.onSurfaceVariant,
                         modifier = Modifier
                             .padding(start = 13.dp, end = 5.dp)
                             .width(10.dp)
@@ -94,9 +98,10 @@ internal fun BadgeList(
                             contentDescription = badge.description,
                             modifier = Modifier
                                 .padding(horizontal = imagePadding / 2)
-                                .clip(RoundedCornerShape(6.dp))
                                 .height(32.dp)
                                 .width(68.dp)
+                                .clip(RoundedCornerShape(6.dp))
+                                .clickable { selectedBadge = badge }
                         )
                     }
                 }
@@ -104,7 +109,7 @@ internal fun BadgeList(
                     Icon(
                         painter = rememberVectorPainter(image = Filled.ChevronRight),
                         contentDescription = stringResource(R.string.osu_action_next),
-                        tint = White1000,
+                        tint = colorScheme.onSurfaceVariant,
                         modifier = Modifier
                             .padding(start = 5.dp, end = 13.dp)
                             .width(10.dp)
@@ -122,5 +127,12 @@ internal fun BadgeList(
                 }
             }
         }
+    }
+
+    selectedBadge?.let { badge ->
+        BadgeDetailSheet(
+            badge = badge,
+            onDismiss = { selectedBadge = null }
+        )
     }
 }

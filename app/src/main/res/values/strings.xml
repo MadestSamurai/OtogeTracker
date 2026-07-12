@@ -34,6 +34,9 @@
     <string name="osu_section_first">First Places</string>
     <string name="osu_no_play_records">No play records</string>
     <string name="osu_no_records_found">No records found</string>
+    <string name="osu_badge_details">Badge details</string>
+    <string name="osu_badge_awarded">Awarded</string>
+    <string name="osu_badge_view_official">View on osu!</string>
     <string name="osu_status_qualified">Qualified</string>
     <string name="osu_status_approved">Approved</string>
     <string name="osu_status_loved">Loved</string>
@@ -122,6 +125,7 @@
     <string name="osu_cd_beatmap_activity">Beatmap activity</string>
     <string name="osu_cd_supporter_activity">Supporter activity</string>
     <string name="osu_cd_achievement">Achievement</string>
+    <string name="osu_cd_badge">Badge</string>
 
     <!-- Chunithm Tab Titles -->
     <string name="chunithm_tab_home">Home</string>

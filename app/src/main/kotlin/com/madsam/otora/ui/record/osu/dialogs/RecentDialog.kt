@@ -1,45 +1,21 @@
 package com.madsam.otora.ui.record.osu.dialogs
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.madsam.otora.R
-import com.madsam.otora.core.theme.BlackAlpha80
 import com.madsam.otora.data.osu.ui.model.OsuRecentUiModel
 import com.madsam.otora.ui.record.osu.components.RecentItem
+import com.madsam.otora.ui.record.osu.components.RecentItemSpacing
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -47,93 +23,28 @@ internal fun RecentDialog(
     recentActivityList: MutableStateFlow<List<OsuRecentUiModel>>,
     onDismiss: () -> Unit
 ) {
-    val colorScheme = MaterialTheme.colorScheme
     val activities by recentActivityList.collectAsState()
-    val density = LocalDensity.current
-    val windowInfo = LocalWindowInfo.current
-    val screenWidthDp = with(density) {
-        windowInfo.containerSize.width.toDp()
-    }
-    val screenHeightDp = with(density) {
-        windowInfo.containerSize.height.toDp()
-    }
-    val cardWidthDp = screenWidthDp * 0.9f - 32.dp
 
-    val scrimColor = BlackAlpha80
-    val properties = DialogProperties(
-        dismissOnClickOutside = true,
-        usePlatformDefaultWidth = false
-    )
-
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = properties
-    ) {
-        Box(
+    OsuExpandableBottomSheet(
+        title = stringResource(R.string.osu_dialog_recent_activities),
+        onDismiss = onDismiss
+    ) { contentWidth ->
+        LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
-                .background(scrimColor)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    if (properties.dismissOnClickOutside) {
-                        onDismiss()
-                    }
-                },
-            contentAlignment = Alignment.Center
+                .weight(1f)
+                .padding(horizontal = 16.dp)
+                .clip(RoundedCornerShape(12.dp))
         ) {
-            Column(
-                modifier = Modifier
-                    .width(screenWidthDp * 0.9f)
-                    .heightIn(
-                        min = 100.dp,
-                        max = screenHeightDp * 0.8f
-                    )
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(colorScheme.surfaceContainerHigh)
-                    .padding(16.dp)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) { /* Prevent click propagation */ }
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.osu_dialog_recent_activities),
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = colorScheme.onSurface
-                    )
-                    IconButton(onClick = onDismiss) {
-                        Icon(
-                            imageVector = Icons.Filled.Close,
-                            contentDescription = stringResource(R.string.osu_action_close),
-                            tint = colorScheme.onSurface,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-
-                LazyColumn(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(6.dp))
-                ) {
-                    items(
-                        count = activities.size,
-                        key = { index -> index }
-                    ) { index ->
-                        RecentItem(
-                            activities[index],
-                            cardWidthDp
-                        )
-                        if (index != activities.size - 1) {
-                            Spacer(modifier = Modifier.height(10.dp))
-                        }
-                    }
+            items(
+                count = activities.size,
+                key = { index -> index }
+            ) { index ->
+                RecentItem(
+                    activity = activities[index],
+                    cardWidthDp = contentWidth
+                )
+                if (index != activities.lastIndex) {
+                    Spacer(modifier = Modifier.height(RecentItemSpacing))
                 }
             }
         }
