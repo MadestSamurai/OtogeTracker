@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -130,7 +131,20 @@ internal fun TopRankCard(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 // Cover image with difficulty overlay
-                Box {
+                Box(
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(colorScheme.surfaceContainerHigh),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Filled.Picture,
+                        contentDescription = null,
+                        tint = colorScheme.onSurfaceVariant.copy(alpha = 0.48f),
+                        modifier = Modifier.size(30.dp)
+                    )
+
                     Image(
                         painter = rememberAsyncImagePainter(
                             model = item.cover2x,
@@ -139,9 +153,7 @@ internal fun TopRankCard(
                         contentDescription = stringResource(R.string.osu_cd_cover),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
-                            .width(100.dp)
-                            .height(100.dp)
-                            .clip(RoundedCornerShape(6.dp))
+                            .fillMaxSize()
                     )
 
                     // Difficulty badge

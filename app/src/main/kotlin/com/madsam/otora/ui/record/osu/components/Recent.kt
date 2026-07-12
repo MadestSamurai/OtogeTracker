@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.End
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -43,12 +42,11 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.madsam.otora.R
 import com.madsam.otora.core.icon.Filled
-import com.madsam.otora.core.theme.OSU_ARROW_YELLOW
-import com.madsam.otora.core.theme.OSU_HEART_RED
-import com.madsam.otora.core.theme.OSU_ROTATE_GREEN
 import com.madsam.otora.data.osu.ui.model.OsuBriefUiModel
 import com.madsam.otora.data.osu.ui.model.OsuRecentUiModel
 import kotlinx.coroutines.flow.MutableStateFlow
+
+internal val RecentItemSpacing = 2.dp
 
 @Composable
 internal fun Recent(
@@ -78,7 +76,7 @@ internal fun Recent(
             activities.items.forEachIndexed { index, item ->
                 RecentItem(item, cardWidthDp)
                 if (index < activities.items.size - 1) {
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(RecentItemSpacing))
                 }
             }
         }
@@ -229,7 +227,7 @@ internal fun RecentItem(
                         }
                     ),
                     contentDescription = stringResource(R.string.osu_cd_game_mode),
-                    tint = Color.White,
+                    tint = colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(end = 2.dp)
                 )
             },
@@ -275,7 +273,7 @@ internal fun RecentItem(
                         Icon(
                             painter = rememberVectorPainter(image = Filled.DoubleDown),
                             contentDescription = stringResource(R.string.osu_cd_beatmap_activity),
-                            tint = Color.White,
+                            tint = colorScheme.error,
                             modifier = Modifier.padding(end = 4.dp)
                         )
                     }
@@ -291,9 +289,9 @@ internal fun RecentItem(
                             ),
                             contentDescription = stringResource(R.string.osu_cd_beatmap_activity),
                             tint = when (activity.type) {
-                                "beatmapsetUpload" -> OSU_ARROW_YELLOW
-                                "beatmapsetUpdate" -> OSU_ROTATE_GREEN
-                                else -> Color.White
+                                "beatmapsetUpload" -> colorScheme.tertiary
+                                "beatmapsetUpdate" -> colorScheme.primary
+                                else -> colorScheme.onSurfaceVariant
                             },
                             modifier = Modifier.padding(end = 4.dp)
                         )
@@ -303,7 +301,7 @@ internal fun RecentItem(
                         Icon(
                             painter = rememberVectorPainter(image = Filled.Gift),
                             contentDescription = stringResource(R.string.osu_cd_supporter_activity),
-                            tint = OSU_HEART_RED,
+                            tint = colorScheme.error,
                             modifier = Modifier.padding(end = 4.dp)
                         )
                     }
@@ -312,7 +310,7 @@ internal fun RecentItem(
                         Icon(
                             painter = rememberVectorPainter(image = Filled.Heart1),
                             contentDescription = stringResource(R.string.osu_cd_supporter_activity),
-                            tint = OSU_HEART_RED,
+                            tint = colorScheme.error,
                             modifier = Modifier.padding(end = 4.dp)
                         )
                     }
@@ -322,10 +320,10 @@ internal fun RecentItem(
                             painter = rememberVectorPainter(image = Filled.Tick),
                             contentDescription = stringResource(R.string.osu_cd_beatmap_activity),
                             tint = when (activity.approval) {
-                                "qualified" -> OSU_ARROW_YELLOW
-                                "approved" -> OSU_ROTATE_GREEN
-                                "loved" -> OSU_HEART_RED
-                                else -> Color.White
+                                "qualified" -> colorScheme.tertiary
+                                "approved" -> colorScheme.primary
+                                "loved" -> colorScheme.error
+                                else -> colorScheme.onSurfaceVariant
                             },
                             modifier = Modifier.padding(end = 4.dp)
                         )
@@ -335,7 +333,7 @@ internal fun RecentItem(
                         Icon(
                             painter = rememberVectorPainter(image = Filled.TrashArrowUp),
                             contentDescription = stringResource(R.string.osu_cd_beatmap_activity),
-                            tint = Color.White,
+                            tint = colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(end = 4.dp)
                         )
                     }
@@ -359,7 +357,7 @@ internal fun RecentItem(
             inlineContent = inlineContent,
             style = MaterialTheme.typography.bodyMedium,
             lineHeight = 16.sp,
-            color = Color.White,
+            color = colorScheme.onSurface,
             modifier = Modifier
                 .width(textWidth)
                 .padding(start = 8.dp, top = 4.dp, end = 8.dp)
@@ -369,7 +367,7 @@ internal fun RecentItem(
             fontSize = 12.sp,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Light,
-            color = Color.Gray,
+            color = colorScheme.onSurfaceVariant,
             modifier = Modifier
                 .padding(end = 8.dp, bottom = 4.dp)
                 .align(End)
