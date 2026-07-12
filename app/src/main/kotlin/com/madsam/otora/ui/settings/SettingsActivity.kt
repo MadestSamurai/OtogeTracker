@@ -5,9 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.unit.em
 import com.madsam.otora.core.datastore.ThemeDataStore
 import com.madsam.otora.core.theme.OtogeTrackerTheme
 
@@ -31,9 +34,13 @@ class SettingsActivity : ComponentActivity() {
             }
             
             OtogeTrackerTheme(sourceColor = themeSettings.themeColor, darkTheme = darkTheme) {
-                SettingsScreen(
-                    onNavigateBack = { finish() }
-                )
+                CompositionLocalProvider(
+                    LocalTextStyle provides LocalTextStyle.current.copy(lineHeight = 1.4.em)
+                ) {
+                    SettingsScreen(
+                        onNavigateBack = { finish() }
+                    )
+                }
             }
         }
     }

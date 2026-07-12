@@ -64,6 +64,11 @@ import com.madsam.otora.core.theme.plexRegular
 import com.madsam.otora.core.theme.plexSemi
 import kotlinx.coroutines.launch
 
+private val SettingsGroupLineHeight = 20.sp
+private val SettingsTitleLineHeight = 22.sp
+private val SettingsDescriptionLineHeight = 20.sp
+private val SettingsSupportingLineHeight = 18.sp
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
@@ -233,6 +238,7 @@ fun SettingsScreen(
                             color = colorScheme.onSurface,
                             fontSize = 14.sp,
                             fontFamily = plexSemi,
+                            lineHeight = SettingsGroupLineHeight,
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
                         )
                         
@@ -384,6 +390,7 @@ private fun <T> SettingsGroup(
             color = colorScheme.onSurface,
             fontSize = 14.sp,
             fontFamily = plexSemi,
+            lineHeight = SettingsGroupLineHeight,
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
         )
         
@@ -439,14 +446,16 @@ private fun DataUpdateSettingItem(
                 text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
-                fontFamily = plexSemi
+                fontFamily = plexSemi,
+                lineHeight = SettingsTitleLineHeight
             )
             
             Text(
                 text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
-                fontFamily = plexRegular
+                fontFamily = plexRegular,
+                lineHeight = SettingsDescriptionLineHeight
             )
             
             if (setting.lastUpdate.isNotEmpty()) {
@@ -454,7 +463,8 @@ private fun DataUpdateSettingItem(
                     text = stringResource(R.string.settings_last_update, setting.lastUpdate),
                     color = colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                     fontSize = 12.sp,
-                    fontFamily = plexRegular
+                    fontFamily = plexRegular,
+                    lineHeight = SettingsSupportingLineHeight
                 )
             }
         }
@@ -498,14 +508,16 @@ private fun ToggleSettingItem(
                 text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
-                fontFamily = plexSemi
+                fontFamily = plexSemi,
+                lineHeight = SettingsTitleLineHeight
             )
             
             Text(
                 text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
-                fontFamily = plexRegular
+                fontFamily = plexRegular,
+                lineHeight = SettingsDescriptionLineHeight
             )
         }
         
@@ -555,14 +567,16 @@ private fun NetworkToggleSettingItem(
                 text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
-                fontFamily = plexSemi
+                fontFamily = plexSemi,
+                lineHeight = SettingsTitleLineHeight
             )
             
             Text(
                 text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
-                fontFamily = plexRegular
+                fontFamily = plexRegular,
+                lineHeight = SettingsDescriptionLineHeight
             )
         }
         
@@ -610,14 +624,16 @@ private fun SelectionSettingItem(
                 text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
-                fontFamily = plexSemi
+                fontFamily = plexSemi,
+                lineHeight = SettingsTitleLineHeight
             )
             
             Text(
                 text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
-                fontFamily = plexRegular
+                fontFamily = plexRegular,
+                lineHeight = SettingsDescriptionLineHeight
             )
             
             if (currentValue.isNotEmpty()) {
@@ -625,7 +641,8 @@ private fun SelectionSettingItem(
                     text = stringResource(R.string.settings_current, currentValue),
                     color = colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 12.sp,
-                    fontFamily = plexRegular
+                    fontFamily = plexRegular,
+                    lineHeight = SettingsSupportingLineHeight
                 )
             }
         }
@@ -667,14 +684,16 @@ private fun NetworkSelectionSettingItem(
                 text = stringResource(setting.titleResId),
                 color = colorScheme.onSurface,
                 fontSize = 16.sp,
-                fontFamily = plexSemi
+                fontFamily = plexSemi,
+                lineHeight = SettingsTitleLineHeight
             )
             
             Text(
                 text = stringResource(setting.descriptionResId),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 14.sp,
-                fontFamily = plexRegular
+                fontFamily = plexRegular,
+                lineHeight = SettingsDescriptionLineHeight
             )
             
             if (currentValue.isNotEmpty()) {
@@ -682,7 +701,8 @@ private fun NetworkSelectionSettingItem(
                     text = stringResource(R.string.settings_current, currentValue),
                     color = colorScheme.onSurface.copy(alpha = 0.8f),
                     fontSize = 12.sp,
-                    fontFamily = plexRegular
+                    fontFamily = plexRegular,
+                    lineHeight = SettingsSupportingLineHeight
                 )
             }
         }
