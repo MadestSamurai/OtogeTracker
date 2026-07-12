@@ -19,22 +19,19 @@ private val Context.themeDataStore: DataStore<Preferences> by preferencesDataSto
 /**
  * 预设主题颜色
  */
-enum class ThemeColor(
-    val displayName: String,
-    val color: Color
-) {
-    VIOLET("紫罗兰", Color(0xFF7C5CBF)),      // 默认色
-    BLUE("蓝色", Color(0xFF2196F3)),
-    CYAN("青色", Color(0xFF00BCD4)),
-    TEAL("蓝绿", Color(0xFF009688)),
-    GREEN("绿色", Color(0xFF4CAF50)),
-    LIME("黄绿", Color(0xFF8BC34A)),
-    YELLOW("黄色", Color(0xFFFFEB3B)),
-    ORANGE("橙色", Color(0xFFFF9800)),
-    RED("红色", Color(0xFFF44336)),
-    PINK("粉色", Color(0xFFE91E63)),
-    PURPLE("紫色", Color(0xFF9C27B0)),
-    INDIGO("靛蓝", Color(0xFF3F51B5));
+enum class ThemeColor(val color: Color) {
+    VIOLET(Color(0xFF7C5CBF)),      // 默认色
+    BLUE(Color(0xFF2196F3)),
+    CYAN(Color(0xFF00BCD4)),
+    TEAL(Color(0xFF009688)),
+    GREEN(Color(0xFF4CAF50)),
+    LIME(Color(0xFF8BC34A)),
+    YELLOW(Color(0xFFFFEB3B)),
+    ORANGE(Color(0xFFFF9800)),
+    RED(Color(0xFFF44336)),
+    PINK(Color(0xFFE91E63)),
+    PURPLE(Color(0xFF9C27B0)),
+    INDIGO(Color(0xFF3F51B5));
 
     companion object {
         fun fromColorValue(colorValue: Long): ThemeColor {

@@ -39,8 +39,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.madsam.otora.R
 import com.madsam.otora.core.datastore.ThemeColor
 import com.madsam.otora.core.datastore.ThemeDataStore
 import com.madsam.otora.core.icon.Filled
@@ -75,7 +77,7 @@ fun ThemeColorSettingScreen(
         CenterAlignedTopAppBar(
             title = {
                 Text(
-                    text = "主题颜色",
+                    text = stringResource(R.string.settings_theme_color_title),
                     fontFamily = plexBold,
                     color = colorScheme.onSurface
                 )
@@ -84,7 +86,7 @@ fun ThemeColorSettingScreen(
                 IconButton(onClick = onNavigateBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "返回",
+                        contentDescription = stringResource(R.string.settings_back),
                         tint = colorScheme.onSurface,
                         modifier = Modifier.size(24.dp)
                     )
@@ -117,7 +119,7 @@ fun ThemeColorSettingScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "当前主题色",
+                        text = stringResource(R.string.settings_theme_current_color),
                         color = colorScheme.onSurfaceVariant,
                         fontSize = 14.sp,
                         fontFamily = plexRegular
@@ -137,9 +139,14 @@ fun ThemeColorSettingScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     
                     // 显示颜色名称
-                    val colorName = ThemeColor.entries.find { 
+                    val selectedThemeColor = ThemeColor.entries.find {
                         it.color.value == currentColor.value 
-                    }?.displayName ?: "自定义"
+                    }
+                    val colorName = if (selectedThemeColor != null) {
+                        stringResource(selectedThemeColor.nameResId)
+                    } else {
+                        stringResource(R.string.settings_theme_color_custom)
+                    }
                     
                     Text(
                         text = colorName,
@@ -154,7 +161,7 @@ fun ThemeColorSettingScreen(
             
             // 颜色选择标题
             Text(
-                text = "选择颜色",
+                text = stringResource(R.string.settings_theme_select_color),
                 color = colorScheme.onSurface,
                 fontSize = 14.sp,
                 fontFamily = plexSemi,
@@ -177,7 +184,7 @@ fun ThemeColorSettingScreen(
                     items(ThemeColor.entries) { themeColor ->
                         ColorItem(
                             color = themeColor.color,
-                            name = themeColor.displayName,
+                            name = stringResource(themeColor.nameResId),
                             isSelected = themeColor.color.value == currentColor.value,
                             onClick = {
                                 scope.launch {
@@ -193,7 +200,7 @@ fun ThemeColorSettingScreen(
             
             // 提示文字
             Text(
-                text = "选择的颜色将作为应用的主题色，影响整体界面配色",
+                text = stringResource(R.string.settings_theme_color_hint),
                 color = colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 fontFamily = plexRegular,
@@ -233,7 +240,7 @@ private fun ColorItem(
             if (isSelected) {
                 Icon(
                     imageVector = Filled.Tick,
-                    contentDescription = "已选中",
+                    contentDescription = stringResource(R.string.settings_theme_color_selected),
                     tint = Color.White,
                     modifier = Modifier.size(24.dp)
                 )
@@ -250,3 +257,19 @@ private fun ColorItem(
         )
     }
 }
+
+private val ThemeColor.nameResId: Int
+    get() = when (this) {
+        ThemeColor.VIOLET -> R.string.settings_theme_color_violet
+        ThemeColor.BLUE -> R.string.settings_theme_color_blue
+        ThemeColor.CYAN -> R.string.settings_theme_color_cyan
+        ThemeColor.TEAL -> R.string.settings_theme_color_teal
+        ThemeColor.GREEN -> R.string.settings_theme_color_green
+        ThemeColor.LIME -> R.string.settings_theme_color_lime
+        ThemeColor.YELLOW -> R.string.settings_theme_color_yellow
+        ThemeColor.ORANGE -> R.string.settings_theme_color_orange
+        ThemeColor.RED -> R.string.settings_theme_color_red
+        ThemeColor.PINK -> R.string.settings_theme_color_pink
+        ThemeColor.PURPLE -> R.string.settings_theme_color_purple
+        ThemeColor.INDIGO -> R.string.settings_theme_color_indigo
+    }
